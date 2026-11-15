@@ -1459,7 +1459,10 @@ static const u8 *ConfigureTrainerBattle(const u8 *data)
     case TRAINER_BATTLE_REMATCH_DOUBLE:
         TrainerBattleLoadArgs(sDoubleBattleParams, data);
         SetMapVarsToTrainer();
-        gTrainerBattleOpponent_A = GetRematchTrainerId(gTrainerBattleOpponent_A);
+        if (MP_VsSeeker_IsKantoTrainer(gTrainerBattleOpponent_A))
+            MP_VsSeeker_PrepareRematch(gTrainerBattleOpponent_A);   // Moemon Kai: the VS SEEKER's (SINNOH's twins...)
+        else
+            gTrainerBattleOpponent_A = GetRematchTrainerId(gTrainerBattleOpponent_A);
         return EventScript_TryDoDoubleRematchBattle;
     case TRAINER_BATTLE_REMATCH:
         TrainerBattleLoadArgs(sOrdinaryBattleParams, data);

@@ -887,6 +887,19 @@ class FileConverter:
             return ['removeobject %s' % obj, 'delay %d' % delay, 'addobject %s' % obj, 'delay %d' % delay] * times
         if cmd == 'EndSafariGame':
             return ['special ExitSafariMode']   # (the game's own SAFARI GAME: safari_zone.c)
+        if cmd == 'StartSafariGame':
+            return ['special EnterSafariMode']   # (30 SAFARI BALLS, 500 steps: its ends run Platinum's safari_game scripts)
+        if cmd == 'GetCurrentSafariGameCaughtNum':
+            return [self.sinnoh(SINNOH_MISC, 60, self.var(a[0]))]
+        # the HONEY trees (src/sinnoh/s3d_wild.c: the tree in front of the player, its HONEY's hours on the own clock)
+        if cmd == 'GetHoneyTreeStatus':
+            return [self.sinnoh(SINNOH_MISC, 61, self.var(a[0]))]
+        if cmd == 'SlatherHoneyTree':
+            return ['special Sinnoh_HoneySlather']
+        if cmd == 'StartHoneyTreeBattle':
+            return ['special Sinnoh_HoneyTreeMon', 'dowildbattle']
+        if cmd == 'StopHoneyTreeShaking':
+            return []   # (the tree is bare again once its POKéMON is met: Sinnoh_HoneyTreeMon)
         if cmd == 'GetUnownFormsSeenCount':
             return [self.sinnoh(SINNOH_UNOWN_SEEN, self.var(a[0]))]
         if cmd == 'MessageUnown':
@@ -1138,7 +1151,8 @@ class FileConverter:
             done = '%s%s__trainer%d' % (PREFIX, self.low, self.next_local())
             out = []
             for t in cands:
-                where = build_text.trainer_message(self.root, t, 'TRMSG_DEFEAT')
+                where = build_text.trainer_message(self.root, t, 'TRMSG_DEFEAT') \
+                    or build_text.trainer_message(self.root, t, 'TRMSG_DOUBLE_BATTLE_DEFEAT_1')   # (a pair: ROXY & OLI)
                 if where is None:
                     raise Unsupported('trainer %s has no defeat line' % t)
                 lab = '%sT_%d_%d' % (PREFIX, where[0], where[1])
@@ -2743,8 +2757,8 @@ def people(root, p, low, name, done):
         if lab not in done:
             lab = None
         ghost = isinstance(hide, str) and hide.startswith('MAP_HEADER_')
-        from gen_maps import VAR_LOOKS
-        looks = i + 1 in VAR_LOOKS.get(name, ())   # (a look its script picks: gen_maps.py VAR_LOOKS)
+        from gen_maps import var_look
+        looks = var_look(name, i, o)   # (a look its script picks: gen_maps.py VAR_LOOKS, the daily trainers)
         if ghost or (sprites.sprite(o['graphics_id']) is None and not looks) or not inside(p, o['x'], o['z']) \
                 or o['graphics_id'].endswith('POKEBALL'):
             continue

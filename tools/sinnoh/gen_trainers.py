@@ -155,6 +155,13 @@ REMATCHES = {
     'TRAINER_LEADER_VOLKNER_FIGHT_AREA': ('LEADER', 'QZ_256', 0, 'ACE_TRAINER'),
     'TRAINER_REPORTER_VALERIE': ('INTERVIEWER', 'INTERVIEWER', 1, 'ACE_TRAINER'),
 }
+# Added later, after every id before them (saves hold trainer flags by id): (the game's class, picture, female, music)
+# - the POKéMON CENTERs' daily trainers (scripts_pokemon_center_daily_trainers.s) the maps don't place: LEE, GRACE,
+#   KINSEY, ROXY & OLI, each with the team Platinum's unlocked VS SEEKER levels pick (the frontier's classes)
+_DAILY = {'CLOWN_LEE': ('S:CLOWN', 'QZ_220', 0), 'IDOL_GRACE': ('S:IDOL', 'LASS', 1),
+          'REPORTER_KINSEY': ('INTERVIEWER', 'INTERVIEWER', 1), 'INTERVIEWERS_ROXY_AND_OLI': ('INTERVIEWER', 'INTERVIEWER', 0)}
+LATER = {'TRAINER_%s%s' % (t, v): c + ('ACE_TRAINER',) for t, c in _DAILY.items()
+         for v in ('_UNUSED', '', '_REMATCH_1', '_REMATCH_2', '_REMATCH_3', '_REMATCH_4')}
 for _starter in ('CHIMCHAR', 'PIPLUP', 'TURTWIG'):
     REMATCHES['TRAINER_RIVAL_SURVIVAL_AREA_2_' + _starter] = ('RIVAL', 'YOUNGSTER', 0, 'ACE_TRAINER')
 # (1.114.0, after those: the BATTLEGROUND's gym leaders and partners, FLINT beside the rival at the FIGHT AREA)
@@ -173,6 +180,27 @@ TALK = ['TRAINER_LASS_CAROLINE', 'TRAINER_AROMA_LADY_JENNA', 'TRAINER_AROMA_LADY
         'TRAINER_ARTIST_ISMAEL', 'TRAINER_CAMERAMAN_DARRYL', 'TRAINER_COLLECTOR_EUGENE', 'TRAINER_GENTLEMAN_LEONARDO',
         'TRAINER_PI_KENDRICK', 'TRAINER_RICH_BOY_ROMAN', 'TRAINER_SCHOOL_KID_ESTEBAN', 'TRAINER_SCIENTIST_EMILIO',
         'TRAINER_VETERAN_EMANUEL']
+
+
+def rematch_table(root):
+    """Platinum's VS SEEKER rematches (src/overlay005/vs_seeker.c gVsSeekerRematchData): [(trainer, [its team at VS SEEKER
+    levels 1-5: a trainer, or None where a level has none])], a level list ending where Platinum's does"""
+    src = open(os.path.join(root, 'src/overlay005/vs_seeker.c')).read()
+    body = src[src.index('gVsSeekerRematchData[] = {'):]
+    body = body[body.index('{') + 1:body.index('};')]
+    out = []
+    for same, row in re.findall(r'NoUniqueRematches\((\w+)\)|\{([^}]*)\}', body):
+        if same:
+            out.append((same, [same]))
+            continue
+        ids = [x.strip() for x in row.split(',')]
+        levels = []
+        for x in ids[1:]:
+            if x == 'VS_SEEKER_REMATCH_DATA_END':
+                break
+            levels.append(None if x == '_' else x)
+        out.append((ids[0], levels))
+    return out
 
 
 def placed(root):
@@ -238,8 +266,13 @@ def main():
         + [t for t in TALK if t not in placed(root)] + list(LATE_STORY)
     only_scripts = scripted(root, set(trainers))   # (battled by Platinum's own scripts: no script of their own here)
     only_scripts += [t for t in REMATCHES if t not in trainers]   # (the last ids: the ones before keep theirs)
+    only_scripts += [t for t in LATER if t not in trainers + only_scripts]
+    rematches = [(b, lv) for b, lv in rematch_table(root) if b in trainers + only_scripts]
+    only_scripts += sorted({t for b, lv in rematches for t in lv if t} - set(trainers + only_scripts),
+                           key=lambda t: [x for b, lv in rematches for x in lv].index(t))   # (the VS SEEKER's teams)
     trainers += only_scripts
     widths = letter_widths()
+    rematch_of = {b: lv for b, lv in rematches}
     consts, entries, parties, script = [], [], [], []
     pics = []   # Platinum's battle picture of each (its class's, include/constants/sinnoh_gfx.h)
     have_pics = set(re.findall(r'#define SINNOH_PIC_(\w+)\s+\d', open('include/constants/sinnoh_gfx.h').read()))
@@ -251,8 +284,8 @@ def main():
         if t in SPECIAL:
             ours, pic, female = SPECIAL[t]
             music = 'ACE_TRAINER'      # (their scripts battle with NO_MUSIC)
-        elif t in STORY_TRAINERS or t in PARTNERS or t in REMATCHES:
-            ours, pic, female, music = STORY_TRAINERS.get(t) or PARTNERS.get(t) or REMATCHES[t]
+        elif t in STORY_TRAINERS or t in PARTNERS or t in REMATCHES or t in LATER:
+            ours, pic, female, music = STORY_TRAINERS.get(t) or PARTNERS.get(t) or REMATCHES.get(t) or LATER[t]
         else:
             ours, pic, music, female = CLASSES[pclass]
         cls = 'TRAINER_CLASS_SINNOH_' + ours[2:] if ours.startswith('S:') else c('TRAINER_CLASS_' + ours)
@@ -292,12 +325,24 @@ def main():
         intro, defeat, after = trainer_words.lines(pclass, t)
         lab = label(t)
         base = 'Sinnoh_Text_Tr' + camel(t)
+        again = t in rematch_of and build_text.trainer_message(root, t, 'TRMSG_REMATCH') is not None
+        check = ('\tspecialvar VAR_RESULT, ShouldTryRematchBattle\n\tgoto_if_eq VAR_RESULT, TRUE, %sRematch\n' % lab) \
+            if again else ''   # (Platinum's VS SEEKER: src/mp/mp_vsseeker.c, src/data/sinnoh_rematches.h)
         if d['double_battle']:
-            script.append('%s::\n\ttrainerbattle_double %s, %sIntro, %sDefeat, %sNotEnough\n\tmsgbox %sAfter, '
-                          'MSGBOX_AUTOCLOSE\n\tend\n\n' % (lab, const, base, base, base, base))
+            script.append('%s::\n\ttrainerbattle_double %s, %sIntro, %sDefeat, %sNotEnough\n%s\tmsgbox %sAfter, '
+                          'MSGBOX_AUTOCLOSE\n\tend\n\n' % (lab, const, base, base, base, check, base))
+            if again:
+                script.append('%sRematch::\n\ttrainerbattle_rematch_double %s, %sRematch, %sDefeat, %sNotEnough\n'
+                              '\tmsgbox %sAfter, MSGBOX_AUTOCLOSE\n\tend\n\n' % (lab, const, base, base, base, base))
         else:
-            script.append('%s::\n\ttrainerbattle_single %s, %sIntro, %sDefeat\n\tmsgbox %sAfter, MSGBOX_AUTOCLOSE\n'
-                          '\tend\n\n' % (lab, const, base, base, base))
+            script.append('%s::\n\ttrainerbattle_single %s, %sIntro, %sDefeat\n%s\tmsgbox %sAfter, MSGBOX_AUTOCLOSE\n'
+                          '\tend\n\n' % (lab, const, base, base, check, base))
+            if again:
+                script.append('%sRematch::\n\ttrainerbattle_rematch %s, %sRematch, %sDefeat\n'
+                              '\tmsgbox %sAfter, MSGBOX_AUTOCLOSE\n\tend\n\n' % (lab, const, base, base, base))
+        if again:
+            script.append('%sRematch:\n\t.byte %s\n\n' % (base, ', '.join(
+                '0x%02X' % x for x in build_text.sinnoh_text_bytes(*build_text.trainer_message(root, t, 'TRMSG_REMATCH')))))
         # their words are Platinum's own (the text pack's trainers' bank, tools/sinnoh/build_text.py: only its numbers
         # here); the written ones only where Platinum has no such line
         kinds = {'Intro': ('TRMSG_PRE_DOUBLE_BATTLE_1', 'TRMSG_PRE_BATTLE'), 'Defeat': ('TRMSG_DOUBLE_BATTLE_DEFEAT_1', 'TRMSG_DEFEAT'),
@@ -335,6 +380,18 @@ def main():
         'static const u8 sSinnohTrainerPics[SINNOH_TRAINERS_COUNT] = {\n' +
         ''.join('    %s,\n' % x for x in pics) + '};\n')
     open('data/scripts/sinnoh_trainers.inc', 'w').write(head.replace('//', '@') + ''.join(script))
+    import ids
+    num = {t: FIRST_ID + i for i, t in enumerate(trainers)}
+    rows = sorted((num[b], b, lv) for b, lv in rematches)
+    open('src/data/sinnoh_rematches.h', 'w').write(
+        head + "// Platinum's VS SEEKER rematches (src/overlay005/vs_seeker.c gVsSeekerRematchData; src/mp/mp_vsseeker.c): a\n"
+        "// trainer, how many levels, its team's trainer at VS SEEKER levels 1-5 (0: none at that level), by trainer number\n"
+        'static const struct SinnohRematch { u16 trainerNum; u8 count; u16 tier[5]; } sSinnohRematches[] = {\n' +
+        ''.join('    {%s, %d, {%s}},\n' % (our_const(b), len(lv), ', '.join(our_const(x) if x else '0' for x in lv))
+                for n, b, lv in rows) + '};\n'
+        "// FLAG_UNLOCKED_VS_SEEKER_LVL_1-5 (ROUTE 207's VS SEEKER, CELESTIC, SPEAR PILLAR, the HALL OF FAME, STARK MOUNTAIN)\n"
+        'static const u16 sSinnohVsSeekerLevels[5] = {%s};\n'
+        % ', '.join('0x%X' % ids.flag(root, 'FLAG_UNLOCKED_VS_SEEKER_LVL_%d' % k) for k in range(1, 6)))
     print('%d SINNOH trainers (%d classes new)' % (len(trainers), len(NEW)))
 
 

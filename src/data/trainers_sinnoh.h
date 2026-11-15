@@ -6683,3 +6683,2079 @@
         .party = ITEM_CUSTOM_MOVES(sParty_SinnohEliteFourFlintFightArea),
     },
 
+    [TRAINER_SINNOH_CLOWN_LEE_UNUSED] =
+    {
+        .trainerClass = TRAINER_CLASS_SINNOH_CLOWN,
+        .encounterMusic_gender = 29,
+        .trainerPic = TRAINER_PIC_QZ_220,
+        .trainerName = _("LEE"),
+        .items = {ITEM_NONE, ITEM_NONE, ITEM_NONE, ITEM_NONE},
+        .doubleBattle = FALSE,
+        .aiFlags = 0x1,
+        .party = NO_ITEM_DEFAULT_MOVES(sParty_SinnohClownLeeUnused),
+    },
+
+    [TRAINER_SINNOH_CLOWN_LEE] =
+    {
+        .trainerClass = TRAINER_CLASS_SINNOH_CLOWN,
+        .encounterMusic_gender = 29,
+        .trainerPic = TRAINER_PIC_QZ_220,
+        .trainerName = _("LEE"),
+        .items = {ITEM_NONE, ITEM_NONE, ITEM_NONE, ITEM_NONE},
+        .doubleBattle = FALSE,
+        .aiFlags = 0x1,
+        .party = NO_ITEM_DEFAULT_MOVES(sParty_SinnohClownLee),
+    },
+
+    [TRAINER_SINNOH_CLOWN_LEE_REMATCH_1] =
+    {
+        .trainerClass = TRAINER_CLASS_SINNOH_CLOWN,
+        .encounterMusic_gender = 29,
+        .trainerPic = TRAINER_PIC_QZ_220,
+        .trainerName = _("LEE"),
+        .items = {ITEM_NONE, ITEM_NONE, ITEM_NONE, ITEM_NONE},
+        .doubleBattle = FALSE,
+        .aiFlags = 0x1,
+        .party = NO_ITEM_DEFAULT_MOVES(sParty_SinnohClownLeeRematch1),
+    },
+
+    [TRAINER_SINNOH_CLOWN_LEE_REMATCH_2] =
+    {
+        .trainerClass = TRAINER_CLASS_SINNOH_CLOWN,
+        .encounterMusic_gender = 29,
+        .trainerPic = TRAINER_PIC_QZ_220,
+        .trainerName = _("LEE"),
+        .items = {ITEM_NONE, ITEM_NONE, ITEM_NONE, ITEM_NONE},
+        .doubleBattle = FALSE,
+        .aiFlags = 0x1,
+        .party = NO_ITEM_DEFAULT_MOVES(sParty_SinnohClownLeeRematch2),
+    },
+
+    [TRAINER_SINNOH_CLOWN_LEE_REMATCH_3] =
+    {
+        .trainerClass = TRAINER_CLASS_SINNOH_CLOWN,
+        .encounterMusic_gender = 29,
+        .trainerPic = TRAINER_PIC_QZ_220,
+        .trainerName = _("LEE"),
+        .items = {ITEM_NONE, ITEM_NONE, ITEM_NONE, ITEM_NONE},
+        .doubleBattle = FALSE,
+        .aiFlags = 0x1,
+        .party = NO_ITEM_DEFAULT_MOVES(sParty_SinnohClownLeeRematch3),
+    },
+
+    [TRAINER_SINNOH_CLOWN_LEE_REMATCH_4] =
+    {
+        .trainerClass = TRAINER_CLASS_SINNOH_CLOWN,
+        .encounterMusic_gender = 29,
+        .trainerPic = TRAINER_PIC_QZ_220,
+        .trainerName = _("LEE"),
+        .items = {ITEM_NONE, ITEM_NONE, ITEM_NONE, ITEM_NONE},
+        .doubleBattle = FALSE,
+        .aiFlags = 0x1,
+        .party = NO_ITEM_DEFAULT_MOVES(sParty_SinnohClownLeeRematch4),
+    },
+
+    [TRAINER_SINNOH_IDOL_GRACE_UNUSED] =
+    {
+        .trainerClass = TRAINER_CLASS_SINNOH_IDOL,
+        .encounterMusic_gender = 29 | F_TRAINER_FEMALE,
+        .trainerPic = TRAINER_PIC_LASS,
+        .trainerName = _("GRACE"),
+        .items = {ITEM_NONE, ITEM_NONE, ITEM_NONE, ITEM_NONE},
+        .doubleBattle = FALSE,
+        .aiFlags = 0x1,
+        .party = NO_ITEM_DEFAULT_MOVES(sParty_SinnohIdolGraceUnused),
+    },
+
+    [TRAINER_SINNOH_IDOL_GRACE] =
+    {
+        .trainerClass = TRAINER_CLASS_SINNOH_IDOL,
+        .encounterMusic_gender = 29 | F_TRAINER_FEMALE,
+        .trainerPic = TRAINER_PIC_LASS,
+        .trainerName = _("GRACE"),
+        .items = {ITEM_NONE, ITEM_NONE, ITEM_NONE, ITEM_NONE},
+        .doubleBattle = FALSE,
+        .aiFlags = 0x1,
+        .party = NO_ITEM_DEFAULT_MOVES(sParty_SinnohIdolGrace),
+    },
+
+    [TRAINER_SINNOH_IDOL_GRACE_REMATCH_1] =
+    {
+        .trainerClass = TRAINER_CLASS_SINNOH_IDOL,
+        .encounterMusic_gender = 29 | F_TRAINER_FEMALE,
+        .trainerPic = TRAINER_PIC_LASS,
+        .trainerName = _("GRACE"),
+        .items = {ITEM_NONE, ITEM_NONE, ITEM_NONE, ITEM_NONE},
+        .doubleBattle = FALSE,
+        .aiFlags = 0x1,
+        .party = NO_ITEM_DEFAULT_MOVES(sParty_SinnohIdolGraceRematch1),
+    },
+
+    [TRAINER_SINNOH_IDOL_GRACE_REMATCH_2] =
+    {
+        .trainerClass = TRAINER_CLASS_SINNOH_IDOL,
+        .encounterMusic_gender = 29 | F_TRAINER_FEMALE,
+        .trainerPic = TRAINER_PIC_LASS,
+        .trainerName = _("GRACE"),
+        .items = {ITEM_NONE, ITEM_NONE, ITEM_NONE, ITEM_NONE},
+        .doubleBattle = FALSE,
+        .aiFlags = 0x1,
+        .party = NO_ITEM_DEFAULT_MOVES(sParty_SinnohIdolGraceRematch2),
+    },
+
+    [TRAINER_SINNOH_IDOL_GRACE_REMATCH_3] =
+    {
+        .trainerClass = TRAINER_CLASS_SINNOH_IDOL,
+        .encounterMusic_gender = 29 | F_TRAINER_FEMALE,
+        .trainerPic = TRAINER_PIC_LASS,
+        .trainerName = _("GRACE"),
+        .items = {ITEM_NONE, ITEM_NONE, ITEM_NONE, ITEM_NONE},
+        .doubleBattle = FALSE,
+        .aiFlags = 0x1,
+        .party = NO_ITEM_DEFAULT_MOVES(sParty_SinnohIdolGraceRematch3),
+    },
+
+    [TRAINER_SINNOH_IDOL_GRACE_REMATCH_4] =
+    {
+        .trainerClass = TRAINER_CLASS_SINNOH_IDOL,
+        .encounterMusic_gender = 29 | F_TRAINER_FEMALE,
+        .trainerPic = TRAINER_PIC_LASS,
+        .trainerName = _("GRACE"),
+        .items = {ITEM_NONE, ITEM_NONE, ITEM_NONE, ITEM_NONE},
+        .doubleBattle = FALSE,
+        .aiFlags = 0x1,
+        .party = NO_ITEM_DEFAULT_MOVES(sParty_SinnohIdolGraceRematch4),
+    },
+
+    [TRAINER_SINNOH_REPORTER_KINSEY_UNUSED] =
+    {
+        .trainerClass = TRAINER_CLASS_INTERVIEWER,
+        .encounterMusic_gender = 29 | F_TRAINER_FEMALE,
+        .trainerPic = TRAINER_PIC_INTERVIEWER,
+        .trainerName = _("KINSEY"),
+        .items = {ITEM_NONE, ITEM_NONE, ITEM_NONE, ITEM_NONE},
+        .doubleBattle = FALSE,
+        .aiFlags = 0x1,
+        .party = NO_ITEM_DEFAULT_MOVES(sParty_SinnohReporterKinseyUnused),
+    },
+
+    [TRAINER_SINNOH_REPORTER_KINSEY] =
+    {
+        .trainerClass = TRAINER_CLASS_INTERVIEWER,
+        .encounterMusic_gender = 29 | F_TRAINER_FEMALE,
+        .trainerPic = TRAINER_PIC_INTERVIEWER,
+        .trainerName = _("KINSEY"),
+        .items = {ITEM_NONE, ITEM_NONE, ITEM_NONE, ITEM_NONE},
+        .doubleBattle = FALSE,
+        .aiFlags = 0x1,
+        .party = NO_ITEM_DEFAULT_MOVES(sParty_SinnohReporterKinsey),
+    },
+
+    [TRAINER_SINNOH_REPORTER_KINSEY_REMATCH_1] =
+    {
+        .trainerClass = TRAINER_CLASS_INTERVIEWER,
+        .encounterMusic_gender = 29 | F_TRAINER_FEMALE,
+        .trainerPic = TRAINER_PIC_INTERVIEWER,
+        .trainerName = _("KINSEY"),
+        .items = {ITEM_NONE, ITEM_NONE, ITEM_NONE, ITEM_NONE},
+        .doubleBattle = FALSE,
+        .aiFlags = 0x1,
+        .party = NO_ITEM_DEFAULT_MOVES(sParty_SinnohReporterKinseyRematch1),
+    },
+
+    [TRAINER_SINNOH_REPORTER_KINSEY_REMATCH_2] =
+    {
+        .trainerClass = TRAINER_CLASS_INTERVIEWER,
+        .encounterMusic_gender = 29 | F_TRAINER_FEMALE,
+        .trainerPic = TRAINER_PIC_INTERVIEWER,
+        .trainerName = _("KINSEY"),
+        .items = {ITEM_NONE, ITEM_NONE, ITEM_NONE, ITEM_NONE},
+        .doubleBattle = FALSE,
+        .aiFlags = 0x1,
+        .party = NO_ITEM_DEFAULT_MOVES(sParty_SinnohReporterKinseyRematch2),
+    },
+
+    [TRAINER_SINNOH_REPORTER_KINSEY_REMATCH_3] =
+    {
+        .trainerClass = TRAINER_CLASS_INTERVIEWER,
+        .encounterMusic_gender = 29 | F_TRAINER_FEMALE,
+        .trainerPic = TRAINER_PIC_INTERVIEWER,
+        .trainerName = _("KINSEY"),
+        .items = {ITEM_NONE, ITEM_NONE, ITEM_NONE, ITEM_NONE},
+        .doubleBattle = FALSE,
+        .aiFlags = 0x1,
+        .party = NO_ITEM_DEFAULT_MOVES(sParty_SinnohReporterKinseyRematch3),
+    },
+
+    [TRAINER_SINNOH_REPORTER_KINSEY_REMATCH_4] =
+    {
+        .trainerClass = TRAINER_CLASS_INTERVIEWER,
+        .encounterMusic_gender = 29 | F_TRAINER_FEMALE,
+        .trainerPic = TRAINER_PIC_INTERVIEWER,
+        .trainerName = _("KINSEY"),
+        .items = {ITEM_NONE, ITEM_NONE, ITEM_NONE, ITEM_NONE},
+        .doubleBattle = FALSE,
+        .aiFlags = 0x1,
+        .party = NO_ITEM_DEFAULT_MOVES(sParty_SinnohReporterKinseyRematch4),
+    },
+
+    [TRAINER_SINNOH_INTERVIEWERS_ROXY_AND_OLI_UNUSED] =
+    {
+        .trainerClass = TRAINER_CLASS_INTERVIEWER,
+        .encounterMusic_gender = 29,
+        .trainerPic = TRAINER_PIC_INTERVIEWER,
+        .trainerName = _("ROXY & OLI"),
+        .items = {ITEM_NONE, ITEM_NONE, ITEM_NONE, ITEM_NONE},
+        .doubleBattle = TRUE,
+        .aiFlags = 0x1,
+        .party = NO_ITEM_DEFAULT_MOVES(sParty_SinnohInterviewersRoxyAndOliUnused),
+    },
+
+    [TRAINER_SINNOH_INTERVIEWERS_ROXY_AND_OLI] =
+    {
+        .trainerClass = TRAINER_CLASS_INTERVIEWER,
+        .encounterMusic_gender = 29,
+        .trainerPic = TRAINER_PIC_INTERVIEWER,
+        .trainerName = _("ROXY & OLI"),
+        .items = {ITEM_NONE, ITEM_NONE, ITEM_NONE, ITEM_NONE},
+        .doubleBattle = TRUE,
+        .aiFlags = 0x1,
+        .party = NO_ITEM_DEFAULT_MOVES(sParty_SinnohInterviewersRoxyAndOli),
+    },
+
+    [TRAINER_SINNOH_INTERVIEWERS_ROXY_AND_OLI_REMATCH_1] =
+    {
+        .trainerClass = TRAINER_CLASS_INTERVIEWER,
+        .encounterMusic_gender = 29,
+        .trainerPic = TRAINER_PIC_INTERVIEWER,
+        .trainerName = _("ROXY & OLI"),
+        .items = {ITEM_NONE, ITEM_NONE, ITEM_NONE, ITEM_NONE},
+        .doubleBattle = TRUE,
+        .aiFlags = 0x1,
+        .party = NO_ITEM_DEFAULT_MOVES(sParty_SinnohInterviewersRoxyAndOliRematch1),
+    },
+
+    [TRAINER_SINNOH_INTERVIEWERS_ROXY_AND_OLI_REMATCH_2] =
+    {
+        .trainerClass = TRAINER_CLASS_INTERVIEWER,
+        .encounterMusic_gender = 29,
+        .trainerPic = TRAINER_PIC_INTERVIEWER,
+        .trainerName = _("ROXY & OLI"),
+        .items = {ITEM_NONE, ITEM_NONE, ITEM_NONE, ITEM_NONE},
+        .doubleBattle = TRUE,
+        .aiFlags = 0x1,
+        .party = NO_ITEM_DEFAULT_MOVES(sParty_SinnohInterviewersRoxyAndOliRematch2),
+    },
+
+    [TRAINER_SINNOH_INTERVIEWERS_ROXY_AND_OLI_REMATCH_3] =
+    {
+        .trainerClass = TRAINER_CLASS_INTERVIEWER,
+        .encounterMusic_gender = 29,
+        .trainerPic = TRAINER_PIC_INTERVIEWER,
+        .trainerName = _("ROXY & OLI"),
+        .items = {ITEM_NONE, ITEM_NONE, ITEM_NONE, ITEM_NONE},
+        .doubleBattle = TRUE,
+        .aiFlags = 0x1,
+        .party = NO_ITEM_DEFAULT_MOVES(sParty_SinnohInterviewersRoxyAndOliRematch3),
+    },
+
+    [TRAINER_SINNOH_INTERVIEWERS_ROXY_AND_OLI_REMATCH_4] =
+    {
+        .trainerClass = TRAINER_CLASS_INTERVIEWER,
+        .encounterMusic_gender = 29,
+        .trainerPic = TRAINER_PIC_INTERVIEWER,
+        .trainerName = _("ROXY & OLI"),
+        .items = {ITEM_NONE, ITEM_NONE, ITEM_NONE, ITEM_NONE},
+        .doubleBattle = TRUE,
+        .aiFlags = 0x1,
+        .party = NO_ITEM_DEFAULT_MOVES(sParty_SinnohInterviewersRoxyAndOliRematch4),
+    },
+
+    [TRAINER_SINNOH_AROMA_LADY_ELIZABETH_REMATCH_1] =
+    {
+        .trainerClass = TRAINER_CLASS_AROMA_LADY,
+        .encounterMusic_gender = 32 | F_TRAINER_FEMALE,
+        .trainerPic = TRAINER_PIC_AROMA_LADY,
+        .trainerName = _("ELIZABETH"),
+        .items = {ITEM_NONE, ITEM_NONE, ITEM_NONE, ITEM_NONE},
+        .doubleBattle = FALSE,
+        .aiFlags = 0x7,
+        .party = NO_ITEM_DEFAULT_MOVES(sParty_SinnohAromaLadyElizabethRematch1),
+    },
+
+    [TRAINER_SINNOH_AROMA_LADY_ELIZABETH_REMATCH_2] =
+    {
+        .trainerClass = TRAINER_CLASS_AROMA_LADY,
+        .encounterMusic_gender = 32 | F_TRAINER_FEMALE,
+        .trainerPic = TRAINER_PIC_AROMA_LADY,
+        .trainerName = _("ELIZABETH"),
+        .items = {ITEM_NONE, ITEM_NONE, ITEM_NONE, ITEM_NONE},
+        .doubleBattle = FALSE,
+        .aiFlags = 0x7,
+        .party = NO_ITEM_DEFAULT_MOVES(sParty_SinnohAromaLadyElizabethRematch2),
+    },
+
+    [TRAINER_SINNOH_AROMA_LADY_ELIZABETH_REMATCH_3] =
+    {
+        .trainerClass = TRAINER_CLASS_AROMA_LADY,
+        .encounterMusic_gender = 32 | F_TRAINER_FEMALE,
+        .trainerPic = TRAINER_PIC_AROMA_LADY,
+        .trainerName = _("ELIZABETH"),
+        .items = {ITEM_NONE, ITEM_NONE, ITEM_NONE, ITEM_NONE},
+        .doubleBattle = FALSE,
+        .aiFlags = 0x7,
+        .party = NO_ITEM_DEFAULT_MOVES(sParty_SinnohAromaLadyElizabethRematch3),
+    },
+
+    [TRAINER_SINNOH_ARTIST_WILLIAM_REMATCH_1] =
+    {
+        .trainerClass = TRAINER_CLASS_SINNOH_ARTIST,
+        .encounterMusic_gender = 35,
+        .trainerPic = TRAINER_PIC_QZ_210,
+        .trainerName = _("WILLIAM"),
+        .items = {ITEM_NONE, ITEM_NONE, ITEM_NONE, ITEM_NONE},
+        .doubleBattle = FALSE,
+        .aiFlags = 0x1,
+        .party = NO_ITEM_DEFAULT_MOVES(sParty_SinnohArtistWilliamRematch1),
+    },
+
+    [TRAINER_SINNOH_ARTIST_WILLIAM_REMATCH_2] =
+    {
+        .trainerClass = TRAINER_CLASS_SINNOH_ARTIST,
+        .encounterMusic_gender = 35,
+        .trainerPic = TRAINER_PIC_QZ_210,
+        .trainerName = _("WILLIAM"),
+        .items = {ITEM_NONE, ITEM_NONE, ITEM_NONE, ITEM_NONE},
+        .doubleBattle = FALSE,
+        .aiFlags = 0x1,
+        .party = NO_ITEM_DEFAULT_MOVES(sParty_SinnohArtistWilliamRematch2),
+    },
+
+    [TRAINER_SINNOH_ARTIST_WILLIAM_REMATCH_3] =
+    {
+        .trainerClass = TRAINER_CLASS_SINNOH_ARTIST,
+        .encounterMusic_gender = 35,
+        .trainerPic = TRAINER_PIC_QZ_210,
+        .trainerName = _("WILLIAM"),
+        .items = {ITEM_NONE, ITEM_NONE, ITEM_NONE, ITEM_NONE},
+        .doubleBattle = FALSE,
+        .aiFlags = 0x1,
+        .party = NO_ITEM_CUSTOM_MOVES(sParty_SinnohArtistWilliamRematch3),
+    },
+
+    [TRAINER_SINNOH_BATTLE_GIRL_HELEN_REMATCH_1] =
+    {
+        .trainerClass = TRAINER_CLASS_BATTLE_GIRL,
+        .encounterMusic_gender = 30 | F_TRAINER_FEMALE,
+        .trainerPic = TRAINER_PIC_BATTLE_GIRL,
+        .trainerName = _("HELEN"),
+        .items = {ITEM_NONE, ITEM_NONE, ITEM_NONE, ITEM_NONE},
+        .doubleBattle = FALSE,
+        .aiFlags = 0x7,
+        .party = NO_ITEM_DEFAULT_MOVES(sParty_SinnohBattleGirlHelenRematch1),
+    },
+
+    [TRAINER_SINNOH_BATTLE_GIRL_HELEN_REMATCH_2] =
+    {
+        .trainerClass = TRAINER_CLASS_BATTLE_GIRL,
+        .encounterMusic_gender = 30 | F_TRAINER_FEMALE,
+        .trainerPic = TRAINER_PIC_BATTLE_GIRL,
+        .trainerName = _("HELEN"),
+        .items = {ITEM_NONE, ITEM_NONE, ITEM_NONE, ITEM_NONE},
+        .doubleBattle = FALSE,
+        .aiFlags = 0x7,
+        .party = NO_ITEM_DEFAULT_MOVES(sParty_SinnohBattleGirlHelenRematch2),
+    },
+
+    [TRAINER_SINNOH_BATTLE_GIRL_HELEN_REMATCH_3] =
+    {
+        .trainerClass = TRAINER_CLASS_BATTLE_GIRL,
+        .encounterMusic_gender = 30 | F_TRAINER_FEMALE,
+        .trainerPic = TRAINER_PIC_BATTLE_GIRL,
+        .trainerName = _("HELEN"),
+        .items = {ITEM_NONE, ITEM_NONE, ITEM_NONE, ITEM_NONE},
+        .doubleBattle = FALSE,
+        .aiFlags = 0x7,
+        .party = NO_ITEM_DEFAULT_MOVES(sParty_SinnohBattleGirlHelenRematch3),
+    },
+
+    [TRAINER_SINNOH_BIRD_KEEPER_BRIANNA_REMATCH_1] =
+    {
+        .trainerClass = TRAINER_CLASS_BIRD_KEEPER,
+        .encounterMusic_gender = 24,
+        .trainerPic = TRAINER_PIC_BIRD_KEEPER,
+        .trainerName = _("BRIANNA"),
+        .items = {ITEM_NONE, ITEM_NONE, ITEM_NONE, ITEM_NONE},
+        .doubleBattle = FALSE,
+        .aiFlags = 0x1,
+        .party = NO_ITEM_DEFAULT_MOVES(sParty_SinnohBirdKeeperBriannaRematch1),
+    },
+
+    [TRAINER_SINNOH_BIRD_KEEPER_BRIANNA_REMATCH_2] =
+    {
+        .trainerClass = TRAINER_CLASS_BIRD_KEEPER,
+        .encounterMusic_gender = 24,
+        .trainerPic = TRAINER_PIC_BIRD_KEEPER,
+        .trainerName = _("BRIANNA"),
+        .items = {ITEM_NONE, ITEM_NONE, ITEM_NONE, ITEM_NONE},
+        .doubleBattle = FALSE,
+        .aiFlags = 0x1,
+        .party = NO_ITEM_CUSTOM_MOVES(sParty_SinnohBirdKeeperBriannaRematch2),
+    },
+
+    [TRAINER_SINNOH_BIRD_KEEPER_AUDREY_REMATCH] =
+    {
+        .trainerClass = TRAINER_CLASS_BIRD_KEEPER,
+        .encounterMusic_gender = 24,
+        .trainerPic = TRAINER_PIC_BIRD_KEEPER,
+        .trainerName = _("AUDREY"),
+        .items = {ITEM_NONE, ITEM_NONE, ITEM_NONE, ITEM_NONE},
+        .doubleBattle = FALSE,
+        .aiFlags = 0x1,
+        .party = NO_ITEM_DEFAULT_MOVES(sParty_SinnohBirdKeeperAudreyRematch),
+    },
+
+    [TRAINER_SINNOH_BREEDER_ALBERT_REMATCH_1] =
+    {
+        .trainerClass = TRAINER_CLASS_PKMN_BREEDER,
+        .encounterMusic_gender = 33,
+        .trainerPic = TRAINER_PIC_POKEMON_BREEDER_M,
+        .trainerName = _("ALBERT"),
+        .items = {ITEM_NONE, ITEM_NONE, ITEM_NONE, ITEM_NONE},
+        .doubleBattle = FALSE,
+        .aiFlags = 0x1,
+        .party = NO_ITEM_DEFAULT_MOVES(sParty_SinnohBreederAlbertRematch1),
+    },
+
+    [TRAINER_SINNOH_BREEDER_ALBERT_REMATCH_2] =
+    {
+        .trainerClass = TRAINER_CLASS_PKMN_BREEDER,
+        .encounterMusic_gender = 33,
+        .trainerPic = TRAINER_PIC_POKEMON_BREEDER_M,
+        .trainerName = _("ALBERT"),
+        .items = {ITEM_NONE, ITEM_NONE, ITEM_NONE, ITEM_NONE},
+        .doubleBattle = FALSE,
+        .aiFlags = 0x1,
+        .party = NO_ITEM_DEFAULT_MOVES(sParty_SinnohBreederAlbertRematch2),
+    },
+
+    [TRAINER_SINNOH_BREEDER_ALBERT_REMATCH_3] =
+    {
+        .trainerClass = TRAINER_CLASS_PKMN_BREEDER,
+        .encounterMusic_gender = 33,
+        .trainerPic = TRAINER_PIC_POKEMON_BREEDER_M,
+        .trainerName = _("ALBERT"),
+        .items = {ITEM_NONE, ITEM_NONE, ITEM_NONE, ITEM_NONE},
+        .doubleBattle = FALSE,
+        .aiFlags = 0x1,
+        .party = NO_ITEM_DEFAULT_MOVES(sParty_SinnohBreederAlbertRematch3),
+    },
+
+    [TRAINER_SINNOH_BREEDER_JENNIFER_REMATCH_1] =
+    {
+        .trainerClass = TRAINER_CLASS_PKMN_BREEDER,
+        .encounterMusic_gender = 33 | F_TRAINER_FEMALE,
+        .trainerPic = TRAINER_PIC_POKEMON_BREEDER_F,
+        .trainerName = _("JENNIFER"),
+        .items = {ITEM_NONE, ITEM_NONE, ITEM_NONE, ITEM_NONE},
+        .doubleBattle = FALSE,
+        .aiFlags = 0x1,
+        .party = NO_ITEM_DEFAULT_MOVES(sParty_SinnohBreederJenniferRematch1),
+    },
+
+    [TRAINER_SINNOH_BREEDER_JENNIFER_REMATCH_2] =
+    {
+        .trainerClass = TRAINER_CLASS_PKMN_BREEDER,
+        .encounterMusic_gender = 33 | F_TRAINER_FEMALE,
+        .trainerPic = TRAINER_PIC_POKEMON_BREEDER_F,
+        .trainerName = _("JENNIFER"),
+        .items = {ITEM_NONE, ITEM_NONE, ITEM_NONE, ITEM_NONE},
+        .doubleBattle = FALSE,
+        .aiFlags = 0x1,
+        .party = NO_ITEM_DEFAULT_MOVES(sParty_SinnohBreederJenniferRematch2),
+    },
+
+    [TRAINER_SINNOH_BREEDER_JENNIFER_REMATCH_3] =
+    {
+        .trainerClass = TRAINER_CLASS_PKMN_BREEDER,
+        .encounterMusic_gender = 33 | F_TRAINER_FEMALE,
+        .trainerPic = TRAINER_PIC_POKEMON_BREEDER_F,
+        .trainerName = _("JENNIFER"),
+        .items = {ITEM_NONE, ITEM_NONE, ITEM_NONE, ITEM_NONE},
+        .doubleBattle = FALSE,
+        .aiFlags = 0x1,
+        .party = NO_ITEM_DEFAULT_MOVES(sParty_SinnohBreederJenniferRematch3),
+    },
+
+    [TRAINER_SINNOH_CAMPER_ZACKARY_REMATCH_1] =
+    {
+        .trainerClass = TRAINER_CLASS_CAMPER,
+        .encounterMusic_gender = 24,
+        .trainerPic = TRAINER_PIC_CAMPER,
+        .trainerName = _("ZACKARY"),
+        .items = {ITEM_NONE, ITEM_NONE, ITEM_NONE, ITEM_NONE},
+        .doubleBattle = FALSE,
+        .aiFlags = 0x7,
+        .party = NO_ITEM_DEFAULT_MOVES(sParty_SinnohCamperZackaryRematch1),
+    },
+
+    [TRAINER_SINNOH_CAMPER_ZACKARY_REMATCH_2] =
+    {
+        .trainerClass = TRAINER_CLASS_CAMPER,
+        .encounterMusic_gender = 24,
+        .trainerPic = TRAINER_PIC_CAMPER,
+        .trainerName = _("ZACKARY"),
+        .items = {ITEM_NONE, ITEM_NONE, ITEM_NONE, ITEM_NONE},
+        .doubleBattle = FALSE,
+        .aiFlags = 0x7,
+        .party = NO_ITEM_DEFAULT_MOVES(sParty_SinnohCamperZackaryRematch2),
+    },
+
+    [TRAINER_SINNOH_CAMPER_ZACKARY_REMATCH_3] =
+    {
+        .trainerClass = TRAINER_CLASS_CAMPER,
+        .encounterMusic_gender = 24,
+        .trainerPic = TRAINER_PIC_CAMPER,
+        .trainerName = _("ZACKARY"),
+        .items = {ITEM_NONE, ITEM_NONE, ITEM_NONE, ITEM_NONE},
+        .doubleBattle = FALSE,
+        .aiFlags = 0x7,
+        .party = NO_ITEM_CUSTOM_MOVES(sParty_SinnohCamperZackaryRematch3),
+    },
+
+    [TRAINER_SINNOH_ACE_TRAINER_DALTON_REMATCH] =
+    {
+        .trainerClass = TRAINER_CLASS_COOLTRAINER,
+        .encounterMusic_gender = 29,
+        .trainerPic = TRAINER_PIC_COOLTRAINER_M,
+        .trainerName = _("DALTON"),
+        .items = {ITEM_NONE, ITEM_NONE, ITEM_NONE, ITEM_NONE},
+        .doubleBattle = FALSE,
+        .aiFlags = 0x7,
+        .party = NO_ITEM_CUSTOM_MOVES(sParty_SinnohAceTrainerDaltonRematch),
+    },
+
+    [TRAINER_SINNOH_ACE_TRAINER_OLIVIA_REMATCH] =
+    {
+        .trainerClass = TRAINER_CLASS_COOLTRAINER,
+        .encounterMusic_gender = 29 | F_TRAINER_FEMALE,
+        .trainerPic = TRAINER_PIC_COOLTRAINER_F,
+        .trainerName = _("OLIVIA"),
+        .items = {ITEM_NONE, ITEM_NONE, ITEM_NONE, ITEM_NONE},
+        .doubleBattle = FALSE,
+        .aiFlags = 0x7,
+        .party = NO_ITEM_CUSTOM_MOVES(sParty_SinnohAceTrainerOliviaRematch),
+    },
+
+    [TRAINER_SINNOH_COLLECTOR_IVAN_REMATCH] =
+    {
+        .trainerClass = TRAINER_CLASS_COLLECTOR,
+        .encounterMusic_gender = 33,
+        .trainerPic = TRAINER_PIC_COLLECTOR,
+        .trainerName = _("IVAN"),
+        .items = {ITEM_NONE, ITEM_NONE, ITEM_NONE, ITEM_NONE},
+        .doubleBattle = FALSE,
+        .aiFlags = 0x1,
+        .party = NO_ITEM_DEFAULT_MOVES(sParty_SinnohCollectorIvanRematch),
+    },
+
+    [TRAINER_SINNOH_CYCLIST_JOHN_REMATCH_1] =
+    {
+        .trainerClass = TRAINER_CLASS_SINNOH_CYCLIST,
+        .encounterMusic_gender = 27,
+        .trainerPic = TRAINER_PIC_CYCLING_TRIATHLETE_M,
+        .trainerName = _("JOHN"),
+        .items = {ITEM_NONE, ITEM_NONE, ITEM_NONE, ITEM_NONE},
+        .doubleBattle = FALSE,
+        .aiFlags = 0x1,
+        .party = NO_ITEM_DEFAULT_MOVES(sParty_SinnohCyclistJohnRematch1),
+    },
+
+    [TRAINER_SINNOH_CYCLIST_JOHN_REMATCH_2] =
+    {
+        .trainerClass = TRAINER_CLASS_SINNOH_CYCLIST,
+        .encounterMusic_gender = 27,
+        .trainerPic = TRAINER_PIC_CYCLING_TRIATHLETE_M,
+        .trainerName = _("JOHN"),
+        .items = {ITEM_NONE, ITEM_NONE, ITEM_NONE, ITEM_NONE},
+        .doubleBattle = FALSE,
+        .aiFlags = 0x1,
+        .party = NO_ITEM_DEFAULT_MOVES(sParty_SinnohCyclistJohnRematch2),
+    },
+
+    [TRAINER_SINNOH_CYCLIST_JOHN_REMATCH_3] =
+    {
+        .trainerClass = TRAINER_CLASS_SINNOH_CYCLIST,
+        .encounterMusic_gender = 27,
+        .trainerPic = TRAINER_PIC_CYCLING_TRIATHLETE_M,
+        .trainerName = _("JOHN"),
+        .items = {ITEM_NONE, ITEM_NONE, ITEM_NONE, ITEM_NONE},
+        .doubleBattle = FALSE,
+        .aiFlags = 0x1,
+        .party = NO_ITEM_DEFAULT_MOVES(sParty_SinnohCyclistJohnRematch3),
+    },
+
+    [TRAINER_SINNOH_CYCLIST_KAYLA_REMATCH_1] =
+    {
+        .trainerClass = TRAINER_CLASS_SINNOH_CYCLIST,
+        .encounterMusic_gender = 27 | F_TRAINER_FEMALE,
+        .trainerPic = TRAINER_PIC_CYCLING_TRIATHLETE_F,
+        .trainerName = _("KAYLA"),
+        .items = {ITEM_NONE, ITEM_NONE, ITEM_NONE, ITEM_NONE},
+        .doubleBattle = FALSE,
+        .aiFlags = 0x1,
+        .party = NO_ITEM_DEFAULT_MOVES(sParty_SinnohCyclistKaylaRematch1),
+    },
+
+    [TRAINER_SINNOH_CYCLIST_KAYLA_REMATCH_2] =
+    {
+        .trainerClass = TRAINER_CLASS_SINNOH_CYCLIST,
+        .encounterMusic_gender = 27 | F_TRAINER_FEMALE,
+        .trainerPic = TRAINER_PIC_CYCLING_TRIATHLETE_F,
+        .trainerName = _("KAYLA"),
+        .items = {ITEM_NONE, ITEM_NONE, ITEM_NONE, ITEM_NONE},
+        .doubleBattle = FALSE,
+        .aiFlags = 0x1,
+        .party = NO_ITEM_DEFAULT_MOVES(sParty_SinnohCyclistKaylaRematch2),
+    },
+
+    [TRAINER_SINNOH_CYCLIST_KAYLA_REMATCH_3] =
+    {
+        .trainerClass = TRAINER_CLASS_SINNOH_CYCLIST,
+        .encounterMusic_gender = 27 | F_TRAINER_FEMALE,
+        .trainerPic = TRAINER_PIC_CYCLING_TRIATHLETE_F,
+        .trainerName = _("KAYLA"),
+        .items = {ITEM_NONE, ITEM_NONE, ITEM_NONE, ITEM_NONE},
+        .doubleBattle = FALSE,
+        .aiFlags = 0x1,
+        .party = NO_ITEM_DEFAULT_MOVES(sParty_SinnohCyclistKaylaRematch3),
+    },
+
+    [TRAINER_SINNOH_DRAGON_TAMER_PATRICK_REMATCH_1] =
+    {
+        .trainerClass = TRAINER_CLASS_DRAGON_TAMER,
+        .encounterMusic_gender = 29,
+        .trainerPic = TRAINER_PIC_DRAGON_TAMER,
+        .trainerName = _("PATRICK"),
+        .items = {ITEM_NONE, ITEM_NONE, ITEM_NONE, ITEM_NONE},
+        .doubleBattle = FALSE,
+        .aiFlags = 0x7,
+        .party = NO_ITEM_DEFAULT_MOVES(sParty_SinnohDragonTamerPatrickRematch1),
+    },
+
+    [TRAINER_SINNOH_DRAGON_TAMER_PATRICK_REMATCH_2] =
+    {
+        .trainerClass = TRAINER_CLASS_DRAGON_TAMER,
+        .encounterMusic_gender = 29,
+        .trainerPic = TRAINER_PIC_DRAGON_TAMER,
+        .trainerName = _("PATRICK"),
+        .items = {ITEM_NONE, ITEM_NONE, ITEM_NONE, ITEM_NONE},
+        .doubleBattle = FALSE,
+        .aiFlags = 0x7,
+        .party = NO_ITEM_DEFAULT_MOVES(sParty_SinnohDragonTamerPatrickRematch2),
+    },
+
+    [TRAINER_SINNOH_DRAGON_TAMER_HAYDEN_REMATCH] =
+    {
+        .trainerClass = TRAINER_CLASS_DRAGON_TAMER,
+        .encounterMusic_gender = 29,
+        .trainerPic = TRAINER_PIC_DRAGON_TAMER,
+        .trainerName = _("HAYDEN"),
+        .items = {ITEM_NONE, ITEM_NONE, ITEM_NONE, ITEM_NONE},
+        .doubleBattle = FALSE,
+        .aiFlags = 0x7,
+        .party = NO_ITEM_DEFAULT_MOVES(sParty_SinnohDragonTamerHaydenRematch),
+    },
+
+    [TRAINER_SINNOH_DRAGON_TAMER_GEOFFREY_REMATCH] =
+    {
+        .trainerClass = TRAINER_CLASS_DRAGON_TAMER,
+        .encounterMusic_gender = 29,
+        .trainerPic = TRAINER_PIC_DRAGON_TAMER,
+        .trainerName = _("GEOFFREY"),
+        .items = {ITEM_NONE, ITEM_NONE, ITEM_NONE, ITEM_NONE},
+        .doubleBattle = FALSE,
+        .aiFlags = 0x7,
+        .party = NO_ITEM_DEFAULT_MOVES(sParty_SinnohDragonTamerGeoffreyRematch),
+    },
+
+    [TRAINER_SINNOH_ACE_TRAINER_JAKE_REMATCH] =
+    {
+        .trainerClass = TRAINER_CLASS_COOLTRAINER,
+        .encounterMusic_gender = 29,
+        .trainerPic = TRAINER_PIC_COOLTRAINER_M,
+        .trainerName = _("JAKE"),
+        .items = {ITEM_NONE, ITEM_NONE, ITEM_NONE, ITEM_NONE},
+        .doubleBattle = FALSE,
+        .aiFlags = 0x7,
+        .party = NO_ITEM_CUSTOM_MOVES(sParty_SinnohAceTrainerJakeRematch),
+    },
+
+    [TRAINER_SINNOH_ACE_TRAINER_DENNIS_REMATCH_1] =
+    {
+        .trainerClass = TRAINER_CLASS_COOLTRAINER,
+        .encounterMusic_gender = 29,
+        .trainerPic = TRAINER_PIC_COOLTRAINER_M,
+        .trainerName = _("DENNIS"),
+        .items = {ITEM_NONE, ITEM_NONE, ITEM_NONE, ITEM_NONE},
+        .doubleBattle = FALSE,
+        .aiFlags = 0x7,
+        .party = NO_ITEM_CUSTOM_MOVES(sParty_SinnohAceTrainerDennisRematch1),
+    },
+
+    [TRAINER_SINNOH_ACE_TRAINER_DENNIS_REMATCH_2] =
+    {
+        .trainerClass = TRAINER_CLASS_COOLTRAINER,
+        .encounterMusic_gender = 29,
+        .trainerPic = TRAINER_PIC_COOLTRAINER_M,
+        .trainerName = _("DENNIS"),
+        .items = {ITEM_NONE, ITEM_NONE, ITEM_NONE, ITEM_NONE},
+        .doubleBattle = FALSE,
+        .aiFlags = 0x7,
+        .party = NO_ITEM_CUSTOM_MOVES(sParty_SinnohAceTrainerDennisRematch2),
+    },
+
+    [TRAINER_SINNOH_ACE_TRAINER_RODOLFO_REMATCH] =
+    {
+        .trainerClass = TRAINER_CLASS_COOLTRAINER,
+        .encounterMusic_gender = 29,
+        .trainerPic = TRAINER_PIC_COOLTRAINER_M,
+        .trainerName = _("RODOLFO"),
+        .items = {ITEM_NONE, ITEM_NONE, ITEM_NONE, ITEM_NONE},
+        .doubleBattle = FALSE,
+        .aiFlags = 0x7,
+        .party = NO_ITEM_CUSTOM_MOVES(sParty_SinnohAceTrainerRodolfoRematch),
+    },
+
+    [TRAINER_SINNOH_ACE_TRAINER_SAUL_REMATCH] =
+    {
+        .trainerClass = TRAINER_CLASS_COOLTRAINER,
+        .encounterMusic_gender = 29,
+        .trainerPic = TRAINER_PIC_COOLTRAINER_M,
+        .trainerName = _("SAUL"),
+        .items = {ITEM_NONE, ITEM_NONE, ITEM_NONE, ITEM_NONE},
+        .doubleBattle = FALSE,
+        .aiFlags = 0x7,
+        .party = NO_ITEM_CUSTOM_MOVES(sParty_SinnohAceTrainerSaulRematch),
+    },
+
+    [TRAINER_SINNOH_ACE_TRAINER_SHANNON_REMATCH] =
+    {
+        .trainerClass = TRAINER_CLASS_COOLTRAINER,
+        .encounterMusic_gender = 29 | F_TRAINER_FEMALE,
+        .trainerPic = TRAINER_PIC_COOLTRAINER_F,
+        .trainerName = _("SHANNON"),
+        .items = {ITEM_NONE, ITEM_NONE, ITEM_NONE, ITEM_NONE},
+        .doubleBattle = FALSE,
+        .aiFlags = 0x7,
+        .party = NO_ITEM_CUSTOM_MOVES(sParty_SinnohAceTrainerShannonRematch),
+    },
+
+    [TRAINER_SINNOH_ACE_TRAINER_MAYA_REMATCH_1] =
+    {
+        .trainerClass = TRAINER_CLASS_COOLTRAINER,
+        .encounterMusic_gender = 29 | F_TRAINER_FEMALE,
+        .trainerPic = TRAINER_PIC_COOLTRAINER_F,
+        .trainerName = _("MAYA"),
+        .items = {ITEM_NONE, ITEM_NONE, ITEM_NONE, ITEM_NONE},
+        .doubleBattle = FALSE,
+        .aiFlags = 0x7,
+        .party = NO_ITEM_CUSTOM_MOVES(sParty_SinnohAceTrainerMayaRematch1),
+    },
+
+    [TRAINER_SINNOH_ACE_TRAINER_MAYA_REMATCH_2] =
+    {
+        .trainerClass = TRAINER_CLASS_COOLTRAINER,
+        .encounterMusic_gender = 29 | F_TRAINER_FEMALE,
+        .trainerPic = TRAINER_PIC_COOLTRAINER_F,
+        .trainerName = _("MAYA"),
+        .items = {ITEM_NONE, ITEM_NONE, ITEM_NONE, ITEM_NONE},
+        .doubleBattle = FALSE,
+        .aiFlags = 0x7,
+        .party = NO_ITEM_CUSTOM_MOVES(sParty_SinnohAceTrainerMayaRematch2),
+    },
+
+    [TRAINER_SINNOH_ACE_TRAINER_DEANNA_REMATCH] =
+    {
+        .trainerClass = TRAINER_CLASS_COOLTRAINER,
+        .encounterMusic_gender = 29 | F_TRAINER_FEMALE,
+        .trainerPic = TRAINER_PIC_COOLTRAINER_F,
+        .trainerName = _("DEANNA"),
+        .items = {ITEM_NONE, ITEM_NONE, ITEM_NONE, ITEM_NONE},
+        .doubleBattle = FALSE,
+        .aiFlags = 0x7,
+        .party = NO_ITEM_CUSTOM_MOVES(sParty_SinnohAceTrainerDeannaRematch),
+    },
+
+    [TRAINER_SINNOH_ACE_TRAINER_MOIRA_REMATCH] =
+    {
+        .trainerClass = TRAINER_CLASS_COOLTRAINER,
+        .encounterMusic_gender = 29 | F_TRAINER_FEMALE,
+        .trainerPic = TRAINER_PIC_COOLTRAINER_F,
+        .trainerName = _("MOIRA"),
+        .items = {ITEM_NONE, ITEM_NONE, ITEM_NONE, ITEM_NONE},
+        .doubleBattle = FALSE,
+        .aiFlags = 0x7,
+        .party = NO_ITEM_CUSTOM_MOVES(sParty_SinnohAceTrainerMoiraRematch),
+    },
+
+    [TRAINER_SINNOH_PSYCHIC_MITCHELL_REMATCH_1] =
+    {
+        .trainerClass = TRAINER_CLASS_PSYCHIC,
+        .encounterMusic_gender = 32,
+        .trainerPic = TRAINER_PIC_PSYCHIC_M,
+        .trainerName = _("MITCHELL"),
+        .items = {ITEM_NONE, ITEM_NONE, ITEM_NONE, ITEM_NONE},
+        .doubleBattle = FALSE,
+        .aiFlags = 0x7,
+        .party = NO_ITEM_DEFAULT_MOVES(sParty_SinnohPsychicMitchellRematch1),
+    },
+
+    [TRAINER_SINNOH_PSYCHIC_MITCHELL_REMATCH_2] =
+    {
+        .trainerClass = TRAINER_CLASS_PSYCHIC,
+        .encounterMusic_gender = 32,
+        .trainerPic = TRAINER_PIC_PSYCHIC_M,
+        .trainerName = _("MITCHELL"),
+        .items = {ITEM_NONE, ITEM_NONE, ITEM_NONE, ITEM_NONE},
+        .doubleBattle = FALSE,
+        .aiFlags = 0x7,
+        .party = NO_ITEM_DEFAULT_MOVES(sParty_SinnohPsychicMitchellRematch2),
+    },
+
+    [TRAINER_SINNOH_PSYCHIC_MAXWELL_REMATCH] =
+    {
+        .trainerClass = TRAINER_CLASS_PSYCHIC,
+        .encounterMusic_gender = 32,
+        .trainerPic = TRAINER_PIC_PSYCHIC_M,
+        .trainerName = _("MAXWELL"),
+        .items = {ITEM_NONE, ITEM_NONE, ITEM_NONE, ITEM_NONE},
+        .doubleBattle = FALSE,
+        .aiFlags = 0x7,
+        .party = NO_ITEM_DEFAULT_MOVES(sParty_SinnohPsychicMaxwellRematch),
+    },
+
+    [TRAINER_SINNOH_PSYCHIC_CORBIN_REMATCH] =
+    {
+        .trainerClass = TRAINER_CLASS_PSYCHIC,
+        .encounterMusic_gender = 32,
+        .trainerPic = TRAINER_PIC_PSYCHIC_M,
+        .trainerName = _("CORBIN"),
+        .items = {ITEM_NONE, ITEM_NONE, ITEM_NONE, ITEM_NONE},
+        .doubleBattle = FALSE,
+        .aiFlags = 0x7,
+        .party = NO_ITEM_DEFAULT_MOVES(sParty_SinnohPsychicCorbinRematch),
+    },
+
+    [TRAINER_SINNOH_PSYCHIC_ABIGAIL_REMATCH_1] =
+    {
+        .trainerClass = TRAINER_CLASS_PSYCHIC,
+        .encounterMusic_gender = 32 | F_TRAINER_FEMALE,
+        .trainerPic = TRAINER_PIC_PSYCHIC_F,
+        .trainerName = _("ABIGAIL"),
+        .items = {ITEM_NONE, ITEM_NONE, ITEM_NONE, ITEM_NONE},
+        .doubleBattle = FALSE,
+        .aiFlags = 0x7,
+        .party = NO_ITEM_DEFAULT_MOVES(sParty_SinnohPsychicAbigailRematch1),
+    },
+
+    [TRAINER_SINNOH_PSYCHIC_ABIGAIL_REMATCH_2] =
+    {
+        .trainerClass = TRAINER_CLASS_PSYCHIC,
+        .encounterMusic_gender = 32 | F_TRAINER_FEMALE,
+        .trainerPic = TRAINER_PIC_PSYCHIC_F,
+        .trainerName = _("ABIGAIL"),
+        .items = {ITEM_NONE, ITEM_NONE, ITEM_NONE, ITEM_NONE},
+        .doubleBattle = FALSE,
+        .aiFlags = 0x7,
+        .party = NO_ITEM_DEFAULT_MOVES(sParty_SinnohPsychicAbigailRematch2),
+    },
+
+    [TRAINER_SINNOH_PSYCHIC_BRITTNEY_REMATCH] =
+    {
+        .trainerClass = TRAINER_CLASS_PSYCHIC,
+        .encounterMusic_gender = 32 | F_TRAINER_FEMALE,
+        .trainerPic = TRAINER_PIC_PSYCHIC_F,
+        .trainerName = _("BRITTNEY"),
+        .items = {ITEM_NONE, ITEM_NONE, ITEM_NONE, ITEM_NONE},
+        .doubleBattle = FALSE,
+        .aiFlags = 0x7,
+        .party = NO_ITEM_CUSTOM_MOVES(sParty_SinnohPsychicBrittneyRematch),
+    },
+
+    [TRAINER_SINNOH_PSYCHIC_DAISY_REMATCH] =
+    {
+        .trainerClass = TRAINER_CLASS_PSYCHIC,
+        .encounterMusic_gender = 32 | F_TRAINER_FEMALE,
+        .trainerPic = TRAINER_PIC_PSYCHIC_F,
+        .trainerName = _("DAISY"),
+        .items = {ITEM_NONE, ITEM_NONE, ITEM_NONE, ITEM_NONE},
+        .doubleBattle = FALSE,
+        .aiFlags = 0x7,
+        .party = NO_ITEM_DEFAULT_MOVES(sParty_SinnohPsychicDaisyRematch),
+    },
+
+    [TRAINER_SINNOH_RANCHER_MARCO_REMATCH_1] =
+    {
+        .trainerClass = TRAINER_CLASS_SINNOH_RANCHER,
+        .encounterMusic_gender = 28,
+        .trainerPic = TRAINER_PIC_QZ_247,
+        .trainerName = _("MARCO"),
+        .items = {ITEM_NONE, ITEM_NONE, ITEM_NONE, ITEM_NONE},
+        .doubleBattle = FALSE,
+        .aiFlags = 0x1,
+        .party = NO_ITEM_DEFAULT_MOVES(sParty_SinnohRancherMarcoRematch1),
+    },
+
+    [TRAINER_SINNOH_RANCHER_MARCO_REMATCH_2] =
+    {
+        .trainerClass = TRAINER_CLASS_SINNOH_RANCHER,
+        .encounterMusic_gender = 28,
+        .trainerPic = TRAINER_PIC_QZ_247,
+        .trainerName = _("MARCO"),
+        .items = {ITEM_NONE, ITEM_NONE, ITEM_NONE, ITEM_NONE},
+        .doubleBattle = FALSE,
+        .aiFlags = 0x1,
+        .party = NO_ITEM_DEFAULT_MOVES(sParty_SinnohRancherMarcoRematch2),
+    },
+
+    [TRAINER_SINNOH_FISHERMAN_JOSEPH_REMATCH_1] =
+    {
+        .trainerClass = TRAINER_CLASS_FISHERMAN,
+        .encounterMusic_gender = 31,
+        .trainerPic = TRAINER_PIC_FISHERMAN,
+        .trainerName = _("JOSEPH"),
+        .items = {ITEM_NONE, ITEM_NONE, ITEM_NONE, ITEM_NONE},
+        .doubleBattle = FALSE,
+        .aiFlags = 0x1,
+        .party = NO_ITEM_DEFAULT_MOVES(sParty_SinnohFishermanJosephRematch1),
+    },
+
+    [TRAINER_SINNOH_FISHERMAN_JOSEPH_REMATCH_2] =
+    {
+        .trainerClass = TRAINER_CLASS_FISHERMAN,
+        .encounterMusic_gender = 31,
+        .trainerPic = TRAINER_PIC_FISHERMAN,
+        .trainerName = _("JOSEPH"),
+        .items = {ITEM_NONE, ITEM_NONE, ITEM_NONE, ITEM_NONE},
+        .doubleBattle = FALSE,
+        .aiFlags = 0x1,
+        .party = NO_ITEM_DEFAULT_MOVES(sParty_SinnohFishermanJosephRematch2),
+    },
+
+    [TRAINER_SINNOH_FISHERMAN_MIGUEL_REMATCH] =
+    {
+        .trainerClass = TRAINER_CLASS_FISHERMAN,
+        .encounterMusic_gender = 31,
+        .trainerPic = TRAINER_PIC_FISHERMAN,
+        .trainerName = _("MIGUEL"),
+        .items = {ITEM_NONE, ITEM_NONE, ITEM_NONE, ITEM_NONE},
+        .doubleBattle = FALSE,
+        .aiFlags = 0x1,
+        .party = NO_ITEM_DEFAULT_MOVES(sParty_SinnohFishermanMiguelRematch),
+    },
+
+    [TRAINER_SINNOH_FISHERMAN_ALEC_REMATCH] =
+    {
+        .trainerClass = TRAINER_CLASS_FISHERMAN,
+        .encounterMusic_gender = 31,
+        .trainerPic = TRAINER_PIC_FISHERMAN,
+        .trainerName = _("ALEC"),
+        .items = {ITEM_NONE, ITEM_NONE, ITEM_NONE, ITEM_NONE},
+        .doubleBattle = FALSE,
+        .aiFlags = 0x1,
+        .party = NO_ITEM_DEFAULT_MOVES(sParty_SinnohFishermanAlecRematch),
+    },
+
+    [TRAINER_SINNOH_TWINS_TERI_AND_TIA_REMATCH_1] =
+    {
+        .trainerClass = TRAINER_CLASS_TWINS,
+        .encounterMusic_gender = 26 | F_TRAINER_FEMALE,
+        .trainerPic = TRAINER_PIC_TWINS,
+        .trainerName = _("TERI & TIA"),
+        .items = {ITEM_NONE, ITEM_NONE, ITEM_NONE, ITEM_NONE},
+        .doubleBattle = TRUE,
+        .aiFlags = 0x1,
+        .party = NO_ITEM_DEFAULT_MOVES(sParty_SinnohTwinsTeriAndTiaRematch1),
+    },
+
+    [TRAINER_SINNOH_TWINS_TERI_AND_TIA_REMATCH_2] =
+    {
+        .trainerClass = TRAINER_CLASS_TWINS,
+        .encounterMusic_gender = 26 | F_TRAINER_FEMALE,
+        .trainerPic = TRAINER_PIC_TWINS,
+        .trainerName = _("TERI & TIA"),
+        .items = {ITEM_NONE, ITEM_NONE, ITEM_NONE, ITEM_NONE},
+        .doubleBattle = TRUE,
+        .aiFlags = 0x1,
+        .party = NO_ITEM_DEFAULT_MOVES(sParty_SinnohTwinsTeriAndTiaRematch2),
+    },
+
+    [TRAINER_SINNOH_PI_CARLOS_REMATCH_1] =
+    {
+        .trainerClass = TRAINER_CLASS_SINNOH_PI,
+        .encounterMusic_gender = 34,
+        .trainerPic = TRAINER_PIC_QZ_220,
+        .trainerName = _("CARLOS"),
+        .items = {ITEM_NONE, ITEM_NONE, ITEM_NONE, ITEM_NONE},
+        .doubleBattle = FALSE,
+        .aiFlags = 0x7,
+        .party = NO_ITEM_CUSTOM_MOVES(sParty_SinnohPiCarlosRematch1),
+    },
+
+    [TRAINER_SINNOH_PI_CARLOS_REMATCH_2] =
+    {
+        .trainerClass = TRAINER_CLASS_SINNOH_PI,
+        .encounterMusic_gender = 34,
+        .trainerPic = TRAINER_PIC_QZ_220,
+        .trainerName = _("CARLOS"),
+        .items = {ITEM_NONE, ITEM_NONE, ITEM_NONE, ITEM_NONE},
+        .doubleBattle = FALSE,
+        .aiFlags = 0x7,
+        .party = NO_ITEM_CUSTOM_MOVES(sParty_SinnohPiCarlosRematch2),
+    },
+
+    [TRAINER_SINNOH_GENTLEMAN_JEREMY_REMATCH_1] =
+    {
+        .trainerClass = TRAINER_CLASS_GENTLEMAN,
+        .encounterMusic_gender = 34,
+        .trainerPic = TRAINER_PIC_GENTLEMAN,
+        .trainerName = _("JEREMY"),
+        .items = {ITEM_FULL_RESTORE, ITEM_NONE, ITEM_NONE, ITEM_NONE},
+        .doubleBattle = FALSE,
+        .aiFlags = 0x1,
+        .party = NO_ITEM_DEFAULT_MOVES(sParty_SinnohGentlemanJeremyRematch1),
+    },
+
+    [TRAINER_SINNOH_GENTLEMAN_JEREMY_REMATCH_2] =
+    {
+        .trainerClass = TRAINER_CLASS_GENTLEMAN,
+        .encounterMusic_gender = 34,
+        .trainerPic = TRAINER_PIC_GENTLEMAN,
+        .trainerName = _("JEREMY"),
+        .items = {ITEM_FULL_RESTORE, ITEM_NONE, ITEM_NONE, ITEM_NONE},
+        .doubleBattle = FALSE,
+        .aiFlags = 0x1,
+        .party = NO_ITEM_DEFAULT_MOVES(sParty_SinnohGentlemanJeremyRematch2),
+    },
+
+    [TRAINER_SINNOH_GENTLEMAN_JEREMY_REMATCH_3] =
+    {
+        .trainerClass = TRAINER_CLASS_GENTLEMAN,
+        .encounterMusic_gender = 34,
+        .trainerPic = TRAINER_PIC_GENTLEMAN,
+        .trainerName = _("JEREMY"),
+        .items = {ITEM_FULL_RESTORE, ITEM_NONE, ITEM_NONE, ITEM_NONE},
+        .doubleBattle = FALSE,
+        .aiFlags = 0x1,
+        .party = NO_ITEM_DEFAULT_MOVES(sParty_SinnohGentlemanJeremyRematch3),
+    },
+
+    [TRAINER_SINNOH_GUITARIST_TONY_REMATCH] =
+    {
+        .trainerClass = TRAINER_CLASS_GUITARIST,
+        .encounterMusic_gender = 35,
+        .trainerPic = TRAINER_PIC_GUITARIST,
+        .trainerName = _("TONY"),
+        .items = {ITEM_NONE, ITEM_NONE, ITEM_NONE, ITEM_NONE},
+        .doubleBattle = FALSE,
+        .aiFlags = 0x1,
+        .party = NO_ITEM_DEFAULT_MOVES(sParty_SinnohGuitaristTonyRematch),
+    },
+
+    [TRAINER_SINNOH_RUIN_MANIAC_HARRY_REMATCH_1] =
+    {
+        .trainerClass = TRAINER_CLASS_RUIN_MANIAC,
+        .encounterMusic_gender = 28,
+        .trainerPic = TRAINER_PIC_RUIN_MANIAC,
+        .trainerName = _("HARRY"),
+        .items = {ITEM_NONE, ITEM_NONE, ITEM_NONE, ITEM_NONE},
+        .doubleBattle = FALSE,
+        .aiFlags = 0x7,
+        .party = NO_ITEM_DEFAULT_MOVES(sParty_SinnohRuinManiacHarryRematch1),
+    },
+
+    [TRAINER_SINNOH_RUIN_MANIAC_HARRY_REMATCH_2] =
+    {
+        .trainerClass = TRAINER_CLASS_RUIN_MANIAC,
+        .encounterMusic_gender = 28,
+        .trainerPic = TRAINER_PIC_RUIN_MANIAC,
+        .trainerName = _("HARRY"),
+        .items = {ITEM_NONE, ITEM_NONE, ITEM_NONE, ITEM_NONE},
+        .doubleBattle = FALSE,
+        .aiFlags = 0x7,
+        .party = NO_ITEM_DEFAULT_MOVES(sParty_SinnohRuinManiacHarryRematch2),
+    },
+
+    [TRAINER_SINNOH_JOGGER_CRAIG_REMATCH_1] =
+    {
+        .trainerClass = TRAINER_CLASS_SINNOH_JOGGER,
+        .encounterMusic_gender = 27,
+        .trainerPic = TRAINER_PIC_RUNNING_TRIATHLETE_M,
+        .trainerName = _("CRAIG"),
+        .items = {ITEM_NONE, ITEM_NONE, ITEM_NONE, ITEM_NONE},
+        .doubleBattle = FALSE,
+        .aiFlags = 0x1,
+        .party = NO_ITEM_DEFAULT_MOVES(sParty_SinnohJoggerCraigRematch1),
+    },
+
+    [TRAINER_SINNOH_JOGGER_CRAIG_REMATCH_2] =
+    {
+        .trainerClass = TRAINER_CLASS_SINNOH_JOGGER,
+        .encounterMusic_gender = 27,
+        .trainerPic = TRAINER_PIC_RUNNING_TRIATHLETE_M,
+        .trainerName = _("CRAIG"),
+        .items = {ITEM_NONE, ITEM_NONE, ITEM_NONE, ITEM_NONE},
+        .doubleBattle = FALSE,
+        .aiFlags = 0x1,
+        .party = NO_ITEM_DEFAULT_MOVES(sParty_SinnohJoggerCraigRematch2),
+    },
+
+    [TRAINER_SINNOH_BLACK_BELT_PHILIP_REMATCH] =
+    {
+        .trainerClass = TRAINER_CLASS_BLACK_BELT,
+        .encounterMusic_gender = 30,
+        .trainerPic = TRAINER_PIC_BLACK_BELT,
+        .trainerName = _("PHILIP"),
+        .items = {ITEM_NONE, ITEM_NONE, ITEM_NONE, ITEM_NONE},
+        .doubleBattle = FALSE,
+        .aiFlags = 0x7,
+        .party = NO_ITEM_DEFAULT_MOVES(sParty_SinnohBlackBeltPhilipRematch),
+    },
+
+    [TRAINER_SINNOH_BLACK_BELT_DAVON_REMATCH] =
+    {
+        .trainerClass = TRAINER_CLASS_BLACK_BELT,
+        .encounterMusic_gender = 30,
+        .trainerPic = TRAINER_PIC_BLACK_BELT,
+        .trainerName = _("DAVON"),
+        .items = {ITEM_NONE, ITEM_NONE, ITEM_NONE, ITEM_NONE},
+        .doubleBattle = FALSE,
+        .aiFlags = 0x7,
+        .party = NO_ITEM_DEFAULT_MOVES(sParty_SinnohBlackBeltDavonRematch),
+    },
+
+    [TRAINER_SINNOH_SOCIALITE_REINA_REMATCH_1] =
+    {
+        .trainerClass = TRAINER_CLASS_SINNOH_SOCIALITE,
+        .encounterMusic_gender = 32 | F_TRAINER_FEMALE,
+        .trainerPic = TRAINER_PIC_QZ_249,
+        .trainerName = _("REINA"),
+        .items = {ITEM_FULL_RESTORE, ITEM_NONE, ITEM_NONE, ITEM_NONE},
+        .doubleBattle = FALSE,
+        .aiFlags = 0x1,
+        .party = NO_ITEM_DEFAULT_MOVES(sParty_SinnohSocialiteReinaRematch1),
+    },
+
+    [TRAINER_SINNOH_SOCIALITE_REINA_REMATCH_2] =
+    {
+        .trainerClass = TRAINER_CLASS_SINNOH_SOCIALITE,
+        .encounterMusic_gender = 32 | F_TRAINER_FEMALE,
+        .trainerPic = TRAINER_PIC_QZ_249,
+        .trainerName = _("REINA"),
+        .items = {ITEM_FULL_RESTORE, ITEM_NONE, ITEM_NONE, ITEM_NONE},
+        .doubleBattle = FALSE,
+        .aiFlags = 0x1,
+        .party = NO_ITEM_DEFAULT_MOVES(sParty_SinnohSocialiteReinaRematch2),
+    },
+
+    [TRAINER_SINNOH_LASS_SAMANTHA_REMATCH_1] =
+    {
+        .trainerClass = TRAINER_CLASS_LASS,
+        .encounterMusic_gender = 25 | F_TRAINER_FEMALE,
+        .trainerPic = TRAINER_PIC_LASS,
+        .trainerName = _("SAMANTHA"),
+        .items = {ITEM_NONE, ITEM_NONE, ITEM_NONE, ITEM_NONE},
+        .doubleBattle = FALSE,
+        .aiFlags = 0x1,
+        .party = NO_ITEM_DEFAULT_MOVES(sParty_SinnohLassSamanthaRematch1),
+    },
+
+    [TRAINER_SINNOH_LASS_SAMANTHA_REMATCH_2] =
+    {
+        .trainerClass = TRAINER_CLASS_LASS,
+        .encounterMusic_gender = 25 | F_TRAINER_FEMALE,
+        .trainerPic = TRAINER_PIC_LASS,
+        .trainerName = _("SAMANTHA"),
+        .items = {ITEM_NONE, ITEM_NONE, ITEM_NONE, ITEM_NONE},
+        .doubleBattle = FALSE,
+        .aiFlags = 0x1,
+        .party = NO_ITEM_DEFAULT_MOVES(sParty_SinnohLassSamanthaRematch2),
+    },
+
+    [TRAINER_SINNOH_LASS_SAMANTHA_REMATCH_3] =
+    {
+        .trainerClass = TRAINER_CLASS_LASS,
+        .encounterMusic_gender = 25 | F_TRAINER_FEMALE,
+        .trainerPic = TRAINER_PIC_LASS,
+        .trainerName = _("SAMANTHA"),
+        .items = {ITEM_NONE, ITEM_NONE, ITEM_NONE, ITEM_NONE},
+        .doubleBattle = FALSE,
+        .aiFlags = 0x1,
+        .party = NO_ITEM_DEFAULT_MOVES(sParty_SinnohLassSamanthaRematch3),
+    },
+
+    [TRAINER_SINNOH_LASS_MADELINE_REMATCH_1] =
+    {
+        .trainerClass = TRAINER_CLASS_LASS,
+        .encounterMusic_gender = 25 | F_TRAINER_FEMALE,
+        .trainerPic = TRAINER_PIC_LASS,
+        .trainerName = _("MADELINE"),
+        .items = {ITEM_NONE, ITEM_NONE, ITEM_NONE, ITEM_NONE},
+        .doubleBattle = FALSE,
+        .aiFlags = 0x1,
+        .party = NO_ITEM_DEFAULT_MOVES(sParty_SinnohLassMadelineRematch1),
+    },
+
+    [TRAINER_SINNOH_LASS_MADELINE_REMATCH_2] =
+    {
+        .trainerClass = TRAINER_CLASS_LASS,
+        .encounterMusic_gender = 25 | F_TRAINER_FEMALE,
+        .trainerPic = TRAINER_PIC_LASS,
+        .trainerName = _("MADELINE"),
+        .items = {ITEM_NONE, ITEM_NONE, ITEM_NONE, ITEM_NONE},
+        .doubleBattle = FALSE,
+        .aiFlags = 0x1,
+        .party = NO_ITEM_DEFAULT_MOVES(sParty_SinnohLassMadelineRematch2),
+    },
+
+    [TRAINER_SINNOH_LASS_MADELINE_REMATCH_3] =
+    {
+        .trainerClass = TRAINER_CLASS_LASS,
+        .encounterMusic_gender = 25 | F_TRAINER_FEMALE,
+        .trainerPic = TRAINER_PIC_LASS,
+        .trainerName = _("MADELINE"),
+        .items = {ITEM_NONE, ITEM_NONE, ITEM_NONE, ITEM_NONE},
+        .doubleBattle = FALSE,
+        .aiFlags = 0x1,
+        .party = NO_ITEM_DEFAULT_MOVES(sParty_SinnohLassMadelineRematch3),
+    },
+
+    [TRAINER_SINNOH_HIKER_THEODORE_REMATCH_1] =
+    {
+        .trainerClass = TRAINER_CLASS_HIKER,
+        .encounterMusic_gender = 28,
+        .trainerPic = TRAINER_PIC_HIKER,
+        .trainerName = _("THEODORE"),
+        .items = {ITEM_NONE, ITEM_NONE, ITEM_NONE, ITEM_NONE},
+        .doubleBattle = FALSE,
+        .aiFlags = 0x7,
+        .party = NO_ITEM_DEFAULT_MOVES(sParty_SinnohHikerTheodoreRematch1),
+    },
+
+    [TRAINER_SINNOH_HIKER_THEODORE_REMATCH_2] =
+    {
+        .trainerClass = TRAINER_CLASS_HIKER,
+        .encounterMusic_gender = 28,
+        .trainerPic = TRAINER_PIC_HIKER,
+        .trainerName = _("THEODORE"),
+        .items = {ITEM_NONE, ITEM_NONE, ITEM_NONE, ITEM_NONE},
+        .doubleBattle = FALSE,
+        .aiFlags = 0x7,
+        .party = NO_ITEM_DEFAULT_MOVES(sParty_SinnohHikerTheodoreRematch2),
+    },
+
+    [TRAINER_SINNOH_HIKER_THEODORE_REMATCH_3] =
+    {
+        .trainerClass = TRAINER_CLASS_HIKER,
+        .encounterMusic_gender = 28,
+        .trainerPic = TRAINER_PIC_HIKER,
+        .trainerName = _("THEODORE"),
+        .items = {ITEM_NONE, ITEM_NONE, ITEM_NONE, ITEM_NONE},
+        .doubleBattle = FALSE,
+        .aiFlags = 0x7,
+        .party = NO_ITEM_DEFAULT_MOVES(sParty_SinnohHikerTheodoreRematch3),
+    },
+
+    [TRAINER_SINNOH_BUG_CATCHER_BRANDON_REMATCH_1] =
+    {
+        .trainerClass = TRAINER_CLASS_BUG_CATCHER,
+        .encounterMusic_gender = 24,
+        .trainerPic = TRAINER_PIC_BUG_CATCHER,
+        .trainerName = _("BRANDON"),
+        .items = {ITEM_NONE, ITEM_NONE, ITEM_NONE, ITEM_NONE},
+        .doubleBattle = FALSE,
+        .aiFlags = 0x1,
+        .party = NO_ITEM_DEFAULT_MOVES(sParty_SinnohBugCatcherBrandonRematch1),
+    },
+
+    [TRAINER_SINNOH_BUG_CATCHER_BRANDON_REMATCH_2] =
+    {
+        .trainerClass = TRAINER_CLASS_BUG_CATCHER,
+        .encounterMusic_gender = 24,
+        .trainerPic = TRAINER_PIC_BUG_CATCHER,
+        .trainerName = _("BRANDON"),
+        .items = {ITEM_NONE, ITEM_NONE, ITEM_NONE, ITEM_NONE},
+        .doubleBattle = FALSE,
+        .aiFlags = 0x1,
+        .party = NO_ITEM_DEFAULT_MOVES(sParty_SinnohBugCatcherBrandonRematch2),
+    },
+
+    [TRAINER_SINNOH_BUG_CATCHER_BRANDON_REMATCH_3] =
+    {
+        .trainerClass = TRAINER_CLASS_BUG_CATCHER,
+        .encounterMusic_gender = 24,
+        .trainerPic = TRAINER_PIC_BUG_CATCHER,
+        .trainerName = _("BRANDON"),
+        .items = {ITEM_NONE, ITEM_NONE, ITEM_NONE, ITEM_NONE},
+        .doubleBattle = FALSE,
+        .aiFlags = 0x1,
+        .party = NO_ITEM_DEFAULT_MOVES(sParty_SinnohBugCatcherBrandonRematch3),
+    },
+
+    [TRAINER_SINNOH_PARASOL_LADY_ALEXA_REMATCH_1] =
+    {
+        .trainerClass = TRAINER_CLASS_PARASOL_LADY,
+        .encounterMusic_gender = 32 | F_TRAINER_FEMALE,
+        .trainerPic = TRAINER_PIC_PARASOL_LADY,
+        .trainerName = _("ALEXA"),
+        .items = {ITEM_NONE, ITEM_NONE, ITEM_NONE, ITEM_NONE},
+        .doubleBattle = FALSE,
+        .aiFlags = 0x1,
+        .party = NO_ITEM_DEFAULT_MOVES(sParty_SinnohParasolLadyAlexaRematch1),
+    },
+
+    [TRAINER_SINNOH_PARASOL_LADY_ALEXA_REMATCH_2] =
+    {
+        .trainerClass = TRAINER_CLASS_PARASOL_LADY,
+        .encounterMusic_gender = 32 | F_TRAINER_FEMALE,
+        .trainerPic = TRAINER_PIC_PARASOL_LADY,
+        .trainerName = _("ALEXA"),
+        .items = {ITEM_NONE, ITEM_NONE, ITEM_NONE, ITEM_NONE},
+        .doubleBattle = FALSE,
+        .aiFlags = 0x1,
+        .party = NO_ITEM_DEFAULT_MOVES(sParty_SinnohParasolLadyAlexaRematch2),
+    },
+
+    [TRAINER_SINNOH_PARASOL_LADY_ALEXA_REMATCH_3] =
+    {
+        .trainerClass = TRAINER_CLASS_PARASOL_LADY,
+        .encounterMusic_gender = 32 | F_TRAINER_FEMALE,
+        .trainerPic = TRAINER_PIC_PARASOL_LADY,
+        .trainerName = _("ALEXA"),
+        .items = {ITEM_NONE, ITEM_NONE, ITEM_NONE, ITEM_NONE},
+        .doubleBattle = FALSE,
+        .aiFlags = 0x1,
+        .party = NO_ITEM_DEFAULT_MOVES(sParty_SinnohParasolLadyAlexaRematch3),
+    },
+
+    [TRAINER_SINNOH_PICNICKER_KARINA_REMATCH_1] =
+    {
+        .trainerClass = TRAINER_CLASS_PICNICKER,
+        .encounterMusic_gender = 25 | F_TRAINER_FEMALE,
+        .trainerPic = TRAINER_PIC_PICNICKER,
+        .trainerName = _("KARINA"),
+        .items = {ITEM_NONE, ITEM_NONE, ITEM_NONE, ITEM_NONE},
+        .doubleBattle = FALSE,
+        .aiFlags = 0x7,
+        .party = NO_ITEM_CUSTOM_MOVES(sParty_SinnohPicnickerKarinaRematch1),
+    },
+
+    [TRAINER_SINNOH_PICNICKER_KARINA_REMATCH_2] =
+    {
+        .trainerClass = TRAINER_CLASS_PICNICKER,
+        .encounterMusic_gender = 25 | F_TRAINER_FEMALE,
+        .trainerPic = TRAINER_PIC_PICNICKER,
+        .trainerName = _("KARINA"),
+        .items = {ITEM_NONE, ITEM_NONE, ITEM_NONE, ITEM_NONE},
+        .doubleBattle = FALSE,
+        .aiFlags = 0x7,
+        .party = NO_ITEM_CUSTOM_MOVES(sParty_SinnohPicnickerKarinaRematch2),
+    },
+
+    [TRAINER_SINNOH_PICNICKER_KARINA_REMATCH_3] =
+    {
+        .trainerClass = TRAINER_CLASS_PICNICKER,
+        .encounterMusic_gender = 25 | F_TRAINER_FEMALE,
+        .trainerPic = TRAINER_PIC_PICNICKER,
+        .trainerName = _("KARINA"),
+        .items = {ITEM_NONE, ITEM_NONE, ITEM_NONE, ITEM_NONE},
+        .doubleBattle = FALSE,
+        .aiFlags = 0x7,
+        .party = NO_ITEM_CUSTOM_MOVES(sParty_SinnohPicnickerKarinaRematch3),
+    },
+
+    [TRAINER_SINNOH_POKE_KID_DANIELLE_REMATCH_1] =
+    {
+        .trainerClass = TRAINER_CLASS_SINNOH_POKE_KID,
+        .encounterMusic_gender = 25 | F_TRAINER_FEMALE,
+        .trainerPic = TRAINER_PIC_QZ_262,
+        .trainerName = _("DANIELLE"),
+        .items = {ITEM_NONE, ITEM_NONE, ITEM_NONE, ITEM_NONE},
+        .doubleBattle = FALSE,
+        .aiFlags = 0x1,
+        .party = NO_ITEM_DEFAULT_MOVES(sParty_SinnohPokeKidDanielleRematch1),
+    },
+
+    [TRAINER_SINNOH_POKE_KID_DANIELLE_REMATCH_2] =
+    {
+        .trainerClass = TRAINER_CLASS_SINNOH_POKE_KID,
+        .encounterMusic_gender = 25 | F_TRAINER_FEMALE,
+        .trainerPic = TRAINER_PIC_QZ_262,
+        .trainerName = _("DANIELLE"),
+        .items = {ITEM_NONE, ITEM_NONE, ITEM_NONE, ITEM_NONE},
+        .doubleBattle = FALSE,
+        .aiFlags = 0x1,
+        .party = NO_ITEM_DEFAULT_MOVES(sParty_SinnohPokeKidDanielleRematch2),
+    },
+
+    [TRAINER_SINNOH_POKE_KID_DANIELLE_REMATCH_3] =
+    {
+        .trainerClass = TRAINER_CLASS_SINNOH_POKE_KID,
+        .encounterMusic_gender = 25 | F_TRAINER_FEMALE,
+        .trainerPic = TRAINER_PIC_QZ_262,
+        .trainerName = _("DANIELLE"),
+        .items = {ITEM_NONE, ITEM_NONE, ITEM_NONE, ITEM_NONE},
+        .doubleBattle = FALSE,
+        .aiFlags = 0x1,
+        .party = NO_ITEM_DEFAULT_MOVES(sParty_SinnohPokeKidDanielleRematch3),
+    },
+
+    [TRAINER_SINNOH_POLICEMAN_DANNY_REMATCH_1] =
+    {
+        .trainerClass = TRAINER_CLASS_QZ_POLICEMAN,
+        .encounterMusic_gender = 34,
+        .trainerPic = TRAINER_PIC_QZ_219,
+        .trainerName = _("DANNY"),
+        .items = {ITEM_NONE, ITEM_NONE, ITEM_NONE, ITEM_NONE},
+        .doubleBattle = FALSE,
+        .aiFlags = 0x1,
+        .party = NO_ITEM_DEFAULT_MOVES(sParty_SinnohPolicemanDannyRematch1),
+    },
+
+    [TRAINER_SINNOH_POLICEMAN_DANNY_REMATCH_2] =
+    {
+        .trainerClass = TRAINER_CLASS_QZ_POLICEMAN,
+        .encounterMusic_gender = 34,
+        .trainerPic = TRAINER_PIC_QZ_219,
+        .trainerName = _("DANNY"),
+        .items = {ITEM_NONE, ITEM_NONE, ITEM_NONE, ITEM_NONE},
+        .doubleBattle = FALSE,
+        .aiFlags = 0x1,
+        .party = NO_ITEM_DEFAULT_MOVES(sParty_SinnohPolicemanDannyRematch2),
+    },
+
+    [TRAINER_SINNOH_POLICEMAN_DANNY_REMATCH_3] =
+    {
+        .trainerClass = TRAINER_CLASS_QZ_POLICEMAN,
+        .encounterMusic_gender = 34,
+        .trainerPic = TRAINER_PIC_QZ_219,
+        .trainerName = _("DANNY"),
+        .items = {ITEM_NONE, ITEM_NONE, ITEM_NONE, ITEM_NONE},
+        .doubleBattle = FALSE,
+        .aiFlags = 0x1,
+        .party = NO_ITEM_DEFAULT_MOVES(sParty_SinnohPolicemanDannyRematch3),
+    },
+
+    [TRAINER_SINNOH_RICH_BOY_TREY_REMATCH_1] =
+    {
+        .trainerClass = TRAINER_CLASS_RICH_BOY,
+        .encounterMusic_gender = 34,
+        .trainerPic = TRAINER_PIC_RICH_BOY,
+        .trainerName = _("TREY"),
+        .items = {ITEM_FULL_RESTORE, ITEM_NONE, ITEM_NONE, ITEM_NONE},
+        .doubleBattle = FALSE,
+        .aiFlags = 0x1,
+        .party = NO_ITEM_DEFAULT_MOVES(sParty_SinnohRichBoyTreyRematch1),
+    },
+
+    [TRAINER_SINNOH_RICH_BOY_TREY_REMATCH_2] =
+    {
+        .trainerClass = TRAINER_CLASS_RICH_BOY,
+        .encounterMusic_gender = 34,
+        .trainerPic = TRAINER_PIC_RICH_BOY,
+        .trainerName = _("TREY"),
+        .items = {ITEM_FULL_RESTORE, ITEM_NONE, ITEM_NONE, ITEM_NONE},
+        .doubleBattle = FALSE,
+        .aiFlags = 0x1,
+        .party = NO_ITEM_DEFAULT_MOVES(sParty_SinnohRichBoyTreyRematch2),
+    },
+
+    [TRAINER_SINNOH_LADY_MELISSA_REMATCH_1] =
+    {
+        .trainerClass = TRAINER_CLASS_LADY,
+        .encounterMusic_gender = 32 | F_TRAINER_FEMALE,
+        .trainerPic = TRAINER_PIC_LADY,
+        .trainerName = _("MELISSA"),
+        .items = {ITEM_FULL_RESTORE, ITEM_NONE, ITEM_NONE, ITEM_NONE},
+        .doubleBattle = FALSE,
+        .aiFlags = 0x1,
+        .party = NO_ITEM_DEFAULT_MOVES(sParty_SinnohLadyMelissaRematch1),
+    },
+
+    [TRAINER_SINNOH_LADY_MELISSA_REMATCH_2] =
+    {
+        .trainerClass = TRAINER_CLASS_LADY,
+        .encounterMusic_gender = 32 | F_TRAINER_FEMALE,
+        .trainerPic = TRAINER_PIC_LADY,
+        .trainerName = _("MELISSA"),
+        .items = {ITEM_FULL_RESTORE, ITEM_NONE, ITEM_NONE, ITEM_NONE},
+        .doubleBattle = FALSE,
+        .aiFlags = 0x1,
+        .party = NO_ITEM_CUSTOM_MOVES(sParty_SinnohLadyMelissaRematch2),
+    },
+
+    [TRAINER_SINNOH_LADY_MELISSA_REMATCH_3] =
+    {
+        .trainerClass = TRAINER_CLASS_LADY,
+        .encounterMusic_gender = 32 | F_TRAINER_FEMALE,
+        .trainerPic = TRAINER_PIC_LADY,
+        .trainerName = _("MELISSA"),
+        .items = {ITEM_FULL_RESTORE, ITEM_NONE, ITEM_NONE, ITEM_NONE},
+        .doubleBattle = FALSE,
+        .aiFlags = 0x1,
+        .party = NO_ITEM_CUSTOM_MOVES(sParty_SinnohLadyMelissaRematch3),
+    },
+
+    [TRAINER_SINNOH_RANGER_TAYLOR_REMATCH_1] =
+    {
+        .trainerClass = TRAINER_CLASS_PKMN_RANGER,
+        .encounterMusic_gender = 29,
+        .trainerPic = TRAINER_PIC_POKEMON_RANGER_M,
+        .trainerName = _("TAYLOR"),
+        .items = {ITEM_NONE, ITEM_NONE, ITEM_NONE, ITEM_NONE},
+        .doubleBattle = FALSE,
+        .aiFlags = 0x7,
+        .party = NO_ITEM_DEFAULT_MOVES(sParty_SinnohRangerTaylorRematch1),
+    },
+
+    [TRAINER_SINNOH_RANGER_TAYLOR_REMATCH_2] =
+    {
+        .trainerClass = TRAINER_CLASS_PKMN_RANGER,
+        .encounterMusic_gender = 29,
+        .trainerPic = TRAINER_PIC_POKEMON_RANGER_M,
+        .trainerName = _("TAYLOR"),
+        .items = {ITEM_NONE, ITEM_NONE, ITEM_NONE, ITEM_NONE},
+        .doubleBattle = FALSE,
+        .aiFlags = 0x7,
+        .party = NO_ITEM_DEFAULT_MOVES(sParty_SinnohRangerTaylorRematch2),
+    },
+
+    [TRAINER_SINNOH_RANGER_TAYLOR_REMATCH_3] =
+    {
+        .trainerClass = TRAINER_CLASS_PKMN_RANGER,
+        .encounterMusic_gender = 29,
+        .trainerPic = TRAINER_PIC_POKEMON_RANGER_M,
+        .trainerName = _("TAYLOR"),
+        .items = {ITEM_NONE, ITEM_NONE, ITEM_NONE, ITEM_NONE},
+        .doubleBattle = FALSE,
+        .aiFlags = 0x7,
+        .party = NO_ITEM_DEFAULT_MOVES(sParty_SinnohRangerTaylorRematch3),
+    },
+
+    [TRAINER_SINNOH_RANGER_KYLER_REMATCH] =
+    {
+        .trainerClass = TRAINER_CLASS_PKMN_RANGER,
+        .encounterMusic_gender = 29,
+        .trainerPic = TRAINER_PIC_POKEMON_RANGER_M,
+        .trainerName = _("KYLER"),
+        .items = {ITEM_NONE, ITEM_NONE, ITEM_NONE, ITEM_NONE},
+        .doubleBattle = FALSE,
+        .aiFlags = 0x7,
+        .party = NO_ITEM_DEFAULT_MOVES(sParty_SinnohRangerKylerRematch),
+    },
+
+    [TRAINER_SINNOH_RANGER_ALLISON_REMATCH_1] =
+    {
+        .trainerClass = TRAINER_CLASS_PKMN_RANGER,
+        .encounterMusic_gender = 29 | F_TRAINER_FEMALE,
+        .trainerPic = TRAINER_PIC_POKEMON_RANGER_F,
+        .trainerName = _("ALLISON"),
+        .items = {ITEM_NONE, ITEM_NONE, ITEM_NONE, ITEM_NONE},
+        .doubleBattle = FALSE,
+        .aiFlags = 0x7,
+        .party = NO_ITEM_DEFAULT_MOVES(sParty_SinnohRangerAllisonRematch1),
+    },
+
+    [TRAINER_SINNOH_RANGER_ALLISON_REMATCH_2] =
+    {
+        .trainerClass = TRAINER_CLASS_PKMN_RANGER,
+        .encounterMusic_gender = 29 | F_TRAINER_FEMALE,
+        .trainerPic = TRAINER_PIC_POKEMON_RANGER_F,
+        .trainerName = _("ALLISON"),
+        .items = {ITEM_NONE, ITEM_NONE, ITEM_NONE, ITEM_NONE},
+        .doubleBattle = FALSE,
+        .aiFlags = 0x7,
+        .party = NO_ITEM_DEFAULT_MOVES(sParty_SinnohRangerAllisonRematch2),
+    },
+
+    [TRAINER_SINNOH_RANGER_ALLISON_REMATCH_3] =
+    {
+        .trainerClass = TRAINER_CLASS_PKMN_RANGER,
+        .encounterMusic_gender = 29 | F_TRAINER_FEMALE,
+        .trainerPic = TRAINER_PIC_POKEMON_RANGER_F,
+        .trainerName = _("ALLISON"),
+        .items = {ITEM_NONE, ITEM_NONE, ITEM_NONE, ITEM_NONE},
+        .doubleBattle = FALSE,
+        .aiFlags = 0x7,
+        .party = NO_ITEM_DEFAULT_MOVES(sParty_SinnohRangerAllisonRematch3),
+    },
+
+    [TRAINER_SINNOH_RANGER_ASHLEE_REMATCH] =
+    {
+        .trainerClass = TRAINER_CLASS_PKMN_RANGER,
+        .encounterMusic_gender = 29 | F_TRAINER_FEMALE,
+        .trainerPic = TRAINER_PIC_POKEMON_RANGER_F,
+        .trainerName = _("ASHLEE"),
+        .items = {ITEM_NONE, ITEM_NONE, ITEM_NONE, ITEM_NONE},
+        .doubleBattle = FALSE,
+        .aiFlags = 0x7,
+        .party = NO_ITEM_DEFAULT_MOVES(sParty_SinnohRangerAshleeRematch),
+    },
+
+    [TRAINER_SINNOH_SAILOR_MARC_REMATCH_1] =
+    {
+        .trainerClass = TRAINER_CLASS_SAILOR,
+        .encounterMusic_gender = 31,
+        .trainerPic = TRAINER_PIC_SAILOR,
+        .trainerName = _("MARC"),
+        .items = {ITEM_NONE, ITEM_NONE, ITEM_NONE, ITEM_NONE},
+        .doubleBattle = FALSE,
+        .aiFlags = 0x1,
+        .party = NO_ITEM_DEFAULT_MOVES(sParty_SinnohSailorMarcRematch1),
+    },
+
+    [TRAINER_SINNOH_SAILOR_MARC_REMATCH_2] =
+    {
+        .trainerClass = TRAINER_CLASS_SAILOR,
+        .encounterMusic_gender = 31,
+        .trainerPic = TRAINER_PIC_SAILOR,
+        .trainerName = _("MARC"),
+        .items = {ITEM_NONE, ITEM_NONE, ITEM_NONE, ITEM_NONE},
+        .doubleBattle = FALSE,
+        .aiFlags = 0x1,
+        .party = NO_ITEM_DEFAULT_MOVES(sParty_SinnohSailorMarcRematch2),
+    },
+
+    [TRAINER_SINNOH_SAILOR_ZACHARIAH_REMATCH] =
+    {
+        .trainerClass = TRAINER_CLASS_SAILOR,
+        .encounterMusic_gender = 31,
+        .trainerPic = TRAINER_PIC_SAILOR,
+        .trainerName = _("ZACHARIAH"),
+        .items = {ITEM_NONE, ITEM_NONE, ITEM_NONE, ITEM_NONE},
+        .doubleBattle = FALSE,
+        .aiFlags = 0x1,
+        .party = NO_ITEM_DEFAULT_MOVES(sParty_SinnohSailorZachariahRematch),
+    },
+
+    [TRAINER_SINNOH_SCIENTIST_SHAUN_REMATCH_1] =
+    {
+        .trainerClass = TRAINER_CLASS_SINNOH_SCIENTIST,
+        .encounterMusic_gender = 33,
+        .trainerPic = TRAINER_PIC_QZ_274,
+        .trainerName = _("SHAUN"),
+        .items = {ITEM_X_ATTACK, ITEM_NONE, ITEM_NONE, ITEM_NONE},
+        .doubleBattle = FALSE,
+        .aiFlags = 0x7,
+        .party = NO_ITEM_DEFAULT_MOVES(sParty_SinnohScientistShaunRematch1),
+    },
+
+    [TRAINER_SINNOH_SCIENTIST_SHAUN_REMATCH_2] =
+    {
+        .trainerClass = TRAINER_CLASS_SINNOH_SCIENTIST,
+        .encounterMusic_gender = 33,
+        .trainerPic = TRAINER_PIC_QZ_274,
+        .trainerName = _("SHAUN"),
+        .items = {ITEM_X_ATTACK, ITEM_NONE, ITEM_NONE, ITEM_NONE},
+        .doubleBattle = FALSE,
+        .aiFlags = 0x7,
+        .party = NO_ITEM_DEFAULT_MOVES(sParty_SinnohScientistShaunRematch2),
+    },
+
+    [TRAINER_SINNOH_SCIENTIST_SHAUN_REMATCH_3] =
+    {
+        .trainerClass = TRAINER_CLASS_SINNOH_SCIENTIST,
+        .encounterMusic_gender = 33,
+        .trainerPic = TRAINER_PIC_QZ_274,
+        .trainerName = _("SHAUN"),
+        .items = {ITEM_X_ATTACK, ITEM_NONE, ITEM_NONE, ITEM_NONE},
+        .doubleBattle = FALSE,
+        .aiFlags = 0x7,
+        .party = NO_ITEM_DEFAULT_MOVES(sParty_SinnohScientistShaunRematch3),
+    },
+
+    [TRAINER_SINNOH_NINJA_BOY_ZACH_REMATCH_1] =
+    {
+        .trainerClass = TRAINER_CLASS_NINJA_BOY,
+        .encounterMusic_gender = 24,
+        .trainerPic = TRAINER_PIC_NINJA_BOY,
+        .trainerName = _("ZACH"),
+        .items = {ITEM_NONE, ITEM_NONE, ITEM_NONE, ITEM_NONE},
+        .doubleBattle = FALSE,
+        .aiFlags = 0x1,
+        .party = NO_ITEM_DEFAULT_MOVES(sParty_SinnohNinjaBoyZachRematch1),
+    },
+
+    [TRAINER_SINNOH_NINJA_BOY_ZACH_REMATCH_2] =
+    {
+        .trainerClass = TRAINER_CLASS_NINJA_BOY,
+        .encounterMusic_gender = 24,
+        .trainerPic = TRAINER_PIC_NINJA_BOY,
+        .trainerName = _("ZACH"),
+        .items = {ITEM_NONE, ITEM_NONE, ITEM_NONE, ITEM_NONE},
+        .doubleBattle = FALSE,
+        .aiFlags = 0x1,
+        .party = NO_ITEM_DEFAULT_MOVES(sParty_SinnohNinjaBoyZachRematch2),
+    },
+
+    [TRAINER_SINNOH_NINJA_BOY_ZACH_REMATCH_3] =
+    {
+        .trainerClass = TRAINER_CLASS_NINJA_BOY,
+        .encounterMusic_gender = 24,
+        .trainerPic = TRAINER_PIC_NINJA_BOY,
+        .trainerName = _("ZACH"),
+        .items = {ITEM_NONE, ITEM_NONE, ITEM_NONE, ITEM_NONE},
+        .doubleBattle = FALSE,
+        .aiFlags = 0x1,
+        .party = NO_ITEM_DEFAULT_MOVES(sParty_SinnohNinjaBoyZachRematch3),
+    },
+
+    [TRAINER_SINNOH_BEAUTY_CYNDY_REMATCH_1] =
+    {
+        .trainerClass = TRAINER_CLASS_BEAUTY,
+        .encounterMusic_gender = 32 | F_TRAINER_FEMALE,
+        .trainerPic = TRAINER_PIC_BEAUTY,
+        .trainerName = _("CYNDY"),
+        .items = {ITEM_NONE, ITEM_NONE, ITEM_NONE, ITEM_NONE},
+        .doubleBattle = FALSE,
+        .aiFlags = 0x1,
+        .party = NO_ITEM_DEFAULT_MOVES(sParty_SinnohBeautyCyndyRematch1),
+    },
+
+    [TRAINER_SINNOH_BEAUTY_CYNDY_REMATCH_2] =
+    {
+        .trainerClass = TRAINER_CLASS_BEAUTY,
+        .encounterMusic_gender = 32 | F_TRAINER_FEMALE,
+        .trainerPic = TRAINER_PIC_BEAUTY,
+        .trainerName = _("CYNDY"),
+        .items = {ITEM_NONE, ITEM_NONE, ITEM_NONE, ITEM_NONE},
+        .doubleBattle = FALSE,
+        .aiFlags = 0x1,
+        .party = NO_ITEM_DEFAULT_MOVES(sParty_SinnohBeautyCyndyRematch2),
+    },
+
+    [TRAINER_SINNOH_SKIER_EDWARD_REMATCH_1] =
+    {
+        .trainerClass = TRAINER_CLASS_SINNOH_SKIER,
+        .encounterMusic_gender = 27,
+        .trainerPic = TRAINER_PIC_RUNNING_TRIATHLETE_M,
+        .trainerName = _("EDWARD"),
+        .items = {ITEM_NONE, ITEM_NONE, ITEM_NONE, ITEM_NONE},
+        .doubleBattle = FALSE,
+        .aiFlags = 0x1,
+        .party = NO_ITEM_DEFAULT_MOVES(sParty_SinnohSkierEdwardRematch1),
+    },
+
+    [TRAINER_SINNOH_SKIER_EDWARD_REMATCH_2] =
+    {
+        .trainerClass = TRAINER_CLASS_SINNOH_SKIER,
+        .encounterMusic_gender = 27,
+        .trainerPic = TRAINER_PIC_RUNNING_TRIATHLETE_M,
+        .trainerName = _("EDWARD"),
+        .items = {ITEM_NONE, ITEM_NONE, ITEM_NONE, ITEM_NONE},
+        .doubleBattle = FALSE,
+        .aiFlags = 0x1,
+        .party = NO_ITEM_DEFAULT_MOVES(sParty_SinnohSkierEdwardRematch2),
+    },
+
+    [TRAINER_SINNOH_SKIER_BJORN_REMATCH_1] =
+    {
+        .trainerClass = TRAINER_CLASS_SINNOH_SKIER,
+        .encounterMusic_gender = 27,
+        .trainerPic = TRAINER_PIC_RUNNING_TRIATHLETE_M,
+        .trainerName = _("BJORN"),
+        .items = {ITEM_NONE, ITEM_NONE, ITEM_NONE, ITEM_NONE},
+        .doubleBattle = FALSE,
+        .aiFlags = 0x1,
+        .party = NO_ITEM_DEFAULT_MOVES(sParty_SinnohSkierBjornRematch1),
+    },
+
+    [TRAINER_SINNOH_SKIER_BJORN_REMATCH_2] =
+    {
+        .trainerClass = TRAINER_CLASS_SINNOH_SKIER,
+        .encounterMusic_gender = 27,
+        .trainerPic = TRAINER_PIC_RUNNING_TRIATHLETE_M,
+        .trainerName = _("BJORN"),
+        .items = {ITEM_NONE, ITEM_NONE, ITEM_NONE, ITEM_NONE},
+        .doubleBattle = FALSE,
+        .aiFlags = 0x1,
+        .party = NO_ITEM_DEFAULT_MOVES(sParty_SinnohSkierBjornRematch2),
+    },
+
+    [TRAINER_SINNOH_SKIER_ANDREA_REMATCH_1] =
+    {
+        .trainerClass = TRAINER_CLASS_SINNOH_SKIER,
+        .encounterMusic_gender = 27 | F_TRAINER_FEMALE,
+        .trainerPic = TRAINER_PIC_RUNNING_TRIATHLETE_F,
+        .trainerName = _("ANDREA"),
+        .items = {ITEM_NONE, ITEM_NONE, ITEM_NONE, ITEM_NONE},
+        .doubleBattle = FALSE,
+        .aiFlags = 0x1,
+        .party = NO_ITEM_DEFAULT_MOVES(sParty_SinnohSkierAndreaRematch1),
+    },
+
+    [TRAINER_SINNOH_SKIER_ANDREA_REMATCH_2] =
+    {
+        .trainerClass = TRAINER_CLASS_SINNOH_SKIER,
+        .encounterMusic_gender = 27 | F_TRAINER_FEMALE,
+        .trainerPic = TRAINER_PIC_RUNNING_TRIATHLETE_F,
+        .trainerName = _("ANDREA"),
+        .items = {ITEM_NONE, ITEM_NONE, ITEM_NONE, ITEM_NONE},
+        .doubleBattle = FALSE,
+        .aiFlags = 0x1,
+        .party = NO_ITEM_DEFAULT_MOVES(sParty_SinnohSkierAndreaRematch2),
+    },
+
+    [TRAINER_SINNOH_SKIER_MADISON_REMATCH_1] =
+    {
+        .trainerClass = TRAINER_CLASS_SINNOH_SKIER,
+        .encounterMusic_gender = 27 | F_TRAINER_FEMALE,
+        .trainerPic = TRAINER_PIC_RUNNING_TRIATHLETE_F,
+        .trainerName = _("MADISON"),
+        .items = {ITEM_NONE, ITEM_NONE, ITEM_NONE, ITEM_NONE},
+        .doubleBattle = FALSE,
+        .aiFlags = 0x1,
+        .party = NO_ITEM_DEFAULT_MOVES(sParty_SinnohSkierMadisonRematch1),
+    },
+
+    [TRAINER_SINNOH_SKIER_MADISON_REMATCH_2] =
+    {
+        .trainerClass = TRAINER_CLASS_SINNOH_SKIER,
+        .encounterMusic_gender = 27 | F_TRAINER_FEMALE,
+        .trainerPic = TRAINER_PIC_RUNNING_TRIATHLETE_F,
+        .trainerName = _("MADISON"),
+        .items = {ITEM_NONE, ITEM_NONE, ITEM_NONE, ITEM_NONE},
+        .doubleBattle = FALSE,
+        .aiFlags = 0x1,
+        .party = NO_ITEM_DEFAULT_MOVES(sParty_SinnohSkierMadisonRematch2),
+    },
+
+    [TRAINER_SINNOH_SWIMMER_WESLEY_REMATCH] =
+    {
+        .trainerClass = TRAINER_CLASS_SWIMMER_M,
+        .encounterMusic_gender = 31,
+        .trainerPic = TRAINER_PIC_SWIMMER_M,
+        .trainerName = _("WESLEY"),
+        .items = {ITEM_NONE, ITEM_NONE, ITEM_NONE, ITEM_NONE},
+        .doubleBattle = FALSE,
+        .aiFlags = 0x1,
+        .party = NO_ITEM_DEFAULT_MOVES(sParty_SinnohSwimmerWesleyRematch),
+    },
+
+    [TRAINER_SINNOH_SWIMMER_FRANCISCO_REMATCH] =
+    {
+        .trainerClass = TRAINER_CLASS_SWIMMER_M,
+        .encounterMusic_gender = 31,
+        .trainerPic = TRAINER_PIC_SWIMMER_M,
+        .trainerName = _("FRANCISCO"),
+        .items = {ITEM_NONE, ITEM_NONE, ITEM_NONE, ITEM_NONE},
+        .doubleBattle = FALSE,
+        .aiFlags = 0x1,
+        .party = NO_ITEM_DEFAULT_MOVES(sParty_SinnohSwimmerFranciscoRematch),
+    },
+
+    [TRAINER_SINNOH_SWIMMER_GLENN_REMATCH] =
+    {
+        .trainerClass = TRAINER_CLASS_SWIMMER_M,
+        .encounterMusic_gender = 31,
+        .trainerPic = TRAINER_PIC_SWIMMER_M,
+        .trainerName = _("GLENN"),
+        .items = {ITEM_NONE, ITEM_NONE, ITEM_NONE, ITEM_NONE},
+        .doubleBattle = FALSE,
+        .aiFlags = 0x1,
+        .party = NO_ITEM_DEFAULT_MOVES(sParty_SinnohSwimmerGlennRematch),
+    },
+
+    [TRAINER_SINNOH_SWIMMER_MIRANDA_REMATCH] =
+    {
+        .trainerClass = TRAINER_CLASS_SWIMMER_F,
+        .encounterMusic_gender = 25 | F_TRAINER_FEMALE,
+        .trainerPic = TRAINER_PIC_SWIMMER_F,
+        .trainerName = _("MIRANDA"),
+        .items = {ITEM_NONE, ITEM_NONE, ITEM_NONE, ITEM_NONE},
+        .doubleBattle = FALSE,
+        .aiFlags = 0x1,
+        .party = NO_ITEM_DEFAULT_MOVES(sParty_SinnohSwimmerMirandaRematch),
+    },
+
+    [TRAINER_SINNOH_SWIMMER_CRYSTAL_REMATCH] =
+    {
+        .trainerClass = TRAINER_CLASS_SWIMMER_F,
+        .encounterMusic_gender = 25 | F_TRAINER_FEMALE,
+        .trainerPic = TRAINER_PIC_SWIMMER_F,
+        .trainerName = _("CRYSTAL"),
+        .items = {ITEM_NONE, ITEM_NONE, ITEM_NONE, ITEM_NONE},
+        .doubleBattle = FALSE,
+        .aiFlags = 0x1,
+        .party = NO_ITEM_DEFAULT_MOVES(sParty_SinnohSwimmerCrystalRematch),
+    },
+
+    [TRAINER_SINNOH_SWIMMER_JOANNA_REMATCH] =
+    {
+        .trainerClass = TRAINER_CLASS_SWIMMER_F,
+        .encounterMusic_gender = 25 | F_TRAINER_FEMALE,
+        .trainerPic = TRAINER_PIC_SWIMMER_F,
+        .trainerName = _("JOANNA"),
+        .items = {ITEM_NONE, ITEM_NONE, ITEM_NONE, ITEM_NONE},
+        .doubleBattle = FALSE,
+        .aiFlags = 0x1,
+        .party = NO_ITEM_DEFAULT_MOVES(sParty_SinnohSwimmerJoannaRematch),
+    },
+
+    [TRAINER_SINNOH_YOUNGSTER_TRISTAN_REMATCH_1] =
+    {
+        .trainerClass = TRAINER_CLASS_YOUNGSTER,
+        .encounterMusic_gender = 24,
+        .trainerPic = TRAINER_PIC_YOUNGSTER,
+        .trainerName = _("TRISTAN"),
+        .items = {ITEM_NONE, ITEM_NONE, ITEM_NONE, ITEM_NONE},
+        .doubleBattle = FALSE,
+        .aiFlags = 0x1,
+        .party = NO_ITEM_DEFAULT_MOVES(sParty_SinnohYoungsterTristanRematch1),
+    },
+
+    [TRAINER_SINNOH_YOUNGSTER_TRISTAN_REMATCH_2] =
+    {
+        .trainerClass = TRAINER_CLASS_YOUNGSTER,
+        .encounterMusic_gender = 24,
+        .trainerPic = TRAINER_PIC_YOUNGSTER,
+        .trainerName = _("TRISTAN"),
+        .items = {ITEM_NONE, ITEM_NONE, ITEM_NONE, ITEM_NONE},
+        .doubleBattle = FALSE,
+        .aiFlags = 0x1,
+        .party = NO_ITEM_DEFAULT_MOVES(sParty_SinnohYoungsterTristanRematch2),
+    },
+
+    [TRAINER_SINNOH_YOUNGSTER_TRISTAN_REMATCH_3] =
+    {
+        .trainerClass = TRAINER_CLASS_YOUNGSTER,
+        .encounterMusic_gender = 24,
+        .trainerPic = TRAINER_PIC_YOUNGSTER,
+        .trainerName = _("TRISTAN"),
+        .items = {ITEM_NONE, ITEM_NONE, ITEM_NONE, ITEM_NONE},
+        .doubleBattle = FALSE,
+        .aiFlags = 0x1,
+        .party = NO_ITEM_DEFAULT_MOVES(sParty_SinnohYoungsterTristanRematch3),
+    },
+
+    [TRAINER_SINNOH_YOUNGSTER_DALLAS_REMATCH_1] =
+    {
+        .trainerClass = TRAINER_CLASS_YOUNGSTER,
+        .encounterMusic_gender = 24,
+        .trainerPic = TRAINER_PIC_YOUNGSTER,
+        .trainerName = _("DALLAS"),
+        .items = {ITEM_NONE, ITEM_NONE, ITEM_NONE, ITEM_NONE},
+        .doubleBattle = FALSE,
+        .aiFlags = 0x1,
+        .party = NO_ITEM_DEFAULT_MOVES(sParty_SinnohYoungsterDallasRematch1),
+    },
+
+    [TRAINER_SINNOH_YOUNGSTER_DALLAS_REMATCH_2] =
+    {
+        .trainerClass = TRAINER_CLASS_YOUNGSTER,
+        .encounterMusic_gender = 24,
+        .trainerPic = TRAINER_PIC_YOUNGSTER,
+        .trainerName = _("DALLAS"),
+        .items = {ITEM_NONE, ITEM_NONE, ITEM_NONE, ITEM_NONE},
+        .doubleBattle = FALSE,
+        .aiFlags = 0x1,
+        .party = NO_ITEM_DEFAULT_MOVES(sParty_SinnohYoungsterDallasRematch2),
+    },
+
+    [TRAINER_SINNOH_YOUNGSTER_DALLAS_REMATCH_3] =
+    {
+        .trainerClass = TRAINER_CLASS_YOUNGSTER,
+        .encounterMusic_gender = 24,
+        .trainerPic = TRAINER_PIC_YOUNGSTER,
+        .trainerName = _("DALLAS"),
+        .items = {ITEM_NONE, ITEM_NONE, ITEM_NONE, ITEM_NONE},
+        .doubleBattle = FALSE,
+        .aiFlags = 0x1,
+        .party = NO_ITEM_DEFAULT_MOVES(sParty_SinnohYoungsterDallasRematch3),
+    },
+
+    [TRAINER_SINNOH_TUBER_JARED_REMATCH_1] =
+    {
+        .trainerClass = TRAINER_CLASS_TUBER_M,
+        .encounterMusic_gender = 24,
+        .trainerPic = TRAINER_PIC_TUBER_M,
+        .trainerName = _("JARED"),
+        .items = {ITEM_NONE, ITEM_NONE, ITEM_NONE, ITEM_NONE},
+        .doubleBattle = FALSE,
+        .aiFlags = 0x1,
+        .party = NO_ITEM_DEFAULT_MOVES(sParty_SinnohTuberJaredRematch1),
+    },
+
+    [TRAINER_SINNOH_TUBER_JARED_REMATCH_2] =
+    {
+        .trainerClass = TRAINER_CLASS_TUBER_M,
+        .encounterMusic_gender = 24,
+        .trainerPic = TRAINER_PIC_TUBER_M,
+        .trainerName = _("JARED"),
+        .items = {ITEM_NONE, ITEM_NONE, ITEM_NONE, ITEM_NONE},
+        .doubleBattle = FALSE,
+        .aiFlags = 0x1,
+        .party = NO_ITEM_DEFAULT_MOVES(sParty_SinnohTuberJaredRematch2),
+    },
+
+    [TRAINER_SINNOH_TUBER_CHELSEA_REMATCH_1] =
+    {
+        .trainerClass = TRAINER_CLASS_TUBER_F,
+        .encounterMusic_gender = 25 | F_TRAINER_FEMALE,
+        .trainerPic = TRAINER_PIC_TUBER_F,
+        .trainerName = _("CHELSEA"),
+        .items = {ITEM_NONE, ITEM_NONE, ITEM_NONE, ITEM_NONE},
+        .doubleBattle = FALSE,
+        .aiFlags = 0x1,
+        .party = NO_ITEM_DEFAULT_MOVES(sParty_SinnohTuberChelseaRematch1),
+    },
+
+    [TRAINER_SINNOH_TUBER_CHELSEA_REMATCH_2] =
+    {
+        .trainerClass = TRAINER_CLASS_TUBER_F,
+        .encounterMusic_gender = 25 | F_TRAINER_FEMALE,
+        .trainerPic = TRAINER_PIC_TUBER_F,
+        .trainerName = _("CHELSEA"),
+        .items = {ITEM_NONE, ITEM_NONE, ITEM_NONE, ITEM_NONE},
+        .doubleBattle = FALSE,
+        .aiFlags = 0x1,
+        .party = NO_ITEM_DEFAULT_MOVES(sParty_SinnohTuberChelseaRematch2),
+    },
+
+    [TRAINER_SINNOH_VETERAN_BRIAN_REMATCH_1] =
+    {
+        .trainerClass = TRAINER_CLASS_SINNOH_VETERAN,
+        .encounterMusic_gender = 29,
+        .trainerPic = TRAINER_PIC_QZ_246,
+        .trainerName = _("BRIAN"),
+        .items = {ITEM_NONE, ITEM_NONE, ITEM_NONE, ITEM_NONE},
+        .doubleBattle = FALSE,
+        .aiFlags = 0x7,
+        .party = NO_ITEM_CUSTOM_MOVES(sParty_SinnohVeteranBrianRematch1),
+    },
+
+    [TRAINER_SINNOH_VETERAN_BRIAN_REMATCH_2] =
+    {
+        .trainerClass = TRAINER_CLASS_SINNOH_VETERAN,
+        .encounterMusic_gender = 29,
+        .trainerPic = TRAINER_PIC_QZ_246,
+        .trainerName = _("BRIAN"),
+        .items = {ITEM_NONE, ITEM_NONE, ITEM_NONE, ITEM_NONE},
+        .doubleBattle = FALSE,
+        .aiFlags = 0x7,
+        .party = NO_ITEM_CUSTOM_MOVES(sParty_SinnohVeteranBrianRematch2),
+    },
+
+    [TRAINER_SINNOH_VETERAN_ARMANDO_REMATCH] =
+    {
+        .trainerClass = TRAINER_CLASS_SINNOH_VETERAN,
+        .encounterMusic_gender = 29,
+        .trainerPic = TRAINER_PIC_QZ_246,
+        .trainerName = _("ARMANDO"),
+        .items = {ITEM_NONE, ITEM_NONE, ITEM_NONE, ITEM_NONE},
+        .doubleBattle = FALSE,
+        .aiFlags = 0x7,
+        .party = NO_ITEM_CUSTOM_MOVES(sParty_SinnohVeteranArmandoRematch),
+    },
+

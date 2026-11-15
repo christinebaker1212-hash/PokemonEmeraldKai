@@ -1,0 +1,10 @@
+# Platinum's VS SEEKER in SINNOH (src/mp/mp_vsseeker.c, src/data/sinnoh_rematches.h from tools/sinnoh/gen_trainers.py):
+# ROUTE 209's BREEDER ALBERT (beaten) answers the charged VS SEEKER and, with VS SEEKER levels 1-2 unlocked
+# (FLAG_UNLOCKED_VS_SEEKER_LVL_1/2), fights his level-2 team (BREEDER_ALBERT_REMATCH_1: ROSELIA, BONSLY, PIKACHU,
+# EEVEE); the win sets that team's own trainer flag (TRAINER_SINNOH_BREEDER_ALBERT_REMATCH_1 2257: 0x3780 + 593 = 14801).
+MODE=1
+GEN=4
+TMO=240
+ENV_A="MOEMON_DEBUG_REGION=3 MOEMON_DEBUG_PARTY=150:100"
+EXPECT_A=("vsseeker battery 0" "foeparty: 363:32 463:32 25:32 133:32" "flag 14801 = 1")
+UNEXPECT_A=("[crash]" "TIMEOUT")

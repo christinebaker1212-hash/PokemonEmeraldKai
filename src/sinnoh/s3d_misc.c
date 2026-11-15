@@ -29,6 +29,8 @@
 //   21 a battle in the FIGHT AREA's battleground (Platinum's RECORD_TIMES_BATTLED_AT_BATTLEGROUND)
 //   40 SetSpeciesSeen A: the species is seen in the POKéDEX (SPEAR PILLAR's DIALGA and PALKIA)
 //   17 GetCurrentBGM A: the song playing (the VILLA's music box keeps it), 18 SetFieldScene A: that song again
+//   60 GetCurrentSafariGameCaughtNum A (the game's SAFARI GAME: safari_zone.c); 61 GetHoneyTreeStatus A (Platinum's
+//      TREE_STATUS_*: 1 bare, 2 slathered, 3 a POKéMON came, from s3d_wild.c's tree in front)
 //   14 CheckAmitySquareManGiftIsAccessory: A the gift's number, B the answer; 15 GetAmitySquareBerryOrAccessoryIDFromMan:
 //      A the gift's number, B its item or accessory
 #include <math.h>
@@ -720,6 +722,19 @@ void Sinnoh_MiscCall(u16 op, u16 a, u16 b)
         VarSet(a, x % 98 + 2);
         break;
     }
+    case 60:
+        {
+            u8 SafariZone_CaughtMons(void);
+            VarSet(a, SafariZone_CaughtMons());
+        }
+        break;
+    case 61:
+        {
+            u16 Sinnoh_HoneyTreeState(void);
+            u16 state = Sinnoh_HoneyTreeState();   // (0 bare, 1 too soon, 2 a POKéMON came, 3 nothing came)
+            VarSet(a, state == 1 ? 2 : state == 2 ? 3 : 1);
+        }
+        break;
     case 40:
         {
             if (a > 0)

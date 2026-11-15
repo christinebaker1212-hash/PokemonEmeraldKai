@@ -42,72 +42,21 @@ Sinnoh_Text_SwarmTwinNone:
 	.string "spread out today. No big crowds\l"
 	.string "anywhere. Boring!$"
 
-@ A HONEY tree, faced from below (tools/sinnoh/gen_maps.py honey_tree)
+@ A HONEY tree, faced from below (tools/sinnoh/gen_maps.py honey_tree): Platinum's own CommonScript_HoneyTree on the
+@ trees of src/sinnoh/s3d_wild.c (GetHoneyTreeStatus / SlatherHoneyTree / StartHoneyTreeBattle: tools/sinnoh/gen_scripts.py)
 Sinnoh_EventScript_HoneyTree::
-	lockall
-	specialvar VAR_RESULT, Sinnoh_HoneyTreeState
-	goto_if_eq VAR_RESULT, 2, Sinnoh_EventScript_HoneyTreeMon
-	goto_if_eq VAR_RESULT, 1, Sinnoh_EventScript_HoneyTreeWaiting
-	goto_if_eq VAR_RESULT, 3, Sinnoh_EventScript_HoneyTreeNothing
-	checkitem ITEM_HONEY
-	goto_if_eq VAR_RESULT, FALSE, Sinnoh_EventScript_HoneyTreeNoHoney
-	msgbox Sinnoh_Text_HoneyTreeAsk, MSGBOX_YESNO
-	goto_if_eq VAR_RESULT, NO, Sinnoh_EventScript_HoneyTreeEnd
-	removeitem ITEM_HONEY
-	special Sinnoh_HoneySlather
-	msgbox Sinnoh_Text_HoneyTreeSlathered, MSGBOX_DEFAULT
-	releaseall
-	end
+	goto SinnohP_common_9
 
-Sinnoh_EventScript_HoneyTreeNoHoney::
-	msgbox Sinnoh_Text_HoneyTree, MSGBOX_DEFAULT
-Sinnoh_EventScript_HoneyTreeEnd::
-	releaseall
-	end
+@ The GREAT MARSH's SAFARI GAME (the game's own: safari_zone.c) ends in Platinum's scripts (safari_game.s): time's up,
+@ out of SAFARI BALLS, retiring from the START menu (data/scripts/safari_zone.inc); PASTORIA's gate is Platinum's too
+Sinnoh_EventScript_MarshTimesUp::
+	goto SinnohP_safari_game_2
 
-Sinnoh_EventScript_HoneyTreeWaiting::
-	msgbox Sinnoh_Text_HoneyTreeWaiting, MSGBOX_DEFAULT
-	releaseall
-	end
+Sinnoh_EventScript_MarshOutOfBalls::
+	goto SinnohP_safari_game_3
 
-Sinnoh_EventScript_HoneyTreeNothing::
-	msgbox Sinnoh_Text_HoneyTreeNothing, MSGBOX_DEFAULT
-	releaseall
-	end
-
-Sinnoh_EventScript_HoneyTreeMon::
-	msgbox Sinnoh_Text_HoneyTreeMon, MSGBOX_DEFAULT
-	closemessage
-	special Sinnoh_HoneyTreeMon
-	dowildbattle
-	releaseall
-	end
-
-Sinnoh_Text_HoneyTree:
-	.string "It's a big tree with soft, golden bark.\n"
-	.string "It smells faintly sweet.$"
-
-Sinnoh_Text_HoneyTreeAsk:
-	.string "It's a big tree with soft, golden bark.\n"
-	.string "It smells faintly sweet.\p"
-	.string "Spread some HONEY on it?$"
-
-Sinnoh_Text_HoneyTreeSlathered:
-	.string "{PLAYER} spread HONEY on the tree.\p"
-	.string "Something may come for it if you\n"
-	.string "leave it for a while...$"
-
-Sinnoh_Text_HoneyTreeWaiting:
-	.string "The HONEY glistens on the bark.\n"
-	.string "Nothing has come for it yet.$"
-
-Sinnoh_Text_HoneyTreeNothing:
-	.string "The HONEY has dried away...\p"
-	.string "Nothing came for it this time.$"
-
-Sinnoh_Text_HoneyTreeMon:
-	.string "Something is clinging to the tree,\n"
-	.string "licking the HONEY!$"
+Sinnoh_EventScript_MarshRetire::
+	goto SinnohP_safari_game_22
 
 @ MR. BACKLOT, the POKéMON MANSION's owner: after SINNOH's LEAGUE a daily POKéMON for his TROPHY GARDEN
 Sinnoh_EventScript_MrBacklot::

@@ -204,6 +204,13 @@ SCENE_PEOPLE = {'Sinnoh_Underground': (17,), 'Sinnoh_Battleground': (3, 4, 5, 6)
 # People whose look a script picks (Platinum's OBJ_EVENT_GFX_VAR_n: the game's own, set through VAR_OBJ_GFX_ID_n): the
 # BATTLEGROUND's four trainers of the day (GetRandomBattlegroundTrainers, s3d_misc.c op 27)
 VAR_LOOKS = {'Sinnoh_Battleground': (3, 4, 5, 6), 'Sinnoh_BattleHall': (13, 14)}
+DAILY_TRAINERS = (10401, 10402)   # (the POKéMON CENTERs' daily trainers: their looks set as the CENTER loads)
+
+
+def var_look(name, i, o):
+    """person I (from 0) of Platinum's events O on map NAME wears a look its script picks (VAR_OBJ_GFX_ID_n)"""
+    return o['graphics_id'].startswith('OBJ_EVENT_GFX_VAR_') and (i + 1 in VAR_LOOKS.get(name, ())
+                                                                  or o.get('script') in DAILY_TRAINERS)
 
 SINNOH_BERRY_TREES = 128   # (the BERRY trees past the save's own 128: src/mp/mp_berrytrees.c)
 OBSTACLES = {'OBJ_EVENT_GFX_CUT_TREE': 'EventScript_CutTree', 'OBJ_EVENT_GFX_ROCK_SMASH': 'EventScript_RockSmash',
@@ -220,7 +227,7 @@ def people(p, root, have):
     for i, o in enumerate(events(root, p['place'])['object_events']):
         label = '%s_EventScript_Person%d' % (p['name'], i + 1)
         gfx = sprites.sprite(o['graphics_id'])
-        if gfx is None and i + 1 in VAR_LOOKS.get(p['name'], ()) and o['graphics_id'].startswith('OBJ_EVENT_GFX_VAR_'):
+        if gfx is None and var_look(p['name'], i, o):
             gfx = o['graphics_id']
         hide = o.get('hidden_flag')
         flag = ids.flag(root, hide) if isinstance(hide, str) and hide.startswith('FLAG_') else None

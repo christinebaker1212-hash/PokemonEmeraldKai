@@ -43,8 +43,18 @@ Sinnoh_Text_TrAceTrainerAllenAfter:
 
 Sinnoh_EventScript_TrAceTrainerAlyssa::
 	trainerbattle_single TRAINER_SINNOH_ACE_TRAINER_ALYSSA, Sinnoh_Text_TrAceTrainerAlyssaIntro, Sinnoh_Text_TrAceTrainerAlyssaDefeat
+	specialvar VAR_RESULT, ShouldTryRematchBattle
+	goto_if_eq VAR_RESULT, TRUE, Sinnoh_EventScript_TrAceTrainerAlyssaRematch
 	msgbox Sinnoh_Text_TrAceTrainerAlyssaAfter, MSGBOX_AUTOCLOSE
 	end
+
+Sinnoh_EventScript_TrAceTrainerAlyssaRematch::
+	trainerbattle_rematch TRAINER_SINNOH_ACE_TRAINER_ALYSSA, Sinnoh_Text_TrAceTrainerAlyssaRematch, Sinnoh_Text_TrAceTrainerAlyssaDefeat
+	msgbox Sinnoh_Text_TrAceTrainerAlyssaAfter, MSGBOX_AUTOCLOSE
+	end
+
+Sinnoh_Text_TrAceTrainerAlyssaRematch:
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x00, 0x39, 0xFF
 
 Sinnoh_Text_TrAceTrainerAlyssaIntro:
 	.byte 0xFD, 0x40, 0x05, 0x2D, 0x00, 0x36, 0xFF
@@ -85,8 +95,18 @@ Sinnoh_Text_TrAceTrainerArthurAfter:
 
 Sinnoh_EventScript_TrAceTrainerBlake::
 	trainerbattle_single TRAINER_SINNOH_ACE_TRAINER_BLAKE, Sinnoh_Text_TrAceTrainerBlakeIntro, Sinnoh_Text_TrAceTrainerBlakeDefeat
+	specialvar VAR_RESULT, ShouldTryRematchBattle
+	goto_if_eq VAR_RESULT, TRUE, Sinnoh_EventScript_TrAceTrainerBlakeRematch
 	msgbox Sinnoh_Text_TrAceTrainerBlakeAfter, MSGBOX_AUTOCLOSE
 	end
+
+Sinnoh_EventScript_TrAceTrainerBlakeRematch::
+	trainerbattle_rematch TRAINER_SINNOH_ACE_TRAINER_BLAKE, Sinnoh_Text_TrAceTrainerBlakeRematch, Sinnoh_Text_TrAceTrainerBlakeDefeat
+	msgbox Sinnoh_Text_TrAceTrainerBlakeAfter, MSGBOX_AUTOCLOSE
+	end
+
+Sinnoh_Text_TrAceTrainerBlakeRematch:
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x00, 0x6F, 0xFF
 
 Sinnoh_Text_TrAceTrainerBlakeIntro:
 	.byte 0xFD, 0x40, 0x05, 0x2D, 0x00, 0x6C, 0xFF
@@ -197,8 +217,18 @@ Sinnoh_Text_TrAceTrainerClariceAfter:
 
 Sinnoh_EventScript_TrAceTrainerDalton::
 	trainerbattle_single TRAINER_SINNOH_ACE_TRAINER_DALTON, Sinnoh_Text_TrAceTrainerDaltonIntro, Sinnoh_Text_TrAceTrainerDaltonDefeat
+	specialvar VAR_RESULT, ShouldTryRematchBattle
+	goto_if_eq VAR_RESULT, TRUE, Sinnoh_EventScript_TrAceTrainerDaltonRematch
 	msgbox Sinnoh_Text_TrAceTrainerDaltonAfter, MSGBOX_AUTOCLOSE
 	end
+
+Sinnoh_EventScript_TrAceTrainerDaltonRematch::
+	trainerbattle_rematch TRAINER_SINNOH_ACE_TRAINER_DALTON, Sinnoh_Text_TrAceTrainerDaltonRematch, Sinnoh_Text_TrAceTrainerDaltonDefeat
+	msgbox Sinnoh_Text_TrAceTrainerDaltonAfter, MSGBOX_AUTOCLOSE
+	end
+
+Sinnoh_Text_TrAceTrainerDaltonRematch:
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x01, 0x7F, 0xFF
 
 Sinnoh_Text_TrAceTrainerDaltonIntro:
 	.byte 0xFD, 0x40, 0x05, 0x2D, 0x01, 0x7C, 0xFF
@@ -211,8 +241,18 @@ Sinnoh_Text_TrAceTrainerDaltonAfter:
 
 Sinnoh_EventScript_TrAceTrainerDana::
 	trainerbattle_single TRAINER_SINNOH_ACE_TRAINER_DANA, Sinnoh_Text_TrAceTrainerDanaIntro, Sinnoh_Text_TrAceTrainerDanaDefeat
+	specialvar VAR_RESULT, ShouldTryRematchBattle
+	goto_if_eq VAR_RESULT, TRUE, Sinnoh_EventScript_TrAceTrainerDanaRematch
 	msgbox Sinnoh_Text_TrAceTrainerDanaAfter, MSGBOX_AUTOCLOSE
 	end
+
+Sinnoh_EventScript_TrAceTrainerDanaRematch::
+	trainerbattle_rematch TRAINER_SINNOH_ACE_TRAINER_DANA, Sinnoh_Text_TrAceTrainerDanaRematch, Sinnoh_Text_TrAceTrainerDanaDefeat
+	msgbox Sinnoh_Text_TrAceTrainerDanaAfter, MSGBOX_AUTOCLOSE
+	end
+
+Sinnoh_Text_TrAceTrainerDanaRematch:
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x02, 0x23, 0xFF
 
 Sinnoh_Text_TrAceTrainerDanaIntro:
 	.byte 0xFD, 0x40, 0x05, 0x2D, 0x02, 0x20, 0xFF
@@ -225,8 +265,18 @@ Sinnoh_Text_TrAceTrainerDanaAfter:
 
 Sinnoh_EventScript_TrAceTrainerDeanna::
 	trainerbattle_single TRAINER_SINNOH_ACE_TRAINER_DEANNA, Sinnoh_Text_TrAceTrainerDeannaIntro, Sinnoh_Text_TrAceTrainerDeannaDefeat
+	specialvar VAR_RESULT, ShouldTryRematchBattle
+	goto_if_eq VAR_RESULT, TRUE, Sinnoh_EventScript_TrAceTrainerDeannaRematch
 	msgbox Sinnoh_Text_TrAceTrainerDeannaAfter, MSGBOX_AUTOCLOSE
 	end
+
+Sinnoh_EventScript_TrAceTrainerDeannaRematch::
+	trainerbattle_rematch TRAINER_SINNOH_ACE_TRAINER_DEANNA, Sinnoh_Text_TrAceTrainerDeannaRematch, Sinnoh_Text_TrAceTrainerDeannaDefeat
+	msgbox Sinnoh_Text_TrAceTrainerDeannaAfter, MSGBOX_AUTOCLOSE
+	end
+
+Sinnoh_Text_TrAceTrainerDeannaRematch:
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x02, 0x35, 0xFF
 
 Sinnoh_Text_TrAceTrainerDeannaIntro:
 	.byte 0xFD, 0x40, 0x05, 0x2D, 0x02, 0x32, 0xFF
@@ -239,8 +289,18 @@ Sinnoh_Text_TrAceTrainerDeannaAfter:
 
 Sinnoh_EventScript_TrAceTrainerDennis::
 	trainerbattle_single TRAINER_SINNOH_ACE_TRAINER_DENNIS, Sinnoh_Text_TrAceTrainerDennisIntro, Sinnoh_Text_TrAceTrainerDennisDefeat
+	specialvar VAR_RESULT, ShouldTryRematchBattle
+	goto_if_eq VAR_RESULT, TRUE, Sinnoh_EventScript_TrAceTrainerDennisRematch
 	msgbox Sinnoh_Text_TrAceTrainerDennisAfter, MSGBOX_AUTOCLOSE
 	end
+
+Sinnoh_EventScript_TrAceTrainerDennisRematch::
+	trainerbattle_rematch TRAINER_SINNOH_ACE_TRAINER_DENNIS, Sinnoh_Text_TrAceTrainerDennisRematch, Sinnoh_Text_TrAceTrainerDennisDefeat
+	msgbox Sinnoh_Text_TrAceTrainerDennisAfter, MSGBOX_AUTOCLOSE
+	end
+
+Sinnoh_Text_TrAceTrainerDennisRematch:
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x02, 0x59, 0xFF
 
 Sinnoh_Text_TrAceTrainerDennisIntro:
 	.byte 0xFD, 0x40, 0x05, 0x2D, 0x02, 0x56, 0xFF
@@ -267,8 +327,18 @@ Sinnoh_Text_TrAceTrainerDestinyAfter:
 
 Sinnoh_EventScript_TrAceTrainerErnest::
 	trainerbattle_single TRAINER_SINNOH_ACE_TRAINER_ERNEST, Sinnoh_Text_TrAceTrainerErnestIntro, Sinnoh_Text_TrAceTrainerErnestDefeat
+	specialvar VAR_RESULT, ShouldTryRematchBattle
+	goto_if_eq VAR_RESULT, TRUE, Sinnoh_EventScript_TrAceTrainerErnestRematch
 	msgbox Sinnoh_Text_TrAceTrainerErnestAfter, MSGBOX_AUTOCLOSE
 	end
+
+Sinnoh_EventScript_TrAceTrainerErnestRematch::
+	trainerbattle_rematch TRAINER_SINNOH_ACE_TRAINER_ERNEST, Sinnoh_Text_TrAceTrainerErnestRematch, Sinnoh_Text_TrAceTrainerErnestDefeat
+	msgbox Sinnoh_Text_TrAceTrainerErnestAfter, MSGBOX_AUTOCLOSE
+	end
+
+Sinnoh_Text_TrAceTrainerErnestRematch:
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x03, 0x21, 0xFF
 
 Sinnoh_Text_TrAceTrainerErnestIntro:
 	.byte 0xFD, 0x40, 0x05, 0x2D, 0x03, 0x1E, 0xFF
@@ -281,8 +351,18 @@ Sinnoh_Text_TrAceTrainerErnestAfter:
 
 Sinnoh_EventScript_TrAceTrainerFelix::
 	trainerbattle_single TRAINER_SINNOH_ACE_TRAINER_FELIX, Sinnoh_Text_TrAceTrainerFelixIntro, Sinnoh_Text_TrAceTrainerFelixDefeat
+	specialvar VAR_RESULT, ShouldTryRematchBattle
+	goto_if_eq VAR_RESULT, TRUE, Sinnoh_EventScript_TrAceTrainerFelixRematch
 	msgbox Sinnoh_Text_TrAceTrainerFelixAfter, MSGBOX_AUTOCLOSE
 	end
+
+Sinnoh_EventScript_TrAceTrainerFelixRematch::
+	trainerbattle_rematch TRAINER_SINNOH_ACE_TRAINER_FELIX, Sinnoh_Text_TrAceTrainerFelixRematch, Sinnoh_Text_TrAceTrainerFelixDefeat
+	msgbox Sinnoh_Text_TrAceTrainerFelixAfter, MSGBOX_AUTOCLOSE
+	end
+
+Sinnoh_Text_TrAceTrainerFelixRematch:
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x03, 0x33, 0xFF
 
 Sinnoh_Text_TrAceTrainerFelixIntro:
 	.byte 0xFD, 0x40, 0x05, 0x2D, 0x03, 0x30, 0xFF
@@ -295,8 +375,18 @@ Sinnoh_Text_TrAceTrainerFelixAfter:
 
 Sinnoh_EventScript_TrAceTrainerGarrett::
 	trainerbattle_single TRAINER_SINNOH_ACE_TRAINER_GARRETT, Sinnoh_Text_TrAceTrainerGarrettIntro, Sinnoh_Text_TrAceTrainerGarrettDefeat
+	specialvar VAR_RESULT, ShouldTryRematchBattle
+	goto_if_eq VAR_RESULT, TRUE, Sinnoh_EventScript_TrAceTrainerGarrettRematch
 	msgbox Sinnoh_Text_TrAceTrainerGarrettAfter, MSGBOX_AUTOCLOSE
 	end
+
+Sinnoh_EventScript_TrAceTrainerGarrettRematch::
+	trainerbattle_rematch TRAINER_SINNOH_ACE_TRAINER_GARRETT, Sinnoh_Text_TrAceTrainerGarrettRematch, Sinnoh_Text_TrAceTrainerGarrettDefeat
+	msgbox Sinnoh_Text_TrAceTrainerGarrettAfter, MSGBOX_AUTOCLOSE
+	end
+
+Sinnoh_Text_TrAceTrainerGarrettRematch:
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x03, 0x45, 0xFF
 
 Sinnoh_Text_TrAceTrainerGarrettIntro:
 	.byte 0xFD, 0x40, 0x05, 0x2D, 0x03, 0x42, 0xFF
@@ -309,8 +399,18 @@ Sinnoh_Text_TrAceTrainerGarrettAfter:
 
 Sinnoh_EventScript_TrAceTrainerGraham::
 	trainerbattle_single TRAINER_SINNOH_ACE_TRAINER_GRAHAM, Sinnoh_Text_TrAceTrainerGrahamIntro, Sinnoh_Text_TrAceTrainerGrahamDefeat
+	specialvar VAR_RESULT, ShouldTryRematchBattle
+	goto_if_eq VAR_RESULT, TRUE, Sinnoh_EventScript_TrAceTrainerGrahamRematch
 	msgbox Sinnoh_Text_TrAceTrainerGrahamAfter, MSGBOX_AUTOCLOSE
 	end
+
+Sinnoh_EventScript_TrAceTrainerGrahamRematch::
+	trainerbattle_rematch TRAINER_SINNOH_ACE_TRAINER_GRAHAM, Sinnoh_Text_TrAceTrainerGrahamRematch, Sinnoh_Text_TrAceTrainerGrahamDefeat
+	msgbox Sinnoh_Text_TrAceTrainerGrahamAfter, MSGBOX_AUTOCLOSE
+	end
+
+Sinnoh_Text_TrAceTrainerGrahamRematch:
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x03, 0x57, 0xFF
 
 Sinnoh_Text_TrAceTrainerGrahamIntro:
 	.byte 0xFD, 0x40, 0x05, 0x2D, 0x03, 0x54, 0xFF
@@ -351,8 +451,18 @@ Sinnoh_Text_TrAceTrainerIsaiahAfter:
 
 Sinnoh_EventScript_TrAceTrainerJake::
 	trainerbattle_single TRAINER_SINNOH_ACE_TRAINER_JAKE, Sinnoh_Text_TrAceTrainerJakeIntro, Sinnoh_Text_TrAceTrainerJakeDefeat
+	specialvar VAR_RESULT, ShouldTryRematchBattle
+	goto_if_eq VAR_RESULT, TRUE, Sinnoh_EventScript_TrAceTrainerJakeRematch
 	msgbox Sinnoh_Text_TrAceTrainerJakeAfter, MSGBOX_AUTOCLOSE
 	end
+
+Sinnoh_EventScript_TrAceTrainerJakeRematch::
+	trainerbattle_rematch TRAINER_SINNOH_ACE_TRAINER_JAKE, Sinnoh_Text_TrAceTrainerJakeRematch, Sinnoh_Text_TrAceTrainerJakeDefeat
+	msgbox Sinnoh_Text_TrAceTrainerJakeAfter, MSGBOX_AUTOCLOSE
+	end
+
+Sinnoh_Text_TrAceTrainerJakeRematch:
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x04, 0x0D, 0xFF
 
 Sinnoh_Text_TrAceTrainerJakeIntro:
 	.byte 0xFD, 0x40, 0x05, 0x2D, 0x04, 0x0A, 0xFF
@@ -365,8 +475,18 @@ Sinnoh_Text_TrAceTrainerJakeAfter:
 
 Sinnoh_EventScript_TrAceTrainerJamie::
 	trainerbattle_single TRAINER_SINNOH_ACE_TRAINER_JAMIE, Sinnoh_Text_TrAceTrainerJamieIntro, Sinnoh_Text_TrAceTrainerJamieDefeat
+	specialvar VAR_RESULT, ShouldTryRematchBattle
+	goto_if_eq VAR_RESULT, TRUE, Sinnoh_EventScript_TrAceTrainerJamieRematch
 	msgbox Sinnoh_Text_TrAceTrainerJamieAfter, MSGBOX_AUTOCLOSE
 	end
+
+Sinnoh_EventScript_TrAceTrainerJamieRematch::
+	trainerbattle_rematch TRAINER_SINNOH_ACE_TRAINER_JAMIE, Sinnoh_Text_TrAceTrainerJamieRematch, Sinnoh_Text_TrAceTrainerJamieDefeat
+	msgbox Sinnoh_Text_TrAceTrainerJamieAfter, MSGBOX_AUTOCLOSE
+	end
+
+Sinnoh_Text_TrAceTrainerJamieRematch:
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x04, 0x31, 0xFF
 
 Sinnoh_Text_TrAceTrainerJamieIntro:
 	.byte 0xFD, 0x40, 0x05, 0x2D, 0x04, 0x2E, 0xFF
@@ -407,8 +527,18 @@ Sinnoh_Text_TrAceTrainerJonahAfter:
 
 Sinnoh_EventScript_TrAceTrainerJose::
 	trainerbattle_single TRAINER_SINNOH_ACE_TRAINER_JOSE, Sinnoh_Text_TrAceTrainerJoseIntro, Sinnoh_Text_TrAceTrainerJoseDefeat
+	specialvar VAR_RESULT, ShouldTryRematchBattle
+	goto_if_eq VAR_RESULT, TRUE, Sinnoh_EventScript_TrAceTrainerJoseRematch
 	msgbox Sinnoh_Text_TrAceTrainerJoseAfter, MSGBOX_AUTOCLOSE
 	end
+
+Sinnoh_EventScript_TrAceTrainerJoseRematch::
+	trainerbattle_rematch TRAINER_SINNOH_ACE_TRAINER_JOSE, Sinnoh_Text_TrAceTrainerJoseRematch, Sinnoh_Text_TrAceTrainerJoseDefeat
+	msgbox Sinnoh_Text_TrAceTrainerJoseAfter, MSGBOX_AUTOCLOSE
+	end
+
+Sinnoh_Text_TrAceTrainerJoseRematch:
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x04, 0x67, 0xFF
 
 Sinnoh_Text_TrAceTrainerJoseIntro:
 	.byte 0xFD, 0x40, 0x05, 0x2D, 0x04, 0x64, 0xFF
@@ -449,8 +579,18 @@ Sinnoh_Text_TrAceTrainerKeenanAfter:
 
 Sinnoh_EventScript_TrAceTrainerLaura::
 	trainerbattle_single TRAINER_SINNOH_ACE_TRAINER_LAURA, Sinnoh_Text_TrAceTrainerLauraIntro, Sinnoh_Text_TrAceTrainerLauraDefeat
+	specialvar VAR_RESULT, ShouldTryRematchBattle
+	goto_if_eq VAR_RESULT, TRUE, Sinnoh_EventScript_TrAceTrainerLauraRematch
 	msgbox Sinnoh_Text_TrAceTrainerLauraAfter, MSGBOX_AUTOCLOSE
 	end
+
+Sinnoh_EventScript_TrAceTrainerLauraRematch::
+	trainerbattle_rematch TRAINER_SINNOH_ACE_TRAINER_LAURA, Sinnoh_Text_TrAceTrainerLauraRematch, Sinnoh_Text_TrAceTrainerLauraDefeat
+	msgbox Sinnoh_Text_TrAceTrainerLauraAfter, MSGBOX_AUTOCLOSE
+	end
+
+Sinnoh_Text_TrAceTrainerLauraRematch:
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x05, 0x1D, 0xFF
 
 Sinnoh_Text_TrAceTrainerLauraIntro:
 	.byte 0xFD, 0x40, 0x05, 0x2D, 0x05, 0x1A, 0xFF
@@ -463,8 +603,18 @@ Sinnoh_Text_TrAceTrainerLauraAfter:
 
 Sinnoh_EventScript_TrAceTrainerMaria::
 	trainerbattle_single TRAINER_SINNOH_ACE_TRAINER_MARIA, Sinnoh_Text_TrAceTrainerMariaIntro, Sinnoh_Text_TrAceTrainerMariaDefeat
+	specialvar VAR_RESULT, ShouldTryRematchBattle
+	goto_if_eq VAR_RESULT, TRUE, Sinnoh_EventScript_TrAceTrainerMariaRematch
 	msgbox Sinnoh_Text_TrAceTrainerMariaAfter, MSGBOX_AUTOCLOSE
 	end
+
+Sinnoh_EventScript_TrAceTrainerMariaRematch::
+	trainerbattle_rematch TRAINER_SINNOH_ACE_TRAINER_MARIA, Sinnoh_Text_TrAceTrainerMariaRematch, Sinnoh_Text_TrAceTrainerMariaDefeat
+	msgbox Sinnoh_Text_TrAceTrainerMariaAfter, MSGBOX_AUTOCLOSE
+	end
+
+Sinnoh_Text_TrAceTrainerMariaRematch:
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x05, 0x2F, 0xFF
 
 Sinnoh_Text_TrAceTrainerMariaIntro:
 	.byte 0xFD, 0x40, 0x05, 0x2D, 0x05, 0x2C, 0xFF
@@ -491,8 +641,18 @@ Sinnoh_Text_TrAceTrainerMariahAfter:
 
 Sinnoh_EventScript_TrAceTrainerMaya::
 	trainerbattle_single TRAINER_SINNOH_ACE_TRAINER_MAYA, Sinnoh_Text_TrAceTrainerMayaIntro, Sinnoh_Text_TrAceTrainerMayaDefeat
+	specialvar VAR_RESULT, ShouldTryRematchBattle
+	goto_if_eq VAR_RESULT, TRUE, Sinnoh_EventScript_TrAceTrainerMayaRematch
 	msgbox Sinnoh_Text_TrAceTrainerMayaAfter, MSGBOX_AUTOCLOSE
 	end
+
+Sinnoh_EventScript_TrAceTrainerMayaRematch::
+	trainerbattle_rematch TRAINER_SINNOH_ACE_TRAINER_MAYA, Sinnoh_Text_TrAceTrainerMayaRematch, Sinnoh_Text_TrAceTrainerMayaDefeat
+	msgbox Sinnoh_Text_TrAceTrainerMayaAfter, MSGBOX_AUTOCLOSE
+	end
+
+Sinnoh_Text_TrAceTrainerMayaRematch:
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x05, 0x53, 0xFF
 
 Sinnoh_Text_TrAceTrainerMayaIntro:
 	.byte 0xFD, 0x40, 0x05, 0x2D, 0x05, 0x50, 0xFF
@@ -505,8 +665,18 @@ Sinnoh_Text_TrAceTrainerMayaAfter:
 
 Sinnoh_EventScript_TrAceTrainerMeagan::
 	trainerbattle_single TRAINER_SINNOH_ACE_TRAINER_MEAGAN, Sinnoh_Text_TrAceTrainerMeaganIntro, Sinnoh_Text_TrAceTrainerMeaganDefeat
+	specialvar VAR_RESULT, ShouldTryRematchBattle
+	goto_if_eq VAR_RESULT, TRUE, Sinnoh_EventScript_TrAceTrainerMeaganRematch
 	msgbox Sinnoh_Text_TrAceTrainerMeaganAfter, MSGBOX_AUTOCLOSE
 	end
+
+Sinnoh_EventScript_TrAceTrainerMeaganRematch::
+	trainerbattle_rematch TRAINER_SINNOH_ACE_TRAINER_MEAGAN, Sinnoh_Text_TrAceTrainerMeaganRematch, Sinnoh_Text_TrAceTrainerMeaganDefeat
+	msgbox Sinnoh_Text_TrAceTrainerMeaganAfter, MSGBOX_AUTOCLOSE
+	end
+
+Sinnoh_Text_TrAceTrainerMeaganRematch:
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x06, 0x09, 0xFF
 
 Sinnoh_Text_TrAceTrainerMeaganIntro:
 	.byte 0xFD, 0x40, 0x05, 0x2D, 0x06, 0x06, 0xFF
@@ -533,8 +703,18 @@ Sinnoh_Text_TrAceTrainerMicahAfter:
 
 Sinnoh_EventScript_TrAceTrainerMikayla::
 	trainerbattle_single TRAINER_SINNOH_ACE_TRAINER_MIKAYLA, Sinnoh_Text_TrAceTrainerMikaylaIntro, Sinnoh_Text_TrAceTrainerMikaylaDefeat
+	specialvar VAR_RESULT, ShouldTryRematchBattle
+	goto_if_eq VAR_RESULT, TRUE, Sinnoh_EventScript_TrAceTrainerMikaylaRematch
 	msgbox Sinnoh_Text_TrAceTrainerMikaylaAfter, MSGBOX_AUTOCLOSE
 	end
+
+Sinnoh_EventScript_TrAceTrainerMikaylaRematch::
+	trainerbattle_rematch TRAINER_SINNOH_ACE_TRAINER_MIKAYLA, Sinnoh_Text_TrAceTrainerMikaylaRematch, Sinnoh_Text_TrAceTrainerMikaylaDefeat
+	msgbox Sinnoh_Text_TrAceTrainerMikaylaAfter, MSGBOX_AUTOCLOSE
+	end
+
+Sinnoh_Text_TrAceTrainerMikaylaRematch:
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x06, 0x2D, 0xFF
 
 Sinnoh_Text_TrAceTrainerMikaylaIntro:
 	.byte 0xFD, 0x40, 0x05, 0x2D, 0x06, 0x2A, 0xFF
@@ -547,8 +727,18 @@ Sinnoh_Text_TrAceTrainerMikaylaAfter:
 
 Sinnoh_EventScript_TrAceTrainerMoira::
 	trainerbattle_single TRAINER_SINNOH_ACE_TRAINER_MOIRA, Sinnoh_Text_TrAceTrainerMoiraIntro, Sinnoh_Text_TrAceTrainerMoiraDefeat
+	specialvar VAR_RESULT, ShouldTryRematchBattle
+	goto_if_eq VAR_RESULT, TRUE, Sinnoh_EventScript_TrAceTrainerMoiraRematch
 	msgbox Sinnoh_Text_TrAceTrainerMoiraAfter, MSGBOX_AUTOCLOSE
 	end
+
+Sinnoh_EventScript_TrAceTrainerMoiraRematch::
+	trainerbattle_rematch TRAINER_SINNOH_ACE_TRAINER_MOIRA, Sinnoh_Text_TrAceTrainerMoiraRematch, Sinnoh_Text_TrAceTrainerMoiraDefeat
+	msgbox Sinnoh_Text_TrAceTrainerMoiraAfter, MSGBOX_AUTOCLOSE
+	end
+
+Sinnoh_Text_TrAceTrainerMoiraRematch:
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x06, 0x3F, 0xFF
 
 Sinnoh_Text_TrAceTrainerMoiraIntro:
 	.byte 0xFD, 0x40, 0x05, 0x2D, 0x06, 0x3C, 0xFF
@@ -589,8 +779,18 @@ Sinnoh_Text_TrAceTrainerNatashaAfter:
 
 Sinnoh_EventScript_TrAceTrainerOlivia::
 	trainerbattle_single TRAINER_SINNOH_ACE_TRAINER_OLIVIA, Sinnoh_Text_TrAceTrainerOliviaIntro, Sinnoh_Text_TrAceTrainerOliviaDefeat
+	specialvar VAR_RESULT, ShouldTryRematchBattle
+	goto_if_eq VAR_RESULT, TRUE, Sinnoh_EventScript_TrAceTrainerOliviaRematch
 	msgbox Sinnoh_Text_TrAceTrainerOliviaAfter, MSGBOX_AUTOCLOSE
 	end
+
+Sinnoh_EventScript_TrAceTrainerOliviaRematch::
+	trainerbattle_rematch TRAINER_SINNOH_ACE_TRAINER_OLIVIA, Sinnoh_Text_TrAceTrainerOliviaRematch, Sinnoh_Text_TrAceTrainerOliviaDefeat
+	msgbox Sinnoh_Text_TrAceTrainerOliviaAfter, MSGBOX_AUTOCLOSE
+	end
+
+Sinnoh_Text_TrAceTrainerOliviaRematch:
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x07, 0x07, 0xFF
 
 Sinnoh_Text_TrAceTrainerOliviaIntro:
 	.byte 0xFD, 0x40, 0x05, 0x2D, 0x07, 0x04, 0xFF
@@ -617,8 +817,18 @@ Sinnoh_Text_TrAceTrainerOmarAfter:
 
 Sinnoh_EventScript_TrAceTrainerQuinn::
 	trainerbattle_single TRAINER_SINNOH_ACE_TRAINER_QUINN, Sinnoh_Text_TrAceTrainerQuinnIntro, Sinnoh_Text_TrAceTrainerQuinnDefeat
+	specialvar VAR_RESULT, ShouldTryRematchBattle
+	goto_if_eq VAR_RESULT, TRUE, Sinnoh_EventScript_TrAceTrainerQuinnRematch
 	msgbox Sinnoh_Text_TrAceTrainerQuinnAfter, MSGBOX_AUTOCLOSE
 	end
+
+Sinnoh_EventScript_TrAceTrainerQuinnRematch::
+	trainerbattle_rematch TRAINER_SINNOH_ACE_TRAINER_QUINN, Sinnoh_Text_TrAceTrainerQuinnRematch, Sinnoh_Text_TrAceTrainerQuinnDefeat
+	msgbox Sinnoh_Text_TrAceTrainerQuinnAfter, MSGBOX_AUTOCLOSE
+	end
+
+Sinnoh_Text_TrAceTrainerQuinnRematch:
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x07, 0x3D, 0xFF
 
 Sinnoh_Text_TrAceTrainerQuinnIntro:
 	.byte 0xFD, 0x40, 0x05, 0x2D, 0x07, 0x3A, 0xFF
@@ -631,8 +841,18 @@ Sinnoh_Text_TrAceTrainerQuinnAfter:
 
 Sinnoh_EventScript_TrAceTrainerRodolfo::
 	trainerbattle_single TRAINER_SINNOH_ACE_TRAINER_RODOLFO, Sinnoh_Text_TrAceTrainerRodolfoIntro, Sinnoh_Text_TrAceTrainerRodolfoDefeat
+	specialvar VAR_RESULT, ShouldTryRematchBattle
+	goto_if_eq VAR_RESULT, TRUE, Sinnoh_EventScript_TrAceTrainerRodolfoRematch
 	msgbox Sinnoh_Text_TrAceTrainerRodolfoAfter, MSGBOX_AUTOCLOSE
 	end
+
+Sinnoh_EventScript_TrAceTrainerRodolfoRematch::
+	trainerbattle_rematch TRAINER_SINNOH_ACE_TRAINER_RODOLFO, Sinnoh_Text_TrAceTrainerRodolfoRematch, Sinnoh_Text_TrAceTrainerRodolfoDefeat
+	msgbox Sinnoh_Text_TrAceTrainerRodolfoAfter, MSGBOX_AUTOCLOSE
+	end
+
+Sinnoh_Text_TrAceTrainerRodolfoRematch:
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x07, 0x4F, 0xFF
 
 Sinnoh_Text_TrAceTrainerRodolfoIntro:
 	.byte 0xFD, 0x40, 0x05, 0x2D, 0x07, 0x4C, 0xFF
@@ -645,8 +865,18 @@ Sinnoh_Text_TrAceTrainerRodolfoAfter:
 
 Sinnoh_EventScript_TrAceTrainerRuben::
 	trainerbattle_single TRAINER_SINNOH_ACE_TRAINER_RUBEN, Sinnoh_Text_TrAceTrainerRubenIntro, Sinnoh_Text_TrAceTrainerRubenDefeat
+	specialvar VAR_RESULT, ShouldTryRematchBattle
+	goto_if_eq VAR_RESULT, TRUE, Sinnoh_EventScript_TrAceTrainerRubenRematch
 	msgbox Sinnoh_Text_TrAceTrainerRubenAfter, MSGBOX_AUTOCLOSE
 	end
+
+Sinnoh_EventScript_TrAceTrainerRubenRematch::
+	trainerbattle_rematch TRAINER_SINNOH_ACE_TRAINER_RUBEN, Sinnoh_Text_TrAceTrainerRubenRematch, Sinnoh_Text_TrAceTrainerRubenDefeat
+	msgbox Sinnoh_Text_TrAceTrainerRubenAfter, MSGBOX_AUTOCLOSE
+	end
+
+Sinnoh_Text_TrAceTrainerRubenRematch:
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x07, 0x73, 0xFF
 
 Sinnoh_Text_TrAceTrainerRubenIntro:
 	.byte 0xFD, 0x40, 0x05, 0x2D, 0x07, 0x70, 0xFF
@@ -659,8 +889,18 @@ Sinnoh_Text_TrAceTrainerRubenAfter:
 
 Sinnoh_EventScript_TrAceTrainerSandra::
 	trainerbattle_single TRAINER_SINNOH_ACE_TRAINER_SANDRA, Sinnoh_Text_TrAceTrainerSandraIntro, Sinnoh_Text_TrAceTrainerSandraDefeat
+	specialvar VAR_RESULT, ShouldTryRematchBattle
+	goto_if_eq VAR_RESULT, TRUE, Sinnoh_EventScript_TrAceTrainerSandraRematch
 	msgbox Sinnoh_Text_TrAceTrainerSandraAfter, MSGBOX_AUTOCLOSE
 	end
+
+Sinnoh_EventScript_TrAceTrainerSandraRematch::
+	trainerbattle_rematch TRAINER_SINNOH_ACE_TRAINER_SANDRA, Sinnoh_Text_TrAceTrainerSandraRematch, Sinnoh_Text_TrAceTrainerSandraDefeat
+	msgbox Sinnoh_Text_TrAceTrainerSandraAfter, MSGBOX_AUTOCLOSE
+	end
+
+Sinnoh_Text_TrAceTrainerSandraRematch:
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x08, 0x05, 0xFF
 
 Sinnoh_Text_TrAceTrainerSandraIntro:
 	.byte 0xFD, 0x40, 0x05, 0x2D, 0x08, 0x02, 0xFF
@@ -673,8 +913,18 @@ Sinnoh_Text_TrAceTrainerSandraAfter:
 
 Sinnoh_EventScript_TrAceTrainerSaul::
 	trainerbattle_single TRAINER_SINNOH_ACE_TRAINER_SAUL, Sinnoh_Text_TrAceTrainerSaulIntro, Sinnoh_Text_TrAceTrainerSaulDefeat
+	specialvar VAR_RESULT, ShouldTryRematchBattle
+	goto_if_eq VAR_RESULT, TRUE, Sinnoh_EventScript_TrAceTrainerSaulRematch
 	msgbox Sinnoh_Text_TrAceTrainerSaulAfter, MSGBOX_AUTOCLOSE
 	end
+
+Sinnoh_EventScript_TrAceTrainerSaulRematch::
+	trainerbattle_rematch TRAINER_SINNOH_ACE_TRAINER_SAUL, Sinnoh_Text_TrAceTrainerSaulRematch, Sinnoh_Text_TrAceTrainerSaulDefeat
+	msgbox Sinnoh_Text_TrAceTrainerSaulAfter, MSGBOX_AUTOCLOSE
+	end
+
+Sinnoh_Text_TrAceTrainerSaulRematch:
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x08, 0x17, 0xFF
 
 Sinnoh_Text_TrAceTrainerSaulIntro:
 	.byte 0xFD, 0x40, 0x05, 0x2D, 0x08, 0x14, 0xFF
@@ -715,8 +965,18 @@ Sinnoh_Text_TrAceTrainerSergioAfter:
 
 Sinnoh_EventScript_TrAceTrainerShannon::
 	trainerbattle_single TRAINER_SINNOH_ACE_TRAINER_SHANNON, Sinnoh_Text_TrAceTrainerShannonIntro, Sinnoh_Text_TrAceTrainerShannonDefeat
+	specialvar VAR_RESULT, ShouldTryRematchBattle
+	goto_if_eq VAR_RESULT, TRUE, Sinnoh_EventScript_TrAceTrainerShannonRematch
 	msgbox Sinnoh_Text_TrAceTrainerShannonAfter, MSGBOX_AUTOCLOSE
 	end
+
+Sinnoh_EventScript_TrAceTrainerShannonRematch::
+	trainerbattle_rematch TRAINER_SINNOH_ACE_TRAINER_SHANNON, Sinnoh_Text_TrAceTrainerShannonRematch, Sinnoh_Text_TrAceTrainerShannonDefeat
+	msgbox Sinnoh_Text_TrAceTrainerShannonAfter, MSGBOX_AUTOCLOSE
+	end
+
+Sinnoh_Text_TrAceTrainerShannonRematch:
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x08, 0x5F, 0xFF
 
 Sinnoh_Text_TrAceTrainerShannonIntro:
 	.byte 0xFD, 0x40, 0x05, 0x2D, 0x08, 0x5C, 0xFF
@@ -785,8 +1045,18 @@ Sinnoh_Text_TrAceTrainerZacheryAfter:
 
 Sinnoh_EventScript_TrAromaLadyElizabeth::
 	trainerbattle_single TRAINER_SINNOH_AROMA_LADY_ELIZABETH, Sinnoh_Text_TrAromaLadyElizabethIntro, Sinnoh_Text_TrAromaLadyElizabethDefeat
+	specialvar VAR_RESULT, ShouldTryRematchBattle
+	goto_if_eq VAR_RESULT, TRUE, Sinnoh_EventScript_TrAromaLadyElizabethRematch
 	msgbox Sinnoh_Text_TrAromaLadyElizabethAfter, MSGBOX_AUTOCLOSE
 	end
+
+Sinnoh_EventScript_TrAromaLadyElizabethRematch::
+	trainerbattle_rematch TRAINER_SINNOH_AROMA_LADY_ELIZABETH, Sinnoh_Text_TrAromaLadyElizabethRematch, Sinnoh_Text_TrAromaLadyElizabethDefeat
+	msgbox Sinnoh_Text_TrAromaLadyElizabethAfter, MSGBOX_AUTOCLOSE
+	end
+
+Sinnoh_Text_TrAromaLadyElizabethRematch:
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x0A, 0x01, 0xFF
 
 Sinnoh_Text_TrAromaLadyElizabethIntro:
 	.byte 0xFD, 0x40, 0x05, 0x2D, 0x09, 0x7E, 0xFF
@@ -799,8 +1069,18 @@ Sinnoh_Text_TrAromaLadyElizabethAfter:
 
 Sinnoh_EventScript_TrAromaLadyHannah::
 	trainerbattle_single TRAINER_SINNOH_AROMA_LADY_HANNAH, Sinnoh_Text_TrAromaLadyHannahIntro, Sinnoh_Text_TrAromaLadyHannahDefeat
+	specialvar VAR_RESULT, ShouldTryRematchBattle
+	goto_if_eq VAR_RESULT, TRUE, Sinnoh_EventScript_TrAromaLadyHannahRematch
 	msgbox Sinnoh_Text_TrAromaLadyHannahAfter, MSGBOX_AUTOCLOSE
 	end
+
+Sinnoh_EventScript_TrAromaLadyHannahRematch::
+	trainerbattle_rematch TRAINER_SINNOH_AROMA_LADY_HANNAH, Sinnoh_Text_TrAromaLadyHannahRematch, Sinnoh_Text_TrAromaLadyHannahDefeat
+	msgbox Sinnoh_Text_TrAromaLadyHannahAfter, MSGBOX_AUTOCLOSE
+	end
+
+Sinnoh_Text_TrAromaLadyHannahRematch:
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x0A, 0x49, 0xFF
 
 Sinnoh_Text_TrAromaLadyHannahIntro:
 	.byte 0xFD, 0x40, 0x05, 0x2D, 0x0A, 0x46, 0xFF
@@ -813,8 +1093,18 @@ Sinnoh_Text_TrAromaLadyHannahAfter:
 
 Sinnoh_EventScript_TrAromaLadyTaylor::
 	trainerbattle_single TRAINER_SINNOH_AROMA_LADY_TAYLOR, Sinnoh_Text_TrAromaLadyTaylorIntro, Sinnoh_Text_TrAromaLadyTaylorDefeat
+	specialvar VAR_RESULT, ShouldTryRematchBattle
+	goto_if_eq VAR_RESULT, TRUE, Sinnoh_EventScript_TrAromaLadyTaylorRematch
 	msgbox Sinnoh_Text_TrAromaLadyTaylorAfter, MSGBOX_AUTOCLOSE
 	end
+
+Sinnoh_EventScript_TrAromaLadyTaylorRematch::
+	trainerbattle_rematch TRAINER_SINNOH_AROMA_LADY_TAYLOR, Sinnoh_Text_TrAromaLadyTaylorRematch, Sinnoh_Text_TrAromaLadyTaylorDefeat
+	msgbox Sinnoh_Text_TrAromaLadyTaylorAfter, MSGBOX_AUTOCLOSE
+	end
+
+Sinnoh_Text_TrAromaLadyTaylorRematch:
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x0A, 0x6D, 0xFF
 
 Sinnoh_Text_TrAromaLadyTaylorIntro:
 	.byte 0xFD, 0x40, 0x05, 0x2D, 0x0A, 0x6A, 0xFF
@@ -827,8 +1117,18 @@ Sinnoh_Text_TrAromaLadyTaylorAfter:
 
 Sinnoh_EventScript_TrArtistWilliam::
 	trainerbattle_single TRAINER_SINNOH_ARTIST_WILLIAM, Sinnoh_Text_TrArtistWilliamIntro, Sinnoh_Text_TrArtistWilliamDefeat
+	specialvar VAR_RESULT, ShouldTryRematchBattle
+	goto_if_eq VAR_RESULT, TRUE, Sinnoh_EventScript_TrArtistWilliamRematch
 	msgbox Sinnoh_Text_TrArtistWilliamAfter, MSGBOX_AUTOCLOSE
 	end
+
+Sinnoh_EventScript_TrArtistWilliamRematch::
+	trainerbattle_rematch TRAINER_SINNOH_ARTIST_WILLIAM, Sinnoh_Text_TrArtistWilliamRematch, Sinnoh_Text_TrArtistWilliamDefeat
+	msgbox Sinnoh_Text_TrArtistWilliamAfter, MSGBOX_AUTOCLOSE
+	end
+
+Sinnoh_Text_TrArtistWilliamRematch:
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x0B, 0x11, 0xFF
 
 Sinnoh_Text_TrArtistWilliamIntro:
 	.byte 0xFD, 0x40, 0x05, 0x2D, 0x0B, 0x0E, 0xFF
@@ -841,8 +1141,18 @@ Sinnoh_Text_TrArtistWilliamAfter:
 
 Sinnoh_EventScript_TrBattleGirlHelen::
 	trainerbattle_single TRAINER_SINNOH_BATTLE_GIRL_HELEN, Sinnoh_Text_TrBattleGirlHelenIntro, Sinnoh_Text_TrBattleGirlHelenDefeat
+	specialvar VAR_RESULT, ShouldTryRematchBattle
+	goto_if_eq VAR_RESULT, TRUE, Sinnoh_EventScript_TrBattleGirlHelenRematch
 	msgbox Sinnoh_Text_TrBattleGirlHelenAfter, MSGBOX_AUTOCLOSE
 	end
+
+Sinnoh_EventScript_TrBattleGirlHelenRematch::
+	trainerbattle_rematch TRAINER_SINNOH_BATTLE_GIRL_HELEN, Sinnoh_Text_TrBattleGirlHelenRematch, Sinnoh_Text_TrBattleGirlHelenDefeat
+	msgbox Sinnoh_Text_TrBattleGirlHelenAfter, MSGBOX_AUTOCLOSE
+	end
+
+Sinnoh_Text_TrBattleGirlHelenRematch:
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x0B, 0x59, 0xFF
 
 Sinnoh_Text_TrBattleGirlHelenIntro:
 	.byte 0xFD, 0x40, 0x05, 0x2D, 0x0B, 0x56, 0xFF
@@ -855,8 +1165,18 @@ Sinnoh_Text_TrBattleGirlHelenAfter:
 
 Sinnoh_EventScript_TrBattleGirlKelsey::
 	trainerbattle_single TRAINER_SINNOH_BATTLE_GIRL_KELSEY, Sinnoh_Text_TrBattleGirlKelseyIntro, Sinnoh_Text_TrBattleGirlKelseyDefeat
+	specialvar VAR_RESULT, ShouldTryRematchBattle
+	goto_if_eq VAR_RESULT, TRUE, Sinnoh_EventScript_TrBattleGirlKelseyRematch
 	msgbox Sinnoh_Text_TrBattleGirlKelseyAfter, MSGBOX_AUTOCLOSE
 	end
+
+Sinnoh_EventScript_TrBattleGirlKelseyRematch::
+	trainerbattle_rematch TRAINER_SINNOH_BATTLE_GIRL_KELSEY, Sinnoh_Text_TrBattleGirlKelseyRematch, Sinnoh_Text_TrBattleGirlKelseyDefeat
+	msgbox Sinnoh_Text_TrBattleGirlKelseyAfter, MSGBOX_AUTOCLOSE
+	end
+
+Sinnoh_Text_TrBattleGirlKelseyRematch:
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x0C, 0x21, 0xFF
 
 Sinnoh_Text_TrBattleGirlKelseyIntro:
 	.byte 0xFD, 0x40, 0x05, 0x2D, 0x0C, 0x1E, 0xFF
@@ -883,8 +1203,18 @@ Sinnoh_Text_TrBattleGirlTylerAfter:
 
 Sinnoh_EventScript_TrBeautyCyndy::
 	trainerbattle_single TRAINER_SINNOH_BEAUTY_CYNDY, Sinnoh_Text_TrBeautyCyndyIntro, Sinnoh_Text_TrBeautyCyndyDefeat
+	specialvar VAR_RESULT, ShouldTryRematchBattle
+	goto_if_eq VAR_RESULT, TRUE, Sinnoh_EventScript_TrBeautyCyndyRematch
 	msgbox Sinnoh_Text_TrBeautyCyndyAfter, MSGBOX_AUTOCLOSE
 	end
+
+Sinnoh_EventScript_TrBeautyCyndyRematch::
+	trainerbattle_rematch TRAINER_SINNOH_BEAUTY_CYNDY, Sinnoh_Text_TrBeautyCyndyRematch, Sinnoh_Text_TrBeautyCyndyDefeat
+	msgbox Sinnoh_Text_TrBeautyCyndyAfter, MSGBOX_AUTOCLOSE
+	end
+
+Sinnoh_Text_TrBeautyCyndyRematch:
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x0C, 0x45, 0xFF
 
 Sinnoh_Text_TrBeautyCyndyIntro:
 	.byte 0xFD, 0x40, 0x05, 0x2D, 0x0C, 0x42, 0xFF
@@ -897,8 +1227,18 @@ Sinnoh_Text_TrBeautyCyndyAfter:
 
 Sinnoh_EventScript_TrBeautyDevon::
 	trainerbattle_single TRAINER_SINNOH_BEAUTY_DEVON, Sinnoh_Text_TrBeautyDevonIntro, Sinnoh_Text_TrBeautyDevonDefeat
+	specialvar VAR_RESULT, ShouldTryRematchBattle
+	goto_if_eq VAR_RESULT, TRUE, Sinnoh_EventScript_TrBeautyDevonRematch
 	msgbox Sinnoh_Text_TrBeautyDevonAfter, MSGBOX_AUTOCLOSE
 	end
+
+Sinnoh_EventScript_TrBeautyDevonRematch::
+	trainerbattle_rematch TRAINER_SINNOH_BEAUTY_DEVON, Sinnoh_Text_TrBeautyDevonRematch, Sinnoh_Text_TrBeautyDevonDefeat
+	msgbox Sinnoh_Text_TrBeautyDevonAfter, MSGBOX_AUTOCLOSE
+	end
+
+Sinnoh_Text_TrBeautyDevonRematch:
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x0C, 0x7B, 0xFF
 
 Sinnoh_Text_TrBeautyDevonIntro:
 	.byte 0xFD, 0x40, 0x05, 0x2D, 0x0C, 0x78, 0xFF
@@ -911,8 +1251,18 @@ Sinnoh_Text_TrBeautyDevonAfter:
 
 Sinnoh_EventScript_TrBeautyNicola::
 	trainerbattle_single TRAINER_SINNOH_BEAUTY_NICOLA, Sinnoh_Text_TrBeautyNicolaIntro, Sinnoh_Text_TrBeautyNicolaDefeat
+	specialvar VAR_RESULT, ShouldTryRematchBattle
+	goto_if_eq VAR_RESULT, TRUE, Sinnoh_EventScript_TrBeautyNicolaRematch
 	msgbox Sinnoh_Text_TrBeautyNicolaAfter, MSGBOX_AUTOCLOSE
 	end
+
+Sinnoh_EventScript_TrBeautyNicolaRematch::
+	trainerbattle_rematch TRAINER_SINNOH_BEAUTY_NICOLA, Sinnoh_Text_TrBeautyNicolaRematch, Sinnoh_Text_TrBeautyNicolaDefeat
+	msgbox Sinnoh_Text_TrBeautyNicolaAfter, MSGBOX_AUTOCLOSE
+	end
+
+Sinnoh_Text_TrBeautyNicolaRematch:
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x0D, 0x43, 0xFF
 
 Sinnoh_Text_TrBeautyNicolaIntro:
 	.byte 0xFD, 0x40, 0x05, 0x2D, 0x0D, 0x40, 0xFF
@@ -959,8 +1309,18 @@ Sinnoh_Text_TrBelleAndPaBethAndBobNotEnough:
 
 Sinnoh_EventScript_TrBirdKeeperAlexandra::
 	trainerbattle_single TRAINER_SINNOH_BIRD_KEEPER_ALEXANDRA, Sinnoh_Text_TrBirdKeeperAlexandraIntro, Sinnoh_Text_TrBirdKeeperAlexandraDefeat
+	specialvar VAR_RESULT, ShouldTryRematchBattle
+	goto_if_eq VAR_RESULT, TRUE, Sinnoh_EventScript_TrBirdKeeperAlexandraRematch
 	msgbox Sinnoh_Text_TrBirdKeeperAlexandraAfter, MSGBOX_AUTOCLOSE
 	end
+
+Sinnoh_EventScript_TrBirdKeeperAlexandraRematch::
+	trainerbattle_rematch TRAINER_SINNOH_BIRD_KEEPER_ALEXANDRA, Sinnoh_Text_TrBirdKeeperAlexandraRematch, Sinnoh_Text_TrBirdKeeperAlexandraDefeat
+	msgbox Sinnoh_Text_TrBirdKeeperAlexandraAfter, MSGBOX_AUTOCLOSE
+	end
+
+Sinnoh_Text_TrBirdKeeperAlexandraRematch:
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x0D, 0x79, 0xFF
 
 Sinnoh_Text_TrBirdKeeperAlexandraIntro:
 	.byte 0xFD, 0x40, 0x05, 0x2D, 0x0D, 0x76, 0xFF
@@ -973,8 +1333,18 @@ Sinnoh_Text_TrBirdKeeperAlexandraAfter:
 
 Sinnoh_EventScript_TrBirdKeeperAudrey::
 	trainerbattle_single TRAINER_SINNOH_BIRD_KEEPER_AUDREY, Sinnoh_Text_TrBirdKeeperAudreyIntro, Sinnoh_Text_TrBirdKeeperAudreyDefeat
+	specialvar VAR_RESULT, ShouldTryRematchBattle
+	goto_if_eq VAR_RESULT, TRUE, Sinnoh_EventScript_TrBirdKeeperAudreyRematch
 	msgbox Sinnoh_Text_TrBirdKeeperAudreyAfter, MSGBOX_AUTOCLOSE
 	end
+
+Sinnoh_EventScript_TrBirdKeeperAudreyRematch::
+	trainerbattle_rematch TRAINER_SINNOH_BIRD_KEEPER_AUDREY, Sinnoh_Text_TrBirdKeeperAudreyRematch, Sinnoh_Text_TrBirdKeeperAudreyDefeat
+	msgbox Sinnoh_Text_TrBirdKeeperAudreyAfter, MSGBOX_AUTOCLOSE
+	end
+
+Sinnoh_Text_TrBirdKeeperAudreyRematch:
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x0E, 0x0B, 0xFF
 
 Sinnoh_Text_TrBirdKeeperAudreyIntro:
 	.byte 0xFD, 0x40, 0x05, 0x2D, 0x0E, 0x08, 0xFF
@@ -1001,8 +1371,18 @@ Sinnoh_Text_TrBirdKeeperAutumnAfter:
 
 Sinnoh_EventScript_TrBirdKeeperBrianna::
 	trainerbattle_single TRAINER_SINNOH_BIRD_KEEPER_BRIANNA, Sinnoh_Text_TrBirdKeeperBriannaIntro, Sinnoh_Text_TrBirdKeeperBriannaDefeat
+	specialvar VAR_RESULT, ShouldTryRematchBattle
+	goto_if_eq VAR_RESULT, TRUE, Sinnoh_EventScript_TrBirdKeeperBriannaRematch
 	msgbox Sinnoh_Text_TrBirdKeeperBriannaAfter, MSGBOX_AUTOCLOSE
 	end
+
+Sinnoh_EventScript_TrBirdKeeperBriannaRematch::
+	trainerbattle_rematch TRAINER_SINNOH_BIRD_KEEPER_BRIANNA, Sinnoh_Text_TrBirdKeeperBriannaRematch, Sinnoh_Text_TrBirdKeeperBriannaDefeat
+	msgbox Sinnoh_Text_TrBirdKeeperBriannaAfter, MSGBOX_AUTOCLOSE
+	end
+
+Sinnoh_Text_TrBirdKeeperBriannaRematch:
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x0E, 0x41, 0xFF
 
 Sinnoh_Text_TrBirdKeeperBriannaIntro:
 	.byte 0xFD, 0x40, 0x05, 0x2D, 0x0E, 0x3E, 0xFF
@@ -1015,8 +1395,18 @@ Sinnoh_Text_TrBirdKeeperBriannaAfter:
 
 Sinnoh_EventScript_TrBirdKeeperGeneva::
 	trainerbattle_single TRAINER_SINNOH_BIRD_KEEPER_GENEVA, Sinnoh_Text_TrBirdKeeperGenevaIntro, Sinnoh_Text_TrBirdKeeperGenevaDefeat
+	specialvar VAR_RESULT, ShouldTryRematchBattle
+	goto_if_eq VAR_RESULT, TRUE, Sinnoh_EventScript_TrBirdKeeperGenevaRematch
 	msgbox Sinnoh_Text_TrBirdKeeperGenevaAfter, MSGBOX_AUTOCLOSE
 	end
+
+Sinnoh_EventScript_TrBirdKeeperGenevaRematch::
+	trainerbattle_rematch TRAINER_SINNOH_BIRD_KEEPER_GENEVA, Sinnoh_Text_TrBirdKeeperGenevaRematch, Sinnoh_Text_TrBirdKeeperGenevaDefeat
+	msgbox Sinnoh_Text_TrBirdKeeperGenevaAfter, MSGBOX_AUTOCLOSE
+	end
+
+Sinnoh_Text_TrBirdKeeperGenevaRematch:
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x0E, 0x77, 0xFF
 
 Sinnoh_Text_TrBirdKeeperGenevaIntro:
 	.byte 0xFD, 0x40, 0x05, 0x2D, 0x0E, 0x74, 0xFF
@@ -1043,8 +1433,18 @@ Sinnoh_Text_TrBirdKeeperHanaAfter:
 
 Sinnoh_EventScript_TrBirdKeeperKatherine::
 	trainerbattle_single TRAINER_SINNOH_BIRD_KEEPER_KATHERINE, Sinnoh_Text_TrBirdKeeperKatherineIntro, Sinnoh_Text_TrBirdKeeperKatherineDefeat
+	specialvar VAR_RESULT, ShouldTryRematchBattle
+	goto_if_eq VAR_RESULT, TRUE, Sinnoh_EventScript_TrBirdKeeperKatherineRematch
 	msgbox Sinnoh_Text_TrBirdKeeperKatherineAfter, MSGBOX_AUTOCLOSE
 	end
+
+Sinnoh_EventScript_TrBirdKeeperKatherineRematch::
+	trainerbattle_rematch TRAINER_SINNOH_BIRD_KEEPER_KATHERINE, Sinnoh_Text_TrBirdKeeperKatherineRematch, Sinnoh_Text_TrBirdKeeperKatherineDefeat
+	msgbox Sinnoh_Text_TrBirdKeeperKatherineAfter, MSGBOX_AUTOCLOSE
+	end
+
+Sinnoh_Text_TrBirdKeeperKatherineRematch:
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x0F, 0x1B, 0xFF
 
 Sinnoh_Text_TrBirdKeeperKatherineIntro:
 	.byte 0xFD, 0x40, 0x05, 0x2D, 0x0F, 0x18, 0xFF
@@ -1071,8 +1471,18 @@ Sinnoh_Text_TrBirdKeeperKrystalAfter:
 
 Sinnoh_EventScript_TrBlackBeltAdam::
 	trainerbattle_single TRAINER_SINNOH_BLACK_BELT_ADAM, Sinnoh_Text_TrBlackBeltAdamIntro, Sinnoh_Text_TrBlackBeltAdamDefeat
+	specialvar VAR_RESULT, ShouldTryRematchBattle
+	goto_if_eq VAR_RESULT, TRUE, Sinnoh_EventScript_TrBlackBeltAdamRematch
 	msgbox Sinnoh_Text_TrBlackBeltAdamAfter, MSGBOX_AUTOCLOSE
 	end
+
+Sinnoh_EventScript_TrBlackBeltAdamRematch::
+	trainerbattle_rematch TRAINER_SINNOH_BLACK_BELT_ADAM, Sinnoh_Text_TrBlackBeltAdamRematch, Sinnoh_Text_TrBlackBeltAdamDefeat
+	msgbox Sinnoh_Text_TrBlackBeltAdamAfter, MSGBOX_AUTOCLOSE
+	end
+
+Sinnoh_Text_TrBlackBeltAdamRematch:
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x0F, 0x3F, 0xFF
 
 Sinnoh_Text_TrBlackBeltAdamIntro:
 	.byte 0xFD, 0x40, 0x05, 0x2D, 0x0F, 0x3C, 0xFF
@@ -1085,8 +1495,18 @@ Sinnoh_Text_TrBlackBeltAdamAfter:
 
 Sinnoh_EventScript_TrBlackBeltCarl::
 	trainerbattle_single TRAINER_SINNOH_BLACK_BELT_CARL, Sinnoh_Text_TrBlackBeltCarlIntro, Sinnoh_Text_TrBlackBeltCarlDefeat
+	specialvar VAR_RESULT, ShouldTryRematchBattle
+	goto_if_eq VAR_RESULT, TRUE, Sinnoh_EventScript_TrBlackBeltCarlRematch
 	msgbox Sinnoh_Text_TrBlackBeltCarlAfter, MSGBOX_AUTOCLOSE
 	end
+
+Sinnoh_EventScript_TrBlackBeltCarlRematch::
+	trainerbattle_rematch TRAINER_SINNOH_BLACK_BELT_CARL, Sinnoh_Text_TrBlackBeltCarlRematch, Sinnoh_Text_TrBlackBeltCarlDefeat
+	msgbox Sinnoh_Text_TrBlackBeltCarlAfter, MSGBOX_AUTOCLOSE
+	end
+
+Sinnoh_Text_TrBlackBeltCarlRematch:
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x0F, 0x51, 0xFF
 
 Sinnoh_Text_TrBlackBeltCarlIntro:
 	.byte 0xFD, 0x40, 0x05, 0x2D, 0x0F, 0x4E, 0xFF
@@ -1141,8 +1561,18 @@ Sinnoh_Text_TrBlackBeltDavidAfter:
 
 Sinnoh_EventScript_TrBlackBeltDavon::
 	trainerbattle_single TRAINER_SINNOH_BLACK_BELT_DAVON, Sinnoh_Text_TrBlackBeltDavonIntro, Sinnoh_Text_TrBlackBeltDavonDefeat
+	specialvar VAR_RESULT, ShouldTryRematchBattle
+	goto_if_eq VAR_RESULT, TRUE, Sinnoh_EventScript_TrBlackBeltDavonRematch
 	msgbox Sinnoh_Text_TrBlackBeltDavonAfter, MSGBOX_AUTOCLOSE
 	end
+
+Sinnoh_EventScript_TrBlackBeltDavonRematch::
+	trainerbattle_rematch TRAINER_SINNOH_BLACK_BELT_DAVON, Sinnoh_Text_TrBlackBeltDavonRematch, Sinnoh_Text_TrBlackBeltDavonDefeat
+	msgbox Sinnoh_Text_TrBlackBeltDavonAfter, MSGBOX_AUTOCLOSE
+	end
+
+Sinnoh_Text_TrBlackBeltDavonRematch:
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x10, 0x19, 0xFF
 
 Sinnoh_Text_TrBlackBeltDavonIntro:
 	.byte 0xFD, 0x40, 0x05, 0x2D, 0x10, 0x16, 0xFF
@@ -1155,8 +1585,18 @@ Sinnoh_Text_TrBlackBeltDavonAfter:
 
 Sinnoh_EventScript_TrBlackBeltDerek::
 	trainerbattle_single TRAINER_SINNOH_BLACK_BELT_DEREK, Sinnoh_Text_TrBlackBeltDerekIntro, Sinnoh_Text_TrBlackBeltDerekDefeat
+	specialvar VAR_RESULT, ShouldTryRematchBattle
+	goto_if_eq VAR_RESULT, TRUE, Sinnoh_EventScript_TrBlackBeltDerekRematch
 	msgbox Sinnoh_Text_TrBlackBeltDerekAfter, MSGBOX_AUTOCLOSE
 	end
+
+Sinnoh_EventScript_TrBlackBeltDerekRematch::
+	trainerbattle_rematch TRAINER_SINNOH_BLACK_BELT_DEREK, Sinnoh_Text_TrBlackBeltDerekRematch, Sinnoh_Text_TrBlackBeltDerekDefeat
+	msgbox Sinnoh_Text_TrBlackBeltDerekAfter, MSGBOX_AUTOCLOSE
+	end
+
+Sinnoh_Text_TrBlackBeltDerekRematch:
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x10, 0x3D, 0xFF
 
 Sinnoh_Text_TrBlackBeltDerekIntro:
 	.byte 0xFD, 0x40, 0x05, 0x2D, 0x10, 0x3A, 0xFF
@@ -1183,8 +1623,18 @@ Sinnoh_Text_TrBlackBeltEddieAfter:
 
 Sinnoh_EventScript_TrBlackBeltGregory::
 	trainerbattle_single TRAINER_SINNOH_BLACK_BELT_GREGORY, Sinnoh_Text_TrBlackBeltGregoryIntro, Sinnoh_Text_TrBlackBeltGregoryDefeat
+	specialvar VAR_RESULT, ShouldTryRematchBattle
+	goto_if_eq VAR_RESULT, TRUE, Sinnoh_EventScript_TrBlackBeltGregoryRematch
 	msgbox Sinnoh_Text_TrBlackBeltGregoryAfter, MSGBOX_AUTOCLOSE
 	end
+
+Sinnoh_EventScript_TrBlackBeltGregoryRematch::
+	trainerbattle_rematch TRAINER_SINNOH_BLACK_BELT_GREGORY, Sinnoh_Text_TrBlackBeltGregoryRematch, Sinnoh_Text_TrBlackBeltGregoryDefeat
+	msgbox Sinnoh_Text_TrBlackBeltGregoryAfter, MSGBOX_AUTOCLOSE
+	end
+
+Sinnoh_Text_TrBlackBeltGregoryRematch:
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x10, 0x61, 0xFF
 
 Sinnoh_Text_TrBlackBeltGregoryIntro:
 	.byte 0xFD, 0x40, 0x05, 0x2D, 0x10, 0x5E, 0xFF
@@ -1197,8 +1647,18 @@ Sinnoh_Text_TrBlackBeltGregoryAfter:
 
 Sinnoh_EventScript_TrBlackBeltGriffin::
 	trainerbattle_single TRAINER_SINNOH_BLACK_BELT_GRIFFIN, Sinnoh_Text_TrBlackBeltGriffinIntro, Sinnoh_Text_TrBlackBeltGriffinDefeat
+	specialvar VAR_RESULT, ShouldTryRematchBattle
+	goto_if_eq VAR_RESULT, TRUE, Sinnoh_EventScript_TrBlackBeltGriffinRematch
 	msgbox Sinnoh_Text_TrBlackBeltGriffinAfter, MSGBOX_AUTOCLOSE
 	end
+
+Sinnoh_EventScript_TrBlackBeltGriffinRematch::
+	trainerbattle_rematch TRAINER_SINNOH_BLACK_BELT_GRIFFIN, Sinnoh_Text_TrBlackBeltGriffinRematch, Sinnoh_Text_TrBlackBeltGriffinDefeat
+	msgbox Sinnoh_Text_TrBlackBeltGriffinAfter, MSGBOX_AUTOCLOSE
+	end
+
+Sinnoh_Text_TrBlackBeltGriffinRematch:
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x10, 0x73, 0xFF
 
 Sinnoh_Text_TrBlackBeltGriffinIntro:
 	.byte 0xFD, 0x40, 0x05, 0x2D, 0x10, 0x70, 0xFF
@@ -1253,8 +1713,18 @@ Sinnoh_Text_TrBlackBeltKendalAfter:
 
 Sinnoh_EventScript_TrBlackBeltKyle::
 	trainerbattle_single TRAINER_SINNOH_BLACK_BELT_KYLE, Sinnoh_Text_TrBlackBeltKyleIntro, Sinnoh_Text_TrBlackBeltKyleDefeat
+	specialvar VAR_RESULT, ShouldTryRematchBattle
+	goto_if_eq VAR_RESULT, TRUE, Sinnoh_EventScript_TrBlackBeltKyleRematch
 	msgbox Sinnoh_Text_TrBlackBeltKyleAfter, MSGBOX_AUTOCLOSE
 	end
+
+Sinnoh_EventScript_TrBlackBeltKyleRematch::
+	trainerbattle_rematch TRAINER_SINNOH_BLACK_BELT_KYLE, Sinnoh_Text_TrBlackBeltKyleRematch, Sinnoh_Text_TrBlackBeltKyleDefeat
+	msgbox Sinnoh_Text_TrBlackBeltKyleAfter, MSGBOX_AUTOCLOSE
+	end
+
+Sinnoh_Text_TrBlackBeltKyleRematch:
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x11, 0x3B, 0xFF
 
 Sinnoh_Text_TrBlackBeltKyleIntro:
 	.byte 0xFD, 0x40, 0x05, 0x2D, 0x11, 0x38, 0xFF
@@ -1267,8 +1737,18 @@ Sinnoh_Text_TrBlackBeltKyleAfter:
 
 Sinnoh_EventScript_TrBlackBeltLuke::
 	trainerbattle_single TRAINER_SINNOH_BLACK_BELT_LUKE, Sinnoh_Text_TrBlackBeltLukeIntro, Sinnoh_Text_TrBlackBeltLukeDefeat
+	specialvar VAR_RESULT, ShouldTryRematchBattle
+	goto_if_eq VAR_RESULT, TRUE, Sinnoh_EventScript_TrBlackBeltLukeRematch
 	msgbox Sinnoh_Text_TrBlackBeltLukeAfter, MSGBOX_AUTOCLOSE
 	end
+
+Sinnoh_EventScript_TrBlackBeltLukeRematch::
+	trainerbattle_rematch TRAINER_SINNOH_BLACK_BELT_LUKE, Sinnoh_Text_TrBlackBeltLukeRematch, Sinnoh_Text_TrBlackBeltLukeDefeat
+	msgbox Sinnoh_Text_TrBlackBeltLukeAfter, MSGBOX_AUTOCLOSE
+	end
+
+Sinnoh_Text_TrBlackBeltLukeRematch:
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x11, 0x4D, 0xFF
 
 Sinnoh_Text_TrBlackBeltLukeIntro:
 	.byte 0xFD, 0x40, 0x05, 0x2D, 0x11, 0x4A, 0xFF
@@ -1295,8 +1775,18 @@ Sinnoh_Text_TrBlackBeltMilesAfter:
 
 Sinnoh_EventScript_TrBlackBeltNathaniel::
 	trainerbattle_single TRAINER_SINNOH_BLACK_BELT_NATHANIEL, Sinnoh_Text_TrBlackBeltNathanielIntro, Sinnoh_Text_TrBlackBeltNathanielDefeat
+	specialvar VAR_RESULT, ShouldTryRematchBattle
+	goto_if_eq VAR_RESULT, TRUE, Sinnoh_EventScript_TrBlackBeltNathanielRematch
 	msgbox Sinnoh_Text_TrBlackBeltNathanielAfter, MSGBOX_AUTOCLOSE
 	end
+
+Sinnoh_EventScript_TrBlackBeltNathanielRematch::
+	trainerbattle_rematch TRAINER_SINNOH_BLACK_BELT_NATHANIEL, Sinnoh_Text_TrBlackBeltNathanielRematch, Sinnoh_Text_TrBlackBeltNathanielDefeat
+	msgbox Sinnoh_Text_TrBlackBeltNathanielAfter, MSGBOX_AUTOCLOSE
+	end
+
+Sinnoh_Text_TrBlackBeltNathanielRematch:
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x11, 0x71, 0xFF
 
 Sinnoh_Text_TrBlackBeltNathanielIntro:
 	.byte 0xFD, 0x40, 0x05, 0x2D, 0x11, 0x6E, 0xFF
@@ -1309,8 +1799,18 @@ Sinnoh_Text_TrBlackBeltNathanielAfter:
 
 Sinnoh_EventScript_TrBlackBeltPhilip::
 	trainerbattle_single TRAINER_SINNOH_BLACK_BELT_PHILIP, Sinnoh_Text_TrBlackBeltPhilipIntro, Sinnoh_Text_TrBlackBeltPhilipDefeat
+	specialvar VAR_RESULT, ShouldTryRematchBattle
+	goto_if_eq VAR_RESULT, TRUE, Sinnoh_EventScript_TrBlackBeltPhilipRematch
 	msgbox Sinnoh_Text_TrBlackBeltPhilipAfter, MSGBOX_AUTOCLOSE
 	end
+
+Sinnoh_EventScript_TrBlackBeltPhilipRematch::
+	trainerbattle_rematch TRAINER_SINNOH_BLACK_BELT_PHILIP, Sinnoh_Text_TrBlackBeltPhilipRematch, Sinnoh_Text_TrBlackBeltPhilipDefeat
+	msgbox Sinnoh_Text_TrBlackBeltPhilipAfter, MSGBOX_AUTOCLOSE
+	end
+
+Sinnoh_Text_TrBlackBeltPhilipRematch:
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x12, 0x03, 0xFF
 
 Sinnoh_Text_TrBlackBeltPhilipIntro:
 	.byte 0xFD, 0x40, 0x05, 0x2D, 0x12, 0x00, 0xFF
@@ -1365,8 +1865,18 @@ Sinnoh_Text_TrBlackBeltRickyAfter:
 
 Sinnoh_EventScript_TrBlackBeltSean::
 	trainerbattle_single TRAINER_SINNOH_BLACK_BELT_SEAN, Sinnoh_Text_TrBlackBeltSeanIntro, Sinnoh_Text_TrBlackBeltSeanDefeat
+	specialvar VAR_RESULT, ShouldTryRematchBattle
+	goto_if_eq VAR_RESULT, TRUE, Sinnoh_EventScript_TrBlackBeltSeanRematch
 	msgbox Sinnoh_Text_TrBlackBeltSeanAfter, MSGBOX_AUTOCLOSE
 	end
+
+Sinnoh_EventScript_TrBlackBeltSeanRematch::
+	trainerbattle_rematch TRAINER_SINNOH_BLACK_BELT_SEAN, Sinnoh_Text_TrBlackBeltSeanRematch, Sinnoh_Text_TrBlackBeltSeanDefeat
+	msgbox Sinnoh_Text_TrBlackBeltSeanAfter, MSGBOX_AUTOCLOSE
+	end
+
+Sinnoh_Text_TrBlackBeltSeanRematch:
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x12, 0x5D, 0xFF
 
 Sinnoh_Text_TrBlackBeltSeanIntro:
 	.byte 0xFD, 0x40, 0x05, 0x2D, 0x12, 0x5A, 0xFF
@@ -1393,8 +1903,18 @@ Sinnoh_Text_TrBlackBeltWillieAfter:
 
 Sinnoh_EventScript_TrBreederAlbert::
 	trainerbattle_single TRAINER_SINNOH_BREEDER_ALBERT, Sinnoh_Text_TrBreederAlbertIntro, Sinnoh_Text_TrBreederAlbertDefeat
+	specialvar VAR_RESULT, ShouldTryRematchBattle
+	goto_if_eq VAR_RESULT, TRUE, Sinnoh_EventScript_TrBreederAlbertRematch
 	msgbox Sinnoh_Text_TrBreederAlbertAfter, MSGBOX_AUTOCLOSE
 	end
+
+Sinnoh_EventScript_TrBreederAlbertRematch::
+	trainerbattle_rematch TRAINER_SINNOH_BREEDER_ALBERT, Sinnoh_Text_TrBreederAlbertRematch, Sinnoh_Text_TrBreederAlbertDefeat
+	msgbox Sinnoh_Text_TrBreederAlbertAfter, MSGBOX_AUTOCLOSE
+	end
+
+Sinnoh_Text_TrBreederAlbertRematch:
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x13, 0x01, 0xFF
 
 Sinnoh_Text_TrBreederAlbertIntro:
 	.byte 0xFD, 0x40, 0x05, 0x2D, 0x12, 0x7E, 0xFF
@@ -1407,8 +1927,18 @@ Sinnoh_Text_TrBreederAlbertAfter:
 
 Sinnoh_EventScript_TrBreederAmber::
 	trainerbattle_single TRAINER_SINNOH_BREEDER_AMBER, Sinnoh_Text_TrBreederAmberIntro, Sinnoh_Text_TrBreederAmberDefeat
+	specialvar VAR_RESULT, ShouldTryRematchBattle
+	goto_if_eq VAR_RESULT, TRUE, Sinnoh_EventScript_TrBreederAmberRematch
 	msgbox Sinnoh_Text_TrBreederAmberAfter, MSGBOX_AUTOCLOSE
 	end
+
+Sinnoh_EventScript_TrBreederAmberRematch::
+	trainerbattle_rematch TRAINER_SINNOH_BREEDER_AMBER, Sinnoh_Text_TrBreederAmberRematch, Sinnoh_Text_TrBreederAmberDefeat
+	msgbox Sinnoh_Text_TrBreederAmberAfter, MSGBOX_AUTOCLOSE
+	end
+
+Sinnoh_Text_TrBreederAmberRematch:
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x13, 0x49, 0xFF
 
 Sinnoh_Text_TrBreederAmberIntro:
 	.byte 0xFD, 0x40, 0x05, 0x2D, 0x13, 0x46, 0xFF
@@ -1421,8 +1951,18 @@ Sinnoh_Text_TrBreederAmberAfter:
 
 Sinnoh_EventScript_TrBreederJennifer::
 	trainerbattle_single TRAINER_SINNOH_BREEDER_JENNIFER, Sinnoh_Text_TrBreederJenniferIntro, Sinnoh_Text_TrBreederJenniferDefeat
+	specialvar VAR_RESULT, ShouldTryRematchBattle
+	goto_if_eq VAR_RESULT, TRUE, Sinnoh_EventScript_TrBreederJenniferRematch
 	msgbox Sinnoh_Text_TrBreederJenniferAfter, MSGBOX_AUTOCLOSE
 	end
+
+Sinnoh_EventScript_TrBreederJenniferRematch::
+	trainerbattle_rematch TRAINER_SINNOH_BREEDER_JENNIFER, Sinnoh_Text_TrBreederJenniferRematch, Sinnoh_Text_TrBreederJenniferDefeat
+	msgbox Sinnoh_Text_TrBreederJenniferAfter, MSGBOX_AUTOCLOSE
+	end
+
+Sinnoh_Text_TrBreederJenniferRematch:
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x13, 0x5B, 0xFF
 
 Sinnoh_Text_TrBreederJenniferIntro:
 	.byte 0xFD, 0x40, 0x05, 0x2D, 0x13, 0x58, 0xFF
@@ -1435,8 +1975,18 @@ Sinnoh_Text_TrBreederJenniferAfter:
 
 Sinnoh_EventScript_TrBreederKahlil::
 	trainerbattle_single TRAINER_SINNOH_BREEDER_KAHLIL, Sinnoh_Text_TrBreederKahlilIntro, Sinnoh_Text_TrBreederKahlilDefeat
+	specialvar VAR_RESULT, ShouldTryRematchBattle
+	goto_if_eq VAR_RESULT, TRUE, Sinnoh_EventScript_TrBreederKahlilRematch
 	msgbox Sinnoh_Text_TrBreederKahlilAfter, MSGBOX_AUTOCLOSE
 	end
+
+Sinnoh_EventScript_TrBreederKahlilRematch::
+	trainerbattle_rematch TRAINER_SINNOH_BREEDER_KAHLIL, Sinnoh_Text_TrBreederKahlilRematch, Sinnoh_Text_TrBreederKahlilDefeat
+	msgbox Sinnoh_Text_TrBreederKahlilAfter, MSGBOX_AUTOCLOSE
+	end
+
+Sinnoh_Text_TrBreederKahlilRematch:
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x14, 0x23, 0xFF
 
 Sinnoh_Text_TrBreederKahlilIntro:
 	.byte 0xFD, 0x40, 0x05, 0x2D, 0x14, 0x20, 0xFF
@@ -1449,8 +1999,18 @@ Sinnoh_Text_TrBreederKahlilAfter:
 
 Sinnoh_EventScript_TrBugCatcherBrandon::
 	trainerbattle_single TRAINER_SINNOH_BUG_CATCHER_BRANDON, Sinnoh_Text_TrBugCatcherBrandonIntro, Sinnoh_Text_TrBugCatcherBrandonDefeat
+	specialvar VAR_RESULT, ShouldTryRematchBattle
+	goto_if_eq VAR_RESULT, TRUE, Sinnoh_EventScript_TrBugCatcherBrandonRematch
 	msgbox Sinnoh_Text_TrBugCatcherBrandonAfter, MSGBOX_AUTOCLOSE
 	end
+
+Sinnoh_EventScript_TrBugCatcherBrandonRematch::
+	trainerbattle_rematch TRAINER_SINNOH_BUG_CATCHER_BRANDON, Sinnoh_Text_TrBugCatcherBrandonRematch, Sinnoh_Text_TrBugCatcherBrandonDefeat
+	msgbox Sinnoh_Text_TrBugCatcherBrandonAfter, MSGBOX_AUTOCLOSE
+	end
+
+Sinnoh_Text_TrBugCatcherBrandonRematch:
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x14, 0x6B, 0xFF
 
 Sinnoh_Text_TrBugCatcherBrandonIntro:
 	.byte 0xFD, 0x40, 0x05, 0x2D, 0x14, 0x68, 0xFF
@@ -1505,8 +2065,18 @@ Sinnoh_Text_TrBugCatcherPhillipAfter:
 
 Sinnoh_EventScript_TrCamperAnthony::
 	trainerbattle_single TRAINER_SINNOH_CAMPER_ANTHONY, Sinnoh_Text_TrCamperAnthonyIntro, Sinnoh_Text_TrCamperAnthonyDefeat
+	specialvar VAR_RESULT, ShouldTryRematchBattle
+	goto_if_eq VAR_RESULT, TRUE, Sinnoh_EventScript_TrCamperAnthonyRematch
 	msgbox Sinnoh_Text_TrCamperAnthonyAfter, MSGBOX_AUTOCLOSE
 	end
+
+Sinnoh_EventScript_TrCamperAnthonyRematch::
+	trainerbattle_rematch TRAINER_SINNOH_CAMPER_ANTHONY, Sinnoh_Text_TrCamperAnthonyRematch, Sinnoh_Text_TrCamperAnthonyDefeat
+	msgbox Sinnoh_Text_TrCamperAnthonyAfter, MSGBOX_AUTOCLOSE
+	end
+
+Sinnoh_Text_TrCamperAnthonyRematch:
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x16, 0x67, 0xFF
 
 Sinnoh_Text_TrCamperAnthonyIntro:
 	.byte 0xFD, 0x40, 0x05, 0x2D, 0x16, 0x64, 0xFF
@@ -1561,8 +2131,18 @@ Sinnoh_Text_TrCamperDrewAfter:
 
 Sinnoh_EventScript_TrCamperJacob::
 	trainerbattle_single TRAINER_SINNOH_CAMPER_JACOB, Sinnoh_Text_TrCamperJacobIntro, Sinnoh_Text_TrCamperJacobDefeat
+	specialvar VAR_RESULT, ShouldTryRematchBattle
+	goto_if_eq VAR_RESULT, TRUE, Sinnoh_EventScript_TrCamperJacobRematch
 	msgbox Sinnoh_Text_TrCamperJacobAfter, MSGBOX_AUTOCLOSE
 	end
+
+Sinnoh_EventScript_TrCamperJacobRematch::
+	trainerbattle_rematch TRAINER_SINNOH_CAMPER_JACOB, Sinnoh_Text_TrCamperJacobRematch, Sinnoh_Text_TrCamperJacobDefeat
+	msgbox Sinnoh_Text_TrCamperJacobAfter, MSGBOX_AUTOCLOSE
+	end
+
+Sinnoh_Text_TrCamperJacobRematch:
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x17, 0x2F, 0xFF
 
 Sinnoh_Text_TrCamperJacobIntro:
 	.byte 0xFD, 0x40, 0x05, 0x2D, 0x17, 0x2C, 0xFF
@@ -1603,8 +2183,18 @@ Sinnoh_Text_TrCamperParkerAfter:
 
 Sinnoh_EventScript_TrCamperZackary::
 	trainerbattle_single TRAINER_SINNOH_CAMPER_ZACKARY, Sinnoh_Text_TrCamperZackaryIntro, Sinnoh_Text_TrCamperZackaryDefeat
+	specialvar VAR_RESULT, ShouldTryRematchBattle
+	goto_if_eq VAR_RESULT, TRUE, Sinnoh_EventScript_TrCamperZackaryRematch
 	msgbox Sinnoh_Text_TrCamperZackaryAfter, MSGBOX_AUTOCLOSE
 	end
+
+Sinnoh_EventScript_TrCamperZackaryRematch::
+	trainerbattle_rematch TRAINER_SINNOH_CAMPER_ZACKARY, Sinnoh_Text_TrCamperZackaryRematch, Sinnoh_Text_TrCamperZackaryDefeat
+	msgbox Sinnoh_Text_TrCamperZackaryAfter, MSGBOX_AUTOCLOSE
+	end
+
+Sinnoh_Text_TrCamperZackaryRematch:
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x17, 0x65, 0xFF
 
 Sinnoh_Text_TrCamperZackaryIntro:
 	.byte 0xFD, 0x40, 0x05, 0x2D, 0x17, 0x62, 0xFF
@@ -1617,8 +2207,18 @@ Sinnoh_Text_TrCamperZackaryAfter:
 
 Sinnoh_EventScript_TrCollectorBrady::
 	trainerbattle_single TRAINER_SINNOH_COLLECTOR_BRADY, Sinnoh_Text_TrCollectorBradyIntro, Sinnoh_Text_TrCollectorBradyDefeat
+	specialvar VAR_RESULT, ShouldTryRematchBattle
+	goto_if_eq VAR_RESULT, TRUE, Sinnoh_EventScript_TrCollectorBradyRematch
 	msgbox Sinnoh_Text_TrCollectorBradyAfter, MSGBOX_AUTOCLOSE
 	end
+
+Sinnoh_EventScript_TrCollectorBradyRematch::
+	trainerbattle_rematch TRAINER_SINNOH_COLLECTOR_BRADY, Sinnoh_Text_TrCollectorBradyRematch, Sinnoh_Text_TrCollectorBradyDefeat
+	msgbox Sinnoh_Text_TrCollectorBradyAfter, MSGBOX_AUTOCLOSE
+	end
+
+Sinnoh_Text_TrCollectorBradyRematch:
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x19, 0x73, 0xFF
 
 Sinnoh_Text_TrCollectorBradyIntro:
 	.byte 0xFD, 0x40, 0x05, 0x2D, 0x19, 0x70, 0xFF
@@ -1631,8 +2231,18 @@ Sinnoh_Text_TrCollectorBradyAfter:
 
 Sinnoh_EventScript_TrCollectorDean::
 	trainerbattle_single TRAINER_SINNOH_COLLECTOR_DEAN, Sinnoh_Text_TrCollectorDeanIntro, Sinnoh_Text_TrCollectorDeanDefeat
+	specialvar VAR_RESULT, ShouldTryRematchBattle
+	goto_if_eq VAR_RESULT, TRUE, Sinnoh_EventScript_TrCollectorDeanRematch
 	msgbox Sinnoh_Text_TrCollectorDeanAfter, MSGBOX_AUTOCLOSE
 	end
+
+Sinnoh_EventScript_TrCollectorDeanRematch::
+	trainerbattle_rematch TRAINER_SINNOH_COLLECTOR_DEAN, Sinnoh_Text_TrCollectorDeanRematch, Sinnoh_Text_TrCollectorDeanDefeat
+	msgbox Sinnoh_Text_TrCollectorDeanAfter, MSGBOX_AUTOCLOSE
+	end
+
+Sinnoh_Text_TrCollectorDeanRematch:
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x1A, 0x05, 0xFF
 
 Sinnoh_Text_TrCollectorDeanIntro:
 	.byte 0xFD, 0x40, 0x05, 0x2D, 0x1A, 0x02, 0xFF
@@ -1645,8 +2255,18 @@ Sinnoh_Text_TrCollectorDeanAfter:
 
 Sinnoh_EventScript_TrCollectorDouglas::
 	trainerbattle_single TRAINER_SINNOH_COLLECTOR_DOUGLAS, Sinnoh_Text_TrCollectorDouglasIntro, Sinnoh_Text_TrCollectorDouglasDefeat
+	specialvar VAR_RESULT, ShouldTryRematchBattle
+	goto_if_eq VAR_RESULT, TRUE, Sinnoh_EventScript_TrCollectorDouglasRematch
 	msgbox Sinnoh_Text_TrCollectorDouglasAfter, MSGBOX_AUTOCLOSE
 	end
+
+Sinnoh_EventScript_TrCollectorDouglasRematch::
+	trainerbattle_rematch TRAINER_SINNOH_COLLECTOR_DOUGLAS, Sinnoh_Text_TrCollectorDouglasRematch, Sinnoh_Text_TrCollectorDouglasDefeat
+	msgbox Sinnoh_Text_TrCollectorDouglasAfter, MSGBOX_AUTOCLOSE
+	end
+
+Sinnoh_Text_TrCollectorDouglasRematch:
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x1A, 0x17, 0xFF
 
 Sinnoh_Text_TrCollectorDouglasIntro:
 	.byte 0xFD, 0x40, 0x05, 0x2D, 0x1A, 0x14, 0xFF
@@ -1687,8 +2307,18 @@ Sinnoh_Text_TrCollectorFernandoAfter:
 
 Sinnoh_EventScript_TrCollectorIvan::
 	trainerbattle_single TRAINER_SINNOH_COLLECTOR_IVAN, Sinnoh_Text_TrCollectorIvanIntro, Sinnoh_Text_TrCollectorIvanDefeat
+	specialvar VAR_RESULT, ShouldTryRematchBattle
+	goto_if_eq VAR_RESULT, TRUE, Sinnoh_EventScript_TrCollectorIvanRematch
 	msgbox Sinnoh_Text_TrCollectorIvanAfter, MSGBOX_AUTOCLOSE
 	end
+
+Sinnoh_EventScript_TrCollectorIvanRematch::
+	trainerbattle_rematch TRAINER_SINNOH_COLLECTOR_IVAN, Sinnoh_Text_TrCollectorIvanRematch, Sinnoh_Text_TrCollectorIvanDefeat
+	msgbox Sinnoh_Text_TrCollectorIvanAfter, MSGBOX_AUTOCLOSE
+	end
+
+Sinnoh_Text_TrCollectorIvanRematch:
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x1A, 0x5F, 0xFF
 
 Sinnoh_Text_TrCollectorIvanIntro:
 	.byte 0xFD, 0x40, 0x05, 0x2D, 0x1A, 0x5C, 0xFF
@@ -1701,8 +2331,18 @@ Sinnoh_Text_TrCollectorIvanAfter:
 
 Sinnoh_EventScript_TrCollectorJamal::
 	trainerbattle_single TRAINER_SINNOH_COLLECTOR_JAMAL, Sinnoh_Text_TrCollectorJamalIntro, Sinnoh_Text_TrCollectorJamalDefeat
+	specialvar VAR_RESULT, ShouldTryRematchBattle
+	goto_if_eq VAR_RESULT, TRUE, Sinnoh_EventScript_TrCollectorJamalRematch
 	msgbox Sinnoh_Text_TrCollectorJamalAfter, MSGBOX_AUTOCLOSE
 	end
+
+Sinnoh_EventScript_TrCollectorJamalRematch::
+	trainerbattle_rematch TRAINER_SINNOH_COLLECTOR_JAMAL, Sinnoh_Text_TrCollectorJamalRematch, Sinnoh_Text_TrCollectorJamalDefeat
+	msgbox Sinnoh_Text_TrCollectorJamalAfter, MSGBOX_AUTOCLOSE
+	end
+
+Sinnoh_Text_TrCollectorJamalRematch:
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x1B, 0x03, 0xFF
 
 Sinnoh_Text_TrCollectorJamalIntro:
 	.byte 0xFD, 0x40, 0x05, 0x2D, 0x1B, 0x00, 0xFF
@@ -1729,8 +2369,18 @@ Sinnoh_Text_TrCollectorTerryAfter:
 
 Sinnoh_EventScript_TrCowgirlShelley::
 	trainerbattle_single TRAINER_SINNOH_COWGIRL_SHELLEY, Sinnoh_Text_TrCowgirlShelleyIntro, Sinnoh_Text_TrCowgirlShelleyDefeat
+	specialvar VAR_RESULT, ShouldTryRematchBattle
+	goto_if_eq VAR_RESULT, TRUE, Sinnoh_EventScript_TrCowgirlShelleyRematch
 	msgbox Sinnoh_Text_TrCowgirlShelleyAfter, MSGBOX_AUTOCLOSE
 	end
+
+Sinnoh_EventScript_TrCowgirlShelleyRematch::
+	trainerbattle_rematch TRAINER_SINNOH_COWGIRL_SHELLEY, Sinnoh_Text_TrCowgirlShelleyRematch, Sinnoh_Text_TrCowgirlShelleyDefeat
+	msgbox Sinnoh_Text_TrCowgirlShelleyAfter, MSGBOX_AUTOCLOSE
+	end
+
+Sinnoh_Text_TrCowgirlShelleyRematch:
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x1C, 0x49, 0xFF
 
 Sinnoh_Text_TrCowgirlShelleyIntro:
 	.byte 0xFD, 0x40, 0x05, 0x2D, 0x1C, 0x46, 0xFF
@@ -1743,8 +2393,18 @@ Sinnoh_Text_TrCowgirlShelleyAfter:
 
 Sinnoh_EventScript_TrCyclistAxel::
 	trainerbattle_single TRAINER_SINNOH_CYCLIST_AXEL, Sinnoh_Text_TrCyclistAxelIntro, Sinnoh_Text_TrCyclistAxelDefeat
+	specialvar VAR_RESULT, ShouldTryRematchBattle
+	goto_if_eq VAR_RESULT, TRUE, Sinnoh_EventScript_TrCyclistAxelRematch
 	msgbox Sinnoh_Text_TrCyclistAxelAfter, MSGBOX_AUTOCLOSE
 	end
+
+Sinnoh_EventScript_TrCyclistAxelRematch::
+	trainerbattle_rematch TRAINER_SINNOH_CYCLIST_AXEL, Sinnoh_Text_TrCyclistAxelRematch, Sinnoh_Text_TrCyclistAxelDefeat
+	msgbox Sinnoh_Text_TrCyclistAxelAfter, MSGBOX_AUTOCLOSE
+	end
+
+Sinnoh_Text_TrCyclistAxelRematch:
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x1C, 0x5B, 0xFF
 
 Sinnoh_Text_TrCyclistAxelIntro:
 	.byte 0xFD, 0x40, 0x05, 0x2D, 0x1C, 0x58, 0xFF
@@ -1757,8 +2417,18 @@ Sinnoh_Text_TrCyclistAxelAfter:
 
 Sinnoh_EventScript_TrCyclistJames::
 	trainerbattle_single TRAINER_SINNOH_CYCLIST_JAMES, Sinnoh_Text_TrCyclistJamesIntro, Sinnoh_Text_TrCyclistJamesDefeat
+	specialvar VAR_RESULT, ShouldTryRematchBattle
+	goto_if_eq VAR_RESULT, TRUE, Sinnoh_EventScript_TrCyclistJamesRematch
 	msgbox Sinnoh_Text_TrCyclistJamesAfter, MSGBOX_AUTOCLOSE
 	end
+
+Sinnoh_EventScript_TrCyclistJamesRematch::
+	trainerbattle_rematch TRAINER_SINNOH_CYCLIST_JAMES, Sinnoh_Text_TrCyclistJamesRematch, Sinnoh_Text_TrCyclistJamesDefeat
+	msgbox Sinnoh_Text_TrCyclistJamesAfter, MSGBOX_AUTOCLOSE
+	end
+
+Sinnoh_Text_TrCyclistJamesRematch:
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x1C, 0x6D, 0xFF
 
 Sinnoh_Text_TrCyclistJamesIntro:
 	.byte 0xFD, 0x40, 0x05, 0x2D, 0x1C, 0x6A, 0xFF
@@ -1771,8 +2441,18 @@ Sinnoh_Text_TrCyclistJamesAfter:
 
 Sinnoh_EventScript_TrCyclistJohn::
 	trainerbattle_single TRAINER_SINNOH_CYCLIST_JOHN, Sinnoh_Text_TrCyclistJohnIntro, Sinnoh_Text_TrCyclistJohnDefeat
+	specialvar VAR_RESULT, ShouldTryRematchBattle
+	goto_if_eq VAR_RESULT, TRUE, Sinnoh_EventScript_TrCyclistJohnRematch
 	msgbox Sinnoh_Text_TrCyclistJohnAfter, MSGBOX_AUTOCLOSE
 	end
+
+Sinnoh_EventScript_TrCyclistJohnRematch::
+	trainerbattle_rematch TRAINER_SINNOH_CYCLIST_JOHN, Sinnoh_Text_TrCyclistJohnRematch, Sinnoh_Text_TrCyclistJohnDefeat
+	msgbox Sinnoh_Text_TrCyclistJohnAfter, MSGBOX_AUTOCLOSE
+	end
+
+Sinnoh_Text_TrCyclistJohnRematch:
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x1C, 0x7F, 0xFF
 
 Sinnoh_Text_TrCyclistJohnIntro:
 	.byte 0xFD, 0x40, 0x05, 0x2D, 0x1C, 0x7C, 0xFF
@@ -1785,8 +2465,18 @@ Sinnoh_Text_TrCyclistJohnAfter:
 
 Sinnoh_EventScript_TrCyclistKayla::
 	trainerbattle_single TRAINER_SINNOH_CYCLIST_KAYLA, Sinnoh_Text_TrCyclistKaylaIntro, Sinnoh_Text_TrCyclistKaylaDefeat
+	specialvar VAR_RESULT, ShouldTryRematchBattle
+	goto_if_eq VAR_RESULT, TRUE, Sinnoh_EventScript_TrCyclistKaylaRematch
 	msgbox Sinnoh_Text_TrCyclistKaylaAfter, MSGBOX_AUTOCLOSE
 	end
+
+Sinnoh_EventScript_TrCyclistKaylaRematch::
+	trainerbattle_rematch TRAINER_SINNOH_CYCLIST_KAYLA, Sinnoh_Text_TrCyclistKaylaRematch, Sinnoh_Text_TrCyclistKaylaDefeat
+	msgbox Sinnoh_Text_TrCyclistKaylaAfter, MSGBOX_AUTOCLOSE
+	end
+
+Sinnoh_Text_TrCyclistKaylaRematch:
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x1D, 0x47, 0xFF
 
 Sinnoh_Text_TrCyclistKaylaIntro:
 	.byte 0xFD, 0x40, 0x05, 0x2D, 0x1D, 0x44, 0xFF
@@ -1799,8 +2489,18 @@ Sinnoh_Text_TrCyclistKaylaAfter:
 
 Sinnoh_EventScript_TrCyclistMegan::
 	trainerbattle_single TRAINER_SINNOH_CYCLIST_MEGAN, Sinnoh_Text_TrCyclistMeganIntro, Sinnoh_Text_TrCyclistMeganDefeat
+	specialvar VAR_RESULT, ShouldTryRematchBattle
+	goto_if_eq VAR_RESULT, TRUE, Sinnoh_EventScript_TrCyclistMeganRematch
 	msgbox Sinnoh_Text_TrCyclistMeganAfter, MSGBOX_AUTOCLOSE
 	end
+
+Sinnoh_EventScript_TrCyclistMeganRematch::
+	trainerbattle_rematch TRAINER_SINNOH_CYCLIST_MEGAN, Sinnoh_Text_TrCyclistMeganRematch, Sinnoh_Text_TrCyclistMeganDefeat
+	msgbox Sinnoh_Text_TrCyclistMeganAfter, MSGBOX_AUTOCLOSE
+	end
+
+Sinnoh_Text_TrCyclistMeganRematch:
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x1E, 0x0F, 0xFF
 
 Sinnoh_Text_TrCyclistMeganIntro:
 	.byte 0xFD, 0x40, 0x05, 0x2D, 0x1E, 0x0C, 0xFF
@@ -1813,8 +2513,18 @@ Sinnoh_Text_TrCyclistMeganAfter:
 
 Sinnoh_EventScript_TrCyclistNicole::
 	trainerbattle_single TRAINER_SINNOH_CYCLIST_NICOLE, Sinnoh_Text_TrCyclistNicoleIntro, Sinnoh_Text_TrCyclistNicoleDefeat
+	specialvar VAR_RESULT, ShouldTryRematchBattle
+	goto_if_eq VAR_RESULT, TRUE, Sinnoh_EventScript_TrCyclistNicoleRematch
 	msgbox Sinnoh_Text_TrCyclistNicoleAfter, MSGBOX_AUTOCLOSE
 	end
+
+Sinnoh_EventScript_TrCyclistNicoleRematch::
+	trainerbattle_rematch TRAINER_SINNOH_CYCLIST_NICOLE, Sinnoh_Text_TrCyclistNicoleRematch, Sinnoh_Text_TrCyclistNicoleDefeat
+	msgbox Sinnoh_Text_TrCyclistNicoleAfter, MSGBOX_AUTOCLOSE
+	end
+
+Sinnoh_Text_TrCyclistNicoleRematch:
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x1E, 0x21, 0xFF
 
 Sinnoh_Text_TrCyclistNicoleIntro:
 	.byte 0xFD, 0x40, 0x05, 0x2D, 0x1E, 0x1E, 0xFF
@@ -1827,8 +2537,18 @@ Sinnoh_Text_TrCyclistNicoleAfter:
 
 Sinnoh_EventScript_TrCyclistRachel::
 	trainerbattle_single TRAINER_SINNOH_CYCLIST_RACHEL, Sinnoh_Text_TrCyclistRachelIntro, Sinnoh_Text_TrCyclistRachelDefeat
+	specialvar VAR_RESULT, ShouldTryRematchBattle
+	goto_if_eq VAR_RESULT, TRUE, Sinnoh_EventScript_TrCyclistRachelRematch
 	msgbox Sinnoh_Text_TrCyclistRachelAfter, MSGBOX_AUTOCLOSE
 	end
+
+Sinnoh_EventScript_TrCyclistRachelRematch::
+	trainerbattle_rematch TRAINER_SINNOH_CYCLIST_RACHEL, Sinnoh_Text_TrCyclistRachelRematch, Sinnoh_Text_TrCyclistRachelDefeat
+	msgbox Sinnoh_Text_TrCyclistRachelAfter, MSGBOX_AUTOCLOSE
+	end
+
+Sinnoh_Text_TrCyclistRachelRematch:
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x1E, 0x33, 0xFF
 
 Sinnoh_Text_TrCyclistRachelIntro:
 	.byte 0xFD, 0x40, 0x05, 0x2D, 0x1E, 0x30, 0xFF
@@ -1841,8 +2561,18 @@ Sinnoh_Text_TrCyclistRachelAfter:
 
 Sinnoh_EventScript_TrCyclistRyan::
 	trainerbattle_single TRAINER_SINNOH_CYCLIST_RYAN, Sinnoh_Text_TrCyclistRyanIntro, Sinnoh_Text_TrCyclistRyanDefeat
+	specialvar VAR_RESULT, ShouldTryRematchBattle
+	goto_if_eq VAR_RESULT, TRUE, Sinnoh_EventScript_TrCyclistRyanRematch
 	msgbox Sinnoh_Text_TrCyclistRyanAfter, MSGBOX_AUTOCLOSE
 	end
+
+Sinnoh_EventScript_TrCyclistRyanRematch::
+	trainerbattle_rematch TRAINER_SINNOH_CYCLIST_RYAN, Sinnoh_Text_TrCyclistRyanRematch, Sinnoh_Text_TrCyclistRyanDefeat
+	msgbox Sinnoh_Text_TrCyclistRyanAfter, MSGBOX_AUTOCLOSE
+	end
+
+Sinnoh_Text_TrCyclistRyanRematch:
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x1E, 0x45, 0xFF
 
 Sinnoh_Text_TrCyclistRyanIntro:
 	.byte 0xFD, 0x40, 0x05, 0x2D, 0x1E, 0x42, 0xFF
@@ -1920,8 +2650,18 @@ Sinnoh_Text_TrDragonTamerClintonAfter:
 
 Sinnoh_EventScript_TrDragonTamerDarien::
 	trainerbattle_single TRAINER_SINNOH_DRAGON_TAMER_DARIEN, Sinnoh_Text_TrDragonTamerDarienIntro, Sinnoh_Text_TrDragonTamerDarienDefeat
+	specialvar VAR_RESULT, ShouldTryRematchBattle
+	goto_if_eq VAR_RESULT, TRUE, Sinnoh_EventScript_TrDragonTamerDarienRematch
 	msgbox Sinnoh_Text_TrDragonTamerDarienAfter, MSGBOX_AUTOCLOSE
 	end
+
+Sinnoh_EventScript_TrDragonTamerDarienRematch::
+	trainerbattle_rematch TRAINER_SINNOH_DRAGON_TAMER_DARIEN, Sinnoh_Text_TrDragonTamerDarienRematch, Sinnoh_Text_TrDragonTamerDarienDefeat
+	msgbox Sinnoh_Text_TrDragonTamerDarienAfter, MSGBOX_AUTOCLOSE
+	end
+
+Sinnoh_Text_TrDragonTamerDarienRematch:
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x20, 0x0B, 0xFF
 
 Sinnoh_Text_TrDragonTamerDarienIntro:
 	.byte 0xFD, 0x40, 0x05, 0x2D, 0x20, 0x08, 0xFF
@@ -1948,8 +2688,18 @@ Sinnoh_Text_TrDragonTamerDrakeAfter:
 
 Sinnoh_EventScript_TrDragonTamerGeoffrey::
 	trainerbattle_single TRAINER_SINNOH_DRAGON_TAMER_GEOFFREY, Sinnoh_Text_TrDragonTamerGeoffreyIntro, Sinnoh_Text_TrDragonTamerGeoffreyDefeat
+	specialvar VAR_RESULT, ShouldTryRematchBattle
+	goto_if_eq VAR_RESULT, TRUE, Sinnoh_EventScript_TrDragonTamerGeoffreyRematch
 	msgbox Sinnoh_Text_TrDragonTamerGeoffreyAfter, MSGBOX_AUTOCLOSE
 	end
+
+Sinnoh_EventScript_TrDragonTamerGeoffreyRematch::
+	trainerbattle_rematch TRAINER_SINNOH_DRAGON_TAMER_GEOFFREY, Sinnoh_Text_TrDragonTamerGeoffreyRematch, Sinnoh_Text_TrDragonTamerGeoffreyDefeat
+	msgbox Sinnoh_Text_TrDragonTamerGeoffreyAfter, MSGBOX_AUTOCLOSE
+	end
+
+Sinnoh_Text_TrDragonTamerGeoffreyRematch:
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x20, 0x2F, 0xFF
 
 Sinnoh_Text_TrDragonTamerGeoffreyIntro:
 	.byte 0xFD, 0x40, 0x05, 0x2D, 0x20, 0x2C, 0xFF
@@ -1962,8 +2712,18 @@ Sinnoh_Text_TrDragonTamerGeoffreyAfter:
 
 Sinnoh_EventScript_TrDragonTamerHayden::
 	trainerbattle_single TRAINER_SINNOH_DRAGON_TAMER_HAYDEN, Sinnoh_Text_TrDragonTamerHaydenIntro, Sinnoh_Text_TrDragonTamerHaydenDefeat
+	specialvar VAR_RESULT, ShouldTryRematchBattle
+	goto_if_eq VAR_RESULT, TRUE, Sinnoh_EventScript_TrDragonTamerHaydenRematch
 	msgbox Sinnoh_Text_TrDragonTamerHaydenAfter, MSGBOX_AUTOCLOSE
 	end
+
+Sinnoh_EventScript_TrDragonTamerHaydenRematch::
+	trainerbattle_rematch TRAINER_SINNOH_DRAGON_TAMER_HAYDEN, Sinnoh_Text_TrDragonTamerHaydenRematch, Sinnoh_Text_TrDragonTamerHaydenDefeat
+	msgbox Sinnoh_Text_TrDragonTamerHaydenAfter, MSGBOX_AUTOCLOSE
+	end
+
+Sinnoh_Text_TrDragonTamerHaydenRematch:
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x20, 0x53, 0xFF
 
 Sinnoh_Text_TrDragonTamerHaydenIntro:
 	.byte 0xFD, 0x40, 0x05, 0x2D, 0x20, 0x50, 0xFF
@@ -1990,8 +2750,18 @@ Sinnoh_Text_TrDragonTamerJoeAfter:
 
 Sinnoh_EventScript_TrDragonTamerKeegan::
 	trainerbattle_single TRAINER_SINNOH_DRAGON_TAMER_KEEGAN, Sinnoh_Text_TrDragonTamerKeeganIntro, Sinnoh_Text_TrDragonTamerKeeganDefeat
+	specialvar VAR_RESULT, ShouldTryRematchBattle
+	goto_if_eq VAR_RESULT, TRUE, Sinnoh_EventScript_TrDragonTamerKeeganRematch
 	msgbox Sinnoh_Text_TrDragonTamerKeeganAfter, MSGBOX_AUTOCLOSE
 	end
+
+Sinnoh_EventScript_TrDragonTamerKeeganRematch::
+	trainerbattle_rematch TRAINER_SINNOH_DRAGON_TAMER_KEEGAN, Sinnoh_Text_TrDragonTamerKeeganRematch, Sinnoh_Text_TrDragonTamerKeeganDefeat
+	msgbox Sinnoh_Text_TrDragonTamerKeeganAfter, MSGBOX_AUTOCLOSE
+	end
+
+Sinnoh_Text_TrDragonTamerKeeganRematch:
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x21, 0x09, 0xFF
 
 Sinnoh_Text_TrDragonTamerKeeganIntro:
 	.byte 0xFD, 0x40, 0x05, 0x2D, 0x21, 0x06, 0xFF
@@ -2032,8 +2802,18 @@ Sinnoh_Text_TrDragonTamerOndrejAfter:
 
 Sinnoh_EventScript_TrDragonTamerPatrick::
 	trainerbattle_single TRAINER_SINNOH_DRAGON_TAMER_PATRICK, Sinnoh_Text_TrDragonTamerPatrickIntro, Sinnoh_Text_TrDragonTamerPatrickDefeat
+	specialvar VAR_RESULT, ShouldTryRematchBattle
+	goto_if_eq VAR_RESULT, TRUE, Sinnoh_EventScript_TrDragonTamerPatrickRematch
 	msgbox Sinnoh_Text_TrDragonTamerPatrickAfter, MSGBOX_AUTOCLOSE
 	end
+
+Sinnoh_EventScript_TrDragonTamerPatrickRematch::
+	trainerbattle_rematch TRAINER_SINNOH_DRAGON_TAMER_PATRICK, Sinnoh_Text_TrDragonTamerPatrickRematch, Sinnoh_Text_TrDragonTamerPatrickDefeat
+	msgbox Sinnoh_Text_TrDragonTamerPatrickAfter, MSGBOX_AUTOCLOSE
+	end
+
+Sinnoh_Text_TrDragonTamerPatrickRematch:
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x21, 0x3F, 0xFF
 
 Sinnoh_Text_TrDragonTamerPatrickIntro:
 	.byte 0xFD, 0x40, 0x05, 0x2D, 0x21, 0x3C, 0xFF
@@ -2046,8 +2826,18 @@ Sinnoh_Text_TrDragonTamerPatrickAfter:
 
 Sinnoh_EventScript_TrDragonTamerStanley::
 	trainerbattle_single TRAINER_SINNOH_DRAGON_TAMER_STANLEY, Sinnoh_Text_TrDragonTamerStanleyIntro, Sinnoh_Text_TrDragonTamerStanleyDefeat
+	specialvar VAR_RESULT, ShouldTryRematchBattle
+	goto_if_eq VAR_RESULT, TRUE, Sinnoh_EventScript_TrDragonTamerStanleyRematch
 	msgbox Sinnoh_Text_TrDragonTamerStanleyAfter, MSGBOX_AUTOCLOSE
 	end
+
+Sinnoh_EventScript_TrDragonTamerStanleyRematch::
+	trainerbattle_rematch TRAINER_SINNOH_DRAGON_TAMER_STANLEY, Sinnoh_Text_TrDragonTamerStanleyRematch, Sinnoh_Text_TrDragonTamerStanleyDefeat
+	msgbox Sinnoh_Text_TrDragonTamerStanleyAfter, MSGBOX_AUTOCLOSE
+	end
+
+Sinnoh_Text_TrDragonTamerStanleyRematch:
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x21, 0x75, 0xFF
 
 Sinnoh_Text_TrDragonTamerStanleyIntro:
 	.byte 0xFD, 0x40, 0x05, 0x2D, 0x21, 0x72, 0xFF
@@ -2060,8 +2850,18 @@ Sinnoh_Text_TrDragonTamerStanleyAfter:
 
 Sinnoh_EventScript_TrFishermanAlec::
 	trainerbattle_single TRAINER_SINNOH_FISHERMAN_ALEC, Sinnoh_Text_TrFishermanAlecIntro, Sinnoh_Text_TrFishermanAlecDefeat
+	specialvar VAR_RESULT, ShouldTryRematchBattle
+	goto_if_eq VAR_RESULT, TRUE, Sinnoh_EventScript_TrFishermanAlecRematch
 	msgbox Sinnoh_Text_TrFishermanAlecAfter, MSGBOX_AUTOCLOSE
 	end
+
+Sinnoh_EventScript_TrFishermanAlecRematch::
+	trainerbattle_rematch TRAINER_SINNOH_FISHERMAN_ALEC, Sinnoh_Text_TrFishermanAlecRematch, Sinnoh_Text_TrFishermanAlecDefeat
+	msgbox Sinnoh_Text_TrFishermanAlecAfter, MSGBOX_AUTOCLOSE
+	end
+
+Sinnoh_Text_TrFishermanAlecRematch:
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x3C, 0x63, 0xFF
 
 Sinnoh_Text_TrFishermanAlecIntro:
 	.byte 0xFD, 0x40, 0x05, 0x2D, 0x3C, 0x60, 0xFF
@@ -2074,8 +2874,18 @@ Sinnoh_Text_TrFishermanAlecAfter:
 
 Sinnoh_EventScript_TrFishermanAndrew::
 	trainerbattle_single TRAINER_SINNOH_FISHERMAN_ANDREW, Sinnoh_Text_TrFishermanAndrewIntro, Sinnoh_Text_TrFishermanAndrewDefeat
+	specialvar VAR_RESULT, ShouldTryRematchBattle
+	goto_if_eq VAR_RESULT, TRUE, Sinnoh_EventScript_TrFishermanAndrewRematch
 	msgbox Sinnoh_Text_TrFishermanAndrewAfter, MSGBOX_AUTOCLOSE
 	end
+
+Sinnoh_EventScript_TrFishermanAndrewRematch::
+	trainerbattle_rematch TRAINER_SINNOH_FISHERMAN_ANDREW, Sinnoh_Text_TrFishermanAndrewRematch, Sinnoh_Text_TrFishermanAndrewDefeat
+	msgbox Sinnoh_Text_TrFishermanAndrewAfter, MSGBOX_AUTOCLOSE
+	end
+
+Sinnoh_Text_TrFishermanAndrewRematch:
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x3D, 0x07, 0xFF
 
 Sinnoh_Text_TrFishermanAndrewIntro:
 	.byte 0xFD, 0x40, 0x05, 0x2D, 0x3D, 0x04, 0xFF
@@ -2088,8 +2898,18 @@ Sinnoh_Text_TrFishermanAndrewAfter:
 
 Sinnoh_EventScript_TrFishermanBrett::
 	trainerbattle_single TRAINER_SINNOH_FISHERMAN_BRETT, Sinnoh_Text_TrFishermanBrettIntro, Sinnoh_Text_TrFishermanBrettDefeat
+	specialvar VAR_RESULT, ShouldTryRematchBattle
+	goto_if_eq VAR_RESULT, TRUE, Sinnoh_EventScript_TrFishermanBrettRematch
 	msgbox Sinnoh_Text_TrFishermanBrettAfter, MSGBOX_AUTOCLOSE
 	end
+
+Sinnoh_EventScript_TrFishermanBrettRematch::
+	trainerbattle_rematch TRAINER_SINNOH_FISHERMAN_BRETT, Sinnoh_Text_TrFishermanBrettRematch, Sinnoh_Text_TrFishermanBrettDefeat
+	msgbox Sinnoh_Text_TrFishermanBrettAfter, MSGBOX_AUTOCLOSE
+	end
+
+Sinnoh_Text_TrFishermanBrettRematch:
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x3D, 0x19, 0xFF
 
 Sinnoh_Text_TrFishermanBrettIntro:
 	.byte 0xFD, 0x40, 0x05, 0x2D, 0x3D, 0x16, 0xFF
@@ -2102,8 +2922,18 @@ Sinnoh_Text_TrFishermanBrettAfter:
 
 Sinnoh_EventScript_TrFishermanCody::
 	trainerbattle_single TRAINER_SINNOH_FISHERMAN_CODY, Sinnoh_Text_TrFishermanCodyIntro, Sinnoh_Text_TrFishermanCodyDefeat
+	specialvar VAR_RESULT, ShouldTryRematchBattle
+	goto_if_eq VAR_RESULT, TRUE, Sinnoh_EventScript_TrFishermanCodyRematch
 	msgbox Sinnoh_Text_TrFishermanCodyAfter, MSGBOX_AUTOCLOSE
 	end
+
+Sinnoh_EventScript_TrFishermanCodyRematch::
+	trainerbattle_rematch TRAINER_SINNOH_FISHERMAN_CODY, Sinnoh_Text_TrFishermanCodyRematch, Sinnoh_Text_TrFishermanCodyDefeat
+	msgbox Sinnoh_Text_TrFishermanCodyAfter, MSGBOX_AUTOCLOSE
+	end
+
+Sinnoh_Text_TrFishermanCodyRematch:
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x3D, 0x2B, 0xFF
 
 Sinnoh_Text_TrFishermanCodyIntro:
 	.byte 0xFD, 0x40, 0x05, 0x2D, 0x3D, 0x28, 0xFF
@@ -2116,8 +2946,18 @@ Sinnoh_Text_TrFishermanCodyAfter:
 
 Sinnoh_EventScript_TrFishermanCole::
 	trainerbattle_single TRAINER_SINNOH_FISHERMAN_COLE, Sinnoh_Text_TrFishermanColeIntro, Sinnoh_Text_TrFishermanColeDefeat
+	specialvar VAR_RESULT, ShouldTryRematchBattle
+	goto_if_eq VAR_RESULT, TRUE, Sinnoh_EventScript_TrFishermanColeRematch
 	msgbox Sinnoh_Text_TrFishermanColeAfter, MSGBOX_AUTOCLOSE
 	end
+
+Sinnoh_EventScript_TrFishermanColeRematch::
+	trainerbattle_rematch TRAINER_SINNOH_FISHERMAN_COLE, Sinnoh_Text_TrFishermanColeRematch, Sinnoh_Text_TrFishermanColeDefeat
+	msgbox Sinnoh_Text_TrFishermanColeAfter, MSGBOX_AUTOCLOSE
+	end
+
+Sinnoh_Text_TrFishermanColeRematch:
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x3D, 0x3D, 0xFF
 
 Sinnoh_Text_TrFishermanColeIntro:
 	.byte 0xFD, 0x40, 0x05, 0x2D, 0x3D, 0x3A, 0xFF
@@ -2130,8 +2970,18 @@ Sinnoh_Text_TrFishermanColeAfter:
 
 Sinnoh_EventScript_TrFishermanCory::
 	trainerbattle_single TRAINER_SINNOH_FISHERMAN_CORY, Sinnoh_Text_TrFishermanCoryIntro, Sinnoh_Text_TrFishermanCoryDefeat
+	specialvar VAR_RESULT, ShouldTryRematchBattle
+	goto_if_eq VAR_RESULT, TRUE, Sinnoh_EventScript_TrFishermanCoryRematch
 	msgbox Sinnoh_Text_TrFishermanCoryAfter, MSGBOX_AUTOCLOSE
 	end
+
+Sinnoh_EventScript_TrFishermanCoryRematch::
+	trainerbattle_rematch TRAINER_SINNOH_FISHERMAN_CORY, Sinnoh_Text_TrFishermanCoryRematch, Sinnoh_Text_TrFishermanCoryDefeat
+	msgbox Sinnoh_Text_TrFishermanCoryAfter, MSGBOX_AUTOCLOSE
+	end
+
+Sinnoh_Text_TrFishermanCoryRematch:
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x3D, 0x4F, 0xFF
 
 Sinnoh_Text_TrFishermanCoryIntro:
 	.byte 0xFD, 0x40, 0x05, 0x2D, 0x3D, 0x4C, 0xFF
@@ -2158,8 +3008,18 @@ Sinnoh_Text_TrFishermanErickAfter:
 
 Sinnoh_EventScript_TrFishermanGeorge::
 	trainerbattle_single TRAINER_SINNOH_FISHERMAN_GEORGE, Sinnoh_Text_TrFishermanGeorgeIntro, Sinnoh_Text_TrFishermanGeorgeDefeat
+	specialvar VAR_RESULT, ShouldTryRematchBattle
+	goto_if_eq VAR_RESULT, TRUE, Sinnoh_EventScript_TrFishermanGeorgeRematch
 	msgbox Sinnoh_Text_TrFishermanGeorgeAfter, MSGBOX_AUTOCLOSE
 	end
+
+Sinnoh_EventScript_TrFishermanGeorgeRematch::
+	trainerbattle_rematch TRAINER_SINNOH_FISHERMAN_GEORGE, Sinnoh_Text_TrFishermanGeorgeRematch, Sinnoh_Text_TrFishermanGeorgeDefeat
+	msgbox Sinnoh_Text_TrFishermanGeorgeAfter, MSGBOX_AUTOCLOSE
+	end
+
+Sinnoh_Text_TrFishermanGeorgeRematch:
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x3D, 0x73, 0xFF
 
 Sinnoh_Text_TrFishermanGeorgeIntro:
 	.byte 0xFD, 0x40, 0x05, 0x2D, 0x3D, 0x70, 0xFF
@@ -2172,8 +3032,18 @@ Sinnoh_Text_TrFishermanGeorgeAfter:
 
 Sinnoh_EventScript_TrFishermanJoseph::
 	trainerbattle_single TRAINER_SINNOH_FISHERMAN_JOSEPH, Sinnoh_Text_TrFishermanJosephIntro, Sinnoh_Text_TrFishermanJosephDefeat
+	specialvar VAR_RESULT, ShouldTryRematchBattle
+	goto_if_eq VAR_RESULT, TRUE, Sinnoh_EventScript_TrFishermanJosephRematch
 	msgbox Sinnoh_Text_TrFishermanJosephAfter, MSGBOX_AUTOCLOSE
 	end
+
+Sinnoh_EventScript_TrFishermanJosephRematch::
+	trainerbattle_rematch TRAINER_SINNOH_FISHERMAN_JOSEPH, Sinnoh_Text_TrFishermanJosephRematch, Sinnoh_Text_TrFishermanJosephDefeat
+	msgbox Sinnoh_Text_TrFishermanJosephAfter, MSGBOX_AUTOCLOSE
+	end
+
+Sinnoh_Text_TrFishermanJosephRematch:
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x3E, 0x05, 0xFF
 
 Sinnoh_Text_TrFishermanJosephIntro:
 	.byte 0xFD, 0x40, 0x05, 0x2D, 0x3E, 0x02, 0xFF
@@ -2186,8 +3056,18 @@ Sinnoh_Text_TrFishermanJosephAfter:
 
 Sinnoh_EventScript_TrFishermanJosh::
 	trainerbattle_single TRAINER_SINNOH_FISHERMAN_JOSH, Sinnoh_Text_TrFishermanJoshIntro, Sinnoh_Text_TrFishermanJoshDefeat
+	specialvar VAR_RESULT, ShouldTryRematchBattle
+	goto_if_eq VAR_RESULT, TRUE, Sinnoh_EventScript_TrFishermanJoshRematch
 	msgbox Sinnoh_Text_TrFishermanJoshAfter, MSGBOX_AUTOCLOSE
 	end
+
+Sinnoh_EventScript_TrFishermanJoshRematch::
+	trainerbattle_rematch TRAINER_SINNOH_FISHERMAN_JOSH, Sinnoh_Text_TrFishermanJoshRematch, Sinnoh_Text_TrFishermanJoshDefeat
+	msgbox Sinnoh_Text_TrFishermanJoshAfter, MSGBOX_AUTOCLOSE
+	end
+
+Sinnoh_Text_TrFishermanJoshRematch:
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x3E, 0x3B, 0xFF
 
 Sinnoh_Text_TrFishermanJoshIntro:
 	.byte 0xFD, 0x40, 0x05, 0x2D, 0x3E, 0x38, 0xFF
@@ -2200,8 +3080,18 @@ Sinnoh_Text_TrFishermanJoshAfter:
 
 Sinnoh_EventScript_TrFishermanJuan::
 	trainerbattle_single TRAINER_SINNOH_FISHERMAN_JUAN, Sinnoh_Text_TrFishermanJuanIntro, Sinnoh_Text_TrFishermanJuanDefeat
+	specialvar VAR_RESULT, ShouldTryRematchBattle
+	goto_if_eq VAR_RESULT, TRUE, Sinnoh_EventScript_TrFishermanJuanRematch
 	msgbox Sinnoh_Text_TrFishermanJuanAfter, MSGBOX_AUTOCLOSE
 	end
+
+Sinnoh_EventScript_TrFishermanJuanRematch::
+	trainerbattle_rematch TRAINER_SINNOH_FISHERMAN_JUAN, Sinnoh_Text_TrFishermanJuanRematch, Sinnoh_Text_TrFishermanJuanDefeat
+	msgbox Sinnoh_Text_TrFishermanJuanAfter, MSGBOX_AUTOCLOSE
+	end
+
+Sinnoh_Text_TrFishermanJuanRematch:
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x3E, 0x4D, 0xFF
 
 Sinnoh_Text_TrFishermanJuanIntro:
 	.byte 0xFD, 0x40, 0x05, 0x2D, 0x3E, 0x4A, 0xFF
@@ -2214,8 +3104,18 @@ Sinnoh_Text_TrFishermanJuanAfter:
 
 Sinnoh_EventScript_TrFishermanKenneth::
 	trainerbattle_single TRAINER_SINNOH_FISHERMAN_KENNETH, Sinnoh_Text_TrFishermanKennethIntro, Sinnoh_Text_TrFishermanKennethDefeat
+	specialvar VAR_RESULT, ShouldTryRematchBattle
+	goto_if_eq VAR_RESULT, TRUE, Sinnoh_EventScript_TrFishermanKennethRematch
 	msgbox Sinnoh_Text_TrFishermanKennethAfter, MSGBOX_AUTOCLOSE
 	end
+
+Sinnoh_EventScript_TrFishermanKennethRematch::
+	trainerbattle_rematch TRAINER_SINNOH_FISHERMAN_KENNETH, Sinnoh_Text_TrFishermanKennethRematch, Sinnoh_Text_TrFishermanKennethDefeat
+	msgbox Sinnoh_Text_TrFishermanKennethAfter, MSGBOX_AUTOCLOSE
+	end
+
+Sinnoh_Text_TrFishermanKennethRematch:
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x3E, 0x5F, 0xFF
 
 Sinnoh_Text_TrFishermanKennethIntro:
 	.byte 0xFD, 0x40, 0x05, 0x2D, 0x3E, 0x5C, 0xFF
@@ -2228,8 +3128,18 @@ Sinnoh_Text_TrFishermanKennethAfter:
 
 Sinnoh_EventScript_TrFishermanLuc::
 	trainerbattle_single TRAINER_SINNOH_FISHERMAN_LUC, Sinnoh_Text_TrFishermanLucIntro, Sinnoh_Text_TrFishermanLucDefeat
+	specialvar VAR_RESULT, ShouldTryRematchBattle
+	goto_if_eq VAR_RESULT, TRUE, Sinnoh_EventScript_TrFishermanLucRematch
 	msgbox Sinnoh_Text_TrFishermanLucAfter, MSGBOX_AUTOCLOSE
 	end
+
+Sinnoh_EventScript_TrFishermanLucRematch::
+	trainerbattle_rematch TRAINER_SINNOH_FISHERMAN_LUC, Sinnoh_Text_TrFishermanLucRematch, Sinnoh_Text_TrFishermanLucDefeat
+	msgbox Sinnoh_Text_TrFishermanLucAfter, MSGBOX_AUTOCLOSE
+	end
+
+Sinnoh_Text_TrFishermanLucRematch:
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x3E, 0x71, 0xFF
 
 Sinnoh_Text_TrFishermanLucIntro:
 	.byte 0xFD, 0x40, 0x05, 0x2D, 0x3E, 0x6E, 0xFF
@@ -2242,8 +3152,18 @@ Sinnoh_Text_TrFishermanLucAfter:
 
 Sinnoh_EventScript_TrFishermanMiguel::
 	trainerbattle_single TRAINER_SINNOH_FISHERMAN_MIGUEL, Sinnoh_Text_TrFishermanMiguelIntro, Sinnoh_Text_TrFishermanMiguelDefeat
+	specialvar VAR_RESULT, ShouldTryRematchBattle
+	goto_if_eq VAR_RESULT, TRUE, Sinnoh_EventScript_TrFishermanMiguelRematch
 	msgbox Sinnoh_Text_TrFishermanMiguelAfter, MSGBOX_AUTOCLOSE
 	end
+
+Sinnoh_EventScript_TrFishermanMiguelRematch::
+	trainerbattle_rematch TRAINER_SINNOH_FISHERMAN_MIGUEL, Sinnoh_Text_TrFishermanMiguelRematch, Sinnoh_Text_TrFishermanMiguelDefeat
+	msgbox Sinnoh_Text_TrFishermanMiguelAfter, MSGBOX_AUTOCLOSE
+	end
+
+Sinnoh_Text_TrFishermanMiguelRematch:
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x3F, 0x03, 0xFF
 
 Sinnoh_Text_TrFishermanMiguelIntro:
 	.byte 0xFD, 0x40, 0x05, 0x2D, 0x3F, 0x00, 0xFF
@@ -2256,8 +3176,18 @@ Sinnoh_Text_TrFishermanMiguelAfter:
 
 Sinnoh_EventScript_TrFishermanTravis::
 	trainerbattle_single TRAINER_SINNOH_FISHERMAN_TRAVIS, Sinnoh_Text_TrFishermanTravisIntro, Sinnoh_Text_TrFishermanTravisDefeat
+	specialvar VAR_RESULT, ShouldTryRematchBattle
+	goto_if_eq VAR_RESULT, TRUE, Sinnoh_EventScript_TrFishermanTravisRematch
 	msgbox Sinnoh_Text_TrFishermanTravisAfter, MSGBOX_AUTOCLOSE
 	end
+
+Sinnoh_EventScript_TrFishermanTravisRematch::
+	trainerbattle_rematch TRAINER_SINNOH_FISHERMAN_TRAVIS, Sinnoh_Text_TrFishermanTravisRematch, Sinnoh_Text_TrFishermanTravisDefeat
+	msgbox Sinnoh_Text_TrFishermanTravisAfter, MSGBOX_AUTOCLOSE
+	end
+
+Sinnoh_Text_TrFishermanTravisRematch:
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x3F, 0x27, 0xFF
 
 Sinnoh_Text_TrFishermanTravisIntro:
 	.byte 0xFD, 0x40, 0x05, 0x2D, 0x3F, 0x24, 0xFF
@@ -2284,8 +3214,18 @@ Sinnoh_Text_TrFishermanWalterAfter:
 
 Sinnoh_EventScript_TrFishermanZachary::
 	trainerbattle_single TRAINER_SINNOH_FISHERMAN_ZACHARY, Sinnoh_Text_TrFishermanZacharyIntro, Sinnoh_Text_TrFishermanZacharyDefeat
+	specialvar VAR_RESULT, ShouldTryRematchBattle
+	goto_if_eq VAR_RESULT, TRUE, Sinnoh_EventScript_TrFishermanZacharyRematch
 	msgbox Sinnoh_Text_TrFishermanZacharyAfter, MSGBOX_AUTOCLOSE
 	end
+
+Sinnoh_EventScript_TrFishermanZacharyRematch::
+	trainerbattle_rematch TRAINER_SINNOH_FISHERMAN_ZACHARY, Sinnoh_Text_TrFishermanZacharyRematch, Sinnoh_Text_TrFishermanZacharyDefeat
+	msgbox Sinnoh_Text_TrFishermanZacharyAfter, MSGBOX_AUTOCLOSE
+	end
+
+Sinnoh_Text_TrFishermanZacharyRematch:
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x3F, 0x4B, 0xFF
 
 Sinnoh_Text_TrFishermanZacharyIntro:
 	.byte 0xFD, 0x40, 0x05, 0x2D, 0x3F, 0x48, 0xFF
@@ -2774,8 +3714,18 @@ Sinnoh_Text_TrGalacticGruntValleyWindworks3After:
 
 Sinnoh_EventScript_TrGentlemanJeremy::
 	trainerbattle_single TRAINER_SINNOH_GENTLEMAN_JEREMY, Sinnoh_Text_TrGentlemanJeremyIntro, Sinnoh_Text_TrGentlemanJeremyDefeat
+	specialvar VAR_RESULT, ShouldTryRematchBattle
+	goto_if_eq VAR_RESULT, TRUE, Sinnoh_EventScript_TrGentlemanJeremyRematch
 	msgbox Sinnoh_Text_TrGentlemanJeremyAfter, MSGBOX_AUTOCLOSE
 	end
+
+Sinnoh_EventScript_TrGentlemanJeremyRematch::
+	trainerbattle_rematch TRAINER_SINNOH_GENTLEMAN_JEREMY, Sinnoh_Text_TrGentlemanJeremyRematch, Sinnoh_Text_TrGentlemanJeremyDefeat
+	msgbox Sinnoh_Text_TrGentlemanJeremyAfter, MSGBOX_AUTOCLOSE
+	end
+
+Sinnoh_Text_TrGentlemanJeremyRematch:
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x46, 0x61, 0xFF
 
 Sinnoh_Text_TrGentlemanJeremyIntro:
 	.byte 0xFD, 0x40, 0x05, 0x2D, 0x46, 0x5E, 0xFF
@@ -2830,8 +3780,18 @@ Sinnoh_Text_TrGuitaristPrestonAfter:
 
 Sinnoh_EventScript_TrGuitaristTony::
 	trainerbattle_single TRAINER_SINNOH_GUITARIST_TONY, Sinnoh_Text_TrGuitaristTonyIntro, Sinnoh_Text_TrGuitaristTonyDefeat
+	specialvar VAR_RESULT, ShouldTryRematchBattle
+	goto_if_eq VAR_RESULT, TRUE, Sinnoh_EventScript_TrGuitaristTonyRematch
 	msgbox Sinnoh_Text_TrGuitaristTonyAfter, MSGBOX_AUTOCLOSE
 	end
+
+Sinnoh_EventScript_TrGuitaristTonyRematch::
+	trainerbattle_rematch TRAINER_SINNOH_GUITARIST_TONY, Sinnoh_Text_TrGuitaristTonyRematch, Sinnoh_Text_TrGuitaristTonyDefeat
+	msgbox Sinnoh_Text_TrGuitaristTonyAfter, MSGBOX_AUTOCLOSE
+	end
+
+Sinnoh_Text_TrGuitaristTonyRematch:
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x48, 0x5D, 0xFF
 
 Sinnoh_Text_TrGuitaristTonyIntro:
 	.byte 0xFD, 0x40, 0x05, 0x2D, 0x48, 0x5A, 0xFF
@@ -2844,8 +3804,18 @@ Sinnoh_Text_TrGuitaristTonyAfter:
 
 Sinnoh_EventScript_TrHikerAlexander::
 	trainerbattle_single TRAINER_SINNOH_HIKER_ALEXANDER, Sinnoh_Text_TrHikerAlexanderIntro, Sinnoh_Text_TrHikerAlexanderDefeat
+	specialvar VAR_RESULT, ShouldTryRematchBattle
+	goto_if_eq VAR_RESULT, TRUE, Sinnoh_EventScript_TrHikerAlexanderRematch
 	msgbox Sinnoh_Text_TrHikerAlexanderAfter, MSGBOX_AUTOCLOSE
 	end
+
+Sinnoh_EventScript_TrHikerAlexanderRematch::
+	trainerbattle_rematch TRAINER_SINNOH_HIKER_ALEXANDER, Sinnoh_Text_TrHikerAlexanderRematch, Sinnoh_Text_TrHikerAlexanderDefeat
+	msgbox Sinnoh_Text_TrHikerAlexanderAfter, MSGBOX_AUTOCLOSE
+	end
+
+Sinnoh_Text_TrHikerAlexanderRematch:
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x49, 0x13, 0xFF
 
 Sinnoh_Text_TrHikerAlexanderIntro:
 	.byte 0xFD, 0x40, 0x05, 0x2D, 0x49, 0x10, 0xFF
@@ -2872,8 +3842,18 @@ Sinnoh_Text_TrHikerDamonAfter:
 
 Sinnoh_EventScript_TrHikerDaniel::
 	trainerbattle_single TRAINER_SINNOH_HIKER_DANIEL, Sinnoh_Text_TrHikerDanielIntro, Sinnoh_Text_TrHikerDanielDefeat
+	specialvar VAR_RESULT, ShouldTryRematchBattle
+	goto_if_eq VAR_RESULT, TRUE, Sinnoh_EventScript_TrHikerDanielRematch
 	msgbox Sinnoh_Text_TrHikerDanielAfter, MSGBOX_AUTOCLOSE
 	end
+
+Sinnoh_EventScript_TrHikerDanielRematch::
+	trainerbattle_rematch TRAINER_SINNOH_HIKER_DANIEL, Sinnoh_Text_TrHikerDanielRematch, Sinnoh_Text_TrHikerDanielDefeat
+	msgbox Sinnoh_Text_TrHikerDanielAfter, MSGBOX_AUTOCLOSE
+	end
+
+Sinnoh_Text_TrHikerDanielRematch:
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x49, 0x37, 0xFF
 
 Sinnoh_Text_TrHikerDanielIntro:
 	.byte 0xFD, 0x40, 0x05, 0x2D, 0x49, 0x34, 0xFF
@@ -2886,8 +3866,18 @@ Sinnoh_Text_TrHikerDanielAfter:
 
 Sinnoh_EventScript_TrHikerJonathan::
 	trainerbattle_single TRAINER_SINNOH_HIKER_JONATHAN, Sinnoh_Text_TrHikerJonathanIntro, Sinnoh_Text_TrHikerJonathanDefeat
+	specialvar VAR_RESULT, ShouldTryRematchBattle
+	goto_if_eq VAR_RESULT, TRUE, Sinnoh_EventScript_TrHikerJonathanRematch
 	msgbox Sinnoh_Text_TrHikerJonathanAfter, MSGBOX_AUTOCLOSE
 	end
+
+Sinnoh_EventScript_TrHikerJonathanRematch::
+	trainerbattle_rematch TRAINER_SINNOH_HIKER_JONATHAN, Sinnoh_Text_TrHikerJonathanRematch, Sinnoh_Text_TrHikerJonathanDefeat
+	msgbox Sinnoh_Text_TrHikerJonathanAfter, MSGBOX_AUTOCLOSE
+	end
+
+Sinnoh_Text_TrHikerJonathanRematch:
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x49, 0x49, 0xFF
 
 Sinnoh_Text_TrHikerJonathanIntro:
 	.byte 0xFD, 0x40, 0x05, 0x2D, 0x49, 0x46, 0xFF
@@ -2900,8 +3890,18 @@ Sinnoh_Text_TrHikerJonathanAfter:
 
 Sinnoh_EventScript_TrHikerJustin::
 	trainerbattle_single TRAINER_SINNOH_HIKER_JUSTIN, Sinnoh_Text_TrHikerJustinIntro, Sinnoh_Text_TrHikerJustinDefeat
+	specialvar VAR_RESULT, ShouldTryRematchBattle
+	goto_if_eq VAR_RESULT, TRUE, Sinnoh_EventScript_TrHikerJustinRematch
 	msgbox Sinnoh_Text_TrHikerJustinAfter, MSGBOX_AUTOCLOSE
 	end
+
+Sinnoh_EventScript_TrHikerJustinRematch::
+	trainerbattle_rematch TRAINER_SINNOH_HIKER_JUSTIN, Sinnoh_Text_TrHikerJustinRematch, Sinnoh_Text_TrHikerJustinDefeat
+	msgbox Sinnoh_Text_TrHikerJustinAfter, MSGBOX_AUTOCLOSE
+	end
+
+Sinnoh_Text_TrHikerJustinRematch:
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x49, 0x5B, 0xFF
 
 Sinnoh_Text_TrHikerJustinIntro:
 	.byte 0xFD, 0x40, 0x05, 0x2D, 0x49, 0x58, 0xFF
@@ -2914,8 +3914,18 @@ Sinnoh_Text_TrHikerJustinAfter:
 
 Sinnoh_EventScript_TrHikerKevin::
 	trainerbattle_single TRAINER_SINNOH_HIKER_KEVIN, Sinnoh_Text_TrHikerKevinIntro, Sinnoh_Text_TrHikerKevinDefeat
+	specialvar VAR_RESULT, ShouldTryRematchBattle
+	goto_if_eq VAR_RESULT, TRUE, Sinnoh_EventScript_TrHikerKevinRematch
 	msgbox Sinnoh_Text_TrHikerKevinAfter, MSGBOX_AUTOCLOSE
 	end
+
+Sinnoh_EventScript_TrHikerKevinRematch::
+	trainerbattle_rematch TRAINER_SINNOH_HIKER_KEVIN, Sinnoh_Text_TrHikerKevinRematch, Sinnoh_Text_TrHikerKevinDefeat
+	msgbox Sinnoh_Text_TrHikerKevinAfter, MSGBOX_AUTOCLOSE
+	end
+
+Sinnoh_Text_TrHikerKevinRematch:
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x49, 0x6D, 0xFF
 
 Sinnoh_Text_TrHikerKevinIntro:
 	.byte 0xFD, 0x40, 0x05, 0x2D, 0x49, 0x6A, 0xFF
@@ -2942,8 +3952,18 @@ Sinnoh_Text_TrHikerLorenzoAfter:
 
 Sinnoh_EventScript_TrHikerLouis::
 	trainerbattle_single TRAINER_SINNOH_HIKER_LOUIS, Sinnoh_Text_TrHikerLouisIntro, Sinnoh_Text_TrHikerLouisDefeat
+	specialvar VAR_RESULT, ShouldTryRematchBattle
+	goto_if_eq VAR_RESULT, TRUE, Sinnoh_EventScript_TrHikerLouisRematch
 	msgbox Sinnoh_Text_TrHikerLouisAfter, MSGBOX_AUTOCLOSE
 	end
+
+Sinnoh_EventScript_TrHikerLouisRematch::
+	trainerbattle_rematch TRAINER_SINNOH_HIKER_LOUIS, Sinnoh_Text_TrHikerLouisRematch, Sinnoh_Text_TrHikerLouisDefeat
+	msgbox Sinnoh_Text_TrHikerLouisAfter, MSGBOX_AUTOCLOSE
+	end
+
+Sinnoh_Text_TrHikerLouisRematch:
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x4A, 0x11, 0xFF
 
 Sinnoh_Text_TrHikerLouisIntro:
 	.byte 0xFD, 0x40, 0x05, 0x2D, 0x4A, 0x0E, 0xFF
@@ -2970,8 +3990,18 @@ Sinnoh_Text_TrHikerMauriceAfter:
 
 Sinnoh_EventScript_TrHikerNicholas::
 	trainerbattle_single TRAINER_SINNOH_HIKER_NICHOLAS, Sinnoh_Text_TrHikerNicholasIntro, Sinnoh_Text_TrHikerNicholasDefeat
+	specialvar VAR_RESULT, ShouldTryRematchBattle
+	goto_if_eq VAR_RESULT, TRUE, Sinnoh_EventScript_TrHikerNicholasRematch
 	msgbox Sinnoh_Text_TrHikerNicholasAfter, MSGBOX_AUTOCLOSE
 	end
+
+Sinnoh_EventScript_TrHikerNicholasRematch::
+	trainerbattle_rematch TRAINER_SINNOH_HIKER_NICHOLAS, Sinnoh_Text_TrHikerNicholasRematch, Sinnoh_Text_TrHikerNicholasDefeat
+	msgbox Sinnoh_Text_TrHikerNicholasAfter, MSGBOX_AUTOCLOSE
+	end
+
+Sinnoh_Text_TrHikerNicholasRematch:
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x4A, 0x35, 0xFF
 
 Sinnoh_Text_TrHikerNicholasIntro:
 	.byte 0xFD, 0x40, 0x05, 0x2D, 0x4A, 0x32, 0xFF
@@ -2998,8 +4028,18 @@ Sinnoh_Text_TrHikerReginaldAfter:
 
 Sinnoh_EventScript_TrHikerRobert::
 	trainerbattle_single TRAINER_SINNOH_HIKER_ROBERT, Sinnoh_Text_TrHikerRobertIntro, Sinnoh_Text_TrHikerRobertDefeat
+	specialvar VAR_RESULT, ShouldTryRematchBattle
+	goto_if_eq VAR_RESULT, TRUE, Sinnoh_EventScript_TrHikerRobertRematch
 	msgbox Sinnoh_Text_TrHikerRobertAfter, MSGBOX_AUTOCLOSE
 	end
+
+Sinnoh_EventScript_TrHikerRobertRematch::
+	trainerbattle_rematch TRAINER_SINNOH_HIKER_ROBERT, Sinnoh_Text_TrHikerRobertRematch, Sinnoh_Text_TrHikerRobertDefeat
+	msgbox Sinnoh_Text_TrHikerRobertAfter, MSGBOX_AUTOCLOSE
+	end
+
+Sinnoh_Text_TrHikerRobertRematch:
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x4A, 0x59, 0xFF
 
 Sinnoh_Text_TrHikerRobertIntro:
 	.byte 0xFD, 0x40, 0x05, 0x2D, 0x4A, 0x56, 0xFF
@@ -3012,8 +4052,18 @@ Sinnoh_Text_TrHikerRobertAfter:
 
 Sinnoh_EventScript_TrHikerTheodore::
 	trainerbattle_single TRAINER_SINNOH_HIKER_THEODORE, Sinnoh_Text_TrHikerTheodoreIntro, Sinnoh_Text_TrHikerTheodoreDefeat
+	specialvar VAR_RESULT, ShouldTryRematchBattle
+	goto_if_eq VAR_RESULT, TRUE, Sinnoh_EventScript_TrHikerTheodoreRematch
 	msgbox Sinnoh_Text_TrHikerTheodoreAfter, MSGBOX_AUTOCLOSE
 	end
+
+Sinnoh_EventScript_TrHikerTheodoreRematch::
+	trainerbattle_rematch TRAINER_SINNOH_HIKER_THEODORE, Sinnoh_Text_TrHikerTheodoreRematch, Sinnoh_Text_TrHikerTheodoreDefeat
+	msgbox Sinnoh_Text_TrHikerTheodoreAfter, MSGBOX_AUTOCLOSE
+	end
+
+Sinnoh_Text_TrHikerTheodoreRematch:
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x4A, 0x6B, 0xFF
 
 Sinnoh_Text_TrHikerTheodoreIntro:
 	.byte 0xFD, 0x40, 0x05, 0x2D, 0x4A, 0x68, 0xFF
@@ -3026,8 +4076,18 @@ Sinnoh_Text_TrHikerTheodoreAfter:
 
 Sinnoh_EventScript_TrJoggerCraig::
 	trainerbattle_single TRAINER_SINNOH_JOGGER_CRAIG, Sinnoh_Text_TrJoggerCraigIntro, Sinnoh_Text_TrJoggerCraigDefeat
+	specialvar VAR_RESULT, ShouldTryRematchBattle
+	goto_if_eq VAR_RESULT, TRUE, Sinnoh_EventScript_TrJoggerCraigRematch
 	msgbox Sinnoh_Text_TrJoggerCraigAfter, MSGBOX_AUTOCLOSE
 	end
+
+Sinnoh_EventScript_TrJoggerCraigRematch::
+	trainerbattle_rematch TRAINER_SINNOH_JOGGER_CRAIG, Sinnoh_Text_TrJoggerCraigRematch, Sinnoh_Text_TrJoggerCraigDefeat
+	msgbox Sinnoh_Text_TrJoggerCraigAfter, MSGBOX_AUTOCLOSE
+	end
+
+Sinnoh_Text_TrJoggerCraigRematch:
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x4D, 0x0B, 0xFF
 
 Sinnoh_Text_TrJoggerCraigIntro:
 	.byte 0xFD, 0x40, 0x05, 0x2D, 0x4D, 0x08, 0xFF
@@ -3040,8 +4100,18 @@ Sinnoh_Text_TrJoggerCraigAfter:
 
 Sinnoh_EventScript_TrJoggerRaul::
 	trainerbattle_single TRAINER_SINNOH_JOGGER_RAUL, Sinnoh_Text_TrJoggerRaulIntro, Sinnoh_Text_TrJoggerRaulDefeat
+	specialvar VAR_RESULT, ShouldTryRematchBattle
+	goto_if_eq VAR_RESULT, TRUE, Sinnoh_EventScript_TrJoggerRaulRematch
 	msgbox Sinnoh_Text_TrJoggerRaulAfter, MSGBOX_AUTOCLOSE
 	end
+
+Sinnoh_EventScript_TrJoggerRaulRematch::
+	trainerbattle_rematch TRAINER_SINNOH_JOGGER_RAUL, Sinnoh_Text_TrJoggerRaulRematch, Sinnoh_Text_TrJoggerRaulDefeat
+	msgbox Sinnoh_Text_TrJoggerRaulAfter, MSGBOX_AUTOCLOSE
+	end
+
+Sinnoh_Text_TrJoggerRaulRematch:
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x4D, 0x41, 0xFF
 
 Sinnoh_Text_TrJoggerRaulIntro:
 	.byte 0xFD, 0x40, 0x05, 0x2D, 0x4D, 0x3E, 0xFF
@@ -3054,8 +4124,18 @@ Sinnoh_Text_TrJoggerRaulAfter:
 
 Sinnoh_EventScript_TrJoggerRichard::
 	trainerbattle_single TRAINER_SINNOH_JOGGER_RICHARD, Sinnoh_Text_TrJoggerRichardIntro, Sinnoh_Text_TrJoggerRichardDefeat
+	specialvar VAR_RESULT, ShouldTryRematchBattle
+	goto_if_eq VAR_RESULT, TRUE, Sinnoh_EventScript_TrJoggerRichardRematch
 	msgbox Sinnoh_Text_TrJoggerRichardAfter, MSGBOX_AUTOCLOSE
 	end
+
+Sinnoh_EventScript_TrJoggerRichardRematch::
+	trainerbattle_rematch TRAINER_SINNOH_JOGGER_RICHARD, Sinnoh_Text_TrJoggerRichardRematch, Sinnoh_Text_TrJoggerRichardDefeat
+	msgbox Sinnoh_Text_TrJoggerRichardAfter, MSGBOX_AUTOCLOSE
+	end
+
+Sinnoh_Text_TrJoggerRichardRematch:
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x4D, 0x53, 0xFF
 
 Sinnoh_Text_TrJoggerRichardIntro:
 	.byte 0xFD, 0x40, 0x05, 0x2D, 0x4D, 0x50, 0xFF
@@ -3068,8 +4148,18 @@ Sinnoh_Text_TrJoggerRichardAfter:
 
 Sinnoh_EventScript_TrJoggerScott::
 	trainerbattle_single TRAINER_SINNOH_JOGGER_SCOTT, Sinnoh_Text_TrJoggerScottIntro, Sinnoh_Text_TrJoggerScottDefeat
+	specialvar VAR_RESULT, ShouldTryRematchBattle
+	goto_if_eq VAR_RESULT, TRUE, Sinnoh_EventScript_TrJoggerScottRematch
 	msgbox Sinnoh_Text_TrJoggerScottAfter, MSGBOX_AUTOCLOSE
 	end
+
+Sinnoh_EventScript_TrJoggerScottRematch::
+	trainerbattle_rematch TRAINER_SINNOH_JOGGER_SCOTT, Sinnoh_Text_TrJoggerScottRematch, Sinnoh_Text_TrJoggerScottDefeat
+	msgbox Sinnoh_Text_TrJoggerScottAfter, MSGBOX_AUTOCLOSE
+	end
+
+Sinnoh_Text_TrJoggerScottRematch:
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x4D, 0x65, 0xFF
 
 Sinnoh_Text_TrJoggerScottIntro:
 	.byte 0xFD, 0x40, 0x05, 0x2D, 0x4D, 0x62, 0xFF
@@ -3082,8 +4172,18 @@ Sinnoh_Text_TrJoggerScottAfter:
 
 Sinnoh_EventScript_TrJoggerWyatt::
 	trainerbattle_single TRAINER_SINNOH_JOGGER_WYATT, Sinnoh_Text_TrJoggerWyattIntro, Sinnoh_Text_TrJoggerWyattDefeat
+	specialvar VAR_RESULT, ShouldTryRematchBattle
+	goto_if_eq VAR_RESULT, TRUE, Sinnoh_EventScript_TrJoggerWyattRematch
 	msgbox Sinnoh_Text_TrJoggerWyattAfter, MSGBOX_AUTOCLOSE
 	end
+
+Sinnoh_EventScript_TrJoggerWyattRematch::
+	trainerbattle_rematch TRAINER_SINNOH_JOGGER_WYATT, Sinnoh_Text_TrJoggerWyattRematch, Sinnoh_Text_TrJoggerWyattDefeat
+	msgbox Sinnoh_Text_TrJoggerWyattAfter, MSGBOX_AUTOCLOSE
+	end
+
+Sinnoh_Text_TrJoggerWyattRematch:
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x4D, 0x77, 0xFF
 
 Sinnoh_Text_TrJoggerWyattIntro:
 	.byte 0xFD, 0x40, 0x05, 0x2D, 0x4D, 0x74, 0xFF
@@ -3096,8 +4196,18 @@ Sinnoh_Text_TrJoggerWyattAfter:
 
 Sinnoh_EventScript_TrLadyMelissa::
 	trainerbattle_single TRAINER_SINNOH_LADY_MELISSA, Sinnoh_Text_TrLadyMelissaIntro, Sinnoh_Text_TrLadyMelissaDefeat
+	specialvar VAR_RESULT, ShouldTryRematchBattle
+	goto_if_eq VAR_RESULT, TRUE, Sinnoh_EventScript_TrLadyMelissaRematch
 	msgbox Sinnoh_Text_TrLadyMelissaAfter, MSGBOX_AUTOCLOSE
 	end
+
+Sinnoh_EventScript_TrLadyMelissaRematch::
+	trainerbattle_rematch TRAINER_SINNOH_LADY_MELISSA, Sinnoh_Text_TrLadyMelissaRematch, Sinnoh_Text_TrLadyMelissaDefeat
+	msgbox Sinnoh_Text_TrLadyMelissaAfter, MSGBOX_AUTOCLOSE
+	end
+
+Sinnoh_Text_TrLadyMelissaRematch:
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x4E, 0x2D, 0xFF
 
 Sinnoh_Text_TrLadyMelissaIntro:
 	.byte 0xFD, 0x40, 0x05, 0x2D, 0x4E, 0x2A, 0xFF
@@ -3138,8 +4248,18 @@ Sinnoh_Text_TrLassCassidyAfter:
 
 Sinnoh_EventScript_TrLassKaitlin::
 	trainerbattle_single TRAINER_SINNOH_LASS_KAITLIN, Sinnoh_Text_TrLassKaitlinIntro, Sinnoh_Text_TrLassKaitlinDefeat
+	specialvar VAR_RESULT, ShouldTryRematchBattle
+	goto_if_eq VAR_RESULT, TRUE, Sinnoh_EventScript_TrLassKaitlinRematch
 	msgbox Sinnoh_Text_TrLassKaitlinAfter, MSGBOX_AUTOCLOSE
 	end
+
+Sinnoh_EventScript_TrLassKaitlinRematch::
+	trainerbattle_rematch TRAINER_SINNOH_LASS_KAITLIN, Sinnoh_Text_TrLassKaitlinRematch, Sinnoh_Text_TrLassKaitlinDefeat
+	msgbox Sinnoh_Text_TrLassKaitlinAfter, MSGBOX_AUTOCLOSE
+	end
+
+Sinnoh_Text_TrLassKaitlinRematch:
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x4F, 0x73, 0xFF
 
 Sinnoh_Text_TrLassKaitlinIntro:
 	.byte 0xFD, 0x40, 0x05, 0x2D, 0x4F, 0x70, 0xFF
@@ -3152,8 +4272,18 @@ Sinnoh_Text_TrLassKaitlinAfter:
 
 Sinnoh_EventScript_TrLassMadeline::
 	trainerbattle_single TRAINER_SINNOH_LASS_MADELINE, Sinnoh_Text_TrLassMadelineIntro, Sinnoh_Text_TrLassMadelineDefeat
+	specialvar VAR_RESULT, ShouldTryRematchBattle
+	goto_if_eq VAR_RESULT, TRUE, Sinnoh_EventScript_TrLassMadelineRematch
 	msgbox Sinnoh_Text_TrLassMadelineAfter, MSGBOX_AUTOCLOSE
 	end
+
+Sinnoh_EventScript_TrLassMadelineRematch::
+	trainerbattle_rematch TRAINER_SINNOH_LASS_MADELINE, Sinnoh_Text_TrLassMadelineRematch, Sinnoh_Text_TrLassMadelineDefeat
+	msgbox Sinnoh_Text_TrLassMadelineAfter, MSGBOX_AUTOCLOSE
+	end
+
+Sinnoh_Text_TrLassMadelineRematch:
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x50, 0x05, 0xFF
 
 Sinnoh_Text_TrLassMadelineIntro:
 	.byte 0xFD, 0x40, 0x05, 0x2D, 0x50, 0x02, 0xFF
@@ -3180,8 +4310,18 @@ Sinnoh_Text_TrLassMollyAfter:
 
 Sinnoh_EventScript_TrLassNatalie::
 	trainerbattle_single TRAINER_SINNOH_LASS_NATALIE, Sinnoh_Text_TrLassNatalieIntro, Sinnoh_Text_TrLassNatalieDefeat
+	specialvar VAR_RESULT, ShouldTryRematchBattle
+	goto_if_eq VAR_RESULT, TRUE, Sinnoh_EventScript_TrLassNatalieRematch
 	msgbox Sinnoh_Text_TrLassNatalieAfter, MSGBOX_AUTOCLOSE
 	end
+
+Sinnoh_EventScript_TrLassNatalieRematch::
+	trainerbattle_rematch TRAINER_SINNOH_LASS_NATALIE, Sinnoh_Text_TrLassNatalieRematch, Sinnoh_Text_TrLassNatalieDefeat
+	msgbox Sinnoh_Text_TrLassNatalieAfter, MSGBOX_AUTOCLOSE
+	end
+
+Sinnoh_Text_TrLassNatalieRematch:
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x50, 0x5F, 0xFF
 
 Sinnoh_Text_TrLassNatalieIntro:
 	.byte 0xFD, 0x40, 0x05, 0x2D, 0x50, 0x5C, 0xFF
@@ -3194,8 +4334,18 @@ Sinnoh_Text_TrLassNatalieAfter:
 
 Sinnoh_EventScript_TrLassSamantha::
 	trainerbattle_single TRAINER_SINNOH_LASS_SAMANTHA, Sinnoh_Text_TrLassSamanthaIntro, Sinnoh_Text_TrLassSamanthaDefeat
+	specialvar VAR_RESULT, ShouldTryRematchBattle
+	goto_if_eq VAR_RESULT, TRUE, Sinnoh_EventScript_TrLassSamanthaRematch
 	msgbox Sinnoh_Text_TrLassSamanthaAfter, MSGBOX_AUTOCLOSE
 	end
+
+Sinnoh_EventScript_TrLassSamanthaRematch::
+	trainerbattle_rematch TRAINER_SINNOH_LASS_SAMANTHA, Sinnoh_Text_TrLassSamanthaRematch, Sinnoh_Text_TrLassSamanthaDefeat
+	msgbox Sinnoh_Text_TrLassSamanthaAfter, MSGBOX_AUTOCLOSE
+	end
+
+Sinnoh_Text_TrLassSamanthaRematch:
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x50, 0x71, 0xFF
 
 Sinnoh_Text_TrLassSamanthaIntro:
 	.byte 0xFD, 0x40, 0x05, 0x2D, 0x50, 0x6E, 0xFF
@@ -3208,8 +4358,18 @@ Sinnoh_Text_TrLassSamanthaAfter:
 
 Sinnoh_EventScript_TrLassSarah::
 	trainerbattle_single TRAINER_SINNOH_LASS_SARAH, Sinnoh_Text_TrLassSarahIntro, Sinnoh_Text_TrLassSarahDefeat
+	specialvar VAR_RESULT, ShouldTryRematchBattle
+	goto_if_eq VAR_RESULT, TRUE, Sinnoh_EventScript_TrLassSarahRematch
 	msgbox Sinnoh_Text_TrLassSarahAfter, MSGBOX_AUTOCLOSE
 	end
+
+Sinnoh_EventScript_TrLassSarahRematch::
+	trainerbattle_rematch TRAINER_SINNOH_LASS_SARAH, Sinnoh_Text_TrLassSarahRematch, Sinnoh_Text_TrLassSarahDefeat
+	msgbox Sinnoh_Text_TrLassSarahAfter, MSGBOX_AUTOCLOSE
+	end
+
+Sinnoh_Text_TrLassSarahRematch:
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x51, 0x39, 0xFF
 
 Sinnoh_Text_TrLassSarahIntro:
 	.byte 0xFD, 0x40, 0x05, 0x2D, 0x51, 0x36, 0xFF
@@ -3222,8 +4382,18 @@ Sinnoh_Text_TrLassSarahAfter:
 
 Sinnoh_EventScript_TrNinjaBoyBrennan::
 	trainerbattle_single TRAINER_SINNOH_NINJA_BOY_BRENNAN, Sinnoh_Text_TrNinjaBoyBrennanIntro, Sinnoh_Text_TrNinjaBoyBrennanDefeat
+	specialvar VAR_RESULT, ShouldTryRematchBattle
+	goto_if_eq VAR_RESULT, TRUE, Sinnoh_EventScript_TrNinjaBoyBrennanRematch
 	msgbox Sinnoh_Text_TrNinjaBoyBrennanAfter, MSGBOX_AUTOCLOSE
 	end
+
+Sinnoh_EventScript_TrNinjaBoyBrennanRematch::
+	trainerbattle_rematch TRAINER_SINNOH_NINJA_BOY_BRENNAN, Sinnoh_Text_TrNinjaBoyBrennanRematch, Sinnoh_Text_TrNinjaBoyBrennanDefeat
+	msgbox Sinnoh_Text_TrNinjaBoyBrennanAfter, MSGBOX_AUTOCLOSE
+	end
+
+Sinnoh_Text_TrNinjaBoyBrennanRematch:
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x56, 0x0B, 0xFF
 
 Sinnoh_Text_TrNinjaBoyBrennanIntro:
 	.byte 0xFD, 0x40, 0x05, 0x2D, 0x56, 0x08, 0xFF
@@ -3236,8 +4406,18 @@ Sinnoh_Text_TrNinjaBoyBrennanAfter:
 
 Sinnoh_EventScript_TrNinjaBoyBruce::
 	trainerbattle_single TRAINER_SINNOH_NINJA_BOY_BRUCE, Sinnoh_Text_TrNinjaBoyBruceIntro, Sinnoh_Text_TrNinjaBoyBruceDefeat
+	specialvar VAR_RESULT, ShouldTryRematchBattle
+	goto_if_eq VAR_RESULT, TRUE, Sinnoh_EventScript_TrNinjaBoyBruceRematch
 	msgbox Sinnoh_Text_TrNinjaBoyBruceAfter, MSGBOX_AUTOCLOSE
 	end
+
+Sinnoh_EventScript_TrNinjaBoyBruceRematch::
+	trainerbattle_rematch TRAINER_SINNOH_NINJA_BOY_BRUCE, Sinnoh_Text_TrNinjaBoyBruceRematch, Sinnoh_Text_TrNinjaBoyBruceDefeat
+	msgbox Sinnoh_Text_TrNinjaBoyBruceAfter, MSGBOX_AUTOCLOSE
+	end
+
+Sinnoh_Text_TrNinjaBoyBruceRematch:
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x56, 0x1D, 0xFF
 
 Sinnoh_Text_TrNinjaBoyBruceIntro:
 	.byte 0xFD, 0x40, 0x05, 0x2D, 0x56, 0x1A, 0xFF
@@ -3250,8 +4430,18 @@ Sinnoh_Text_TrNinjaBoyBruceAfter:
 
 Sinnoh_EventScript_TrNinjaBoyDavido::
 	trainerbattle_single TRAINER_SINNOH_NINJA_BOY_DAVIDO, Sinnoh_Text_TrNinjaBoyDavidoIntro, Sinnoh_Text_TrNinjaBoyDavidoDefeat
+	specialvar VAR_RESULT, ShouldTryRematchBattle
+	goto_if_eq VAR_RESULT, TRUE, Sinnoh_EventScript_TrNinjaBoyDavidoRematch
 	msgbox Sinnoh_Text_TrNinjaBoyDavidoAfter, MSGBOX_AUTOCLOSE
 	end
+
+Sinnoh_EventScript_TrNinjaBoyDavidoRematch::
+	trainerbattle_rematch TRAINER_SINNOH_NINJA_BOY_DAVIDO, Sinnoh_Text_TrNinjaBoyDavidoRematch, Sinnoh_Text_TrNinjaBoyDavidoDefeat
+	msgbox Sinnoh_Text_TrNinjaBoyDavidoAfter, MSGBOX_AUTOCLOSE
+	end
+
+Sinnoh_Text_TrNinjaBoyDavidoRematch:
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x56, 0x2F, 0xFF
 
 Sinnoh_Text_TrNinjaBoyDavidoIntro:
 	.byte 0xFD, 0x40, 0x05, 0x2D, 0x56, 0x2C, 0xFF
@@ -3264,8 +4454,18 @@ Sinnoh_Text_TrNinjaBoyDavidoAfter:
 
 Sinnoh_EventScript_TrNinjaBoyEthan::
 	trainerbattle_single TRAINER_SINNOH_NINJA_BOY_ETHAN, Sinnoh_Text_TrNinjaBoyEthanIntro, Sinnoh_Text_TrNinjaBoyEthanDefeat
+	specialvar VAR_RESULT, ShouldTryRematchBattle
+	goto_if_eq VAR_RESULT, TRUE, Sinnoh_EventScript_TrNinjaBoyEthanRematch
 	msgbox Sinnoh_Text_TrNinjaBoyEthanAfter, MSGBOX_AUTOCLOSE
 	end
+
+Sinnoh_EventScript_TrNinjaBoyEthanRematch::
+	trainerbattle_rematch TRAINER_SINNOH_NINJA_BOY_ETHAN, Sinnoh_Text_TrNinjaBoyEthanRematch, Sinnoh_Text_TrNinjaBoyEthanDefeat
+	msgbox Sinnoh_Text_TrNinjaBoyEthanAfter, MSGBOX_AUTOCLOSE
+	end
+
+Sinnoh_Text_TrNinjaBoyEthanRematch:
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x56, 0x41, 0xFF
 
 Sinnoh_Text_TrNinjaBoyEthanIntro:
 	.byte 0xFD, 0x40, 0x05, 0x2D, 0x56, 0x3E, 0xFF
@@ -3278,8 +4478,18 @@ Sinnoh_Text_TrNinjaBoyEthanAfter:
 
 Sinnoh_EventScript_TrNinjaBoyFabian::
 	trainerbattle_single TRAINER_SINNOH_NINJA_BOY_FABIAN, Sinnoh_Text_TrNinjaBoyFabianIntro, Sinnoh_Text_TrNinjaBoyFabianDefeat
+	specialvar VAR_RESULT, ShouldTryRematchBattle
+	goto_if_eq VAR_RESULT, TRUE, Sinnoh_EventScript_TrNinjaBoyFabianRematch
 	msgbox Sinnoh_Text_TrNinjaBoyFabianAfter, MSGBOX_AUTOCLOSE
 	end
+
+Sinnoh_EventScript_TrNinjaBoyFabianRematch::
+	trainerbattle_rematch TRAINER_SINNOH_NINJA_BOY_FABIAN, Sinnoh_Text_TrNinjaBoyFabianRematch, Sinnoh_Text_TrNinjaBoyFabianDefeat
+	msgbox Sinnoh_Text_TrNinjaBoyFabianAfter, MSGBOX_AUTOCLOSE
+	end
+
+Sinnoh_Text_TrNinjaBoyFabianRematch:
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x56, 0x53, 0xFF
 
 Sinnoh_Text_TrNinjaBoyFabianIntro:
 	.byte 0xFD, 0x40, 0x05, 0x2D, 0x56, 0x50, 0xFF
@@ -3292,8 +4502,18 @@ Sinnoh_Text_TrNinjaBoyFabianAfter:
 
 Sinnoh_EventScript_TrNinjaBoyJoel::
 	trainerbattle_single TRAINER_SINNOH_NINJA_BOY_JOEL, Sinnoh_Text_TrNinjaBoyJoelIntro, Sinnoh_Text_TrNinjaBoyJoelDefeat
+	specialvar VAR_RESULT, ShouldTryRematchBattle
+	goto_if_eq VAR_RESULT, TRUE, Sinnoh_EventScript_TrNinjaBoyJoelRematch
 	msgbox Sinnoh_Text_TrNinjaBoyJoelAfter, MSGBOX_AUTOCLOSE
 	end
+
+Sinnoh_EventScript_TrNinjaBoyJoelRematch::
+	trainerbattle_rematch TRAINER_SINNOH_NINJA_BOY_JOEL, Sinnoh_Text_TrNinjaBoyJoelRematch, Sinnoh_Text_TrNinjaBoyJoelDefeat
+	msgbox Sinnoh_Text_TrNinjaBoyJoelAfter, MSGBOX_AUTOCLOSE
+	end
+
+Sinnoh_Text_TrNinjaBoyJoelRematch:
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x56, 0x65, 0xFF
 
 Sinnoh_Text_TrNinjaBoyJoelIntro:
 	.byte 0xFD, 0x40, 0x05, 0x2D, 0x56, 0x62, 0xFF
@@ -3306,8 +4526,18 @@ Sinnoh_Text_TrNinjaBoyJoelAfter:
 
 Sinnoh_EventScript_TrNinjaBoyMatthew::
 	trainerbattle_single TRAINER_SINNOH_NINJA_BOY_MATTHEW, Sinnoh_Text_TrNinjaBoyMatthewIntro, Sinnoh_Text_TrNinjaBoyMatthewDefeat
+	specialvar VAR_RESULT, ShouldTryRematchBattle
+	goto_if_eq VAR_RESULT, TRUE, Sinnoh_EventScript_TrNinjaBoyMatthewRematch
 	msgbox Sinnoh_Text_TrNinjaBoyMatthewAfter, MSGBOX_AUTOCLOSE
 	end
+
+Sinnoh_EventScript_TrNinjaBoyMatthewRematch::
+	trainerbattle_rematch TRAINER_SINNOH_NINJA_BOY_MATTHEW, Sinnoh_Text_TrNinjaBoyMatthewRematch, Sinnoh_Text_TrNinjaBoyMatthewDefeat
+	msgbox Sinnoh_Text_TrNinjaBoyMatthewAfter, MSGBOX_AUTOCLOSE
+	end
+
+Sinnoh_Text_TrNinjaBoyMatthewRematch:
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x56, 0x77, 0xFF
 
 Sinnoh_Text_TrNinjaBoyMatthewIntro:
 	.byte 0xFD, 0x40, 0x05, 0x2D, 0x56, 0x74, 0xFF
@@ -3320,8 +4550,18 @@ Sinnoh_Text_TrNinjaBoyMatthewAfter:
 
 Sinnoh_EventScript_TrNinjaBoyNathan::
 	trainerbattle_single TRAINER_SINNOH_NINJA_BOY_NATHAN, Sinnoh_Text_TrNinjaBoyNathanIntro, Sinnoh_Text_TrNinjaBoyNathanDefeat
+	specialvar VAR_RESULT, ShouldTryRematchBattle
+	goto_if_eq VAR_RESULT, TRUE, Sinnoh_EventScript_TrNinjaBoyNathanRematch
 	msgbox Sinnoh_Text_TrNinjaBoyNathanAfter, MSGBOX_AUTOCLOSE
 	end
+
+Sinnoh_EventScript_TrNinjaBoyNathanRematch::
+	trainerbattle_rematch TRAINER_SINNOH_NINJA_BOY_NATHAN, Sinnoh_Text_TrNinjaBoyNathanRematch, Sinnoh_Text_TrNinjaBoyNathanDefeat
+	msgbox Sinnoh_Text_TrNinjaBoyNathanAfter, MSGBOX_AUTOCLOSE
+	end
+
+Sinnoh_Text_TrNinjaBoyNathanRematch:
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x57, 0x09, 0xFF
 
 Sinnoh_Text_TrNinjaBoyNathanIntro:
 	.byte 0xFD, 0x40, 0x05, 0x2D, 0x57, 0x06, 0xFF
@@ -3334,8 +4574,18 @@ Sinnoh_Text_TrNinjaBoyNathanAfter:
 
 Sinnoh_EventScript_TrNinjaBoyNick::
 	trainerbattle_single TRAINER_SINNOH_NINJA_BOY_NICK, Sinnoh_Text_TrNinjaBoyNickIntro, Sinnoh_Text_TrNinjaBoyNickDefeat
+	specialvar VAR_RESULT, ShouldTryRematchBattle
+	goto_if_eq VAR_RESULT, TRUE, Sinnoh_EventScript_TrNinjaBoyNickRematch
 	msgbox Sinnoh_Text_TrNinjaBoyNickAfter, MSGBOX_AUTOCLOSE
 	end
+
+Sinnoh_EventScript_TrNinjaBoyNickRematch::
+	trainerbattle_rematch TRAINER_SINNOH_NINJA_BOY_NICK, Sinnoh_Text_TrNinjaBoyNickRematch, Sinnoh_Text_TrNinjaBoyNickDefeat
+	msgbox Sinnoh_Text_TrNinjaBoyNickAfter, MSGBOX_AUTOCLOSE
+	end
+
+Sinnoh_Text_TrNinjaBoyNickRematch:
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x57, 0x1B, 0xFF
 
 Sinnoh_Text_TrNinjaBoyNickIntro:
 	.byte 0xFD, 0x40, 0x05, 0x2D, 0x57, 0x18, 0xFF
@@ -3348,8 +4598,18 @@ Sinnoh_Text_TrNinjaBoyNickAfter:
 
 Sinnoh_EventScript_TrNinjaBoyZach::
 	trainerbattle_single TRAINER_SINNOH_NINJA_BOY_ZACH, Sinnoh_Text_TrNinjaBoyZachIntro, Sinnoh_Text_TrNinjaBoyZachDefeat
+	specialvar VAR_RESULT, ShouldTryRematchBattle
+	goto_if_eq VAR_RESULT, TRUE, Sinnoh_EventScript_TrNinjaBoyZachRematch
 	msgbox Sinnoh_Text_TrNinjaBoyZachAfter, MSGBOX_AUTOCLOSE
 	end
+
+Sinnoh_EventScript_TrNinjaBoyZachRematch::
+	trainerbattle_rematch TRAINER_SINNOH_NINJA_BOY_ZACH, Sinnoh_Text_TrNinjaBoyZachRematch, Sinnoh_Text_TrNinjaBoyZachDefeat
+	msgbox Sinnoh_Text_TrNinjaBoyZachAfter, MSGBOX_AUTOCLOSE
+	end
+
+Sinnoh_Text_TrNinjaBoyZachRematch:
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x57, 0x2D, 0xFF
 
 Sinnoh_Text_TrNinjaBoyZachIntro:
 	.byte 0xFD, 0x40, 0x05, 0x2D, 0x57, 0x2A, 0xFF
@@ -3362,8 +4622,18 @@ Sinnoh_Text_TrNinjaBoyZachAfter:
 
 Sinnoh_EventScript_TrParasolLadyAlexa::
 	trainerbattle_single TRAINER_SINNOH_PARASOL_LADY_ALEXA, Sinnoh_Text_TrParasolLadyAlexaIntro, Sinnoh_Text_TrParasolLadyAlexaDefeat
+	specialvar VAR_RESULT, ShouldTryRematchBattle
+	goto_if_eq VAR_RESULT, TRUE, Sinnoh_EventScript_TrParasolLadyAlexaRematch
 	msgbox Sinnoh_Text_TrParasolLadyAlexaAfter, MSGBOX_AUTOCLOSE
 	end
+
+Sinnoh_EventScript_TrParasolLadyAlexaRematch::
+	trainerbattle_rematch TRAINER_SINNOH_PARASOL_LADY_ALEXA, Sinnoh_Text_TrParasolLadyAlexaRematch, Sinnoh_Text_TrParasolLadyAlexaDefeat
+	msgbox Sinnoh_Text_TrParasolLadyAlexaAfter, MSGBOX_AUTOCLOSE
+	end
+
+Sinnoh_Text_TrParasolLadyAlexaRematch:
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x58, 0x07, 0xFF
 
 Sinnoh_Text_TrParasolLadyAlexaIntro:
 	.byte 0xFD, 0x40, 0x05, 0x2D, 0x58, 0x04, 0xFF
@@ -3376,8 +4646,18 @@ Sinnoh_Text_TrParasolLadyAlexaAfter:
 
 Sinnoh_EventScript_TrParasolLadySabrina::
 	trainerbattle_single TRAINER_SINNOH_PARASOL_LADY_SABRINA, Sinnoh_Text_TrParasolLadySabrinaIntro, Sinnoh_Text_TrParasolLadySabrinaDefeat
+	specialvar VAR_RESULT, ShouldTryRematchBattle
+	goto_if_eq VAR_RESULT, TRUE, Sinnoh_EventScript_TrParasolLadySabrinaRematch
 	msgbox Sinnoh_Text_TrParasolLadySabrinaAfter, MSGBOX_AUTOCLOSE
 	end
+
+Sinnoh_EventScript_TrParasolLadySabrinaRematch::
+	trainerbattle_rematch TRAINER_SINNOH_PARASOL_LADY_SABRINA, Sinnoh_Text_TrParasolLadySabrinaRematch, Sinnoh_Text_TrParasolLadySabrinaDefeat
+	msgbox Sinnoh_Text_TrParasolLadySabrinaAfter, MSGBOX_AUTOCLOSE
+	end
+
+Sinnoh_Text_TrParasolLadySabrinaRematch:
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x58, 0x4F, 0xFF
 
 Sinnoh_Text_TrParasolLadySabrinaIntro:
 	.byte 0xFD, 0x40, 0x05, 0x2D, 0x58, 0x4C, 0xFF
@@ -3432,8 +4712,18 @@ Sinnoh_Text_TrPicnickerDianaAfter:
 
 Sinnoh_EventScript_TrPicnickerKarina::
 	trainerbattle_single TRAINER_SINNOH_PICNICKER_KARINA, Sinnoh_Text_TrPicnickerKarinaIntro, Sinnoh_Text_TrPicnickerKarinaDefeat
+	specialvar VAR_RESULT, ShouldTryRematchBattle
+	goto_if_eq VAR_RESULT, TRUE, Sinnoh_EventScript_TrPicnickerKarinaRematch
 	msgbox Sinnoh_Text_TrPicnickerKarinaAfter, MSGBOX_AUTOCLOSE
 	end
+
+Sinnoh_EventScript_TrPicnickerKarinaRematch::
+	trainerbattle_rematch TRAINER_SINNOH_PICNICKER_KARINA, Sinnoh_Text_TrPicnickerKarinaRematch, Sinnoh_Text_TrPicnickerKarinaDefeat
+	msgbox Sinnoh_Text_TrPicnickerKarinaAfter, MSGBOX_AUTOCLOSE
+	end
+
+Sinnoh_Text_TrPicnickerKarinaRematch:
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x59, 0x5F, 0xFF
 
 Sinnoh_Text_TrPicnickerKarinaIntro:
 	.byte 0xFD, 0x40, 0x05, 0x2D, 0x59, 0x5C, 0xFF
@@ -3446,8 +4736,18 @@ Sinnoh_Text_TrPicnickerKarinaAfter:
 
 Sinnoh_EventScript_TrPicnickerLauren::
 	trainerbattle_single TRAINER_SINNOH_PICNICKER_LAUREN, Sinnoh_Text_TrPicnickerLaurenIntro, Sinnoh_Text_TrPicnickerLaurenDefeat
+	specialvar VAR_RESULT, ShouldTryRematchBattle
+	goto_if_eq VAR_RESULT, TRUE, Sinnoh_EventScript_TrPicnickerLaurenRematch
 	msgbox Sinnoh_Text_TrPicnickerLaurenAfter, MSGBOX_AUTOCLOSE
 	end
+
+Sinnoh_EventScript_TrPicnickerLaurenRematch::
+	trainerbattle_rematch TRAINER_SINNOH_PICNICKER_LAUREN, Sinnoh_Text_TrPicnickerLaurenRematch, Sinnoh_Text_TrPicnickerLaurenDefeat
+	msgbox Sinnoh_Text_TrPicnickerLaurenAfter, MSGBOX_AUTOCLOSE
+	end
+
+Sinnoh_Text_TrPicnickerLaurenRematch:
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x5A, 0x27, 0xFF
 
 Sinnoh_Text_TrPicnickerLaurenIntro:
 	.byte 0xFD, 0x40, 0x05, 0x2D, 0x5A, 0x24, 0xFF
@@ -3460,8 +4760,18 @@ Sinnoh_Text_TrPicnickerLaurenAfter:
 
 Sinnoh_EventScript_TrPicnickerSiena::
 	trainerbattle_single TRAINER_SINNOH_PICNICKER_SIENA, Sinnoh_Text_TrPicnickerSienaIntro, Sinnoh_Text_TrPicnickerSienaDefeat
+	specialvar VAR_RESULT, ShouldTryRematchBattle
+	goto_if_eq VAR_RESULT, TRUE, Sinnoh_EventScript_TrPicnickerSienaRematch
 	msgbox Sinnoh_Text_TrPicnickerSienaAfter, MSGBOX_AUTOCLOSE
 	end
+
+Sinnoh_EventScript_TrPicnickerSienaRematch::
+	trainerbattle_rematch TRAINER_SINNOH_PICNICKER_SIENA, Sinnoh_Text_TrPicnickerSienaRematch, Sinnoh_Text_TrPicnickerSienaDefeat
+	msgbox Sinnoh_Text_TrPicnickerSienaAfter, MSGBOX_AUTOCLOSE
+	end
+
+Sinnoh_Text_TrPicnickerSienaRematch:
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x5A, 0x39, 0xFF
 
 Sinnoh_Text_TrPicnickerSienaIntro:
 	.byte 0xFD, 0x40, 0x05, 0x2D, 0x5A, 0x36, 0xFF
@@ -3502,8 +4812,18 @@ Sinnoh_Text_TrPicnickerToriAfter:
 
 Sinnoh_EventScript_TrPiCarlos::
 	trainerbattle_single TRAINER_SINNOH_PI_CARLOS, Sinnoh_Text_TrPiCarlosIntro, Sinnoh_Text_TrPiCarlosDefeat
+	specialvar VAR_RESULT, ShouldTryRematchBattle
+	goto_if_eq VAR_RESULT, TRUE, Sinnoh_EventScript_TrPiCarlosRematch
 	msgbox Sinnoh_Text_TrPiCarlosAfter, MSGBOX_AUTOCLOSE
 	end
+
+Sinnoh_EventScript_TrPiCarlosRematch::
+	trainerbattle_rematch TRAINER_SINNOH_PI_CARLOS, Sinnoh_Text_TrPiCarlosRematch, Sinnoh_Text_TrPiCarlosDefeat
+	msgbox Sinnoh_Text_TrPiCarlosAfter, MSGBOX_AUTOCLOSE
+	end
+
+Sinnoh_Text_TrPiCarlosRematch:
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x58, 0x61, 0xFF
 
 Sinnoh_Text_TrPiCarlosIntro:
 	.byte 0xFD, 0x40, 0x05, 0x2D, 0x58, 0x5E, 0xFF
@@ -3544,8 +4864,18 @@ Sinnoh_Text_TrPokefanRebekahAfter:
 
 Sinnoh_EventScript_TrPokeKidDanielle::
 	trainerbattle_single TRAINER_SINNOH_POKE_KID_DANIELLE, Sinnoh_Text_TrPokeKidDanielleIntro, Sinnoh_Text_TrPokeKidDanielleDefeat
+	specialvar VAR_RESULT, ShouldTryRematchBattle
+	goto_if_eq VAR_RESULT, TRUE, Sinnoh_EventScript_TrPokeKidDanielleRematch
 	msgbox Sinnoh_Text_TrPokeKidDanielleAfter, MSGBOX_AUTOCLOSE
 	end
+
+Sinnoh_EventScript_TrPokeKidDanielleRematch::
+	trainerbattle_rematch TRAINER_SINNOH_POKE_KID_DANIELLE, Sinnoh_Text_TrPokeKidDanielleRematch, Sinnoh_Text_TrPokeKidDanielleDefeat
+	msgbox Sinnoh_Text_TrPokeKidDanielleAfter, MSGBOX_AUTOCLOSE
+	end
+
+Sinnoh_Text_TrPokeKidDanielleRematch:
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x5B, 0x5B, 0xFF
 
 Sinnoh_Text_TrPokeKidDanielleIntro:
 	.byte 0xFD, 0x40, 0x05, 0x2D, 0x5B, 0x58, 0xFF
@@ -3586,8 +4916,18 @@ Sinnoh_Text_TrPokeKidMeghanAfter:
 
 Sinnoh_EventScript_TrPolicemanAlex::
 	trainerbattle_single TRAINER_SINNOH_POLICEMAN_ALEX, Sinnoh_Text_TrPolicemanAlexIntro, Sinnoh_Text_TrPolicemanAlexDefeat
+	specialvar VAR_RESULT, ShouldTryRematchBattle
+	goto_if_eq VAR_RESULT, TRUE, Sinnoh_EventScript_TrPolicemanAlexRematch
 	msgbox Sinnoh_Text_TrPolicemanAlexAfter, MSGBOX_AUTOCLOSE
 	end
+
+Sinnoh_EventScript_TrPolicemanAlexRematch::
+	trainerbattle_rematch TRAINER_SINNOH_POLICEMAN_ALEX, Sinnoh_Text_TrPolicemanAlexRematch, Sinnoh_Text_TrPolicemanAlexDefeat
+	msgbox Sinnoh_Text_TrPolicemanAlexAfter, MSGBOX_AUTOCLOSE
+	end
+
+Sinnoh_Text_TrPolicemanAlexRematch:
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x5C, 0x7D, 0xFF
 
 Sinnoh_Text_TrPolicemanAlexIntro:
 	.byte 0xFD, 0x40, 0x05, 0x2D, 0x5C, 0x7A, 0xFF
@@ -3600,8 +4940,18 @@ Sinnoh_Text_TrPolicemanAlexAfter:
 
 Sinnoh_EventScript_TrPolicemanBobby::
 	trainerbattle_single TRAINER_SINNOH_POLICEMAN_BOBBY, Sinnoh_Text_TrPolicemanBobbyIntro, Sinnoh_Text_TrPolicemanBobbyDefeat
+	specialvar VAR_RESULT, ShouldTryRematchBattle
+	goto_if_eq VAR_RESULT, TRUE, Sinnoh_EventScript_TrPolicemanBobbyRematch
 	msgbox Sinnoh_Text_TrPolicemanBobbyAfter, MSGBOX_AUTOCLOSE
 	end
+
+Sinnoh_EventScript_TrPolicemanBobbyRematch::
+	trainerbattle_rematch TRAINER_SINNOH_POLICEMAN_BOBBY, Sinnoh_Text_TrPolicemanBobbyRematch, Sinnoh_Text_TrPolicemanBobbyDefeat
+	msgbox Sinnoh_Text_TrPolicemanBobbyAfter, MSGBOX_AUTOCLOSE
+	end
+
+Sinnoh_Text_TrPolicemanBobbyRematch:
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x5D, 0x0F, 0xFF
 
 Sinnoh_Text_TrPolicemanBobbyIntro:
 	.byte 0xFD, 0x40, 0x05, 0x2D, 0x5D, 0x0C, 0xFF
@@ -3614,8 +4964,18 @@ Sinnoh_Text_TrPolicemanBobbyAfter:
 
 Sinnoh_EventScript_TrPolicemanCaleb::
 	trainerbattle_single TRAINER_SINNOH_POLICEMAN_CALEB, Sinnoh_Text_TrPolicemanCalebIntro, Sinnoh_Text_TrPolicemanCalebDefeat
+	specialvar VAR_RESULT, ShouldTryRematchBattle
+	goto_if_eq VAR_RESULT, TRUE, Sinnoh_EventScript_TrPolicemanCalebRematch
 	msgbox Sinnoh_Text_TrPolicemanCalebAfter, MSGBOX_AUTOCLOSE
 	end
+
+Sinnoh_EventScript_TrPolicemanCalebRematch::
+	trainerbattle_rematch TRAINER_SINNOH_POLICEMAN_CALEB, Sinnoh_Text_TrPolicemanCalebRematch, Sinnoh_Text_TrPolicemanCalebDefeat
+	msgbox Sinnoh_Text_TrPolicemanCalebAfter, MSGBOX_AUTOCLOSE
+	end
+
+Sinnoh_Text_TrPolicemanCalebRematch:
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x5D, 0x21, 0xFF
 
 Sinnoh_Text_TrPolicemanCalebIntro:
 	.byte 0xFD, 0x40, 0x05, 0x2D, 0x5D, 0x1E, 0xFF
@@ -3628,8 +4988,18 @@ Sinnoh_Text_TrPolicemanCalebAfter:
 
 Sinnoh_EventScript_TrPolicemanDanny::
 	trainerbattle_single TRAINER_SINNOH_POLICEMAN_DANNY, Sinnoh_Text_TrPolicemanDannyIntro, Sinnoh_Text_TrPolicemanDannyDefeat
+	specialvar VAR_RESULT, ShouldTryRematchBattle
+	goto_if_eq VAR_RESULT, TRUE, Sinnoh_EventScript_TrPolicemanDannyRematch
 	msgbox Sinnoh_Text_TrPolicemanDannyAfter, MSGBOX_AUTOCLOSE
 	end
+
+Sinnoh_EventScript_TrPolicemanDannyRematch::
+	trainerbattle_rematch TRAINER_SINNOH_POLICEMAN_DANNY, Sinnoh_Text_TrPolicemanDannyRematch, Sinnoh_Text_TrPolicemanDannyDefeat
+	msgbox Sinnoh_Text_TrPolicemanDannyAfter, MSGBOX_AUTOCLOSE
+	end
+
+Sinnoh_Text_TrPolicemanDannyRematch:
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x5D, 0x33, 0xFF
 
 Sinnoh_Text_TrPolicemanDannyIntro:
 	.byte 0xFD, 0x40, 0x05, 0x2D, 0x5D, 0x30, 0xFF
@@ -3642,8 +5012,18 @@ Sinnoh_Text_TrPolicemanDannyAfter:
 
 Sinnoh_EventScript_TrPolicemanDylan::
 	trainerbattle_single TRAINER_SINNOH_POLICEMAN_DYLAN, Sinnoh_Text_TrPolicemanDylanIntro, Sinnoh_Text_TrPolicemanDylanDefeat
+	specialvar VAR_RESULT, ShouldTryRematchBattle
+	goto_if_eq VAR_RESULT, TRUE, Sinnoh_EventScript_TrPolicemanDylanRematch
 	msgbox Sinnoh_Text_TrPolicemanDylanAfter, MSGBOX_AUTOCLOSE
 	end
+
+Sinnoh_EventScript_TrPolicemanDylanRematch::
+	trainerbattle_rematch TRAINER_SINNOH_POLICEMAN_DYLAN, Sinnoh_Text_TrPolicemanDylanRematch, Sinnoh_Text_TrPolicemanDylanDefeat
+	msgbox Sinnoh_Text_TrPolicemanDylanAfter, MSGBOX_AUTOCLOSE
+	end
+
+Sinnoh_Text_TrPolicemanDylanRematch:
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x5D, 0x7B, 0xFF
 
 Sinnoh_Text_TrPolicemanDylanIntro:
 	.byte 0xFD, 0x40, 0x05, 0x2D, 0x5D, 0x78, 0xFF
@@ -3656,8 +5036,18 @@ Sinnoh_Text_TrPolicemanDylanAfter:
 
 Sinnoh_EventScript_TrPolicemanThomas::
 	trainerbattle_single TRAINER_SINNOH_POLICEMAN_THOMAS, Sinnoh_Text_TrPolicemanThomasIntro, Sinnoh_Text_TrPolicemanThomasDefeat
+	specialvar VAR_RESULT, ShouldTryRematchBattle
+	goto_if_eq VAR_RESULT, TRUE, Sinnoh_EventScript_TrPolicemanThomasRematch
 	msgbox Sinnoh_Text_TrPolicemanThomasAfter, MSGBOX_AUTOCLOSE
 	end
+
+Sinnoh_EventScript_TrPolicemanThomasRematch::
+	trainerbattle_rematch TRAINER_SINNOH_POLICEMAN_THOMAS, Sinnoh_Text_TrPolicemanThomasRematch, Sinnoh_Text_TrPolicemanThomasDefeat
+	msgbox Sinnoh_Text_TrPolicemanThomasAfter, MSGBOX_AUTOCLOSE
+	end
+
+Sinnoh_Text_TrPolicemanThomasRematch:
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x5E, 0x0D, 0xFF
 
 Sinnoh_Text_TrPolicemanThomasIntro:
 	.byte 0xFD, 0x40, 0x05, 0x2D, 0x5E, 0x0A, 0xFF
@@ -3670,8 +5060,18 @@ Sinnoh_Text_TrPolicemanThomasAfter:
 
 Sinnoh_EventScript_TrPsychicAbigail::
 	trainerbattle_single TRAINER_SINNOH_PSYCHIC_ABIGAIL, Sinnoh_Text_TrPsychicAbigailIntro, Sinnoh_Text_TrPsychicAbigailDefeat
+	specialvar VAR_RESULT, ShouldTryRematchBattle
+	goto_if_eq VAR_RESULT, TRUE, Sinnoh_EventScript_TrPsychicAbigailRematch
 	msgbox Sinnoh_Text_TrPsychicAbigailAfter, MSGBOX_AUTOCLOSE
 	end
+
+Sinnoh_EventScript_TrPsychicAbigailRematch::
+	trainerbattle_rematch TRAINER_SINNOH_PSYCHIC_ABIGAIL, Sinnoh_Text_TrPsychicAbigailRematch, Sinnoh_Text_TrPsychicAbigailDefeat
+	msgbox Sinnoh_Text_TrPsychicAbigailAfter, MSGBOX_AUTOCLOSE
+	end
+
+Sinnoh_Text_TrPsychicAbigailRematch:
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x5E, 0x1F, 0xFF
 
 Sinnoh_Text_TrPsychicAbigailIntro:
 	.byte 0xFD, 0x40, 0x05, 0x2D, 0x5E, 0x1C, 0xFF
@@ -3684,8 +5084,18 @@ Sinnoh_Text_TrPsychicAbigailAfter:
 
 Sinnoh_EventScript_TrPsychicBrittney::
 	trainerbattle_single TRAINER_SINNOH_PSYCHIC_BRITTNEY, Sinnoh_Text_TrPsychicBrittneyIntro, Sinnoh_Text_TrPsychicBrittneyDefeat
+	specialvar VAR_RESULT, ShouldTryRematchBattle
+	goto_if_eq VAR_RESULT, TRUE, Sinnoh_EventScript_TrPsychicBrittneyRematch
 	msgbox Sinnoh_Text_TrPsychicBrittneyAfter, MSGBOX_AUTOCLOSE
 	end
+
+Sinnoh_EventScript_TrPsychicBrittneyRematch::
+	trainerbattle_rematch TRAINER_SINNOH_PSYCHIC_BRITTNEY, Sinnoh_Text_TrPsychicBrittneyRematch, Sinnoh_Text_TrPsychicBrittneyDefeat
+	msgbox Sinnoh_Text_TrPsychicBrittneyAfter, MSGBOX_AUTOCLOSE
+	end
+
+Sinnoh_Text_TrPsychicBrittneyRematch:
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x5E, 0x55, 0xFF
 
 Sinnoh_Text_TrPsychicBrittneyIntro:
 	.byte 0xFD, 0x40, 0x05, 0x2D, 0x5E, 0x52, 0xFF
@@ -3726,8 +5136,18 @@ Sinnoh_Text_TrPsychicChelseyAfter:
 
 Sinnoh_EventScript_TrPsychicCorbin::
 	trainerbattle_single TRAINER_SINNOH_PSYCHIC_CORBIN, Sinnoh_Text_TrPsychicCorbinIntro, Sinnoh_Text_TrPsychicCorbinDefeat
+	specialvar VAR_RESULT, ShouldTryRematchBattle
+	goto_if_eq VAR_RESULT, TRUE, Sinnoh_EventScript_TrPsychicCorbinRematch
 	msgbox Sinnoh_Text_TrPsychicCorbinAfter, MSGBOX_AUTOCLOSE
 	end
+
+Sinnoh_EventScript_TrPsychicCorbinRematch::
+	trainerbattle_rematch TRAINER_SINNOH_PSYCHIC_CORBIN, Sinnoh_Text_TrPsychicCorbinRematch, Sinnoh_Text_TrPsychicCorbinDefeat
+	msgbox Sinnoh_Text_TrPsychicCorbinAfter, MSGBOX_AUTOCLOSE
+	end
+
+Sinnoh_Text_TrPsychicCorbinRematch:
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x5F, 0x1D, 0xFF
 
 Sinnoh_Text_TrPsychicCorbinIntro:
 	.byte 0xFD, 0x40, 0x05, 0x2D, 0x5F, 0x1A, 0xFF
@@ -3740,8 +5160,18 @@ Sinnoh_Text_TrPsychicCorbinAfter:
 
 Sinnoh_EventScript_TrPsychicDaisy::
 	trainerbattle_single TRAINER_SINNOH_PSYCHIC_DAISY, Sinnoh_Text_TrPsychicDaisyIntro, Sinnoh_Text_TrPsychicDaisyDefeat
+	specialvar VAR_RESULT, ShouldTryRematchBattle
+	goto_if_eq VAR_RESULT, TRUE, Sinnoh_EventScript_TrPsychicDaisyRematch
 	msgbox Sinnoh_Text_TrPsychicDaisyAfter, MSGBOX_AUTOCLOSE
 	end
+
+Sinnoh_EventScript_TrPsychicDaisyRematch::
+	trainerbattle_rematch TRAINER_SINNOH_PSYCHIC_DAISY, Sinnoh_Text_TrPsychicDaisyRematch, Sinnoh_Text_TrPsychicDaisyDefeat
+	msgbox Sinnoh_Text_TrPsychicDaisyAfter, MSGBOX_AUTOCLOSE
+	end
+
+Sinnoh_Text_TrPsychicDaisyRematch:
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x5F, 0x41, 0xFF
 
 Sinnoh_Text_TrPsychicDaisyIntro:
 	.byte 0xFD, 0x40, 0x05, 0x2D, 0x5F, 0x3E, 0xFF
@@ -3852,8 +5282,18 @@ Sinnoh_Text_TrPsychicLindseyAfter:
 
 Sinnoh_EventScript_TrPsychicMaxwell::
 	trainerbattle_single TRAINER_SINNOH_PSYCHIC_MAXWELL, Sinnoh_Text_TrPsychicMaxwellIntro, Sinnoh_Text_TrPsychicMaxwellDefeat
+	specialvar VAR_RESULT, ShouldTryRematchBattle
+	goto_if_eq VAR_RESULT, TRUE, Sinnoh_EventScript_TrPsychicMaxwellRematch
 	msgbox Sinnoh_Text_TrPsychicMaxwellAfter, MSGBOX_AUTOCLOSE
 	end
+
+Sinnoh_EventScript_TrPsychicMaxwellRematch::
+	trainerbattle_rematch TRAINER_SINNOH_PSYCHIC_MAXWELL, Sinnoh_Text_TrPsychicMaxwellRematch, Sinnoh_Text_TrPsychicMaxwellDefeat
+	msgbox Sinnoh_Text_TrPsychicMaxwellAfter, MSGBOX_AUTOCLOSE
+	end
+
+Sinnoh_Text_TrPsychicMaxwellRematch:
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x60, 0x63, 0xFF
 
 Sinnoh_Text_TrPsychicMaxwellIntro:
 	.byte 0xFD, 0x40, 0x05, 0x2D, 0x60, 0x60, 0xFF
@@ -3866,8 +5306,18 @@ Sinnoh_Text_TrPsychicMaxwellAfter:
 
 Sinnoh_EventScript_TrPsychicMitchell::
 	trainerbattle_single TRAINER_SINNOH_PSYCHIC_MITCHELL, Sinnoh_Text_TrPsychicMitchellIntro, Sinnoh_Text_TrPsychicMitchellDefeat
+	specialvar VAR_RESULT, ShouldTryRematchBattle
+	goto_if_eq VAR_RESULT, TRUE, Sinnoh_EventScript_TrPsychicMitchellRematch
 	msgbox Sinnoh_Text_TrPsychicMitchellAfter, MSGBOX_AUTOCLOSE
 	end
+
+Sinnoh_EventScript_TrPsychicMitchellRematch::
+	trainerbattle_rematch TRAINER_SINNOH_PSYCHIC_MITCHELL, Sinnoh_Text_TrPsychicMitchellRematch, Sinnoh_Text_TrPsychicMitchellDefeat
+	msgbox Sinnoh_Text_TrPsychicMitchellAfter, MSGBOX_AUTOCLOSE
+	end
+
+Sinnoh_Text_TrPsychicMitchellRematch:
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x61, 0x07, 0xFF
 
 Sinnoh_Text_TrPsychicMitchellIntro:
 	.byte 0xFD, 0x40, 0x05, 0x2D, 0x61, 0x04, 0xFF
@@ -3922,8 +5372,18 @@ Sinnoh_Text_TrPsychicValenciaAfter:
 
 Sinnoh_EventScript_TrRancherMarco::
 	trainerbattle_single TRAINER_SINNOH_RANCHER_MARCO, Sinnoh_Text_TrRancherMarcoIntro, Sinnoh_Text_TrRancherMarcoDefeat
+	specialvar VAR_RESULT, ShouldTryRematchBattle
+	goto_if_eq VAR_RESULT, TRUE, Sinnoh_EventScript_TrRancherMarcoRematch
 	msgbox Sinnoh_Text_TrRancherMarcoAfter, MSGBOX_AUTOCLOSE
 	end
+
+Sinnoh_EventScript_TrRancherMarcoRematch::
+	trainerbattle_rematch TRAINER_SINNOH_RANCHER_MARCO, Sinnoh_Text_TrRancherMarcoRematch, Sinnoh_Text_TrRancherMarcoDefeat
+	msgbox Sinnoh_Text_TrRancherMarcoAfter, MSGBOX_AUTOCLOSE
+	end
+
+Sinnoh_Text_TrRancherMarcoRematch:
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x61, 0x73, 0xFF
 
 Sinnoh_Text_TrRancherMarcoIntro:
 	.byte 0xFD, 0x40, 0x05, 0x2D, 0x61, 0x70, 0xFF
@@ -3936,8 +5396,18 @@ Sinnoh_Text_TrRancherMarcoAfter:
 
 Sinnoh_EventScript_TrRangerAllison::
 	trainerbattle_single TRAINER_SINNOH_RANGER_ALLISON, Sinnoh_Text_TrRangerAllisonIntro, Sinnoh_Text_TrRangerAllisonDefeat
+	specialvar VAR_RESULT, ShouldTryRematchBattle
+	goto_if_eq VAR_RESULT, TRUE, Sinnoh_EventScript_TrRangerAllisonRematch
 	msgbox Sinnoh_Text_TrRangerAllisonAfter, MSGBOX_AUTOCLOSE
 	end
+
+Sinnoh_EventScript_TrRangerAllisonRematch::
+	trainerbattle_rematch TRAINER_SINNOH_RANGER_ALLISON, Sinnoh_Text_TrRangerAllisonRematch, Sinnoh_Text_TrRangerAllisonDefeat
+	msgbox Sinnoh_Text_TrRangerAllisonAfter, MSGBOX_AUTOCLOSE
+	end
+
+Sinnoh_Text_TrRangerAllisonRematch:
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x62, 0x29, 0xFF
 
 Sinnoh_Text_TrRangerAllisonIntro:
 	.byte 0xFD, 0x40, 0x05, 0x2D, 0x62, 0x26, 0xFF
@@ -3950,8 +5420,18 @@ Sinnoh_Text_TrRangerAllisonAfter:
 
 Sinnoh_EventScript_TrRangerAshlee::
 	trainerbattle_single TRAINER_SINNOH_RANGER_ASHLEE, Sinnoh_Text_TrRangerAshleeIntro, Sinnoh_Text_TrRangerAshleeDefeat
+	specialvar VAR_RESULT, ShouldTryRematchBattle
+	goto_if_eq VAR_RESULT, TRUE, Sinnoh_EventScript_TrRangerAshleeRematch
 	msgbox Sinnoh_Text_TrRangerAshleeAfter, MSGBOX_AUTOCLOSE
 	end
+
+Sinnoh_EventScript_TrRangerAshleeRematch::
+	trainerbattle_rematch TRAINER_SINNOH_RANGER_ASHLEE, Sinnoh_Text_TrRangerAshleeRematch, Sinnoh_Text_TrRangerAshleeDefeat
+	msgbox Sinnoh_Text_TrRangerAshleeAfter, MSGBOX_AUTOCLOSE
+	end
+
+Sinnoh_Text_TrRangerAshleeRematch:
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x62, 0x71, 0xFF
 
 Sinnoh_Text_TrRangerAshleeIntro:
 	.byte 0xFD, 0x40, 0x05, 0x2D, 0x62, 0x6E, 0xFF
@@ -3964,8 +5444,18 @@ Sinnoh_Text_TrRangerAshleeAfter:
 
 Sinnoh_EventScript_TrRangerDeshawn::
 	trainerbattle_single TRAINER_SINNOH_RANGER_DESHAWN, Sinnoh_Text_TrRangerDeshawnIntro, Sinnoh_Text_TrRangerDeshawnDefeat
+	specialvar VAR_RESULT, ShouldTryRematchBattle
+	goto_if_eq VAR_RESULT, TRUE, Sinnoh_EventScript_TrRangerDeshawnRematch
 	msgbox Sinnoh_Text_TrRangerDeshawnAfter, MSGBOX_AUTOCLOSE
 	end
+
+Sinnoh_EventScript_TrRangerDeshawnRematch::
+	trainerbattle_rematch TRAINER_SINNOH_RANGER_DESHAWN, Sinnoh_Text_TrRangerDeshawnRematch, Sinnoh_Text_TrRangerDeshawnDefeat
+	msgbox Sinnoh_Text_TrRangerDeshawnAfter, MSGBOX_AUTOCLOSE
+	end
+
+Sinnoh_Text_TrRangerDeshawnRematch:
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x63, 0x15, 0xFF
 
 Sinnoh_Text_TrRangerDeshawnIntro:
 	.byte 0xFD, 0x40, 0x05, 0x2D, 0x63, 0x12, 0xFF
@@ -3978,8 +5468,18 @@ Sinnoh_Text_TrRangerDeshawnAfter:
 
 Sinnoh_EventScript_TrRangerDwayne::
 	trainerbattle_single TRAINER_SINNOH_RANGER_DWAYNE, Sinnoh_Text_TrRangerDwayneIntro, Sinnoh_Text_TrRangerDwayneDefeat
+	specialvar VAR_RESULT, ShouldTryRematchBattle
+	goto_if_eq VAR_RESULT, TRUE, Sinnoh_EventScript_TrRangerDwayneRematch
 	msgbox Sinnoh_Text_TrRangerDwayneAfter, MSGBOX_AUTOCLOSE
 	end
+
+Sinnoh_EventScript_TrRangerDwayneRematch::
+	trainerbattle_rematch TRAINER_SINNOH_RANGER_DWAYNE, Sinnoh_Text_TrRangerDwayneRematch, Sinnoh_Text_TrRangerDwayneDefeat
+	msgbox Sinnoh_Text_TrRangerDwayneAfter, MSGBOX_AUTOCLOSE
+	end
+
+Sinnoh_Text_TrRangerDwayneRematch:
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x63, 0x27, 0xFF
 
 Sinnoh_Text_TrRangerDwayneIntro:
 	.byte 0xFD, 0x40, 0x05, 0x2D, 0x63, 0x24, 0xFF
@@ -3992,8 +5492,18 @@ Sinnoh_Text_TrRangerDwayneAfter:
 
 Sinnoh_EventScript_TrRangerFelicia::
 	trainerbattle_single TRAINER_SINNOH_RANGER_FELICIA, Sinnoh_Text_TrRangerFeliciaIntro, Sinnoh_Text_TrRangerFeliciaDefeat
+	specialvar VAR_RESULT, ShouldTryRematchBattle
+	goto_if_eq VAR_RESULT, TRUE, Sinnoh_EventScript_TrRangerFeliciaRematch
 	msgbox Sinnoh_Text_TrRangerFeliciaAfter, MSGBOX_AUTOCLOSE
 	end
+
+Sinnoh_EventScript_TrRangerFeliciaRematch::
+	trainerbattle_rematch TRAINER_SINNOH_RANGER_FELICIA, Sinnoh_Text_TrRangerFeliciaRematch, Sinnoh_Text_TrRangerFeliciaDefeat
+	msgbox Sinnoh_Text_TrRangerFeliciaAfter, MSGBOX_AUTOCLOSE
+	end
+
+Sinnoh_Text_TrRangerFeliciaRematch:
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x63, 0x39, 0xFF
 
 Sinnoh_Text_TrRangerFeliciaIntro:
 	.byte 0xFD, 0x40, 0x05, 0x2D, 0x63, 0x36, 0xFF
@@ -4006,8 +5516,18 @@ Sinnoh_Text_TrRangerFeliciaAfter:
 
 Sinnoh_EventScript_TrRangerJeffrey::
 	trainerbattle_single TRAINER_SINNOH_RANGER_JEFFREY, Sinnoh_Text_TrRangerJeffreyIntro, Sinnoh_Text_TrRangerJeffreyDefeat
+	specialvar VAR_RESULT, ShouldTryRematchBattle
+	goto_if_eq VAR_RESULT, TRUE, Sinnoh_EventScript_TrRangerJeffreyRematch
 	msgbox Sinnoh_Text_TrRangerJeffreyAfter, MSGBOX_AUTOCLOSE
 	end
+
+Sinnoh_EventScript_TrRangerJeffreyRematch::
+	trainerbattle_rematch TRAINER_SINNOH_RANGER_JEFFREY, Sinnoh_Text_TrRangerJeffreyRematch, Sinnoh_Text_TrRangerJeffreyDefeat
+	msgbox Sinnoh_Text_TrRangerJeffreyAfter, MSGBOX_AUTOCLOSE
+	end
+
+Sinnoh_Text_TrRangerJeffreyRematch:
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x63, 0x4B, 0xFF
 
 Sinnoh_Text_TrRangerJeffreyIntro:
 	.byte 0xFD, 0x40, 0x05, 0x2D, 0x63, 0x48, 0xFF
@@ -4020,8 +5540,18 @@ Sinnoh_Text_TrRangerJeffreyAfter:
 
 Sinnoh_EventScript_TrRangerKrista::
 	trainerbattle_single TRAINER_SINNOH_RANGER_KRISTA, Sinnoh_Text_TrRangerKristaIntro, Sinnoh_Text_TrRangerKristaDefeat
+	specialvar VAR_RESULT, ShouldTryRematchBattle
+	goto_if_eq VAR_RESULT, TRUE, Sinnoh_EventScript_TrRangerKristaRematch
 	msgbox Sinnoh_Text_TrRangerKristaAfter, MSGBOX_AUTOCLOSE
 	end
+
+Sinnoh_EventScript_TrRangerKristaRematch::
+	trainerbattle_rematch TRAINER_SINNOH_RANGER_KRISTA, Sinnoh_Text_TrRangerKristaRematch, Sinnoh_Text_TrRangerKristaDefeat
+	msgbox Sinnoh_Text_TrRangerKristaAfter, MSGBOX_AUTOCLOSE
+	end
+
+Sinnoh_Text_TrRangerKristaRematch:
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x63, 0x5D, 0xFF
 
 Sinnoh_Text_TrRangerKristaIntro:
 	.byte 0xFD, 0x40, 0x05, 0x2D, 0x63, 0x5A, 0xFF
@@ -4034,8 +5564,18 @@ Sinnoh_Text_TrRangerKristaAfter:
 
 Sinnoh_EventScript_TrRangerKyler::
 	trainerbattle_single TRAINER_SINNOH_RANGER_KYLER, Sinnoh_Text_TrRangerKylerIntro, Sinnoh_Text_TrRangerKylerDefeat
+	specialvar VAR_RESULT, ShouldTryRematchBattle
+	goto_if_eq VAR_RESULT, TRUE, Sinnoh_EventScript_TrRangerKylerRematch
 	msgbox Sinnoh_Text_TrRangerKylerAfter, MSGBOX_AUTOCLOSE
 	end
+
+Sinnoh_EventScript_TrRangerKylerRematch::
+	trainerbattle_rematch TRAINER_SINNOH_RANGER_KYLER, Sinnoh_Text_TrRangerKylerRematch, Sinnoh_Text_TrRangerKylerDefeat
+	msgbox Sinnoh_Text_TrRangerKylerAfter, MSGBOX_AUTOCLOSE
+	end
+
+Sinnoh_Text_TrRangerKylerRematch:
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x63, 0x6F, 0xFF
 
 Sinnoh_Text_TrRangerKylerIntro:
 	.byte 0xFD, 0x40, 0x05, 0x2D, 0x63, 0x6C, 0xFF
@@ -4048,8 +5588,18 @@ Sinnoh_Text_TrRangerKylerAfter:
 
 Sinnoh_EventScript_TrRangerTaylor::
 	trainerbattle_single TRAINER_SINNOH_RANGER_TAYLOR, Sinnoh_Text_TrRangerTaylorIntro, Sinnoh_Text_TrRangerTaylorDefeat
+	specialvar VAR_RESULT, ShouldTryRematchBattle
+	goto_if_eq VAR_RESULT, TRUE, Sinnoh_EventScript_TrRangerTaylorRematch
 	msgbox Sinnoh_Text_TrRangerTaylorAfter, MSGBOX_AUTOCLOSE
 	end
+
+Sinnoh_EventScript_TrRangerTaylorRematch::
+	trainerbattle_rematch TRAINER_SINNOH_RANGER_TAYLOR, Sinnoh_Text_TrRangerTaylorRematch, Sinnoh_Text_TrRangerTaylorDefeat
+	msgbox Sinnoh_Text_TrRangerTaylorAfter, MSGBOX_AUTOCLOSE
+	end
+
+Sinnoh_Text_TrRangerTaylorRematch:
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x64, 0x13, 0xFF
 
 Sinnoh_Text_TrRangerTaylorIntro:
 	.byte 0xFD, 0x40, 0x05, 0x2D, 0x64, 0x10, 0xFF
@@ -4062,8 +5612,18 @@ Sinnoh_Text_TrRangerTaylorAfter:
 
 Sinnoh_EventScript_TrRichBoyJason::
 	trainerbattle_single TRAINER_SINNOH_RICH_BOY_JASON, Sinnoh_Text_TrRichBoyJasonIntro, Sinnoh_Text_TrRichBoyJasonDefeat
+	specialvar VAR_RESULT, ShouldTryRematchBattle
+	goto_if_eq VAR_RESULT, TRUE, Sinnoh_EventScript_TrRichBoyJasonRematch
 	msgbox Sinnoh_Text_TrRichBoyJasonAfter, MSGBOX_AUTOCLOSE
 	end
+
+Sinnoh_EventScript_TrRichBoyJasonRematch::
+	trainerbattle_rematch TRAINER_SINNOH_RICH_BOY_JASON, Sinnoh_Text_TrRichBoyJasonRematch, Sinnoh_Text_TrRichBoyJasonDefeat
+	msgbox Sinnoh_Text_TrRichBoyJasonAfter, MSGBOX_AUTOCLOSE
+	end
+
+Sinnoh_Text_TrRichBoyJasonRematch:
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x65, 0x59, 0xFF
 
 Sinnoh_Text_TrRichBoyJasonIntro:
 	.byte 0xFD, 0x40, 0x05, 0x2D, 0x65, 0x56, 0xFF
@@ -4076,8 +5636,18 @@ Sinnoh_Text_TrRichBoyJasonAfter:
 
 Sinnoh_EventScript_TrRichBoyTrey::
 	trainerbattle_single TRAINER_SINNOH_RICH_BOY_TREY, Sinnoh_Text_TrRichBoyTreyIntro, Sinnoh_Text_TrRichBoyTreyDefeat
+	specialvar VAR_RESULT, ShouldTryRematchBattle
+	goto_if_eq VAR_RESULT, TRUE, Sinnoh_EventScript_TrRichBoyTreyRematch
 	msgbox Sinnoh_Text_TrRichBoyTreyAfter, MSGBOX_AUTOCLOSE
 	end
+
+Sinnoh_EventScript_TrRichBoyTreyRematch::
+	trainerbattle_rematch TRAINER_SINNOH_RICH_BOY_TREY, Sinnoh_Text_TrRichBoyTreyRematch, Sinnoh_Text_TrRichBoyTreyDefeat
+	msgbox Sinnoh_Text_TrRichBoyTreyAfter, MSGBOX_AUTOCLOSE
+	end
+
+Sinnoh_Text_TrRichBoyTreyRematch:
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x66, 0x0F, 0xFF
 
 Sinnoh_Text_TrRichBoyTreyIntro:
 	.byte 0xFD, 0x40, 0x05, 0x2D, 0x66, 0x0C, 0xFF
@@ -4104,8 +5674,18 @@ Sinnoh_Text_TrRoughneckKirbyAfter:
 
 Sinnoh_EventScript_TrRuinManiacBryan::
 	trainerbattle_single TRAINER_SINNOH_RUIN_MANIAC_BRYAN, Sinnoh_Text_TrRuinManiacBryanIntro, Sinnoh_Text_TrRuinManiacBryanDefeat
+	specialvar VAR_RESULT, ShouldTryRematchBattle
+	goto_if_eq VAR_RESULT, TRUE, Sinnoh_EventScript_TrRuinManiacBryanRematch
 	msgbox Sinnoh_Text_TrRuinManiacBryanAfter, MSGBOX_AUTOCLOSE
 	end
+
+Sinnoh_EventScript_TrRuinManiacBryanRematch::
+	trainerbattle_rematch TRAINER_SINNOH_RUIN_MANIAC_BRYAN, Sinnoh_Text_TrRuinManiacBryanRematch, Sinnoh_Text_TrRuinManiacBryanDefeat
+	msgbox Sinnoh_Text_TrRuinManiacBryanAfter, MSGBOX_AUTOCLOSE
+	end
+
+Sinnoh_Text_TrRuinManiacBryanRematch:
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x6B, 0x4D, 0xFF
 
 Sinnoh_Text_TrRuinManiacBryanIntro:
 	.byte 0xFD, 0x40, 0x05, 0x2D, 0x6B, 0x4A, 0xFF
@@ -4118,8 +5698,18 @@ Sinnoh_Text_TrRuinManiacBryanAfter:
 
 Sinnoh_EventScript_TrRuinManiacCalvin::
 	trainerbattle_single TRAINER_SINNOH_RUIN_MANIAC_CALVIN, Sinnoh_Text_TrRuinManiacCalvinIntro, Sinnoh_Text_TrRuinManiacCalvinDefeat
+	specialvar VAR_RESULT, ShouldTryRematchBattle
+	goto_if_eq VAR_RESULT, TRUE, Sinnoh_EventScript_TrRuinManiacCalvinRematch
 	msgbox Sinnoh_Text_TrRuinManiacCalvinAfter, MSGBOX_AUTOCLOSE
 	end
+
+Sinnoh_EventScript_TrRuinManiacCalvinRematch::
+	trainerbattle_rematch TRAINER_SINNOH_RUIN_MANIAC_CALVIN, Sinnoh_Text_TrRuinManiacCalvinRematch, Sinnoh_Text_TrRuinManiacCalvinDefeat
+	msgbox Sinnoh_Text_TrRuinManiacCalvinAfter, MSGBOX_AUTOCLOSE
+	end
+
+Sinnoh_Text_TrRuinManiacCalvinRematch:
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x6B, 0x5F, 0xFF
 
 Sinnoh_Text_TrRuinManiacCalvinIntro:
 	.byte 0xFD, 0x40, 0x05, 0x2D, 0x6B, 0x5C, 0xFF
@@ -4146,8 +5736,18 @@ Sinnoh_Text_TrRuinManiacGeraldAfter:
 
 Sinnoh_EventScript_TrRuinManiacHarry::
 	trainerbattle_single TRAINER_SINNOH_RUIN_MANIAC_HARRY, Sinnoh_Text_TrRuinManiacHarryIntro, Sinnoh_Text_TrRuinManiacHarryDefeat
+	specialvar VAR_RESULT, ShouldTryRematchBattle
+	goto_if_eq VAR_RESULT, TRUE, Sinnoh_EventScript_TrRuinManiacHarryRematch
 	msgbox Sinnoh_Text_TrRuinManiacHarryAfter, MSGBOX_AUTOCLOSE
 	end
+
+Sinnoh_EventScript_TrRuinManiacHarryRematch::
+	trainerbattle_rematch TRAINER_SINNOH_RUIN_MANIAC_HARRY, Sinnoh_Text_TrRuinManiacHarryRematch, Sinnoh_Text_TrRuinManiacHarryDefeat
+	msgbox Sinnoh_Text_TrRuinManiacHarryAfter, MSGBOX_AUTOCLOSE
+	end
+
+Sinnoh_Text_TrRuinManiacHarryRematch:
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x6C, 0x03, 0xFF
 
 Sinnoh_Text_TrRuinManiacHarryIntro:
 	.byte 0xFD, 0x40, 0x05, 0x2D, 0x6C, 0x00, 0xFF
@@ -4174,8 +5774,18 @@ Sinnoh_Text_TrRuinManiacKarlAfter:
 
 Sinnoh_EventScript_TrRuinManiacLarry::
 	trainerbattle_single TRAINER_SINNOH_RUIN_MANIAC_LARRY, Sinnoh_Text_TrRuinManiacLarryIntro, Sinnoh_Text_TrRuinManiacLarryDefeat
+	specialvar VAR_RESULT, ShouldTryRematchBattle
+	goto_if_eq VAR_RESULT, TRUE, Sinnoh_EventScript_TrRuinManiacLarryRematch
 	msgbox Sinnoh_Text_TrRuinManiacLarryAfter, MSGBOX_AUTOCLOSE
 	end
+
+Sinnoh_EventScript_TrRuinManiacLarryRematch::
+	trainerbattle_rematch TRAINER_SINNOH_RUIN_MANIAC_LARRY, Sinnoh_Text_TrRuinManiacLarryRematch, Sinnoh_Text_TrRuinManiacLarryDefeat
+	msgbox Sinnoh_Text_TrRuinManiacLarryAfter, MSGBOX_AUTOCLOSE
+	end
+
+Sinnoh_Text_TrRuinManiacLarryRematch:
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x6C, 0x4B, 0xFF
 
 Sinnoh_Text_TrRuinManiacLarryIntro:
 	.byte 0xFD, 0x40, 0x05, 0x2D, 0x6C, 0x48, 0xFF
@@ -4188,8 +5798,18 @@ Sinnoh_Text_TrRuinManiacLarryAfter:
 
 Sinnoh_EventScript_TrRuinManiacRonald::
 	trainerbattle_single TRAINER_SINNOH_RUIN_MANIAC_RONALD, Sinnoh_Text_TrRuinManiacRonaldIntro, Sinnoh_Text_TrRuinManiacRonaldDefeat
+	specialvar VAR_RESULT, ShouldTryRematchBattle
+	goto_if_eq VAR_RESULT, TRUE, Sinnoh_EventScript_TrRuinManiacRonaldRematch
 	msgbox Sinnoh_Text_TrRuinManiacRonaldAfter, MSGBOX_AUTOCLOSE
 	end
+
+Sinnoh_EventScript_TrRuinManiacRonaldRematch::
+	trainerbattle_rematch TRAINER_SINNOH_RUIN_MANIAC_RONALD, Sinnoh_Text_TrRuinManiacRonaldRematch, Sinnoh_Text_TrRuinManiacRonaldDefeat
+	msgbox Sinnoh_Text_TrRuinManiacRonaldAfter, MSGBOX_AUTOCLOSE
+	end
+
+Sinnoh_Text_TrRuinManiacRonaldRematch:
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x6C, 0x5D, 0xFF
 
 Sinnoh_Text_TrRuinManiacRonaldIntro:
 	.byte 0xFD, 0x40, 0x05, 0x2D, 0x6C, 0x5A, 0xFF
@@ -4216,8 +5836,18 @@ Sinnoh_Text_TrSailorDamianAfter:
 
 Sinnoh_EventScript_TrSailorLuther::
 	trainerbattle_single TRAINER_SINNOH_SAILOR_LUTHER, Sinnoh_Text_TrSailorLutherIntro, Sinnoh_Text_TrSailorLutherDefeat
+	specialvar VAR_RESULT, ShouldTryRematchBattle
+	goto_if_eq VAR_RESULT, TRUE, Sinnoh_EventScript_TrSailorLutherRematch
 	msgbox Sinnoh_Text_TrSailorLutherAfter, MSGBOX_AUTOCLOSE
 	end
+
+Sinnoh_EventScript_TrSailorLutherRematch::
+	trainerbattle_rematch TRAINER_SINNOH_SAILOR_LUTHER, Sinnoh_Text_TrSailorLutherRematch, Sinnoh_Text_TrSailorLutherDefeat
+	msgbox Sinnoh_Text_TrSailorLutherAfter, MSGBOX_AUTOCLOSE
+	end
+
+Sinnoh_Text_TrSailorLutherRematch:
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x6D, 0x01, 0xFF
 
 Sinnoh_Text_TrSailorLutherIntro:
 	.byte 0xFD, 0x40, 0x05, 0x2D, 0x6C, 0x7E, 0xFF
@@ -4230,8 +5860,18 @@ Sinnoh_Text_TrSailorLutherAfter:
 
 Sinnoh_EventScript_TrSailorMarc::
 	trainerbattle_single TRAINER_SINNOH_SAILOR_MARC, Sinnoh_Text_TrSailorMarcIntro, Sinnoh_Text_TrSailorMarcDefeat
+	specialvar VAR_RESULT, ShouldTryRematchBattle
+	goto_if_eq VAR_RESULT, TRUE, Sinnoh_EventScript_TrSailorMarcRematch
 	msgbox Sinnoh_Text_TrSailorMarcAfter, MSGBOX_AUTOCLOSE
 	end
+
+Sinnoh_EventScript_TrSailorMarcRematch::
+	trainerbattle_rematch TRAINER_SINNOH_SAILOR_MARC, Sinnoh_Text_TrSailorMarcRematch, Sinnoh_Text_TrSailorMarcDefeat
+	msgbox Sinnoh_Text_TrSailorMarcAfter, MSGBOX_AUTOCLOSE
+	end
+
+Sinnoh_Text_TrSailorMarcRematch:
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x6D, 0x13, 0xFF
 
 Sinnoh_Text_TrSailorMarcIntro:
 	.byte 0xFD, 0x40, 0x05, 0x2D, 0x6D, 0x10, 0xFF
@@ -4244,8 +5884,18 @@ Sinnoh_Text_TrSailorMarcAfter:
 
 Sinnoh_EventScript_TrSailorPaul::
 	trainerbattle_single TRAINER_SINNOH_SAILOR_PAUL, Sinnoh_Text_TrSailorPaulIntro, Sinnoh_Text_TrSailorPaulDefeat
+	specialvar VAR_RESULT, ShouldTryRematchBattle
+	goto_if_eq VAR_RESULT, TRUE, Sinnoh_EventScript_TrSailorPaulRematch
 	msgbox Sinnoh_Text_TrSailorPaulAfter, MSGBOX_AUTOCLOSE
 	end
+
+Sinnoh_EventScript_TrSailorPaulRematch::
+	trainerbattle_rematch TRAINER_SINNOH_SAILOR_PAUL, Sinnoh_Text_TrSailorPaulRematch, Sinnoh_Text_TrSailorPaulDefeat
+	msgbox Sinnoh_Text_TrSailorPaulAfter, MSGBOX_AUTOCLOSE
+	end
+
+Sinnoh_Text_TrSailorPaulRematch:
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x6D, 0x49, 0xFF
 
 Sinnoh_Text_TrSailorPaulIntro:
 	.byte 0xFD, 0x40, 0x05, 0x2D, 0x6D, 0x46, 0xFF
@@ -4272,8 +5922,18 @@ Sinnoh_Text_TrSailorSamsonAfter:
 
 Sinnoh_EventScript_TrSailorSkyler::
 	trainerbattle_single TRAINER_SINNOH_SAILOR_SKYLER, Sinnoh_Text_TrSailorSkylerIntro, Sinnoh_Text_TrSailorSkylerDefeat
+	specialvar VAR_RESULT, ShouldTryRematchBattle
+	goto_if_eq VAR_RESULT, TRUE, Sinnoh_EventScript_TrSailorSkylerRematch
 	msgbox Sinnoh_Text_TrSailorSkylerAfter, MSGBOX_AUTOCLOSE
 	end
+
+Sinnoh_EventScript_TrSailorSkylerRematch::
+	trainerbattle_rematch TRAINER_SINNOH_SAILOR_SKYLER, Sinnoh_Text_TrSailorSkylerRematch, Sinnoh_Text_TrSailorSkylerDefeat
+	msgbox Sinnoh_Text_TrSailorSkylerAfter, MSGBOX_AUTOCLOSE
+	end
+
+Sinnoh_Text_TrSailorSkylerRematch:
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x6D, 0x6D, 0xFF
 
 Sinnoh_Text_TrSailorSkylerIntro:
 	.byte 0xFD, 0x40, 0x05, 0x2D, 0x6D, 0x6A, 0xFF
@@ -4286,8 +5946,18 @@ Sinnoh_Text_TrSailorSkylerAfter:
 
 Sinnoh_EventScript_TrSailorZachariah::
 	trainerbattle_single TRAINER_SINNOH_SAILOR_ZACHARIAH, Sinnoh_Text_TrSailorZachariahIntro, Sinnoh_Text_TrSailorZachariahDefeat
+	specialvar VAR_RESULT, ShouldTryRematchBattle
+	goto_if_eq VAR_RESULT, TRUE, Sinnoh_EventScript_TrSailorZachariahRematch
 	msgbox Sinnoh_Text_TrSailorZachariahAfter, MSGBOX_AUTOCLOSE
 	end
+
+Sinnoh_EventScript_TrSailorZachariahRematch::
+	trainerbattle_rematch TRAINER_SINNOH_SAILOR_ZACHARIAH, Sinnoh_Text_TrSailorZachariahRematch, Sinnoh_Text_TrSailorZachariahDefeat
+	msgbox Sinnoh_Text_TrSailorZachariahAfter, MSGBOX_AUTOCLOSE
+	end
+
+Sinnoh_Text_TrSailorZachariahRematch:
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x6D, 0x7F, 0xFF
 
 Sinnoh_Text_TrSailorZachariahIntro:
 	.byte 0xFD, 0x40, 0x05, 0x2D, 0x6D, 0x7C, 0xFF
@@ -4384,8 +6054,18 @@ Sinnoh_Text_TrScientistFredrickAfter:
 
 Sinnoh_EventScript_TrScientistShaun::
 	trainerbattle_single TRAINER_SINNOH_SCIENTIST_SHAUN, Sinnoh_Text_TrScientistShaunIntro, Sinnoh_Text_TrScientistShaunDefeat
+	specialvar VAR_RESULT, ShouldTryRematchBattle
+	goto_if_eq VAR_RESULT, TRUE, Sinnoh_EventScript_TrScientistShaunRematch
 	msgbox Sinnoh_Text_TrScientistShaunAfter, MSGBOX_AUTOCLOSE
 	end
+
+Sinnoh_EventScript_TrScientistShaunRematch::
+	trainerbattle_rematch TRAINER_SINNOH_SCIENTIST_SHAUN, Sinnoh_Text_TrScientistShaunRematch, Sinnoh_Text_TrScientistShaunDefeat
+	msgbox Sinnoh_Text_TrScientistShaunAfter, MSGBOX_AUTOCLOSE
+	end
+
+Sinnoh_Text_TrScientistShaunRematch:
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x6F, 0x57, 0xFF
 
 Sinnoh_Text_TrScientistShaunIntro:
 	.byte 0xFD, 0x40, 0x05, 0x2D, 0x6F, 0x54, 0xFF
@@ -4398,8 +6078,18 @@ Sinnoh_Text_TrScientistShaunAfter:
 
 Sinnoh_EventScript_TrScientistStefano::
 	trainerbattle_single TRAINER_SINNOH_SCIENTIST_STEFANO, Sinnoh_Text_TrScientistStefanoIntro, Sinnoh_Text_TrScientistStefanoDefeat
+	specialvar VAR_RESULT, ShouldTryRematchBattle
+	goto_if_eq VAR_RESULT, TRUE, Sinnoh_EventScript_TrScientistStefanoRematch
 	msgbox Sinnoh_Text_TrScientistStefanoAfter, MSGBOX_AUTOCLOSE
 	end
+
+Sinnoh_EventScript_TrScientistStefanoRematch::
+	trainerbattle_rematch TRAINER_SINNOH_SCIENTIST_STEFANO, Sinnoh_Text_TrScientistStefanoRematch, Sinnoh_Text_TrScientistStefanoDefeat
+	msgbox Sinnoh_Text_TrScientistStefanoAfter, MSGBOX_AUTOCLOSE
+	end
+
+Sinnoh_Text_TrScientistStefanoRematch:
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x70, 0x1F, 0xFF
 
 Sinnoh_Text_TrScientistStefanoIntro:
 	.byte 0xFD, 0x40, 0x05, 0x2D, 0x70, 0x1C, 0xFF
@@ -4426,8 +6116,18 @@ Sinnoh_Text_TrScientistTravonAfter:
 
 Sinnoh_EventScript_TrSkierAndrea::
 	trainerbattle_single TRAINER_SINNOH_SKIER_ANDREA, Sinnoh_Text_TrSkierAndreaIntro, Sinnoh_Text_TrSkierAndreaDefeat
+	specialvar VAR_RESULT, ShouldTryRematchBattle
+	goto_if_eq VAR_RESULT, TRUE, Sinnoh_EventScript_TrSkierAndreaRematch
 	msgbox Sinnoh_Text_TrSkierAndreaAfter, MSGBOX_AUTOCLOSE
 	end
+
+Sinnoh_EventScript_TrSkierAndreaRematch::
+	trainerbattle_rematch TRAINER_SINNOH_SKIER_ANDREA, Sinnoh_Text_TrSkierAndreaRematch, Sinnoh_Text_TrSkierAndreaDefeat
+	msgbox Sinnoh_Text_TrSkierAndreaAfter, MSGBOX_AUTOCLOSE
+	end
+
+Sinnoh_Text_TrSkierAndreaRematch:
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x70, 0x43, 0xFF
 
 Sinnoh_Text_TrSkierAndreaIntro:
 	.byte 0xFD, 0x40, 0x05, 0x2D, 0x70, 0x40, 0xFF
@@ -4440,8 +6140,18 @@ Sinnoh_Text_TrSkierAndreaAfter:
 
 Sinnoh_EventScript_TrSkierBjorn::
 	trainerbattle_single TRAINER_SINNOH_SKIER_BJORN, Sinnoh_Text_TrSkierBjornIntro, Sinnoh_Text_TrSkierBjornDefeat
+	specialvar VAR_RESULT, ShouldTryRematchBattle
+	goto_if_eq VAR_RESULT, TRUE, Sinnoh_EventScript_TrSkierBjornRematch
 	msgbox Sinnoh_Text_TrSkierBjornAfter, MSGBOX_AUTOCLOSE
 	end
+
+Sinnoh_EventScript_TrSkierBjornRematch::
+	trainerbattle_rematch TRAINER_SINNOH_SKIER_BJORN, Sinnoh_Text_TrSkierBjornRematch, Sinnoh_Text_TrSkierBjornDefeat
+	msgbox Sinnoh_Text_TrSkierBjornAfter, MSGBOX_AUTOCLOSE
+	end
+
+Sinnoh_Text_TrSkierBjornRematch:
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x70, 0x79, 0xFF
 
 Sinnoh_Text_TrSkierBjornIntro:
 	.byte 0xFD, 0x40, 0x05, 0x2D, 0x70, 0x76, 0xFF
@@ -4454,8 +6164,18 @@ Sinnoh_Text_TrSkierBjornAfter:
 
 Sinnoh_EventScript_TrSkierBradley::
 	trainerbattle_single TRAINER_SINNOH_SKIER_BRADLEY, Sinnoh_Text_TrSkierBradleyIntro, Sinnoh_Text_TrSkierBradleyDefeat
+	specialvar VAR_RESULT, ShouldTryRematchBattle
+	goto_if_eq VAR_RESULT, TRUE, Sinnoh_EventScript_TrSkierBradleyRematch
 	msgbox Sinnoh_Text_TrSkierBradleyAfter, MSGBOX_AUTOCLOSE
 	end
+
+Sinnoh_EventScript_TrSkierBradleyRematch::
+	trainerbattle_rematch TRAINER_SINNOH_SKIER_BRADLEY, Sinnoh_Text_TrSkierBradleyRematch, Sinnoh_Text_TrSkierBradleyDefeat
+	msgbox Sinnoh_Text_TrSkierBradleyAfter, MSGBOX_AUTOCLOSE
+	end
+
+Sinnoh_Text_TrSkierBradleyRematch:
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x71, 0x2F, 0xFF
 
 Sinnoh_Text_TrSkierBradleyIntro:
 	.byte 0xFD, 0x40, 0x05, 0x2D, 0x71, 0x2C, 0xFF
@@ -4468,8 +6188,18 @@ Sinnoh_Text_TrSkierBradleyAfter:
 
 Sinnoh_EventScript_TrSkierEdward::
 	trainerbattle_single TRAINER_SINNOH_SKIER_EDWARD, Sinnoh_Text_TrSkierEdwardIntro, Sinnoh_Text_TrSkierEdwardDefeat
+	specialvar VAR_RESULT, ShouldTryRematchBattle
+	goto_if_eq VAR_RESULT, TRUE, Sinnoh_EventScript_TrSkierEdwardRematch
 	msgbox Sinnoh_Text_TrSkierEdwardAfter, MSGBOX_AUTOCLOSE
 	end
+
+Sinnoh_EventScript_TrSkierEdwardRematch::
+	trainerbattle_rematch TRAINER_SINNOH_SKIER_EDWARD, Sinnoh_Text_TrSkierEdwardRematch, Sinnoh_Text_TrSkierEdwardDefeat
+	msgbox Sinnoh_Text_TrSkierEdwardAfter, MSGBOX_AUTOCLOSE
+	end
+
+Sinnoh_Text_TrSkierEdwardRematch:
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x71, 0x41, 0xFF
 
 Sinnoh_Text_TrSkierEdwardIntro:
 	.byte 0xFD, 0x40, 0x05, 0x2D, 0x71, 0x3E, 0xFF
@@ -4482,8 +6212,18 @@ Sinnoh_Text_TrSkierEdwardAfter:
 
 Sinnoh_EventScript_TrSkierKaitlyn::
 	trainerbattle_single TRAINER_SINNOH_SKIER_KAITLYN, Sinnoh_Text_TrSkierKaitlynIntro, Sinnoh_Text_TrSkierKaitlynDefeat
+	specialvar VAR_RESULT, ShouldTryRematchBattle
+	goto_if_eq VAR_RESULT, TRUE, Sinnoh_EventScript_TrSkierKaitlynRematch
 	msgbox Sinnoh_Text_TrSkierKaitlynAfter, MSGBOX_AUTOCLOSE
 	end
+
+Sinnoh_EventScript_TrSkierKaitlynRematch::
+	trainerbattle_rematch TRAINER_SINNOH_SKIER_KAITLYN, Sinnoh_Text_TrSkierKaitlynRematch, Sinnoh_Text_TrSkierKaitlynDefeat
+	msgbox Sinnoh_Text_TrSkierKaitlynAfter, MSGBOX_AUTOCLOSE
+	end
+
+Sinnoh_Text_TrSkierKaitlynRematch:
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x71, 0x77, 0xFF
 
 Sinnoh_Text_TrSkierKaitlynIntro:
 	.byte 0xFD, 0x40, 0x05, 0x2D, 0x71, 0x74, 0xFF
@@ -4496,8 +6236,18 @@ Sinnoh_Text_TrSkierKaitlynAfter:
 
 Sinnoh_EventScript_TrSkierLexie::
 	trainerbattle_single TRAINER_SINNOH_SKIER_LEXIE, Sinnoh_Text_TrSkierLexieIntro, Sinnoh_Text_TrSkierLexieDefeat
+	specialvar VAR_RESULT, ShouldTryRematchBattle
+	goto_if_eq VAR_RESULT, TRUE, Sinnoh_EventScript_TrSkierLexieRematch
 	msgbox Sinnoh_Text_TrSkierLexieAfter, MSGBOX_AUTOCLOSE
 	end
+
+Sinnoh_EventScript_TrSkierLexieRematch::
+	trainerbattle_rematch TRAINER_SINNOH_SKIER_LEXIE, Sinnoh_Text_TrSkierLexieRematch, Sinnoh_Text_TrSkierLexieDefeat
+	msgbox Sinnoh_Text_TrSkierLexieAfter, MSGBOX_AUTOCLOSE
+	end
+
+Sinnoh_Text_TrSkierLexieRematch:
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x72, 0x09, 0xFF
 
 Sinnoh_Text_TrSkierLexieIntro:
 	.byte 0xFD, 0x40, 0x05, 0x2D, 0x72, 0x06, 0xFF
@@ -4510,8 +6260,18 @@ Sinnoh_Text_TrSkierLexieAfter:
 
 Sinnoh_EventScript_TrSkierMadison::
 	trainerbattle_single TRAINER_SINNOH_SKIER_MADISON, Sinnoh_Text_TrSkierMadisonIntro, Sinnoh_Text_TrSkierMadisonDefeat
+	specialvar VAR_RESULT, ShouldTryRematchBattle
+	goto_if_eq VAR_RESULT, TRUE, Sinnoh_EventScript_TrSkierMadisonRematch
 	msgbox Sinnoh_Text_TrSkierMadisonAfter, MSGBOX_AUTOCLOSE
 	end
+
+Sinnoh_EventScript_TrSkierMadisonRematch::
+	trainerbattle_rematch TRAINER_SINNOH_SKIER_MADISON, Sinnoh_Text_TrSkierMadisonRematch, Sinnoh_Text_TrSkierMadisonDefeat
+	msgbox Sinnoh_Text_TrSkierMadisonAfter, MSGBOX_AUTOCLOSE
+	end
+
+Sinnoh_Text_TrSkierMadisonRematch:
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x72, 0x1B, 0xFF
 
 Sinnoh_Text_TrSkierMadisonIntro:
 	.byte 0xFD, 0x40, 0x05, 0x2D, 0x72, 0x18, 0xFF
@@ -4524,8 +6284,18 @@ Sinnoh_Text_TrSkierMadisonAfter:
 
 Sinnoh_EventScript_TrSkierShawn::
 	trainerbattle_single TRAINER_SINNOH_SKIER_SHAWN, Sinnoh_Text_TrSkierShawnIntro, Sinnoh_Text_TrSkierShawnDefeat
+	specialvar VAR_RESULT, ShouldTryRematchBattle
+	goto_if_eq VAR_RESULT, TRUE, Sinnoh_EventScript_TrSkierShawnRematch
 	msgbox Sinnoh_Text_TrSkierShawnAfter, MSGBOX_AUTOCLOSE
 	end
+
+Sinnoh_EventScript_TrSkierShawnRematch::
+	trainerbattle_rematch TRAINER_SINNOH_SKIER_SHAWN, Sinnoh_Text_TrSkierShawnRematch, Sinnoh_Text_TrSkierShawnDefeat
+	msgbox Sinnoh_Text_TrSkierShawnAfter, MSGBOX_AUTOCLOSE
+	end
+
+Sinnoh_Text_TrSkierShawnRematch:
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x72, 0x51, 0xFF
 
 Sinnoh_Text_TrSkierShawnIntro:
 	.byte 0xFD, 0x40, 0x05, 0x2D, 0x72, 0x4E, 0xFF
@@ -4538,8 +6308,18 @@ Sinnoh_Text_TrSkierShawnAfter:
 
 Sinnoh_EventScript_TrSocialiteReina::
 	trainerbattle_single TRAINER_SINNOH_SOCIALITE_REINA, Sinnoh_Text_TrSocialiteReinaIntro, Sinnoh_Text_TrSocialiteReinaDefeat
+	specialvar VAR_RESULT, ShouldTryRematchBattle
+	goto_if_eq VAR_RESULT, TRUE, Sinnoh_EventScript_TrSocialiteReinaRematch
 	msgbox Sinnoh_Text_TrSocialiteReinaAfter, MSGBOX_AUTOCLOSE
 	end
+
+Sinnoh_EventScript_TrSocialiteReinaRematch::
+	trainerbattle_rematch TRAINER_SINNOH_SOCIALITE_REINA, Sinnoh_Text_TrSocialiteReinaRematch, Sinnoh_Text_TrSocialiteReinaDefeat
+	msgbox Sinnoh_Text_TrSocialiteReinaAfter, MSGBOX_AUTOCLOSE
+	end
+
+Sinnoh_Text_TrSocialiteReinaRematch:
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x72, 0x75, 0xFF
 
 Sinnoh_Text_TrSocialiteReinaIntro:
 	.byte 0xFD, 0x40, 0x05, 0x2D, 0x72, 0x72, 0xFF
@@ -4552,8 +6332,18 @@ Sinnoh_Text_TrSocialiteReinaAfter:
 
 Sinnoh_EventScript_TrSwimmerAdrian::
 	trainerbattle_single TRAINER_SINNOH_SWIMMER_ADRIAN, Sinnoh_Text_TrSwimmerAdrianIntro, Sinnoh_Text_TrSwimmerAdrianDefeat
+	specialvar VAR_RESULT, ShouldTryRematchBattle
+	goto_if_eq VAR_RESULT, TRUE, Sinnoh_EventScript_TrSwimmerAdrianRematch
 	msgbox Sinnoh_Text_TrSwimmerAdrianAfter, MSGBOX_AUTOCLOSE
 	end
+
+Sinnoh_EventScript_TrSwimmerAdrianRematch::
+	trainerbattle_rematch TRAINER_SINNOH_SWIMMER_ADRIAN, Sinnoh_Text_TrSwimmerAdrianRematch, Sinnoh_Text_TrSwimmerAdrianDefeat
+	msgbox Sinnoh_Text_TrSwimmerAdrianAfter, MSGBOX_AUTOCLOSE
+	end
+
+Sinnoh_Text_TrSwimmerAdrianRematch:
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x73, 0x2B, 0xFF
 
 Sinnoh_Text_TrSwimmerAdrianIntro:
 	.byte 0xFD, 0x40, 0x05, 0x2D, 0x73, 0x28, 0xFF
@@ -4566,8 +6356,18 @@ Sinnoh_Text_TrSwimmerAdrianAfter:
 
 Sinnoh_EventScript_TrSwimmerAubree::
 	trainerbattle_single TRAINER_SINNOH_SWIMMER_AUBREE, Sinnoh_Text_TrSwimmerAubreeIntro, Sinnoh_Text_TrSwimmerAubreeDefeat
+	specialvar VAR_RESULT, ShouldTryRematchBattle
+	goto_if_eq VAR_RESULT, TRUE, Sinnoh_EventScript_TrSwimmerAubreeRematch
 	msgbox Sinnoh_Text_TrSwimmerAubreeAfter, MSGBOX_AUTOCLOSE
 	end
+
+Sinnoh_EventScript_TrSwimmerAubreeRematch::
+	trainerbattle_rematch TRAINER_SINNOH_SWIMMER_AUBREE, Sinnoh_Text_TrSwimmerAubreeRematch, Sinnoh_Text_TrSwimmerAubreeDefeat
+	msgbox Sinnoh_Text_TrSwimmerAubreeAfter, MSGBOX_AUTOCLOSE
+	end
+
+Sinnoh_Text_TrSwimmerAubreeRematch:
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x73, 0x3D, 0xFF
 
 Sinnoh_Text_TrSwimmerAubreeIntro:
 	.byte 0xFD, 0x40, 0x05, 0x2D, 0x73, 0x3A, 0xFF
@@ -4580,8 +6380,18 @@ Sinnoh_Text_TrSwimmerAubreeAfter:
 
 Sinnoh_EventScript_TrSwimmerCassandra::
 	trainerbattle_single TRAINER_SINNOH_SWIMMER_CASSANDRA, Sinnoh_Text_TrSwimmerCassandraIntro, Sinnoh_Text_TrSwimmerCassandraDefeat
+	specialvar VAR_RESULT, ShouldTryRematchBattle
+	goto_if_eq VAR_RESULT, TRUE, Sinnoh_EventScript_TrSwimmerCassandraRematch
 	msgbox Sinnoh_Text_TrSwimmerCassandraAfter, MSGBOX_AUTOCLOSE
 	end
+
+Sinnoh_EventScript_TrSwimmerCassandraRematch::
+	trainerbattle_rematch TRAINER_SINNOH_SWIMMER_CASSANDRA, Sinnoh_Text_TrSwimmerCassandraRematch, Sinnoh_Text_TrSwimmerCassandraDefeat
+	msgbox Sinnoh_Text_TrSwimmerCassandraAfter, MSGBOX_AUTOCLOSE
+	end
+
+Sinnoh_Text_TrSwimmerCassandraRematch:
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x73, 0x4F, 0xFF
 
 Sinnoh_Text_TrSwimmerCassandraIntro:
 	.byte 0xFD, 0x40, 0x05, 0x2D, 0x73, 0x4C, 0xFF
@@ -4594,8 +6404,18 @@ Sinnoh_Text_TrSwimmerCassandraAfter:
 
 Sinnoh_EventScript_TrSwimmerClaire::
 	trainerbattle_single TRAINER_SINNOH_SWIMMER_CLAIRE, Sinnoh_Text_TrSwimmerClaireIntro, Sinnoh_Text_TrSwimmerClaireDefeat
+	specialvar VAR_RESULT, ShouldTryRematchBattle
+	goto_if_eq VAR_RESULT, TRUE, Sinnoh_EventScript_TrSwimmerClaireRematch
 	msgbox Sinnoh_Text_TrSwimmerClaireAfter, MSGBOX_AUTOCLOSE
 	end
+
+Sinnoh_EventScript_TrSwimmerClaireRematch::
+	trainerbattle_rematch TRAINER_SINNOH_SWIMMER_CLAIRE, Sinnoh_Text_TrSwimmerClaireRematch, Sinnoh_Text_TrSwimmerClaireDefeat
+	msgbox Sinnoh_Text_TrSwimmerClaireAfter, MSGBOX_AUTOCLOSE
+	end
+
+Sinnoh_Text_TrSwimmerClaireRematch:
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x73, 0x61, 0xFF
 
 Sinnoh_Text_TrSwimmerClaireIntro:
 	.byte 0xFD, 0x40, 0x05, 0x2D, 0x73, 0x5E, 0xFF
@@ -4608,8 +6428,18 @@ Sinnoh_Text_TrSwimmerClaireAfter:
 
 Sinnoh_EventScript_TrSwimmerColton::
 	trainerbattle_single TRAINER_SINNOH_SWIMMER_COLTON, Sinnoh_Text_TrSwimmerColtonIntro, Sinnoh_Text_TrSwimmerColtonDefeat
+	specialvar VAR_RESULT, ShouldTryRematchBattle
+	goto_if_eq VAR_RESULT, TRUE, Sinnoh_EventScript_TrSwimmerColtonRematch
 	msgbox Sinnoh_Text_TrSwimmerColtonAfter, MSGBOX_AUTOCLOSE
 	end
+
+Sinnoh_EventScript_TrSwimmerColtonRematch::
+	trainerbattle_rematch TRAINER_SINNOH_SWIMMER_COLTON, Sinnoh_Text_TrSwimmerColtonRematch, Sinnoh_Text_TrSwimmerColtonDefeat
+	msgbox Sinnoh_Text_TrSwimmerColtonAfter, MSGBOX_AUTOCLOSE
+	end
+
+Sinnoh_Text_TrSwimmerColtonRematch:
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x73, 0x73, 0xFF
 
 Sinnoh_Text_TrSwimmerColtonIntro:
 	.byte 0xFD, 0x40, 0x05, 0x2D, 0x73, 0x70, 0xFF
@@ -4622,8 +6452,18 @@ Sinnoh_Text_TrSwimmerColtonAfter:
 
 Sinnoh_EventScript_TrSwimmerCrystal::
 	trainerbattle_single TRAINER_SINNOH_SWIMMER_CRYSTAL, Sinnoh_Text_TrSwimmerCrystalIntro, Sinnoh_Text_TrSwimmerCrystalDefeat
+	specialvar VAR_RESULT, ShouldTryRematchBattle
+	goto_if_eq VAR_RESULT, TRUE, Sinnoh_EventScript_TrSwimmerCrystalRematch
 	msgbox Sinnoh_Text_TrSwimmerCrystalAfter, MSGBOX_AUTOCLOSE
 	end
+
+Sinnoh_EventScript_TrSwimmerCrystalRematch::
+	trainerbattle_rematch TRAINER_SINNOH_SWIMMER_CRYSTAL, Sinnoh_Text_TrSwimmerCrystalRematch, Sinnoh_Text_TrSwimmerCrystalDefeat
+	msgbox Sinnoh_Text_TrSwimmerCrystalAfter, MSGBOX_AUTOCLOSE
+	end
+
+Sinnoh_Text_TrSwimmerCrystalRematch:
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x74, 0x05, 0xFF
 
 Sinnoh_Text_TrSwimmerCrystalIntro:
 	.byte 0xFD, 0x40, 0x05, 0x2D, 0x74, 0x02, 0xFF
@@ -4636,8 +6476,18 @@ Sinnoh_Text_TrSwimmerCrystalAfter:
 
 Sinnoh_EventScript_TrSwimmerDillon::
 	trainerbattle_single TRAINER_SINNOH_SWIMMER_DILLON, Sinnoh_Text_TrSwimmerDillonIntro, Sinnoh_Text_TrSwimmerDillonDefeat
+	specialvar VAR_RESULT, ShouldTryRematchBattle
+	goto_if_eq VAR_RESULT, TRUE, Sinnoh_EventScript_TrSwimmerDillonRematch
 	msgbox Sinnoh_Text_TrSwimmerDillonAfter, MSGBOX_AUTOCLOSE
 	end
+
+Sinnoh_EventScript_TrSwimmerDillonRematch::
+	trainerbattle_rematch TRAINER_SINNOH_SWIMMER_DILLON, Sinnoh_Text_TrSwimmerDillonRematch, Sinnoh_Text_TrSwimmerDillonDefeat
+	msgbox Sinnoh_Text_TrSwimmerDillonAfter, MSGBOX_AUTOCLOSE
+	end
+
+Sinnoh_Text_TrSwimmerDillonRematch:
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x74, 0x29, 0xFF
 
 Sinnoh_Text_TrSwimmerDillonIntro:
 	.byte 0xFD, 0x40, 0x05, 0x2D, 0x74, 0x26, 0xFF
@@ -4650,8 +6500,18 @@ Sinnoh_Text_TrSwimmerDillonAfter:
 
 Sinnoh_EventScript_TrSwimmerErica::
 	trainerbattle_single TRAINER_SINNOH_SWIMMER_ERICA, Sinnoh_Text_TrSwimmerEricaIntro, Sinnoh_Text_TrSwimmerEricaDefeat
+	specialvar VAR_RESULT, ShouldTryRematchBattle
+	goto_if_eq VAR_RESULT, TRUE, Sinnoh_EventScript_TrSwimmerEricaRematch
 	msgbox Sinnoh_Text_TrSwimmerEricaAfter, MSGBOX_AUTOCLOSE
 	end
+
+Sinnoh_EventScript_TrSwimmerEricaRematch::
+	trainerbattle_rematch TRAINER_SINNOH_SWIMMER_ERICA, Sinnoh_Text_TrSwimmerEricaRematch, Sinnoh_Text_TrSwimmerEricaDefeat
+	msgbox Sinnoh_Text_TrSwimmerEricaAfter, MSGBOX_AUTOCLOSE
+	end
+
+Sinnoh_Text_TrSwimmerEricaRematch:
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x74, 0x3B, 0xFF
 
 Sinnoh_Text_TrSwimmerEricaIntro:
 	.byte 0xFD, 0x40, 0x05, 0x2D, 0x74, 0x38, 0xFF
@@ -4664,8 +6524,18 @@ Sinnoh_Text_TrSwimmerEricaAfter:
 
 Sinnoh_EventScript_TrSwimmerErik::
 	trainerbattle_single TRAINER_SINNOH_SWIMMER_ERIK, Sinnoh_Text_TrSwimmerErikIntro, Sinnoh_Text_TrSwimmerErikDefeat
+	specialvar VAR_RESULT, ShouldTryRematchBattle
+	goto_if_eq VAR_RESULT, TRUE, Sinnoh_EventScript_TrSwimmerErikRematch
 	msgbox Sinnoh_Text_TrSwimmerErikAfter, MSGBOX_AUTOCLOSE
 	end
+
+Sinnoh_EventScript_TrSwimmerErikRematch::
+	trainerbattle_rematch TRAINER_SINNOH_SWIMMER_ERIK, Sinnoh_Text_TrSwimmerErikRematch, Sinnoh_Text_TrSwimmerErikDefeat
+	msgbox Sinnoh_Text_TrSwimmerErikAfter, MSGBOX_AUTOCLOSE
+	end
+
+Sinnoh_Text_TrSwimmerErikRematch:
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x74, 0x4D, 0xFF
 
 Sinnoh_Text_TrSwimmerErikIntro:
 	.byte 0xFD, 0x40, 0x05, 0x2D, 0x74, 0x4A, 0xFF
@@ -4678,8 +6548,18 @@ Sinnoh_Text_TrSwimmerErikAfter:
 
 Sinnoh_EventScript_TrSwimmerEvan::
 	trainerbattle_single TRAINER_SINNOH_SWIMMER_EVAN, Sinnoh_Text_TrSwimmerEvanIntro, Sinnoh_Text_TrSwimmerEvanDefeat
+	specialvar VAR_RESULT, ShouldTryRematchBattle
+	goto_if_eq VAR_RESULT, TRUE, Sinnoh_EventScript_TrSwimmerEvanRematch
 	msgbox Sinnoh_Text_TrSwimmerEvanAfter, MSGBOX_AUTOCLOSE
 	end
+
+Sinnoh_EventScript_TrSwimmerEvanRematch::
+	trainerbattle_rematch TRAINER_SINNOH_SWIMMER_EVAN, Sinnoh_Text_TrSwimmerEvanRematch, Sinnoh_Text_TrSwimmerEvanDefeat
+	msgbox Sinnoh_Text_TrSwimmerEvanAfter, MSGBOX_AUTOCLOSE
+	end
+
+Sinnoh_Text_TrSwimmerEvanRematch:
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x74, 0x5F, 0xFF
 
 Sinnoh_Text_TrSwimmerEvanIntro:
 	.byte 0xFD, 0x40, 0x05, 0x2D, 0x74, 0x5C, 0xFF
@@ -4692,8 +6572,18 @@ Sinnoh_Text_TrSwimmerEvanAfter:
 
 Sinnoh_EventScript_TrSwimmerFrancisco::
 	trainerbattle_single TRAINER_SINNOH_SWIMMER_FRANCISCO, Sinnoh_Text_TrSwimmerFranciscoIntro, Sinnoh_Text_TrSwimmerFranciscoDefeat
+	specialvar VAR_RESULT, ShouldTryRematchBattle
+	goto_if_eq VAR_RESULT, TRUE, Sinnoh_EventScript_TrSwimmerFranciscoRematch
 	msgbox Sinnoh_Text_TrSwimmerFranciscoAfter, MSGBOX_AUTOCLOSE
 	end
+
+Sinnoh_EventScript_TrSwimmerFranciscoRematch::
+	trainerbattle_rematch TRAINER_SINNOH_SWIMMER_FRANCISCO, Sinnoh_Text_TrSwimmerFranciscoRematch, Sinnoh_Text_TrSwimmerFranciscoDefeat
+	msgbox Sinnoh_Text_TrSwimmerFranciscoAfter, MSGBOX_AUTOCLOSE
+	end
+
+Sinnoh_Text_TrSwimmerFranciscoRematch:
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x74, 0x71, 0xFF
 
 Sinnoh_Text_TrSwimmerFranciscoIntro:
 	.byte 0xFD, 0x40, 0x05, 0x2D, 0x74, 0x6E, 0xFF
@@ -4706,8 +6596,18 @@ Sinnoh_Text_TrSwimmerFranciscoAfter:
 
 Sinnoh_EventScript_TrSwimmerGabrielle::
 	trainerbattle_single TRAINER_SINNOH_SWIMMER_GABRIELLE, Sinnoh_Text_TrSwimmerGabrielleIntro, Sinnoh_Text_TrSwimmerGabrielleDefeat
+	specialvar VAR_RESULT, ShouldTryRematchBattle
+	goto_if_eq VAR_RESULT, TRUE, Sinnoh_EventScript_TrSwimmerGabrielleRematch
 	msgbox Sinnoh_Text_TrSwimmerGabrielleAfter, MSGBOX_AUTOCLOSE
 	end
+
+Sinnoh_EventScript_TrSwimmerGabrielleRematch::
+	trainerbattle_rematch TRAINER_SINNOH_SWIMMER_GABRIELLE, Sinnoh_Text_TrSwimmerGabrielleRematch, Sinnoh_Text_TrSwimmerGabrielleDefeat
+	msgbox Sinnoh_Text_TrSwimmerGabrielleAfter, MSGBOX_AUTOCLOSE
+	end
+
+Sinnoh_Text_TrSwimmerGabrielleRematch:
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x75, 0x15, 0xFF
 
 Sinnoh_Text_TrSwimmerGabrielleIntro:
 	.byte 0xFD, 0x40, 0x05, 0x2D, 0x75, 0x12, 0xFF
@@ -4720,8 +6620,18 @@ Sinnoh_Text_TrSwimmerGabrielleAfter:
 
 Sinnoh_EventScript_TrSwimmerGlenn::
 	trainerbattle_single TRAINER_SINNOH_SWIMMER_GLENN, Sinnoh_Text_TrSwimmerGlennIntro, Sinnoh_Text_TrSwimmerGlennDefeat
+	specialvar VAR_RESULT, ShouldTryRematchBattle
+	goto_if_eq VAR_RESULT, TRUE, Sinnoh_EventScript_TrSwimmerGlennRematch
 	msgbox Sinnoh_Text_TrSwimmerGlennAfter, MSGBOX_AUTOCLOSE
 	end
+
+Sinnoh_EventScript_TrSwimmerGlennRematch::
+	trainerbattle_rematch TRAINER_SINNOH_SWIMMER_GLENN, Sinnoh_Text_TrSwimmerGlennRematch, Sinnoh_Text_TrSwimmerGlennDefeat
+	msgbox Sinnoh_Text_TrSwimmerGlennAfter, MSGBOX_AUTOCLOSE
+	end
+
+Sinnoh_Text_TrSwimmerGlennRematch:
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x75, 0x27, 0xFF
 
 Sinnoh_Text_TrSwimmerGlennIntro:
 	.byte 0xFD, 0x40, 0x05, 0x2D, 0x75, 0x24, 0xFF
@@ -4734,8 +6644,18 @@ Sinnoh_Text_TrSwimmerGlennAfter:
 
 Sinnoh_EventScript_TrSwimmerHaley::
 	trainerbattle_single TRAINER_SINNOH_SWIMMER_HALEY, Sinnoh_Text_TrSwimmerHaleyIntro, Sinnoh_Text_TrSwimmerHaleyDefeat
+	specialvar VAR_RESULT, ShouldTryRematchBattle
+	goto_if_eq VAR_RESULT, TRUE, Sinnoh_EventScript_TrSwimmerHaleyRematch
 	msgbox Sinnoh_Text_TrSwimmerHaleyAfter, MSGBOX_AUTOCLOSE
 	end
+
+Sinnoh_EventScript_TrSwimmerHaleyRematch::
+	trainerbattle_rematch TRAINER_SINNOH_SWIMMER_HALEY, Sinnoh_Text_TrSwimmerHaleyRematch, Sinnoh_Text_TrSwimmerHaleyDefeat
+	msgbox Sinnoh_Text_TrSwimmerHaleyAfter, MSGBOX_AUTOCLOSE
+	end
+
+Sinnoh_Text_TrSwimmerHaleyRematch:
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x75, 0x4B, 0xFF
 
 Sinnoh_Text_TrSwimmerHaleyIntro:
 	.byte 0xFD, 0x40, 0x05, 0x2D, 0x75, 0x48, 0xFF
@@ -4748,8 +6668,18 @@ Sinnoh_Text_TrSwimmerHaleyAfter:
 
 Sinnoh_EventScript_TrSwimmerJessica::
 	trainerbattle_single TRAINER_SINNOH_SWIMMER_JESSICA, Sinnoh_Text_TrSwimmerJessicaIntro, Sinnoh_Text_TrSwimmerJessicaDefeat
+	specialvar VAR_RESULT, ShouldTryRematchBattle
+	goto_if_eq VAR_RESULT, TRUE, Sinnoh_EventScript_TrSwimmerJessicaRematch
 	msgbox Sinnoh_Text_TrSwimmerJessicaAfter, MSGBOX_AUTOCLOSE
 	end
+
+Sinnoh_EventScript_TrSwimmerJessicaRematch::
+	trainerbattle_rematch TRAINER_SINNOH_SWIMMER_JESSICA, Sinnoh_Text_TrSwimmerJessicaRematch, Sinnoh_Text_TrSwimmerJessicaDefeat
+	msgbox Sinnoh_Text_TrSwimmerJessicaAfter, MSGBOX_AUTOCLOSE
+	end
+
+Sinnoh_Text_TrSwimmerJessicaRematch:
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x75, 0x5D, 0xFF
 
 Sinnoh_Text_TrSwimmerJessicaIntro:
 	.byte 0xFD, 0x40, 0x05, 0x2D, 0x75, 0x5A, 0xFF
@@ -4762,8 +6692,18 @@ Sinnoh_Text_TrSwimmerJessicaAfter:
 
 Sinnoh_EventScript_TrSwimmerJoanna::
 	trainerbattle_single TRAINER_SINNOH_SWIMMER_JOANNA, Sinnoh_Text_TrSwimmerJoannaIntro, Sinnoh_Text_TrSwimmerJoannaDefeat
+	specialvar VAR_RESULT, ShouldTryRematchBattle
+	goto_if_eq VAR_RESULT, TRUE, Sinnoh_EventScript_TrSwimmerJoannaRematch
 	msgbox Sinnoh_Text_TrSwimmerJoannaAfter, MSGBOX_AUTOCLOSE
 	end
+
+Sinnoh_EventScript_TrSwimmerJoannaRematch::
+	trainerbattle_rematch TRAINER_SINNOH_SWIMMER_JOANNA, Sinnoh_Text_TrSwimmerJoannaRematch, Sinnoh_Text_TrSwimmerJoannaDefeat
+	msgbox Sinnoh_Text_TrSwimmerJoannaAfter, MSGBOX_AUTOCLOSE
+	end
+
+Sinnoh_Text_TrSwimmerJoannaRematch:
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x75, 0x6F, 0xFF
 
 Sinnoh_Text_TrSwimmerJoannaIntro:
 	.byte 0xFD, 0x40, 0x05, 0x2D, 0x75, 0x6C, 0xFF
@@ -4776,8 +6716,18 @@ Sinnoh_Text_TrSwimmerJoannaAfter:
 
 Sinnoh_EventScript_TrSwimmerKatelyn::
 	trainerbattle_single TRAINER_SINNOH_SWIMMER_KATELYN, Sinnoh_Text_TrSwimmerKatelynIntro, Sinnoh_Text_TrSwimmerKatelynDefeat
+	specialvar VAR_RESULT, ShouldTryRematchBattle
+	goto_if_eq VAR_RESULT, TRUE, Sinnoh_EventScript_TrSwimmerKatelynRematch
 	msgbox Sinnoh_Text_TrSwimmerKatelynAfter, MSGBOX_AUTOCLOSE
 	end
+
+Sinnoh_EventScript_TrSwimmerKatelynRematch::
+	trainerbattle_rematch TRAINER_SINNOH_SWIMMER_KATELYN, Sinnoh_Text_TrSwimmerKatelynRematch, Sinnoh_Text_TrSwimmerKatelynDefeat
+	msgbox Sinnoh_Text_TrSwimmerKatelynAfter, MSGBOX_AUTOCLOSE
+	end
+
+Sinnoh_Text_TrSwimmerKatelynRematch:
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x76, 0x13, 0xFF
 
 Sinnoh_Text_TrSwimmerKatelynIntro:
 	.byte 0xFD, 0x40, 0x05, 0x2D, 0x76, 0x10, 0xFF
@@ -4790,8 +6740,18 @@ Sinnoh_Text_TrSwimmerKatelynAfter:
 
 Sinnoh_EventScript_TrSwimmerKurt::
 	trainerbattle_single TRAINER_SINNOH_SWIMMER_KURT, Sinnoh_Text_TrSwimmerKurtIntro, Sinnoh_Text_TrSwimmerKurtDefeat
+	specialvar VAR_RESULT, ShouldTryRematchBattle
+	goto_if_eq VAR_RESULT, TRUE, Sinnoh_EventScript_TrSwimmerKurtRematch
 	msgbox Sinnoh_Text_TrSwimmerKurtAfter, MSGBOX_AUTOCLOSE
 	end
+
+Sinnoh_EventScript_TrSwimmerKurtRematch::
+	trainerbattle_rematch TRAINER_SINNOH_SWIMMER_KURT, Sinnoh_Text_TrSwimmerKurtRematch, Sinnoh_Text_TrSwimmerKurtDefeat
+	msgbox Sinnoh_Text_TrSwimmerKurtAfter, MSGBOX_AUTOCLOSE
+	end
+
+Sinnoh_Text_TrSwimmerKurtRematch:
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x76, 0x25, 0xFF
 
 Sinnoh_Text_TrSwimmerKurtIntro:
 	.byte 0xFD, 0x40, 0x05, 0x2D, 0x76, 0x22, 0xFF
@@ -4804,8 +6764,18 @@ Sinnoh_Text_TrSwimmerKurtAfter:
 
 Sinnoh_EventScript_TrSwimmerLydia::
 	trainerbattle_single TRAINER_SINNOH_SWIMMER_LYDIA, Sinnoh_Text_TrSwimmerLydiaIntro, Sinnoh_Text_TrSwimmerLydiaDefeat
+	specialvar VAR_RESULT, ShouldTryRematchBattle
+	goto_if_eq VAR_RESULT, TRUE, Sinnoh_EventScript_TrSwimmerLydiaRematch
 	msgbox Sinnoh_Text_TrSwimmerLydiaAfter, MSGBOX_AUTOCLOSE
 	end
+
+Sinnoh_EventScript_TrSwimmerLydiaRematch::
+	trainerbattle_rematch TRAINER_SINNOH_SWIMMER_LYDIA, Sinnoh_Text_TrSwimmerLydiaRematch, Sinnoh_Text_TrSwimmerLydiaDefeat
+	msgbox Sinnoh_Text_TrSwimmerLydiaAfter, MSGBOX_AUTOCLOSE
+	end
+
+Sinnoh_Text_TrSwimmerLydiaRematch:
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x76, 0x37, 0xFF
 
 Sinnoh_Text_TrSwimmerLydiaIntro:
 	.byte 0xFD, 0x40, 0x05, 0x2D, 0x76, 0x34, 0xFF
@@ -4818,8 +6788,18 @@ Sinnoh_Text_TrSwimmerLydiaAfter:
 
 Sinnoh_EventScript_TrSwimmerMallory::
 	trainerbattle_single TRAINER_SINNOH_SWIMMER_MALLORY, Sinnoh_Text_TrSwimmerMalloryIntro, Sinnoh_Text_TrSwimmerMalloryDefeat
+	specialvar VAR_RESULT, ShouldTryRematchBattle
+	goto_if_eq VAR_RESULT, TRUE, Sinnoh_EventScript_TrSwimmerMalloryRematch
 	msgbox Sinnoh_Text_TrSwimmerMalloryAfter, MSGBOX_AUTOCLOSE
 	end
+
+Sinnoh_EventScript_TrSwimmerMalloryRematch::
+	trainerbattle_rematch TRAINER_SINNOH_SWIMMER_MALLORY, Sinnoh_Text_TrSwimmerMalloryRematch, Sinnoh_Text_TrSwimmerMalloryDefeat
+	msgbox Sinnoh_Text_TrSwimmerMalloryAfter, MSGBOX_AUTOCLOSE
+	end
+
+Sinnoh_Text_TrSwimmerMalloryRematch:
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x76, 0x49, 0xFF
 
 Sinnoh_Text_TrSwimmerMalloryIntro:
 	.byte 0xFD, 0x40, 0x05, 0x2D, 0x76, 0x46, 0xFF
@@ -4832,8 +6812,18 @@ Sinnoh_Text_TrSwimmerMalloryAfter:
 
 Sinnoh_EventScript_TrSwimmerMary::
 	trainerbattle_single TRAINER_SINNOH_SWIMMER_MARY, Sinnoh_Text_TrSwimmerMaryIntro, Sinnoh_Text_TrSwimmerMaryDefeat
+	specialvar VAR_RESULT, ShouldTryRematchBattle
+	goto_if_eq VAR_RESULT, TRUE, Sinnoh_EventScript_TrSwimmerMaryRematch
 	msgbox Sinnoh_Text_TrSwimmerMaryAfter, MSGBOX_AUTOCLOSE
 	end
+
+Sinnoh_EventScript_TrSwimmerMaryRematch::
+	trainerbattle_rematch TRAINER_SINNOH_SWIMMER_MARY, Sinnoh_Text_TrSwimmerMaryRematch, Sinnoh_Text_TrSwimmerMaryDefeat
+	msgbox Sinnoh_Text_TrSwimmerMaryAfter, MSGBOX_AUTOCLOSE
+	end
+
+Sinnoh_Text_TrSwimmerMaryRematch:
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x76, 0x5B, 0xFF
 
 Sinnoh_Text_TrSwimmerMaryIntro:
 	.byte 0xFD, 0x40, 0x05, 0x2D, 0x76, 0x58, 0xFF
@@ -4846,8 +6836,18 @@ Sinnoh_Text_TrSwimmerMaryAfter:
 
 Sinnoh_EventScript_TrSwimmerMiranda::
 	trainerbattle_single TRAINER_SINNOH_SWIMMER_MIRANDA, Sinnoh_Text_TrSwimmerMirandaIntro, Sinnoh_Text_TrSwimmerMirandaDefeat
+	specialvar VAR_RESULT, ShouldTryRematchBattle
+	goto_if_eq VAR_RESULT, TRUE, Sinnoh_EventScript_TrSwimmerMirandaRematch
 	msgbox Sinnoh_Text_TrSwimmerMirandaAfter, MSGBOX_AUTOCLOSE
 	end
+
+Sinnoh_EventScript_TrSwimmerMirandaRematch::
+	trainerbattle_rematch TRAINER_SINNOH_SWIMMER_MIRANDA, Sinnoh_Text_TrSwimmerMirandaRematch, Sinnoh_Text_TrSwimmerMirandaDefeat
+	msgbox Sinnoh_Text_TrSwimmerMirandaAfter, MSGBOX_AUTOCLOSE
+	end
+
+Sinnoh_Text_TrSwimmerMirandaRematch:
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x76, 0x6D, 0xFF
 
 Sinnoh_Text_TrSwimmerMirandaIntro:
 	.byte 0xFD, 0x40, 0x05, 0x2D, 0x76, 0x6A, 0xFF
@@ -4860,8 +6860,18 @@ Sinnoh_Text_TrSwimmerMirandaAfter:
 
 Sinnoh_EventScript_TrSwimmerOscar::
 	trainerbattle_single TRAINER_SINNOH_SWIMMER_OSCAR, Sinnoh_Text_TrSwimmerOscarIntro, Sinnoh_Text_TrSwimmerOscarDefeat
+	specialvar VAR_RESULT, ShouldTryRematchBattle
+	goto_if_eq VAR_RESULT, TRUE, Sinnoh_EventScript_TrSwimmerOscarRematch
 	msgbox Sinnoh_Text_TrSwimmerOscarAfter, MSGBOX_AUTOCLOSE
 	end
+
+Sinnoh_EventScript_TrSwimmerOscarRematch::
+	trainerbattle_rematch TRAINER_SINNOH_SWIMMER_OSCAR, Sinnoh_Text_TrSwimmerOscarRematch, Sinnoh_Text_TrSwimmerOscarDefeat
+	msgbox Sinnoh_Text_TrSwimmerOscarAfter, MSGBOX_AUTOCLOSE
+	end
+
+Sinnoh_Text_TrSwimmerOscarRematch:
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x77, 0x11, 0xFF
 
 Sinnoh_Text_TrSwimmerOscarIntro:
 	.byte 0xFD, 0x40, 0x05, 0x2D, 0x77, 0x0E, 0xFF
@@ -4874,8 +6884,18 @@ Sinnoh_Text_TrSwimmerOscarAfter:
 
 Sinnoh_EventScript_TrSwimmerPaige::
 	trainerbattle_single TRAINER_SINNOH_SWIMMER_PAIGE, Sinnoh_Text_TrSwimmerPaigeIntro, Sinnoh_Text_TrSwimmerPaigeDefeat
+	specialvar VAR_RESULT, ShouldTryRematchBattle
+	goto_if_eq VAR_RESULT, TRUE, Sinnoh_EventScript_TrSwimmerPaigeRematch
 	msgbox Sinnoh_Text_TrSwimmerPaigeAfter, MSGBOX_AUTOCLOSE
 	end
+
+Sinnoh_EventScript_TrSwimmerPaigeRematch::
+	trainerbattle_rematch TRAINER_SINNOH_SWIMMER_PAIGE, Sinnoh_Text_TrSwimmerPaigeRematch, Sinnoh_Text_TrSwimmerPaigeDefeat
+	msgbox Sinnoh_Text_TrSwimmerPaigeAfter, MSGBOX_AUTOCLOSE
+	end
+
+Sinnoh_Text_TrSwimmerPaigeRematch:
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x77, 0x23, 0xFF
 
 Sinnoh_Text_TrSwimmerPaigeIntro:
 	.byte 0xFD, 0x40, 0x05, 0x2D, 0x77, 0x20, 0xFF
@@ -4888,8 +6908,18 @@ Sinnoh_Text_TrSwimmerPaigeAfter:
 
 Sinnoh_EventScript_TrSwimmerRicardo::
 	trainerbattle_single TRAINER_SINNOH_SWIMMER_RICARDO, Sinnoh_Text_TrSwimmerRicardoIntro, Sinnoh_Text_TrSwimmerRicardoDefeat
+	specialvar VAR_RESULT, ShouldTryRematchBattle
+	goto_if_eq VAR_RESULT, TRUE, Sinnoh_EventScript_TrSwimmerRicardoRematch
 	msgbox Sinnoh_Text_TrSwimmerRicardoAfter, MSGBOX_AUTOCLOSE
 	end
+
+Sinnoh_EventScript_TrSwimmerRicardoRematch::
+	trainerbattle_rematch TRAINER_SINNOH_SWIMMER_RICARDO, Sinnoh_Text_TrSwimmerRicardoRematch, Sinnoh_Text_TrSwimmerRicardoDefeat
+	msgbox Sinnoh_Text_TrSwimmerRicardoAfter, MSGBOX_AUTOCLOSE
+	end
+
+Sinnoh_Text_TrSwimmerRicardoRematch:
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x77, 0x35, 0xFF
 
 Sinnoh_Text_TrSwimmerRicardoIntro:
 	.byte 0xFD, 0x40, 0x05, 0x2D, 0x77, 0x32, 0xFF
@@ -4902,8 +6932,18 @@ Sinnoh_Text_TrSwimmerRicardoAfter:
 
 Sinnoh_EventScript_TrSwimmerSam::
 	trainerbattle_single TRAINER_SINNOH_SWIMMER_SAM, Sinnoh_Text_TrSwimmerSamIntro, Sinnoh_Text_TrSwimmerSamDefeat
+	specialvar VAR_RESULT, ShouldTryRematchBattle
+	goto_if_eq VAR_RESULT, TRUE, Sinnoh_EventScript_TrSwimmerSamRematch
 	msgbox Sinnoh_Text_TrSwimmerSamAfter, MSGBOX_AUTOCLOSE
 	end
+
+Sinnoh_EventScript_TrSwimmerSamRematch::
+	trainerbattle_rematch TRAINER_SINNOH_SWIMMER_SAM, Sinnoh_Text_TrSwimmerSamRematch, Sinnoh_Text_TrSwimmerSamDefeat
+	msgbox Sinnoh_Text_TrSwimmerSamAfter, MSGBOX_AUTOCLOSE
+	end
+
+Sinnoh_Text_TrSwimmerSamRematch:
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x77, 0x47, 0xFF
 
 Sinnoh_Text_TrSwimmerSamIntro:
 	.byte 0xFD, 0x40, 0x05, 0x2D, 0x77, 0x44, 0xFF
@@ -4916,8 +6956,18 @@ Sinnoh_Text_TrSwimmerSamAfter:
 
 Sinnoh_EventScript_TrSwimmerSheltin::
 	trainerbattle_single TRAINER_SINNOH_SWIMMER_SHELTIN, Sinnoh_Text_TrSwimmerSheltinIntro, Sinnoh_Text_TrSwimmerSheltinDefeat
+	specialvar VAR_RESULT, ShouldTryRematchBattle
+	goto_if_eq VAR_RESULT, TRUE, Sinnoh_EventScript_TrSwimmerSheltinRematch
 	msgbox Sinnoh_Text_TrSwimmerSheltinAfter, MSGBOX_AUTOCLOSE
 	end
+
+Sinnoh_EventScript_TrSwimmerSheltinRematch::
+	trainerbattle_rematch TRAINER_SINNOH_SWIMMER_SHELTIN, Sinnoh_Text_TrSwimmerSheltinRematch, Sinnoh_Text_TrSwimmerSheltinDefeat
+	msgbox Sinnoh_Text_TrSwimmerSheltinAfter, MSGBOX_AUTOCLOSE
+	end
+
+Sinnoh_Text_TrSwimmerSheltinRematch:
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x77, 0x59, 0xFF
 
 Sinnoh_Text_TrSwimmerSheltinIntro:
 	.byte 0xFD, 0x40, 0x05, 0x2D, 0x77, 0x56, 0xFF
@@ -4930,8 +6980,18 @@ Sinnoh_Text_TrSwimmerSheltinAfter:
 
 Sinnoh_EventScript_TrSwimmerSophia::
 	trainerbattle_single TRAINER_SINNOH_SWIMMER_SOPHIA, Sinnoh_Text_TrSwimmerSophiaIntro, Sinnoh_Text_TrSwimmerSophiaDefeat
+	specialvar VAR_RESULT, ShouldTryRematchBattle
+	goto_if_eq VAR_RESULT, TRUE, Sinnoh_EventScript_TrSwimmerSophiaRematch
 	msgbox Sinnoh_Text_TrSwimmerSophiaAfter, MSGBOX_AUTOCLOSE
 	end
+
+Sinnoh_EventScript_TrSwimmerSophiaRematch::
+	trainerbattle_rematch TRAINER_SINNOH_SWIMMER_SOPHIA, Sinnoh_Text_TrSwimmerSophiaRematch, Sinnoh_Text_TrSwimmerSophiaDefeat
+	msgbox Sinnoh_Text_TrSwimmerSophiaAfter, MSGBOX_AUTOCLOSE
+	end
+
+Sinnoh_Text_TrSwimmerSophiaRematch:
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x77, 0x6B, 0xFF
 
 Sinnoh_Text_TrSwimmerSophiaIntro:
 	.byte 0xFD, 0x40, 0x05, 0x2D, 0x77, 0x68, 0xFF
@@ -4944,8 +7004,18 @@ Sinnoh_Text_TrSwimmerSophiaAfter:
 
 Sinnoh_EventScript_TrSwimmerTroy::
 	trainerbattle_single TRAINER_SINNOH_SWIMMER_TROY, Sinnoh_Text_TrSwimmerTroyIntro, Sinnoh_Text_TrSwimmerTroyDefeat
+	specialvar VAR_RESULT, ShouldTryRematchBattle
+	goto_if_eq VAR_RESULT, TRUE, Sinnoh_EventScript_TrSwimmerTroyRematch
 	msgbox Sinnoh_Text_TrSwimmerTroyAfter, MSGBOX_AUTOCLOSE
 	end
+
+Sinnoh_EventScript_TrSwimmerTroyRematch::
+	trainerbattle_rematch TRAINER_SINNOH_SWIMMER_TROY, Sinnoh_Text_TrSwimmerTroyRematch, Sinnoh_Text_TrSwimmerTroyDefeat
+	msgbox Sinnoh_Text_TrSwimmerTroyAfter, MSGBOX_AUTOCLOSE
+	end
+
+Sinnoh_Text_TrSwimmerTroyRematch:
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x77, 0x7D, 0xFF
 
 Sinnoh_Text_TrSwimmerTroyIntro:
 	.byte 0xFD, 0x40, 0x05, 0x2D, 0x77, 0x7A, 0xFF
@@ -4958,8 +7028,18 @@ Sinnoh_Text_TrSwimmerTroyAfter:
 
 Sinnoh_EventScript_TrSwimmerVanessa::
 	trainerbattle_single TRAINER_SINNOH_SWIMMER_VANESSA, Sinnoh_Text_TrSwimmerVanessaIntro, Sinnoh_Text_TrSwimmerVanessaDefeat
+	specialvar VAR_RESULT, ShouldTryRematchBattle
+	goto_if_eq VAR_RESULT, TRUE, Sinnoh_EventScript_TrSwimmerVanessaRematch
 	msgbox Sinnoh_Text_TrSwimmerVanessaAfter, MSGBOX_AUTOCLOSE
 	end
+
+Sinnoh_EventScript_TrSwimmerVanessaRematch::
+	trainerbattle_rematch TRAINER_SINNOH_SWIMMER_VANESSA, Sinnoh_Text_TrSwimmerVanessaRematch, Sinnoh_Text_TrSwimmerVanessaDefeat
+	msgbox Sinnoh_Text_TrSwimmerVanessaAfter, MSGBOX_AUTOCLOSE
+	end
+
+Sinnoh_Text_TrSwimmerVanessaRematch:
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x78, 0x0F, 0xFF
 
 Sinnoh_Text_TrSwimmerVanessaIntro:
 	.byte 0xFD, 0x40, 0x05, 0x2D, 0x78, 0x0C, 0xFF
@@ -4972,8 +7052,18 @@ Sinnoh_Text_TrSwimmerVanessaAfter:
 
 Sinnoh_EventScript_TrSwimmerVincent::
 	trainerbattle_single TRAINER_SINNOH_SWIMMER_VINCENT, Sinnoh_Text_TrSwimmerVincentIntro, Sinnoh_Text_TrSwimmerVincentDefeat
+	specialvar VAR_RESULT, ShouldTryRematchBattle
+	goto_if_eq VAR_RESULT, TRUE, Sinnoh_EventScript_TrSwimmerVincentRematch
 	msgbox Sinnoh_Text_TrSwimmerVincentAfter, MSGBOX_AUTOCLOSE
 	end
+
+Sinnoh_EventScript_TrSwimmerVincentRematch::
+	trainerbattle_rematch TRAINER_SINNOH_SWIMMER_VINCENT, Sinnoh_Text_TrSwimmerVincentRematch, Sinnoh_Text_TrSwimmerVincentDefeat
+	msgbox Sinnoh_Text_TrSwimmerVincentAfter, MSGBOX_AUTOCLOSE
+	end
+
+Sinnoh_Text_TrSwimmerVincentRematch:
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x78, 0x21, 0xFF
 
 Sinnoh_Text_TrSwimmerVincentIntro:
 	.byte 0xFD, 0x40, 0x05, 0x2D, 0x78, 0x1E, 0xFF
@@ -4986,8 +7076,18 @@ Sinnoh_Text_TrSwimmerVincentAfter:
 
 Sinnoh_EventScript_TrSwimmerWade::
 	trainerbattle_single TRAINER_SINNOH_SWIMMER_WADE, Sinnoh_Text_TrSwimmerWadeIntro, Sinnoh_Text_TrSwimmerWadeDefeat
+	specialvar VAR_RESULT, ShouldTryRematchBattle
+	goto_if_eq VAR_RESULT, TRUE, Sinnoh_EventScript_TrSwimmerWadeRematch
 	msgbox Sinnoh_Text_TrSwimmerWadeAfter, MSGBOX_AUTOCLOSE
 	end
+
+Sinnoh_EventScript_TrSwimmerWadeRematch::
+	trainerbattle_rematch TRAINER_SINNOH_SWIMMER_WADE, Sinnoh_Text_TrSwimmerWadeRematch, Sinnoh_Text_TrSwimmerWadeDefeat
+	msgbox Sinnoh_Text_TrSwimmerWadeAfter, MSGBOX_AUTOCLOSE
+	end
+
+Sinnoh_Text_TrSwimmerWadeRematch:
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x78, 0x33, 0xFF
 
 Sinnoh_Text_TrSwimmerWadeIntro:
 	.byte 0xFD, 0x40, 0x05, 0x2D, 0x78, 0x30, 0xFF
@@ -5000,8 +7100,18 @@ Sinnoh_Text_TrSwimmerWadeAfter:
 
 Sinnoh_EventScript_TrSwimmerWesley::
 	trainerbattle_single TRAINER_SINNOH_SWIMMER_WESLEY, Sinnoh_Text_TrSwimmerWesleyIntro, Sinnoh_Text_TrSwimmerWesleyDefeat
+	specialvar VAR_RESULT, ShouldTryRematchBattle
+	goto_if_eq VAR_RESULT, TRUE, Sinnoh_EventScript_TrSwimmerWesleyRematch
 	msgbox Sinnoh_Text_TrSwimmerWesleyAfter, MSGBOX_AUTOCLOSE
 	end
+
+Sinnoh_EventScript_TrSwimmerWesleyRematch::
+	trainerbattle_rematch TRAINER_SINNOH_SWIMMER_WESLEY, Sinnoh_Text_TrSwimmerWesleyRematch, Sinnoh_Text_TrSwimmerWesleyDefeat
+	msgbox Sinnoh_Text_TrSwimmerWesleyAfter, MSGBOX_AUTOCLOSE
+	end
+
+Sinnoh_Text_TrSwimmerWesleyRematch:
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x78, 0x45, 0xFF
 
 Sinnoh_Text_TrSwimmerWesleyIntro:
 	.byte 0xFD, 0x40, 0x05, 0x2D, 0x78, 0x42, 0xFF
@@ -5028,8 +7138,18 @@ Sinnoh_Text_TrTuberCaitlynAfter:
 
 Sinnoh_EventScript_TrTuberChelsea::
 	trainerbattle_single TRAINER_SINNOH_TUBER_CHELSEA, Sinnoh_Text_TrTuberChelseaIntro, Sinnoh_Text_TrTuberChelseaDefeat
+	specialvar VAR_RESULT, ShouldTryRematchBattle
+	goto_if_eq VAR_RESULT, TRUE, Sinnoh_EventScript_TrTuberChelseaRematch
 	msgbox Sinnoh_Text_TrTuberChelseaAfter, MSGBOX_AUTOCLOSE
 	end
+
+Sinnoh_EventScript_TrTuberChelseaRematch::
+	trainerbattle_rematch TRAINER_SINNOH_TUBER_CHELSEA, Sinnoh_Text_TrTuberChelseaRematch, Sinnoh_Text_TrTuberChelseaDefeat
+	msgbox Sinnoh_Text_TrTuberChelseaAfter, MSGBOX_AUTOCLOSE
+	end
+
+Sinnoh_Text_TrTuberChelseaRematch:
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x79, 0x0D, 0xFF
 
 Sinnoh_Text_TrTuberChelseaIntro:
 	.byte 0xFD, 0x40, 0x05, 0x2D, 0x79, 0x0A, 0xFF
@@ -5042,8 +7162,18 @@ Sinnoh_Text_TrTuberChelseaAfter:
 
 Sinnoh_EventScript_TrTuberConner::
 	trainerbattle_single TRAINER_SINNOH_TUBER_CONNER, Sinnoh_Text_TrTuberConnerIntro, Sinnoh_Text_TrTuberConnerDefeat
+	specialvar VAR_RESULT, ShouldTryRematchBattle
+	goto_if_eq VAR_RESULT, TRUE, Sinnoh_EventScript_TrTuberConnerRematch
 	msgbox Sinnoh_Text_TrTuberConnerAfter, MSGBOX_AUTOCLOSE
 	end
+
+Sinnoh_EventScript_TrTuberConnerRematch::
+	trainerbattle_rematch TRAINER_SINNOH_TUBER_CONNER, Sinnoh_Text_TrTuberConnerRematch, Sinnoh_Text_TrTuberConnerDefeat
+	msgbox Sinnoh_Text_TrTuberConnerAfter, MSGBOX_AUTOCLOSE
+	end
+
+Sinnoh_Text_TrTuberConnerRematch:
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x79, 0x43, 0xFF
 
 Sinnoh_Text_TrTuberConnerIntro:
 	.byte 0xFD, 0x40, 0x05, 0x2D, 0x79, 0x40, 0xFF
@@ -5056,8 +7186,18 @@ Sinnoh_Text_TrTuberConnerAfter:
 
 Sinnoh_EventScript_TrTuberHolly::
 	trainerbattle_single TRAINER_SINNOH_TUBER_HOLLY, Sinnoh_Text_TrTuberHollyIntro, Sinnoh_Text_TrTuberHollyDefeat
+	specialvar VAR_RESULT, ShouldTryRematchBattle
+	goto_if_eq VAR_RESULT, TRUE, Sinnoh_EventScript_TrTuberHollyRematch
 	msgbox Sinnoh_Text_TrTuberHollyAfter, MSGBOX_AUTOCLOSE
 	end
+
+Sinnoh_EventScript_TrTuberHollyRematch::
+	trainerbattle_rematch TRAINER_SINNOH_TUBER_HOLLY, Sinnoh_Text_TrTuberHollyRematch, Sinnoh_Text_TrTuberHollyDefeat
+	msgbox Sinnoh_Text_TrTuberHollyAfter, MSGBOX_AUTOCLOSE
+	end
+
+Sinnoh_Text_TrTuberHollyRematch:
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x79, 0x55, 0xFF
 
 Sinnoh_Text_TrTuberHollyIntro:
 	.byte 0xFD, 0x40, 0x05, 0x2D, 0x79, 0x52, 0xFF
@@ -5084,8 +7224,18 @@ Sinnoh_Text_TrTuberJackyAfter:
 
 Sinnoh_EventScript_TrTuberJared::
 	trainerbattle_single TRAINER_SINNOH_TUBER_JARED, Sinnoh_Text_TrTuberJaredIntro, Sinnoh_Text_TrTuberJaredDefeat
+	specialvar VAR_RESULT, ShouldTryRematchBattle
+	goto_if_eq VAR_RESULT, TRUE, Sinnoh_EventScript_TrTuberJaredRematch
 	msgbox Sinnoh_Text_TrTuberJaredAfter, MSGBOX_AUTOCLOSE
 	end
+
+Sinnoh_EventScript_TrTuberJaredRematch::
+	trainerbattle_rematch TRAINER_SINNOH_TUBER_JARED, Sinnoh_Text_TrTuberJaredRematch, Sinnoh_Text_TrTuberJaredDefeat
+	msgbox Sinnoh_Text_TrTuberJaredAfter, MSGBOX_AUTOCLOSE
+	end
+
+Sinnoh_Text_TrTuberJaredRematch:
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x79, 0x79, 0xFF
 
 Sinnoh_Text_TrTuberJaredIntro:
 	.byte 0xFD, 0x40, 0x05, 0x2D, 0x79, 0x76, 0xFF
@@ -5098,8 +7248,18 @@ Sinnoh_Text_TrTuberJaredAfter:
 
 Sinnoh_EventScript_TrTuberMariel::
 	trainerbattle_single TRAINER_SINNOH_TUBER_MARIEL, Sinnoh_Text_TrTuberMarielIntro, Sinnoh_Text_TrTuberMarielDefeat
+	specialvar VAR_RESULT, ShouldTryRematchBattle
+	goto_if_eq VAR_RESULT, TRUE, Sinnoh_EventScript_TrTuberMarielRematch
 	msgbox Sinnoh_Text_TrTuberMarielAfter, MSGBOX_AUTOCLOSE
 	end
+
+Sinnoh_EventScript_TrTuberMarielRematch::
+	trainerbattle_rematch TRAINER_SINNOH_TUBER_MARIEL, Sinnoh_Text_TrTuberMarielRematch, Sinnoh_Text_TrTuberMarielDefeat
+	msgbox Sinnoh_Text_TrTuberMarielAfter, MSGBOX_AUTOCLOSE
+	end
+
+Sinnoh_Text_TrTuberMarielRematch:
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x7A, 0x2F, 0xFF
 
 Sinnoh_Text_TrTuberMarielIntro:
 	.byte 0xFD, 0x40, 0x05, 0x2D, 0x7A, 0x2C, 0xFF
@@ -5112,8 +7272,18 @@ Sinnoh_Text_TrTuberMarielAfter:
 
 Sinnoh_EventScript_TrTuberTrenton::
 	trainerbattle_single TRAINER_SINNOH_TUBER_TRENTON, Sinnoh_Text_TrTuberTrentonIntro, Sinnoh_Text_TrTuberTrentonDefeat
+	specialvar VAR_RESULT, ShouldTryRematchBattle
+	goto_if_eq VAR_RESULT, TRUE, Sinnoh_EventScript_TrTuberTrentonRematch
 	msgbox Sinnoh_Text_TrTuberTrentonAfter, MSGBOX_AUTOCLOSE
 	end
+
+Sinnoh_EventScript_TrTuberTrentonRematch::
+	trainerbattle_rematch TRAINER_SINNOH_TUBER_TRENTON, Sinnoh_Text_TrTuberTrentonRematch, Sinnoh_Text_TrTuberTrentonDefeat
+	msgbox Sinnoh_Text_TrTuberTrentonAfter, MSGBOX_AUTOCLOSE
+	end
+
+Sinnoh_Text_TrTuberTrentonRematch:
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x7A, 0x41, 0xFF
 
 Sinnoh_Text_TrTuberTrentonIntro:
 	.byte 0xFD, 0x40, 0x05, 0x2D, 0x7A, 0x3E, 0xFF
@@ -5177,8 +7347,18 @@ Sinnoh_Text_TrTwinsTeriAndTiaNotEnough:
 
 Sinnoh_EventScript_TrVeteranArmando::
 	trainerbattle_single TRAINER_SINNOH_VETERAN_ARMANDO, Sinnoh_Text_TrVeteranArmandoIntro, Sinnoh_Text_TrVeteranArmandoDefeat
+	specialvar VAR_RESULT, ShouldTryRematchBattle
+	goto_if_eq VAR_RESULT, TRUE, Sinnoh_EventScript_TrVeteranArmandoRematch
 	msgbox Sinnoh_Text_TrVeteranArmandoAfter, MSGBOX_AUTOCLOSE
 	end
+
+Sinnoh_EventScript_TrVeteranArmandoRematch::
+	trainerbattle_rematch TRAINER_SINNOH_VETERAN_ARMANDO, Sinnoh_Text_TrVeteranArmandoRematch, Sinnoh_Text_TrVeteranArmandoDefeat
+	msgbox Sinnoh_Text_TrVeteranArmandoAfter, MSGBOX_AUTOCLOSE
+	end
+
+Sinnoh_Text_TrVeteranArmandoRematch:
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x7B, 0x2D, 0xFF
 
 Sinnoh_Text_TrVeteranArmandoIntro:
 	.byte 0xFD, 0x40, 0x05, 0x2D, 0x7B, 0x2A, 0xFF
@@ -5205,8 +7385,18 @@ Sinnoh_Text_TrVeteranBrendenAfter:
 
 Sinnoh_EventScript_TrVeteranBrian::
 	trainerbattle_single TRAINER_SINNOH_VETERAN_BRIAN, Sinnoh_Text_TrVeteranBrianIntro, Sinnoh_Text_TrVeteranBrianDefeat
+	specialvar VAR_RESULT, ShouldTryRematchBattle
+	goto_if_eq VAR_RESULT, TRUE, Sinnoh_EventScript_TrVeteranBrianRematch
 	msgbox Sinnoh_Text_TrVeteranBrianAfter, MSGBOX_AUTOCLOSE
 	end
+
+Sinnoh_EventScript_TrVeteranBrianRematch::
+	trainerbattle_rematch TRAINER_SINNOH_VETERAN_BRIAN, Sinnoh_Text_TrVeteranBrianRematch, Sinnoh_Text_TrVeteranBrianDefeat
+	msgbox Sinnoh_Text_TrVeteranBrianAfter, MSGBOX_AUTOCLOSE
+	end
+
+Sinnoh_Text_TrVeteranBrianRematch:
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x7B, 0x63, 0xFF
 
 Sinnoh_Text_TrVeteranBrianIntro:
 	.byte 0xFD, 0x40, 0x05, 0x2D, 0x7B, 0x60, 0xFF
@@ -5471,8 +7661,18 @@ Sinnoh_Text_TrWorkerQuentinAfter:
 
 Sinnoh_EventScript_TrYoungsterAustin::
 	trainerbattle_single TRAINER_SINNOH_YOUNGSTER_AUSTIN, Sinnoh_Text_TrYoungsterAustinIntro, Sinnoh_Text_TrYoungsterAustinDefeat
+	specialvar VAR_RESULT, ShouldTryRematchBattle
+	goto_if_eq VAR_RESULT, TRUE, Sinnoh_EventScript_TrYoungsterAustinRematch
 	msgbox Sinnoh_Text_TrYoungsterAustinAfter, MSGBOX_AUTOCLOSE
 	end
+
+Sinnoh_EventScript_TrYoungsterAustinRematch::
+	trainerbattle_rematch TRAINER_SINNOH_YOUNGSTER_AUSTIN, Sinnoh_Text_TrYoungsterAustinRematch, Sinnoh_Text_TrYoungsterAustinDefeat
+	msgbox Sinnoh_Text_TrYoungsterAustinAfter, MSGBOX_AUTOCLOSE
+	end
+
+Sinnoh_Text_TrYoungsterAustinRematch:
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x7F, 0x13, 0xFF
 
 Sinnoh_Text_TrYoungsterAustinIntro:
 	.byte 0xFD, 0x40, 0x05, 0x2D, 0x7F, 0x10, 0xFF
@@ -5485,8 +7685,18 @@ Sinnoh_Text_TrYoungsterAustinAfter:
 
 Sinnoh_EventScript_TrYoungsterDallas::
 	trainerbattle_single TRAINER_SINNOH_YOUNGSTER_DALLAS, Sinnoh_Text_TrYoungsterDallasIntro, Sinnoh_Text_TrYoungsterDallasDefeat
+	specialvar VAR_RESULT, ShouldTryRematchBattle
+	goto_if_eq VAR_RESULT, TRUE, Sinnoh_EventScript_TrYoungsterDallasRematch
 	msgbox Sinnoh_Text_TrYoungsterDallasAfter, MSGBOX_AUTOCLOSE
 	end
+
+Sinnoh_EventScript_TrYoungsterDallasRematch::
+	trainerbattle_rematch TRAINER_SINNOH_YOUNGSTER_DALLAS, Sinnoh_Text_TrYoungsterDallasRematch, Sinnoh_Text_TrYoungsterDallasDefeat
+	msgbox Sinnoh_Text_TrYoungsterDallasAfter, MSGBOX_AUTOCLOSE
+	end
+
+Sinnoh_Text_TrYoungsterDallasRematch:
+	.byte 0xFD, 0x40, 0x05, 0x2D, 0x7F, 0x25, 0xFF
 
 Sinnoh_Text_TrYoungsterDallasIntro:
 	.byte 0xFD, 0x40, 0x05, 0x2D, 0x7F, 0x22, 0xFF
@@ -5541,8 +7751,18 @@ Sinnoh_Text_TrYoungsterJonathonAfter:
 
 Sinnoh_EventScript_TrYoungsterLogan::
 	trainerbattle_single TRAINER_SINNOH_YOUNGSTER_LOGAN, Sinnoh_Text_TrYoungsterLoganIntro, Sinnoh_Text_TrYoungsterLoganDefeat
+	specialvar VAR_RESULT, ShouldTryRematchBattle
+	goto_if_eq VAR_RESULT, TRUE, Sinnoh_EventScript_TrYoungsterLoganRematch
 	msgbox Sinnoh_Text_TrYoungsterLoganAfter, MSGBOX_AUTOCLOSE
 	end
+
+Sinnoh_EventScript_TrYoungsterLoganRematch::
+	trainerbattle_rematch TRAINER_SINNOH_YOUNGSTER_LOGAN, Sinnoh_Text_TrYoungsterLoganRematch, Sinnoh_Text_TrYoungsterLoganDefeat
+	msgbox Sinnoh_Text_TrYoungsterLoganAfter, MSGBOX_AUTOCLOSE
+	end
+
+Sinnoh_Text_TrYoungsterLoganRematch:
+	.byte 0xFD, 0x40, 0x05, 0x2E, 0x00, 0x27, 0xFF
 
 Sinnoh_Text_TrYoungsterLoganIntro:
 	.byte 0xFD, 0x40, 0x05, 0x2E, 0x00, 0x24, 0xFF
@@ -5555,8 +7775,18 @@ Sinnoh_Text_TrYoungsterLoganAfter:
 
 Sinnoh_EventScript_TrYoungsterMichael::
 	trainerbattle_single TRAINER_SINNOH_YOUNGSTER_MICHAEL, Sinnoh_Text_TrYoungsterMichaelIntro, Sinnoh_Text_TrYoungsterMichaelDefeat
+	specialvar VAR_RESULT, ShouldTryRematchBattle
+	goto_if_eq VAR_RESULT, TRUE, Sinnoh_EventScript_TrYoungsterMichaelRematch
 	msgbox Sinnoh_Text_TrYoungsterMichaelAfter, MSGBOX_AUTOCLOSE
 	end
+
+Sinnoh_EventScript_TrYoungsterMichaelRematch::
+	trainerbattle_rematch TRAINER_SINNOH_YOUNGSTER_MICHAEL, Sinnoh_Text_TrYoungsterMichaelRematch, Sinnoh_Text_TrYoungsterMichaelDefeat
+	msgbox Sinnoh_Text_TrYoungsterMichaelAfter, MSGBOX_AUTOCLOSE
+	end
+
+Sinnoh_Text_TrYoungsterMichaelRematch:
+	.byte 0xFD, 0x40, 0x05, 0x2E, 0x00, 0x39, 0xFF
 
 Sinnoh_Text_TrYoungsterMichaelIntro:
 	.byte 0xFD, 0x40, 0x05, 0x2E, 0x00, 0x36, 0xFF
@@ -5583,8 +7813,18 @@ Sinnoh_Text_TrYoungsterOliverAfter:
 
 Sinnoh_EventScript_TrYoungsterSebastian::
 	trainerbattle_single TRAINER_SINNOH_YOUNGSTER_SEBASTIAN, Sinnoh_Text_TrYoungsterSebastianIntro, Sinnoh_Text_TrYoungsterSebastianDefeat
+	specialvar VAR_RESULT, ShouldTryRematchBattle
+	goto_if_eq VAR_RESULT, TRUE, Sinnoh_EventScript_TrYoungsterSebastianRematch
 	msgbox Sinnoh_Text_TrYoungsterSebastianAfter, MSGBOX_AUTOCLOSE
 	end
+
+Sinnoh_EventScript_TrYoungsterSebastianRematch::
+	trainerbattle_rematch TRAINER_SINNOH_YOUNGSTER_SEBASTIAN, Sinnoh_Text_TrYoungsterSebastianRematch, Sinnoh_Text_TrYoungsterSebastianDefeat
+	msgbox Sinnoh_Text_TrYoungsterSebastianAfter, MSGBOX_AUTOCLOSE
+	end
+
+Sinnoh_Text_TrYoungsterSebastianRematch:
+	.byte 0xFD, 0x40, 0x05, 0x2E, 0x01, 0x49, 0xFF
 
 Sinnoh_Text_TrYoungsterSebastianIntro:
 	.byte 0xFD, 0x40, 0x05, 0x2E, 0x01, 0x46, 0xFF
@@ -5597,8 +7837,18 @@ Sinnoh_Text_TrYoungsterSebastianAfter:
 
 Sinnoh_EventScript_TrYoungsterTristan::
 	trainerbattle_single TRAINER_SINNOH_YOUNGSTER_TRISTAN, Sinnoh_Text_TrYoungsterTristanIntro, Sinnoh_Text_TrYoungsterTristanDefeat
+	specialvar VAR_RESULT, ShouldTryRematchBattle
+	goto_if_eq VAR_RESULT, TRUE, Sinnoh_EventScript_TrYoungsterTristanRematch
 	msgbox Sinnoh_Text_TrYoungsterTristanAfter, MSGBOX_AUTOCLOSE
 	end
+
+Sinnoh_EventScript_TrYoungsterTristanRematch::
+	trainerbattle_rematch TRAINER_SINNOH_YOUNGSTER_TRISTAN, Sinnoh_Text_TrYoungsterTristanRematch, Sinnoh_Text_TrYoungsterTristanDefeat
+	msgbox Sinnoh_Text_TrYoungsterTristanAfter, MSGBOX_AUTOCLOSE
+	end
+
+Sinnoh_Text_TrYoungsterTristanRematch:
+	.byte 0xFD, 0x40, 0x05, 0x2E, 0x01, 0x5B, 0xFF
 
 Sinnoh_Text_TrYoungsterTristanIntro:
 	.byte 0xFD, 0x40, 0x05, 0x2E, 0x01, 0x58, 0xFF
@@ -5611,8 +7861,18 @@ Sinnoh_Text_TrYoungsterTristanAfter:
 
 Sinnoh_EventScript_TrYoungsterTyler::
 	trainerbattle_single TRAINER_SINNOH_YOUNGSTER_TYLER, Sinnoh_Text_TrYoungsterTylerIntro, Sinnoh_Text_TrYoungsterTylerDefeat
+	specialvar VAR_RESULT, ShouldTryRematchBattle
+	goto_if_eq VAR_RESULT, TRUE, Sinnoh_EventScript_TrYoungsterTylerRematch
 	msgbox Sinnoh_Text_TrYoungsterTylerAfter, MSGBOX_AUTOCLOSE
 	end
+
+Sinnoh_EventScript_TrYoungsterTylerRematch::
+	trainerbattle_rematch TRAINER_SINNOH_YOUNGSTER_TYLER, Sinnoh_Text_TrYoungsterTylerRematch, Sinnoh_Text_TrYoungsterTylerDefeat
+	msgbox Sinnoh_Text_TrYoungsterTylerAfter, MSGBOX_AUTOCLOSE
+	end
+
+Sinnoh_Text_TrYoungsterTylerRematch:
+	.byte 0xFD, 0x40, 0x05, 0x2E, 0x02, 0x23, 0xFF
 
 Sinnoh_Text_TrYoungsterTylerIntro:
 	.byte 0xFD, 0x40, 0x05, 0x2E, 0x02, 0x20, 0xFF

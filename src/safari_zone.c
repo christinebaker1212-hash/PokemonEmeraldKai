@@ -81,6 +81,12 @@ void EnterSafariMode(void)
     }
 }
 
+// Moemon Kai: the POKéMON caught in this SAFARI GAME (SINNOH's GetCurrentSafariGameCaughtNum: src/sinnoh/s3d_misc.c)
+u8 SafariZone_CaughtMons(void)
+{
+    return sSafariZoneCaughtMons;
+}
+
 void ExitSafariMode(void)
 {
     if (S3D_IsSinnohGroup(gSaveBlock1Ptr->location.mapGroup))

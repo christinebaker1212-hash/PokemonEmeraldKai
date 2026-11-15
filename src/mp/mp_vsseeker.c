@@ -8,6 +8,11 @@
 // LEAGUE, SEVII's network machine). Each tier keeps its own "beaten" flag (KANTO_VS_TIER_FLAGS_*), as FireRed's tier
 // trainers do. The trainers' scripts are FireRed's already (ShouldTryRematchBattle, trainerbattle_rematch): battle_setup.c
 // asks this file for KANTO's trainers.
+//
+// SINNOH's trainers answer it as Platinum's (src/overlay005/vs_seeker.c; data src/data/sinnoh_rematches.h from
+// tools/sinnoh/gen_trainers.py): a trainer's rematch is its first team at a VS SEEKER level not beaten yet (else the
+// last), lowered to the highest level the story has unlocked (FLAG_UNLOCKED_VS_SEEKER_LVL_*: ROUTE 207, CELESTIC, SPEAR
+// PILLAR, the HALL OF FAME, STARK MOUNTAIN); each team is a trainer of its own, beaten by its own flag.
 #include <stdio.h>
 #include "global.h"
 #include "battle_setup.h"
@@ -38,6 +43,7 @@
 #include "mp_region.h"
 
 #include "../data/qz_original_teams.h"
+#include "../data/sinnoh_rematches.h"
 
 #define VS_SEEKER_STEPS 100
 #define VIEW_X 7
@@ -52,6 +58,7 @@ static EWRAM_DATA u16 sReadyMap = 0;          // (group << 8 | num) + 1 of the m
 static EWRAM_DATA u16 sRematchTrainer = 0;    // the rematch being fought: its trainer and tier
 static EWRAM_DATA u8 sRematchTier = 0;
 static EWRAM_DATA bool8 sTestAlwaysYes = FALSE;   // (tests: every trainer with a rematch wants it)
+static EWRAM_DATA u16 sSinnohRematchId = 0;       // (SINNOH: the team's trainer the rematch is fought as)
 
 static const u8 sText_BatteryNotCharged[] = _("The battery isn't charged enough.\pNo. of steps required to fully\ncharge the battery: {STR_VAR_1}{PAUSE_UNTIL_PRESS}");
 static const u8 sText_NoTrainersWithinRange[] = _("There are no TRAINERS within range\nwho can battle…\pThe VS SEEKER was turned off.{PAUSE_UNTIL_PRESS}");
@@ -89,6 +96,44 @@ static const struct KantoRematch *Rematch(u16 trainerNum)
     }
     return NULL;
 }
+
+// ---- SINNOH's (Platinum's VsSeeker_GetCurrentLevelForRematchData / VsSeeker_AdjustRematchLevel)
+static const struct SinnohRematch *SinnohRematch(u16 trainerNum)
+{
+    s32 lo = 0, hi = ARRAY_COUNT(sSinnohRematches) - 1;
+    while (lo <= hi)
+    {
+        s32 mid = (lo + hi) / 2;
+        if (sSinnohRematches[mid].trainerNum == trainerNum)
+            return &sSinnohRematches[mid];
+        if (sSinnohRematches[mid].trainerNum < trainerNum)
+            lo = mid + 1;
+        else
+            hi = mid - 1;
+    }
+    return NULL;
+}
+
+static u8 SinnohTier(const struct SinnohRematch *r)
+{
+    u8 level, last = 0;
+    for (level = 1; level <= r->count; level++)
+    {
+        if (r->tier[level - 1] == 0)
+            continue;
+        last = level;
+        if (!FlagGet(TRAINER_FLAG(r->tier[level - 1])))
+            break;
+    }
+    if (level > r->count)
+        level = last;
+    while (level != 0 && (r->tier[level - 1] == 0 || !FlagGet(sSinnohVsSeekerLevels[level - 1])))
+        level--;
+    return level;
+}
+
+// the rematch tier a beaten trainer of either table would give now (0: none)
+static u8 AnyTier(u16 trainerNum);
 
 static bool8 TierBeaten(const struct KantoRematch *r, u8 tier)
 {
@@ -185,7 +230,18 @@ void MP_VsSeeker_Step(void)
 
 bool8 MP_VsSeeker_IsKantoTrainer(u16 trainerNum)
 {
-    return Rematch(trainerNum) != NULL;
+    return Rematch(trainerNum) != NULL || SinnohRematch(trainerNum) != NULL
+        || (sRematchTier != 0 && sSinnohRematchId != 0 && trainerNum == sSinnohRematchId);
+}
+
+static u8 AnyTier(u16 trainerNum)
+{
+    const struct KantoRematch *r = Rematch(trainerNum);
+    const struct SinnohRematch *sr;
+    if (r != NULL)
+        return NextTier(r);
+    sr = SinnohRematch(trainerNum);
+    return sr != NULL ? SinnohTier(sr) : 0;
 }
 
 // FireRed's ShouldTryRematchBattle: a beaten trainer of the table takes the rematch path (which asks IsTrainerReadyForRematch)
@@ -204,7 +260,17 @@ bool8 MP_VsSeeker_Ready(void)
 void MP_VsSeeker_PrepareRematch(u16 trainerNum)
 {
     const struct KantoRematch *r = Rematch(trainerNum);
+    const struct SinnohRematch *sr = SinnohRematch(trainerNum);
     sRematchTrainer = trainerNum;
+    sSinnohRematchId = 0;
+    if (sr != NULL)
+    {
+        // (SINNOH: the level's team is a trainer of its own; its win sets that trainer's flag, Platinum's way)
+        sRematchTier = SinnohTier(sr);
+        if (sRematchTier != 0)
+            gTrainerBattleOpponent_A = sSinnohRematchId = sr->tier[sRematchTier - 1];
+        return;
+    }
     sRematchTier = r != NULL ? GateTier(r, NextTier(r)) : 0;
 }
 
@@ -216,11 +282,13 @@ void MP_VsSeeker_RematchWon(void)
         FlagSet(r->tier[sRematchTier - 1].beatenFlag);
     sReady[(u8)gSpecialVar_LastTalked] = FALSE;
     sRematchTier = 0;
+    sSinnohRematchId = 0;
 }
 
 void MP_VsSeeker_BattleEnded(void)
 {
     sRematchTier = 0;
+    sSinnohRematchId = 0;
 }
 
 // ---------------------------------------------------------------------------------------------------- using it
@@ -262,8 +330,7 @@ static bool8 AnyoneToAnswer(void)
     u32 i;
     for (i = 0; i < sSeenCount; i++)
     {
-        const struct KantoRematch *r = Rematch(sSeen[i].trainerNum);
-        if (!FlagGet(TRAINER_FLAG(sSeen[i].trainerNum)) || (r != NULL && NextTier(r) != 0))
+        if (!FlagGet(TRAINER_FLAG(sSeen[i].trainerNum)) || AnyTier(sSeen[i].trainerNum) != 0)
             return TRUE;
     }
     return FALSE;
@@ -288,7 +355,6 @@ static u8 Answer(void)
     for (i = 0; i < sSeenCount; i++)
     {
         const struct Seen *s = &sSeen[i];
-        const struct KantoRematch *r = Rematch(s->trainerNum);
         u8 tier;
         if (!FlagGet(TRAINER_FLAG(s->trainerNum)))
         {
@@ -296,7 +362,7 @@ static u8 Answer(void)
             unfought = TRUE;
             continue;
         }
-        tier = r != NULL ? NextTier(r) : 0;
+        tier = AnyTier(s->trainerNum);
         if (tier == 0)
         {
             Icon(s, 1);

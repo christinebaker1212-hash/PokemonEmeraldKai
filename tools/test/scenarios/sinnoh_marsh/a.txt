@@ -38,10 +38,16 @@ wait 100
 press A 1
 wait 60
 pressuntil A field 3000
-wait 60
+wait 200
 mp where
 mp getflag 2188
+mp warp 42,96,5,8
+wait 60
+waitfor field 1000
 mp face up
+press UP 1
+wait 20
+waitfor field 300
 press UP 1
 wait 60
 pressuntil A field 3000
@@ -54,7 +60,7 @@ press DOWN 1
 wait 200
 shot m_walkout
 pressuntil A field 3000
-wait 60
+wait 200
 mp where
 mp getflag 2188
 shot m_out

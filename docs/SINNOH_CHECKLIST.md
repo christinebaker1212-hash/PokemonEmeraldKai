@@ -52,7 +52,7 @@ Each segment: Platinum's own map scripts, people, triggers, words and battles, p
       boards (2026-11-15: the game's results window, Platinum's words: COOP_NOTES "The FRONTIER's records boards";
       sinnoh_frontier_records); the TOWER's record machines are Platinum's Wi-Fi results and leaders (online: closed). The CONTEST HALL's practice receptionist converts
       again (2026-11-15: OpenPartyMenuForContest's literal; sinnoh_contest_practice)
-- [ ] One test from TWINLEAF to the HALL OF FAME
+- [x] One test from TWINLEAF to the HALL OF FAME (done, the user 2026-11-15)
 
 ## 2. Kai's systems in SINNOH (kept, Platinum's commands mapped onto them)
 
