@@ -725,6 +725,8 @@ class FileConverter:
         if cmd == 'Message' and self.low == 'contests' and a[0] in LINK_DESK_TEXTS:
             # (the link desk in CO-OP's words, not DS wireless: src/sinnoh/s3d_contest_link.c Contest_LinkText)
             return [self.sinnoh(SINNOH_CONTEST, CC_LINK_TEXT, LINK_DESK_TEXTS[a[0]]), 'message gStringVar4', 'waitmessage']
+        if cmd == 'Message' and a[0] == 'TeamGalacticEternaBuilding1F_Text_PlayerUsedTheSecretKey':
+            return []   # (ROTOM's room opens without the SECRET KEY: the user, 2026-11-15; its wall goes, the room's line stays)
         if cmd == 'Message':
             return ['message %s' % self.text_label(a[0]), 'waitmessage']
         if cmd in ('WaitButton', 'WaitABXPadPress', 'WaitABPress', 'WaitABPressTime'):
@@ -839,7 +841,9 @@ class FileConverter:
             # (the party's ROTOM: how many, the first one's slot; their forms: src/mp/mp_forms.c)
             return [self.sinnoh(SINNOH_MISC, 47, self.var(a[0]), self.var(a[1]))]
         if cmd == 'GetRotomFormsInSave':
-            return ['setvar %s, 1' % self.var(x) for x in a[:5]]   # (every appliance stands in ROTOM's room)
+            # (HEAT, WASH, FROST, FAN, MOW: TRUE when a ROTOM in the party or the boxes has that form, its appliance
+            # then gone from the room, as Platinum's ScrCmd_GetRotomFormsInSave)
+            return [self.sinnoh(SINNOH_MISC, 51, k + 1, self.var(x)) for k, x in enumerate(a[:5])]
         if cmd == 'SetRotomForm':
             # (partySlot, moveSlot, -, form: the form and its move, Platinum's Pokemon_SetRotomForm: mp_forms.c)
             mv = a[1]
@@ -937,6 +941,8 @@ class FileConverter:
             return [self.sinnoh(SINNOH_IS_TMHM, self.arg(a[0]), self.var(a[1]))]
         if cmd == 'CheckItemIsPlate':
             return ['setvar %s, 0' % self.var(a[1])]     # (this game has no ARCEUS plates to engrave)
+        if cmd == 'CheckItem' and a[0] == 'ITEM_SECRET_KEY':
+            return ['setvar %s, 1' % self.var(a[2])]   # (ROTOM's room without the SECRET KEY, a DS event: the user, 2026-11-15)
         if cmd in ('CheckItem', 'CanFitItem'):
             op = 'checkitem' if cmd == 'CheckItem' else 'checkitemspace'
             return ['%s %s, %s' % (op, self.arg(a[0]), self.arg(a[1])), 'copyvar %s, VAR_RESULT' % self.var(a[2])]
@@ -1638,7 +1644,9 @@ class FileConverter:
             return [self.sinnoh(SINNOH_SET_BIKE, self.value(a[0]))]
 
         if cmd == 'CheckDistributionEvent':
-            return ['setvar %s, 0' % self.var(a[1])]   # (no distribution events: Platinum without them)
+            # (no distribution events: Platinum without them; but ROTOM's room is open, its appliances working: the
+            # user, 2026-11-15)
+            return ['setvar %s, %d' % (self.var(a[1]), a[0] == 'DISTRIBUTION_EVENT_ROTOM')]
         # ROUTE 224's tablet (OAK comes only with the OAK'S LETTER, a distribution event: closed, so its tablet stays
         # unmarked); its two commands, for the scripts to convert whole: the name thanked is the player's, the
         # writing never chosen (Platinum's naming screen's "no one")

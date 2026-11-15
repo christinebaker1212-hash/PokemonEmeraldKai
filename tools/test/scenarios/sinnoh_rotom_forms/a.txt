@@ -1,0 +1,18 @@
+pressuntil A field 5000
+wait 30
+mp warp 43,18,4,7
+wait 200
+shot rf_room
+mp face up
+press A 2
+wait 40
+pressuntillog A 3000 ROTOM to form
+wait 30
+shot rf_heat
+pressuntil B field 3000
+mp form 0
+mp warp 43,18,8,7
+wait 200
+shot rf_after
+echo [rf] done
+quit

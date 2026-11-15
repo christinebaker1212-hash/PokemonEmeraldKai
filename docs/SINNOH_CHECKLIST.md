@@ -93,8 +93,9 @@ Each segment: Platinum's own map scripts, people, triggers, words and battles, p
 - [x] The GREAT MARSH tram (MoveGreatMarshTram, CheckGreatMarshTramLocation: src/sinnoh/s3d_tram.c) (sinnoh_tram)
 - [x] The REGI ruins in Platinum's own scripts (ActivateRegiRuinsDot, the statue's quake ScrCmd_29F, FLAG_GAME_COMPLETED;
       REGIGIGAS's check: any REGIGIGAS, Platinum's being a DS event's) (sinnoh_regi); the OLD CHATEAU's ROTOM (sinnoh_rotom)
-- [x] ROTOM's room in Platinum's own scripts: as Platinum's without the ROTOM distribution (a DS event, closed): no
-      appliances, the notebooks and PROF. ROWAN (sinnoh_rotom_room)
+- [x] ROTOM's room in Platinum's own scripts, open without the SECRET KEY (the user, 2026-11-15): the wall goes once
+      Team Galactic has left, the five appliances stand (Platinum's sprites; one goes while a ROTOM has its form), ROTOM
+      changes form and move, the notebooks and PROF. ROWAN (sinnoh_rotom_room, sinnoh_rotom_forms)
 - [x] UNOWN messages in Platinum's UNOWN font (MessageUnown), the letters seen (GetUnownFormsSeenCount) (sinnoh_unown)
 - [x] The VILLA (RESORT AREA) and its furniture: all 44 of Platinum's scripts (the order form, the visitors, each
       piece's own); what's bought stands as Platinum's model (s3d_gyms.c VILLA, its table generated from Platinum's

@@ -643,6 +643,24 @@ void Sinnoh_MiscCall(u16 op, u16 a, u16 b)
         VarSet(b, any);
         break;
     }
+    case 51:   // GetRotomFormsInSave, one form at a time: B <- TRUE when a ROTOM in the party or the boxes has form A
+    {
+        u8 MP_Form_Of(const struct BoxPokemon *box);
+        struct PokemonStorage *MP_PersonalStorage(void);
+        struct PokemonStorage *st = MP_PersonalStorage();
+        u32 i, any = FALSE;
+        for (i = 0; i < PARTY_SIZE && !any; i++)
+            if (GetMonData(&gPlayerParty[i], MON_DATA_SPECIES) == SPECIES_ROTOM && MP_Form_Of(&gPlayerParty[i].box) == a)
+                any = TRUE;
+        for (i = 0; st && i < TOTAL_BOXES_COUNT * IN_BOX_COUNT && !any; i++)
+        {
+            struct BoxPokemon *box = &st->boxes[i / IN_BOX_COUNT][i % IN_BOX_COUNT];
+            if (GetBoxMonData(box, MON_DATA_SPECIES) == SPECIES_ROTOM && MP_Form_Of(box) == a)
+                any = TRUE;
+        }
+        VarSet(b, any);
+        break;
+    }
     case 46:   // GetDailyRandomLevel: A <- the day's level, 2-99 (Platinum's VAR_DAILY_RANDOM_LEVEL, picked as a day starts)
     {
         u32 x = (RtcGetLocalDayCount() + 1) * 0x9E3779B1u ^ 0x221;

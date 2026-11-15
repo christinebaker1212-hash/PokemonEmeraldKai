@@ -7711,6 +7711,10 @@ The user (2026-11-15): "form changes, and they must scale across all regions". O
   (item_use.c ItemUseOutOfBattle_Gracidea, party_menu.c ItemUseCB_Gracidea: the icon redrawn at once); SHAYMIN's Sky
   Forme ends at night (MP_Form_MapLoaded); BURMY takes its last battle ground's cloak (MP_Form_AfterBattle). ROTOM's
   appliances: MP_Form_SetRotom swaps the form's move for the last one's, or puts it in the given slot.
-- SINNOH's ROTOM room stays as Platinum's without the SECRET KEY (a DS event, closed): Black's appliances change ROTOM.
+- SINNOH's ROTOM room is open without the SECRET KEY (the user, 2026-11-15; a DS event in Platinum): gen_scripts.py
+  answers CheckItem ITEM_SECRET_KEY and CheckDistributionEvent DISTRIBUTION_EVENT_ROTOM with TRUE and drops the
+  "used the SECRET KEY" line at ETERNA's Galactic building wall; GetRotomFormsInSave is s3d_misc.c op 51 (a form
+  any ROTOM in the party or boxes has: its appliance gone); the appliances are Platinum's sprites (sprites.py no longer
+  hides ROTOM_*; gen_maps.py SCENE_PEOPLE shows them by the room's flags). Scenario sinnoh_rotom_forms.
 - Tests: `mp form SLOT [FORM]`, `mp sinnohop OP A B [V8009]` (a SINNOH op straight); scenarios forms, forms_changes
   (SINNOH's ops, the GRACIDEA through the BAG), forms_unova (Black's meteorite and appliances).

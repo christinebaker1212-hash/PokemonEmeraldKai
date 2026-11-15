@@ -1,0 +1,8 @@
+# ROTOM's room open without the SECRET KEY (the user, 2026-11-15): the appliances stand (GetRotomFormsInSave: none
+# taken yet), ROTOM goes into the microwave (Platinum's script: HEAT ROTOM, OVERHEAT), then the room shows the
+# microwave gone. Needs both SINNOH packs. Shots rf_room, rf_heat, rf_after.
+MODE=1
+TMO=150
+ENV_A="MOEMON_DEBUG_REGION=3 MOEMON_DEBUG_PARTY=504:30"
+EXPECT_A=("forms: ROTOM to form 1" "form: slot 0 species 504 form 1 types 13 10" "[rf] done")
+UNEXPECT_A=("[crash]" "TIMEOUT")
