@@ -108,6 +108,21 @@ jobs:
         if: steps.ver.outputs.skip != 'true'
         run: tools/sinnoh/make_pack.sh "$RUNNER_TEMP/pokeplatinum"
 
+      # SINNOH's pieces the decomp doesn't hold, from the user's Platinum ROM: CANALAVE LIBRARY's TV
+      # (tools/sinnoh/rom_pack.sh -> sinnoh/platinum_libtv.bin, shipped by package.sh). Its link is the PLATINUM_ROM_URL
+      # secret (never in this repository). Without it the release goes out with the TV's screen held dark.
+      - name: SINNOH from the Platinum ROM
+        if: steps.ver.outputs.skip != 'true'
+        env:
+          PLATINUM_ROM_URL: ${{ secrets.PLATINUM_ROM_URL }}
+        run: |
+          if [ -n "$PLATINUM_ROM_URL" ]; then
+            PLATINUM_WORK="$RUNNER_TEMP/platinum_rom" tools/sinnoh/rom_pack.sh || echo "::warning::the Platinum ROM's pieces didn't build"
+            rm -rf "$RUNNER_TEMP/platinum_rom"
+          else
+            echo "::warning::no PLATINUM_ROM_URL secret: the release has no library TV picture"
+          fi
+
       - name: Linux build
         if: steps.ver.outputs.skip != 'true'
         run: make linux -j"$(nproc)"

@@ -62,6 +62,10 @@ if [ -f sinnoh/platinum3d.pak ]; then
     if [ -f sinnoh/platinum_text.pak ]; then cp sinnoh/platinum_text.pak "$P/sinnoh/"; fi   # (its words)
     if [ -f sinnoh/platinum_daylight.bin ]; then cp sinnoh/platinum_daylight.bin "$P/sinnoh/"; fi   # (its time-of-day tint for the 2D regions)
 fi
+if [ -f sinnoh/platinum_libtv.bin ]; then   # (CANALAVE LIBRARY's TV, from the user's Platinum ROM: tools/sinnoh/rom_pack.sh)
+    mkdir -p "$P/sinnoh"
+    cp sinnoh/platinum_libtv.bin "$P/sinnoh/"
+fi
 if [ -f sinnoh/platinum_gfx.pak ]; then   # (SINNOH's people as Platinum draws them, tools/sinnoh/build_gfx.py)
     mkdir -p "$P/sinnoh"
     cp sinnoh/platinum_gfx.pak "$P/sinnoh/"

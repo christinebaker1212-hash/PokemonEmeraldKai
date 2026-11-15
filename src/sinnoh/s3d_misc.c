@@ -761,6 +761,12 @@ void Sinnoh_MiscCall(u16 op, u16 a, u16 b)
             Sinnoh_BinocularsEnd();
         }
         break;
+    case 73:   // (StartLibraryTV: CANALAVE LIBRARY's news, s3d_libtv.c)
+        {
+            void Sinnoh_LibraryTvStart(void);
+            Sinnoh_LibraryTvStart();
+        }
+        break;
     case 67:   // (CheckHasLearnableReminderMoves: A the answer, B the party slot's variable)
         VarSet(a, VarGet(b) < PARTY_SIZE && GetNumberOfRelearnableMoves(&gPlayerParty[VarGet(b)]) > 0);
         break;

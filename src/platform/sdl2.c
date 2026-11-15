@@ -1007,6 +1007,10 @@ void VDraw(void)
         void S3D_BinocularsComposite(u16 *frame);
         S3D_BinocularsComposite(image);  // Moemon Kai: SINNOH's binoculars' lenses (src/sinnoh/s3d_binoculars.c)
     }
+    {
+        void S3D_LibraryTvComposite(u16 *frame);
+        S3D_LibraryTvComposite(image);   // Moemon Kai: CANALAVE LIBRARY's TV (src/sinnoh/s3d_libtv.c)
+    }
     MP_ModernAnim_Composite(image);      // ... BATTLE ANIMS > MODERN: glows, trails and impacts over the animation
     {
         void MP_MakerAnim_Composite(u16 *frame);

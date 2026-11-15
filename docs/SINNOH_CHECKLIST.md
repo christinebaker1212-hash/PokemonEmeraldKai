@@ -72,7 +72,8 @@ Each segment: Platinum's own map scripts, people, triggers, words and battles, p
       the HONEY trees, the SAFARI GAME's gate and ends, the CENTERs' daily trainers, the VS SEEKER's rematches
       (sinnoh_vs_seeker), bookshelves / shelves / trash cans / wall TOWN MAPs (sinnoh_tile_lines), the FLOWER SHOP,
       MOVE MANIAC and NEWS PRESS (sinnoh_counters), the binoculars (sinnoh_binoculars). Left: the BATTLE FRONTIER's
-      scratch-off cards (a screen: mock-up first). On the game's own: the frontier halls, BERRY trees, signs, nurse,
+      scratch-off cards (a screen: mock-up shown to the user 2026-11-15, docs/sinnoh/mockups/, from Platinum's art in
+      the ROM by tools/sinnoh/mockups_scratch.py; built once approved). On the game's own: the frontier halls, BERRY trees, signs, nurse,
       poison, SAVE, PC, egg hatching, DAY CARE, field moves, TRAINER CARD signature
 
 ## 3. Built for 1:1 (Platinum has it, Kai doesn't)
@@ -192,10 +193,11 @@ Each segment: Platinum's own map scripts, people, triggers, words and battles, p
 - [x] The interviews and records from SINNOH's own systems: contests, the dress-up photo (PHOTO RATING), POFFINS (the
       POFFIN HOUSE's blends), the BATTLE TOWER's records and interviews, the HALL, BP, ribbons, the GAME CORNER, BERRY
       patches (BERRY LOOKOUT), AMITY SQUARE, the VILLA (sinnoh_studio, sinnoh_tower: COOP_NOTES "SINNOH's TV")
-- [~] CANALAVE LIBRARY's TV news of LAKE VALOR (StartLibraryTV, Platinum's src/library_tv): the scene plays and the
-      screen holds dark for the TV's length (1.185.13, sinnoh_library_explosion); its picture (the intro's TV frame,
-      demo/intro/intro_tv.narc, graphic/library_tv.narc, the rolling scan lines) needs Platinum's ROM: the decomp
-      doesn't hold those archives (the user's ROM: SINNOH_HANDOFF "The user's Platinum ROM", 2026-11-15)
+- [x] CANALAVE LIBRARY's TV news of LAKE VALOR (StartLibraryTV, Platinum's src/library_tv): the TV's frame, the news
+      picture and the rolling scan lines from the user's ROM (the decomp doesn't hold demo/intro/intro_tv.narc or
+      graphic/library_tv.narc): tools/sinnoh/build_library_tv.py -> sinnoh/platinum_libtv.bin (tools/sinnoh/rom_pack.sh;
+      the release's PLATINUM_ROM_URL secret), drawn by src/sinnoh/s3d_libtv.c (SINNOH_MISC 73); without the file the
+      screen holds dark as before (2026-11-15, sinnoh_library_explosion's shots tv*)
 - [x] Friends' segments on each other's TV: CO-OP's record mixing carries each game's kept segments; the TV keeps 8
       of friends' and airs them with the friend's name (sinnoh_tv_mix: COOP_NOTES "SINNOH's TV")
 - [x] JUBILIFE TV's floors and their people: every script converts; the 3F questionnaire man's two words on the

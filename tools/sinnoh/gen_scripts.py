@@ -1505,8 +1505,9 @@ class FileConverter:
             return []                       # (the briefcase went back to the field itself)
         if cmd == 'StartLibraryTV':
             # CANALAVE LIBRARY's news of LAKE VALOR (Platinum's src/library_tv: a fade in, LIBRARY_TV_DURATION 240
-            # frames, a fade out) while the field is faded out; its picture isn't drawn yet (docs/SINNOH_CHECKLIST.md)
-            return ['delay 252']
+            # frames, a fade out) while the field is faded out: drawn by src/sinnoh/s3d_libtv.c from the user's ROM
+            # (sinnoh/platinum_libtv.bin; without it the screen holds dark)
+            return [self.sinnoh(SINNOH_MISC, 73), 'delay 252']
         if cmd in ('BufferRivalStarterSpeciesName', 'BufferRivalStarterSpeciesNameWithArticle'):
             return [self.sinnoh(SINNOH_BUFFER_RIVAL_STARTER, self.value(a[0]))]
         if cmd in ('BufferPlayerCounterpartStarterSpeciesName', 'BufferPlayerCounterpartStarterSpeciesNameWithArticle'):

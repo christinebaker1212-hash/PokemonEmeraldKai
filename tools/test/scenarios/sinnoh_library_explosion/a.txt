@@ -5,6 +5,7 @@ mp setvar 0x51A4 3
 mp setvar 0x51A5 1
 mp warp 41,29,4,4
 wait 90
+shotburst tv 6000 60
 mash A 300 10
 pressuntil A field 6000
 mp where
