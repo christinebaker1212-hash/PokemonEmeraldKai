@@ -3265,6 +3265,22 @@ static void Step(struct Thread *t)
             *WorkPtr(a[3]) = sText[i];
             break;
         }
+        case U3C_FLD_BATTLE_RegisterAllowedSpecies:   // regulation, count: the regulation's barred POKeMON the player
+        {                                             // has caught, named in the word slots (scrcmd_fld_battle.c)
+            u16 n = 0, nat;
+            bool8 U3D_Subway_Banned(u16 species);
+            for (nat = 1; nat <= 649 && n < UNOVA_STR_VARS; nat++)
+            {
+                u16 sp = NationalPokedexNumToSpecies(nat);
+                if (U3D_Subway_Banned(sp) && GetSetPokedexFlag(nat, FLAG_GET_CAUGHT))
+                    GetSpeciesName(Slot(n++), sp);
+            }
+            *WorkPtr(a[1]) = n;
+            break;
+        }
+        case U3C_HasPlayerLanguage:   // (the player's registered country, Black's GeoNet: none registered here)
+            *WorkPtr(a[0]) = 0;
+            break;
         case U3C_NETWORK_CmdLoadNpcTable:   // (the table is the pack's, always at hand)
         case U3C_NETWORK_CmdFreeNpcTable:
             break;

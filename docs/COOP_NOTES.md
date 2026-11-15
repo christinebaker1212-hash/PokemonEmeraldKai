@@ -7659,3 +7659,30 @@ performers with their props and names: banks 76 / 77; titles in each show's own 
   on the stage (scored as everyone's). Protocol 82.
 - Tests: `mp musical PROPS [SLOT]`, `mp musicaldress SLOT`; scenario unova_musical. A debug warp (`mp u3dzone`) ends
   any script still running where the player was.
+
+## UNOVA's phenomena, fishing, NIMBASA's stadium trainers, greetings (1.199.9)
+
+- Phenomena (src/unova/u3d_phenom.c, Black's ov021 effect_encount.c): the pack keeps each tile's
+  MAP_ATTR_GetEncounterEffectKind in the high four bits of its battle byte (tools/unova/build_pack.py phenom_code: 0-3
+  grass with flag 4, 4 cave floor, 5 / 6 water, 7 terrain 0x20, a bridge's planks; u3d.c U3D_PhenomKindAt). Each step on
+  an UNOVA map (field_control_avatar.c, after the step scripts) counts once UNOVA's first badge is won and the zone has
+  an encounter table; the zone's setting (row byte 7: 20 steps at 10%, or 5 at 15%) rolls; a tile is picked in Black's
+  search window (sSearchAreaOffsets, inside the player's 32 x 32 block of Black's grid), never under a person. Stepped
+  onto: a dust cloud 40% a battle (else a gem 85% / EVERSTONE 5% / a stone 10%), a bird's shadow 20% (else a wing), the
+  rest a battle; the battle from Black's type 2 (land) or 4 (water) table, repels ignored (wild_encounter.c
+  MP_U3dSpecialWild); the item through Black's script 10133 (PROC_FLD_StoreEffectEncountItemId). Drawn with the game's
+  field effects (jump grass leaves, dust, ripples every 16 / 24 frames) and a SHADOW_XL sprite with mpShadow circling;
+  sounds once a loop within 10 tiles. Tests: `mp u3dphenom [KIND [1 | 2 | 3 | 4]]` (natural search / in front / the
+  zone's setting / in front giving an item / a battle); scenario unova_phenomena.
+- UNOVA's fishing (wild_encounter.c U3dFishInfo / U3dFish): Black's fishing table (type 5) at Black's odds 40 / 40 / 15
+  / 4 / 1 whichever rod, Kai's Gen 1 bite; at the ripples (type 6) a sure bite (field_player_avatar.c).
+- NIMBASA's stadium trainers (u3d_vm.c NpcTable, NpcFromRow): Black's NPC table (a/2/0/9) appended to the scripts pack
+  (version 11); SetNpcEvent(Pair)FromTable set a person's script to the row's trainer (3000 / 5000 +), SetNpcTriple
+  their look too (U3D_Vm_PersonGfx at spawn, ObjectEventSetGraphicsId if already shown), ApplyTableEventKeys lets every
+  table trainer battle again, PickSixDistinctRandom picks the day's crowd rows. Overrides last while the player stays
+  in the zone. Scenario unova_stadium.
+- Greetings, birthdays, the trade counter (u3d_vm.c): GetNpcGreetingMessage with Black's gGreetingCounterTable, misc and
+  random message tables (the clock's minutes, the records, the badges, the player's gender); GetBirthdayMessageIds as
+  Black's on any day but the DS owner's birthday (Kai keeps none); StartCountOtherOtIdsTask counts other trainers' IDs
+  over the party and every box (50 at most). `mp setot SLOT ID` gives a party POKeMON another trainer's ID for tests.
+  Scenario unova_greetings.

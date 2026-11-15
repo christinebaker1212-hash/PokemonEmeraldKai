@@ -64,7 +64,10 @@ records, item lookups, the POKeDEX ratings, trainer records and the sounds liste
       won / lost phrases ("No. 1" asked, not kept: Kai has none); scenario unova_phrases
 - [ ] Black's own words (0x1ED kinds 4 / 5, 0x20C): the PEP QUIZ (zone 117) needs Black's word list; MR. LOCK's
       password (zone 50) is an event's (closed)
-- [ ] Counting POKeMON from other trainers (0x239), NPC greetings by the clock and the party (0x23D)
+- [x] Counting POKeMON from other trainers (0x239: the party and every box, EGGS left out, 50 at most), NPC
+      greetings by the clock and the party (0x23D with Black's record / message tables), the birthday lines (0x20D:
+      Black's other days', no DS birthday here), the barred POKeMON named (0x1B9), the GeoNet country (0x246: none);
+      scenario unova_greetings
 - [ ] The time effect and trainer-card records of zone 389 (0x24E-0x250), the subprocess of zones 32-34 / 254 (0x134)
 - Kai's own: SURF / WATERFALL's hops and jumps (0x0C5 / 0x0C6, Black's field-move scripts: Kai's field moves); closed
   as the DS's or online: birthdays (0x1D6 / 0x1D7 / 0x20D), the research surveys (0x210-0x21F), Wi-Fi lists, GTS,
@@ -99,7 +102,10 @@ records, item lookups, the POKeDEX ratings, trainer records and the sounds liste
 - [ ] The XTRANSCEIVER's calls (friends' video calls)
 - [x] Dark grass: two POKeMON at once (Black's double wild battles: 40 in 100 with two able to battle,
       wild_encounter.c U3dStartWild; test: mp u3dwild 3 b, MOEMON_U3D_DARK_DOUBLE=100)
-- [ ] Shaking grass, dust clouds, rippling water
+- [x] Shaking grass, dust clouds, rippling water, birds' shadows (Black's ov021 effect_encount.c: after the first
+      badge, the zone's steps and odds, a tile round the player of the pack's encounter-effect kinds; battles from
+      Black's special tables, a dust cloud's gem / stone and a shadow's wing by Black's script 10133) and UNOVA's
+      fishing (Black's table and odds, a sure bite at the ripples): src/unova/u3d_phenom.c; scenario unova_phenomena
 - [ ] POKeMON forms outside battle (ROTOM's appliances 0x117 / 0x11C, DEERLING / SAWSBUCK's seasons, form numbers
       0x0FF): Kai keeps forms its own way (battle recomputes); not reworked, unless the user says otherwise
 - [x] TRIPLE battles as Kai's Triple Battles (the player commanding three, with three able; u3d_battle.c, the center
@@ -114,7 +120,9 @@ records, item lookups, the POKeDEX ratings, trainer records and the sounds liste
       no 8 x 8 blocks): visual only, Kai's battles unchanged (singles, Doubles, Triples, co-op; PvP keeps
       Kai's building): tools/unova/battle_bg.py, u3d_battlebg.c; the time's light tints the lit rows. Left: the
       fields' own animations (clouds, water: a/0/1/1's animation files) are drawn at their first frame
-- [ ] NIMBASA's people tables (NETWORK NPC tables 0x1F3-0x1F8, 0x25C)
+- [x] NIMBASA's people tables (NETWORK NPC tables 0x1F3-0x1F8, 0x25C: Black's a/2/0/9 in the scripts pack's
+      version 11; the BIG STADIUM / SMALL COURT trainers and crowd set by the zones' own scripts); scenario
+      unova_stadium
 - [ ] UNITY TOWER, the GEAR STATION / CASTELIA name and greeting boards (0x1D8-0x1E3, 0x1ED, 0x20C) as far as they
       don't need Wi-Fi
 
