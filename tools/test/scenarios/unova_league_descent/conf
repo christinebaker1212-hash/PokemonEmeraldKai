@@ -1,0 +1,7 @@
+# The LEAGUE (ov049 / ov050, script command 0x1BB: u3d_vm.c League*): the hub's lamps lit by the ELITE FOUR's flags,
+# then the centre platform sinks with the player into the CHAMPION's room, where it lands with its glow. Shots ld_*.png.
+MODE=1
+TMO=300
+ENV_A="MOEMON_DEBUG_REGION=4 MOEMON_DEBUG_PARTY=6:100"
+EXPECT_A=("the LEAGUE's lamps, 4 of 4 lit" "the LEAGUE's platform sinks" "into the CHAMPION's room" "the LEAGUE's platform has landed" "the LEAGUE's landing over" "[ld] done")
+UNEXPECT_A=("[crash]" "TIMEOUT")

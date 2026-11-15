@@ -62,8 +62,13 @@ systems. Tick an entry only once it plays as Black's and has been seen running.
       terrain 0x33: phenomenon kind 9 in the pack) the player sways up and down, 8 degrees of a sine a Black frame to
       a height picked each swing (8, 8, 12 or 14 units), the view staying put (u3d_vm.c BridgeFrame, U3D_PlayerBob);
       scenario unova_bridge_sway (debug u3dkind K)
-- [ ] Black's other field gimmicks (arc 0x65's zone table, ov021 gFieldGimmickOverlayIds): the LEAGUE's models (ov049 /
-      ov050), the special POKeMON's spots (ov059: MOOR OF ICIRRUS, CASTELIA), the ENTRALINK's gauge and markers
+- [x] The LEAGUE's hub and the descent to the CHAMPION (ov049 / ov050, script command 0x1BB: ov010 namein_setup.c
+      RunFallEvent / RunLandEvent; 2026-11-15, zones 137 / 138): the hub's four lamps lit by the ELITE FOUR's flags and
+      its centre alight with all four; the centre statue's platform sinks with the player into its pit after Black's
+      camera move (tools/unova/gen_league.py -> u3d_league.h: archive 0x9D's paths), the screen goes black, and in the
+      CHAMPION's room the platform comes down from above with its glow, lands with a thud and a shake (u3d_vm.c
+      League*, U3D_PlayerDepthTest); scenario unova_league_descent
+- [ ] Black's other field gimmicks (arc 0x65's zone table, ov021 gFieldGimmickOverlayIds): the special POKeMON's spots (ov059: MOOR OF ICIRRUS, CASTELIA), the ENTRALINK's gauge and markers
       (ov060 / ov061), LIBERTY GARDEN's (ov062)
 - [x] Camera shakes (0x148: ABYSSAL RUINS, CHARGESTONE, DRAGONSPIRAL, N's CASTLE; 2026-11-15, scenario
       unova_camera_shake): ShakeTask's swings, their decay and the script's wait (u3d.c U3D_CameraShake)
@@ -148,7 +153,8 @@ records, item lookups, the POKeDEX ratings, trainer records and the sounds liste
       scenario unova_greetings
 - [x] Zone 389's time effect (0x24E-0x250: overlays share addresses, so these are ov065's, not the trainer card's;
       2026-11-15, scenario unova_time_effect): the effect model by day or night (gimmicks 65 / 165 in the pack), its
-      pending flag, played with the script waiting, then hidden (u3d_vm.c TimeFx*)
+      pending flag, played with the script waiting, then hidden (u3d_vm.c TimeFx*); in ROUTE 1 (317) and zone 397 too,
+      as arc 0x65 has it (gimmick 54 in all three)
 - [x] CASTELIA's crowds (0x134 starts ov055's field_gimmick_crowd.c in zones 32-34 / 254; 2026-11-15, scenario
       unova_crowd): Black's setups (tools/unova/gen_crowds.py -> u3d_crowds.h), people spawned on each area's edge at
       the time of day's rate and walked its length, solid ones stepping aside two tiles out, one in ten player-aware

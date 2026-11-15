@@ -1092,16 +1092,22 @@ static void LanesFrame(void);
 static void SoundObjsLoad(void);
 static void SoundObjsFrame(void);
 static void BridgeFrame(void);
+static void LeagueFrame(void);
+static void LeagueLoad(void);
+static bool8 LeagueLandStart(void);
+static bool8 LeagueWarpNow(void);
+static bool8 LeagueBusy(void);
 
 // ------------------------------------------------------------------------------------------------ the VM
 // (BURGH's gym, the honey's trainers: Black's StartScriptedEvent run after its script, PlateDoorsFrame)
 static u8 sPdScripted, sPdScriptedVariant;
 static const float sPdEffectPos[2][3] = {{616, 0, 408}, {328, 0, 472}};   // (gPlateDoorsEffectPos)
 enum { W_BGM_STOPPED = 100, W_EXP_ANIM, W_LIFT_RIDE, W_MUSICAL, W_SUBWAY_MAP, W_BMODEL, W_BMODEL_DOOR, W_SHAKE, W_TIMEFX, W_ICA, W_MOTION,
-       W_ARC_GLOW, W_ARC_FLY, W_ARC_PEAK, W_ARC_END };
+       W_ARC_GLOW, W_ARC_FLY, W_ARC_PEAK, W_ARC_END, W_LEAGUE };
 static u16 sBModelWait;
 // zone 389's time effect (ov065): sWork.white's TIMEFX_PENDING is Black's isEffectPending (its gimmick save 0x36)
 #define ZONE_TIME_EFFECT 389
+#define IS_TIME_EFFECT_ZONE(z) ((z) == ZONE_TIME_EFFECT || (z) == 397 || (z) == 317)   // (arc 0x65: gimmick 54 in all three)
 #define TIMEFX_PENDING 0x80
 static struct { bool8 playing, night, peaked; } sTimeFx;
 static u8 TimeZoneNow(void)   // (Black's time of day: 0 morning, 1 day, 2 evening, 3 night, 4 late night; the clock
@@ -1632,7 +1638,7 @@ static void ArcFrame(void)   // (the events: Black's frames are two of ours)
 
 static void TimeFxStart(void)   // (StartEffect: shown, both tracks played, its sound)
 {
-    if (CurrentZone() != ZONE_TIME_EFFECT)
+    if (!IS_TIME_EFFECT_ZONE(CurrentZone()))
         return;
     sTimeFx.playing = TRUE, sTimeFx.peaked = FALSE;
     U3D_ExpHide(0, FALSE);
@@ -4364,18 +4370,11 @@ static void Step(struct Thread *t)
             }
             break;
         }
-        case U3C_PALPARK_CallFallEvent:   // the LEAGUE's statue sinks (ov010 namein_setup.c NAMEIN_SETUP_RunFallEvent):
-        {                                 // a warp to zone 0x8A at its own start spot (Black's zone header: 30, 83)
-            u8 group, num;
-            s16 x, y;
-            if (U3D_MapOfZoneTile(0x8A, 30, 83, &group, &num, &x, &y))
-            {
-                sHolding = FALSE;
-                t->wait = W_WARP;
-                SetWarpDestination(group, num, WARP_ID_NONE, x, y);
-                DoWarp();
-                return;
-            }
+        case U3C_PALPARK_CallFallEvent:   // the LEAGUE's platform sinks (ov010 namein_setup.c NAMEIN_SETUP_RunFallEvent):
+        {                                 // the descent and the landing in zone 0x8A (League*)
+            void LeagueFallStart(void);
+            LeagueFallStart();
+            t->wait = W_LEAGUE;
             break;
         }
         case U3C_EVENT_MON_CmdClearEventMonFlag:
@@ -5057,6 +5056,16 @@ static void Wait(struct Thread *t)
         break;
     case W_ARC_END:
         if (!sArc.shown)
+            t->wait = W_NONE;
+        break;
+    case W_LEAGUE:   // (the LEAGUE's descent: its warp once the screen is black, then the landing to its end)
+        if (LeagueWarpNow())
+        {
+            sHolding = FALSE;
+            t->wait = W_WARP;
+            return;
+        }
+        if (!LeagueBusy())
             t->wait = W_NONE;
         break;
     case W_TIMEFX:   // (zone 389's time effect over: WaitEffectEventMain)
@@ -5839,7 +5848,7 @@ void U3D_Vm_FieldFrame(void)
         IceModels(FALSE);
     else if (CurrentZone() == ZONE_NIMBASA_GYM)
         CartStep();
-    else if (CurrentZone() == ZONE_TIME_EFFECT)
+    else if (IS_TIME_EFFECT_ZONE(CurrentZone()))
         TimeFxFrame();
     else if (CurrentZone() == ZONE_THRONE)
         ArcFrame();
@@ -5857,6 +5866,7 @@ void U3D_Vm_FieldFrame(void)
     LanesFrame();
     SoundObjsFrame();
     BridgeFrame();
+    LeagueFrame();
     {
         void U3D_Subway_SwayFrame(u16 zone);
         U3D_Subway_SwayFrame(CurrentZone());   // (the BATTLE SUBWAY's carriage: u3d_subway.c)
@@ -5919,7 +5929,7 @@ void U3D_Vm_FieldShown(void)
         U3D_ExpLoad(38);
         PlateModels(TRUE);
     }
-    else if (CurrentZone() == ZONE_TIME_EFFECT)   // (ov065 Init: by night or day, hidden unless it's pending)
+    else if (IS_TIME_EFFECT_ZONE(CurrentZone()))   // (ov065 Init: by night or day, hidden unless it's pending)
     {
         u8 tz = TimeZoneNow();
         sTimeFx.night = tz >= 3, sTimeFx.playing = FALSE;
@@ -5944,6 +5954,8 @@ void U3D_Vm_FieldShown(void)
         LanesLoad();
     else if (CurrentZone() == 249 || CurrentZone() == 254)   // (ov053 / ov054: SKYARROW's and TUBELINE's traffic)
         SoundObjsLoad();
+    else if (CurrentZone() == 137 || CurrentZone() == 138)   // (ov049 / ov050: the LEAGUE's hub and the CHAMPION's room)
+        LeagueLoad();
     else if (CurrentZone() >= 67 && CurrentZone() <= 76)   // (ov052: the GEAR STATION's platforms, their trains
         U3D_ExpLoad(52);                                   //  brought in by the subway's scripts: u3d_subway.c)
     else if (CurrentZone() == ZONE_NACRENE_GYM)   // (ov040 Init: the shelf moved, if it has been)
@@ -6925,6 +6937,158 @@ static void SoundObjsFrame(void)
         SoundObjsSlide();
 }
 
+// ------------------------------------------------------------------------------------------------ the LEAGUE
+// The LEAGUE's hub (ov049 field_gimmick_models_a.c, zone 137): a lamp for each ELITE FOUR member (models 2-5, lit by
+// flags 0x96B, 0x96A, 0x969, 0x96C: their second animation, else their first), the centre (models 0, 1) alight once
+// all four are. Script command 0x1BB (ov010 NAMEIN_SETUP_RunFallEvent): the view moves to Black's (sLeagueCam, 20
+// Black frames), the centre platform sinks with the player on it (sLeagueFallY, a rumble playing), the screen goes
+// black and the player is in the CHAMPION's room (zone 138, ov050 field_gimmick_models_b.c), where RunLandEvent brings
+// the platform down from above (sLeagueLandY) with its glow shown and both playing once; landed, a thud and the view
+// shakes; when the glow's done it's hidden and the player is on the floor. The script goes on there.
+#include "u3d_league.h"
+enum { LG_NONE, LG_CAMERA, LG_FALL, LG_FADE, LG_WARP, LG_LAND, LG_SETTLE };
+static struct { u8 phase, tick; u16 f; bool8 landing; float x, z; } sLeague;
+static const u16 sLeagueLampFlags[4] = {0x96B, 0x96A, 0x969, 0x96C};   // (models 2-5)
+
+static void LeagueLoad(void)
+{
+    u32 k, lit = 0;
+    if (CurrentZone() == 138)
+    {
+        U3D_ExpLoad(50);   // (InitModels: the platform's animation stopped, the glow hidden)
+        return;
+    }
+    U3D_ExpLoad(49);
+    for (k = 0; k < 4; k++)
+    {
+        bool8 on = FlagOn(sLeagueLampFlags[k]);
+        lit += on;
+        U3D_ExpTex(2 + k, on ? 1 : 0, TRUE, 0, TRUE, TRUE);
+    }
+    if (lit == 4)
+        U3D_ExpTex(0, 0, TRUE, 0, TRUE, TRUE), U3D_ExpTex(1, 0, TRUE, 0, TRUE, TRUE);
+    MPNet_Log("u3d vm: the LEAGUE's lamps, %u of 4 lit", (unsigned)lit);
+}
+
+void LeagueFallStart(void)
+{
+    float pw[3];
+    U3D_PlayerWorldPos(pw);
+    sLeague.x = pw[0], sLeague.z = pw[2];
+    sLeague.phase = LG_CAMERA, sLeague.f = 0, sLeague.tick = 0;
+    U3D_PlayerDepthTest(2);
+    U3D_CameraMoveTo((u16)sLeagueCam[0], (u16)sLeagueCam[1], sLeagueCam[2], sLeagueCam[3], sLeagueCam[4], sLeagueCam[5],
+                     40);
+    MPNet_Log("u3d vm: the LEAGUE's platform sinks");
+}
+
+static bool8 LeagueWarpNow(void)
+{
+    u8 group, num;
+    s16 x, y;
+    if (sLeague.phase != LG_WARP)
+        return FALSE;
+    sLeague.phase = LG_NONE;
+    if (!U3D_MapOfZoneTile(0x8A, 30, 83, &group, &num, &x, &y))   // (Black's zone header: its start, 30, 83)
+    {
+        U3D_PlayerFly(FALSE, 0, 0, 0);
+        return FALSE;
+    }
+    sLeague.landing = TRUE;
+    SetWarpDestination(group, num, WARP_ID_NONE, x, y);
+    DoWarp();
+    return TRUE;
+}
+
+static bool8 LeagueLandStart(void)
+{
+    if (!sLeague.landing || CurrentZone() != 0x8A)
+        return FALSE;
+    sLeague.landing = FALSE;
+    sLeague.phase = LG_LAND, sLeague.f = 0, sLeague.tick = 0;
+    sLeague.x = 30 * 16 + 8, sLeague.z = 83 * 16 + 8;   // (SnapObjToGrid: the platform's tile, z 32 on)
+    U3D_ExpSetY(0, sLeagueLandY[0]);
+    U3D_PlayerFly(TRUE, sLeague.x, sLeagueLandY[0], sLeague.z);
+    U3D_ExpTex(0, 0, TRUE, 0, TRUE, FALSE);   // (StartModel0Anime, ShowModel1: each played once)
+    U3D_ExpHide(1, FALSE);
+    U3D_ExpTex(1, 0, TRUE, 0, TRUE, FALSE);
+    U3D_ExpTex(1, 1, TRUE, 0, TRUE, FALSE);
+    PlaySE(SE_ELEVATOR);
+    MPNet_Log("u3d vm: the LEAGUE's platform comes down into the CHAMPION's room");
+    return TRUE;
+}
+
+static bool8 LeagueBusy(void)
+{
+    return sLeague.phase != LG_NONE || sLeague.landing;
+}
+
+static void LeagueFrame(void)
+{
+    float y;
+    switch (sLeague.phase)
+    {
+    case LG_CAMERA:
+        if (!U3D_CameraMoving())
+        {
+            PlaySE(SE_ELEVATOR);   // (Black's SEQ_SE_FLD_148, the platform's hum)
+            sLeague.phase = LG_FALL, sLeague.f = 0;
+        }
+        break;
+    case LG_FALL:
+    case LG_LAND:
+    {
+        const s16 *ys = sLeague.phase == LG_FALL ? sLeagueFallY : sLeagueLandY;
+        u16 n = sLeague.phase == LG_FALL ? ARRAY_COUNT(sLeagueFallY) : ARRAY_COUNT(sLeagueLandY);
+        y = ys[sLeague.f];
+        if (sLeague.f + 1 < n && (sLeague.tick & 1))   // (between Black's frames: halfway)
+            y = (y + ys[sLeague.f + 1]) / 2.0f;
+        U3D_ExpSetY(0, y);
+        U3D_PlayerFly(TRUE, sLeague.x, y, sLeague.z);
+        if (sLeague.phase == LG_FALL)   // (into the pit: once below the floor its edge hides the player as they go down)
+            U3D_PlayerDepthTest(y < -24.0f ? 1 : 2);
+        if (++sLeague.tick & 1)
+            break;
+        if (++sLeague.f < n)
+            break;
+        if (sLeague.phase == LG_FALL)
+        {
+            BeginNormalPaletteFade(PALETTES_ALL, 0, 0, 16, RGB_BLACK);
+            sLeague.phase = LG_FADE;
+        }
+        else
+        {
+            m4aSongNumStop(SE_ELEVATOR);
+            PlaySE(SE_M_STRENGTH);   // (Black's SEQ_SE_FLD_94)
+            U3D_CameraShake(2, 0, 3, 2, 0, 1, 0, 2);   // (the land event's shake)
+            sLeague.phase = LG_SETTLE;
+            MPNet_Log("u3d vm: the LEAGUE's platform has landed");
+        }
+        break;
+    }
+    case LG_FADE:
+        if (!gPaletteFade.active)
+        {
+            U3D_PlayerDepthTest(0);
+            m4aSongNumStop(SE_ELEVATOR);
+            sLeague.phase = LG_WARP;
+        }
+        break;
+    case LG_SETTLE:   // (both models' animations over: the platform stopped, the glow hidden, the player on the floor)
+        if (!U3D_ExpTexPlaying(0, 0) && !U3D_ExpTexPlaying(1, 0) && !U3D_ExpTexPlaying(1, 1) && !U3D_CameraShaking())
+        {
+            U3D_ExpTex(0, 0, FALSE, 0, FALSE, FALSE);
+            U3D_ExpHide(1, TRUE);
+            U3D_ExpTex(1, 0, FALSE, 0, FALSE, FALSE);
+            U3D_ExpTex(1, 1, FALSE, 0, FALSE, FALSE);
+            U3D_PlayerFly(FALSE, 0, 0, 0);
+            sLeague.phase = LG_NONE;
+            MPNet_Log("u3d vm: the LEAGUE's landing over");
+        }
+        break;
+    }
+}
+
 // ------------------------------------------------------------------------------------------------ ROUTE 10's bridge
 // ROUTE 10's bridge (ov047 field_gimmick_bridge.c, zone 362): standing on its planks (Black's no-dash ground, terrain
 // 0x33: phenomenon kind 9 in the pack, build_pack.py phenom_code) the player bobs up and down, 8 degrees of a sine a Black frame (4 a field frame here) to a
@@ -7261,7 +7425,7 @@ bool8 U3D_Vm_SceneStart(void)
     {
         // (the script whose warp brought the player here goes on: FENNEL's scene sets its work after hers)
         SpawnAdded();
-        sThread.wait = W_NONE;
+        sThread.wait = LeagueLandStart() ? W_LEAGUE : W_NONE;   // (the LEAGUE's landing: RunLandEvent first)
         sHolding = TRUE;
         if (!FuncIsActiveTask(Task_Vm))
             CreateTask(Task_Vm, 80);

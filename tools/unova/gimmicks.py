@@ -37,6 +37,8 @@ SETUPS = {
     46: ('rotating room (DRAYDEN)', 0x021F4120),
     48: ('gate news board (the gates)', 0x021F4EA4),   # (gGateExpObjSetups[1]: the English game's, text mode 0)
     58: ('the lane traffic (ROUTE 4, the DESERT RESORT: zones 326 / 157)', 0x021F3B60),   # (sLaneTrainsUnitSetup)
+    49: ("the LEAGUE's lamps (zone 137)", 0x021F3894),   # (gModelsASetup)
+    50: ("the LEAGUE's landing (zone 138)", 0x021F38A4),   # (gModelsBSetup)
     53: ("SKYARROW BRIDGE's traffic (zone 249)", 0x021F3D60),   # (sSoundObjsUnitSetup: two cars each way, the ship)
     54: ("TUBELINE BRIDGE's trains (zone 254)", 0x021F39A0),   # (sSoundObjsBUnitSetup)
     52: ("the BATTLE SUBWAY's trains at the GEAR STATION's platforms (zones 67-76)", 'btrain'),
@@ -415,6 +417,16 @@ def _place54(img):
     return [((0.0, -4096.0, 0.0), 0)] * 2
 
 
+# the LEAGUE (ov049 field_gimmick_models_a.c, ov050 _b.c): their models at gModelsAModelPos / gModelsBModelPos; ov050's
+# model 1 hidden until the landing shows it
+def _place49(img):
+    return [(img.vec(0x021F38A4 + 12 * i), 0) for i in range(6)]
+
+
+def _place50(img):
+    return [(img.vec(0x021F38B4), 0), (img.vec(0x021F38B4 + 12), 0, 1)]
+
+
 def d06_tables():
     """{zone: (stones [(x, y, z)], panels [(x, y, z)])} from ov051's tables"""
     img = Image(51)
@@ -449,7 +461,7 @@ def _place48(img):
     return [((0.0, 0.0, 0.0), 0, 1)]
 
 
-PLACES = {53: _place53, 54: _place54, 58: _place58, 52: _place_btrain, 151: _d06_place(195), 152: _d06_place(196), 153: _d06_place(197), 48: _place48, 64: _place64, 65: _place65, 165: _place65, 38: _place38, 39: _place39, 40: _place40, 41: _place41, 42: _place42, 43: _place43, 44: _place44, 45: _place45,
+PLACES = {49: _place49, 50: _place50, 53: _place53, 54: _place54, 58: _place58, 52: _place_btrain, 151: _d06_place(195), 152: _d06_place(196), 153: _d06_place(197), 48: _place48, 64: _place64, 65: _place65, 165: _place65, 38: _place38, 39: _place39, 40: _place40, 41: _place41, 42: _place42, 43: _place43, 44: _place44, 45: _place45,
           46: _place46}   # (the gimmicks drawn so far)
 
 

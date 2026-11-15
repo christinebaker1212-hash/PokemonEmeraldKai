@@ -1,0 +1,21 @@
+pressuntil A field 6000
+wait 60
+mash B 12 20
+mp u3dclear
+wait 30
+mp u3dflag 969 1
+mp u3dflag 96A 1
+mp u3dflag 96B 1
+mp u3dflag 96C 1
+mp u3dzone 137 32 43
+wait 200
+mash B 6 15
+mp where
+shot ld_hub
+mp u3drun 1
+shotburst ld 900 30
+wait 920
+mash B 20 20
+mp where
+echo [ld] done
+quit

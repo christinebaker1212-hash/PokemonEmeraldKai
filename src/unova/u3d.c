@@ -1395,6 +1395,15 @@ static bool8 PlayerCovered(const OamDepth *o)
     return sCovered = n >= 2;
 }
 
+// the player's sprite against the scene (the LEAGUE's platform sinking into its pit: u3d_vm.c League*): 0 as always,
+// 1 hidden by the scene like anyone else (not kept in sight behind what covers them), 2 always shown (a scene's own
+// camera: the card's lean is the usual view's)
+static u8 sPlayerDepth;
+void U3D_PlayerDepthTest(u8 mode)
+{
+    sPlayerDepth = mode;
+}
+
 static bool OamHidden(int oamIndex, int x, int line)
 {
     const OamDepth *o;
@@ -1408,7 +1417,9 @@ static bool OamHidden(int oamIndex, int x, int line)
         return TRUE;
     if (o->flat)
         return sDepth[line][x] < o->d0 - 16.0f;
-    if (o->player && PlayerCovered(o))
+    if (o->player && sPlayerDepth == 2)
+        return FALSE;
+    if (o->player && sPlayerDepth == 0 && PlayerCovered(o))
         return FALSE;
     d = o->d0 - (o->feet - line) * 1.3375f;   // tan(53.22 degrees): a card's pixel above its feet is that much nearer
     return sDepth[line][x] < d - 6.0f;
