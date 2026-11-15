@@ -76,8 +76,10 @@ systems. Tick an entry only once it plays as Black's and has been seen running.
       with its water moving (pack gimmick 62); after script command 0x23C it's gone the next time the island loads,
       until the player has been elsewhere (Black's gimmick work 0x34, which another place's gimmick takes back);
       scenario unova_liberty_ship
-- [ ] Black's other field gimmicks (arc 0x65's zone table, ov021 gFieldGimmickOverlayIds): the ENTRALINK's gauge and
-      markers (ov060 / ov061)
+- [x] Black's other field gimmicks (arc 0x65's zone table, ov021 gFieldGimmickOverlayIds): all drawn or closed. The
+      ENTRALINK's gauges (ov060) show the tallies of a wireless visit's sessions and its markers (ov061) the ways out
+      of a friend's world (zones 289-316): Black's wireless visit, which Kai's co-op takes the place of (the user's
+      decision: missions with co-op friends in the player's own ENTRALINK), so closed
 - [x] Camera shakes (0x148: ABYSSAL RUINS, CHARGESTONE, DRAGONSPIRAL, N's CASTLE; 2026-11-15, scenario
       unova_camera_shake): ShakeTask's swings, their decay and the script's wait (u3d.c U3D_CameraShake)
 - [x] The ELITE FOUR rooms' entrance scenes (ov056 field_fk_demo.c, script command 0x1A2 with the room's slot;
@@ -203,7 +205,8 @@ records, item lookups, the POKeDEX ratings, trainer records and the sounds liste
       relay MPR_ENTRALINK 15), Black Level and Pass Orbs, RECEIVE PASS POWER, CHECK STATUS; PASS POWERS from
       Black's table (a/0/3/8) with gpower.c's rules, SHARE for the room. Scenarios unova_entralink,
       unova_entralink_mission
-- [ ] The ENTRALINK's own forest maps' extras: WHITE FOREST / BLACK CITY's people (0x1C5 / 0x1C6)
+- [x] The ENTRALINK's own forest maps' extras (0x1C5 / 0x1C6): WHITE FOREST's alone (zones 424 / 426, White's; Black
+      never goes there): answered as nobody's there (a resident's "parent" the player, no POKeMON found)
 - [x] The C-GEAR as UNOVA's device (1.199.7, the approved mock-up: src/unova/u3d_screen.c; START > C-GEAR): IR with
       the friend in front (TRADE, BATTLE), WIRELESS (the CO-OP menu), ENTRALINK; scenarios unova_cgear, unova_cgear_ir
 - The XTRANSCEIVER's friends' video calls: closed (the user, 2026-11-15: "video calls aren't important")
@@ -231,8 +234,9 @@ records, item lookups, the POKeDEX ratings, trainer records and the sounds liste
 - [x] NIMBASA's people tables (NETWORK NPC tables 0x1F3-0x1F8, 0x25C: Black's a/2/0/9 in the scripts pack's
       version 11; the BIG STADIUM / SMALL COURT trainers and crowd set by the zones' own scripts); scenario
       unova_stadium
-- [ ] UNITY TOWER, the GEAR STATION / CASTELIA name and greeting boards (0x1D8-0x1E3, 0x1ED, 0x20C) as far as they
-      don't need Wi-Fi
+- [x] UNITY TOWER, the GEAR STATION / CASTELIA name and greeting boards (0x1D8-0x1E3, 0x20C; 2026-11-15): answered as
+      Black's with its Wi-Fi history and Game Sync block empty (no countries, no partner candidates, nothing to pick),
+      the greeting set chosen kept; MR. LOCK's password (0x1ED kind 5 + 0x20C) is an event's, closed
 
 ## 5. Closed (as Platinum's)
 

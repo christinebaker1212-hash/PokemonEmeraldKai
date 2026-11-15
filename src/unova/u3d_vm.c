@@ -1096,6 +1096,7 @@ static void LeagueFrame(void);
 static void FkStart(u8 slot);
 static void SpPokeFrame(void);
 static bool8 sSpPoke, sLibertyShipGone;
+static u16 sGreetingSet;   // (Black's Wi-Fi history's greeting set: 0x1E2 / 0x1E3)
 static struct { bool8 on, pending; u8 side; u16 elapsed, frames; float from[3], to[3], bump; u16 from_, to_; }
     sSpMove, sSpSwap;   // (the special POKeMON's ball on its way; ZORUA's smoke's swap waiting)
 static void SwapPeople(u16 a, u16 b);
@@ -4218,6 +4219,45 @@ static void Step(struct Thread *t)
                 *WorkPtr(a[3]) = 0;
             break;
         }
+        // ---- UNITY TOWER and the greeting boards (ov021 scrcmd_wifi_history.c, ov010 symbol_map.c): Black's Wi-Fi
+        // history and Game Sync block, empty without Wi-Fi: no countries, no partner candidates, nothing picked; the
+        // greeting set chosen kept (for the session)
+        case U3C_GetWifiHistoryCountryCount:   // kind, result
+        case U3C_IsPartnerCandidateMarked:     // candidate, result
+        case U3C_SYMBOL_MAP_ScrCmdGetSyncBlockHeader:
+            *WorkPtr(a[1]) = 0;
+            break;
+        case U3C_SYMBOL_MAP_ScrCmdGetSyncBlockItem:   // index (h), result
+            *WorkPtr(a[1]) = 0;
+            break;
+        case U3C_GetPartnerGreetingMessageFromScript:   // candidate, variant (h), result
+            *WorkPtr(a[2]) = 0;
+            break;
+        case U3C_SYMBOL_MAP_ScrCmdStartPicker:   // mode, kind, value, picked: nothing to pick
+            *WorkPtr(a[1]) = 0, *WorkPtr(a[2]) = 0, *WorkPtr(a[3]) = 0;
+            break;
+        case U3C_GetWifiHistoryEntryCount:
+            *WorkPtr(a[0]) = 0;
+            break;
+        case U3C_SetWifiHistoryGreetingSet:
+            sGreetingSet = V(0);
+            break;
+        case U3C_GetWifiHistoryGreetingSet:
+            *WorkPtr(a[0]) = sGreetingSet;
+            break;
+        case U3C_MarkPartnerCandidate:
+        case U3C_SetWifiHistoryRatingLevel:
+        case U3C_FillPartnerCandidatesFromScript:
+            break;
+        case U3C_CheckPmsWordPair:   // (MR. LOCK's event password: its input closed, kind 5 of 0x1ED)
+            *WorkPtr(a[3]) = 0;
+            break;
+        case U3C_FIELD_WFBC_DATA_LOCAL_ScrCmdSetFacingPersonParam:   // (WHITE FOREST's, White's: never here)
+            StringCopy(Slot(V(0)), gSaveBlock2Ptr->playerName);
+            break;
+        case U3C_FIELD_WFBC_DATA_LOCAL_ScrCmdFindTargetPokemonInParty:   // (WHITE FOREST's: found, today, slot)
+            *WorkPtr(a[0]) = 0, *WorkPtr(a[1]) = 0, *WorkPtr(a[2]) = 0xFFFF;
+            break;
         case U3C_CheckPlayerFormModel:   // (the player in a form of its own model: never here)
             *WorkPtr(a[0]) = 0;
             break;
