@@ -196,6 +196,53 @@ def _tex_of(s, res):
     return nitro.Bmd0(d).tex
 
 
+def _texture_frames(pack, model, drawn, tex0, d):
+    """A texture animation (NSBTP / NSBTA / NSBMA: D, its file) baked for the mesh's groups (one a drawn material, in
+    _part_mesh's order): (frames, [group], [[(texture, alpha 0-31 or 255, du, dv, (r, g, b) multipliers) a touched
+    group] a frame]); None when it touches none of them"""
+    import copy
+    order = [mi for mi, _ in sorted(drawn.items())]
+    if d[:4] == b'BTP0':
+        anims, kind = nitro.Btp0(d).anims, 'pat'
+    elif d[:4] == b'BTA0':
+        anims, kind = nitro.Bta0(d).anims, 'srt'
+    elif d[:4] == b'BMA0':
+        anims, kind = nitro.Bma0(d).anims, 'mat'
+    else:
+        return None
+    if not anims:
+        return None
+    a = anims[0]
+    groups = [gi for gi, mi in enumerate(order) if model.materials[mi].name in a.mats]
+    if not groups or not a.frames:
+        return None
+    out = []
+    for f in range(a.frames):
+        row = []
+        for gi in groups:
+            mat = model.materials[order[gi]]
+            tex, alpha, du, dv, mul = -1, 255, 0.0, 0.0, (1.0, 1.0, 1.0)
+            if kind == 'pat':
+                pick = a.pick(mat.name, f)
+                if pick:
+                    m2 = copy.copy(mat)
+                    m2.texture, m2.palette = pick
+                    tex = pack.texture(tex0, m2)
+            elif kind == 'srt':
+                v = a.value(mat.name, f)
+                if v:
+                    du, dv = v[2], v[3]
+            else:
+                v = a.value(mat.name, f)
+                if v:
+                    dif, alpha = v
+                    rest = mat.dif_amb & 0x7FFF
+                    mul = tuple((((dif >> (5 * c)) & 31) + 1) / (((rest >> (5 * c)) & 31) + 1) for c in range(3))
+            row.append((tex, alpha, du, dv, mul))
+        out.append(row)
+    return a.frames, groups, out
+
+
 def _part_mesh(pack, key, model, drawn, tex0):
     """a model's triangles as a pack mesh (as Pack.mesh builds one: a group a material)"""
     import math
@@ -305,15 +352,19 @@ def add(pack):
                 ps, frames = parts(model, [j for j in joint if j is not None])
                 nparts = max((v[2][3] for tris in ps.values() for t in tris for v in t), default=0) + 1
                 mesh = _part_mesh(pack, ('gimmick',) + k, model, ps, tex0)
-                it = iter(frames)   # (a joint animation's frames; another kind's (texture) animation: none)
+                it = iter(frames)   # (a joint animation's frames; a texture one's overrides of its groups)
                 kind_anims = []
-                for j in joint:
-                    f = next(it) if j is not None else []
-                    kind_anims.append((len(f), f))
+                for j, (ar, ad) in zip(joint, anims):
+                    if j is not None:
+                        f = next(it)
+                        kind_anims.append(('joint', len(f), f))
+                    else:
+                        t = _texture_frames(pack, model, ps, tex0, member(s, ar))
+                        kind_anims.append(('tex',) + t if t else ('joint', 0, []))
                 kind_ids[k] = len(kinds)
                 kinds.append((mesh, nparts, kind_anims))
                 print('gimmick ov%03d model %d: %d parts, animations %s' % (
-                    ov, i, nparts, [n for n, _ in kind_anims]))
+                    ov, i, nparts, ['%s%d' % ('t' if k[0] == 'tex' else '', k[1]) for k in kind_anims]))
             models.append((kind_ids[k], pos, yaw, hidden))
         gims.append((ov, models))
     return kinds, gims

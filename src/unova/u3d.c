@@ -110,7 +110,9 @@ static struct
     // (a mesh each, at rest) and its animations in Black's order, each part's matrix a frame (none for an animation
     // that isn't a joint one: a texture's); a gimmick is its models (a kind each) where Black first places them
     u32 nkind, ngim;
-    struct { u16 nparts, nanims; s16 mesh; u16 *frames; float **m; } *kind;   // (a vertex's part: its pad byte)
+    // (7: a texture animation's overrides of the groups it touches, a frame each: Black's NSBTP / NSBTA / NSBMA)
+    struct { u16 nparts, nanims; s16 mesh; u16 *frames; float **m; u8 *isTex; u16 *ngroups; u16 **groups;
+             struct U3dTexOver { s16 tex; u8 alpha, pad; float du, dv, mul[3]; } **over; } *kind;   // (a vertex's part: its pad byte)
     struct { u8 ov; u16 n; struct { u16 kind; float pos[3]; u16 yaw; u8 hidden; } *m; } *gim;
 } sPack;
 
@@ -190,7 +192,7 @@ static void LoadPack(void)
     }
     r.p += 4;
     version = TakeU32(&r);
-    if (version < 1 || version > 6)
+    if (version < 1 || version > 7)
     {
         printf("[u3d] %s: another pack version (%u)\n", path, (unsigned)version);
         free(data);
@@ -348,10 +350,33 @@ static void LoadPack(void)
             Take(&r, &kd->mesh, 2);
             kd->frames = calloc(kd->nanims ? kd->nanims : 1, sizeof(u16));
             kd->m = calloc(kd->nanims ? kd->nanims : 1, sizeof(float *));
+            kd->isTex = calloc(kd->nanims ? kd->nanims : 1, 1);
+            kd->ngroups = calloc(kd->nanims ? kd->nanims : 1, sizeof(u16));
+            kd->groups = calloc(kd->nanims ? kd->nanims : 1, sizeof(u16 *));
+            kd->over = calloc(kd->nanims ? kd->nanims : 1, sizeof(*kd->over));
             for (j = 0; j < kd->nanims && !r.bad; j++)
             {
                 u32 n;
+                u8 type = 0;
+                if (version >= 7)
+                    Take(&r, &type, 1);
                 kd->frames[j] = TakeU16(&r);
+                if (type == 1)
+                {
+                    kd->isTex[j] = TRUE;
+                    kd->ngroups[j] = TakeU16(&r);
+                    kd->groups[j] = malloc(2 * (kd->ngroups[j] ? kd->ngroups[j] : 1));
+                    Take(&r, kd->groups[j], 2 * kd->ngroups[j]);
+                    n = (u32)kd->frames[j] * kd->ngroups[j];
+                    kd->over[j] = malloc(sizeof(struct U3dTexOver) * (n ? n : 1));
+                    for (k = 0; k < n && !r.bad; k++)
+                    {
+                        Take(&r, &kd->over[j][k].tex, 2);
+                        Take(&r, &kd->over[j][k].alpha, 2);
+                        Take(&r, &kd->over[j][k].du, 4 * 5);
+                    }
+                    continue;
+                }
                 n = (u32)kd->frames[j] * kd->nparts * 12;
                 kd->m[j] = malloc(sizeof(float) * (n ? n : 1));
                 Take(&r, kd->m[j], sizeof(float) * n);
@@ -1284,6 +1309,11 @@ static s32 Wrap(s32 i, s32 size, u8 repeat, u8 flip)
     return ((i % size) + size) % size;
 }
 
+// (a gym piece's texture tracks now, per group of the mesh being drawn: ExpDraw sets them around DrawMeshParts)
+static float sOverDu, sOverDv;
+static const struct U3dTexOver *sGroupOver;
+static const u8 *sGroupOverOn;
+
 static void DrawTriangle(const SVtx *a, const SVtx *b, const SVtx *c, const U3dGroup *g)
 {
     float area = (b->x - a->x) * (c->y - a->y) - (c->x - a->x) * (b->y - a->y);
@@ -1299,6 +1329,8 @@ static void DrawTriangle(const SVtx *a, const SVtx *b, const SVtx *c, const U3dG
     maxy = (s32)ceilf(fmaxf(a->y, fmaxf(b->y, c->y)));
     if (t && g->srt && g->srt <= sPack.nsrt)
         du = -sPack.srtNow[g->srt][0] * t->w, dv = -sPack.srtNow[g->srt][1] * t->h;
+    if (t && (sOverDu != 0.0f || sOverDv != 0.0f))   // (a gym piece's texture track scrolling it: ExpDraw)
+        du -= sOverDu * t->w, dv -= sOverDv * t->h;
     if (minx < 0) minx = 0;
     if (miny < 0) miny = 0;
     if (maxx > W - 1) maxx = W - 1;
@@ -1392,10 +1424,24 @@ static void DrawMeshParts(const U3dMesh *mesh, const float *m, float ox, float o
     }
     for (gi = 0; gi < mesh->ngroups; gi++)
     {
-        U3dGroup *g = &mesh->g[gi];
-        bool8 soft = g->alpha < 31 || (g->tex >= 0 && (u32)g->tex < sPack.ntex && sPack.tex[sPack.shown[g->tex]].soft);
+        U3dGroup *g = &mesh->g[gi], over;
+        const struct U3dTexOver *o = sGroupOverOn && gi < 64 && sGroupOverOn[gi] ? &sGroupOver[gi] : NULL;
+        bool8 soft;
+        if (o)   // (a gym piece's texture track: its texture, alpha, scrolling and colour now)
+        {
+            over = *g;
+            if (o->tex >= 0)
+                over.tex = o->tex;
+            if (o->alpha != 255)
+                over.alpha = o->alpha;
+            g = &over;
+            if (g->alpha == 0)
+                continue;
+        }
+        soft = g->alpha < 31 || (g->tex >= 0 && (u32)g->tex < sPack.ntex && sPack.tex[sPack.shown[g->tex]].soft);
         if (soft != pass)
             continue;
+        sOverDu = o ? o->du : 0.0f, sOverDv = o ? o->dv : 0.0f;
         if (g->count > sScratchSize)
         {
             sScratchSize = g->count + 1024;
@@ -1427,10 +1473,17 @@ static void DrawMeshParts(const U3dMesh *mesh, const float *m, float ox, float o
                 s->c[0] = g->lit[3 * i] * s->iz, s->c[1] = g->lit[3 * i + 1] * s->iz, s->c[2] = g->lit[3 * i + 2] * s->iz;
             else
                 s->c[0] = v->r * s->iz, s->c[1] = v->g * s->iz, s->c[2] = v->b * s->iz;
+            if (o)
+            {
+                s->c[0] = fminf(s->c[0] * o->mul[0], 255.0f * s->iz);
+                s->c[1] = fminf(s->c[1] * o->mul[1], 255.0f * s->iz);
+                s->c[2] = fminf(s->c[2] * o->mul[2], 255.0f * s->iz);
+            }
         }
         for (i = 0; i + 2 < g->count; i += 3)
             if (sScratchOk[i] && sScratchOk[i + 1] && sScratchOk[i + 2])
                 DrawTriangle(&sScratch[i], &sScratch[i + 1], &sScratch[i + 2], g);
+        sOverDu = sOverDv = 0.0f;
     }
 }
 
@@ -1444,12 +1497,14 @@ static void DrawMesh(const U3dMesh *mesh, const float *m, float ox, float oy, fl
 // model where Black places it, turned (its yaw), an animation shown at a frame or played on to its last (Black's
 // FLD_EXP_OBJ_UpdateAnimes: a frame each field frame, 30 a second), hidden or drawn
 #define EXP_MAX 48
+#define EXP_TEX 16
 static struct
 {
     s16 gim;
     u16 n;
-    struct { float pos[3], frame; u16 yaw; u8 hidden, anim, playing; } m[EXP_MAX];
-} sExp = {-1};
+    struct { float pos[3], frame; u16 yaw; u8 hidden, anim, playing;
+             u16 texOn; float tframe[EXP_TEX]; u8 tplay[EXP_TEX], tloop[EXP_TEX]; } m[EXP_MAX];   // (Black's texture
+} sExp = {-1};                                                                                      //  tracks, by index)
 
 void U3D_ExpLoad(u8 ov)
 {
@@ -1469,6 +1524,7 @@ void U3D_ExpLoad(u8 ov)
                 sExp.m[k].anim = 0xFF;
                 sExp.m[k].frame = 0;
                 sExp.m[k].playing = FALSE;
+                sExp.m[k].texOn = 0;
             }
             if (getenv("MOEMON_U3D_TRACE"))
                 printf("[u3d] gym models of ov%03u: %u\n", (unsigned)ov, (unsigned)sExp.n);
@@ -1482,6 +1538,8 @@ void U3D_ExpClear(void)
     sExp.gim = -1;
     sExp.n = 0;
 }
+
+void U3D_ExpTex(u16 model, u8 anim, bool8 on, s16 frame, bool8 play, bool8 loop);
 
 static u16 ExpFrames(u16 model, u8 anim)
 {
@@ -1501,12 +1559,44 @@ void U3D_ExpAnim(u16 model, u8 anim, s16 frame, bool8 play)
         sExp.m[model].playing = FALSE;
         return;
     }
+    if (anim < sPack.kind[sPack.gim[sExp.gim].m[model].kind].nanims && sPack.kind[sPack.gim[sExp.gim].m[model].kind].isTex[anim])
+    {
+        U3D_ExpTex(model, anim, TRUE, frame, play, FALSE);   // (a texture track: its own state, the joints left)
+        return;
+    }
     frames = ExpFrames(model, anim);
     if (frames == 0)
-        return;   // (a texture animation's: the model as it is)
+        return;
     sExp.m[model].anim = anim;
     sExp.m[model].frame = frame < 0 || frame >= frames ? frames - 1 : frame;
     sExp.m[model].playing = play && sExp.m[model].frame < frames - 1;
+}
+
+// Black's FLD_EXP_OBJ_SetAnimeEnabled / Paused / Loop / Frame for a texture track (an NSBTP / NSBTA / NSBMA) of a
+// model: ON shown, at FRAME (-1 its last), PLAY on from there (LOOP: round again, else held at its last)
+void U3D_ExpTex(u16 model, u8 anim, bool8 on, s16 frame, bool8 play, bool8 loop)
+{
+    u16 kind, frames;
+    if (sExp.gim < 0 || model >= sExp.n || anim >= EXP_TEX)
+        return;
+    kind = sPack.gim[sExp.gim].m[model].kind;
+    if (anim >= sPack.kind[kind].nanims || !sPack.kind[kind].isTex[anim])
+        return;
+    if (!on)
+    {
+        sExp.m[model].texOn &= ~(1 << anim);
+        return;
+    }
+    frames = sPack.kind[kind].frames[anim];
+    sExp.m[model].texOn |= 1 << anim;
+    sExp.m[model].tframe[anim] = frame < 0 || frame >= frames ? frames - 1 : frame;
+    sExp.m[model].tplay[anim] = play;
+    sExp.m[model].tloop[anim] = loop;
+}
+
+bool8 U3D_ExpTexPlaying(u16 model, u8 anim)
+{
+    return sExp.gim >= 0 && model < sExp.n && anim < EXP_TEX && (sExp.m[model].texOn >> anim & 1) && sExp.m[model].tplay[anim];
 }
 
 bool8 U3D_ExpPlaying(u16 model)
@@ -1528,6 +1618,12 @@ void U3D_ExpPlace(u16 model, float x, float y, float z, u16 yaw)
     sExp.m[model].yaw = yaw;
 }
 
+void U3D_ExpGetPos(u16 model, float out[3])
+{
+    if (sExp.gim >= 0 && model < sExp.n)
+        out[0] = sExp.m[model].pos[0], out[1] = sExp.m[model].pos[1], out[2] = sExp.m[model].pos[2];
+}
+
 float U3D_ExpFrame(u16 model)
 {
     return sExp.gim >= 0 && model < sExp.n && sExp.m[model].anim != 0xFF ? sExp.m[model].frame : -1.0f;
@@ -1546,7 +1642,21 @@ void U3D_ExpSetY(u16 model, float y)
 
 static void ExpStep(void)
 {
-    u32 i;
+    u32 i, a;
+    for (i = 0; i < sExp.n; i++)
+        for (a = 0; sExp.m[i].texOn && a < EXP_TEX; a++)
+            if ((sExp.m[i].texOn >> a & 1) && sExp.m[i].tplay[a])
+            {
+                u16 frames = ExpFrames(i, a);
+                sExp.m[i].tframe[a] += 0.5f;
+                if (sExp.m[i].tframe[a] >= frames)
+                {
+                    if (sExp.m[i].tloop[a])
+                        sExp.m[i].tframe[a] -= frames;
+                    else
+                        sExp.m[i].tframe[a] = frames - 1, sExp.m[i].tplay[a] = FALSE;
+                }
+            }
     for (i = 0; i < sExp.n; i++)
         if (sExp.m[i].playing)
         {
@@ -1582,7 +1692,7 @@ static void ExpDraw(int pass)
         {
             const float rot[3][3] = {{c, 0, sn}, {0, 1, 0}, {-sn, 0, c}};
             const float *d = sIdentity;
-            if (sExp.m[i].anim < kd->nanims && kd->frames[sExp.m[i].anim])
+            if (sExp.m[i].anim < kd->nanims && kd->frames[sExp.m[i].anim] && !kd->isTex[sExp.m[i].anim])
             {
                 u32 f = (u32)sExp.m[i].frame;
                 if (f >= kd->frames[sExp.m[i].anim])
@@ -1593,8 +1703,42 @@ static void ExpDraw(int pass)
                 for (k = 0; k < 4; k++)
                     sParts[p * 12 + r * 4 + k] = rot[r][0] * d[k] + rot[r][1] * d[4 + k] + rot[r][2] * d[8 + k];
         }
+        sGroupOverOn = NULL;
+        if (sExp.m[i].texOn)   // (its texture tracks on: each group they touch at their frames, merged in order)
+        {
+            static struct U3dTexOver sMerged[64];
+            static u8 sMergedOn[64];
+            u32 a, gk;
+            memset(sMergedOn, 0, sizeof(sMergedOn));
+            for (a = 0; a < kd->nanims && a < EXP_TEX; a++)
+                if ((sExp.m[i].texOn >> a & 1) && kd->isTex[a] && kd->frames[a])
+                {
+                    u32 f = min((u32)sExp.m[i].tframe[a], kd->frames[a] - 1u);
+                    for (gk = 0; gk < kd->ngroups[a]; gk++)
+                    {
+                        const struct U3dTexOver *o = &kd->over[a][f * kd->ngroups[a] + gk];
+                        u16 g = kd->groups[a][gk];
+                        if (g >= 64)
+                            continue;
+                        if (!sMergedOn[g])
+                        {
+                            sMerged[g].tex = -1, sMerged[g].alpha = 255, sMerged[g].du = sMerged[g].dv = 0.0f;
+                            sMerged[g].mul[0] = sMerged[g].mul[1] = sMerged[g].mul[2] = 1.0f;
+                            sMergedOn[g] = TRUE;
+                        }
+                        if (o->tex >= 0)
+                            sMerged[g].tex = o->tex;
+                        if (o->alpha != 255)
+                            sMerged[g].alpha = o->alpha;
+                        sMerged[g].du += o->du, sMerged[g].dv += o->dv;
+                        sMerged[g].mul[0] *= o->mul[0], sMerged[g].mul[1] *= o->mul[1], sMerged[g].mul[2] *= o->mul[2];
+                    }
+                }
+            sGroupOver = sMerged, sGroupOverOn = sMergedOn;
+        }
         DrawMeshParts(&sPack.mesh[kd->mesh], NULL, sExp.m[i].pos[0], sExp.m[i].pos[1], sExp.m[i].pos[2], pass, sParts,
                       nparts);
+        sGroupOverOn = NULL;
     }
 }
 

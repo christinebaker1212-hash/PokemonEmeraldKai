@@ -1058,17 +1058,27 @@ static u8 sIceShown[3];
 static void IceToggle(u32 i);
 static struct { s8 lift; bool8 rider; u16 stall; float cur, goal, step; } sMineRide = {-1};
 static struct { s8 model; u8 hex; s16 x, z, w, d; float cur, goal, step; } sPlat = {-1};
+// (a lift's texture track played as it arrives (Black's lift events: the shown anime unpaused), then IDLE at its first
+// frame, the event waiting for it)
+static struct { s8 model; u8 track, idle; } sLiftTex = {-1};
 static void PlatRide(u8 model, u8 hex, s16 x, s16 z, s16 w, s16 d, s16 from, s16 to);
+static void LiftTexShow(u8 model, u8 track);
+static void IceSecondary(u32 i);
 #define ZONE_CLAY_LOBBY 98
 #define ZONE_MISTRALTON_GYM 108
 #define ZONE_NIMBASA_GYM 63
 static void CartStep(void);
 static void CartModels(void);
 static void CartSwap(u32 lane);
+static void CartLever(u32 lane);
+static void CartTex(u32 lane);
 static void CartDone(void);
 static void DragonReset(void);
 
 // ------------------------------------------------------------------------------------------------ the VM
+// (BURGH's gym, the honey's trainers: Black's StartScriptedEvent run after its script, PlateDoorsFrame)
+static u8 sPdScripted, sPdScriptedVariant;
+static const float sPdEffectPos[2][3] = {{616, 0, 408}, {328, 0, 472}};   // (gPlateDoorsEffectPos)
 enum { W_BGM_STOPPED = 100, W_EXP_ANIM, W_LIFT_RIDE, W_MUSICAL, W_SUBWAY_MAP };   // (W_MUSICAL: the MUSICAL dressing room closed)   // (W_EXP_ANIM: a gym model's animation to its end, sExpWait)
 static u16 sExpWait;
 enum { W_NONE, W_FRAMES, W_MESSAGE, W_MESSAGE_KEY, W_KEY, W_MOVES, W_FADE, W_YESNO, W_CLOSE, W_SCREEN, W_SONG_THEN_POP, W_SE, W_CAMERA, W_CRY, W_MENU,
@@ -2604,6 +2614,8 @@ static void Step(struct Thread *t)
             if (CurrentZone() == ZONE_DRIFTVEIL_GYM)
             {
                 PlatRide(7, 2, 13, 24, 5, 3, a[0] ? 800 : 880, a[0] ? 880 : 800);
+                if (!a[0])
+                    LiftTexShow(7, 1);   // (going down: its track 1, played as it arrives)
                 t->wait = W_LIFT_RIDE;
             }
             break;
@@ -2614,6 +2626,8 @@ static void Step(struct Thread *t)
             if (CurrentZone() == ZONE_CLAY_LOBBY)
             {
                 PlatRide(0, 0, 5, 3, 5, 3, a[0] ? 0 : -80, a[0] ? -80 : 0);
+                if (!a[0])
+                    LiftTexShow(0, 0);   // (coming up: its track 0, played as it arrives)
                 t->wait = W_LIFT_RIDE;
             }
             break;
@@ -2622,7 +2636,9 @@ static void Step(struct Thread *t)
                 t->wait = W_MOVES;
             break;
         case U3C_FIELD_GIMMICK_SWITCH_TOGGLE_StartSecondarySwitchEvent:   // (its switch's and ice piece's models
-            break;                                                           // turning: the works and blockers say it)
+            if (CurrentZone() == ICE_GYM_ZONE && a[0] < 3)                   // turning: the works and blockers say it;
+                IceSecondary(a[0]);                                          // the second model's light: IceSecondary)
+            break;
         // STRIATON's gym (ov042 button states) and NACRENE's (ov040 flag anime): models only, the way through being
         // Black's works and people. Their states are kept for the models: sWork.gym[6] the curtains played to their
         // end (oneShotPlayed, bits 0-2), sButtonModels the nine state models at their last frame; sWork.gym[7] bit 0
@@ -2693,6 +2709,7 @@ static void Step(struct Thread *t)
             {
                 sWork.gym[0] ^= 1 << V(0);
                 CartSwap(V(0));   // (the other cart, as the lane's comes round to its start)
+                CartLever(V(0));
             }
             PlaySE(SE_SWITCH);
             break;
@@ -2710,11 +2727,29 @@ static void Step(struct Thread *t)
         case U3C_FIELD_GIMMICK_PLATE_DOORS_StartPlateEvent:   // ... its plates lit: a door both of whose are opens
             PlateDoorsRefresh(TRUE);
             break;
-        case U3C_FIELD_GIMMICK_PLATE_DOORS_StartScriptedEvent:
+        case U3C_FIELD_GIMMICK_PLATE_DOORS_StartScriptedEvent:   // the honey's trainer (PlateDoorsFrame), after this
+            if (V(0) < 2)                                        // script ends as Black's event starts
+            {
+                u32 k;
+                sPdScriptedVariant = V(0);
+                U3D_ExpPlace(32, sPdEffectPos[V(0)][0], sPdEffectPos[V(0)][1], sPdEffectPos[V(0)][2], 0);
+                U3D_ExpHide(32, FALSE);
+                U3D_ExpAnim(32, 1, 0, TRUE);
+                for (k = 0; k < 1; k++)
+                    U3D_ExpTex(32, k, TRUE, 0, TRUE, FALSE);
+                sPdScripted = 1;
+            }
             break;
         case U3C_FIELD_GIMMICK_PLATE_DOORS_StartDoorEvent:   // (in DRAYDEN's gym, ov046's button: unit, side)
             if (CurrentZone() == DRAGON_GYM_ZONE)
+            {
                 PlaySE(SE_SWITCH);
+                if (V(0) < 3 && V(1) < 2)   // (ButtonEventProc: the button's texture track 0 played from its start)
+                {
+                    U3D_ExpTex(V(0) * 5 + 3 + V(1), 0, TRUE, 0, TRUE, FALSE);
+                    MPNet_Log("u3d vm: DRAYDEN's gym, button %u.%u", (unsigned)V(0), (unsigned)V(1));
+                }
+            }
             break;
         case U3C_FIELD_GIMMICK_ROTATING_ROOM_StartHopEvent:   // DRAYDEN's gym: the button bounces the player a tile
             if (DragonHop(a[0]))
@@ -4210,7 +4245,7 @@ static void Wait(struct Thread *t)
         break;
     }
     case W_LIFT_RIDE:   // (CLAY's mine: Black's lift event, till the lift arrives)
-        if (sMineRide.lift < 0 && sPlat.model < 0)
+        if (sMineRide.lift < 0 && sPlat.model < 0 && sLiftTex.model < 0)
             t->wait = W_NONE;
         break;
     case W_EXP_ANIM:   // (Black's gimmick events wait for their model's animation: FLD_EXP_OBJ_IsAnimeStopped)
@@ -4567,21 +4602,86 @@ static u16 PlatesLit(void)
     return lit;
 }
 
+// (the switches found as shown: their two texture tracks, lit at their last frame; the doors shown open; a door
+// opening: Black's effect model 33 at its place, its tracks 4-7, then the open door: PlateDoorsFrame)
+static u8 sPdSwitchesShown, sPdDoorsShown, sPdOpening = 0xFF;
+
 static void PlateModels(bool8 load)
 {
     u16 lit = PlatesLit();
-    u32 i;
+    u32 i, k;
+    for (i = 0; i < 8; i++)   // (Init: each switch's tracks on and paused, at their last frame once found; found,
+    {                         //  EventPressSwitch plays them)
+        bool8 on = *WorkPtr(0x4000 + i) != 0, was = (sPdSwitchesShown >> i) & 1;
+        if (load || on != was)
+            for (k = 0; k < 2; k++)
+                U3D_ExpTex(i, k, TRUE, on ? (load ? -1 : 0) : 0, on && !load, FALSE);
+    }
+    sPdSwitchesShown = 0;
+    for (i = 0; i < 8; i++)
+        sPdSwitchesShown |= (*WorkPtr(0x4000 + i) != 0) << i;
     for (i = 0; i < 10; i++)
     {
         bool8 on = (lit >> i) & 1, was = (sPdPlatesShown >> i) & 1;
         if (load || on != was)
+        {
             U3D_ExpAnim(8 + i, on ? 1 : 0xFF, on && !load ? 0 : -1, on && !load);
+            U3D_ExpTex(8 + i, 0, TRUE, on ? (load ? -1 : 0) : 0, on && !load, FALSE);   // (its texture track too)
+        }
     }
     sPdPlatesShown = lit;
     for (i = 0; i < 7; i++)
     {
-        U3D_ExpHide(18 + i, PlateDoorOpen(i));
-        U3D_ExpHide(25 + i, !PlateDoorOpen(i));
+        bool8 open = PlateDoorOpen(i);
+        if (open && !load && !((sPdDoorsShown >> i) & 1) && i < 6 && sPdOpening == 0xFF)
+        {
+            float pos[3];   // (EventPressPlate: the shut door hidden, the effect played where it stood)
+            U3D_ExpGetPos(18 + i, pos);
+            U3D_ExpPlace(33, pos[0], pos[1], pos[2], 0);
+            U3D_ExpHide(33, FALSE);
+            U3D_ExpAnim(33, 4, 0, TRUE);
+            for (k = 5; k < 8; k++)
+                U3D_ExpTex(33, k, TRUE, 0, TRUE, FALSE);
+            sPdOpening = i;
+            MPNet_Log("u3d vm: BURGH's gym, door %u opening (the effect at %d,%d)", (unsigned)i, (int)pos[0], (int)pos[2]);
+        }
+        U3D_ExpHide(18 + i, open);
+        U3D_ExpHide(25 + i, !open || sPdOpening == i);
+    }
+    sPdDoorsShown = 0;
+    for (i = 0; i < 7; i++)
+        sPdDoorsShown |= PlateDoorOpen(i) << i;
+    if (load)
+        sPdOpening = 0xFF, U3D_ExpHide(33, TRUE);
+}
+
+// BURGH's gym each frame: the door effect over (its joint track 4 stopped: the open door shown), and Black's scripted
+// event (StartScriptedEvent: the honey cocoon's effect model 32 at its place, zone script 3 / 4 called, then 5 / 6
+// once the effect stops: the trainer out of the honey and the battle)
+extern const u8 Unova_EventScript_Scene[];
+
+static void PlateDoorsFrame(void)
+{
+    if (sPdOpening != 0xFF && !U3D_ExpPlaying(33))
+    {
+        u32 k;
+        for (k = 5; k < 8; k++)
+            U3D_ExpTex(33, k, FALSE, 0, FALSE, FALSE);
+        U3D_ExpHide(33, TRUE);
+        U3D_ExpHide(25 + sPdOpening, FALSE);
+        PlaySE(SE_UNLOCK);   // (Black's 0x6DC as the door's model swaps)
+        MPNet_Log("u3d vm: BURGH's gym, door %u now open", (unsigned)sPdOpening);
+        sPdOpening = 0xFF;
+    }
+    if (sPdScripted && !sThread.alive && !ScriptContext_IsEnabled())
+    {
+        u16 id = sPdScripted == 1 ? (sPdScriptedVariant ? 4 : 3) : (sPdScriptedVariant ? 6 : 5);
+        if (sPdScripted == 2 && U3D_ExpPlaying(32))
+            return;
+        if (Run(id, 0xFFFF, TRUE))
+            ScriptContext_SetupScript(Unova_EventScript_Scene);
+        MPNet_Log("u3d vm: BURGH's gym, the honey's script %u", id);
+        sPdScripted = sPdScripted == 1 ? 2 : 0;
     }
 }
 
@@ -4652,13 +4752,45 @@ static void MineSetup(void)
 
 // The mine's models (ov043): the lifts at their heights (Black's world units, a tile 16), the obstacle broken once the
 // big lift (5) has gone down past it (sWork.gym[1] bit 7, Black's obstacleBroken)
+static const u8 sMineLiftFlip[6] = {1, 0, 1, 0, 0, 1};   // (sLiftElevatorLiftAnimeFlip)
+
+// (a model's texture track TRACK shown at its first frame, paused, the other of its two off: ShowLiftAnime,
+// ShowElevatorIdleAnime, ov044 ShowIdleAnime)
+static void LiftTexShow(u8 model, u8 track)
+{
+    U3D_ExpTex(model, track ^ 1, FALSE, 0, FALSE, FALSE);
+    U3D_ExpTex(model, track, TRUE, 0, FALSE, FALSE);
+}
+
+static void LiftTexArrive(u8 model, u8 track, u8 idle)
+{
+    U3D_ExpTex(model, track ^ 1, FALSE, 0, FALSE, FALSE);
+    U3D_ExpTex(model, track, TRUE, 0, TRUE, FALSE);
+    sLiftTex.model = model, sLiftTex.track = track, sLiftTex.idle = idle;
+    MPNet_Log("u3d vm: model %u's lamp, track %u", model, track);
+}
+
+static void LiftTexStep(void)
+{
+    if (sLiftTex.model >= 0 && !U3D_ExpTexPlaying(sLiftTex.model, sLiftTex.track))
+    {
+        LiftTexShow(sLiftTex.model, sLiftTex.idle);
+        sLiftTex.model = -1;
+    }
+}
+
 static void MineModels(void)
 {
     u32 i;
     U3D_ExpLoad(43);
+    sLiftTex.model = -1;
     for (i = 0; i < ARRAY_COUNT(sMineLift); i++)
+    {
         U3D_ExpSetY(i, MINE_H(sMineLift[i][4 + ((sWork.gym[1] >> i) & 1)]));
+        LiftTexShow(i, ((sWork.gym[1] >> i) & 1) ^ sMineLiftFlip[i]);
+    }
     U3D_ExpAnim(6, 0, sWork.gym[1] & 0x80 ? -1 : 0, FALSE);
+    LiftTexShow(7, 0);
 }
 
 // a lever: lift I to its other height, the player riding it if they stand on it at the height it leaves. It rides as
@@ -4696,6 +4828,7 @@ static void PlatRide(u8 model, u8 hex, s16 x, s16 z, s16 w, s16 d, s16 from, s16
 
 static void PlatStep(void)
 {
+    LiftTexStep();
     if (sPlat.model < 0)
         return;
     sPlat.cur += sPlat.step;
@@ -4704,6 +4837,10 @@ static void PlatStep(void)
         sPlat.cur = sPlat.goal;
         U3D_ExpSetY(sPlat.model, sPlat.cur);
         MPNet_Log("u3d vm: model %d arrived at %d", sPlat.model, (int)sPlat.cur);
+        if (CurrentZone() == ZONE_CLAY_LOBBY && sPlat.step > 0)   // (ov044: rising, its track 0 played, then idle 1)
+            LiftTexArrive(0, 0, 1);
+        else if (CurrentZone() != ZONE_CLAY_LOBBY && sPlat.step < 0)   // (ov043's elevator down: track 1, idle 0)
+            LiftTexArrive(sPlat.model, 1, 0);
         sPlat.model = -1;
         if (CurrentZone() == ZONE_CLAY_LOBBY)   // (the lobby's floor again: the grid's own)
         {
@@ -4755,6 +4892,7 @@ static void MineRideStep(void)
             U3D_SetFloor(MineFloorHeight(to) ? (float)MINE_H(to) : NAN);
         }
         PlaySE(SE_PIN);
+        LiftTexArrive(i, (((sWork.gym[1] >> i) & 1) ^ 1) ^ sMineLiftFlip[i], ((sWork.gym[1] >> i) & 1) ^ sMineLiftFlip[i]);
         MPNet_Log("u3d vm: lift %d arrived at %d, floor %d", (int)i, to, sWork.gym[2] - 128);
     }
 }
@@ -4795,6 +4933,24 @@ bool8 U3D_Vm_PersonHeight(u8 localId, float *h)
 // the script then sets the switch's work (0x4001 + the switch) to match. sIceShown: bit 0 the state shown, bit 1 the
 // change playing
 
+// (the second models, 3-5: SetSwitchModelPose's texture track 1 at its first frame while on; SecondarySwitchEventProc
+// plays the shown one to its end, then the other pose. sIceSec: bit i on, bit 4 + i its track playing)
+static u8 sIceSec;
+static void IceSecondary(u32 i)
+{
+    if (sIceSec & (1 << i))
+    {
+        U3D_ExpTex(3 + i, 1, TRUE, 0, TRUE, FALSE);
+        sIceSec = (sIceSec & ~(1 << i)) | (16 << i);
+    }
+    else
+    {
+        U3D_ExpTex(3 + i, 1, TRUE, 0, FALSE, FALSE);
+        sIceSec |= 1 << i;
+    }
+    MPNet_Log("u3d vm: BRYCEN's gym, switch %u's light %s", (unsigned)i, sIceSec & (1 << i) ? "on" : "going off");
+}
+
 static void IceToggle(u32 i)
 {
     U3D_ExpAnim(i, sIceShown[i] & 1, 0, TRUE);
@@ -4807,11 +4963,19 @@ static void IceModels(bool8 load)
     for (i = 0; i < 3; i++)
     {
         u8 on = WorkValue(0x4001 + i) != 0;
+        if (!load && (sIceSec & (16 << i)) && !U3D_ExpTexPlaying(3 + i, 1))
+        {
+            sIceSec &= ~(16 << i);
+            U3D_ExpTex(3 + i, 1, FALSE, 0, FALSE, FALSE);
+        }
         if (load)
         {
             sIceShown[i] = on;
             U3D_ExpAnim(i, on, 0, FALSE);
+            sIceSec = (sIceSec & ~(17 << i)) | (on << i);
+            U3D_ExpTex(3 + i, 1, on, 0, FALSE, FALSE);
         }
+
         else if (sIceShown[i] & 2)
         {
             if (!U3D_ExpPlaying(i))
@@ -4836,6 +5000,8 @@ void U3D_Vm_FieldFrame(void)
         return;
     if (CurrentZone() == DRAGON_GYM_ZONE)
         DragonInside();
+    else if (CurrentZone() == ZONE_CASTELIA_GYM)
+        PlateDoorsFrame();
     else if (CurrentZone() == ICE_GYM_ZONE)
         IceModels(FALSE);
     else if (CurrentZone() == ZONE_NIMBASA_GYM)
@@ -4880,13 +5046,20 @@ void U3D_Vm_FieldShown(void)
                 U3D_ExpAnim(9 + k, 0, -1, FALSE);
     }
     else if (CurrentZone() == ZONE_CLAY_LOBBY)   // (ov044 Init: the lift up, at the lobby's floor)
+    {
         U3D_ExpLoad(44);
+        sLiftTex.model = -1;
+        LiftTexShow(0, 1);
+    }
     else if (CurrentZone() == ZONE_MISTRALTON_GYM)   // (ov041 Init: the cannons, turned, at rest)
         U3D_ExpLoad(41);
     else if (CurrentZone() == ZONE_NIMBASA_GYM)   // (ov039 Setup: each lane's cart where it has got to)
     {
+        u32 lane;
         U3D_ExpLoad(39);
         CartModels();
+        for (lane = 0; lane < 4; lane++)
+            CartTex(lane);
     }
     else if (CurrentZone() == ZONE_CASTELIA_GYM)   // (ov038 Init: plates and doors as the switches found make them)
     {
@@ -4930,12 +5103,47 @@ static struct
     u8 cart[4], swap[4], tick, phase, wait, lane, riding, arriving;
     u16 frame[4], timer[4];
     s8 parked[4], holdLane;
+    u8 gate[4];   // (the gate's resting frame: 0 shut, CART_GATE_OPEN open)
 } sCarts;
 static u8 sRideFrom;
 
 static void CartSwap(u32 lane)
 {
     sCarts.swap[lane] = TRUE;
+}
+
+// (Setup: the lane's gate (the cart model's texture track 0) shut at its first frame, paused; each of the lane's two
+// levers (models 4-7, 8-11) showing the lever's track at its last frame)
+static void CartTex(u32 lane)
+{
+    u32 k, on = (sWork.gym[0] >> lane) & 1;
+    U3D_ExpTex(lane, 0, TRUE, sCarts.gate[lane], FALSE, FALSE);
+    for (k = 1; k <= 2; k++)
+    {
+        U3D_ExpTex(lane + 4 * k, on ^ 1, FALSE, 0, FALSE, FALSE);
+        U3D_ExpTex(lane + 4 * k, on, TRUE, -1, FALSE, FALSE);
+    }
+}
+
+// (the lever event: the other track on, played from its start)
+static void CartLever(u32 lane)
+{
+    u32 k, on = (sWork.gym[0] >> lane) & 1;
+    for (k = 1; k <= 2; k++)
+    {
+        U3D_ExpTex(lane + 4 * k, on ^ 1, FALSE, 0, FALSE, FALSE);
+        U3D_ExpTex(lane + 4 * k, on, TRUE, 0, TRUE, FALSE);
+    }
+    MPNet_Log("u3d vm: ELESA's gym, lane %u's levers to %u", (unsigned)lane, (unsigned)on);
+}
+
+// (the gate: frames 0-15 open it, 15-30 shut it again: GATE_OPEN_FRAME)
+#define CART_GATE_OPEN 15
+static void CartGate(u32 lane, bool8 open)
+{
+    sCarts.gate[lane] = open ? CART_GATE_OPEN : 0;
+    U3D_ExpTex(lane, 0, TRUE, open ? 0 : CART_GATE_OPEN, TRUE, FALSE);
+    MPNet_Log("u3d vm: ELESA's gym, lane %u's gate %s", (unsigned)lane, open ? "opening" : "shutting");
 }
 
 static u16 CartFrames(u32 cart)
@@ -5083,6 +5291,7 @@ static void Task_CartRide(u8 taskId)
             gSpecialVar_0x8004 = sCartDocks[dock][0] - (m >= 0 ? 32 * U3D_MapCellX(m) : 0);
             gSpecialVar_0x8005 = sCartDocks[dock][1] - 2 - (m >= 0 ? 32 * U3D_MapCellZ(m) : 0);
             PlaySE(SE_TRUCK_STOP);
+            CartGate(lane, TRUE);   // (RideEventMain 5: the gate opens again)
             sCarts.phase = 3;
             sCarts.wait = 30;
         }
@@ -5104,6 +5313,7 @@ void U3D_VmCartGate(void)
 {
     sCarts.phase = 0;
     sCarts.wait = 30;
+    CartGate(sCarts.lane, TRUE);
     PlaySE(SE_DOOR);
     CreateTask(Task_CartRide, 80);
 }
@@ -5120,6 +5330,8 @@ void U3D_VmCartRide(void)
 {
     sCarts.phase = 1;
     sCarts.wait = 30;
+    CartGate(sCarts.lane, FALSE);
+    PlaySE(SE_DOOR);
     CreateTask(Task_CartRide, 80);
 }
 
@@ -5128,6 +5340,7 @@ static void CartDone(void)
 {
     if (sCarts.holdLane >= 0)
     {
+        CartGate(sCarts.holdLane, FALSE);   // (the gate shut behind them)
         sCarts.timer[sCarts.holdLane] = 0;
         sCarts.parked[sCarts.holdLane] = -1;
     }
@@ -5181,6 +5394,17 @@ bool8 U3D_Vm_CannonAhead(u16 direction)
     return FALSE;
 }
 
+
+// a cannon's firing: Black enables its joint track (2 x the direction) with the material track after it (the glow's
+// colour and alpha: field_gimmick_cannons.c, both enabled and disabled together)
+static void CannonAnim(u8 anim, s16 frame, bool8 play)
+{
+    u32 d;
+    for (d = 0; d < 4; d++)
+        U3D_ExpTex(sShot.cannon, d * 2 + 1, anim == d * 2, frame, play, FALSE);
+    U3D_ExpAnim(sShot.cannon, anim, frame, play);
+}
+
 static void Task_CannonAim(u8 taskId)
 {
     float f = U3D_ExpFrame(sShot.cannon);
@@ -5191,7 +5415,7 @@ static void Task_CannonAim(u8 taskId)
     }
     if (f < 0 || f >= sCannonFrames[CANNON_FIRE_DONE][sShot.dir])
     {
-        U3D_ExpAnim(sShot.cannon, sShot.dir * 2, sCannonFrames[CANNON_FIRE_DONE][sShot.dir], FALSE);
+        CannonAnim(sShot.dir * 2, sCannonFrames[CANNON_FIRE_DONE][sShot.dir], FALSE);
         DestroyTask(taskId);
         ScriptContext_Enable();
     }
@@ -5205,7 +5429,7 @@ void U3D_VmCannonAim(void)
         ScriptContext_Enable();
         return;
     }
-    U3D_ExpAnim(sShot.cannon, sShot.dir * 2, 0, TRUE);
+    CannonAnim(sShot.dir * 2, 0, TRUE);
     CreateTask(Task_CannonAim, 80);
 }
 
@@ -5246,7 +5470,7 @@ static void Task_CannonFly(u8 taskId)
             PlaySE(SE_LEDGE);   // (Black's 0x697, the landing)
             U3D_PlayerFly(FALSE, 0, 0, 0);
             pl->invisible = FALSE;
-            U3D_ExpAnim(sShot.cannon, 0xFF, 0, FALSE);   // (its animations off again, the cannon at rest)
+            CannonAnim(0xFF, 0, FALSE);   // (its animations off again, the cannon at rest)
             sShot.cannon = -1;
             DestroyTask(taskId);
             ScriptContext_Enable();
@@ -5263,7 +5487,7 @@ void U3D_VmCannonFly(void)
         return;
     }
     gObjectEvents[gPlayerAvatar.objectEventId].invisible = TRUE;
-    U3D_ExpAnim(sShot.cannon, sShot.dir * 2, sCannonFrames[CANNON_FIRE_DONE][sShot.dir], TRUE);
+    CannonAnim(sShot.dir * 2, sCannonFrames[CANNON_FIRE_DONE][sShot.dir], TRUE);
     PlaySE(SE_M_EXPLOSION);   // (Black's 0x699, the shot)
     sShot.phase = 0;
     sShot.seen = FALSE;

@@ -1,0 +1,29 @@
+pressuntil A field 6000
+wait 60
+mash B 12 20
+mp u3dzone 63 14 40
+wait 200
+mash B 6 15
+shot eg_arrive
+mp u3drun 6
+wait 4
+shotburst eg_lever 40 8
+pressuntil B field 3000
+press UP 20
+wait 30
+shot eg_dock
+mp where
+shotburst eg_wait 600 60
+waitlog 900 lane 0's gate opening
+shotburst eg_gate 40 8
+pressuntillog A 3000 gate shutting
+shotburst eg_shut 40 8
+wait 200
+shot eg_ride
+pressuntillog DOWN 3000 gate opening
+wait 40
+pressuntil A field 3000
+wait 60
+shot eg_off
+echo [eg] done
+quit

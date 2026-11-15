@@ -727,3 +727,85 @@ class Bta0:
             if d[so:so + 4] == b'SRT0':
                 for name, e in read_dict(d, so + 8):
                     self.anims.append(SrtAnim(name, d, so + u32(e, 0)))
+
+
+class PatAnim:
+    """One texture pattern animation (an NSBTP's PAT0 entry, 'M\\0PT'): frames, the texture and palette names it
+    picks from (16 bytes each), and per material its keys [(frame, texture index, palette index)] (an entry: u16 key
+    count, u16, u16, u16 the keys' offset; 4 bytes a key). pick(material, frame) -> (texture name, palette name)"""
+    def __init__(self, name, d, a):
+        self.name = name
+        self.frames = u16(d, a + 4)
+        ntex, npal = d[a + 6], d[a + 7]
+        to, po = u16(d, a + 8), u16(d, a + 0x0A)
+        self.textures = [d[a + to + 16 * i:a + to + 16 * i + 16].split(b'\0')[0].decode('latin-1') for i in range(ntex)]
+        self.palettes = [d[a + po + 16 * i:a + po + 16 * i + 16].split(b'\0')[0].decode('latin-1') for i in range(npal)]
+        self.mats = {}
+        for mname, e in read_dict(d, a + 0x0C):
+            n, ko = u16(e, 0), u16(e, 6)
+            self.mats[mname] = [(u16(d, a + ko + 4 * k), d[a + ko + 4 * k + 2], d[a + ko + 4 * k + 3]) for k in range(n)]
+
+    def pick(self, material, frame):
+        keys = self.mats.get(material)
+        if not keys:
+            return None
+        t, p = keys[0][1], keys[0][2]
+        for f, ti, pi in keys:
+            if f <= frame:
+                t, p = ti, pi
+        if t >= len(self.textures):
+            return None
+        return self.textures[t], self.palettes[p] if p < len(self.palettes) else None
+
+
+class Btp0:
+    def __init__(self, d):
+        assert d[:4] == b'BTP0', d[:4]
+        self.anims = []
+        for i in range(u16(d, 0x0E)):
+            so = u32(d, 0x10 + 4 * i)
+            if d[so:so + 4] == b'PAT0':
+                for name, e in read_dict(d, so + 8):
+                    self.anims.append(PatAnim(name, d, so + u32(e, 0)))
+
+
+class MatAnim:
+    """One material colour animation (an NSBMA's MAT0 entry, 'M\\0AM'): frames, and per material five tracks (diffuse,
+    ambient, specular, emission: RGB555; polygon alpha 0-31), each (u16 the value or the samples' offset from the
+    animation's start, u16 info: 0x2000 a constant, else a sample a frame: u16 a colour, u8 the alpha).
+    value(material, frame) -> (diffuse RGB555, alpha) or None"""
+    def __init__(self, name, d, a):
+        self.name = name
+        self.frames = u16(d, a + 4)
+        self.mats = {}
+        for mname, e in read_dict(d, a + 8):
+            tracks = []
+            for k in range(5):
+                v, info = u16(e, 4 * k), u16(e, 4 * k + 2)
+                if info & 0x2000:
+                    tracks.append(('const', v))
+                else:
+                    size = 1 if k == 4 else 2
+                    tracks.append(('samples', [d[a + v + i] if size == 1 else u16(d, a + v + 2 * i)
+                                               for i in range(self.frames)]))
+            self.mats[mname] = tracks
+
+    def value(self, material, frame):
+        t = self.mats.get(material)
+        if t is None:
+            return None
+
+        def at(tr):
+            return tr[1] if tr[0] == 'const' else tr[1][min(frame, len(tr[1]) - 1)]
+        return at(t[0]) & 0x7FFF, at(t[4]) & 31
+
+
+class Bma0:
+    def __init__(self, d):
+        assert d[:4] == b'BMA0', d[:4]
+        self.anims = []
+        for i in range(u16(d, 0x0E)):
+            so = u32(d, 0x10 + 4 * i)
+            if d[so:so + 4] == b'MAT0':
+                for name, e in read_dict(d, so + 8):
+                    self.anims.append(MatAnim(name, d, so + u32(e, 0)))

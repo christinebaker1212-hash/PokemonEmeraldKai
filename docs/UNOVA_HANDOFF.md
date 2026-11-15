@@ -140,6 +140,16 @@ decisions: docs/UNOVA_DECISIONS.md (read it first: every Platinum decision holds
   the cannons' Task_CannonFly with U3D_PlayerFly, PlateModels, STRIATON's and NACRENE's states). CLAY's mine's floors are
   Black's world units (800 / 640 / 480; they were set in tiles, the player drawn far below the walkways). Tests:
   mp u3drun ID (a zone's script as a scene), mp u3dexphide MODEL 0|1, mp u3dground.
+  Their texture animations (2026-11-15, pack v7): each gimmick's NSBTP / NSBTA / NSBMA (tools/sinnoh/nitro.py Btp0,
+  Bta0 via the SRT tracks, Bma0) baked by gimmicks.py _texture_frames into per-frame overrides of the mesh's material
+  groups (texture, alpha, UV shift, colour multiplier against the material's diffuse); u3d.c keeps up to 16 texture
+  tracks a model beside its one joint track (U3D_ExpTex: Black's SetAnimeEnabled / Paused / Frame / Loop; U3D_ExpAnim
+  routes a texture track there), each going half a frame a game frame. Drivers mirror each overlay's own calls:
+  PlateModels / PlateDoorsFrame (BURGH: switches' tracks 0-1, plates', the doors' effect model 33 and its tracks 4-7,
+  the honey cocoon model 32 then Black's zone scripts 3/4 and 5/6), CartTex / CartLever / CartGate (ELESA: gate frames
+  0-15 open, 15-30 shut), LiftTexShow / LiftTexArrive (CLAY: sLiftElevatorLiftAnimeFlip), IceSecondary (BRYCEN's second
+  models), the button event (DRAYDEN), CannonAnim (SKYLA: track d*2+1 beside joint track d*2). Scenarios
+  unova_burgh_gym, unova_elesa_gym, unova_gym_lights.
   BRYCEN's gym (2026-11-13, Black's ov045 and its rails' own attributes): the ice rink as Black's grid (0x18 slide
   ice), its curves, ramps and way down as forced rides from a jump-start tile ("the blue tile") to the far one
   (tools/unova/gen_gyms.py -> src/unova/u3d_gyms.h, u3d_vm.c U3D_Vm_IceSlideAhead / IceRide); a curve starts where

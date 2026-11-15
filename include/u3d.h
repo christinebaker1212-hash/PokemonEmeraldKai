@@ -32,6 +32,9 @@ void U3D_ExpLoad(u8 ov);
 void U3D_ExpClear(void);
 void U3D_ExpAnim(u16 model, u8 anim, s16 frame, bool8 play);
 bool8 U3D_ExpPlaying(u16 model);
+void U3D_ExpTex(u16 model, u8 anim, bool8 on, s16 frame, bool8 play, bool8 loop);   // (a texture track: Black's
+bool8 U3D_ExpTexPlaying(u16 model, u8 anim);
+void U3D_ExpGetPos(u16 model, float out[3]);                                        //  SetAnimeEnabled / Paused / Loop)
 void U3D_ExpHide(u16 model, bool8 hidden);
 void U3D_ExpPlace(u16 model, float x, float y, float z, u16 yaw);
 void U3D_ExpSetY(u16 model, float y);

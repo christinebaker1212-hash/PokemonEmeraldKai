@@ -16,8 +16,13 @@ systems. Tick an entry only once it plays as Black's and has been seen running.
       cannons and the flight (ov041), STRIATON's switches and curtains (ov042), CLAY's lifts, obstacle and elevator,
       ridden at Black's speeds (ov043 / ov044), BRYCEN's switch pieces (ov045), DRAYDEN's dragons and levers (ov046).
       tools/unova/gimmicks.py (pack v5), u3d.c U3D_Exp*, u3d_vm.c's drivers
-- [ ] The gym models' texture animations (BTA / BTP / BMA: the switches' and plates' glows, the coasters' gates and
-      lights, DRAYDEN's buttons, the cannons' colours): the models are drawn at their first texture frame
+- [x] The gym models' texture animations (BTA / BTP / BMA, 2026-11-15, seen running: scenarios unova_burgh_gym,
+      unova_elesa_gym, unova_gym_lights): BURGH's switch glows, plates, the doors' effect model and the honey cocoon
+      (which also brought back Black's scripted honey trainers), ELESA's cart gates and lane levers, CLAY's lift lamps
+      and elevator, BRYCEN's switch lights, DRAYDEN's buttons, SKYLA's cannons' colours. Baked per frame into the
+      pack (v7) by tools/unova/gimmicks.py from nitro.py's Btp0 / Bta0 / Bma0; u3d.c U3D_ExpTex. A few of Black's
+      BTA tracks name materials their models don't have (ov042, ov045's track 0, ov046's extra model), so they change
+      nothing here (not yet compared with Black running)
 - [ ] SKYLA's flight camera (gCannonsCameraInfos: Black turns the view's pitch and yaw for each flight; here the view
       follows the flying player at the field's own angle)
 - [ ] **Building animations**: doors opening and closing (SCREENEFFECTS 0x124-0x132, build-model nodes), machines'

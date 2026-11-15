@@ -1,0 +1,32 @@
+pressuntil A field 6000
+wait 60
+mash B 12 20
+mp battlestyle 1
+mp teach 0 44
+mp u3dzone 29 32 20
+wait 200
+mash B 6 15
+shot bg_arrive
+mp u3drun 8
+wait 30
+pressuntil B field 3000
+wait 30
+mp u3drun 7
+wait 30
+shotburst bg_door 300 30
+pressuntil B field 3000
+waitlog 900 door 0 now open
+wait 30
+shot bg_opened
+mp u3dzone 29 20 32
+wait 200
+mash B 6 15
+mp u3drun 16
+wait 20
+shotburst bg_honey 80 10
+pressuntillog A 6000 the honey's script 6
+pressuntil A field 6000
+wait 30
+shot bg_after
+echo [bg] done
+quit

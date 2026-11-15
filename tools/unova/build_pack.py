@@ -57,8 +57,8 @@ _sinnoh = importlib.util.module_from_spec(_spec)
 _spec.loader.exec_module(_sinnoh)
 Pack = _sinnoh.Pack      # (texture and mesh tables, shared as a tool: never the games' engines)
 
-VERSION = 6   # (4: Black's animated map textures, an area's ITP frames and ITA scrolling; 5: the gyms' machinery;
-              #  6: each tile's battle background column)
+VERSION = 7   # (4: Black's animated map textures, an area's ITP frames and ITA scrolling; 5: the gyms' machinery;
+              #  6: each tile's battle background column; 7: the gyms' texture animations)
 ITA_ARC, ITP_ARC = 'a/0/6/9', 'a/0/7/0'   # (an area record's ita / itp: zonedata.c ZONEDATA_GetAreaItaAnimeId...)
 
 
@@ -673,11 +673,19 @@ def write(path, pack, light_sets, mats, gims=([], [])):
     out += struct.pack('<I', len(kinds))
     for mesh, nparts, anims in kinds:
         out += struct.pack('<HHh', nparts, len(anims), mesh)
-        for n, frames in anims:
-            out += struct.pack('<H', n)
-            for row in frames:
-                for m in row:
-                    out += struct.pack('<12f', *m)
+        for a in anims:   # (7: a kind byte first: 0 a joint animation, 1 a texture one)
+            if a[0] == 'joint':
+                _, n, frames = a
+                out += struct.pack('<BH', 0, n)
+                for row in frames:
+                    for m in row:
+                        out += struct.pack('<12f', *m)
+            else:
+                _, n, groups, frames = a
+                out += struct.pack('<BHH', 1, n, len(groups)) + struct.pack('<%dH' % len(groups), *groups)
+                for row in frames:
+                    for tex, alpha, du, dv, mul in row:
+                        out += struct.pack('<hBB5f', tex, alpha, 0, du, dv, *mul)
     out += struct.pack('<I', len(gimmick_list))
     for ov, models in gimmick_list:
         out += struct.pack('<BBH', ov, 0, len(models))

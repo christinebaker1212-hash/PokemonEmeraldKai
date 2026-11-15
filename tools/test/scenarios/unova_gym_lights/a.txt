@@ -1,0 +1,39 @@
+pressuntil A field 6000
+wait 60
+mash B 12 20
+mp u3dzone 97 15 25
+wait 200
+mash B 6 15
+shot gl_mine
+mp u3dflag A 1
+mp u3drun 2
+wait 10
+pressuntillog A 3000 lift 0 arrived
+shotburst gl_lift 30 4
+pressuntil B field 3000
+wait 30
+mp u3drun 15
+wait 10
+pressuntil B field 3000
+wait 30
+mp u3dzone 114 17 61
+wait 200
+mash B 6 15
+mp u3drun 4
+wait 10
+pressuntil B field 3000
+shot gl_ice_on
+wait 30
+mp u3drun 4
+wait 10
+shotburst gl_ice_off 30 4
+pressuntil B field 3000
+mp u3dzone 121 27 48
+wait 200
+mash B 6 15
+mp u3drun 4
+wait 10
+shotburst gl_button 30 4
+pressuntil B field 3000
+echo [gl] done
+quit
