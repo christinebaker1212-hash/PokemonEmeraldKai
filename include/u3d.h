@@ -77,6 +77,8 @@ void U3D_RefreshBlocks(void);   // the field's blocks again after Black replaced
 void U3D_CameraMoveTo(u16 pitch, u16 yaw, s32 dist, s32 x, s32 y, s32 z, u16 frames);
 void U3D_CameraMoveBack(u16 frames);
 void U3D_CameraReset(void);
+void U3D_CameraTurn(u16 pitch, u16 yaw, u16 frames);
+void U3D_CameraLook(u16 frames);
 bool8 U3D_CameraMoving(void);
 float U3D_TestGround(s32 mapX, s32 mapY, float near);         // tests: the ground's height (map pixels), NaN none
 void U3D_ShopPicture(bool8 on, s16 dx, s16 dy);               // shop.c's BUY screen: the field's last picture behind

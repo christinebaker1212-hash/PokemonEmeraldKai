@@ -5362,7 +5362,11 @@ void U3D_VmRideLocked(void)
 // in, the player is hidden and the animation goes on: the flight starts at its flight frame, along the flight's ICA path
 // from the cannon's cell, the player seen again at its landing frame, and the flight ends on its landing cell. The
 // tables are ov041's (src/unova/u3d_gyms.h from tools/unova/gen_gyms.py); no flight that way: nothing happens
-static struct { s8 cannon; u8 ring, dir, phase, seen; float frame; s16 ox, oz; } sShot = {-1};
+static struct { s8 cannon; u8 ring, dir, phase, seen; float frame; s16 ox, oz;
+                u16 followEnd, ret, bounce; bool8 looking, back; } sShot = {-1};
+// (the flight's camera, EventLaunch: turned to sCannonCamera's pitch and yaw before the shot; once the landing
+// frame's bounce (8 field frames) is over the eye holds and the view follows the player to the flight's follow frames,
+// then goes back over its return frames)
 static u8 sCannonLandX, sCannonLandZ;
 
 bool8 U3D_Vm_CannonAhead(u16 direction)
@@ -5447,6 +5451,17 @@ static void Task_CannonFly(u8 taskId)
     const s16 *fl = sCannonFlights[sShot.cannon][sShot.ring];
     struct ObjectEvent *pl = &gObjectEvents[gPlayerAvatar.objectEventId];
     float f = U3D_ExpFrame(sShot.cannon);
+    const u16 *cam = sCannonCamera[fl[5] < (s16)ARRAY_COUNT(sCannonCamera) ? fl[5] : 0];
+    if (sShot.phase == 3)   // (the turn to the flight's view, then the shot: EventLaunch 3)
+    {
+        if (U3D_CameraMoving())
+            return;
+        gObjectEvents[gPlayerAvatar.objectEventId].invisible = TRUE;
+        CannonAnim(sShot.dir * 2, sCannonFrames[CANNON_FIRE_DONE][sShot.dir], TRUE);
+        PlaySE(SE_M_EXPLOSION);   // (Black's 0x699, the shot)
+        sShot.phase = 0;
+        return;
+    }
     if (sShot.phase == 0 && f >= sCannonFrames[CANNON_FLIGHT_START][sShot.dir])
     {
         sShot.phase = 1;   // (the flight: Black's 0x6A0)
@@ -5457,6 +5472,8 @@ static void Task_CannonFly(u8 taskId)
     {
         sShot.seen = TRUE;   // (Black shows the player again at the animation's landing frame)
         pl->invisible = FALSE;
+        if (!sShot.back)
+            sShot.bounce = 1;   // (StartBounce)
     }
     if (sShot.phase == 1)
     {
@@ -5464,10 +5481,28 @@ static void Task_CannonFly(u8 taskId)
         const s16 *pt = sCannonPath[fl[0] + (k < (u32)fl[1] ? k : (u32)fl[1] - 1)];
         const u16 *cell = sCannonCells[sShot.cannon];
         U3D_PlayerFly(TRUE, pt[0] / 8.0f + cell[0] * 16 + 8, pt[1] / 8.0f + cell[1] * 16, pt[2] / 8.0f + cell[2] * 16 + 8);
+        if (sShot.frame == (u32)sShot.frame)   // (a field frame: Black's camera steps)
+        {
+            if (sShot.bounce && ++sShot.bounce > 8)
+                sShot.bounce = 0xFFFF;   // (UpdateBounce: two up-and-downs, the camera free to follow)
+            if (sShot.bounce == 0xFFFF && !sShot.looking && k < sShot.followEnd)
+            {
+                U3D_CameraLook(sShot.followEnd - k);
+                sShot.looking = TRUE;
+            }
+            if (k == sShot.followEnd && !sShot.back)
+            {
+                U3D_CameraMoveBack(sShot.ret);
+                sShot.back = TRUE;
+            }
+            if (fl[5] == 11 ? k == 0x46 : k == (u32)fl[1] - 1 - (s16)cam[5])
+                PlaySE(SE_LEDGE);   // (Black's 0x697, the landing, so many frames before the end; flight 11 its 0x6A1)
+        }
         sShot.frame += 0.5f;   // (a point a field frame, 30 a second)
         if (sShot.frame >= fl[1])
         {
-            PlaySE(SE_LEDGE);   // (Black's 0x697, the landing)
+            if (!sShot.back)
+                U3D_CameraMoveBack(sShot.ret);   // (PopState)
             U3D_PlayerFly(FALSE, 0, 0, 0);
             pl->invisible = FALSE;
             CannonAnim(0xFF, 0, FALSE);   // (its animations off again, the cannon at rest)
@@ -5486,10 +5521,17 @@ void U3D_VmCannonFly(void)
         ScriptContext_Enable();
         return;
     }
-    gObjectEvents[gPlayerAvatar.objectEventId].invisible = TRUE;
-    CannonAnim(sShot.dir * 2, sCannonFrames[CANNON_FIRE_DONE][sShot.dir], TRUE);
-    PlaySE(SE_M_EXPLOSION);   // (Black's 0x699, the shot)
-    sShot.phase = 0;
+    {
+        const s16 *fl = sCannonFlights[sShot.cannon][sShot.ring];
+        const u16 *cam = sCannonCamera[fl[5] < (s16)ARRAY_COUNT(sCannonCamera) ? fl[5] : 0];
+        sShot.ret = cam[4];
+        sShot.followEnd = cam[3] + cam[4] >= fl[1] ? fl[1] - (cam[4] + 1) : cam[3];
+        sShot.bounce = 0;
+        sShot.looking = sShot.back = FALSE;
+        U3D_CameraTurn(cam[0], cam[1], cam[2]);   // (EventLaunch 2: pitch and yaw, over its move frames)
+        MPNet_Log("u3d vm: SKYLA's cannon %d, flight camera %d", sShot.cannon, fl[5]);
+    }
+    sShot.phase = 3;
     sShot.seen = FALSE;
     CreateTask(Task_CannonFly, 80);
 }

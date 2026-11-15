@@ -1,0 +1,9 @@
+# SKYLA's gym's cannons (ov041) with Black's flight camera: walked into from the south, cannon 0 turns the view to its
+# flight's pitch and yaw (gCannonsCameraInfos 0), fires (its joint and texture tracks), the view holds its eye and
+# follows the player after the landing frame's bounce, then comes back; the player lands on the cannon's cell 15,2,19.
+# Shots sc_*.png.
+MODE=1
+TMO=300
+ENV_A="MOEMON_DEBUG_REGION=4 MOEMON_DEBUG_PARTY=6:100"
+EXPECT_A=("SKYLA's cannon 0, flight camera 0" "[sc] done")
+UNEXPECT_A=("[crash]" "TIMEOUT" "not played yet")

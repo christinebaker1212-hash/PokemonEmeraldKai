@@ -298,6 +298,8 @@ def main():
 CANNON_CELLS, CANNON_TURNS, CANNON_RING = 0x021F40F0, 0x021F4660, 0x021F4080
 CANNON_FRAMES = (0x021F4084, 0x021F408C, 0x021F4094, 0x021F409C)   # (fire sound, fire done, landing, flight start)
 CANNON_FLIGHTS, CANNON_ICA_ARC = 0x021F4320, 'a/1/2/1'
+CANNON_CAMERAS = 0x021F4198   # (gCannonsCameraInfos: u16 pitch, yaw; u8 move, follow, return frames, pad)
+CANNON_LAND_SE = 0x021F40B4   # (gCannonsLandSeFramesBeforeEnd: u16 a camera info)
 
 
 def ica_path(d):
@@ -346,6 +348,12 @@ def write_cannons(f):
     for row in flights:
         f.write('    {%s},\n' % ', '.join('{%s}' % ', '.join(str(v) for v in fl) for fl in row))
     f.write('};\n')
+    ncam = max(fl[5] for row in flights for fl in row if fl[1]) + 1
+    cams = [struct.unpack_from('<HHBBB', d, CANNON_CAMERAS - ram + 8 * k) for k in range(ncam)]
+    f.write("// each flight's camera (gCannonsCameraInfos: pitch, yaw, frames to turn there, to follow the player, to "
+            "come back;\n// gCannonsLandSeFramesBeforeEnd: the landing sound that many frames before the flight's end)\n")
+    f.write('static const u16 sCannonCamera[%d][6] = {%s};\n' % (ncam, ', '.join(
+        '{%s}' % ', '.join(str(v) for v in c + (u16(CANNON_LAND_SE + 2 * k),)) for k, c in enumerate(cams))))
     f.write('static const s16 sCannonPath[][3] = {\n')
     for k in range(0, len(paths), 6):
         f.write('    %s,\n' % ', '.join('{%d, %d, %d}' % tuple(round(v * 8) for v in p) for p in paths[k:k + 6]))

@@ -931,8 +931,9 @@ static struct
     u16 t, frames;
     float from[7], to[7];             // target x, y, z, pitch, yaw (degrees), distance, the screen's shift (EMERALD_DROP)
     float cur[7];
+    float eye[3];                     // (CAM_LOOK: the eye held where it was, the target going to the player's)
 } sCam;
-enum { CAM_FOLLOW, CAM_TO, CAM_BACK };
+enum { CAM_FOLLOW, CAM_TO, CAM_BACK, CAM_LOOK };
 
 static void CamStart(u8 mode, const float *to, u16 frames)
 {
@@ -961,6 +962,29 @@ void U3D_CameraMoveBack(u16 frames)
 void U3D_CameraReset(void)
 {
     sCam.mode = CAM_FOLLOW;
+}
+
+// SKYLA's cannons (ov041 EventLaunch): the view turned to a flight's pitch and yaw (FIELD_CAMERA_StartMove, the
+// target and distance kept), then the eye held while the target goes to the flying player over FRAMES and stays on
+// them (StopTargetTrace + StartFreeMove, the goal updated each frame), then U3D_CameraMoveBack (StartMoveToSaved)
+void U3D_CameraTurn(u16 pitch, u16 yaw, u16 frames)
+{
+    float to[7], d;
+    memcpy(to, sCam.cur, sizeof(to));
+    to[3] = pitch * 360.0f / 65536.0f;
+    d = fmodf(yaw * 360.0f / 65536.0f - sCam.cur[4], 360.0f);   // (the short way round)
+    if (d > 180.0f)
+        d -= 360.0f;
+    else if (d < -180.0f)
+        d += 360.0f;
+    to[4] = sCam.cur[4] + d;
+    CamStart(CAM_TO, to, frames * 2);
+}
+
+void U3D_CameraLook(u16 frames)
+{
+    memcpy(sCam.eye, sView.eye, sizeof(sCam.eye));
+    CamStart(CAM_LOOK, NULL, frames * 2);
 }
 
 bool8 U3D_CameraMoving(void)
@@ -1016,6 +1040,23 @@ static void SetupView(void)
         }
         if (sCam.mode == CAM_FOLLOW)
             memcpy(v, follow, sizeof(follow));
+        else if (sCam.mode == CAM_LOOK)
+        {
+            float d[3], len;
+            if (sCam.t < sCam.frames)
+                sCam.t++;
+            f = (float)sCam.t / sCam.frames;
+            for (i = 0; i < 3; i++)
+                v[i] = sCam.from[i] + (follow[i] - sCam.from[i]) * f;
+            d[0] = sCam.eye[0] - v[0], d[1] = sCam.eye[1] - (v[1] + CAM_LIFT), d[2] = sCam.eye[2] - v[2];
+            len = sqrtf(d[0] * d[0] + d[1] * d[1] + d[2] * d[2]);
+            if (len > 1.0f)
+            {
+                v[3] = asinf(d[1] / len) * 180.0f / 3.14159265f;
+                v[4] = atan2f(d[0], d[2]) * 180.0f / 3.14159265f;
+                v[5] = len;
+            }
+        }
         else
         {
             const float *to = sCam.mode == CAM_TO ? sCam.to : follow;

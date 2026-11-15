@@ -23,8 +23,10 @@ systems. Tick an entry only once it plays as Black's and has been seen running.
       pack (v7) by tools/unova/gimmicks.py from nitro.py's Btp0 / Bta0 / Bma0; u3d.c U3D_ExpTex. A few of Black's
       BTA tracks name materials their models don't have (ov042, ov045's track 0, ov046's extra model), so they change
       nothing here (not yet compared with Black running)
-- [ ] SKYLA's flight camera (gCannonsCameraInfos: Black turns the view's pitch and yaw for each flight; here the view
-      follows the flying player at the field's own angle)
+- [x] SKYLA's flight camera (2026-11-15, scenario unova_skyla_cannon): each flight's gCannonsCameraInfos (pitch, yaw,
+      move / follow / return frames; gen_gyms.py sCannonCamera) turn the view before the shot (u3d.c U3D_CameraTurn),
+      the eye held while the view follows the flying player after the landing frame's bounce (U3D_CameraLook), then
+      back (U3D_CameraMoveBack); the landing sound at Black's frame (gCannonsLandSeFramesBeforeEnd)
 - [ ] **Building animations**: doors opening and closing (SCREENEFFECTS 0x124-0x132, build-model nodes), machines'
       and lamps' BCA0 / BTP0 / BMA0 (field_buildmodel.c), the POKeMON LEAGUE's statues and stairs (0x12B-0x12E)
 - [ ] The GEAR STATION's trains on the platforms
