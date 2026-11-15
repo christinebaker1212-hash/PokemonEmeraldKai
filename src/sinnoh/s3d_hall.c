@@ -30,6 +30,7 @@
 #include "strings.h"
 #include "task.h"
 #include "constants/battle.h"
+#include "constants/characters.h"
 #include "constants/battle_frontier.h"
 #include "constants/battle_frontier_trainers.h"
 #include "constants/script_menu.h"
@@ -531,6 +532,69 @@ u8 *Sinnoh_HallPrints(void)
 void Sinnoh_HallSetStreak(u16 streak)   // (tests)
 {
     sHall.streak = streak;
+}
+
+// (the records boards: s3d_frontier.c) a kind's best, and the POKéMON the HALL knows last
+u16 Sinnoh_HallSpeciesBest(u16 species)
+{
+    u32 i;
+    for (i = 0; i < sHall.recordCount; i++)
+        if (sHall.records[i].species == species)
+            return sHall.records[i].best;
+    return 0;
+}
+
+u16 Sinnoh_HallSpecies(void)
+{
+    return sHall.species;
+}
+
+// Platinum's CallBattleHallLobbyFunction on the records board: 0 BH_LOBBY_FUNC_CHECK_STREAK_ACTIVE, 1
+// BH_LOBBY_FUNC_GET_CURRENT_STREAK_SPECIES
+u16 Sinnoh_HallLobbyFunction(u16 fn)
+{
+    if (fn == 0)
+        return sHall.species != SPECIES_NONE && sHall.streak > 0;
+    return sHall.species;
+}
+
+// Platinum's ShowBattleHallRecordMonSelectionMenu: the kinds with a record whose names begin with letter group GROUP
+// (0 ABC ... 8 YZ), by name, into the script's menu (s3d_scrcmd.c), the chosen one's species into VAR (MENU_CANCEL
+// 0xFFFE: none)
+void Sinnoh_HallRecordMenu(u16 group, u16 var)
+{
+    void Sinnoh_MenuBegin(u16 var, bool8 canExit);
+    void Sinnoh_MenuAddLine(const u8 *text, u16 value);
+    u16 order[HALL_RECORDS];
+    u32 i, j, n = 0;
+    u8 a[POKEMON_NAME_LENGTH + 1], b[POKEMON_NAME_LENGTH + 1];
+    for (i = 0; i < sHall.recordCount; i++)
+    {
+        u8 c;
+        GetSpeciesName(a, sHall.records[i].species);
+        c = a[0];
+        if (c >= CHAR_a && c <= CHAR_z)
+            c = c - CHAR_a + CHAR_A;
+        if (c < CHAR_A || c > CHAR_Z || (c - CHAR_A) / 3 != group)
+            continue;
+        for (j = n; j > 0; j--)   // (by name)
+        {
+            GetSpeciesName(b, order[j - 1]);
+            if (StringCompare(b, a) <= 0)
+                break;
+            order[j] = order[j - 1];
+        }
+        order[j] = sHall.records[i].species;
+        n++;
+    }
+    Sinnoh_MenuBegin(var, TRUE);
+    for (i = 0; i < n && i < 22; i++)
+    {
+        GetSpeciesName(a, order[i]);
+        Sinnoh_MenuAddLine(a, order[i]);
+    }
+    Sinnoh_MenuAddLine(S3D_TextByName("BattleFrontierRecords_Text_Cancel2"), 0xFFFE);
+    MPNet_Log("hall: the records board's menu, group %d: %d kinds", group, n);
 }
 
 void Sinnoh_HallSetRecord(u16 species, u16 best)   // (tests: `mp hallrecord SPECIES BEST`)

@@ -1,0 +1,47 @@
+pressuntil A field 5000
+mp textspeed 2
+mp platinumstory
+mp hallrecord 6 40
+wait 30
+mp warp 41,7,7,9
+wait 90
+waitfor field 1000
+mp face up
+press A 4
+pressuntil A multichoice 3000
+wait 20
+press A 4
+pressuntillog A 3000 the records board's menu
+wait 30
+shot fr_hall_menu
+press A 4
+pressuntillog A 3000 records board, facility 5
+wait 40
+shot fr_hall
+pressuntil B field 4000
+mp warp 41,3,6,9
+wait 90
+waitfor field 1000
+mp face up
+press A 4
+pressuntil A multichoice 3000
+wait 20
+press A 4
+waitlog 600 records board, facility 4
+wait 40
+shot fr_castle
+pressuntil B field 4000
+mp warp 41,8,13,6
+wait 90
+waitfor field 1000
+mp face up
+press A 4
+pressuntil A multichoice 3000
+wait 20
+press A 4
+waitlog 600 records board, facility 1
+wait 40
+shot fr_tower
+pressuntil B field 4000
+echo [fr] done
+quit

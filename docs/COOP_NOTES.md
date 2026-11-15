@@ -7732,3 +7732,16 @@ The user (2026-11-15): "form changes, and they must scale across all regions". O
   to 0 (Sinnoh_HallLobbyLoad). The FRONTIER's map load sets FLAG_HIDE_BATTLE_HALL_MAJOR_NPC (Platinum's
   BattleFrontier_OnTransition, its first line). SERENA / WINSTON and the visitor are shown by their looks (gen_maps.py
   SCENE_PEOPLE / VAR_LOOKS). Test `mp hallrecord SPECIES BEST`; scenario sinnoh_hall_records.
+
+## The FRONTIER's records boards (1.199.10)
+
+Platinum's boards in the five lobbies (scripts_battle_frontier_records.s, bg events from 10450: gen_words.py lets the
+shared file through). OpenFrontierRecordsApp is s3d_misc.c op 56 between the board's own fades: the TOWER's and
+FACTORY's records (the game's own halls) in the game's own results window (frontier_util.c ShowFacilityResultsWindow
+through CallFrontierUtilFunc), the HALL's, CASTLE's and ARCADE's in that window's frame with Platinum's board words
+(s3d_frontier.c Sinnoh_RecordsShow; the bank battle_frontier_records is in tv_data.py's named texts): the HALL a kind's
+record, picked from Platinum's letters menu (ShowBattleHallRecordMonSelectionMenu, op 58: s3d_hall.c
+Sinnoh_HallRecordMenu), the CASTLE its points. Op 57 answers the board's CallBattleHallLobbyFunction (a streak on, its
+POKéMON), op 59 closes the window. DOUBLE and MULTI the game's HALL, CASTLE and ARCADE don't hold (and the FACTORY's
+MULTI) show no streak. The TOWER's machines in Platinum are its Wi-Fi results and leaders: closed (online only).
+Scenario sinnoh_frontier_records.

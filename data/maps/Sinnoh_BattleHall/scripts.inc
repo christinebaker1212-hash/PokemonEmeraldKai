@@ -2,6 +2,10 @@ Sinnoh_BattleHall_MapScripts::
 	.byte 0
 
 @ --- SINNOH words (tools/sinnoh/gen_words.py from tools/sinnoh/words.py): not to be edited here ---
+Sinnoh_BattleHall_EventScript_Bg1::
+	goto SinnohP_battle_frontier_records_4
+	end
+
 Sinnoh_BattleHall_EventScript_Person1::
 	goto Sinnoh_EventScript_HallCounter
 	end
@@ -50,17 +54,16 @@ Sinnoh_BattleHall_EventScript_Person12::
 	goto SinnohP_battle_hall_15
 	end
 
+Sinnoh_BattleHall_EventScript_Person13::
+	goto SinnohP_battle_hall_18
+	end
+
 Sinnoh_BattleHall_EventScript_Person15::
-	msgbox Sinnoh_BattleHall_Text_Person15, MSGBOX_NPC
+	goto SinnohP_battle_hall_17
 	end
 
 Sinnoh_BattleHall_Text_Person11:
 	.string "The BATTLE HALL's crowd is the\n"
 	.string "loudest in SINNOH!$"
-
-Sinnoh_BattleHall_Text_Person15:
-	.string "I keep the records of the BATTLE\n"
-	.string "HALL. One MOéMON, every type, ten\l"
-	.string "ranks each. Good luck!$"
 
 @ --- end of SINNOH words ---

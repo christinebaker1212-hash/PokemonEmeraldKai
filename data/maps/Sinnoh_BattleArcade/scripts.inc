@@ -2,6 +2,10 @@ Sinnoh_BattleArcade_MapScripts::
 	.byte 0
 
 @ --- SINNOH words (tools/sinnoh/gen_words.py from tools/sinnoh/words.py): not to be edited here ---
+Sinnoh_BattleArcade_EventScript_Bg1::
+	goto SinnohP_battle_frontier_records_6
+	end
+
 Sinnoh_BattleArcade_EventScript_Person1::
 	goto Sinnoh_EventScript_ArcadeCounter
 	end

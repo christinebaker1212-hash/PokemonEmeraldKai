@@ -687,6 +687,30 @@ void Sinnoh_MiscCall(u16 op, u16 a, u16 b)
         VarSet(a, Sinnoh_HallLastStreak() == 50);
         break;
     }
+    case 56:   // OpenFrontierRecordsApp: facility A, challenge type B, the HALL's kind in VAR_0x8009 (s3d_frontier.c)
+    {
+        void Sinnoh_RecordsShow(u16 facility, u16 type, u16 species);
+        Sinnoh_RecordsShow(VarGet(a), VarGet(b), VarGet(VAR_0x8009));
+        break;
+    }
+    case 57:   // CallBattleHallLobbyFunction on the records board: function A, B <- its answer (s3d_hall.c)
+    {
+        u16 Sinnoh_HallLobbyFunction(u16 fn);
+        VarSet(b, Sinnoh_HallLobbyFunction(a));
+        break;
+    }
+    case 58:   // ShowBattleHallRecordMonSelectionMenu: letter group A, the kind into variable B (then SINNOH_MENU_SHOW)
+    {
+        void Sinnoh_HallRecordMenu(u16 group, u16 var);
+        Sinnoh_HallRecordMenu(VarGet(a), b);
+        break;
+    }
+    case 59:   // the records board closes
+    {
+        void Sinnoh_RecordsClose(void);
+        Sinnoh_RecordsClose();
+        break;
+    }
     case 46:   // GetDailyRandomLevel: A <- the day's level, 2-99 (Platinum's VAR_DAILY_RANDOM_LEVEL, picked as a day starts)
     {
         u32 x = (RtcGetLocalDayCount() + 1) * 0x9E3779B1u ^ 0x221;

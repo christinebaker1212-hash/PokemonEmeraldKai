@@ -48,8 +48,9 @@ Each segment: Platinum's own map scripts, people, triggers, words and battles, p
       director's diplomas (the game's own), the FRONTIER's exchange attendants (their words, the game's BP list);
       Platinum's FLAG_DAILY_* cleared each day (src/data/sinnoh_daily_flags.h); the clock runs in a game begun away from
       HOENN (sinnoh_postgame_people, sinnoh_trophy, sinnoh_bp). The HALL's record keeper, SERENA / WINSTON and the day's
-      visitor (2026-11-15: each kind's best kept, s3d_hall.c; ops 52-55; sinnoh_hall_records). Left: the FRONTIER's
-      records boards and the TOWER's record machines (Platinum's record screens: mock-ups first). The CONTEST HALL's practice receptionist converts
+      visitor (2026-11-15: each kind's best kept, s3d_hall.c; ops 52-55; sinnoh_hall_records). The FRONTIER's records
+      boards (2026-11-15: the game's results window, Platinum's words: COOP_NOTES "The FRONTIER's records boards";
+      sinnoh_frontier_records); the TOWER's record machines are Platinum's Wi-Fi results and leaders (online: closed). The CONTEST HALL's practice receptionist converts
       again (2026-11-15: OpenPartyMenuForContest's literal; sinnoh_contest_practice)
 - [ ] One test from TWINLEAF to the HALL OF FAME
 

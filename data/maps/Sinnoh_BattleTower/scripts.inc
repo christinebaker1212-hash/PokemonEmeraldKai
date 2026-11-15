@@ -2,6 +2,10 @@ Sinnoh_BattleTower_MapScripts::
 	.byte 0
 
 @ --- SINNOH words (tools/sinnoh/gen_words.py from tools/sinnoh/words.py): not to be edited here ---
+Sinnoh_BattleTower_EventScript_Bg1::
+	goto SinnohP_battle_frontier_records_1
+	end
+
 Sinnoh_BattleTower_EventScript_Bg2::
 	msgbox Sinnoh_BattleTower_Text_Bg2, MSGBOX_SIGN
 	end

@@ -130,7 +130,7 @@ FANFARE = {'SEQ_FANFA4': 'MUS_OBTAIN_ITEM', 'SEQ_FANFA3': 'MUS_OBTAIN_TMHM', 'SE
            'SEQ_ACCE': 'MUS_OBTAIN_ITEM', 'SEQ_POKEWALKER': 'MUS_OBTAIN_ITEM', 'SEQ_BADGE': 'MUS_OBTAIN_BADGE',
            'SEQ_ASA': 'MUS_HEAL', 'SEQ_KEYITEM': 'MUS_OBTAIN_ITEM', 'SEQ_WAZA': 'MUS_OBTAIN_TMHM'}
 
-CONSTANTS = {'BATTLEGROUND_TRAINER_NONE': 0xFFF, 'MOVE_NOT_SELECTED': 0xFF, 'TRUE': 1, 'FALSE': 0, 'NO_EXIT_ON_B': 0, 'EXIT_ON_B': 1, 'MENU_YES': 0, 'MENU_NO': 1, 'GENDER_MALE': 0, 'GENDER_FEMALE': 1}
+CONSTANTS = {'FACILITY_TOWER': 1, 'FACILITY_FACTORY': 2, 'FACILITY_FACTORY_OPEN': 3, 'FACILITY_CASTLE': 4, 'FACILITY_HALL': 5, 'FACILITY_ARCADE': 6, 'BATTLEGROUND_TRAINER_NONE': 0xFFF, 'MOVE_NOT_SELECTED': 0xFF, 'TRUE': 1, 'FALSE': 0, 'NO_EXIT_ON_B': 0, 'EXIT_ON_B': 1, 'MENU_YES': 0, 'MENU_NO': 1, 'GENDER_MALE': 0, 'GENDER_FEMALE': 1}
 
 # Platinum's movement actions -> this game's (Platinum's field runs at 30 frames a second, this one at 60: a delay
 # is twice as many frames here)
@@ -842,6 +842,20 @@ class FileConverter:
             return [self.sinnoh(SINNOH_MISC, 52, self.var(a[0]))]
         if cmd == 'GetBattleHallTotalSinglesRecord':
             return [self.sinnoh(SINNOH_MISC, 53, self.var(a[0]))]
+        # the FRONTIER's records boards (scripts_battle_frontier_records.s: s3d_frontier.c Sinnoh_RecordsShow, the game's
+        # results window; the board's own fades stand: the window shows between them)
+        if cmd == 'OpenFrontierRecordsApp':
+            sp = a[2]
+            return [('copyvar VAR_0x8009, %s' % self.var(sp)) if self.is_var(sp) else ('setvar VAR_0x8009, %s' % self.value(sp)),
+                    'fadescreen FADE_FROM_BLACK', self.sinnoh(SINNOH_MISC, 56, self.arg(a[1]), self.arg(a[0])),
+                    'waitbuttonpress', self.sinnoh(SINNOH_MISC, 59), 'fadescreen FADE_TO_BLACK']
+        if cmd == 'CallBattleHallLobbyFunction' and self.low == 'battle_frontier_records':
+            fn = {'BH_LOBBY_FUNC_CHECK_STREAK_ACTIVE': 0, 'BH_LOBBY_FUNC_GET_CURRENT_STREAK_SPECIES': 1}.get(a[0])
+            if fn is None:
+                raise Unsupported('CallBattleHallLobbyFunction %s' % a[0])
+            return [self.sinnoh(SINNOH_MISC, 57, fn, self.var(a[2]))]
+        if cmd == 'ShowBattleHallRecordMonSelectionMenu':
+            return [self.sinnoh(SINNOH_MISC, 58, self.arg(a[1]), self.var(a[2])), self.sinnoh(SINNOH_MENU_SHOW)]
         if cmd == 'CheckIfBattleHallStreakIs50':
             return [self.sinnoh(SINNOH_MISC, 55, self.var(a[0]))]
         if cmd == 'GetBattleHallRecordKeeperStats':

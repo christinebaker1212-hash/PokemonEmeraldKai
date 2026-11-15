@@ -2,6 +2,10 @@ Sinnoh_BattleFactory_MapScripts::
 	.byte 0
 
 @ --- SINNOH words (tools/sinnoh/gen_words.py from tools/sinnoh/words.py): not to be edited here ---
+Sinnoh_BattleFactory_EventScript_Bg1::
+	goto SinnohP_battle_frontier_records_3
+	end
+
 Sinnoh_BattleFactory_EventScript_Person1::
 	goto Sinnoh_EventScript_FactoryGuide
 	end

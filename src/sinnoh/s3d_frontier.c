@@ -514,3 +514,115 @@ u16 Sinnoh_FrontierBest(u8 facility)
 {
     return sSave.best[facility & 1];
 }
+
+// ---------------------------------------------------------------------------------- the FRONTIER's records boards
+// Platinum's records boards in each lobby (scripts_battle_frontier_records.s: OpenFrontierRecordsApp, s3d_misc.c ops
+// 56-59): the TOWER's and FACTORY's records in the game's own results window (frontier_util.c: SINNOH's TOWER and
+// FACTORY are the game's own halls), the HALL's, CASTLE's and ARCADE's in that window with Platinum's board words
+// (its battle_frontier_records bank). Platinum's facility numbers: 1 TOWER, 2 FACTORY, 3 FACTORY (open), 4 CASTLE,
+// 5 HALL, 6 ARCADE; its challenge types 0 SINGLE, 1 DOUBLE, 2 MULTI.
+#include "battle_records.h"
+#include "frontier_util.h"
+#include "constants/frontier_util.h"
+#include "menu.h"
+#include "text.h"
+#include "window.h"
+
+u16 Sinnoh_HallLastStreak(void);
+u16 Sinnoh_HallSpeciesBest(u16 species);
+u16 Sinnoh_HallSpecies(void);
+
+static const struct WindowTemplate sRecordsWindow = {.bg = 0, .tilemapLeft = 1, .tilemapTop = 1, .width = 28,
+                                                     .height = 18, .paletteNum = 15, .baseBlock = 1};
+
+static void RecPrint(const u8 *s, s32 x, u8 row, u8 align)
+{
+    if (align == 1)
+        x -= GetStringWidth(FONT_NORMAL, s, 0) / 2;
+    else if (align == 2)
+        x -= GetStringWidth(FONT_NORMAL, s, 0);
+    AddTextPrinterParameterized(gRecordsWindowId, FONT_NORMAL, s, x, row * 8 + 1, TEXT_SKIP_DRAW, NULL);
+}
+
+static void RecWords(const char *name, s32 x, u8 row, u8 align)
+{
+    StringExpandPlaceholders(gStringVar4, S3D_TextByName(name));
+    RecPrint(gStringVar4, x, row, align);
+}
+
+// "PREV" / "CURRENT" (or "RECORD") and "Win streak: N" on a row
+static void RecStreak(const char *label, u16 streak, u8 row)
+{
+    RecWords(label, 16, row, 0);
+    ConvertIntToDecimalStringN(gStringVar1, streak > 9999 ? 9999 : streak, STR_CONV_MODE_LEFT_ALIGN, 4);
+    RecWords("BattleFrontierRecords_Text_WinStreak", 136, row, 1);
+}
+
+void Sinnoh_RecordsShow(u16 facility, u16 type, u16 species)
+{
+    static const char *const sTitles[] = {"BattleFrontierRecords_Text_BattleTower", "BattleFrontierRecords_Text_BattleFactory",
+        "BattleFrontierRecords_Text_BattleFactory", "BattleFrontierRecords_Text_BattleCastle",
+        "BattleFrontierRecords_Text_BattleHall", "BattleFrontierRecords_Text_BattleArcade"};
+    static const char *const sTypes[] = {"BattleFrontierRecords_Text_SingleRecord", "BattleFrontierRecords_Text_DoubleRecord",
+                                         "BattleFrontierRecords_Text_MultiRecord"};
+    u16 streak = 0, best = 0;
+    bool8 current = FALSE;
+    if (type > 2)
+        type = 0;
+    if ((facility == 1 && type <= 2) || ((facility == 2 || facility == 3) && type <= 1))
+    {
+        // the game's own TOWER and FACTORY: their results window (frontier_util.c ShowFacilityResultsWindow)
+        u16 v4 = gSpecialVar_0x8004, v5 = gSpecialVar_0x8005, v6 = gSpecialVar_0x8006;
+        gSpecialVar_0x8004 = FRONTIER_UTIL_FUNC_RESULTS_WINDOW;
+        gSpecialVar_0x8005 = facility == 1 ? FRONTIER_FACILITY_TOWER : FRONTIER_FACILITY_FACTORY;
+        gSpecialVar_0x8006 = type;
+        CallFrontierUtilFunc();
+        gSpecialVar_0x8004 = v4, gSpecialVar_0x8005 = v5, gSpecialVar_0x8006 = v6;
+        MPNet_Log("frontier: records board, facility %d type %d (the game's own)", facility, type);
+        return;
+    }
+    gRecordsWindowId = AddWindow(&sRecordsWindow);
+    DrawStdWindowFrame(gRecordsWindowId, FALSE);
+    FillWindowPixelBuffer(gRecordsWindowId, PIXEL_FILL(1));
+    RecWords(sTitles[facility >= 1 && facility <= 6 ? facility - 1 : 0], 8, 0, 0);
+    RecWords(sTypes[type], 216, 0, 2);
+    if (type == 0 && facility == 5)
+    {
+        // the HALL: the chosen kind's record, its latest streak if it's the one the HALL knows last
+        GetSpeciesName(gStringVar1, species);
+        RecWords("BattleFrontierRecords_Text_MonsRecord", 8, 3, 0);
+        best = Sinnoh_HallSpeciesBest(species);
+        if (species == Sinnoh_HallSpecies())
+        {
+            streak = Sinnoh_HallStreak();
+            current = streak > 0;
+            if (!current)
+                streak = Sinnoh_HallLastStreak();
+        }
+    }
+    else if (type == 0 && (facility == 4 || facility == 6))
+    {
+        // the CASTLE (with its points) and the ARCADE
+        u8 f = facility == 4 ? 0 : 1;
+        streak = sSave.streak[f], best = sSave.best[f];
+        current = streak > 0;
+        if (facility == 4)
+        {
+            RecWords("BattleFrontierRecords_Text_CastlePoints", 8, 3, 0);
+            ConvertIntToDecimalStringN(gStringVar1, sSave.cp, STR_CONV_MODE_LEFT_ALIGN, 4);
+            RecWords("BattleFrontierRecords_Text_CP", 216, 3, 2);
+        }
+    }
+    // (a DOUBLE or MULTI the game's HALL, CASTLE and ARCADE don't hold, or the FACTORY's MULTI: no streak yet)
+    RecStreak(current ? "BattleFrontierRecords_Text_Current" : "BattleFrontierRecords_Text_Prev", streak, 7);
+    RecStreak("BattleFrontierRecords_Text_Record", best > streak ? best : streak, 11);
+    PutWindowTilemap(gRecordsWindowId);
+    CopyWindowToVram(gRecordsWindowId, COPYWIN_FULL);
+    MPNet_Log("frontier: records board, facility %d type %d species %d: streak %d, record %d", facility, type, species,
+              streak, best);
+}
+
+void Sinnoh_RecordsClose(void)
+{
+    RemoveRecordsWindow();
+}

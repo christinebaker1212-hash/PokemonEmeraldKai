@@ -1,0 +1,10 @@
+# The FRONTIER's records boards in Platinum's own script (scripts_battle_frontier_records.s; s3d_frontier.c
+# Sinnoh_RecordsShow): the HALL's (SINGLE, the letters ABC, CHARIZARD's record 40), the CASTLE's (its points) in the
+# game's results window with Platinum's words, and the TOWER's in the game's own TOWER results window.
+# Shots fr_hall_menu, fr_hall, fr_castle, fr_tower.
+MODE=1
+TMO=300
+ENV_A="MOEMON_DEBUG_REGION=3 MOEMON_DEBUG_PARTY=6:60"
+EXPECT_A=("hall: the records board's menu, group 0: 1 kinds" "records board, facility 5 type 0 species 6: streak 0, record 40"
+          "records board, facility 4 type 0" "records board, facility 1 type 0 (the game's own)" "[fr] done")
+UNEXPECT_A=("[crash]" "TIMEOUT")
