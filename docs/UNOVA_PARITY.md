@@ -47,7 +47,10 @@ systems. Tick an entry only once it plays as Black's and has been seen running.
       platform, 19 plays its doors, 20 hides it (u3d_subway.c); the carriage (zone 75) sways as Black's does, until
       command 350 stops it (U3D_Subway_SwayFrame, u3d.c U3D_ViewBob); scenario unova_subway_train
       (`mp u3dsubwaytool CMD OP1 OP2`)
-- [ ] Black's other field gimmicks (arc 0x65's zone table, ov021 gFieldGimmickOverlayIds): the lane trains (ov058, ROUTE 4 / DESERT RESORT), SKYARROW's and TUBELINE
+- [x] ROUTE 4's traffic (ov058 field_gimmick_lane_trains.c, 2026-11-15; zones 326 / 157): the trucks and cars on the
+      lanes drive by as Black's (setup 58 in tools/unova/gimmicks.py, u3d_vm.c LanesLoad / LanesFrame); scenario
+      unova_lane_traffic
+- [ ] Black's other field gimmicks (arc 0x65's zone table, ov021 gFieldGimmickOverlayIds): SKYARROW's and TUBELINE
       BRIDGE's passing traffic and sounds (ov053 / ov054), ROUTE 10's bridge (ov047), the LEAGUE's models (ov049 /
       ov050), the special POKeMON's spots (ov059: MOOR OF ICIRRUS, CASTELIA), the ENTRALINK's gauge and markers
       (ov060 / ov061), LIBERTY GARDEN's (ov062)
