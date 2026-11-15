@@ -84,6 +84,19 @@ void HandleLoadSpecialPokePic(const struct CompressedSpriteSheet *src, void *des
 
 void LoadSpecialPokePic(const struct CompressedSpriteSheet *src, void *dest, s32 species, u32 personality, bool8 isFrontPic)
 {
+    const u32 *MP_Form_Pic(u16 species, u32 personality, bool8 front);
+    bool8 MP_Form_DeoxysNormal(u32 personality);
+    const u32 *formPic = species > 0 && species <= NUM_SPECIES ? MP_Form_Pic(species, personality, isFrontPic) : NULL;
+    if (formPic)   // Moemon Kai: a form's own picture (src/mp/mp_forms.c)
+    {
+        LZ77UnCompWram(formPic, dest);
+        return;
+    }
+    if (species == SPECIES_DEOXYS && MP_Form_DeoxysNormal(personality))
+    {
+        LZ77UnCompWram(src->data, dest);   // (the Normal Forme: the picture's own first frame)
+        return;
+    }
     if (species == SPECIES_UNOWN)
     {
         u16 i = GET_UNOWN_LETTER(personality);
@@ -315,6 +328,19 @@ void DecompressPicFromTable_2(const struct CompressedSpriteSheet *src, void *buf
 
 void LoadSpecialPokePic_2(const struct CompressedSpriteSheet *src, void *dest, s32 species, u32 personality, bool8 isFrontPic) // a copy of LoadSpecialPokePic
 {
+    const u32 *MP_Form_Pic(u16 species, u32 personality, bool8 front);
+    bool8 MP_Form_DeoxysNormal(u32 personality);
+    const u32 *formPic = species > 0 && species <= NUM_SPECIES ? MP_Form_Pic(species, personality, isFrontPic) : NULL;
+    if (formPic)   // Moemon Kai: a form's own picture (src/mp/mp_forms.c)
+    {
+        LZ77UnCompWram(formPic, dest);
+        return;
+    }
+    if (species == SPECIES_DEOXYS && MP_Form_DeoxysNormal(personality))
+    {
+        LZ77UnCompWram(src->data, dest);   // (the Normal Forme: the picture's own first frame)
+        return;
+    }
     if (species == SPECIES_UNOWN)
     {
         u16 i = GET_UNOWN_LETTER(personality);
@@ -377,6 +403,19 @@ void HandleLoadSpecialPokePic_DontHandleDeoxys(const struct CompressedSpriteShee
 
 void LoadSpecialPokePic_DontHandleDeoxys(const struct CompressedSpriteSheet *src, void *dest, s32 species, u32 personality, bool8 isFrontPic)
 {
+    const u32 *MP_Form_Pic(u16 species, u32 personality, bool8 front);
+    bool8 MP_Form_DeoxysNormal(u32 personality);
+    const u32 *formPic = species > 0 && species <= NUM_SPECIES ? MP_Form_Pic(species, personality, isFrontPic) : NULL;
+    if (formPic)   // Moemon Kai: a form's own picture (src/mp/mp_forms.c)
+    {
+        LZ77UnCompWram(formPic, dest);
+        return;
+    }
+    if (species == SPECIES_DEOXYS && MP_Form_DeoxysNormal(personality))
+    {
+        LZ77UnCompWram(src->data, dest);   // (the Normal Forme: the picture's own first frame)
+        return;
+    }
     if (species == SPECIES_UNOWN)
     {
         u16 i = GET_UNOWN_LETTER(personality);

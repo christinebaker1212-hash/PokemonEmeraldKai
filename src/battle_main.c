@@ -3765,6 +3765,7 @@ void FaintClearSetData(void)
 
     gBattleMons[gActiveBattler].types[0] = gSpeciesInfo[gBattleMons[gActiveBattler].species].types[0];
     gBattleMons[gActiveBattler].types[1] = gSpeciesInfo[gBattleMons[gActiveBattler].species].types[1];
+    MP_Form_FitBattler(gActiveBattler);   // Moemon Kai: forms (src/mp/mp_forms.c)
     MP_Gen_FitBattler(gActiveBattler);   // Moemon Kai: GENERATION (FAIRY, abilities past the cap)
 
     ClearBattlerMoveHistory(gActiveBattler);
@@ -3848,6 +3849,7 @@ static void BattleIntroDrawTrainersOrMonsSprites(void)
             gBattleMons[gActiveBattler].types[0] = gSpeciesInfo[gBattleMons[gActiveBattler].species].types[0];
             gBattleMons[gActiveBattler].types[1] = gSpeciesInfo[gBattleMons[gActiveBattler].species].types[1];
             gBattleMons[gActiveBattler].ability = GetAbilityBySpecies(gBattleMons[gActiveBattler].species, gBattleMons[gActiveBattler].abilityNum);
+            MP_Form_FitBattler(gActiveBattler);   // Moemon Kai: forms (src/mp/mp_forms.c)
             MP_Gen_FitBattler(gActiveBattler);   // Moemon Kai: GENERATION
             hpOnSwitchout = &gBattleStruct->hpOnSwitchout[GetBattlerSide(gActiveBattler)];
             *hpOnSwitchout = gBattleMons[gActiveBattler].hp;
@@ -5818,6 +5820,10 @@ static void HandleEndTurn_FinishBattle(void)
 
 static void FreeResetData_ReturnToOvOrDoEvolutions(void)
 {
+    {
+        void MP_Form_AfterBattle(void);
+        MP_Form_AfterBattle();   // Moemon Kai: BURMY's cloak from the ground fought on (src/mp/mp_forms.c)
+    }
     if (!gPaletteFade.active)
     {
 #ifdef PORTABLE

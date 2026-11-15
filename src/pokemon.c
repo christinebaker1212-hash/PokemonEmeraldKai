@@ -2417,6 +2417,10 @@ void CreateBoxMon(struct BoxPokemon *boxMon, u16 species, u8 level, u8 fixedIV, 
     }
 
     GiveBoxMonInitialMoveset(boxMon);
+    {
+        void MP_Form_Init(struct BoxPokemon *box);
+        MP_Form_Init(boxMon);   // Moemon Kai: its form by where it's met (src/mp/mp_forms.c)
+    }
 }
 
 void CreateMonWithNature(struct Pokemon *mon, u16 species, u8 level, u8 fixedIV, u8 nature)
@@ -2826,6 +2830,11 @@ static u16 GetDeoxysStat(struct Pokemon *mon, s32 statId)
 
     if (gBattleTypeFlags & BATTLE_TYPE_LINK_IN_BATTLE || GetMonData(mon, MON_DATA_SPECIES, NULL) != SPECIES_DEOXYS)
         return 0;
+    {
+        u8 MP_Form_Of(const struct BoxPokemon *box);
+        if (MP_Form_Of(&mon->box) != 0)   // Moemon Kai: another Forme than the game's own (src/mp/mp_forms.c)
+            return 0;
+    }
 
     ivVal = GetMonData(mon, MON_DATA_HP_IV + statId, NULL);
     evVal = GetMonData(mon, MON_DATA_HP_EV + statId, NULL);
@@ -2934,9 +2943,10 @@ static u16 CalculateBoxMonChecksum(struct BoxPokemon *boxMon)
     return checksum;
 }
 
+u8 MP_Form_BaseStat(struct Pokemon *mon, u8 stat, u8 own);   // Moemon Kai (src/mp/mp_forms.c)
 #define CALC_STAT(base, iv, ev, statIndex, field)               \
 {                                                               \
-    u8 baseStat = gSpeciesInfo[species].base;                   \
+    u8 baseStat = MP_Form_BaseStat(mon, statIndex, gSpeciesInfo[species].base);   /* Moemon Kai: forms */ \
     s32 n = (((2 * baseStat + iv + ev / 4) * level) / 100) + 5; \
     u8 nature = GetNature(mon);                                 \
     n = ModifyStatByNature(nature, n, statIndex);               \
@@ -2978,7 +2988,7 @@ void CalculateMonStats(struct Pokemon *mon)
     }
     else
     {
-        s32 n = 2 * gSpeciesInfo[species].baseHP + hpIV;
+        s32 n = 2 * MP_Form_BaseStat(mon, STAT_HP, gSpeciesInfo[species].baseHP) + hpIV;   // Moemon Kai: forms
         newMaxHP = (((n + hpEV / 4) * level) / 100) + level + 10;
     }
 
@@ -3985,7 +3995,7 @@ u32 GetBoxMonData3(struct BoxPokemon *boxMon, s32 field, u8 *data)
             StringCopy(data, gText_EggNickname);
             retVal = StringLength(data);
         }
-        else if (boxMon->language == LANGUAGE_JAPANESE)
+        else if ((boxMon->language & 0x0F) == LANGUAGE_JAPANESE)
         {
             data[0] = EXT_CTRL_CODE_BEGIN;
             data[1] = EXT_CTRL_CODE_JPN;
@@ -4009,7 +4019,10 @@ u32 GetBoxMonData3(struct BoxPokemon *boxMon, s32 field, u8 *data)
         break;
     }
     case MON_DATA_LANGUAGE:
-        retVal = boxMon->language;
+        retVal = boxMon->language & 0x0F;   // Moemon Kai: the top 4 bits are the form (MON_DATA_FORM)
+        break;
+    case MON_DATA_FORM:
+        retVal = boxMon->language >> 4;
         break;
     case MON_DATA_SANITY_IS_BAD_EGG:
         retVal = boxMon->isBadEgg;
@@ -4414,7 +4427,10 @@ void SetBoxMonData(struct BoxPokemon *boxMon, s32 field, const void *dataArg)
         break;
     }
     case MON_DATA_LANGUAGE:
-        SET8(boxMon->language);
+        boxMon->language = (boxMon->language & 0xF0) | (data[0] & 0x0F);   // Moemon Kai: the form kept (MON_DATA_FORM)
+        break;
+    case MON_DATA_FORM:
+        boxMon->language = (boxMon->language & 0x0F) | ((data[0] & 0x0F) << 4);
         break;
     case MON_DATA_SANITY_IS_BAD_EGG:
         SET8(boxMon->isBadEgg);
@@ -4816,7 +4832,8 @@ u16 GetMonAbility(struct Pokemon *mon)
 {
     u16 species = GetMonData(mon, MON_DATA_SPECIES, NULL);
     u8 abilityNum = GetMonData(mon, MON_DATA_ABILITY_NUM, NULL);
-    return GetAbilityBySpecies(species, abilityNum);
+    u16 MP_Form_Ability(struct Pokemon *mon, u16 own);
+    return MP_Form_Ability(mon, GetAbilityBySpecies(species, abilityNum));   // Moemon Kai: forms (mp_forms.c)
 }
 
 void CreateSecretBaseEnemyParty(struct SecretBase *secretBaseRecord)
@@ -7086,6 +7103,12 @@ static const u32 *MonSpritePal(u16 species, u32 otId, u32 personality)
         return gMonPaletteTable[SPECIES_NONE].data;
 
     shinyValue = GET_SHINY_VALUE(otId, personality);
+    {
+        const struct CompressedSpritePalette *MP_Form_PalStruct(u16 species, u32 personality, bool8 shiny);
+        const struct CompressedSpritePalette *f = MP_Form_PalStruct(species, personality, shinyValue < SHINY_ODDS);
+        if (f)   // Moemon Kai: a form's own (src/mp/mp_forms.c)
+            return f->data;
+    }
     if (shinyValue < SHINY_ODDS)
         return gMonShinyPaletteTable[species].data;
     else
@@ -7097,6 +7120,12 @@ static const struct CompressedSpritePalette *MonSpritePalStruct(u16 species, u32
     u32 shinyValue;
 
     shinyValue = GET_SHINY_VALUE(otId, personality);
+    {
+        const struct CompressedSpritePalette *MP_Form_PalStruct(u16 species, u32 personality, bool8 shiny);
+        const struct CompressedSpritePalette *f = species <= NUM_SPECIES ? MP_Form_PalStruct(species, personality, shinyValue < SHINY_ODDS) : NULL;
+        if (f)   // Moemon Kai: a form's own (src/mp/mp_forms.c)
+            return f;
+    }
     if (shinyValue < SHINY_ODDS)
         return &gMonShinyPaletteTable[species];
     else

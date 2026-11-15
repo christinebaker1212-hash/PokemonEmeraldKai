@@ -171,6 +171,7 @@ bool8 MP_Gen_MoveAllowed(u16 move);                // a move past the cap can't 
 u8 MP_Gen_SpeciesType(u16 species, u8 which);      // its types as the generation has them (FAIRY from Gen 6)
 u8 MP_Gen_MoveType(u8 type);                       // FAIRY moves are NORMAL before Gen 6
 void MP_Gen_FitBattler(u8 battler);
+void MP_Form_FitBattler(u8 battler);   // (mp_forms.c: a battler's types and Ability as its form's)
 u8 MP_Gen_OfItem(u16 item);                        // 0 = always there (Kai's own, story items)
 bool8 MP_Gen_ItemAllowed(u16 item);                // past the GENERATION: kept in the bag, can't be used or held
 u16 MP_Gen_CapNow(void);                           // (special) the GENERATION in play here

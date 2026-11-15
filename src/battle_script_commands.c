@@ -5256,6 +5256,7 @@ static void Cmd_switchindataupdate(void)
     gBattleMons[gActiveBattler].types[0] = gSpeciesInfo[gBattleMons[gActiveBattler].species].types[0];
     gBattleMons[gActiveBattler].types[1] = gSpeciesInfo[gBattleMons[gActiveBattler].species].types[1];
     gBattleMons[gActiveBattler].ability = GetAbilityBySpecies(gBattleMons[gActiveBattler].species, gBattleMons[gActiveBattler].abilityNum);
+    MP_Form_FitBattler(gActiveBattler);   // Moemon Kai: forms (src/mp/mp_forms.c)
     MP_Gen_FitBattler(gActiveBattler);   // Moemon Kai: GENERATION
 
     // check knocked off item

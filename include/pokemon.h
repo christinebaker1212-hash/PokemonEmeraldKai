@@ -98,6 +98,7 @@ enum {
     MON_DATA_MP_BALLFX_SOUND,  // Moemon Co-op: its sound accent (the 4 spare flag bits)
     MON_DATA_MP_BALLFX_EXT,    // Moemon Co-op: 8 more bits for the effect (the markings byte's spare top 4 bits and
                                // the 4 unused ribbon bits; mp_ballfx.c)
+    MON_DATA_FORM,             // Moemon Kai: the stored form (the language byte's spare top 4 bits; mp_forms.c)
 };
 
 struct PokemonSubstruct0

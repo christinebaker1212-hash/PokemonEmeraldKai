@@ -1262,6 +1262,10 @@ void MP_Region_GiveDevices(void)
         AddBagItem(ITEM_POKEGEAR, 1);
     MP_RegionItems_Update();   // (key items: each region's own; a beaten region's postgame, all: mp_regionitems.c)
     MP_ExpCurve_MapLoaded();   // (the EXP CURVE's ANALYZE of the new map, the region's frontier: mp_expcurve.c)
+    {
+        void MP_Form_MapLoaded(void);
+        MP_Form_MapLoaded();   // (SHAYMIN's Sky Forme ends at night: mp_forms.c)
+    }
 }
 
 // Moemon Kai: MY ROOM in JOHTO has decorations of its own (Crystal's room; the Secret Base / bedroom logic of

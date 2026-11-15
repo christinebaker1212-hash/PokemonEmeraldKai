@@ -1,0 +1,22 @@
+pressuntil A field 6000
+wait 60
+mash B 12 20
+mp form 0
+mp form 0 1
+mp form 1
+mp form 1 2
+mp form 2 1
+mp form 3
+mp party
+mp summary
+wait 90
+rendershot summary_rotom
+press DOWN 1
+wait 40
+rendershot summary_deoxys
+press DOWN 1
+wait 40
+rendershot summary_shaymin
+pressuntil B field 2000
+echo [fm] done
+quit

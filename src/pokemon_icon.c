@@ -1198,6 +1198,10 @@ u16 GetIconSpeciesNoPersonality(u16 species)
 
 const u8 *GetMonIconPtr(u16 species, u32 personality, bool32 handleDeoxys)
 {
+    const u8 *MP_Form_Icon(u16 species, u32 personality);
+    const u8 *f = species <= NUM_SPECIES ? MP_Form_Icon(species, personality) : NULL;
+    if (f)   // Moemon Kai: a form's own icon (src/mp/mp_forms.c)
+        return f;
     return GetMonIconTiles(GetIconSpecies(species, personality), handleDeoxys);
 }
 

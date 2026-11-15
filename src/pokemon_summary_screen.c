@@ -4269,13 +4269,13 @@ static void PrintMonOTID(void)
 
 static void PrintMonAbilityName(void)
 {
-    u16 ability = GetAbilityBySpecies(sMonSummaryScreen->summary.species, sMonSummaryScreen->summary.abilityNum);
+    u16 ability = GetMonAbility(&sMonSummaryScreen->currentMon);   // Moemon Kai: its form's (src/mp/mp_forms.c)
     PrintTextOnWindow(AddWindowFromTemplateList(sPageInfoTemplate, PSS_DATA_WINDOW_INFO_ABILITY), gAbilityNames[ability], 0, 1, 0, 1);
 }
 
 static void PrintMonAbilityDescription(void)
 {
-    u16 ability = GetAbilityBySpecies(sMonSummaryScreen->summary.species, sMonSummaryScreen->summary.abilityNum);
+    u16 ability = GetMonAbility(&sMonSummaryScreen->currentMon);   // Moemon Kai: its form's (src/mp/mp_forms.c)
     PrintTextOnWindow(AddWindowFromTemplateList(sPageInfoTemplate, PSS_DATA_WINDOW_INFO_ABILITY), gAbilityDescriptionPointers[ability], 0, 17, 0, 0);
 }
 
@@ -5202,10 +5202,13 @@ static void SetMonTypeIcons(void)
     }
     else
     {
-        SetTypeSpritePosAndPal(gSpeciesInfo[summary->species].types[0], 120, 48, SPRITE_ARR_ID_TYPE);
-        if (gSpeciesInfo[summary->species].types[0] != gSpeciesInfo[summary->species].types[1])
+        u8 t0, t1;
+        void MP_Form_MonTypes(struct Pokemon *mon, u8 *t0, u8 *t1);
+        MP_Form_MonTypes(&sMonSummaryScreen->currentMon, &t0, &t1);   // Moemon Kai: its form's (src/mp/mp_forms.c)
+        SetTypeSpritePosAndPal(t0, 120, 48, SPRITE_ARR_ID_TYPE);
+        if (t0 != t1)
         {
-            SetTypeSpritePosAndPal(gSpeciesInfo[summary->species].types[1], 160, 48, SPRITE_ARR_ID_TYPE + 1);
+            SetTypeSpritePosAndPal(t1, 160, 48, SPRITE_ARR_ID_TYPE + 1);
             SetSpriteInvisibility(SPRITE_ARR_ID_TYPE + 1, FALSE);
         }
         else

@@ -4698,6 +4698,13 @@ void MP_TestCommand(const char *cmd, const char *arg)
         if (sscanf(arg, "%d %d", &cabin, &main) == 2)
             U3D_Vm_DebugBoat(cabin, main);
     }
+    else if (strcmp(cmd, "form") == 0)   // form SLOT [FORM]: party SLOT's form set (ROTOM: its move too) and printed
+    {
+        void MP_Form_Debug(u8 slot, s16 form);
+        int slot = 0, form = -1;
+        sscanf(arg, "%d %d", &slot, &form);
+        MP_Form_Debug(slot, form);
+    }
     else if (strcmp(cmd, "u3dsubwaymap") == 0)   // u3dsubwaymap: the BATTLE SUBWAY's map over the field
     {
         void Unova_SubwayMap_Debug(void);
