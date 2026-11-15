@@ -1,0 +1,6 @@
+# UI STYLE mock-ups (tools/ui_styles/mockups.py): the game's own screen pictures, KAI's column and the scenes the other styles are drawn over (rendershot; `mp hud 0` hides a battle's boxes). Not a check: it only takes pictures.
+MODE=1
+TMO=120
+ENV_A="MOEMON_DEBUG_PARTY=280:24,283:22,286:20,288:18"
+EXPECT_A=()
+UNEXPECT_A=("[crash]")

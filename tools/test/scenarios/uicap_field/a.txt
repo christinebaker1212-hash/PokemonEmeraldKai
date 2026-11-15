@@ -1,0 +1,13 @@
+pressuntil A field 5000
+mp textspeed 2
+mp warp 2,4,3,3
+wait 60
+waitfor field 1000
+mp face left
+wait 400
+rendershot f_mart
+press A 1
+wait 200
+wait 10
+rendershot k_msg
+quit

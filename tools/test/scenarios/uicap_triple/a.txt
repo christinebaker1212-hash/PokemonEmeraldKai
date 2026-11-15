@@ -1,0 +1,14 @@
+pressuntil A field 5000
+mp textspeed 2
+mp typeicons 1
+wait 20
+mp triple 286:7 288:6 290:7
+pressuntil A action 4000
+wait 40
+rendershot k_triple
+mp hud 0
+wait 4
+rendershot s_triple
+mp hud 1
+wait 4
+quit

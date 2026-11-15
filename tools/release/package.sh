@@ -66,6 +66,10 @@ if [ -f sinnoh/platinum_libtv.bin ]; then   # (CANALAVE LIBRARY's TV, from the u
     mkdir -p "$P/sinnoh"
     cp sinnoh/platinum_libtv.bin "$P/sinnoh/"
 fi
+if [ -f sinnoh/platinum_scratch.bin ]; then   # (the BATTLE FRONTIER's Scratch-Off Cards, from the same ROM)
+    mkdir -p "$P/sinnoh"
+    cp sinnoh/platinum_scratch.bin "$P/sinnoh/"
+fi
 if [ -f sinnoh/platinum_gfx.pak ]; then   # (SINNOH's people as Platinum draws them, tools/sinnoh/build_gfx.py)
     mkdir -p "$P/sinnoh"
     cp sinnoh/platinum_gfx.pak "$P/sinnoh/"

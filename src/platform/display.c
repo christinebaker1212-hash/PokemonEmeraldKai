@@ -1431,6 +1431,11 @@ static void RenderToBackbuffer(void)
         }
         if (!fight && !badges)
         {
+            SDL_Texture *Sinnoh_Scratch_Canvas(SDL_Renderer *r);   // (the Scratch-Off Cards: src/sinnoh/s3d_scratch.c)
+            badges = Sinnoh_Scratch_Canvas(sRenderer);
+        }
+        if (!fight && !badges)
+        {
             SDL_Texture *MP_StadiumUi_Canvas(SDL_Renderer *r);   // (POKéMON STADIUM's screens: src/mp/mp_stadium_ui.c)
             badges = MP_StadiumUi_Canvas(sRenderer);
         }

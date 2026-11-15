@@ -31,7 +31,8 @@ COOP_NOTES "Platinum's own words and scripts". Progress: docs/SINNOH_CHECKLIST.m
 tools/sinnoh/contest_data.py, docs/SUPER_CONTEST.md (COOP_NOTES "SUPER CONTESTS"; POKé BALL effects in the Seals'
 place: s3d_seals.c; test sinnoh_contest). The Underground, for its digging and SPIRITOMB only (wireless sides are CO-OP's):
 src/sinnoh/s3d_underground.c + s3d_mining.c (art tools/sinnoh/build_mining.py; COOP_NOTES "The Underground"; tests
-sinnoh_underground*, sinnoh_spiritomb*). The written words in
+sinnoh_underground*, sinnoh_spiritomb*). The BATTLE FRONTIER's Scratch-Off Cards: src/sinnoh/s3d_scratch.c (art from the ROM:
+tools/sinnoh/build_scratch.py; COOP_NOTES "The BATTLE FRONTIER's Scratch-Off Cards"; test sinnoh_scratch). The written words in
 tools/sinnoh/words*.py / story_people.py only stand in until a script's commands are converted.
 
 **Done (2026-11-01): `docs/NEXT_TASKS.md`**, the user's list through 1.63.7 (40 PC boxes: COOP_NOTES "40 PC boxes"; the save holds
@@ -183,6 +184,10 @@ duel, mtg_board.c). The same music in two files plays on (MP_Kaisong_SameMusic);
 
 Read `BUILDING_COOP.md` first for the architecture and build steps. The player
 docs are in `dist_extras/README.txt` (shipped next to the exe).
+
+**UI STYLE** (the user, 2026-11-15: OPTIONS > DISPLAY > UI STYLE, KAI / RED / CRYSTAL / FIRERED / PLATINUM / BLACK over
+Kai's own layouts): **mock-ups shown, waiting for approval; build nothing before it**. `docs/ui_styles/UI_STYLES.md`,
+mock-ups docs/ui_styles/mockups/ from tools/ui_styles/mockups.py.
 
 **The GBA's limits are not this game's** (the user, 2026-11-13: "this isn't a GBA game, this is a PC port"): any time
 something would go over a GBA limit (tiles, palettes, colours, sprites, VRAM, OAM, screen size...), ask the user how

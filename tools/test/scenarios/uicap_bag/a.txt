@@ -1,0 +1,17 @@
+pressuntil A field 5000
+mp additem 13 5
+mp additem 14 2
+mp additem 17 1
+mp additem 85 1
+mp additem 26 3
+wait 30
+press START 1
+wait 30
+press DOWN 1
+wait 8
+press DOWN 1
+wait 8
+press A 1
+wait 80
+rendershot k_bag
+quit

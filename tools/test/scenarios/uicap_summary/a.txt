@@ -1,0 +1,6 @@
+pressuntil A field 5000
+wait 30
+mp summary
+wait 60
+rendershot k_summary
+quit

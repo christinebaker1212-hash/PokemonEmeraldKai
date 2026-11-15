@@ -30,6 +30,8 @@ bool8 Sinnoh_Contest_IsActive(void);   // Moemon Kai: SINNOH's SUPER CONTESTS (s
 bool8 Sinnoh_Contest_Step(u16 keys);
 bool8 Sinnoh_Mining_IsActive(void);   // Moemon Kai: SINNOH's Underground digging (src/sinnoh/s3d_mining.c)
 bool8 Sinnoh_Mining_Step(u16 keys);
+bool8 Sinnoh_Scratch_IsActive(void);   // Moemon Kai: the BATTLE FRONTIER's Scratch-Off Cards (src/sinnoh/s3d_scratch.c)
+bool8 Sinnoh_Scratch_Step(u16 keys);
 bool8 Orre_WorldMap_IsActive(void);   // Moemon Kai: ORRE's world map, Colosseum's own screen (src/orre/worldmap.c)
 bool8 Orre_WorldMap_Step(u16 keys);
 bool8 Unova_Screen_IsActive(void);   // Moemon Kai: UNOVA's own screens: the C-GEAR, ENTRALINK, MUSICALS (src/unova/u3d_screen.c)
@@ -429,7 +431,7 @@ int main(int argc, char **argv)
                 SDL_Delay(1);
         }
         // (DISPLAY > FRAME RATE: a present waits for its slot, 60 or 120 a second, or none when UNCAPPED)
-        else if ((Tcg_IsActive() || MP_Fight_IsActive() || Rhythm_IsActive() || MP_BadgeCase_IsActive() || MP_StadiumUi_IsActive() || MP_CardScreen_IsActive() || Sinnoh_Contest_IsActive() || Sinnoh_Mining_IsActive() || Orre_WorldMap_IsActive() || Unova_Screen_IsActive() || Display_NeedsPresent() || lockstep)   // lockstep: every refresh is presented, so vsync paces the loop
+        else if ((Tcg_IsActive() || MP_Fight_IsActive() || Rhythm_IsActive() || MP_BadgeCase_IsActive() || MP_StadiumUi_IsActive() || MP_CardScreen_IsActive() || Sinnoh_Contest_IsActive() || Sinnoh_Mining_IsActive() || Sinnoh_Scratch_IsActive() || Orre_WorldMap_IsActive() || Unova_Screen_IsActive() || Display_NeedsPresent() || lockstep)   // lockstep: every refresh is presented, so vsync paces the loop
               && Display_PresentSlot())
         {
             Display_Present();
@@ -1251,6 +1253,11 @@ const u16 *Platform_GetFrame(void)
             card = Sinnoh_Mining_Frame();
         if (card == NULL)
         {
+            const u16 *Sinnoh_Scratch_Frame(void);   // (the Scratch-Off Cards: src/sinnoh/s3d_scratch.c)
+            card = Sinnoh_Scratch_Frame();
+        }
+        if (card == NULL)
+        {
             const u16 *MP_StadiumUi_Frame(void);   // (POKéMON STADIUM: src/mp/mp_stadium_ui.c)
             card = MP_StadiumUi_Frame();
         }
@@ -1283,7 +1290,8 @@ static bool ScreenStep(void)
 {
     if (Tcg_Step(Platform_GetKeyInput()) || MP_Fight_Step() || MP_BadgeCase_Step(Platform_GetKeyInput())
      || MP_CardScreen_Step(Platform_GetKeyInput()) || Sinnoh_Contest_Step(Platform_GetKeyInput())
-     || Sinnoh_Mining_Step(Platform_GetKeyInput()) || MP_StadiumUi_Step(Platform_GetKeyInput())
+     || Sinnoh_Mining_Step(Platform_GetKeyInput()) || Sinnoh_Scratch_Step(Platform_GetKeyInput())
+     || MP_StadiumUi_Step(Platform_GetKeyInput())
      || Orre_WorldMap_Step(Platform_GetKeyInput()) || Unova_Screen_Step(Platform_GetKeyInput()))
     {
         MP_Spectate_PanelSync();

@@ -62,8 +62,8 @@ Queued after the 1.61.6 release and the KANTO / JOHTO sweep (the user's plan, 20
   Download it outside the repository (e.g. `~/.cache/moemon/platinum_rom/`), never commit or ship it. Direct download:
   `curl -sSL -o pokeplatinum.nds "https://drive.usercontent.google.com/download?id=1NqTPVxXFvfEyDDtNioeep8yC0tUF0xa7&export=download&confirm=t"`
   For what the decomp doesn't hold (the library TV's archives, the scratch-off cards' art...): tools/sinnoh/rom_pack.sh
-  ROM builds sinnoh/platinum_libtv.bin; the release does it from the PLATINUM_ROM_URL secret (without it the release
-  goes out with the TV held dark).
+  ROM builds sinnoh/platinum_libtv.bin and sinnoh/platinum_scratch.bin; the release does it from the PLATINUM_ROM_URL
+  secret (without it the release goes out with the TV held dark and the cards' screen saying what it lacks).
 
 ## Platinum's own words and scripts: where it stands (2026-11-02) and what's next
 

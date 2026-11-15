@@ -1,0 +1,16 @@
+pressuntil A field 5000
+mp textspeed 2
+wait 20
+mp wild 286:7
+pressuntil A action 4000
+wait 40
+rendershot k_single
+mp hud 0
+wait 4
+rendershot s_single
+mp hud 1
+wait 4
+press A 1
+wait 30
+rendershot k_moves
+quit

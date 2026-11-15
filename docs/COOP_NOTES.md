@@ -7801,3 +7801,24 @@ be, things unseen but in the way in SINNOH) are to be the real thing, checked ag
   (u3d.c ObjModelsDraw). The boulders push with Black's STRENGTH (its event flag 964: field_player_avatar.c
   TryPushBoulder, fldeff_rocksmash.c MP_ObstacleGfxIs).
 Tests: kanto_sprite_audit, sinnoh_model_objects, unova_sprite_audit.
+
+## The BATTLE FRONTIER's Scratch-Off Cards (2026-11-15)
+
+Platinum's last unconverted script entry (scripts_scratch_off_cards.s, the attendant north-west of the FRONTIER's
+plaza) and its screen (pokeplatinum src/applications/scratch_off_cards), on one 240x160 screen as the user approved
+(mock-ups docs/sinnoh/mockups/, tools/sinnoh/mockups_scratch.py, cleaned 2026-11-15: every card whole, all four prize
+rows, nothing over the cells).
+- The script is Platinum's: BP through the game's own BP box and frontier points (gen_scripts.py ShowBattlePoints,
+  CheckBattlePoints, RemoveBattlePoints...), OpenScratchOffCardsApp = special Sinnoh_ScratchOffOpen + waitstate,
+  GetScratchOffCardsWonItem = Sinnoh_ScratchOffWonItem (VAR_0x8004 card -> VAR_0x8005 item, VAR_0x8006 count);
+  BufferItemNamePlural is the game's plural now ("Received 3 PASSHO BERRIES!").
+- The screen (src/sinnoh/s3d_scratch.c, drawn as UNOVA's screens are but in SINNOH's own code: sdl2.c / display.c
+  Sinnoh_Scratch_*): Platinum's rules (two DITTO, three of the first prize, two of each other, a NUGGET among the four,
+  three cells to scratch, 380 of 500 middle pixels bare to show), its pull-out, slides, flashing boxes, pop-up and
+  DITTO's mosaic. Platinum's two screens are one: the prize card (its top screen) slides in as each card begins and
+  shows while R is held; the touch screen's stylus is a coin the + Control Pad moves cell to cell, A held scribbling
+  Platinum's 6 x 6 strokes across the cell; B is its NEXT CARD / CANCEL button.
+- Art: sinnoh/platinum_scratch.bin, the very pictures Platinum's screens show, rendered from the user's ROM by
+  tools/sinnoh/build_scratch.py (rom_pack.sh, the release's PLATINUM_ROM_URL secret; never committed); words:
+  scratch_off_cards_app through the names table (tv_data.py TEXT_BANKS).
+Test: sinnoh_scratch (`mp scratch`, `mp scratchcell [VALUE|w]`).

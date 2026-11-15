@@ -1107,7 +1107,10 @@ class FileConverter:
             return [self.sinnoh(SINNOH_BUFFER_RIVAL, self.value(a[0]))]
         if cmd == 'BufferCounterpartName':
             return [self.sinnoh(SINNOH_BUFFER_COUNTERPART, self.value(a[0]))]
-        if cmd in ('BufferItemName', 'BufferItemNamePlural', 'BufferItemNameWithArticle'):
+        if cmd == 'BufferItemNamePlural':
+            # (Platinum's plural name: the game's own, as for more than one: POMEG BERRIES)
+            return ['bufferitemnameplural %s, %s, 2' % (self.strvar(a[0]), self.arg(a[1]))]
+        if cmd in ('BufferItemName', 'BufferItemNameWithArticle'):
             return ['bufferitemname %s, %s' % (self.strvar(a[0]), self.arg(a[1]))]
         if cmd in ('BufferSpeciesName', 'BufferSpeciesNameFromVar', 'BufferSpeciesNameWithArticle', 'BufferMoveName'):
             slot = int(self.value(a[0]))
@@ -1508,6 +1511,31 @@ class FileConverter:
             # frames, a fade out) while the field is faded out: drawn by src/sinnoh/s3d_libtv.c from the user's ROM
             # (sinnoh/platinum_libtv.bin; without it the screen holds dark)
             return [self.sinnoh(SINNOH_MISC, 73), 'delay 252']
+        if cmd == 'OpenScratchOffCardsApp':
+            # the BATTLE FRONTIER's Scratch-Off Cards (Platinum's application on src/sinnoh/s3d_scratch.c, its art from
+            # the user's ROM: sinnoh/platinum_scratch.bin); what each card won is kept there for the next command
+            return ['special Sinnoh_ScratchOffOpen', 'waitstate']
+        if cmd == 'GetScratchOffCardsWonItem':
+            return ['setvar VAR_0x8004, %s' % self.value(a[0]), 'special Sinnoh_ScratchOffWonItem',
+                    'copyvar %s, VAR_0x8005' % self.var(a[1]), 'copyvar %s, VAR_0x8006' % self.var(a[2])]
+        if cmd == 'FreeScratchOffCardsArgs':
+            return []
+        if cmd == 'ShowBattlePoints':
+            return ['special ShowBattlePointsWindow']   # (the game's own BP box, as the BATTLE FRONTIER's counters')
+        if cmd == 'HideBattlePoints':
+            return ['special CloseBattlePointsWindow']
+        if cmd == 'UpdateBPDisplay':
+            return ['special UpdateBattlePointsWindow']
+        if cmd == 'CheckBattlePoints':
+            # (DEST: TRUE when the player has AMOUNT BP or more)
+            dest, done = self.var(a[1]), '%s%s__bp%d' % (PREFIX, self.low, self.next_local())
+            return ['specialvar %s, GetFrontierBattlePoints' % dest, 'compare_var_to_value %s, %s' % (dest, self.value(a[0])),
+                    'goto_if 0, %s__lt' % done,
+                    'setvar %s, TRUE' % dest, 'goto %s' % done, '%s__lt:' % done, 'setvar %s, FALSE' % dest, '%s:' % done]
+        if cmd in ('RemoveBattlePoints', 'AddBattlePoints'):
+            n = self.var(a[0]) if self.is_var(a[0]) else None
+            return [('copyvar VAR_0x8004, %s' % n) if n else 'setvar VAR_0x8004, %s' % self.value(a[0]),
+                    'special %s' % ('TakeFrontierBattlePoints' if cmd == 'RemoveBattlePoints' else 'GiveFrontierBattlePoints')]
         if cmd in ('BufferRivalStarterSpeciesName', 'BufferRivalStarterSpeciesNameWithArticle'):
             return [self.sinnoh(SINNOH_BUFFER_RIVAL_STARTER, self.value(a[0]))]
         if cmd in ('BufferPlayerCounterpartStarterSpeciesName', 'BufferPlayerCounterpartStarterSpeciesNameWithArticle'):

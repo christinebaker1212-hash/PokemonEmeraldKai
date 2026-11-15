@@ -3843,6 +3843,21 @@ void MP_TestCommand(const char *cmd, const char *arg)
         if (!region)
             MP_HmRescue_GiveAll();   // (the HMs a player with them has had: no HM rescue in tests that skip the story)
     }
+    else if (strcmp(cmd, "hud") == 0)
+    {
+        // hud 0|1: a battle's boxes and text layer hidden / shown (pictures of the scene alone: UI style mock-ups)
+        int i, on = atoi(arg) != 0;
+        for (i = 0; i < gBattlersCount; i++)
+            if (on)
+                SetHealthboxSpriteVisible(gHealthboxSpriteIds[i]);
+            else
+                SetHealthboxSpriteInvisible(gHealthboxSpriteIds[i]);
+        if (on)
+            SetGpuRegBits(REG_OFFSET_DISPCNT, DISPCNT_BG0_ON);
+        else
+            ClearGpuRegBits(REG_OFFSET_DISPCNT, DISPCNT_BG0_ON);
+        printf("[test] hud %d\n", on);
+    }
     else if (strcmp(cmd, "photo") == 0)
     {
         const char *why = MP_Photo_Check();
@@ -6081,6 +6096,25 @@ void MP_TestCommand(const char *cmd, const char *arg)
     {
         // mining: the digging screen's wall (what is buried, what lies bare)
         Sinnoh_MiningDebug();
+    }
+    else if (strcmp(cmd, "scratch") == 0)
+    {
+        // scratch: the Scratch-Off Cards' screen (src/sinnoh/s3d_scratch.c)
+        void Sinnoh_ScratchDebug(void);
+        Sinnoh_ScratchDebug();
+    }
+    else if (strcmp(cmd, "scratchcell") == 0)
+    {
+        // scratchcell [VALUE]: the coin to an unscratched cell (holding VALUE or a DITTO when one's left); VALUE w:
+        // the value three of which lie on the card
+        bool8 Sinnoh_ScratchTestCell(int value);
+        int Sinnoh_ScratchTestWinner(void);
+        int v = -1;
+        if (arg && arg[0] == 'w')
+            v = Sinnoh_ScratchTestWinner();
+        else if (arg && *arg)
+            v = atoi(arg);
+        printf("[test] scratchcell: %d (%d)\n", Sinnoh_ScratchTestCell(v), v);
     }
     else if (strcmp(cmd, "minecell") == 0)
     {

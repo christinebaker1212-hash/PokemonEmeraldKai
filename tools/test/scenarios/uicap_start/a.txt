@@ -1,0 +1,19 @@
+pressuntil A field 5000
+wait 400
+rendershot f_town
+press START 1
+wait 30
+rendershot k_start
+press DOWN 1
+wait 8
+press A 1
+wait 60
+rendershot k_party
+press B 1
+wait 40
+press DOWN 1
+wait 8
+press A 1
+wait 60
+rendershot k_bag
+quit

@@ -65,15 +65,15 @@ Each segment: Platinum's own map scripts, people, triggers, words and battles, p
       sinnoh_tower, sinnoh_factory, sinnoh_hall, sinnoh_castle, sinnoh_arcade)
 - [x] Platinum's "choose a POKéMON" (SelectMoveTutorPokemon / GetSelectedPartySlot) on the game's party menu; its save
       prompt (Common_SaveGame) the game's; scripts go on after a warp (SINNOH_WARP_CONTINUE)
-- [x] Platinum's commands mapped onto Kai's systems (2026-11-15: 2410 of 2511 entries convert, 38 stay on the game's
-      own systems by the user's rule, 62 closed, 1 left: `python3 -I tools/sinnoh/gen_scripts.py --report`;
+- [x] Platinum's commands mapped onto Kai's systems (2026-11-15: 2411 of 2511 entries convert, 38 stay on the game's
+      own systems by the user's rule, 62 closed, none left: `python3 -I tools/sinnoh/gen_scripts.py --report`;
       gen_scripts.py KAI_SYSTEMS / CLOSED say why each): the shops and nurses with Platinum's greetings, the party, BAG,
       ribbon and trade commands (s3d_party.c), JUBILIFE TV's rankings, the BATTLE TOWER (docs/SINNOH_TOWER_PORT.md),
       the HONEY trees, the SAFARI GAME's gate and ends, the CENTERs' daily trainers, the VS SEEKER's rematches
       (sinnoh_vs_seeker), bookshelves / shelves / trash cans / wall TOWN MAPs (sinnoh_tile_lines), the FLOWER SHOP,
-      MOVE MANIAC and NEWS PRESS (sinnoh_counters), the binoculars (sinnoh_binoculars). Left: the BATTLE FRONTIER's
-      scratch-off cards (a screen: mock-up shown to the user 2026-11-15, docs/sinnoh/mockups/, from Platinum's art in
-      the ROM by tools/sinnoh/mockups_scratch.py; built once approved). On the game's own: the frontier halls, BERRY trees, signs, nurse,
+      MOVE MANIAC and NEWS PRESS (sinnoh_counters), the binoculars (sinnoh_binoculars), the BATTLE FRONTIER's
+      Scratch-Off Cards (src/sinnoh/s3d_scratch.c, its art from the user's ROM; COOP_NOTES "The BATTLE FRONTIER's
+      Scratch-Off Cards"; sinnoh_scratch). On the game's own: the frontier halls, BERRY trees, signs, nurse,
       poison, SAVE, PC, egg hatching, DAY CARE, field moves, TRAINER CARD signature
 
 ## 3. Built for 1:1 (Platinum has it, Kai doesn't)

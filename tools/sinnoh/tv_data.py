@@ -27,7 +27,8 @@ TEXT_BANKS = ('tv_programs', 'tv_commercials', 'tv_programs_interviews', 'tv_pro
               'rankings_machine', 'journal_entries', 'gym_names', 'month_names', 'times_of_day',
               'battle_hall', 'battle_hall_scene', 'battle_castle', 'battle_castle_scene', 'battle_arcade',
               'battle_arcade_scene',   # (the Frontier Brains' words: s3d_frontier.c)
-              'battle_frontier_records')   # (the records boards' words: s3d_frontier.c Sinnoh_RecordsShow)
+              'battle_frontier_records',   # (the records boards' words: s3d_frontier.c Sinnoh_RecordsShow)
+              'scratch_off_cards_app')     # (the Scratch-Off Cards' screen: s3d_scratch.c)
 
 
 def fnv(name):

@@ -667,6 +667,8 @@ gSpecials::
 	def_special Sinnoh_TvChooseWord, waitstate=1   @ Moemon Kai: SINNOH's TV reporters' one word (src/sinnoh/s3d_tv.c)
 	def_special Sinnoh_UndergroundBulging   @ Moemon Kai: SINNOH's Underground, a dig spot's question (src/sinnoh/s3d_mining.c)
 	def_special Sinnoh_UndergroundDig, waitstate=1   @ Moemon Kai: SINNOH's Underground, the digging screen (src/sinnoh/s3d_mining.c)
+	def_special Sinnoh_ScratchOffOpen, waitstate=1   @ Moemon Kai: the BATTLE FRONTIER's Scratch-Off Cards (src/sinnoh/s3d_scratch.c)
+	def_special Sinnoh_ScratchOffWonItem
 	def_special Sinnoh_ExplorerKitUse, waitstate=1   @ Moemon Kai: SINNOH's EXPLORER KIT, down into the Underground or up (src/sinnoh/s3d_underground.c)
 	def_special BattleSetup_StartScriptedWildBattle   @ Moemon Kai: SINNOH's converted StartWildBattle (ROUTE 209's SPIRITOMB, the OLD CHATEAU's ROTOM)
 	def_special MP_PlayerHasHmVar

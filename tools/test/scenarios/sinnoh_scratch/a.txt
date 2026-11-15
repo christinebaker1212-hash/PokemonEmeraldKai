@@ -1,0 +1,88 @@
+pressuntil A field 5000
+wait 30
+mp textspeed 2
+mp platinumstory
+mp tower 10
+mp warp 41,5,46,37
+wait 90
+waitfor field 1000
+mp face left
+wait 10
+shot sc_field
+watchlog sinnoh scratch: open
+pressuntil A multichoice 2000
+wait 10
+shot sc_menu
+press A 1
+pressuntil A yesno 600
+press A 1
+pressuntillog A 600 sinnoh scratch: open
+wait 70
+rendershot sc_choose
+press RIGHT 1
+wait 10
+press A 1
+wait 50
+rendershot sc_pull
+wait 60
+press A 1
+wait 110
+press RIGHT 1
+wait 6
+press RIGHT 1
+wait 6
+press A 1
+wait 90
+rendershot sc_prizes
+press A 1
+wait 20
+rendershot sc_start
+wait 30
+mp scratch
+mp scratchcell w
+press A 45
+rendershot sc_rub
+press A 45
+mp scratchcell w
+press A 90
+rendershot sc_pair
+mp scratchcell w
+press A 90
+rendershot sc_win
+mp scratch
+wait 120
+press A 1
+wait 50
+press R 2
+rendershot sc_prizes_r
+press R 1
+wait 10
+press B 1
+wait 10
+rendershot sc_stop
+press UP 1
+wait 4
+press A 1
+wait 60
+press A 1
+wait 50
+mp scratchcell
+press A 90
+mp scratchcell
+press A 90
+mp scratchcell
+press A 90
+wait 20
+rendershot sc_end
+mp scratch
+wait 200
+shot sc_after
+press A 1
+wait 60
+shot sc_won
+press A 1
+wait 60
+shot sc_received
+pressuntil A field 600
+wait 20
+mp scratch
