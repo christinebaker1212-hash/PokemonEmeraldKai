@@ -8085,6 +8085,13 @@ static void UpdateObjectEventOffscreen(struct ObjectEvent *objectEvent, struct S
     // picture: the sprite stands where it is in the scene (o3d.c O3D_PlaceSprite hides it behind the camera)
     if (O3D_Active() && O3D_CamActive())
         objectEvent->offScreen = FALSE;
+    // Moemon Kai: UNOVA's people flown along Black's paths are drawn where the flight has them, not at their tile
+    // (src/unova/u3d.c U3D_ObjectFly)
+    {
+        float flown[3];
+        if (U3D_Active() && U3D_ObjectFlyPos(objectEvent->spriteId, flown))
+            objectEvent->offScreen = FALSE;
+    }
 }
 
 static void UpdateObjectEventSpriteVisibility(struct ObjectEvent *objectEvent, struct Sprite *sprite)

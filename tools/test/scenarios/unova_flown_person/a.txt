@@ -3,7 +3,7 @@ wait 60
 mash B 12 20
 mp u3dclear
 wait 30
-mp u3dzone 376 22 3
+mp u3dzone 376 22 13
 wait 200
 mash B 6 15
 mp u3drun 2

@@ -117,10 +117,11 @@ systems. Tick an entry only once it plays as Black's and has been seen running.
 - [x] The map-change wipes (fld_wipe_3dobj.c: sequences 11 / 12, 18 / 19 around a warp) are FLY's (move_pokemon.c
       MOVE_POKEMON_StartSkillOnTarget): Kai's own FLY (the party's POKeMON carrying the player) takes their place, as
       SINNOH keeps Kai's, so closed
-- [ ] People flown along Black's paths (built; MmdlIca 0x15B-0x15E: archive 0xCB by tools/unova/gen_icas.py -> u3d_icas.h;
+- [x] People flown along Black's paths (MmdlIca 0x15B-0x15E: archive 0xCB by tools/unova/gen_icas.py -> u3d_icas.h;
       u3d.c U3D_ObjectFly draws the person at the path's point from where the player stood, set down on the tile at
-      its end; 2026-11-15, scenario unova_flown_person: the ABUNDANT SHRINE's LANDORUS flies in and out by the logs,
-      but the scene's camera keeps it off the test's shots, so not yet seen on screen)
+      its end; a flown person is never off the field's screen (event_object_movement.c UpdateObjectEventOffscreen):
+      2026-11-15, scenario unova_flown_person: the ABUNDANT SHRINE's LANDORUS flies in from the sky over the shrine
+      and lands before it, as the player looks at it from 22, 13)
 - [x] A person rising / circling (0x225 / 0x226), dropping in (0x247, RELIC CASTLE), spinning away (SpinRise, the
       LEAGUE): u3d_vm.c Motion* on U3D_ObjectFly, as scrcmd_mmdl.c / scrcmd_fldmmdl.c move them (2026-11-15, scenario
       unova_person_motions by `mp u3dmotion`; CASTELIA's rise and circling belong to the distributed MELOETTA's scene)

@@ -1433,6 +1433,12 @@ static void IcaFrame(void)
                   sIca.base[2] + pt[2] / 8.0f);
     if (pt[3] != 255)
         ObjectEventTurn(&gObjectEvents[id], BlackToDir(pt[3]));
+    if (getenv("MOEMON_ICA_TRACE") && ((u32)(sIca.frame * 2) % 20) == 0)
+        printf("[ica] f %.1f obj %u (%d,%d) spr %u inv %d at %d,%d pos %.0f %.0f %.0f\n", sIca.frame, id,
+               gObjectEvents[id].currentCoords.x, gObjectEvents[id].currentCoords.y, gObjectEvents[id].spriteId,
+               gSprites[gObjectEvents[id].spriteId].invisible, gSprites[gObjectEvents[id].spriteId].oam.x,
+               gSprites[gObjectEvents[id].spriteId].oam.y, sIca.base[0] + pt[0] / 8.0f, sIca.base[1] + pt[1] / 8.0f,
+               sIca.base[2] + pt[2] / 8.0f);
     sIca.frame += 0.5f;
 }
 
