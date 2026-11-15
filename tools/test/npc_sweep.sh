@@ -5,14 +5,15 @@
 # player, and specials that aren't ported.
 # usage: tools/test/npc_sweep.sh [FIRST_GROUP LAST_GROUP]   (default 34 39: JOHTO and KANTO)
 #   JOBS=n games at once (default 4), LIMIT=n only the first n maps, ONLY=MapName[,MapName...] only those, REGION=0|1|2 (default: the
-#   map group's region), KEEP=1 keeps every run folder; a failed map's log stays in $OUT/npc_sweep/<map>.log
+#   map group's region), KEEP=1 keeps every run folder, POSTGAME=1 plays each map after its region's HALL OF FAME (JOHTO /
+#   KANTO: `mp qzpostgame`, both regions beaten); a failed map's log stays in $OUT/npc_sweep/<map>.log
 . "$(dirname "$0")/common.sh"
 G0=${1:-34}; G1=${2:-39}; JOBS=${JOBS:-4}
 D="$OUT/npc_sweep"; rm -rf "$D"; mkdir -p "$D"
 # GROUP NUM REGION COUNT NAME per map, and a test script per map in $D/scripts/NAME.txt
-python3 - "$REPO" "$G0" "$G1" "$D" "${ONLY:-}" > "$D/maps.txt" <<'PY'
+python3 - "$REPO" "$G0" "$G1" "$D" "${ONLY:-}" "${POSTGAME:-}" > "$D/maps.txt" <<'PY'
 import json, os, sys
-repo, g0, g1, out, only = sys.argv[1], int(sys.argv[2]), int(sys.argv[3]), sys.argv[4], sys.argv[5]
+repo, g0, g1, out, only, postgame = sys.argv[1], int(sys.argv[2]), int(sys.argv[3]), sys.argv[4], sys.argv[5], sys.argv[6]
 groups = json.load(open(os.path.join(repo, 'data/maps/map_groups.json')))
 CARD_SCRIPTS = ('EventScript_CardClub', 'EventScript_TtPlayer', 'EventScript_TtQueen', 'EventScript_YgoClub',
                 'EventScript_GcCardShop', 'EventScript_GcClerk')
@@ -35,6 +36,8 @@ for g in range(g0, g1 + 1):
         if not spots:
             continue
         lines = ['pressuntil A field 5000', 'wait 30', 'mp teach 0 44', 'mp teach 1 44', 'mp battlestyle 1']
+        if postgame:
+            lines += ['mp qzpostgame 1', 'wait 20', 'mp qzpostgame 2', 'wait 20']
         for what, x, y in spots:
             # A through what it says and any battle (A keeps the battle cursor on FIGHT and the first move); B out of
             # menus and questions; a card game still going is conceded; START then A to close a naming screen; B, A (a

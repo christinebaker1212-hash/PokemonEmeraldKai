@@ -1,0 +1,56 @@
+pressuntil A field 5000
+mp textspeed 2
+mp battlestyle 1
+mp teach 0 44
+mp qzpostgame 2
+wait 30
+mp setvar 0x5117 4
+mp additem 367 1
+mp warp 36,102,7,8
+wait 90
+waitfor field 1000
+mp face up
+press A 4
+pressuntil A field 3000
+mp getflag 0x2161
+mp hasitem 373
+shot sq_ruby
+mp warp 38,118,15,7
+wait 90
+waitfor field 1000
+mp face up
+press A 4
+pressuntil A field 5000
+mp getvar 0x5117
+mp hasitem 373
+shot sq_celio_ruby
+mp warp 36,120,7,8
+wait 90
+waitfor field 1000
+mp face up
+press A 4
+pressuntil A field 5000
+mp getflag 0x21DD
+shot sq_sapphire_room
+mp warp 36,114,27,5
+wait 90
+waitfor field 1000
+mp face up
+press A 4
+pressuntil A field 8000
+pressuntil B field 2000
+mp getflag 0x21EB
+mp hasitem 374
+shot sq_gideon
+mp warp 38,118,15,7
+wait 90
+waitfor field 1000
+mp face up
+press A 4
+pressuntil A field 8000
+mp getvar 0x5117
+mp hasitem 374
+mp getflag 0x220A
+shot sq_celio_sapphire
+echo [sq] done
+quit

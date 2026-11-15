@@ -2697,6 +2697,23 @@ void MP_TestCommand(const char *cmd, const char *arg)
         VarSet(VAR_0x8004, id);
         ScriptContext_SetupScript(EventScript_MpDebugGiveItem);
     }
+    else if (strcmp(cmd, "qzpostgame") == 0)
+    {
+        // qzpostgame R - JOHTO (1) or KANTO (2) after its HALL OF FAME: its eight badges, its LEAGUE beaten, and the
+        // flags its HALL OF FAME script sets (data/scripts/obtain_item.inc), without the credits
+        extern const u8 EventScript_MpDebugQzPostgameJohto[], EventScript_MpDebugQzPostgameKanto[];
+        void MP_HmRescue_GiveAll(void);
+        int r = atoi(arg), b;
+        if (r == 1 || r == 2)
+        {
+            for (b = 0; b < 8; b++)
+                FlagSet(MP_Region_BadgeFlag(r, b));
+            MP_Region_SetCleared(r);
+            MP_HmRescue_GiveAll();
+            ScriptContext_SetupScript(r == 1 ? EventScript_MpDebugQzPostgameJohto : EventScript_MpDebugQzPostgameKanto);
+            printf("[test] qzpostgame %d\n", r);
+        }
+    }
     else if (strcmp(cmd, "qzputaway") == 0)
     {
         // qzputaway ID N - KANTO's "put away ... Pocket:" message (Quetzal's script, tests)

@@ -1,0 +1,56 @@
+pressuntil A field 5000
+mp textspeed 2
+mp battlestyle 1
+mp teach 0 44
+mp qzpostgame 2
+wait 30
+mp warp 36,74,7,13
+wait 90
+waitfor field 1000
+mp face up
+press A 4
+pressuntil A battle 3000
+wait 200
+mp foeparty
+shot kl_mewtwo
+pressuntil A field 6000
+pressuntil B field 2000
+mp heal
+mp warp 36,101,9,7
+wait 90
+waitfor field 1000
+mp face up
+press A 4
+pressuntil A battle 3000
+wait 200
+mp foeparty
+shot kl_moltres
+pressuntil A field 6000
+pressuntil B field 2000
+mp heal
+mp warp 36,95,5,12
+wait 90
+waitfor field 1000
+mp face up
+press A 4
+pressuntil A battle 3000
+wait 200
+mp foeparty
+shot kl_zapdos
+pressuntil A field 6000
+pressuntil B field 2000
+mp heal
+mp warp 36,87,9,3
+wait 90
+waitfor field 1000
+mp face up
+press A 4
+pressuntil A battle 3000
+wait 200
+mp foeparty
+shot kl_articuno
+pressuntil A field 6000
+pressuntil B field 2000
+mp heal
+echo [kl] done
+quit

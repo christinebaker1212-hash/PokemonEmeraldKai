@@ -1,0 +1,8 @@
+# KANTO's legendaries after its HALL OF FAME (`mp qzpostgame 2`), each from FireRed's own script where it stands:
+# CERULEAN CAVE's MEWTWO, MT. EMBER's MOLTRES, the POWER PLANT's ZAPDOS, SEAFOAM's ARTICUNO: the battle starts with
+# that POKeMON and, beaten (foes at 1 HP), the game goes back to the field. Shots kl_*.png.
+MODE=1
+TMO=400
+ENV_A="MOEMON_DEBUG_REGION=2 MOEMON_DEBUG_PARTY=6:100 MOEMON_TEST_FOE_HP1=1"
+EXPECT_A=("foeparty: 150:" "foeparty: 146:" "foeparty: 145:" "foeparty: 144:" "[kl] done")
+UNEXPECT_A=("[crash]" "TIMEOUT")

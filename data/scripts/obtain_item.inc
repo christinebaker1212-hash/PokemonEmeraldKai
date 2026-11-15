@@ -22,6 +22,18 @@ EventScript_MpDebugQzPutAway::
 	release
 	end
 
+@ Moemon Kai (tests: `mp qzpostgame 1|2`): what JOHTO's / KANTO's HALL OF FAME sets after the credits' line, without
+@ the credits (their own calls: the postgame people and places as a beaten LEAGUE leaves them)
+EventScript_MpDebugQzPostgameJohto::
+	call Johto_HallOfFame_EventScript_83E7EB3
+	end
+
+EventScript_MpDebugQzPostgameKanto::
+	call Kanto_PokemonLeague_HallOfFame_EventScript_845699F
+	setflag 0x2109   @ (FLAG_QZ_0x2109, FLAG_QZ_0x2108: the HALL OF FAME's own two)
+	setflag 0x2108
+	end
+
 @ Moemon Co-op: an important item from someone (key items, HMs, gym leaders' TMs, EXP. SHARE)
 @ comes with a MOEGATCHA TICKET, once per item (MP_GatchaTicketForItem decides)
 EventScript_MpGatchaTicket::

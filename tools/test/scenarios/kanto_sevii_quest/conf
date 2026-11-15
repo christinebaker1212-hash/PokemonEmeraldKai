@@ -1,0 +1,10 @@
+# KANTO's post-game SEVII quest as FireRed's (after the HALL OF FAME: `mp qzpostgame 2`): MT. EMBER's RUBY picked up
+# (flag 0x2161), CELIO takes it with the TRI-PASS (quest 5), DOTTED HOLE's SAPPHIRE snatched by GIDEON (0x21DD),
+# GIDEON beaten in the ROCKET WAREHOUSE hands it back (0x21EB), CELIO links the network (quest 6, the RAINBOW PASS's
+# islands open: 0x220A). Foes at 1 HP. Shots sq_*.png.
+MODE=1
+TMO=300
+ENV_A="MOEMON_DEBUG_REGION=2 MOEMON_DEBUG_PARTY=6:100 MOEMON_TEST_FOE_HP1=1"
+EXPECT_A=("flag 8545 = 1" "hasitem 373: 1" "var 0x5117 = 5" "hasitem 373: 0" "flag 8669 = 1" "flag 8683 = 1"
+          "hasitem 374: 1" "var 0x5117 = 6" "hasitem 374: 0" "flag 8714 = 1" "[sq] done")
+UNEXPECT_A=("[crash]" "TIMEOUT")
