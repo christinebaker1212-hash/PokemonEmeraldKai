@@ -48,8 +48,8 @@ Each segment: Platinum's own map scripts, people, triggers, words and battles, p
       director's diplomas (the game's own), the FRONTIER's exchange attendants (their words, the game's BP list);
       Platinum's FLAG_DAILY_* cleared each day (src/data/sinnoh_daily_flags.h); the clock runs in a game begun away from
       HOENN (sinnoh_postgame_people, sinnoh_trophy, sinnoh_bp). Left: the FRONTIER's records boards, the HALL's record
-      keepers, the TOWER's record machines (Platinum's record screens), the CONTEST HALL's practice receptionist (no
-      longer converts: "variable 0")
+      keepers, the TOWER's record machines (Platinum's record screens). The CONTEST HALL's practice receptionist converts
+      again (2026-11-15: OpenPartyMenuForContest's literal; sinnoh_contest_practice)
 - [ ] One test from TWINLEAF to the HALL OF FAME
 
 ## 2. Kai's systems in SINNOH (kept, Platinum's commands mapped onto them)

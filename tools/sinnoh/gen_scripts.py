@@ -1407,7 +1407,7 @@ class FileConverter:
                     self.sinnoh(SINNOH_CONTEST, 18, self.var(a[2]), self.var(a[3]))]
         if cmd == 'OpenPartyMenuForContest':
             # (the game's party menu: it answers in VAR_0x8004, where the hall keeps the rank: kept and put back)
-            return ([self.sinnoh(SINNOH_CONTEST, CC_PARTY_ANY_RANK, self.var(a[3]))] if len(a) > 3 else []) + \
+            return ([self.sinnoh(SINNOH_CONTEST, CC_PARTY_ANY_RANK, self.arg(a[3]))] if len(a) > 3 else []) + \
                    [self.sinnoh(SINNOH_CONTEST, 23, self.arg(a[1]), self.arg(a[2])), 'special ChoosePartyMon',
                     'waitstate', self.sinnoh(SINNOH_CONTEST, 24)]
         if cmd in ('StartBattleClient', 'StartBattleServer') and self.low == 'contests':

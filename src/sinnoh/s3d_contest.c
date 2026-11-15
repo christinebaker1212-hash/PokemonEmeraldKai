@@ -1241,7 +1241,10 @@ static void End(void)
         return;
     }
     if (C.mode != CONTEST_OFFICIAL && C.mode != CONTEST_UNK0 && C.mode != CONTEST_UNK1)
+    {
+        MPNet_Log("sinnoh contest: practice ended, the player placed %d", C.e[0].place + 1);
         return;   // (practice and the single rounds give nothing)
+    }
     IncrementGameStat(GAME_STAT_ENTERED_CONTEST);   // (the game's contest records: JUBILIFE TV's rankings read them)
     if (C.e[0].place == 0)
     {

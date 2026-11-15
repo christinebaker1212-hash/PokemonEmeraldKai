@@ -1,0 +1,8 @@
+# The CONTEST HALL's practice receptionist (Platinum's Contests_ReceptionistPracticeContest, converting again since
+# OpenPartyMenuForContest takes a number there): PRACTICE, VISUAL PRACTICE, the first POKeMON; the practice's screens
+# open and end, back in the lobby. Needs the packs. Shots cp_*.png.
+MODE=1
+TMO=300
+ENV_A="MOEMON_DEBUG_REGION=3 MOEMON_TEST_CONTEST_SEED=7"
+EXPECT_A=("sinnoh contest: rank 0" "sinnoh contest: the screens open" "sinnoh contest: practice ended" "[cp] done")
+UNEXPECT_A=("[crash]" "TIMEOUT")

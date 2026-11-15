@@ -1,0 +1,28 @@
+pressuntil A field 5000
+wait 30
+mp textspeed 2
+mp platinumstory
+mp additem 670 1
+mp warp 44,73,27,12
+wait 90
+mash A 60 10
+pressuntil B field 2000
+wait 30
+press UP 120
+wait 10
+shot cp_counter
+press A 1
+wait 60
+shot cp_welcome
+mash A 6 20
+shot cp_menu
+pressuntillog A 4000 sinnoh contest: the screens open
+wait 60
+shot cp_screen
+pressuntillog A 12000 practice ended
+wait 60
+mash B 20 15
+pressuntil B field 4000
+shot cp_lobby
+echo [cp] done
+quit
