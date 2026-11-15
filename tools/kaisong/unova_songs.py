@@ -80,13 +80,21 @@ def slots():
     print('%d UNOVA song slots from %d' % (len(seqs), FIRST))
 
 
+# the songs whose tracks Black's 3D sound sources play (archive 0xB9, a/1/8/5: the songs and the tracks silent until a
+# source or the camera's height brings them in; ov053 / ov054): kept on tracks of their own (the studio's MMS_RIP_PARTS,
+# INFO parts=), so the game sets them as Black does (u3d_vm.c SoundObjs*)
+PARTS = {'SEQ_BGM_H_01': '6,7,8,9', 'SEQ_BGM_H_03': '7,8,9'}
+
+
 def convert(studio):
     seqs = sequences()
 
     def one(item):
         i, n = item
         out = os.path.join(ROOT, 'music', slot_name(n) + '.kaisong')
-        r = subprocess.run([studio, '--export', '%s#%d' % (SDAT, i), out, slot_name(n)], capture_output=True, text=True)
+        env = dict(os.environ, MMS_RIP_PARTS=PARTS[n]) if n in PARTS else None
+        r = subprocess.run([studio, '--export', '%s#%d' % (SDAT, i), out, slot_name(n)], capture_output=True, text=True,
+                           env=env)
         return n, r.returncode == 0 and os.path.exists(out), (r.stderr or r.stdout).strip()[-200:]
 
     bad = 0

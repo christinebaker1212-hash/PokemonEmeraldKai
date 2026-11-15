@@ -37,6 +37,7 @@ bool8 U3D_ExpTexPlaying(u16 model, u8 anim);
 void U3D_ExpGetPos(u16 model, float out[3]);                                        //  SetAnimeEnabled / Paused / Loop)
 void U3D_ExpHide(u16 model, bool8 hidden);
 void U3D_ExpPlace(u16 model, float x, float y, float z, u16 yaw);
+void U3D_ExpPlaceRot(u16 model, float x, float y, float z, u16 pitch, u16 yaw);
 void U3D_ExpSetY(u16 model, float y);
 float U3D_ExpFrame(u16 model);
 u16 U3D_ExpAnimFrames(u16 model, u8 anim);
@@ -101,6 +102,7 @@ void U3D_CameraTurn(u16 pitch, u16 yaw, u16 frames);
 void U3D_CameraLook(u16 frames);
 void U3D_ObjectFly(u8 spriteId, bool8 on, float x, float y, float z);
 void U3D_PlayerWorldPos(float out[3]);
+void U3D_CameraEye(float eye[3], float fwd[3]);
 bool8 U3D_ObjectFlyPos(u8 spriteId, float out[3]);
 void U3D_TileWorldPos(s16 x, s16 y, float out[3]);
 void U3D_CameraShake(s16 x, s16 y, u16 steps, u8 total, s16 dx, s16 dy, u16 thresh, u16 period);

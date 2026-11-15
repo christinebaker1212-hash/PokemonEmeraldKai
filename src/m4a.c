@@ -1454,6 +1454,29 @@ void m4aMPlayVolumeControl(struct MusicPlayerInfo *mplayInfo, u16 trackBits, u16
     mplayInfo->ident = ID_NUMBER;
 }
 
+// Moemon Kai: the volume (0-256) and pan (-64 to 63) of the tracks in a 64-bit mask (a .kaisong song's up to 64
+// tracks; UNOVA's bridges: Black's 3D sound sources, u3d_vm.c)
+void MP_M4aTracksControl(struct MusicPlayerInfo *mplayInfo, u64 trackBits, u16 volume, s8 pan)
+{
+    s32 i;
+    struct MusicPlayerTrack *track;
+
+    if (mplayInfo->ident != ID_NUMBER)
+        return;
+    mplayInfo->ident++;
+    track = mplayInfo->tracks;
+    for (i = 0; i < mplayInfo->trackCount && i < 64; i++, track++)
+    {
+        if ((trackBits >> i & 1) && (track->flags & MPT_FLG_EXIST))
+        {
+            track->volX = volume / 4;
+            track->panX = pan;
+            track->flags |= MPT_FLG_VOLCHG;
+        }
+    }
+    mplayInfo->ident = ID_NUMBER;
+}
+
 void m4aMPlayPitchControl(struct MusicPlayerInfo *mplayInfo, u16 trackBits, s16 pitch)
 {
     s32 i;

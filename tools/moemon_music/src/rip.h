@@ -46,6 +46,8 @@ typedef struct {
     uint8_t flags;                   // RIPV_*
     float rate;                      // the rate the sample plays at (Hz); squares / waves: the note's frequency (Hz)
     float l, r;                      // volume with the envelope, linear: 1 = the chip's loudest
+    uint8_t part;                    // the track of the song's own data that played it + 1 (an SDAT sequence's), 0 =
+                                     // not known: MMS_RIP_PARTS keeps the parts it names on lanes of their own
 } RipVF;
 
 #define RIPV_REVERB 1                // the voice goes to the reverb

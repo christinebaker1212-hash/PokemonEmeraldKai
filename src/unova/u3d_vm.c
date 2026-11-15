@@ -32,6 +32,8 @@
 #include "script.h"
 #include "script_movement.h"
 #include "sound.h"
+#include "mp_kaisong.h"
+#include "m4a.h"
 #include "string_util.h"
 #include "text.h"
 #include "u3d.h"
@@ -1087,6 +1089,8 @@ static void D06Load(void);
 static void D06Frame(void);
 static void LanesLoad(void);
 static void LanesFrame(void);
+static void SoundObjsLoad(void);
+static void SoundObjsFrame(void);
 
 // ------------------------------------------------------------------------------------------------ the VM
 // (BURGH's gym, the honey's trainers: Black's StartScriptedEvent run after its script, PlateDoorsFrame)
@@ -5850,6 +5854,7 @@ void U3D_Vm_FieldFrame(void)
     U3D_Elboard_Frame();
     D06Frame();
     LanesFrame();
+    SoundObjsFrame();
     {
         void U3D_Subway_SwayFrame(u16 zone);
         U3D_Subway_SwayFrame(CurrentZone());   // (the BATTLE SUBWAY's carriage: u3d_subway.c)
@@ -5935,6 +5940,8 @@ void U3D_Vm_FieldShown(void)
         D06Load();
     else if (CurrentZone() == 326 || CurrentZone() == 157)   // (ov058: ROUTE 4's traffic)
         LanesLoad();
+    else if (CurrentZone() == 249 || CurrentZone() == 254)   // (ov053 / ov054: SKYARROW's and TUBELINE's traffic)
+        SoundObjsLoad();
     else if (CurrentZone() >= 67 && CurrentZone() <= 76)   // (ov052: the GEAR STATION's platforms, their trains
         U3D_ExpLoad(52);                                   //  brought in by the subway's scripts: u3d_subway.c)
     else if (CurrentZone() == ZONE_NACRENE_GYM)   // (ov040 Init: the shelf moved, if it has been)
@@ -6691,6 +6698,229 @@ static void LanesFrame(void)
             t->lane = Random() % 3;
         }
     }
+}
+
+// ------------------------------------------------------------------------------------------------ the bridges
+// SKYARROW's and TUBELINE's traffic (ov053 field_gimmick_sound_objs.c, ov054 _b.c; pack gimmicks 53 / 54, paths
+// u3d_soundobjs.h): each model runs its path once, a Black frame a field frame (30 a second: drawn halfway between
+// on the frames between), then sits at its start a random wait between its limits; SKYARROW's trailing cars (1, 3)
+// start again with their lead (0, 2). Where each was is kept while the player is away (Black's gimmick work)
+#include "u3d_soundobjs.h"
+static struct { s8 zone; u8 tick; s16 frame[8]; u16 wait[8]; s16 vol[16], pan[16]; s16 fade; u64 bits[16];
+                bool8 bike, sliding; s32 prevZ; s32 ys[32]; u8 head, count; } sSnd = {-1};
+static s16 sSndKept[ARRAY_COUNT(sSoundObjs)];
+
+// Black's 3D sound (ISS_3DS_SYS: archive 0xB9's songs silence the parts SILENT on arrival; a source k sets part k's
+// volume by its distance from the camera's eye, (reach - distance) / reach of its volume, and its pan by which side
+// of the view it's on, each moved 16 / 32 a Black frame towards it; SKYARROW's part 6 comes in as the camera rises,
+// FIELD_GIMMICK_SOUND_OBJS_UpdateBgmFade). The song's parts are its own tracks (INFO parts=: the studio's
+// MMS_RIP_PARTS, tools/kaisong/unova_songs.py PARTS)
+#define SND_SILENT_SKYARROW 0x3C0   // (archive 0xB9: SEQ_BGM_H_01 tracks 6-9, SEQ_BGM_H_03 tracks 7-9)
+#define SND_SILENT_TUBELINE 0x380
+
+static void SoundObjsHear(void)
+{
+    u32 k, n = sSoundZones[sSnd.zone].n, silent = CurrentZone() == 249 ? SND_SILENT_SKYARROW : SND_SILENT_TUBELINE;
+    float eye[3], fwd[3];
+    U3D_CameraEye(eye, fwd);
+    for (k = 0; k < n; k++)
+    {
+        u32 o = sSoundZones[sSnd.zone].first + k;
+        s8 t = sSoundObjs[o].track;
+        float pos[3], d[3], dist, right[3], h, len;
+        s32 vol, pan;
+        if (t < 0)
+            continue;
+        U3D_ExpGetPos(k, pos);
+        d[0] = pos[0] - eye[0], d[1] = pos[1] - eye[1], d[2] = pos[2] - eye[2];
+        dist = sqrtf(d[0] * d[0] + d[1] * d[1] + d[2] * d[2]);
+        vol = dist > sSoundObjs[o].reach ? 0 : (s32)(sSoundObjs[o].volume * (sSoundObjs[o].reach - dist) / sSoundObjs[o].reach);
+        // (CalcSourcePan: the way to the source along the view's level, on its right: + right, - left)
+        right[0] = -fwd[2], right[1] = 0, right[2] = fwd[0];
+        len = sqrtf(right[0] * right[0] + right[2] * right[2]);
+        if (len > 0.0001f)
+            right[0] /= len, right[2] /= len;
+        {
+            float up[3] = {right[1] * fwd[2] - right[2] * fwd[1], right[2] * fwd[0] - right[0] * fwd[2],
+                           right[0] * fwd[1] - right[1] * fwd[0]};
+            h = d[0] * up[0] + d[1] * up[1] + d[2] * up[2];
+            d[0] -= up[0] * h, d[1] -= up[1] * h, d[2] -= up[2] * h;
+        }
+        len = sqrtf(d[0] * d[0] + d[1] * d[1] + d[2] * d[2]);
+        pan = len > 0.0001f ? (s32)((d[0] * right[0] + d[2] * right[2]) / len * 128.0f) : 0;
+        pan = pan < -128 ? -128 : pan > 127 ? 127 : pan;
+        if (getenv("MOEMON_SND_TRACE") && sSnd.tick % 60 == 0)
+            printf("[snd] src %d at %d,%d,%d eye %d,%d,%d dist %d vol %d\n", t, (int)pos[0], (int)pos[1], (int)pos[2],
+                   (int)eye[0], (int)eye[1], (int)eye[2], (int)dist, (int)vol);
+        if (sSnd.vol[t] == 0 && vol > 0)
+            MPNet_Log("u3d vm: part %d heard (%d units off, to %d, pan %d)", t, (int)dist, (int)vol, (int)pan);
+        sSnd.vol[t] = sSnd.vol[t] < vol ? min(sSnd.vol[t] + 16, vol) : max(sSnd.vol[t] - 16, vol);
+        sSnd.pan[t] = sSnd.pan[t] < pan ? min(sSnd.pan[t] + 32, pan) : max(sSnd.pan[t] - 32, pan);
+    }
+    if (sSoundZones[sSnd.zone].fadeTracks)   // (SKYARROW: the camera's height brings a part in)
+    {
+        float lo = sSoundZones[sSnd.zone].fadeLow, hi = sSoundZones[sSnd.zone].fadeHigh;
+        s32 to = eye[1] <= lo ? 0 : eye[1] > hi ? 127 : (s32)(127.0f * (eye[1] - lo) / (hi - lo));
+        sSnd.fade = sSnd.fade < to ? min(sSnd.fade + 16, to) : max(sSnd.fade - 16, to);
+        for (k = 0; k < 16; k++)
+            if (sSoundZones[sSnd.zone].fadeTracks >> k & 1)
+                sSnd.vol[k] = sSnd.fade, sSnd.pan[k] = 0;
+    }
+    (void)silent;
+}
+
+static void SoundObjsApply(void)
+{
+    u32 k, silent = CurrentZone() == 249 ? SND_SILENT_SKYARROW : SND_SILENT_TUBELINE;
+    for (k = 0; k < 16; k++)
+        if ((silent >> k & 1) && sSnd.bits[k])
+            MP_M4aTracksControl(&gMPlayInfo_BGM, sSnd.bits[k], sSnd.vol[k] * 256 / 127, sSnd.pan[k] / 2);
+}
+
+// SKYARROW's slide (FIELD_GIMMICK_SOUND_OBJS_UpdateSlideSe): the view crossing a line across the bridge (z 1884 on
+// foot, 1980 on a bike) after dropping 100 or more over its last 32 moving frames plays a rush of wind (Black's
+// SEQ_SE_FLD_173 / 171: SE_M_GUST / GUST2 here)
+static void SoundObjsSlide(void)
+{
+    float eye[3], fwd[3];
+    s32 z, line;
+    U3D_CameraEye(eye, fwd);
+    z = (s32)(eye[2] * 4096.0f);
+    if (z != sSnd.prevZ)
+    {
+        u8 i;
+        if (sSnd.count < 32)
+            i = (sSnd.head + sSnd.count++) % 32;
+        else
+            i = sSnd.head, sSnd.head = (sSnd.head + 1) % 32;
+        sSnd.ys[i] = (s32)(eye[1] * 4096.0f);
+    }
+    else
+        sSnd.count = sSnd.head = 0;
+    if (sSnd.count > 0)
+    {
+        bool8 bike = TestPlayerAvatarFlags(PLAYER_AVATAR_FLAG_MACH_BIKE | PLAYER_AVATAR_FLAG_ACRO_BIKE);
+        line = bike ? 0x7BC000 : 0x75C000;
+        if (((z < line && sSnd.prevZ > line) || (z > line && sSnd.prevZ < line))
+         && sSnd.ys[sSnd.head] - (s32)(eye[1] * 4096.0f) >= 0x64000)
+        {
+            PlaySE(bike ? SE_M_GUST2 : SE_M_GUST);
+            MPNet_Log("u3d vm: SKYARROW's slide (the view down past z %d)", (int)(line >> 12));
+        }
+    }
+    sSnd.prevZ = z;
+}
+
+static void SoundObjPlace(u32 o, u32 m, float f)
+{
+    u32 n = sSoundObjs[o].frames, pts = (n + SOUND_PATH_STEP - 1) / SOUND_PATH_STEP, i;
+    float t, x, y, z, rx, ry, drx, dry;
+    if (f >= n - 1)
+        f = n - 1;
+    i = (u32)(f / SOUND_PATH_STEP);
+    t = (f - i * SOUND_PATH_STEP) / SOUND_PATH_STEP;
+    {
+        typeof(sSoundPath[0]) a = sSoundPath[sSoundObjs[o].at + i];
+        typeof(sSoundPath[0]) b = sSoundPath[sSoundObjs[o].at + (i + 1 < pts ? i + 1 : i)];
+        x = (a.x + (b.x - a.x) * t) / 4.0f;
+        y = (a.y + (b.y - a.y) * t) / 4.0f;
+        z = (a.z + (b.z - a.z) * t) / 4.0f;
+        drx = (s16)(u16)(b.rx - a.rx), dry = (s16)(u16)(b.ry - a.ry);   // (the short way round)
+        rx = a.rx + drx * t, ry = a.ry + dry * t;
+    }
+    U3D_ExpPlaceRot(m, x, y, z, (u16)(s32)rx, (u16)(s32)ry);
+}
+
+static void SoundObjsLoad(void)
+{
+    u32 z, k;
+    sSnd.zone = -1;
+    for (z = 0; z < ARRAY_COUNT(sSoundZones); z++)
+        if (sSoundZones[z].zone == CurrentZone())
+            sSnd.zone = z;
+    if (sSnd.zone < 0)
+        return;
+    U3D_ExpLoad(CurrentZone() == 249 ? 53 : 54);
+    memset(sSnd.vol, 0, sizeof(sSnd.vol));   // (ISS_3DS_SYS_Enter: the song's sources' parts silent, then brought in)
+    memset(sSnd.pan, 0, sizeof(sSnd.pan));
+    sSnd.fade = 0, sSnd.count = sSnd.head = 0, sSnd.prevZ = 0;
+    for (k = 0; k < 16; k++)
+        sSnd.bits[k] = MP_Kaisong_PartTracks(gMPlayInfo_BGM.songHeader, k);
+    SoundObjsApply();
+    if (CurrentZone() == 249)
+        U3D_ExpTex(4, 0, TRUE, 0, TRUE, TRUE);   // (the ship's wake: SetAnimeEnabled, looping)
+    sSnd.tick = 0;
+    for (k = 0; k < sSoundZones[sSnd.zone].n; k++)
+    {
+        u32 o = sSoundZones[sSnd.zone].first + k;
+        sSnd.frame[k] = sSndKept[o];   // (RestoreAnimeFrames)
+        sSnd.wait[k] = 0;
+        SoundObjPlace(o, k, sSnd.frame[k]);
+    }
+    {
+        float pw[3], eye[3], fwd[3];
+        U3D_PlayerWorldPos(pw);
+        U3D_CameraEye(eye, fwd);
+        MPNet_Log("u3d vm: %s's traffic, %u models (the player at %d,%d,%d, the eye at %d,%d,%d)",
+                  CurrentZone() == 249 ? "SKYARROW" : "TUBELINE", (unsigned)sSoundZones[sSnd.zone].n, (int)pw[0],
+                  (int)pw[1], (int)pw[2], (int)eye[0], (int)eye[1], (int)eye[2]);
+    }
+}
+
+static void SoundObjsFrame(void)
+{
+    u32 k, n;
+    if (sSnd.zone < 0)
+        return;
+    if (sSoundZones[sSnd.zone].zone != CurrentZone())
+    {
+        sSnd.zone = -1;
+        return;
+    }
+    if (!sSnd.bits[8] && !sSnd.bits[9])   // (the song started after the zone's load: its parts now)
+    {
+        for (k = 0; k < 16; k++)
+            sSnd.bits[k] = MP_Kaisong_PartTracks(gMPlayInfo_BGM.songHeader, k);
+        if (sSnd.bits[8] || sSnd.bits[9])
+            MPNet_Log("u3d vm: the song's parts 6-9 on tracks %llx %llx %llx %llx", (unsigned long long)sSnd.bits[6],
+                      (unsigned long long)sSnd.bits[7], (unsigned long long)sSnd.bits[8], (unsigned long long)sSnd.bits[9]);
+    }
+    n = sSoundZones[sSnd.zone].n;
+    SoundObjsApply();
+    if (++sSnd.tick & 1)   // (between Black's frames: halfway on)
+    {
+        for (k = 0; k < n; k++)
+            if (!sSnd.wait[k] && sSnd.frame[k] + 1 < sSoundObjs[sSoundZones[sSnd.zone].first + k].frames)
+                SoundObjPlace(sSoundZones[sSnd.zone].first + k, k, sSnd.frame[k] + 0.5f);
+        return;
+    }
+    for (k = 0; k < n; k++)
+    {
+        u32 o = sSoundZones[sSnd.zone].first + k;
+        if (sSnd.wait[k])
+        {
+            if (--sSnd.wait[k] == 0)
+            {
+                sSnd.frame[k] = 0;   // (RestartAnime)
+                SoundObjPlace(o, k, 0);
+                if (n == 5 && (k == 0 || k == 2))   // (the trailing car goes with its lead)
+                    sSnd.wait[k + 1] = 1;
+            }
+        }
+        else
+        {
+            if (++sSnd.frame[k] >= sSoundObjs[o].frames)   // (ICA_ANIME_IncFrameLoop: round to the start, wait)
+            {
+                sSnd.frame[k] = 0;
+                sSnd.wait[k] = sSoundObjs[o].waitMin + Random() % (sSoundObjs[o].waitMax - sSoundObjs[o].waitMin + 1);
+            }
+            SoundObjPlace(o, k, sSnd.frame[k]);
+        }
+        sSndKept[o] = sSnd.frame[k];
+    }
+    SoundObjsHear();
+    if (CurrentZone() == 249)
+        SoundObjsSlide();
 }
 
 // ------------------------------------------------------------------------------------------------ CHARGESTONE

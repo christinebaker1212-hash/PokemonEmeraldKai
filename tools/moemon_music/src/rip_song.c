@@ -187,6 +187,7 @@ typedef struct {
     int flat;                      // held at one pitch (flatSemis), not following the chip's (a GB arpeggio's chord note)
     float flatSemis;
     int mixed;                     // a Game Boy square note across duty switches (gb_for_instruments)
+    int part;                      // RipVF.part of its first frame (0 = not known)
 } Note;
 
 #define SILENT 1e-6f
@@ -883,6 +884,7 @@ int rip_song_build(Rip *r, RipSong *out, float gain, int gbaDrums, const uint8_t
                 cur.voice = v;
                 cur.f0 = f;
                 cur.sample = x->sample;
+                cur.part = x->part;
                 in = 1;
             }
             if (in && x && a > cur.peak) cur.peak = a;
@@ -1235,21 +1237,35 @@ int rip_song_build(Rip *r, RipSong *out, float gain, int gbaDrums, const uint8_t
     // is laid out again with lanes that change instrument: a note goes on a free lane already playing its
     // instrument, else on any free lane (a VOICE change before it). The chip never plays more notes at once
     // than it has voices, so every note finds a lane (drum hits keep lanes of their own drum).
+    // MMS_RIP_PARTS ("6,7,8,9": the song data's own tracks, an SDAT sequence's from 0) keeps the notes of each part
+    // it names on lanes of their own, named "[part N]", so a game can set those parts' volume by themselves (Black's
+    // 3D sound sources: tracks of SKYARROW's and TUBELINE's songs); the rest never share them
+    uint32_t keepParts = 0;
+    if (getenv("MMS_RIP_PARTS"))
+        for (const char *p = getenv("MMS_RIP_PARTS"); *p; ) {
+            char *e;
+            long v = strtol(p, &e, 10);
+            if (e == p) { p++; continue; }
+            if (v >= 0 && v < 32) keepParts |= 1u << v;
+            p = e;
+        }
+    int *lanePart = calloc((size_t)nn + 1, sizeof(int));
     int ntr = 0;
     {
         enum { LANE_LIMIT = 64 };
         int *laneEnd = malloc(sizeof(int) * (size_t)nn), *laneSlot = malloc(sizeof(int) * (size_t)nn);
         uint8_t *laneDrum = malloc((size_t)nn + 1);
-        for (int pass = 0; pass < 2 && laneEnd && laneSlot && laneDrum; pass++) {
+        for (int pass = 0; pass < 2 && laneEnd && laneSlot && laneDrum && lanePart; pass++) {
             ntr = 0;
             for (int i = 0; i < nn; i++) {
                 int slot = notes[i].sample < ns ? slotOf[notes[i].sample] : 127;
                 int drum = out->gbaDrums && drumKey[i] >= 0;
                 int f0 = notes[i].f0 + notes[i].shift, t = -1;
-                for (int k = 0; k < ntr; k++) if (laneSlot[k] == slot && laneEnd[k] <= f0) { t = k; break; }
+                int part = notes[i].part > 0 && (keepParts >> (notes[i].part - 1) & 1) ? notes[i].part : 0;
+                for (int k = 0; k < ntr; k++) if (laneSlot[k] == slot && laneEnd[k] <= f0 && lanePart[k] == part) { t = k; break; }
                 if (t < 0 && pass && !drum)
-                    for (int k = 0; k < ntr; k++) if (!laneDrum[k] && laneEnd[k] <= f0) { t = k; break; }
-                if (t < 0) { t = ntr++; laneDrum[t] = (uint8_t)drum; }
+                    for (int k = 0; k < ntr; k++) if (!laneDrum[k] && laneEnd[k] <= f0 && lanePart[k] == part) { t = k; break; }
+                if (t < 0) { t = ntr++; laneDrum[t] = (uint8_t)drum; lanePart[t] = part; }
                 laneSlot[t] = slot;
                 laneEnd[t] = notes[i].f1 + notes[i].shift;
                 notes[i].track = t;
@@ -1279,6 +1295,8 @@ int rip_song_build(Rip *r, RipSong *out, float gain, int gbaDrums, const uint8_t
         char name[40];
         if (nOfSlot) snprintf(name, sizeof name, "Instrument %d (%d)", slot + 1, nOfSlot + 1);
         else snprintf(name, sizeof name, "Instrument %d", slot + 1);
+        if (lanePart && lanePart[lane])   // (MMS_RIP_PARTS: the part it plays, read back by export.c into INFO parts=)
+            snprintf(name + strlen(name), sizeof name - strlen(name), " [part %d]", lanePart[lane] - 1);
         mmeta(t, 0, 0x03, name, (int)strlen(name));
         mev(t, 0, 0xB0 | ch, 7, 127);
         mev(t, 0, 0xC0 | ch, slot, 0);
@@ -1418,6 +1436,7 @@ int rip_song_build(Rip *r, RipSong *out, float gain, int gbaDrums, const uint8_t
         free(t->b.b);
     }
     free(tr);
+    free(lanePart);
     out->mid = mf.b;
     out->midLen = mf.n;
     // reverb: when the original sends most of its voices to its reverb; as deep as the original's (its reverb

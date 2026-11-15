@@ -31,6 +31,7 @@ bool8 MP_Kaisong_PlayFile(const char *file);   // tests: one file's song (mp pla
 #define MAKER_SONG_COUNT 256
 u16 MP_Kaisong_TableIndex(u16 song);
 int MP_Kaisong_TrackCount(void);
+u64 MP_Kaisong_PartTracks(const struct SongHeader *header, u8 part);
 const char *MP_Kaisong_TrackName(int i);
 int MP_Kaisong_TrackId(const char *name);
 void MP_Kaisong_Rescan(void);

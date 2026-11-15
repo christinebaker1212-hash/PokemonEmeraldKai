@@ -697,6 +697,7 @@ static void sd_snapshot(RipEmu *e, RipVF *out)
         x->rate = (float)c->rate;
         x->l = c->l;
         x->r = c->r;
+        x->part = (uint8_t)(c->track + 1);
     }
 }
 

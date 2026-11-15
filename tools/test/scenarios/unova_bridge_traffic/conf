@@ -1,0 +1,7 @@
+# SKYARROW's and TUBELINE's traffic (ov053 / ov054 sound objects: pack gimmicks 53 / 54, u3d_vm.c SoundObjs*): the cars
+# up and down SKYARROW's ramps, the ship under it, TUBELINE's trains. Shots sk_*.png, tb_*.png.
+MODE=1
+TMO=300
+ENV_A="MOEMON_DEBUG_REGION=4 MOEMON_DEBUG_PARTY=6:100 MOEMON_SND_TRACE=1"
+EXPECT_A=("SKYARROW's traffic, 5 models" "TUBELINE's traffic, 2 models" "the song's parts 6-9 on tracks" "part 8 heard" "[bt] done")
+UNEXPECT_A=("[crash]" "TIMEOUT")

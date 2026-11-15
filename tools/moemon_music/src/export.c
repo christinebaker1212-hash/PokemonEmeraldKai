@@ -207,6 +207,19 @@ int export_kaisong(const Project *p, const Conv *c, const char *path, char *err,
         snprintf(line, sizeof(line), "source=%s\n", p->ripInfo);
         bput(&info, line, strlen(line));
     }
+    {   // parts=: each track's part of the original song ("[part N]" in its MIDI track's name: MMS_RIP_PARTS), -1 none
+        int any = 0;
+        for (int i = 0; i < ntr; i++) any |= strstr(c->cand[c->candOf[i]].name, "[part ") != NULL;
+        if (any) {
+            bput(&info, "parts=", 6);
+            for (int i = 0; i < ntr; i++) {
+                const char *q = strstr(c->cand[c->candOf[i]].name, "[part ");
+                snprintf(line, sizeof(line), "%s%d", i ? "," : "", q ? atoi(q + 6) : -1);
+                bput(&info, line, strlen(line));
+            }
+            bput(&info, "\n", 1);
+        }
+    }
 
     bput(&out, "KAISONG", 8);              // 8 bytes with the terminating 0
     b16(&out, custom ? KAISONG_VERSION_CUSTOM : KAISONG_VERSION);

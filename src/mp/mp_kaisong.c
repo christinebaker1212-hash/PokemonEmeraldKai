@@ -67,6 +67,8 @@ struct KaiFile
     s16 tableGain;          // music/kaisong_gains.txt's, tenths of a dB (KAI_NO_GAIN: not in it)
     u32 music;              // a hash of everything but INFO: files with the same music (MP_Kaisong_SameMusic)
     struct SongHeader *header;
+    s8 *parts;              // INFO parts=: each track's part of the original song (-1 none; NULL: no parts kept
+                            // apart): MP_Kaisong_PartTracks
 };
 
 static struct
@@ -597,7 +599,7 @@ static bool8 Load(struct KaiFile *f)
     f->gain = 256;
     if (info)
     {
-        char line[80];
+        char line[512];   // (parts= runs long)
         u32 a = 0;
         while (a < infoLen)
         {
@@ -611,6 +613,26 @@ static bool8 Load(struct KaiFile *f)
             {
                 int v = atoi(line + 7);
                 f->voices = v < 1 ? KAI_GAME_VOICES : v > MAX_DIRECTSOUND_CHANNELS ? MAX_DIRECTSOUND_CHANNELS : v;
+            }
+            else if (!strncmp(line, "parts=", 6))
+            {
+                const char *q = line + 6;
+                int k = 0;
+                free(f->parts);
+                f->parts = malloc(64);
+                if (f->parts != NULL)
+                {
+                    memset(f->parts, -1, 64);
+                    while (*q && k < 64)
+                    {
+                        char *e;
+                        long v = strtol(q, &e, 10);
+                        if (e == q)
+                            break;
+                        f->parts[k++] = (s8)v;
+                        q = *e == ',' ? e + 1 : e;
+                    }
+                }
             }
             else if (!strncmp(line, "gain=", 5))
             {
@@ -889,6 +911,21 @@ static const struct KaiFile *FileOf(const struct SongHeader *header)
         if (sKai.files[i].header == header)
             return &sKai.files[i];
     return NULL;
+}
+
+// the BGM player's tracks that play part PART of the original song (the song's INFO parts=; 0 when it kept none
+// apart): UNOVA's bridges set them as Black's 3D sound sources do (u3d_vm.c SoundObjs*)
+u64 MP_Kaisong_PartTracks(const struct SongHeader *header, u8 part)
+{
+    const struct KaiFile *f = FileOf(header);
+    u64 bits = 0;
+    int i;
+    if (f == NULL || f->parts == NULL)
+        return 0;
+    for (i = 0; i < 64; i++)
+        if (f->parts[i] == part)
+            bits |= 1ULL << i;
+    return bits;
 }
 
 // TRUE when the song that would play for `song` at warp (NULL = here) is the same music the BGM player plays now:

@@ -46,9 +46,15 @@ tool=Moemon Music Studio 1.0
 made=2026-10-25 14:55
 source=Final Fantasy 7 - Nobuo Uematsu - PlayStation      (songs made from music of another game)
 gain=5.2                   dB, -12 to 12: the game plays the song that much louder or quieter (missing = 0)
+parts=8,-1,6,...           each track's part of the original song, -1 none (a rip made with MMS_RIP_PARTS)
 ```
 
-`gain=` is the one key the game uses: every sample and Game Boy voice's volume (velocity × track volume, before
+`parts=` is written when a rip is made with `MMS_RIP_PARTS=6,7,8,9` (the original's own tracks, an SDAT sequence's
+from 0): the notes of those parts get tracks of their own, named `[part N]`, and the game finds them by
+`MP_Kaisong_PartTracks` to set their volume and pan by themselves (UNOVA's bridges: Black's 3D sound sources play
+tracks of SKYARROW's and TUBELINE's songs; tools/kaisong/unova_songs.py PARTS, u3d_vm.c SoundObjs*).
+
+`gain=` is the one other key the game uses: every sample and Game Boy voice's volume (velocity × track volume, before
 the clamp to 255) is multiplied by it, in 0.1 dB steps (src/music_player.c ChnVolSetAsm, mp_kaisong.c
 MP_Kaisong_Gain). The studio doesn't write it; `tools/kaisong/loudness.py --write` does (the release build runs it on the files it
 ships), so a song plays as loud as

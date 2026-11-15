@@ -50,8 +50,15 @@ systems. Tick an entry only once it plays as Black's and has been seen running.
 - [x] ROUTE 4's traffic (ov058 field_gimmick_lane_trains.c, 2026-11-15; zones 326 / 157): the trucks and cars on the
       lanes drive by as Black's (setup 58 in tools/unova/gimmicks.py, u3d_vm.c LanesLoad / LanesFrame); scenario
       unova_lane_traffic
-- [ ] Black's other field gimmicks (arc 0x65's zone table, ov021 gFieldGimmickOverlayIds): SKYARROW's and TUBELINE
-      BRIDGE's passing traffic and sounds (ov053 / ov054), ROUTE 10's bridge (ov047), the LEAGUE's models (ov049 /
+- [x] SKYARROW's and TUBELINE's traffic and its sound (ov053 / ov054 sound objects, 2026-11-15; zones 249 / 254):
+      SKYARROW's cars both ways (a lead and its trail) up and down the ramps and along the road, turned with the
+      slope, and the ship below; TUBELINE's trains each way: along Black's own paths (tools/unova/gen_soundobjs.py ->
+      u3d_soundobjs.h), a random wait at the start between runs (pack gimmicks 53 / 54, u3d_vm.c SoundObjs*,
+      U3D_ExpPlaceRot). Black's 3D sound: the songs' tracks that Black silences on arrival (archive 0xB9) kept as
+      tracks of their own by the studio (MMS_RIP_PARTS -> INFO parts=), each brought in by its vehicle's distance from
+      the camera and panned to its side; SKYARROW's high part comes in as the camera rises, and the rush of wind as the
+      view drops at the bridge's end (SE_M_GUST for Black's SEQ_SE_FLD_173); scenario unova_bridge_traffic
+- [ ] Black's other field gimmicks (arc 0x65's zone table, ov021 gFieldGimmickOverlayIds): ROUTE 10's bridge (ov047), the LEAGUE's models (ov049 /
       ov050), the special POKeMON's spots (ov059: MOOR OF ICIRRUS, CASTELIA), the ENTRALINK's gauge and markers
       (ov060 / ov061), LIBERTY GARDEN's (ov062)
 - [x] Camera shakes (0x148: ABYSSAL RUINS, CHARGESTONE, DRAGONSPIRAL, N's CASTLE; 2026-11-15, scenario

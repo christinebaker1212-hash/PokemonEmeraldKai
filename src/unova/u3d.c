@@ -1695,7 +1695,7 @@ static struct
 {
     s16 gim;
     u16 n;
-    struct { float pos[3], frame; u16 yaw; u8 hidden, anim, playing;
+    struct { float pos[3], frame; u16 yaw, pitch; u8 hidden, anim, playing;
              u16 texOn; float tframe[EXP_TEX]; u8 tplay[EXP_TEX], tloop[EXP_TEX]; } m[EXP_MAX];   // (Black's texture
 } sExp = {-1};                                                                                      //  tracks, by index)
 
@@ -1713,6 +1713,7 @@ void U3D_ExpLoad(u8 ov)
             {
                 memcpy(sExp.m[k].pos, sPack.gim[i].m[k].pos, sizeof(sExp.m[k].pos));
                 sExp.m[k].yaw = sPack.gim[i].m[k].yaw;
+                sExp.m[k].pitch = 0;
                 sExp.m[k].hidden = sPack.gim[i].m[k].hidden;
                 sExp.m[k].anim = 0xFF;
                 sExp.m[k].frame = 0;
@@ -1849,6 +1850,15 @@ void U3D_ExpPlace(u16 model, float x, float y, float z, u16 yaw)
     sExp.m[model].yaw = yaw;
 }
 
+// (a model turned about x first, then y, as Black's BUTTON_MAN_MakeRotMtxXYZ: SKYARROW's cars up and down its ramps)
+void U3D_ExpPlaceRot(u16 model, float x, float y, float z, u16 pitch, u16 yaw)
+{
+    if (sExp.gim < 0 || model >= sExp.n)
+        return;
+    U3D_ExpPlace(model, x, y, z, yaw);
+    sExp.m[model].pitch = pitch;
+}
+
 void U3D_ExpGetPos(u16 model, float out[3])
 {
     if (sExp.gim >= 0 && model < sExp.n)
@@ -1905,6 +1915,15 @@ void U3D_TileWorldPos(s16 x, s16 y, float out[3])
 }
 
 // the player's place in the world (Black's FIELD_PLAYER_GetPos: the tile's middle, the ground under them)
+// the camera's eye in Black's world and the way it looks (a unit vector): Black's 3D sound sources' listener
+// (ISS_3DS_SYS_SetCamera; u3d_vm.c SoundObjs*)
+void U3D_CameraEye(float eye[3], float fwd[3])
+{
+    u32 i;
+    for (i = 0; i < 3; i++)
+        eye[i] = sView.eye[i], fwd[i] = sView.fwd[i];
+}
+
 void U3D_PlayerWorldPos(float out[3])
 {
     s32 gtx, gtz;
@@ -2021,7 +2040,8 @@ static void ExpDraw(int pass)
         a = sExp.m[i].yaw / 65536.0f * 2.0f * (float)M_PI;
         c = cosf(a), sn = sinf(a);
         {
-            const float rot[9] = {c, 0, sn, 0, 1, 0, -sn, 0, c};
+            float p = sExp.m[i].pitch / 65536.0f * 2.0f * (float)M_PI, pc = cosf(p), ps = sinf(p);
+            const float rot[9] = {c, sn * ps, sn * pc, 0, pc, -ps, -sn, c * ps, c * pc};   // (yaw x pitch)
             DrawKindPose(&sPack.kind[sPack.gim[sExp.gim].m[i].kind], sExp.m[i].anim, sExp.m[i].frame,
                          sExp.m[i].texOn, sExp.m[i].tframe, rot, sExp.m[i].pos[0], sExp.m[i].pos[1], sExp.m[i].pos[2],
                          pass);
