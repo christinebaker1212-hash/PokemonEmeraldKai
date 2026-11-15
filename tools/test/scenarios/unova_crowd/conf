@@ -3,5 +3,5 @@
 MODE=1
 TMO=300
 ENV_A="MOEMON_DEBUG_REGION=4 MOEMON_DEBUG_PARTY=6:100"
-EXPECT_A=("CASTELIA's crowd in zone 34" "[cr] done")
+EXPECT_A=("CASTELIA's crowd in zone 34" "the crowd says line" "[cr] done")
 UNEXPECT_A=("[crash]" "TIMEOUT")

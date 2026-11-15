@@ -211,7 +211,11 @@ records, item lookups, the POKeDEX ratings, trainer records and the sounds liste
       unova_crowd): Black's setups (tools/unova/gen_crowds.py -> u3d_crowds.h), people spawned on each area's edge at
       the time of day's rate and walked its length, solid ones stepping aside two tiles out, one in ten player-aware
       (stops before the player and can be talked to: its look's script), local ids 0xA0 + slot (u3d_vm.c Crowd*)
-- [ ] The crowd's chatter: Black's small windows popping up over the street (bank 0x9F) need a mock-up first
+- [x] The crowd's chatter (CROWD_*Chatter; 2026-11-15, the user's approved mock-up docs/unova/mockups/crowd_chatter.png):
+      a line of the setup's (bank 0x9F) in a small 8 x 2 window at the next of Black's sixteen places every 16 + a
+      random part of the time of day's interval, each open for 16 of Black's frames, none while a script runs; drawn
+      over the finished frame with the player's own window frame and the small font (u3d_vm.c Chat*,
+      U3D_Vm_ChatterComposite); scenario unova_crowd
 - Kai's own: SURF / WATERFALL's hops and jumps (0x0C5 / 0x0C6, Black's field-move scripts: Kai's field moves); closed
   as the DS's or online: birthdays (0x1D6 / 0x1D7 / 0x20D), the research surveys (0x210-0x21F), Wi-Fi lists, GTS,
   the TRIAL HOUSE downloads, PAL PARK (0x1C0), the fixed-zone link-room warp (0x0C3)

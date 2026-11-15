@@ -2400,6 +2400,10 @@ void U3D_CiComposite(u16 *frame)
     s32 x, y, k, level;
     float half;
     typeof(sView) keep;
+    {
+        void U3D_Vm_ChatterComposite(u16 *frame);
+        U3D_Vm_ChatterComposite(frame);   // (CASTELIA's crowd's chatter, u3d_vm.c)
+    }
     if (sCi.gim < 0)
     {
         if (sCiHoldBlack && U3D_Active())   // (a VS cut-in's black until the battle takes the screen)

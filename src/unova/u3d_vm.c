@@ -36,6 +36,7 @@
 #include "m4a.h"
 #include "string_util.h"
 #include "text.h"
+#include "text_window.h"
 #include "u3d.h"
 #include "constants/trainers.h"
 #include "naming_screen.h"
@@ -1287,6 +1288,104 @@ static s32 CrowdFree(void)
     return -1;
 }
 
+// ---- the crowd's chatter (CROWD_InitChatter / UpdateChatter / OpenChatterSlot; the user's approved mock-up
+// 2026-11-15, docs/unova/mockups/crowd_chatter.png): a line of the setup's (bank 0x9F) in a small 8 x 2 window at the
+// next of Black's sixteen places every 16 + a random part of the time of day's interval of Black's frames, each open for
+// 16 of them; none while a script runs. Drawn over the finished frame (U3D_Vm_ChatterComposite) with the player's own
+// window frame and the small font
+static const u8 sChatX[16] = {1, 22, 2, 20, 4, 21, 3, 19, 1, 19, 2, 22, 3, 20, 4, 21};   // (gCrowdChatterSlotX / Y: the
+static const u8 sChatY[16] = {6, 2, 17, 14, 17, 10, 14, 2, 10, 17, 10, 6, 2, 6, 14, 6};   //  DS's tiles)
+static struct { u16 timer, interval; u8 next; struct { u8 open, frames; u16 msg; } slot[16]; } sChat;
+
+static bool8 U3D_Vm_SceneRunning(void);
+static void ChatStart(u8 tz)
+{
+    memset(&sChat, 0, sizeof(sChat));
+    sChat.interval = 0x10 + Random() % max(1, sCrowds[sCrowd.cfg].interval[tz]);
+    sChat.next = Random() & 15;
+}
+
+static void ChatFrame(u8 tz)   // (a Black frame)
+{
+    u32 k;
+    if (U3D_Vm_SceneRunning() || ScriptContext_IsEnabled() || ArePlayerFieldControlsLocked())
+    {
+        for (k = 0; k < 16; k++)
+            sChat.slot[k].open = FALSE;
+        return;
+    }
+    if (++sChat.timer >= sChat.interval && sCrowds[sCrowd.cfg].chatCount)
+    {
+        sChat.slot[sChat.next].open = TRUE, sChat.slot[sChat.next].frames = 0;
+        sChat.slot[sChat.next].msg = sCrowds[sCrowd.cfg].chatFirst + Random() % sCrowds[sCrowd.cfg].chatCount;
+        sChat.timer = 0, sChat.next = (sChat.next + 1) & 15;
+        sChat.interval = 0x10 + Random() % max(1, sCrowds[sCrowd.cfg].interval[tz]);
+        MPNet_Log("u3d vm: the crowd says line %u", sChat.slot[(sChat.next + 15) & 15].msg);
+    }
+    for (k = 0; k < 16; k++)
+        if (sChat.slot[k].open && ++sChat.slot[k].frames >= 16)
+            sChat.slot[k].open = FALSE;
+}
+
+u8 MP_RenderFontGlyph(u8 fontId, u16 glyphId, u8 fgColor, u8 bgColor, u8 shadowColor);   // (text.c)
+void U3D_Vm_ChatterComposite(u16 *frame)
+{
+    const struct TilesPal *tp;
+    u32 k;
+    if (sCrowd.cfg < 0 || !U3D_Active() || gPaletteFade.active)
+        return;
+    tp = GetWindowFrameTilesPal(gSaveBlock2Ptr->optionsWindowFrameType);
+    for (k = 0; k < 16; k++)
+    {
+        static u8 sLine[96];
+        s32 x0, y0, tx, ty, px, py, x;
+        u32 i;
+        if (!sChat.slot[k].open)
+            continue;
+        // (the DS's tiles to the screen's: the mock-up's places, the window kept on the screen)
+        x0 = min(max(sChatX[k] * 8 - 8, 0), DISPLAY_WIDTH - 80);
+        y0 = min(max(sChatY[k] * 8 - 16, 0), DISPLAY_HEIGHT - 32);
+        for (ty = 0; ty < 4; ty++)
+            for (tx = 0; tx < 10; tx++)
+            {
+                u32 tile = (ty == 0 ? 0 : ty == 3 ? 6 : 3) + (tx == 0 ? 0 : tx == 9 ? 2 : 1);
+                for (py = 0; py < 8; py++)
+                    for (px = 0; px < 8; px++)
+                    {
+                        u8 v;
+                        u16 *d = &frame[(y0 + ty * 8 + py) * DISPLAY_WIDTH + x0 + tx * 8 + px];
+                        if (tile == 4)   // (the inside: FillWindowPixelBuffer's white)
+                        {
+                            *d = 0xFFFF;
+                            continue;
+                        }
+                        v = tp->tiles[tile * 32 + py * 4 + px / 2];
+                        v = (px & 1) ? v >> 4 : v & 15;
+                        if (v)
+                            *d = tp->pal[v] | 0x8000;
+                    }
+            }
+        StringExpandPlaceholders(sLine, U3D_Text(SYSTEM_BANKS + 0x9F, sChat.slot[k].msg));
+        for (i = 0, x = x0 + 10; sLine[i] != EOS && sLine[i] != CHAR_NEWLINE && x < x0 + 72; i++)
+        {
+            u32 w = MP_RenderFontGlyph(FONT_SMALL, sLine[i], 2, 1, 3), gx, gy;
+            for (gy = 0; gy < 16 && y0 + 8 + gy < DISPLAY_HEIGHT; gy++)
+            {
+                const u32 *rows = gy < 8 ? gCurGlyph.gfxBufferTop : gCurGlyph.gfxBufferBottom;
+                for (gx = 0; gx < w && gx < 16 && x + gx < (u32)x0 + 72; gx++)
+                {
+                    u8 c = (rows[(gx < 8 ? 0 : 8) + gy % 8] >> ((gx % 8) * 4)) & 0xF;
+                    if (c == 2)
+                        frame[(y0 + 8 + gy) * DISPLAY_WIDTH + x + gx] = 0x8000 | RGB(12, 12, 12);   // (dark grey)
+                    else if (c == 3)
+                        frame[(y0 + 8 + gy) * DISPLAY_WIDTH + x + gx] = 0x8000 | RGB(26, 26, 25);   // (its shadow)
+                }
+            }
+            x += w;
+        }
+    }
+}
+
 static void CrowdStart(void)   // (CROWD_Init: the zone's setup, its areas filled as the spawn rate would have)
 {
     u32 i, a, n, k, off;
@@ -1299,6 +1398,7 @@ static void CrowdStart(void)   // (CROWD_Init: the zone's setup, its areas fille
     if (sCrowd.cfg < 0 || sCrowds[sCrowd.cfg].interval[tz] <= 0)
         return;
     sCrowd.zone = CurrentZone(), sCrowd.counter[0] = sCrowd.counter[1] = 0;
+    ChatStart(tz);
     for (a = 0; a < sCrowds[sCrowd.cfg].areas && a < 2; a++)
     {
         n = sCrowds[sCrowd.cfg].area[a][5] * 6 / sCrowds[sCrowd.cfg].interval[tz];
@@ -1328,6 +1428,8 @@ static void CrowdFrame(void)
         return;
     }
     tz = TimeZoneNow();
+    if (sCrowd.tick == 0)   // (CROWD_UpdateChatter, a field frame each)
+        ChatFrame(tz);
     if ((sCrowd.tick ^= 1) && sCrowds[sCrowd.cfg].interval[tz] > 0)   // (UpdateSpawns, a field frame each)
         for (a = 0; a < sCrowds[sCrowd.cfg].areas && a < 2; a++)
         {
@@ -8199,6 +8301,11 @@ bool8 U3D_Vm_DebugRun(u16 id)
         return FALSE;
     ScriptContext_SetupScript(Unova_EventScript_Scene);
     return TRUE;
+}
+
+static bool8 U3D_Vm_SceneRunning(void)   // (the crowd's chatter waits while one of Black's scripts runs)
+{
+    return sThread.alive;
 }
 
 u16 U3D_Vm_DebugGet(bool8 flag, u16 id)

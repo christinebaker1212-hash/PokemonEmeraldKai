@@ -15,5 +15,7 @@ wait 10
 shotburst cr_more 300 30
 wait 300
 mp where
+shotburst cr_chat 600 8
+wait 620
 echo [cr] done
 quit
