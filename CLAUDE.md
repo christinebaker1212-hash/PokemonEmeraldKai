@@ -19,6 +19,8 @@ runs it and ships the pack; never committed: sinnoh/ is ignored; no ROM needed);
 walk; tools/sinnoh/test_poc.sh POKEPLATINUM_DIR [ROM]; COOP_NOTES "SINNOH's 3D engine" (doors, moving lakes, buildings drawn by
 Platinum's material / shape lists: COOP_NOTES "SINNOH's doors, moving lakes and the feet row"); its people's sprites and battle pictures
 in sinnoh/platinum_gfx.pak (tools/sinnoh/build_gfx.py, src/sinnoh/s3d_gfx.c; test sinnoh_pics).
+The user's Platinum ROM (US Rev 1 .nds, for what the decomp lacks; never commit or ship it):
+https://drive.google.com/file/d/1NqTPVxXFvfEyDDtNioeep8yC0tUF0xa7/view?usp=sharing (SINNOH_HANDOFF "The user's Platinum ROM").
 **SINNOH's words and scripts are Platinum's own** (the user, 2026-11-02): never write original dialogue or scripts
 for SINNOH. They're converted from the decomp when the game is built, never committed: sinnoh/platinum_text.pak
 (tools/sinnoh/build_text.py) and sinnoh/platinum_scripts.inc (tools/sinnoh/gen_scripts.py; maps hold only

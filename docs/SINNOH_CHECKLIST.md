@@ -195,7 +195,7 @@ Each segment: Platinum's own map scripts, people, triggers, words and battles, p
 - [~] CANALAVE LIBRARY's TV news of LAKE VALOR (StartLibraryTV, Platinum's src/library_tv): the scene plays and the
       screen holds dark for the TV's length (1.185.13, sinnoh_library_explosion); its picture (the intro's TV frame,
       demo/intro/intro_tv.narc, graphic/library_tv.narc, the rolling scan lines) needs Platinum's ROM: the decomp
-      doesn't hold those archives (2026-11-15: asked the user for one, as UNOVA's ROM comes)
+      doesn't hold those archives (the user's ROM: SINNOH_HANDOFF "The user's Platinum ROM", 2026-11-15)
 - [x] Friends' segments on each other's TV: CO-OP's record mixing carries each game's kept segments; the TV keeps 8
       of friends' and airs them with the friend's name (sinnoh_tv_mix: COOP_NOTES "SINNOH's TV")
 - [x] JUBILIFE TV's floors and their people: every script converts; the 3F questionnaire man's two words on the

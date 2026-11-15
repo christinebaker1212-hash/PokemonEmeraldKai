@@ -56,6 +56,13 @@ Queued after the 1.61.6 release and the KANTO / JOHTO sweep (the user's plan, 20
 - Data: pret/pokeplatinum (tools/sinnoh/fetch_decomp.sh, pinned commit). The user's ROM, for cross-checks only:
   Google Drive file 13njqEG8nKIltrVkMAgXtM5E6X3dV33as, "Pokemon - Platinum Version (USA) (Rev 1).zip" (about 51 MB;
   the .nds inside), downloaded into its own folder outside the repo. Nothing from either is committed.
+- **The user's Platinum ROM** (sent again 2026-11-15, the one to use): "POKEMON PL", CPUE01 (USA, Rev 1), the .nds itself
+  (128 MB, SHA-1 0862ec35b24de5c7e2dcb88c9eea0873110d755c):
+  https://drive.google.com/file/d/1NqTPVxXFvfEyDDtNioeep8yC0tUF0xa7/view?usp=sharing
+  Download it outside the repository (e.g. `~/.cache/moemon/platinum_rom/`), never commit or ship it. Direct download:
+  `curl -sSL -o pokeplatinum.nds "https://drive.usercontent.google.com/download?id=1NqTPVxXFvfEyDDtNioeep8yC0tUF0xa7&export=download&confirm=t"`
+  For what the decomp doesn't hold (the library TV's archives, the scratch-off cards' art...). A release that needs it
+  reads it from a repository secret the user adds (as UNOVA_ROM_URL), e.g. PLATINUM_ROM_URL.
 
 ## Platinum's own words and scripts: where it stands (2026-11-02) and what's next
 
