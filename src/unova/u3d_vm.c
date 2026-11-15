@@ -6585,6 +6585,36 @@ static bool8 DragonTileIn(u32 unit, u32 pose, s32 x, s32 z)
     return FALSE;
 }
 
+// DRAYDEN's gym's rails (u3d_gyms.h sDragonRails): the ways out of a tile's rail cell at about height H, OR'd over
+// its lines there; FALSE when no rail of it is at that height (the floor below a walkway, say)
+static bool8 DragonRailWays(s32 x, s32 z, float h, u8 *ways)
+{
+    u32 i;
+    bool8 on = FALSE;
+    *ways = 0;
+    for (i = 0; i < ARRAY_COUNT(sDragonRails); i++)
+        if (sDragonRails[i].x == x && sDragonRails[i].z == z && fabsf(h - sDragonRails[i].h) <= 10.0f)
+            *ways |= sDragonRails[i].ways, on = TRUE;
+    return on;
+}
+
+// u3d.c U3D_StepBlocked: a step in DRAYDEN's gym from grid tile FX, FZ (at height HF) to TX, TZ (its ground HT) that
+// gets on or off a rail other than as Black lets it (along its line, across within its width, at its ends): none
+bool8 U3D_Vm_RailWayBlocked(s32 fx, s32 fz, float hf, s32 tx, s32 tz, float ht)
+{
+    u8 wa, wb, d, back;
+    bool8 onA, onB;
+    if (!Ready() || CurrentZone() != DRAGON_GYM_ZONE)
+        return FALSE;
+    d = tz < fz ? 1 : tz > fz ? 2 : tx < fx ? 4 : 8;
+    back = d == 1 ? 2 : d == 2 ? 1 : d == 4 ? 8 : 4;
+    onA = DragonRailWays(fx, fz, hf, &wa);
+    onB = DragonRailWays(tx, tz, ht, &wb);
+    if (!onA && !onB)
+        return FALSE;
+    return !((onA && (wa & d)) || (onB && (wb & back)));
+}
+
 // u3d.c U3D_StepBlocked: a dragon's line its pose keeps closed (grid tile X, Z)
 bool8 U3D_Vm_DragonBlocked(s32 x, s32 z)
 {

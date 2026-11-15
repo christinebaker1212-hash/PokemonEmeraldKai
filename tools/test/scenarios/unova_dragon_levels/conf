@@ -1,0 +1,9 @@
+# DRAYDEN's gym's levels (Black's rails got on and off only at their ends: u3d_vm.c U3D_Vm_RailWayBlocked from
+# u3d_gyms.h sDragonRails): from the floor a walkway's side is no step (27,47 stays), from the high walkway (27,30) the
+# drop beside it is no step while the walkway goes on (28,30); DRAYDEN still reachable from the door (every dragon's
+# way open: `mp u3dreach`). Shots dl_*.png.
+MODE=1
+TMO=200
+ENV_A="MOEMON_DEBUG_REGION=4 MOEMON_DEBUG_PARTY=6:100"
+EXPECT_A=("where map 49.19 xy 27,47" "where map 49.19 xy 27,30" "where map 49.19 xy 28,30" "reach 27,3: yes" "[dl] done")
+UNEXPECT_A=("[crash]" "TIMEOUT" "xy 27,46" "xy 26,30")

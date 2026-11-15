@@ -616,6 +616,30 @@ bool8 U3D_ObjectsApart(const struct ObjectEvent *a, const struct ObjectEvent *b)
 // (Emerald's non-animated door), so a door is never walked into from the side: the Cold Storage's container from the
 // row beside it skipped the trigger in front (map coordinates, MAP_OFFSET in). The player on a floor of height areas
 // walks only where that floor is; on the ground, only where the grid lets them
+static float TileHeight(s32 gtx, s32 gtz, float near);
+static bool8 PlayerHeight(float *h);
+
+// a tile of a rail's (its own camera: the rail maps' cells)
+static bool8 RailTile(s32 gtx, s32 gtz)
+{
+    const U3dCell *c = gtx >= 0 && gtz >= 0 ? Cell(gtx / 32, gtz / 32) : NULL;
+    return c && c->cam && c->cam[(gtz % 32) * 32 + gtx % 32][2] != 0;
+}
+
+// DRAYDEN's gym's levels (Black's own: its walkways and the dragons' necks are rails at their own heights, got on
+// and off only at their ends, u3d_vm.c U3D_Vm_RailWayBlocked); the flattened grid would let the player step from a
+// walkway onto the floor below or another walkway beside it
+static bool8 RailStepBlocked(s16 fromX, s16 fromY, s32 gtx, s32 gtz)
+{
+    bool8 U3D_Vm_RailWayBlocked(s32 fx, s32 fz, float hf, s32 tx, s32 tz, float ht);
+    s32 ftx, ftz;
+    float h;
+    if (!PlayerHeight(&h))
+        return FALSE;
+    MapToGrid(fromX, fromY, &ftx, &ftz);
+    return U3D_Vm_RailWayBlocked(ftx, ftz, h, gtx, gtz, TileHeight(gtx, gtz, h));
+}
+
 bool8 U3D_StepBlocked(bool8 isPlayer, s16 fromX, s16 fromY, s16 x, s16 y)
 {
     if (!U3D_IsUnovaGroup(gSaveBlock1Ptr->location.mapGroup))
@@ -629,6 +653,8 @@ bool8 U3D_StepBlocked(bool8 isPlayer, s16 fromX, s16 fromY, s16 x, s16 y)
         MapToGrid(x, y, &gtx, &gtz);
         if (U3D_Vm_DragonBlocked(gtx, gtz))
             return TRUE;   // (DRAYDEN's gym: a dragon's way its pose keeps closed)
+        if (U3D_CurrentZone() == 121 && RailStepBlocked(fromX, fromY, gtx, gtz))
+            return TRUE;   // (... and its walkways' own heights: no stepping off one onto another level)
     }
     if (sHexAny && isPlayer)
     {
@@ -932,6 +958,12 @@ static struct
     float focal;
     float right[3], up[3], fwd[3], eye[3];
 } sView;
+
+static bool8 PlayerHeight(float *h)   // (the player's ground height now, when the view has it)
+{
+    *h = sView.playerH;
+    return sView.havePlayerH;
+}
 
 static u16 sColor[H][W];
 static float sDepth[H][W];
@@ -2515,6 +2547,78 @@ static void U3dLine(int line, u16 layers[4][DISPLAY_WIDTH])
 }
 
 // ------------------------------------------------------------------------------------------------ every frame
+// (mp u3dheights: the ground's height a tile, the surface nearest the player's, as tiles above or below them, around)
+// (mp u3dreach X Y: whether map tile X, Y can be walked to from the player, by the map's collision and the levels'
+// rule above, every dragon's way taken as open; the tiles walked carry their heights)
+void U3D_DebugReach(s16 tx, s16 ty, bool8 levels)
+{
+    static s16 sQ[4096][2];
+    static float sH[64][64];
+    static u8 sSeen[64][64];
+    s32 head = 0, tail = 0, n = 0;
+    float h0;
+    if (!PlayerHeight(&h0))
+        h0 = 0;
+    memset(sSeen, 0, sizeof(sSeen));
+    sQ[tail][0] = gSaveBlock1Ptr->pos.x, sQ[tail][1] = gSaveBlock1Ptr->pos.y, tail++;
+    if (sQ[0][0] < 0 || sQ[0][0] >= 64 || sQ[0][1] < 0 || sQ[0][1] >= 64)
+        return;
+    sSeen[sQ[0][1]][sQ[0][0]] = 1, sH[sQ[0][1]][sQ[0][0]] = h0;
+    while (head < tail)
+    {
+        static const s8 sD[4][2] = {{0, -1}, {0, 1}, {-1, 0}, {1, 0}};
+        s16 x = sQ[head][0], y = sQ[head][1];
+        u32 d;
+        head++, n++;
+        for (d = 0; d < 4; d++)
+        {
+            s16 nx = x + sD[d][0], ny = y + sD[d][1];
+            s32 fx, fz, gx, gz;
+            float h = sH[y][x], to;
+            if (nx < 0 || ny < 0 || nx >= 64 || ny >= 64 || sSeen[ny][nx] || tail >= 4096)
+                continue;
+            if (MapGridGetCollisionAt(nx + MAP_OFFSET, ny + MAP_OFFSET))
+                continue;
+            MapToGrid(x + MAP_OFFSET, y + MAP_OFFSET, &fx, &fz);
+            MapToGrid(nx + MAP_OFFSET, ny + MAP_OFFSET, &gx, &gz);
+            to = TileHeight(gx, gz, h);
+            if (levels)
+            {
+                bool8 U3D_Vm_RailWayBlocked(s32 fx, s32 fz, float hf, s32 tx, s32 tz, float ht);
+                if (U3D_Vm_RailWayBlocked(fx, fz, h, gx, gz, to))
+                    continue;
+            }
+            sSeen[ny][nx] = 1, sH[ny][nx] = to;
+            sQ[tail][0] = nx, sQ[tail][1] = ny, tail++;
+        }
+    }
+    printf("[test] reach %d,%d: %s (%d tiles walked)\n", tx, ty,
+           tx >= 0 && ty >= 0 && tx < 64 && ty < 64 && sSeen[ty][tx] ? "yes" : "no", n);
+}
+
+void U3D_DebugHeights(void)
+{
+    s32 x0, z0, x, z;
+    float h = sView.havePlayerH ? sView.playerH : 0.0f;
+    MapToGrid(gSaveBlock1Ptr->pos.x + MAP_OFFSET, gSaveBlock1Ptr->pos.y + MAP_OFFSET, &x0, &z0);
+    printf("[u3d] heights round %d,%d (player %.1f): a tile's nearest surface, eighths of a tile from the player's\n",
+           x0, z0, h);
+    for (z = z0 - 12; z <= z0 + 12; z++)
+    {
+        char line[200];
+        u32 n = 0;
+        for (x = x0 - 20; x <= x0 + 20 && n < sizeof(line) - 4; x++)
+        {
+            float t = TileHeight(x, z, h);
+            s32 d = isnan(t) ? 99 : (s32)roundf((t - h) / 2.0f);
+            line[n++] = x == x0 && z == z0 ? '@' : d == 99 ? '#' : d == 0 ? '.' : d > 0 ? (d > 9 ? '^' : '0' + d)
+                                                                            : (d < -9 ? 'v' : 'a' - 1 - d);
+        }
+        line[n] = 0;
+        printf("[u3d] %3d %s\n", z, line);
+    }
+}
+
 float U3D_TestGround(s32 mapX, s32 mapY, float near)
 {
     s32 map = MapIndex(gSaveBlock1Ptr->location.mapGroup, gSaveBlock1Ptr->location.mapNum);

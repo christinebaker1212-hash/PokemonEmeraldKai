@@ -72,7 +72,11 @@ systems. Tick an entry only once it plays as Black's and has been seen running.
 - [x] Mass outbreaks (2026-11-15; u3d_wild.c SwarmFill / U3D_SwarmZone): after the HALL OF FAME (flag 0x960) one of
       Black's 17 swarm routes a day (sSwarmTable: the day and the player's ID pick it), 400 in 1000 of its grass's
       POKeMON at Lv 15-55, and its line first on the gates' boards; `mp u3dswarm`, scenario unova_news_board
-- [ ] The dragons' levels in DRAYDEN's gym (walkways at their own heights, so the poses force Black's route)
+- [x] The dragons' levels in DRAYDEN's gym (2026-11-15): its walkways and the dragons' necks are Black's rails, got
+      on and off only as field_rail.c lets them (along a line, across within its width, off its ends): each cell's
+      ways at its height (tools/unova/gen_gyms.py rail_moves -> u3d_gyms.h sDragonRails), a step any other way none
+      (u3d_vm.c U3D_Vm_RailWayBlocked from u3d.c U3D_StepBlocked), so the poses force Black's route; scenario
+      unova_dragon_levels (`mp u3dheights`, `mp u3dreach X Y`)
 
 ## 2. Gyms
 

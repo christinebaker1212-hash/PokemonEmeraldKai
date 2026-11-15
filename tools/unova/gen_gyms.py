@@ -242,6 +242,63 @@ def dragon_tiles():
     return out
 
 
+def rail_moves(zone):
+    """Black's rails walked as Black walks them (ov021 field_rail.c: a rail is walked along its line, across it within
+    its width, and left or joined only at its ends): [(tile x, tile z, height, the ways out as bits: 1 up, 2 down,
+    4 left, 8 right)] for each cell of each line (its height that line's there)"""
+    rail = rails.rail_files()[zone]
+    r = rails.load(rail)
+    dirs = {(0, -1): 1, (0, 1): 2, (-1, 0): 4, (1, 0): 8}
+    entries = {}
+
+    def cell_of(p):
+        return (int(math.floor(p[0] / rails.CELL)), int(math.floor(p[2] / rails.CELL)))
+
+    for li, line in enumerate(r['lines']):
+        n = max(1, line['length'])
+        length = n * rails.CELL
+        mine = {}
+        for off in range(n):
+            half = int(rails._width_at(r, li, off * rails.CELL, length) // rails.CELL)
+            for s_ in range(-half, half + 1):
+                for f in (0.0, 0.5, 1.0):
+                    p = rails.place(r, li, off + f, s_)
+                    mine.setdefault(cell_of(p), p[1])
+        # (its ends: the cells beyond them, straight on, are its ways off)
+        exits = []
+        for at, step in ((0.0, 0.5), (float(n), -0.5)):
+            half = int(rails._width_at(r, li, min(at, n - 1) * rails.CELL, length) // rails.CELL)
+            for s_ in range(-half, half + 1):
+                a, b = rails.place(r, li, at, s_), rails.place(r, li, at + step, s_)
+                dx, dz = a[0] - b[0], a[2] - b[2]
+                k = math.hypot(dx, dz) or 1.0
+                e = cell_of((a[0] + dx / k * rails.CELL, 0, a[2] + dz / k * rails.CELL))
+                exits.append((cell_of(a), e))
+        mask = {c: 0 for c in mine}
+        for c in mine:
+            for (dx, dz), bit in dirs.items():
+                if (c[0] + dx, c[1] + dz) in mine:
+                    mask[c] |= bit
+        for c, e in exits:
+            d = (e[0] - c[0], e[1] - c[1])
+            if c in mask:
+                if d in dirs:
+                    mask[c] |= dirs[d]
+                else:   # (a slant's end: both of its ways)
+                    for (dx, dz), bit in dirs.items():
+                        if dx and dx == d[0] or dz and dz == d[1]:
+                            mask[c] |= bit
+        for c, y in mine.items():
+            key = None
+            for (cx, cz, h) in entries:
+                if (cx, cz) == c and abs(h - y) <= 4:
+                    key = (cx, cz, h)
+                    break
+            key = key or (c[0], c[1], y)
+            entries[key] = entries.get(key, 0) | mask[c]
+    return sorted((x, z, int(round(h)), m) for (x, z, h), m in entries.items())
+
+
 def main():
     reqs = requirements()
     rows = rides()
@@ -286,6 +343,14 @@ def main():
                 "GetRotateAnim)\n")
         f.write('static const s8 sDragonRotateAnim[4][4] = {%s};\n' % ', '.join(
             '{%s}' % ', '.join(str(v) for v in row) for row in rot))
+        moves = rail_moves(DRAGON_ZONE)
+        f.write("// DRAYDEN's gym's rails walked as Black's (field_rail.c): each cell of a line at its height, the ways out of it\n"
+                "// (along the line, across it within its width, off its ends: 1 up, 2 down, 4 left, 8 right); a step onto\n"
+                "// or off a rail any other way is none (u3d.c RailStepBlocked)\n")
+        f.write('static const struct { u8 x, z; s16 h; u8 ways; } sDragonRails[%d] = {\n' % len(moves))
+        for k in range(0, len(moves), 6):
+            f.write('    %s,\n' % ', '.join('{%d, %d, %d, %d}' % m for m in moves[k:k + 6]))
+        f.write('};\n')
         write_cannons(f)
         write_carts(f)
     print('%s: %d rides, %d dragon tiles' % (path, len(rows), sum(len(t) for unit in dt for t in unit)))

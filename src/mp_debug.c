@@ -4788,6 +4788,18 @@ void MP_TestCommand(const char *cmd, const char *arg)
         if (sscanf(arg, "%d %d", &local, &kind) == 2)
             U3D_Vm_DebugMotion(local, kind);
     }
+    else if (strcmp(cmd, "u3dreach") == 0)   // u3dreach X Y: can the player walk to map tile X, Y (u3d.c)
+    {
+        void U3D_DebugReach(s16 tx, s16 ty, bool8 levels);
+        int x = 0, y = 0, levels = 1;
+        if (sscanf(arg, "%d %d %d", &x, &y, &levels) >= 2)
+            U3D_DebugReach(x, y, levels);
+    }
+    else if (strcmp(cmd, "u3dheights") == 0)   // the ground around the player, by height (u3d.c U3D_DebugHeights)
+    {
+        void U3D_DebugHeights(void);
+        U3D_DebugHeights();
+    }
     else if (strcmp(cmd, "u3dswarm") == 0)   // today's UNOVA outbreak's zone (0xFFFF: none)
     {
         u16 U3D_SwarmZone(void);
