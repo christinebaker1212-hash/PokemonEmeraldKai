@@ -1738,6 +1738,44 @@ bool8 U3D_ExpTexPlaying(u16 model, u8 anim)
     return sExp.gim >= 0 && model < sExp.n && anim < EXP_TEX && (sExp.m[model].texOn >> anim & 1) && sExp.m[model].tplay[anim];
 }
 
+// the frames of a model's animation ANIM (a joint or a texture track)
+u16 U3D_ExpAnimFrames(u16 model, u8 anim)
+{
+    return sExp.gim >= 0 && model < sExp.n ? ExpFrames(model, anim) : 0;
+}
+
+// the group a model's texture track ANIM touches first drawn with a texture of its own, W x H, cleared: its texels
+// (R, G, B, A a byte each, from the low) for the caller to write (a gate board's lane, its text drawn into it as
+// gimmick_obj_elboard.c does); the same one again on a later visit; NULL when there's no such track
+u32 *U3D_ExpOwnTexture(u16 model, u8 anim, u16 w, u16 h)
+{
+    typeof(*sPack.kind) *kd;
+    U3dGroup *g;
+    static u32 sBase;   // (the pack's own textures: those past it are these)
+    if (sExp.gim < 0 || model >= sExp.n)
+        return NULL;
+    kd = &sPack.kind[sPack.gim[sExp.gim].m[model].kind];
+    if (anim >= kd->nanims || !kd->isTex[anim] || kd->ngroups[anim] == 0 || kd->mesh < 0)
+        return NULL;
+    if (sBase == 0 || sBase > sPack.ntex)
+        sBase = sPack.ntex;
+    g = &sPack.mesh[kd->mesh].g[kd->groups[anim][0]];
+    if (g->tex < (s32)sBase || (u32)g->tex >= sPack.ntex || sPack.tex[g->tex].w != w || sPack.tex[g->tex].h != h)
+    {
+        U3dTex *t = realloc(sPack.tex, sizeof(U3dTex) * (sPack.ntex + 1));
+        u16 *shown = realloc(sPack.shown, sizeof(u16) * (sPack.ntex + 1));
+        if (t == NULL || shown == NULL)
+            return NULL;
+        sPack.tex = t, sPack.shown = shown;
+        t[sPack.ntex].w = w, t[sPack.ntex].h = h, t[sPack.ntex].soft = FALSE;
+        t[sPack.ntex].px = calloc((u32)w * h, 4);
+        shown[sPack.ntex] = sPack.ntex;
+        g->tex = sPack.ntex++;
+    }
+    memset(sPack.tex[g->tex].px, 0, (u32)w * h * 4);
+    return sPack.tex[g->tex].px;
+}
+
 bool8 U3D_ExpPlaying(u16 model)
 {
     return sExp.gim >= 0 && model < sExp.n && sExp.m[model].playing;

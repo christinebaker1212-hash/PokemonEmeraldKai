@@ -353,6 +353,7 @@ static void FlagTo(u16 id, bool8 on)
 
 bool8 U3D_Vm_Flag(u16 id) { return FlagOn(id); }
 void U3D_Vm_SetFlag(u16 id) { FlagTo(id, TRUE); }
+void U3D_Vm_ClearFlag(u16 id) { FlagTo(id, FALSE); }
 
 // ------------------------------------------------------------------------------------------------ the zone's events
 static u16 CurrentZone(void)
@@ -5756,6 +5757,7 @@ void U3D_Vm_FieldFrame(void)
     IcaFrame();
     MotionFrame();
     BoatFrame();
+    U3D_Elboard_Frame();
 }
 
 void U3D_Vm_FieldShown(void)
@@ -5766,6 +5768,10 @@ void U3D_Vm_FieldShown(void)
     {
         void U3D_TownMapArrive(u16 zone);
         U3D_TownMapArrive(CurrentZone());   // (Black's arrival flags: FLY's towns, src/unova/u3d_townmap.c)
+    }
+    {
+        void U3D_Elboard_Clear(void);
+        U3D_Elboard_Clear();
     }
     if (CurrentZone() == DRAGON_GYM_ZONE)   // (the gyms' machinery: Black's models, u3d.c U3D_Exp*)
     {
@@ -5827,6 +5833,8 @@ void U3D_Vm_FieldShown(void)
         U3D_ExpLoad(64);
         memset(&sArc, 0, sizeof(sArc));
     }
+    else if (U3D_Elboard_Load(CurrentZone()))   // (ov048: a gate's news board, u3d_elboard.c)
+        ;
     else if (CurrentZone() == ZONE_NACRENE_GYM)   // (ov040 Init: the shelf moved, if it has been)
     {
         U3D_ExpLoad(40);
@@ -7158,6 +7166,17 @@ static void RoamMove(struct UnovaRoamer *r)
         to = Random() % 16;
     while (to == r->loc);
     r->loc = to;
+}
+
+// (MOVE_POKEMON_FindEntryByZone: a roamer's zone has its weather, TORNADUS's strong storm, THUNDURUS's thunderstorm;
+// zone_weather.c WEATHER_GetZoneWeatherId asks it first) 0xFFFF when none is there
+u16 U3D_Vm_RoamerWeather(u16 zone)
+{
+    u32 i;
+    for (i = 0; i < 2; i++)
+        if (sWork.roam[i].state == 1 && sWork.roam[i].loc < 16 && sRoamZones[sWork.roam[i].loc] == zone)
+            return sWork.roam[i].species == 642 ? 6 : 7;
+    return 0xFFFF;
 }
 
 static void RoamSpawn(u8 slot, u16 national)

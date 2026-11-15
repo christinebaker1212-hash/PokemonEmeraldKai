@@ -35,6 +35,7 @@ SETUPS = {
     44: ('lift (CLAY, the lobby)', 0x021F39E8),
     45: ('switch toggle (BRYCEN)', 0x021F3B50),
     46: ('rotating room (DRAYDEN)', 0x021F4120),
+    48: ('gate news board (the gates)', 0x021F4EA4),   # (gGateExpObjSetups[1]: the English game's, text mode 0)
     64: ('arc effect, the LIGHT STONE (N\'s Castle, zone 278)', 0x021F3C30),   # (gArcEffectDefaultUnitSetup)
     65: ('time effect, by day (zone 389)', 0x021F38F8),
     165: ('time effect, by night (zone 389)', 0x021F3918, 65),   # (ov065's night setup: its image, a number of its own)
@@ -363,7 +364,12 @@ def _place64(img):
     return [((0.0, 0.0, 0.0), 0, 1)] * 2
 
 
-PLACES = {64: _place64, 65: _place65, 165: _place65, 38: _place38, 39: _place39, 40: _place40, 41: _place41, 42: _place42, 43: _place43, 44: _place44, 45: _place45,
+# a gate's news board (ov048 FIELD_GIMMICK_GATE_PlaceBoardModel): placed by the zone's record, hidden until then
+def _place48(img):
+    return [((0.0, 0.0, 0.0), 0, 1)]
+
+
+PLACES = {48: _place48, 64: _place64, 65: _place65, 165: _place65, 38: _place38, 39: _place39, 40: _place40, 41: _place41, 42: _place42, 43: _place43, 44: _place44, 45: _place45,
           46: _place46}   # (the gimmicks drawn so far)
 
 

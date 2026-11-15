@@ -1,0 +1,21 @@
+pressuntil A field 6000
+wait 60
+mash B 12 20
+mp u3dclear
+wait 30
+mp u3dzone 27 8 5
+wait 200
+mash B 6 15
+press UP 2
+wait 30
+shotburst nb_board 900 60
+wait 920
+mp u3dzone 131 8 5
+wait 200
+mash B 6 15
+press UP 2
+wait 30
+shotburst nb_gear 600 60
+wait 620
+echo [nb] done
+quit

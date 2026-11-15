@@ -56,7 +56,18 @@ systems. Tick an entry only once it plays as Black's and has been seen running.
   fades on screens 4 / 8 (FADE_Start 0xC) are white now. Scenario unova_light_stone (`mp u3darc LOCAL`: the throw
   without N's battle before it).
 - [ ] Face-up portraits (FLD_FACEUP 0x1D3-0x1D5: N's CASTLE, NIMBASA)
-- [ ] The gates' electric news boards (GIMMICK_OBJ_ELBOARD 0x17E)
+- [x] The gates' electric news boards (ov048, 2026-11-15; src/unova/u3d_elboard.c, data tools/unova/gen_elboard.py ->
+      u3d_elboard.h; pack gimmick 48, the English game's lanes): each gate's record places the board and its TV's
+      picture; the lines Black writes (the date, "place: weather" for its four places by Black's weather calendar and
+      the roamers' storms, the day's three sayings or the story's news by their flags, the week's notice) drawn in the
+      small font into each lane's own texture (u3d.c U3D_ExpOwnTexture), the lamps flickering orange / amber, scrolled
+      one after another by the lanes' tracks as GIMMICK_OBJ_ELBOARD_UpdateLine; scenario unova_news_board. Not yet:
+      the HALL OF FAME team for a day after the LEAGUE (gate points, 0x960 / 0x97B), the outbreak line (no outbreaks
+      yet, below), the board's camera view (0x17E's own command)
+- [ ] Field weather: Black's weather calendar (ov010 calender.c: 68 zones, a weather a day; u3d_elboard.c
+      U3D_ZoneWeather already reads it for the boards) and the roamers' storms shown on the field (UNOVA's maps are
+      WEATHER_NONE now)
+- [ ] Mass outbreaks (FIELD_ENCOUNT_GetSwarmZoneId: Black's daily swarm after the LEAGUE, its board line)
 - [ ] The dragons' levels in DRAYDEN's gym (walkways at their own heights, so the poses force Black's route)
 
 ## 2. Gyms
@@ -134,7 +145,7 @@ records, item lookups, the POKeDEX ratings, trainer records and the sounds liste
 - [ ] The ENTRALINK's own forest maps' extras: WHITE FOREST / BLACK CITY's people (0x1C5 / 0x1C6)
 - [x] The C-GEAR as UNOVA's device (1.199.7, the approved mock-up: src/unova/u3d_screen.c; START > C-GEAR): IR with
       the friend in front (TRADE, BATTLE), WIRELESS (the CO-OP menu), ENTRALINK; scenarios unova_cgear, unova_cgear_ir
-- [ ] The XTRANSCEIVER's calls (friends' video calls)
+- The XTRANSCEIVER's friends' video calls: closed (the user, 2026-11-15: "video calls aren't important")
 - [x] Dark grass: two POKeMON at once (Black's double wild battles: 40 in 100 with two able to battle,
       wild_encounter.c U3dStartWild; test: mp u3dwild 3 b, MOEMON_U3D_DARK_DOUBLE=100)
 - [x] Shaking grass, dust clouds, rippling water, birds' shadows (Black's ov021 effect_encount.c: after the first
