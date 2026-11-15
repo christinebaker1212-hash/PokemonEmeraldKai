@@ -1079,8 +1079,49 @@ static void DragonReset(void);
 // (BURGH's gym, the honey's trainers: Black's StartScriptedEvent run after its script, PlateDoorsFrame)
 static u8 sPdScripted, sPdScriptedVariant;
 static const float sPdEffectPos[2][3] = {{616, 0, 408}, {328, 0, 472}};   // (gPlateDoorsEffectPos)
-enum { W_BGM_STOPPED = 100, W_EXP_ANIM, W_LIFT_RIDE, W_MUSICAL, W_SUBWAY_MAP, W_BMODEL, W_BMODEL_DOOR, W_SHAKE };
-static u16 sBModelWait;   // (W_MUSICAL: the MUSICAL dressing room closed)   // (W_EXP_ANIM: a gym model's animation to its end, sExpWait)
+enum { W_BGM_STOPPED = 100, W_EXP_ANIM, W_LIFT_RIDE, W_MUSICAL, W_SUBWAY_MAP, W_BMODEL, W_BMODEL_DOOR, W_SHAKE, W_TIMEFX };
+static u16 sBModelWait;
+// zone 389's time effect (ov065): sWork.white's TIMEFX_PENDING is Black's isEffectPending (its gimmick save 0x36)
+#define ZONE_TIME_EFFECT 389
+#define TIMEFX_PENDING 0x80
+static struct { bool8 playing, night, peaked; } sTimeFx;
+static u8 TimeZoneNow(void)   // (Black's time of day: 0 morning, 1 day, 2 evening, 3 night, 4 late night)
+{
+    u8 h;
+    RtcCalcLocalTime();
+    h = gLocalTime.hours;
+    return h < 5 ? 4 : h < 10 ? 0 : h < 17 ? 1 : h < 20 ? 2 : 3;
+}
+
+static void TimeFxStart(void)   // (StartEffect: shown, both tracks played, its sound)
+{
+    if (CurrentZone() != ZONE_TIME_EFFECT)
+        return;
+    sTimeFx.playing = TRUE, sTimeFx.peaked = FALSE;
+    U3D_ExpHide(0, FALSE);
+    U3D_ExpAnim(0, 0, 0, TRUE);
+    U3D_ExpTex(0, 1, TRUE, 0, TRUE, FALSE);
+    PlaySE(sTimeFx.night ? SE_M_MOONLIGHT : SE_M_MORNING_SUN);
+    MPNet_Log("u3d vm: zone 389's time effect, by %s", sTimeFx.night ? "night" : "day");
+}
+
+static void TimeFxFrame(void)   // (Update: the day's peak sound at frame 60; at the end hidden, no longer pending)
+{
+    if (!sTimeFx.playing)
+        return;
+    if (!sTimeFx.night && !sTimeFx.peaked && U3D_ExpFrame(0) >= 60)
+    {
+        sTimeFx.peaked = TRUE;
+        PlaySE(SE_M_HEAL_BELL);
+    }
+    if (!U3D_ExpPlaying(0))
+    {
+        U3D_ExpHide(0, TRUE);
+        sTimeFx.playing = FALSE;
+        sWork.white &= ~TIMEFX_PENDING;
+        MPNet_Log("u3d vm: zone 389's time effect over");
+    }
+}   // (W_MUSICAL: the MUSICAL dressing room closed)   // (W_EXP_ANIM: a gym model's animation to its end, sExpWait)
 static u16 sExpWait;
 enum { W_NONE, W_FRAMES, W_MESSAGE, W_MESSAGE_KEY, W_KEY, W_MOVES, W_FADE, W_YESNO, W_CLOSE, W_SCREEN, W_SONG_THEN_POP, W_SE, W_CAMERA, W_CRY, W_MENU,
        W_WARP, W_PIC_KEY };   // (W_WARP: a warp's map is loading; the script goes on there: U3D_Vm_SceneStart)
@@ -3828,13 +3869,20 @@ static void Step(struct Thread *t)
             FlagTo(0x963, TRUE);
             break;
         case U3C_WORK_CmdGetTimeZone:   // Black's time of day: 0 morning, 1 day, 2 evening, 3 night, 4 late night
-        {
-            u8 h;
-            RtcCalcLocalTime();
-            h = gLocalTime.hours;
-            *WorkPtr(a[0]) = h < 5 ? 4 : h < 10 ? 0 : h < 17 ? 1 : h < 20 ? 2 : 3;
+            *WorkPtr(a[0]) = TimeZoneNow();
             break;
-        }
+        // zone 389's time effect (ov065 field_gimmick_time_effect.c; overlays share addresses, so these commands'
+        // names are another overlay's): its pending flag set, the effect started, the script waiting for its end
+        case U3C_TRCARD_SYS_ScrCmdSetRecordFlag36:
+            sWork.white |= TIMEFX_PENDING;
+            break;
+        case U3C_TRCARD_SYS_ScrCmdStartFieldProc:
+            TimeFxStart();
+            break;
+        case U3C_TRCARD_SYS_ScrCmdRunScriptTask:
+            if (sTimeFx.playing)
+                t->wait = W_TIMEFX;
+            break;
         case U3C_WORK_CmdGetTrainerCardStars:   // (Black's card's stars: the game's TRAINER CARD keeps its own)
             *WorkPtr(a[0]) = 0;
             break;
@@ -4308,6 +4356,10 @@ static void Wait(struct Thread *t)
     }
     case W_LIFT_RIDE:   // (CLAY's mine: Black's lift event, till the lift arrives)
         if (sMineRide.lift < 0 && sPlat.model < 0 && sLiftTex.model < 0)
+            t->wait = W_NONE;
+        break;
+    case W_TIMEFX:   // (zone 389's time effect over: WaitEffectEventMain)
+        if (!sTimeFx.playing)
             t->wait = W_NONE;
         break;
     case W_SHAKE:   // (the camera's shake over)
@@ -5080,6 +5132,8 @@ void U3D_Vm_FieldFrame(void)
         IceModels(FALSE);
     else if (CurrentZone() == ZONE_NIMBASA_GYM)
         CartStep();
+    else if (CurrentZone() == ZONE_TIME_EFFECT)
+        TimeFxFrame();
     else if (CurrentZone() == ZONE_DRIFTVEIL_GYM || CurrentZone() == ZONE_CLAY_LOBBY)
     {
         MineRideStep();
@@ -5139,6 +5193,18 @@ void U3D_Vm_FieldShown(void)
     {
         U3D_ExpLoad(38);
         PlateModels(TRUE);
+    }
+    else if (CurrentZone() == ZONE_TIME_EFFECT)   // (ov065 Init: by night or day, hidden unless it's pending)
+    {
+        u8 tz = TimeZoneNow();
+        sTimeFx.night = tz >= 3, sTimeFx.playing = FALSE;
+        U3D_ExpLoad(sTimeFx.night ? 165 : 65);
+        U3D_ExpHide(0, !(sWork.white & TIMEFX_PENDING));
+        if (sWork.white & TIMEFX_PENDING)
+        {
+            U3D_ExpAnim(0, 0, 0, FALSE);
+            U3D_ExpTex(0, 1, TRUE, 0, FALSE, FALSE);
+        }
     }
     else if (CurrentZone() == ZONE_NACRENE_GYM)   // (ov040 Init: the shelf moved, if it has been)
     {

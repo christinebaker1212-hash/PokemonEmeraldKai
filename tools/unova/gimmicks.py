@@ -35,6 +35,8 @@ SETUPS = {
     44: ('lift (CLAY, the lobby)', 0x021F39E8),
     45: ('switch toggle (BRYCEN)', 0x021F3B50),
     46: ('rotating room (DRAYDEN)', 0x021F4120),
+    65: ('time effect, by day (zone 389)', 0x021F38F8),
+    165: ('time effect, by night (zone 389)', 0x021F3918, 65),   # (ov065's night setup: its image, a number of its own)
 }
 
 
@@ -85,11 +87,12 @@ def member(s, res):
 
 
 def main():
-    for ov, (name, at) in SETUPS.items():
+    for ov, sv in SETUPS.items():
+        name, at = sv[:2]
         if at is None:
             print('ov%03d %s: setup not found yet' % (ov, name))
             continue
-        img = Image(ov)
+        img = Image(sv[2] if len(sv) > 2 else ov)
         s = setup(img, at)
         print('ov%03d %s: archive %s, %d resources, %d models' % (ov, name, arc_path(s['res'][0][0]), len(s['res']),
                                                                  len(s['objs'])))
@@ -324,7 +327,12 @@ def _place39(img):
                                      0x021F4CD0, 0x021F4CDC, 0x021F4D30, 0x021F4D48, 0x021F4CE8)]
 
 
-PLACES = {38: _place38, 39: _place39, 40: _place40, 41: _place41, 42: _place42, 43: _place43, 44: _place44, 45: _place45,
+# the time effect (ov065 field_gimmick_time_effect.c): its one model at sTimeEffectEffectPosition
+def _place65(img):
+    return [(img.vec(0x021F3970), 0)]
+
+
+PLACES = {65: _place65, 165: _place65, 38: _place38, 39: _place39, 40: _place40, 41: _place41, 42: _place42, 43: _place43, 44: _place44, 45: _place45,
           46: _place46}   # (the gimmicks drawn so far)
 
 
@@ -334,12 +342,13 @@ def add(pack):
     yaw, hidden)])]"""
     kinds, kind_ids, gims = [], {}, []
     for ov, place in sorted(PLACES.items()):
-        img = Image(ov)
+        img = Image(SETUPS[ov][2] if len(SETUPS[ov]) > 2 else ov)
         s = setup(img, SETUPS[ov][1])
         models = []
         for i, (where, (mr, md, tr, anims)) in enumerate(zip(place(img), s['objs'])):
             pos, yaw, hidden = (where + (0,))[:3]
-            k = (s['res'][0][0], mr, md, tr, tuple(anims))
+            k = (tuple(s['res'][mr][:2]), md, tuple(s['res'][tr][:2]),   # (by the members themselves: two setups
+                 tuple((tuple(s['res'][ar][:2]), ad) for ar, ad in anims))   # of one overlay share none, ov065's)
             if k not in kind_ids:
                 bmd = nitro.Bmd0(member(s, mr))
                 model = bmd.models[md] if md < len(bmd.models) else bmd.models[0]

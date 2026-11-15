@@ -86,7 +86,11 @@ records, item lookups, the POKeDEX ratings, trainer records and the sounds liste
       greetings by the clock and the party (0x23D with Black's record / message tables), the birthday lines (0x20D:
       Black's other days', no DS birthday here), the barred POKeMON named (0x1B9), the GeoNet country (0x246: none);
       scenario unova_greetings
-- [ ] The time effect and trainer-card records of zone 389 (0x24E-0x250), the subprocess of zones 32-34 / 254 (0x134)
+- [x] Zone 389's time effect (0x24E-0x250: overlays share addresses, so these are ov065's, not the trainer card's;
+      2026-11-15, scenario unova_time_effect): the effect model by day or night (gimmicks 65 / 165 in the pack), its
+      pending flag, played with the script waiting, then hidden (u3d_vm.c TimeFx*)
+- [ ] CASTELIA's crowds (0x134 starts ov055's field_gimmick_crowd.c in zones 32-34 / 254: people walking the
+      streets, stepping round the player, their chatter)
 - Kai's own: SURF / WATERFALL's hops and jumps (0x0C5 / 0x0C6, Black's field-move scripts: Kai's field moves); closed
   as the DS's or online: birthdays (0x1D6 / 0x1D7 / 0x20D), the research surveys (0x210-0x21F), Wi-Fi lists, GTS,
   the TRIAL HOUSE downloads, PAL PARK (0x1C0), the fixed-zone link-room warp (0x0C3)
