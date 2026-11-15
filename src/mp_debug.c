@@ -4648,6 +4648,15 @@ void MP_TestCommand(const char *cmd, const char *arg)
         sscanf(arg, "%d %d", &m, &h);
         U3D_ExpHide((u16)m, h != 0);
     }
+    else if (strcmp(cmd, "sinnohop") == 0)   // sinnohop OP A B [V8009] (hex A / B): SINNOH's `sinnoh 61` op, then A's and B's
+    {                                        // values (vars or numbers as VarGet reads them)
+        void Sinnoh_MiscCall(u16 op, u16 a, u16 b);
+        unsigned op = 0, a = 0, b = 0, v9 = 0;
+        if (sscanf(arg, "%u %x %x %x", &op, &a, &b, &v9) >= 4)
+            VarSet(VAR_0x8009, v9);
+        Sinnoh_MiscCall(op, a, b);
+        printf("[test] sinnohop %u: %u %u\n", op, VarGet(a), VarGet(b));
+    }
     else if (strcmp(cmd, "u3drun") == 0)   // u3drun ID (decimal): a Black script of this zone (or shared) as a scene
     {
         bool8 U3D_Vm_DebugRun(u16 id);

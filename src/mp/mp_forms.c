@@ -7,7 +7,7 @@
 //     appliances), SHAYMIN (1 Sky: the GRACIDEA by day; back at night), BURMY / WORMADAM (0 Plant, 1 Sandy, 2 Trash:
 //     the cloak of its last battle's ground; WORMADAM keeps the cloak it evolved in), SHELLOS / GASTRODON (1 East:
 //     where it was met: SINNOH's east of MT. CORONET);
-//   - worked out: GIRATINA (Origin holding the GRISEOUS ORB), ARCEUS (its PLATE's type), DEERLING / SAWSBUCK (the
+//   - worked out: GIRATINA (Origin holding the GRISEOUS ORB, or stored 1 by the DISTORTION WORLD), ARCEUS (its PLATE's type), DEERLING / SAWSBUCK (the
 //     season: Black's by the month, in every region), BASCULIN (blue stripes from its personality, as UNOWN's letter).
 // Each form's stats, types, Abilities, MOéMON and POKéMON pictures and icon: src/mp/mp_forms_data.c
 // (tools/moemon_forms/gen_forms.py); the pictures are picked where the game loads them (decompress.c, pokemon.c,
@@ -84,7 +84,7 @@ static u8 Worked(u16 species, u32 personality, u16 item, u8 stored)
 {
     switch (species)
     {
-    case SPECIES_GIRATINA: return item == ITEM_GRISEOUS_ORB;
+    case SPECIES_GIRATINA: return item == ITEM_GRISEOUS_ORB || stored == 1;   // (the ORB, or the DISTORTION WORLD)
     case SPECIES_ARCEUS: return PlateForm(item);
     case SPECIES_DEERLING: case SPECIES_SAWSBUCK: return U3D_Season();
     case SPECIES_BASCULIN: return (personality >> 8) & 1;
@@ -102,17 +102,20 @@ u8 MP_Form_Of(const struct BoxPokemon *box)
                   GetBoxMonData((struct BoxPokemon *)box, MON_DATA_FORM, NULL));
 }
 
+static u32 sFormChanges;   // (MP_Form_OfPersonality's answer is kept a frame, unless a form changes)
+
 void MP_Form_Set(struct BoxPokemon *box, u8 form)
 {
     u32 f = form;
     SetBoxMonData(box, MON_DATA_FORM, &f);
+    sFormChanges++;
 }
 
 // The POKeMON with this personality the game holds now (the party, the foes, the boxes): its form, for the pictures
 // (the game loads them by species and personality)
 u8 MP_Form_OfPersonality(u16 species, u32 personality)
 {
-    static u32 sLastPid, sLastFrame;
+    static u32 sLastPid, sLastFrame, sLastChanges;
     static u16 sLastSpecies;
     static u8 sLastForm;
     struct PokemonStorage *st;
@@ -121,9 +124,10 @@ u8 MP_Form_OfPersonality(u16 species, u32 personality)
         return 0;
     if (species == SPECIES_BASCULIN || species == SPECIES_DEERLING || species == SPECIES_SAWSBUCK)
         return Worked(species, personality, ITEM_NONE, 0);
-    if (sLastPid == personality && sLastSpecies == species && sLastFrame == gMain.vblankCounter1)
+    if (sLastPid == personality && sLastSpecies == species && sLastFrame == gMain.vblankCounter1 && sLastChanges == sFormChanges)
         return sLastForm;
     sLastPid = personality, sLastSpecies = species, sLastFrame = gMain.vblankCounter1, sLastForm = 0;
+    sLastChanges = sFormChanges;
     for (i = 0; i < PARTY_SIZE * 2; i++)
     {
         struct Pokemon *m = i < PARTY_SIZE ? &gPlayerParty[i] : &gEnemyParty[i - PARTY_SIZE];

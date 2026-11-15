@@ -1283,6 +1283,13 @@ void ItemUseOutOfBattle_EvolutionStone(u8 taskId)
     SetUpItemUseCallback(taskId);
 }
 
+// Moemon Kai: the GRACIDEA, on SHAYMIN by day (party_menu.c ItemUseCB_Gracidea, src/mp/mp_forms.c)
+void ItemUseOutOfBattle_Gracidea(u8 taskId)
+{
+    gItemUseCB = ItemUseCB_Gracidea;
+    SetUpItemUseCallback(taskId);
+}
+
 void ItemUseInBattle_PokeBall(u8 taskId)
 {
     const u8 *refusal = Orre_Shadow_BallRefusal();

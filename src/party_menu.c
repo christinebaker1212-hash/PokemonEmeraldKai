@@ -6075,6 +6075,33 @@ void ItemUseCB_EvolutionStone(u8 taskId, TaskFunc task)
     }
 }
 
+// Moemon Kai: the GRACIDEA (a key item: kept): SHAYMIN takes its Sky Forme by day, as Platinum's; the picture is
+// redrawn as the menu comes back
+void ItemUseCB_Gracidea(u8 taskId, TaskFunc task)
+{
+    bool8 MP_Form_Gracidea(struct Pokemon *mon);
+    struct Pokemon *mon = &gPlayerParty[gPartyMenu.slotId];
+    gPartyMenuUseExitCallback = FALSE;
+    if (!MP_Form_Gracidea(mon))
+    {
+        PlaySE(SE_SELECT);
+        DisplayPartyMenuMessage(gText_WontHaveEffect, TRUE);
+    }
+    else
+    {
+        static const u8 sChanged[] = _("{STR_VAR_1} changed Forme!{PAUSE_UNTIL_PRESS}");
+        PlaySE(SE_USE_ITEM);
+        GetMonNickname(mon, gStringVar1);
+        StringExpandPlaceholders(gStringVar4, sChanged);
+        DisplayPartyMenuMessage(gStringVar4, TRUE);
+        FreeAndDestroyMonIconSprite(&gSprites[sPartyMenuBoxes[gPartyMenu.slotId].monSpriteId]);   // (its Sky Forme's icon)
+        CreatePartyMonIconSprite(mon, &sPartyMenuBoxes[gPartyMenu.slotId], gPartyMenu.slotId);
+        AnimatePartySlot(gPartyMenu.slotId, 1);
+    }
+    ScheduleBgCopyTilemapToVram(2);
+    gTasks[taskId].func = task;
+}
+
 u8 GetItemEffectType(u16 item)
 {
     const u8 *itemEffect;

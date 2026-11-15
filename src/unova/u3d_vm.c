@@ -383,6 +383,25 @@ static const u8 *Person(u16 zone, u8 index)
 
 static u16 Le16(const u8 *p) { return p[0] | p[1] << 8; }
 
+// ---- forms (src/mp/mp_forms.c): Black's numbers are the game's, but for DEOXYS (Black: 0 Normal, 1 Attack, 2
+// Defense, 3 Speed; here 0 is the game's own Speed Forme, 1 Normal, 2 Attack, 3 Defense)
+#include "mp_forms.h"
+void MP_Form_Change(struct Pokemon *mon, u8 form);
+void MP_Form_SetRotom(struct Pokemon *mon, u8 form, u8 slot);
+u8 U3D_Vm_KaiForm(u16 species, u16 blackForm)
+{
+    if (species == SPECIES_DEOXYS)
+        return blackForm >= 3 ? 0 : blackForm + 1;
+    return blackForm;
+}
+
+static u16 BlackForm(u16 species, u8 form)
+{
+    if (species == SPECIES_DEOXYS)
+        return form == 0 ? 3 : form - 1;
+    return form;
+}
+
 // ---- Black's NPC table (a/2/0/9, the pack's version 11; ov010 scrcmd_network.c): NIMBASA's BIG STADIUM and SMALL
 // COURT trainers by the stadium's place (key A) and the story's stage (key B), the crowd's looks; the script sets a
 // person's event (EVENTDATA_SYSTEM_SetNpcEventId) or look (SetNpcObjCode) for as long as the player is in the zone
@@ -2857,8 +2876,17 @@ static void Step(struct Thread *t)
                 SetMonData(&gPlayerParty[V(0)], MON_DATA_FRIENDSHIP, &f);
             }
             break;
-        case U3C_PROC_GetMonForm:   // result, party slot (the game keeps no forms outside battle: the first)
-            *WorkPtr(a[0]) = 0;
+        case U3C_PROC_GetMonForm:   // result, party slot: its form, as Black numbers it (mp_forms.c)
+            *WorkPtr(a[0]) = V(1) < PARTY_SIZE ? BlackForm(GetMonData(&gPlayerParty[V(1)], MON_DATA_SPECIES),
+                                                           MP_Form_Of(&gPlayerParty[V(1)].box)) : 0;
+            break;
+        case U3C_PROC_ChangeMonForm:   // party slot, form (Black's numbers): DEOXYS at NACRENE's meteorite...
+            if (V(0) < PARTY_SIZE)
+                MP_Form_Change(&gPlayerParty[V(0)], U3D_Vm_KaiForm(GetMonData(&gPlayerParty[V(0)], MON_DATA_SPECIES), V(1)));
+            break;
+        case U3C_PROC_SetRotomFormMove:   // party slot, the move's slot (the one forgotten when it knows none of the
+            if (V(0) < PARTY_SIZE)        // forms' moves), form (Black's script 10315 picks it from its menu)
+                MP_Form_SetRotom(&gPlayerParty[V(0)], V(2), V(1));
             break;
         // ---- moves: Black's scripts on the game's own screens (the summary's move list, the move relearner)
         case U3C_POKEMON_FLD_SelectMonMove:   // decided (1 a move picked), its slot, party slot, the move to learn (0 none)

@@ -1,0 +1,11 @@
+# Form changers outside battle (src/mp/mp_forms.c): SINNOH's ops (s3d_misc.c `sinnoh 61`): 49 ChangeDeoxysForm
+# (Platinum's 1 Attack = the game's form 2), 47 GetPartyRotomCountAndFirst, 48 SetRotomForm (WASH), 34
+# SetPartyGiratinaForm, 50 TryRevertPokemonForm (no GRISEOUS ORB); the GRACIDEA used from the BAG on SHAYMIN by day.
+# Shots keyitems, party, used.
+MODE=1
+TMO=200
+ENV_A="MOEMON_DEBUG_HOUR=12 MOEMON_DEBUG_PARTY=517:40,410:50,504:30,512:50"
+EXPECT_A=("form: slot 1 species 410 form 2" "sinnohop 47: 1 2" "form: slot 2 species 504 form 2 types 13 11"
+          "form: slot 3 species 512 form 1" "sinnohop 50: 0 1" "form: slot 3 species 512 form 0"
+          "form: slot 0 species 517 form 1 types 12 2" "[fm] done")
+UNEXPECT_A=("[crash]" "TIMEOUT")

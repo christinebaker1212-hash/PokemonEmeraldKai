@@ -1,0 +1,24 @@
+pressuntil A field 6000
+wait 60
+mash B 12 20
+mp u3dzone 81 8 25
+wait 200
+mash B 6 15
+mp form 1 1
+mp u3drun 10270
+wait 40
+pressuntillog A 4000 forms: 410 to form
+wait 30
+shot meteor
+pressuntil B field 3000
+mp form 1
+wait 30
+mp u3drun 10315
+wait 40
+pressuntillog A 4000 ROTOM to form
+wait 30
+shot rotom_done
+pressuntil B field 3000
+mp form 0
+echo [fu] done
+quit

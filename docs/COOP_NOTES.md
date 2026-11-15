@@ -7686,3 +7686,31 @@ performers with their props and names: banks 76 / 77; titles in each show's own 
   Black's on any day but the DS owner's birthday (Kai keeps none); StartCountOtherOtIdsTask counts other trainers' IDs
   over the party and every box (50 at most). `mp setot SLOT ID` gives a party POKeMON another trainer's ID for tests.
   Scenario unova_greetings.
+
+## POKéMON forms outside battle, in every region
+
+The user (2026-11-15): "form changes, and they must scale across all regions". One system, src/mp/mp_forms.c
+(include/mp_forms.h), for every region's POKéMON:
+- Where a form lives: MON_DATA_FORM, the high four bits of the BoxPokemon's language byte (MON_DATA_LANGUAGE masks
+  them off; the save's layout is unchanged and the form travels in trades, co-op and the boxes), or worked out:
+  GIRATINA (the GRISEOUS ORB, or stored 1), ARCEUS (its PLATE), DEERLING / SAWSBUCK (the season, U3D_Season(), in every
+  region), BASCULIN (personality bit 8).
+- What a form changes: stats (MP_Form_BaseStat in CALC_STAT; GetDeoxysStat stands aside when the form isn't 0), types
+  (MP_Form_MonTypes, MP_Form_FitBattler in battle), Abilities (GetMonAbility), MOéMON and POKéMON pictures, palettes
+  (under the species' own tags: sprites look the palette up by that tag) and icons. The data: src/mp/mp_forms_data.c,
+  graphics/moemon/forms/, graphics/pokemon/forms/ from tools/moemon_forms/gen_forms.py (Quetzal's ids; separate
+  tables, never the species-indexed ones Moemon Maker copies at a fixed size).
+- DEOXYS: 0 is Emerald's own Speed Forme, 1 Normal, 2 Attack, 3 Defense; a DEOXYS met in KANTO is FireRed's Attack
+  Forme, in SINNOH / UNOVA / JOHTO the Normal Forme (MP_Form_Init). Platinum's and Black's numbers (0 Normal .. 3 Speed)
+  go through `f >= 3 ? 0 : f + 1` (s3d_misc.c op 49, u3d_vm.c U3D_Vm_KaiForm / BlackForm).
+- The changers: SINNOH's Platinum scripts (tools/sinnoh/gen_scripts.py -> `sinnoh 61` ops in s3d_misc.c: 34
+  SetPartyGiratinaForm, 47 GetPartyRotomCountAndFirst, 48 SetRotomForm (the move's slot in VAR_0x8009), 49
+  ChangeDeoxysForm (the meteorites), 50 TryRevertPokemonForm); Black's (u3d_vm.c: PROC_GetMonForm, ChangeMonForm (the
+  meteorite, script 10270), SetRotomFormMove (slot, the move's slot, form: the appliances, script 10315)); Black's
+  trainers' forms from their team records (u3d_battle.c BuildTeam); the GRACIDEA from the BAG on SHAYMIN by day
+  (item_use.c ItemUseOutOfBattle_Gracidea, party_menu.c ItemUseCB_Gracidea: the icon redrawn at once); SHAYMIN's Sky
+  Forme ends at night (MP_Form_MapLoaded); BURMY takes its last battle ground's cloak (MP_Form_AfterBattle). ROTOM's
+  appliances: MP_Form_SetRotom swaps the form's move for the last one's, or puts it in the given slot.
+- SINNOH's ROTOM room stays as Platinum's without the SECRET KEY (a DS event, closed): Black's appliances change ROTOM.
+- Tests: `mp form SLOT [FORM]`, `mp sinnohop OP A B [V8009]` (a SINNOH op straight); scenarios forms, forms_changes
+  (SINNOH's ops, the GRACIDEA through the BAG), forms_unova (Black's meteorite and appliances).

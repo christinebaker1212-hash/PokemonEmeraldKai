@@ -101,11 +101,12 @@ def main():
             pal = [tuple(raw[k:k + 3]) for k in range(0, 48, 3)]
         write_pal(os.path.join(REPO, 'graphics/items/icon_palettes/%s.pal' % snake(c)), recolor(pal, rc) if rc else pal)
         key = pocket == 'KEY'
+        use = 'ItemUseOutOfBattle_Gracidea' if c == 'GRACIDEA' else 'ItemUseOutOfBattle_CannotUse'   # (SHAYMIN's forms)
         data.append('    [%s] =\n    {\n        .name = _("%s"),\n        .itemId = %s,\n        .price = %d,\n'
-                    '        .description = s%sDesc,\n%s        .pocket = POCKET_%s,\n        .type = ITEM_USE_BAG_MENU,\n'
-                    '        .fieldUseFunc = ItemUseOutOfBattle_CannotUse,\n    },\n\n'
+                    '        .description = s%sDesc,\n%s        .pocket = POCKET_%s,\n        .type = %s,\n'
+                    '        .fieldUseFunc = %s,\n    },\n\n'
                     % (const, name, const, price, camel(c), '        .importance = 1,\n' if key else '',
-                       'KEY_ITEMS' if key else 'ITEMS'))
+                       'KEY_ITEMS' if key else 'ITEMS', 'ITEM_USE_PARTY_MENU' if c == 'GRACIDEA' else 'ITEM_USE_BAG_MENU', use))
         desc.append('static const u8 s%sDesc[] = _(\n%s);\n\n' % (camel(c), '\n'.join(
             '    "%s%s"' % (l.replace('"', '\\"'), '\\n' if j < len(text.split('\n')) - 1 else '')
             for j, l in enumerate(text.split('\n')))))

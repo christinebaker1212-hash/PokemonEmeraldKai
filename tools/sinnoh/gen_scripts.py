@@ -836,13 +836,15 @@ class FileConverter:
         if cmd in ('AddToGameRecord', 'AddToGameRecordBigValue'):
             return []   # (Platinum's records shown only by its rankings rooms: group / Wi-Fi, closed)
         if cmd == 'GetPartyRotomCountAndFirst':
-            # (ROTOM in another form than its own: none, the forms coming only from the ROTOM distribution, a DS event
-            # closed here: ROTOM's room has no appliances, as Platinum's without it)
-            return ['setvar %s, 0' % self.var(a[0]), 'setvar %s, 255' % self.var(a[1])]
+            # (the party's ROTOM: how many, the first one's slot; their forms: src/mp/mp_forms.c)
+            return [self.sinnoh(SINNOH_MISC, 47, self.var(a[0]), self.var(a[1]))]
         if cmd == 'GetRotomFormsInSave':
-            return ['setvar %s, 1' % self.var(x) for x in a[:5]]
+            return ['setvar %s, 1' % self.var(x) for x in a[:5]]   # (every appliance stands in ROTOM's room)
         if cmd == 'SetRotomForm':
-            return []
+            # (partySlot, moveSlot, -, form: the form and its move, Platinum's Pokemon_SetRotomForm: mp_forms.c)
+            mv = a[1]
+            return [('copyvar VAR_0x8009, %s' % self.var(mv)) if self.is_var(mv) else ('setvar VAR_0x8009, %s' % self.value(mv)),
+                    self.sinnoh(SINNOH_MISC, 48, self.arg(a[0]), self.arg(a[3]))]
         if cmd == 'ActivateRoamingPokemon':
             slots = [x.strip() for x in open(os.path.join(self.root, 'generated/roaming_slots.txt')) if x.strip()]
             return [self.sinnoh(SINNOH_ROAMER, slots.index(a[0]))]
@@ -1173,8 +1175,8 @@ class FileConverter:
         if cmd == 'GetDailyRandomLevel':
             return [self.sinnoh(SINNOH_MISC, 46, self.var(a[0]))]
         if cmd == 'ChangeDeoxysForm':
-            # (DEOXYS has one form in this game, as GIRATINA: SetPartyGiratinaForm; the meteorite's words stay Platinum's)
-            return []
+            # (the party's DEOXYS take the meteorite's Forme: src/mp/mp_forms.c, Platinum's numbers)
+            return [self.sinnoh(SINNOH_MISC, 49, self.arg(a[0]))]
         if cmd == 'PokeMartFrontier' and a[0] in ('MART_FRONTIER_ID_EXCHANGE_SERVICE_CORNER_LEFT',
                                                   'MART_FRONTIER_ID_EXCHANGE_SERVICE_CORNER_RIGHT'):
             # (the BATTLE FRONTIER's exchange: the game's BP list as the shop screen, data/scripts/sinnoh_places.inc)
@@ -1978,7 +1980,9 @@ class FileConverter:
             return ['buffernumberstring STR_VAR_1, %s' % self.value(a[1]), 'message %s' % self.text_label(a[0]),
                     'waitmessage']
         if cmd == 'TryRevertPokemonForm':
-            return ['setvar %s, 0' % self.var(a[1])]   # (no GRISEOUS ORB form to change back here)
+            # (a POKeMON that can't keep its form out of the DISTORTION WORLD (GIRATINA without its ORB) goes back:
+            # TRUE in the variable when one did)
+            return [self.sinnoh(SINNOH_MISC, 50, self.arg(a[0]), self.var(a[1]))]
         if cmd in ('ScrCmd_1DF', 'ScrCmd_1E0'):
             # (TEALA's trophies are the Underground's goods for a secret base: closed, so she has none to give)
             return ['setvar %s, 0' % self.var(a[0])]

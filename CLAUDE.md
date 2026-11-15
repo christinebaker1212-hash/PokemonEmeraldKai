@@ -308,6 +308,9 @@ mp_legacy_*.c, tools/moemon_legacy). Also the HGSS battle balls (16x32 frames, a
 pokeball.h BALL_FRAME_*, tools/moemon_balls/hgss_balls.py; COOP_NOTES "HGSS POKé BALLS"; test hgss_balls).
 Also the ASTRAL BALL (special 14: a sure catch, the catch made shiny keeping what shows, a prismatic sheen and silver
 sparkles drawn over its own pixels until it clicks shut: pokemon.c MP_Astral_MakeShiny, src/mp/mp_astralfx.c; COOP_NOTES "The ASTRAL BALL"; test astral_ball).
+Also POKéMON forms outside battle in every region (the user, 2026-11-15: MON_DATA_FORM in the language byte's top bits or worked
+out; stats, types, Abilities, pictures, icons; DEOXYS 0 = Emerald's Speed, KANTO's Attack; SINNOH's / Black's changers, the GRACIDEA:
+src/mp/mp_forms.c, data tools/moemon_forms/gen_forms.py; COOP_NOTES "POKéMON forms outside battle, in every region"; tests forms*).
 Also fishing as Gen 1 had it (1.97.0: cast, then a bite and the battle or no nibble; no dots or timing: field_player_avatar.c;
 COOP_NOTES "Fishing as Gen 1 had it"; test fishing_gen1).
 Also breeding by Gen 9's rules (1.166.0: NIDORAN / VOLBEAT either kind from any pair, no incense, egg moves from both

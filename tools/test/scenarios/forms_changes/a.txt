@@ -1,0 +1,53 @@
+pressuntil A field 6000
+wait 60
+mash B 12 20
+mp sinnohop 49 1 0
+mp form 1
+mp sinnohop 47 8003 800d
+mp sinnohop 48 2 2 0
+mp form 2
+mp sinnohop 34 1 0
+mp form 3
+mp sinnohop 50 0 8004
+mp form 3
+mp form 0
+mp item 505 1
+mp bagview 6
+wait 10
+press START 2
+wait 30
+press DOWN 2
+wait 6
+press DOWN 2
+wait 6
+press A 2
+wait 90
+press RIGHT 2
+wait 15
+press RIGHT 2
+wait 15
+press RIGHT 2
+wait 15
+press RIGHT 2
+wait 15
+press RIGHT 2
+wait 15
+press RIGHT 2
+wait 30
+press DOWN 2
+wait 15
+shot keyitems
+press A 2
+wait 20
+shot menu
+press A 2
+wait 80
+shot party
+press A 2
+wait 80
+shot used
+mp form 0
+mash B 10 20
+wait 60
+echo [fm] done
+quit

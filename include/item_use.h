@@ -32,6 +32,7 @@ void ItemUseOutOfBattle_EscapeRope(u8 taskId);
 void ItemUseOutOfBattle_ExplorerKit(u8 taskId);   // Moemon Kai: SINNOH's Underground
 void ItemUseOutOfBattle_BlackWhiteFlute(u8 taskId);
 void ItemUseOutOfBattle_EvolutionStone(u8 taskId);
+void ItemUseOutOfBattle_Gracidea(u8 taskId);   // Moemon Kai: SHAYMIN's Sky Forme (src/mp/mp_forms.c)
 void ItemUseOutOfBattle_Berry(u8 taskId);
 void ItemUseOutOfBattle_EnigmaBerry(u8 taskId);
 void ItemUseOutOfBattle_CannotUse(u8 taskId);

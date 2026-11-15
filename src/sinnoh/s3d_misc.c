@@ -522,9 +522,16 @@ void Sinnoh_MiscCall(u16 op, u16 a, u16 b)
         break;
     }
     case 34:
-        // SetPartyGiratinaForm: GIRATINA has the one form here (its GRISEOUS ORB powers it up in battle)
-        MPNet_Log("sinnoh dw: GIRATINA's form %u (one form here)", VarGet(a));
+        // SetPartyGiratinaForm: the party's GIRATINA in the DISTORTION WORLD's form (src/mp/mp_forms.c)
+    {
+        void MP_Form_Change(struct Pokemon *mon, u8 form);
+        u32 i;
+        for (i = 0; i < PARTY_SIZE; i++)
+            if (GetMonData(&gPlayerParty[i], MON_DATA_SPECIES) == SPECIES_GIRATINA)
+                MP_Form_Change(&gPlayerParty[i], VarGet(a) != 0);
+        MPNet_Log("sinnoh dw: GIRATINA's form %u", VarGet(a));
         break;
+    }
     case 35:
     case 36:
     {
@@ -588,6 +595,52 @@ void Sinnoh_MiscCall(u16 op, u16 a, u16 b)
     {
         u16 Sinnoh_TrophyGardenNewest(void);
         VarSet(a, Sinnoh_TrophyGardenNewest());
+        break;
+    }
+    case 47:   // GetPartyRotomCountAndFirst: A <- the party's ROTOM, B <- the first one's slot (255: none)
+    {
+        u32 i, n = 0, first = 255;
+        for (i = 0; i < PARTY_SIZE; i++)
+            if (GetMonData(&gPlayerParty[i], MON_DATA_SPECIES) == SPECIES_ROTOM && !GetMonData(&gPlayerParty[i], MON_DATA_IS_EGG))
+            {
+                if (first == 255)
+                    first = i;
+                n++;
+            }
+        VarSet(a, n);
+        VarSet(b, first);
+        break;
+    }
+    case 48:   // SetRotomForm: party slot A, form B, the move's slot in VAR_0x8009 (Platinum's Pokemon_SetRotomForm)
+    {
+        void MP_Form_SetRotom(struct Pokemon *mon, u8 form, u8 slot);
+        if (VarGet(a) < PARTY_SIZE)
+            MP_Form_SetRotom(&gPlayerParty[VarGet(a)], VarGet(b), VarGet(VAR_0x8009));
+        break;
+    }
+    case 49:   // ChangeDeoxysForm: the party's DEOXYS to Forme A (Platinum's: 0 Normal, 1 Attack, 2 Defense, 3 Speed)
+    {
+        void MP_Form_Change(struct Pokemon *mon, u8 form);
+        u16 f = VarGet(a);
+        u32 i;
+        for (i = 0; i < PARTY_SIZE; i++)
+            if (GetMonData(&gPlayerParty[i], MON_DATA_SPECIES) == SPECIES_DEOXYS)
+                MP_Form_Change(&gPlayerParty[i], f >= 3 ? 0 : f + 1);
+        break;
+    }
+    case 50:   // TryRevertPokemonForm: B <- TRUE when a GIRATINA without its ORB went back to its Altered Forme
+    {
+        u8 MP_Form_Of(const struct BoxPokemon *box);
+        void MP_Form_Change(struct Pokemon *mon, u8 form);
+        u32 i, any = FALSE;
+        for (i = 0; i < PARTY_SIZE; i++)
+            if (GetMonData(&gPlayerParty[i], MON_DATA_SPECIES) == SPECIES_GIRATINA
+             && GetMonData(&gPlayerParty[i], MON_DATA_HELD_ITEM) != ITEM_GRISEOUS_ORB && MP_Form_Of(&gPlayerParty[i].box))
+            {
+                MP_Form_Change(&gPlayerParty[i], 0);
+                any = TRUE;
+            }
+        VarSet(b, any);
         break;
     }
     case 46:   // GetDailyRandomLevel: A <- the day's level, 2-99 (Platinum's VAR_DAILY_RANDOM_LEVEL, picked as a day starts)

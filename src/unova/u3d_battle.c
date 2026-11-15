@@ -101,6 +101,16 @@ static u8 BuildTeam(u8 which, u16 id, const u8 *t)
         CreateMon(mon, species, scaled, iv, FALSE, 0, OT_ID_RANDOM_NO_SHINY, 0);
         if (scaled > level)
             MP_LevelScale_EvolveMon(mon);   // (Black's set moves below stay its own)
+        {
+            u8 U3D_Vm_KaiForm(u16 species, u16 blackForm);
+            u16 form = Le16(r + 6) & 0x1F;   // (Black's team record: the form; the POKeMON's own data keeps it: mp_forms.c)
+            if (form)
+            {
+                u32 f = U3D_Vm_KaiForm(GetMonData(mon, MON_DATA_SPECIES), form);
+                SetMonData(mon, MON_DATA_FORM, &f);
+                CalculateMonStats(mon);
+            }
+        }
         if (flags & 1)
         {
             const u8 *m = r + 8 + ((flags & 2) ? 2 : 0);

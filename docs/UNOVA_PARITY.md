@@ -108,8 +108,9 @@ records, item lookups, the POKeDEX ratings, trainer records and the sounds liste
       badge, the zone's steps and odds, a tile round the player of the pack's encounter-effect kinds; battles from
       Black's special tables, a dust cloud's gem / stone and a shadow's wing by Black's script 10133) and UNOVA's
       fishing (Black's table and odds, a sure bite at the ripples): src/unova/u3d_phenom.c; scenario unova_phenomena
-- [ ] POKeMON forms outside battle (ROTOM's appliances 0x117 / 0x11C, DEERLING / SAWSBUCK's seasons, form numbers
-      0x0FF): Kai keeps forms its own way (battle recomputes); not reworked, unless the user says otherwise
+- [x] POKeMON forms outside battle (the user, 2026-11-15: every region): GetMonForm 0x0FF, ChangeMonForm 0x117 (the
+      meteorite), SetRotomFormMove 0x11C (the appliances), trainers' forms, DEERLING / SAWSBUCK's seasons: src/mp/mp_forms.c,
+      COOP_NOTES "POKéMON forms outside battle, in every region"; scenario forms_unova
 - [x] TRIPLE battles as Kai's Triple Battles (the player commanding three, with three able; u3d_battle.c, the center
       foe sent out by battle_main.c); ROTATION trainers as Doubles: no Rotation Battles in Kai (the user, 2026-11-14).
       Scenario unova_triple

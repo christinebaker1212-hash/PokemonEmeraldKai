@@ -1,0 +1,8 @@
+# Black's form changers (u3d_vm.c): the meteorite's script 10270 (GetMonForm / ChangeMonForm: DEOXYS from Black's
+# Normal to Attack, the game's form 2) and the ROTOM appliances' 10315 (SetRotomFormMove: HEAT, form 1).
+# Shots meteor, rotom_done.
+MODE=1
+TMO=240
+ENV_A="MOEMON_DEBUG_REGION=4 MOEMON_DEBUG_PARTY=504:30,410:50"
+EXPECT_A=("form: slot 1 species 410 form 1" "form: slot 1 species 410 form 2" "form: slot 0 species 504 form 1 types 13 10" "[fu] done")
+UNEXPECT_A=("[crash]" "TIMEOUT" "not played yet")
