@@ -1256,6 +1256,14 @@ bool8 U3D_GridPoint(s32 x, s32 y, s32 *outX, s32 *outY)
     return TRUE;
 }
 
+// the player's model drawn DY units above their ground, the view staying on the ground (ROUTE 10's bridge swaying:
+// Black's FLDMMDL_SetDrawOffsetOutside, ov047; u3d_vm.c BridgeFrame)
+static float sPlayerBob;
+void U3D_PlayerBob(float dy)
+{
+    sPlayerBob = dy;
+}
+
 void U3D_PlaceSprite(u16 spriteId, s32 x, s32 feetY, s32 *outX, s32 *outY, float *depth)
 {
     float sx, sy, d, h, near = sView.ty;
@@ -1308,7 +1316,8 @@ void U3D_PlaceSprite(u16 spriteId, s32 x, s32 feetY, s32 *outX, s32 *outY, float
         sSpriteH[spriteId] = h;
         sSpriteHFrame[spriteId] = sView.frame;
     }
-    if (!Project(wx, h, wz + FEET_TOWARD, &sx, &sy, &d))
+    if (!Project(wx, h + (sPlayerBob != 0.0f && spriteId == gObjectEvents[gPlayerAvatar.objectEventId].spriteId
+                          ? sPlayerBob : 0.0f), wz + FEET_TOWARD, &sx, &sy, &d))
     {
         *outX = x;
         *outY = feetY;

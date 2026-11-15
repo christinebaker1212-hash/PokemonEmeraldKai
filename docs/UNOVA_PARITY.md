@@ -58,7 +58,11 @@ systems. Tick an entry only once it plays as Black's and has been seen running.
       tracks of their own by the studio (MMS_RIP_PARTS -> INFO parts=), each brought in by its vehicle's distance from
       the camera and panned to its side; SKYARROW's high part comes in as the camera rises, and the rush of wind as the
       view drops at the bridge's end (SE_M_GUST for Black's SEQ_SE_FLD_173); scenario unova_bridge_traffic
-- [ ] Black's other field gimmicks (arc 0x65's zone table, ov021 gFieldGimmickOverlayIds): ROUTE 10's bridge (ov047), the LEAGUE's models (ov049 /
+- [x] ROUTE 10's bridge (ov047 field_gimmick_bridge.c, 2026-11-15; zone 362): on its planks (Black's no-dash ground,
+      terrain 0x33: phenomenon kind 9 in the pack) the player sways up and down, 8 degrees of a sine a Black frame to
+      a height picked each swing (8, 8, 12 or 14 units), the view staying put (u3d_vm.c BridgeFrame, U3D_PlayerBob);
+      scenario unova_bridge_sway (debug u3dkind K)
+- [ ] Black's other field gimmicks (arc 0x65's zone table, ov021 gFieldGimmickOverlayIds): the LEAGUE's models (ov049 /
       ov050), the special POKeMON's spots (ov059: MOOR OF ICIRRUS, CASTELIA), the ENTRALINK's gauge and markers
       (ov060 / ov061), LIBERTY GARDEN's (ov062)
 - [x] Camera shakes (0x148: ABYSSAL RUINS, CHARGESTONE, DRAGONSPIRAL, N's CASTLE; 2026-11-15, scenario

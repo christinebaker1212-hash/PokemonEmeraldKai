@@ -4808,6 +4808,21 @@ void MP_TestCommand(const char *cmd, const char *arg)
         if (sscanf(arg, "%d %d %d", &c, &a, &b) >= 1)
             printf("[test] subway tool %d: %u, result %u\n", c, U3D_Subway_Tool(c, a, b, &r, &mb, &m), r);
     }
+    else if (strcmp(cmd, "u3dkind") == 0)   // u3dkind K: warp to the first tile of this map whose phenomenon kind is K
+    {                                        // (9: Black's no-dash ground, ROUTE 10's planks)
+        int k = atoi(arg), x, y, done = 0;
+        for (y = 0; y < gMapHeader.mapLayout->height && !done; y++)
+            for (x = 0; x < gMapHeader.mapLayout->width && !done; x++)
+                if (U3D_PhenomKindAt(x + MAP_OFFSET, y + MAP_OFFSET) == k)
+                {
+                    printf("[test] u3dkind %d at %d,%d\n", k, x, y);
+                    SetWarpDestination(gSaveBlock1Ptr->location.mapGroup, gSaveBlock1Ptr->location.mapNum, WARP_ID_NONE, x, y);
+                    DoWarp();
+                    done = 1;
+                }
+        if (!done)
+            printf("[test] u3dkind %d: none here\n", k);
+    }
     else if (strcmp(cmd, "u3dstones") == 0)   // CHARGESTONE CAVE's stones on this floor (u3d_vm.c)
     {
         void U3D_Vm_DebugStones(void);

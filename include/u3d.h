@@ -103,6 +103,7 @@ void U3D_CameraLook(u16 frames);
 void U3D_ObjectFly(u8 spriteId, bool8 on, float x, float y, float z);
 void U3D_PlayerWorldPos(float out[3]);
 void U3D_CameraEye(float eye[3], float fwd[3]);
+void U3D_PlayerBob(float dy);
 bool8 U3D_ObjectFlyPos(u8 spriteId, float out[3]);
 void U3D_TileWorldPos(s16 x, s16 y, float out[3]);
 void U3D_CameraShake(s16 x, s16 y, u16 steps, u8 total, s16 dx, s16 dy, u16 thresh, u16 period);

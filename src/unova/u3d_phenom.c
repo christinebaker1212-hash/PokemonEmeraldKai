@@ -118,7 +118,7 @@ static void TrySpawn(u8 setting)
         for (dx = minX - ox; dx <= maxX - ox; dx++)
         {
             u8 k = U3D_PhenomKindAt(px + dx, py + dy);
-            if (k != 0xFF && n < ARRAY_COUNT(sCx))
+            if (k != 0xFF && k != 9 && n < ARRAY_COUNT(sCx))   // (9: no-dash ground, no phenomenon)
             {
                 sCx[n] = px + dx, sCy[n] = py + dy, sCk[n] = k;
                 n++;

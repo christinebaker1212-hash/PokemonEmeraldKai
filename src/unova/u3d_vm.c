@@ -1091,6 +1091,7 @@ static void LanesLoad(void);
 static void LanesFrame(void);
 static void SoundObjsLoad(void);
 static void SoundObjsFrame(void);
+static void BridgeFrame(void);
 
 // ------------------------------------------------------------------------------------------------ the VM
 // (BURGH's gym, the honey's trainers: Black's StartScriptedEvent run after its script, PlateDoorsFrame)
@@ -5855,6 +5856,7 @@ void U3D_Vm_FieldFrame(void)
     D06Frame();
     LanesFrame();
     SoundObjsFrame();
+    BridgeFrame();
     {
         void U3D_Subway_SwayFrame(u16 zone);
         U3D_Subway_SwayFrame(CurrentZone());   // (the BATTLE SUBWAY's carriage: u3d_subway.c)
@@ -6921,6 +6923,33 @@ static void SoundObjsFrame(void)
     SoundObjsHear();
     if (CurrentZone() == 249)
         SoundObjsSlide();
+}
+
+// ------------------------------------------------------------------------------------------------ ROUTE 10's bridge
+// ROUTE 10's bridge (ov047 field_gimmick_bridge.c, zone 362): standing on its planks (Black's no-dash ground, terrain
+// 0x33: phenomenon kind 9 in the pack, build_pack.py phenom_code) the player bobs up and down, 8 degrees of a sine a Black frame (4 a field frame here) to a
+// height picked each swing from gBridgeSwayAmplitudes (8, 8, 12 or 14 units); off them, still
+#define BRIDGE_ZONE 362
+static const u8 sBridgeAmp[4] = {8, 8, 12, 14};
+static struct { s16 angle; u8 amp; bool8 on; } sBridge;
+
+static void BridgeFrame(void)
+{
+    struct ObjectEvent *p = &gObjectEvents[gPlayerAvatar.objectEventId];
+    if (CurrentZone() != BRIDGE_ZONE || U3D_PhenomKindAt(p->currentCoords.x, p->currentCoords.y) != 9)
+    {
+        if (sBridge.on)
+            U3D_PlayerBob(0.0f);
+        sBridge.on = FALSE, sBridge.angle = 0;
+        return;
+    }
+    if (!sBridge.on)
+        MPNet_Log("u3d vm: on ROUTE 10's bridge, swaying");
+    sBridge.on = TRUE;
+    if (sBridge.angle == 0)
+        sBridge.amp = sBridgeAmp[Random() % 4];
+    U3D_PlayerBob(sinf(sBridge.angle * (float)M_PI / 180.0f) * sBridge.amp);
+    sBridge.angle = (sBridge.angle + 4) % 360;
 }
 
 // ------------------------------------------------------------------------------------------------ CHARGESTONE

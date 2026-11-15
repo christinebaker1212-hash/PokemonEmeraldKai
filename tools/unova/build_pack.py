@@ -220,7 +220,8 @@ def battle_column(attr):
 
 # Black's phenomena (ov021 map_attr.c MAP_ATTR_GetEncounterEffectKind): what a tile can show, kept in the high four bits
 # of its battle byte as the kind + 1 (0: none): 0-3 grass (rustling), 4 cave floor (dust), 5 water, 6 deep water
-# (rippling), 7 a bridge's planks (a bird's shadow: terrain 0x20, whatever its flags); the rest only with flag 4
+# (rippling), 7 a bridge's planks (a bird's shadow: terrain 0x20, whatever its flags); the rest only with flag 4.
+# Kind 9 isn't a phenomenon: Black's no-dash ground (terrain 0x33), ROUTE 10's swaying planks (ov047; u3d_vm.c BridgeFrame)
 PHENOM = {0x04: 0, 0x05: 1, 0x21: 2, 0x08: 3, 0x0A: 4, 0x3D: 5, 0x3F: 6, 0x43: 6}
 
 
@@ -230,6 +231,8 @@ def phenom_code(attr):
         return 0
     if terrain_id == 0x20:
         return 8
+    if terrain_id == 0x33:
+        return 10
     if not flags & 4 or terrain_id not in PHENOM:
         return 0
     return PHENOM[terrain_id] + 1
