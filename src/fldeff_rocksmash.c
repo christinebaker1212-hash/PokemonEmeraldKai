@@ -35,8 +35,9 @@ bool8 MP_ObstacleGfxIs(u16 objGfx, u16 graphicsId)
         return TRUE;
     switch (graphicsId)
     {
-    case OBJ_EVENT_GFX_PUSHABLE_BOULDER:
-        return objGfx == OBJ_EVENT_GFX_QZ_87 || objGfx == OBJ_EVENT_GFX_QZ_16186;
+    case OBJ_EVENT_GFX_PUSHABLE_BOULDER:   // (UNOVA's: Black's bigrock / bigrock2, object code table 792 / 794)
+        return objGfx == OBJ_EVENT_GFX_QZ_87 || objGfx == OBJ_EVENT_GFX_QZ_16186
+            || objGfx == OBJ_EVENT_GFX_UNOVA_FIRST + 792 || objGfx == OBJ_EVENT_GFX_UNOVA_FIRST + 794;
     case OBJ_EVENT_GFX_BREAKABLE_ROCK:
         return objGfx == OBJ_EVENT_GFX_QZ_86 || objGfx == OBJ_EVENT_GFX_QZ_16190;
     case OBJ_EVENT_GFX_CUTTABLE_TREE:

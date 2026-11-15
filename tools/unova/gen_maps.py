@@ -59,8 +59,21 @@ def ascii_name(name):
 # place: u3d_vm.c LocalId), their signs and trigger spots; Black's own scripts run for them (data/scripts/unova.inc).
 # Their pictures are Black's own, by object code (OBJ_EVENT_GFX_UNOVA_FIRST + code: src/unova/u3d_gfx.c draws them from
 # the sprites pack, tools/unova/build_gfx.py; a stand-in without it)
-STAND_IN = 'OBJ_EVENT_GFX_YOUNGSTER'
 UNOVA_GFX, UNOVA_GFX_COUNT = 0x600, 0x320   # (include/constants/event_objects.h OBJ_EVENT_GFX_UNOVA_FIRST)
+
+
+def obj_index(code):
+    """Black's object code as its place in the object code table (the sprites pack's order): aletheia's
+    FLDMMDL_ObjCodeToTableIndex. Codes 0x1000-0x1235 and 0x2000-0x2009 (the boulders, the DRAGON SKULL... drawn as
+    Black's 3D models: src/unova/u3d.c U3D_ObjModels) sit past the people; anything else is entry 10. Before, those
+    codes were drawn as a stand-in YOUNGSTER (the user, 2026-11-15)"""
+    if code < 0xDF:
+        return code
+    if 0x1000 <= code < 0x1236:
+        return code - 0xF21
+    if 0x2000 <= code < 0x200A:
+        return code - 0x1CEB
+    return 0xA
 SIZED_BLOCKER = 185   # (an invisible hit box as wide and deep as its params: STRIATON's gym's doorways)
 BLACK_DIR = {0: 'UP', 1: 'DOWN', 2: 'LEFT', 3: 'RIGHT'}
 BLACK_CITY = 0   # (its zone: its residents, see events_of)
@@ -78,7 +91,7 @@ def events_of(m, w, h):
         inside = 0 <= x < w and 0 <= z < h
         face = BLACK_DIR.get(p['dir'], 'DOWN')
         wander = p['move'] == 3 and (p['limit'][0] or p['limit'][1])
-        objs.append({'graphics_id': '0x%X' % (UNOVA_GFX + p['gfx']) if p['gfx'] < UNOVA_GFX_COUNT else STAND_IN, 'x': x if inside else 0, 'y': z if inside else 0, 'elevation': 3,
+        objs.append({'graphics_id': '0x%X' % (UNOVA_GFX + obj_index(p['gfx'])), 'x': x if inside else 0, 'y': z if inside else 0, 'elevation': 3,
                      'movement_type': 'MOVEMENT_TYPE_WANDER_AROUND' if wander else 'MOVEMENT_TYPE_FACE_' + face,
                      'movement_range_x': max(0, p['limit'][0]) if wander else 0,
                      'movement_range_y': max(0, p['limit'][1]) if wander else 0,

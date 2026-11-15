@@ -1292,6 +1292,7 @@ const u8 *S3D_Gyms_VillaScript(s16 x, s16 y, u8 direction)
 }
 
 void Sinnoh_Signs_MapLoaded(float ox, float oz);
+void Sinnoh_Signs_Update(void);
 
 // The map a save was made on, loaded with it (overworld.c's continue): the gyms that keep their state with the save
 // take it from there
@@ -1374,6 +1375,7 @@ void S3D_Gyms_Update(void)
     Sinnoh_Underground_Update();
     Sinnoh_Lift_Update();
     Sinnoh_Tram_Update();
+    Sinnoh_Signs_Update();   // (the ELITE FOUR's doors, ROTOM's wall: s3d_signs.c)
     if (sG.gym == GYM_NONE)
         return;
     if (sG.gym == GYM_CANALAVE)

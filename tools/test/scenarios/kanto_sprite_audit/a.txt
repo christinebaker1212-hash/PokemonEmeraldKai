@@ -1,0 +1,19 @@
+pressuntil A field 5000
+wait 30
+mp clearflag 0x2313
+mp setvar 0x5135 0
+mp warp 36,4,31,9
+wait 200
+shot dock
+mp warp 36,4,33,13
+wait 200
+mp objs
+shot dock_near
+mp warp 37,121,6,6
+wait 200
+waitfor field 1000
+mp face up
+wait 20
+mp objs
+shot town_map
+quit

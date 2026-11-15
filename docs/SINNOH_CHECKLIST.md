@@ -37,7 +37,7 @@ Each segment: Platinum's own map scripts, people, triggers, words and battles, p
       white flash, not built)
 - [x] The DISTORTION WORLD, 1:1 (section 3)
 - [~] SUNYSHORE: VOLKNER (the gym's buttons: PressSunyshoreGymButton), VICTORY ROAD
-- [~] The POKéMON LEAGUE: the ELITE FOUR, CYNTHIA, the platform lift (TriggerPlatformLift), the HALL OF FAME in
+- [~] The POKéMON LEAGUE: the ELITE FOUR (their room doors: COOP_NOTES "Objects as the original games draw them"), CYNTHIA, the platform lift (TriggerPlatformLift), the HALL OF FAME in
       Platinum's own scripts (now the written CHAMPION's)
 - [x] After the HALL OF FAME: the FIGHT AREA, STARK MOUNTAIN with BUCK, the SURVIVAL / RESORT AREAs, the VILLA, the
       NATIONAL DEX, the SNOWPOINT temple (1.114.0: every script there converts; the BATTLEGROUND's trainers of the day,
@@ -52,7 +52,6 @@ Each segment: Platinum's own map scripts, people, triggers, words and battles, p
       boards (2026-11-15: the game's results window, Platinum's words: COOP_NOTES "The FRONTIER's records boards";
       sinnoh_frontier_records); the TOWER's record machines are Platinum's Wi-Fi results and leaders (online: closed). The CONTEST HALL's practice receptionist converts
       again (2026-11-15: OpenPartyMenuForContest's literal; sinnoh_contest_practice)
-- [x] One test from TWINLEAF to the HALL OF FAME (done, the user 2026-11-15)
 
 ## 2. Kai's systems in SINNOH (kept, Platinum's commands mapped onto them)
 

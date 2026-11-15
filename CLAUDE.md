@@ -311,6 +311,12 @@ sparkles drawn over its own pixels until it clicks shut: pokemon.c MP_Astral_Mak
 Also POKéMON forms outside battle in every region (the user, 2026-11-15: MON_DATA_FORM in the language byte's top bits or worked
 out; stats, types, Abilities, pictures, icons; DEOXYS 0 = Emerald's Speed, KANTO's Attack; SINNOH's / Black's changers, the GRACIDEA:
 src/mp/mp_forms.c, data tools/moemon_forms/gen_forms.py; COOP_NOTES "POKéMON forms outside battle, in every region"; tests forms*).
+Also objects as the original games draw them (the user's sprite audit, 2026-11-15: no stand-in where FireRed, Crystal,
+Platinum or Black draw something of their own; KANTO's TOWN MAP / S.S. ANNE (gen_objects.py PADDED / BLANK), JOHTO's
+people by Crystal's (tools/quetzal_port/fix_sprites.py), SINNOH's model objects (ELITE FOUR doors, ROTOM's wall,
+books: s3d_signs.c) and crowds (sprite kind 5), UNOVA's object code table (gen_maps.py obj_index) and Black's 3D
+objects (u3d.c ObjModelsDraw); COOP_NOTES "Objects as the original games draw them"; tests kanto_sprite_audit,
+sinnoh_model_objects, unova_sprite_audit).
 Also fishing as Gen 1 had it (1.97.0: cast, then a bite and the battle or no nibble; no dots or timing: field_player_avatar.c;
 COOP_NOTES "Fishing as Gen 1 had it"; test fishing_gen1).
 Also breeding by Gen 9's rules (1.166.0: NIDORAN / VOLBEAT either kind from any pair, no incense, egg moves from both

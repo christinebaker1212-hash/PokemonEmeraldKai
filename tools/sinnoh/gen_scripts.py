@@ -2918,7 +2918,8 @@ def people(root, p, low, name, done):
         ghost = isinstance(hide, str) and hide.startswith('MAP_HEADER_')
         from gen_maps import var_look
         looks = var_look(name, i, o)   # (a look its script picks: gen_maps.py VAR_LOOKS, the daily trainers)
-        if ghost or (sprites.sprite(o['graphics_id']) is None and not looks) or not inside(p, o['x'], o['z']) \
+        model = o['graphics_id'] in sprites.MODEL_OBJECTS   # (a door or wall drawn as its model: still someone to talk to)
+        if ghost or (sprites.sprite(o['graphics_id']) is None and not looks and not model) or not inside(p, o['x'], o['z']) \
                 or o['graphics_id'].endswith('POKEBALL'):
             continue
         script = mine['script']

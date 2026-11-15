@@ -276,6 +276,13 @@ def people(p, root, have):
         # a story person (tools/sinnoh/story_people.py): shown by the story (Sinnoh_StoryRefresh sets its flag)
         story = story_people.SHOW.get(hide[len('FLAG_HIDE_'):]) if isinstance(hide, str) and hide.startswith('FLAG_HIDE_') \
             else None
+        if o['graphics_id'] in sprites.MODEL_OBJECTS and inside(p, o['x'], o['z']):
+            # a door or a wall Platinum draws as a model (s3d_signs.c draws it): solid, unseen, there by its flag
+            out.append({'graphics_id': 'OBJ_EVENT_GFX_MAN_1', 'x': o['x'] - p['x0'] * 32, 'y': o['z'] - p['z0'] * 32,
+                        'elevation': 3, 'movement_type': 'MOVEMENT_TYPE_INVISIBLE', 'movement_range_x': 0,
+                        'movement_range_y': 0, 'trainer_type': 'TRAINER_TYPE_NONE', 'trainer_sight_or_berry_tree_id': '0',
+                        'script': '0x0', 'flag': ('0x%X' % flag) if flag else '0'})
+            continue
         ball = items.ball(root, o['script']) if o['graphics_id'].endswith('POKEBALL') else None
         if ball and not inside(p, o['x'], o['z']):
             ball = None

@@ -2126,6 +2126,14 @@ static const struct ObjectEventGraphicsInfo *SinnohPackInfo(u16 i, bool8 small)
     if (sBuilt[small][i])
         return info;
     frames = kind == 0 ? 9 : kind == 3 ? 10 : 1;   // (3: the nurse, her bow as frame 9)
+    if (kind == 5)
+    {
+        // (a picture wider than a sprite: a clear 64x64 frame, the picture drawn whole over it by the big sprites,
+        // feet at its bottom: src/sinnoh/s3d_signs.c Sinnoh_Signs_Update sets each one's sprite->mpBig)
+        static const u8 sClear[2048];
+        tiles = sClear;
+        kind = 4;
+    }
     for (f = 0; f < frames; f++)
     {
         sImages[small][i][f].data = tiles + f * (kind == 2 ? 128 : kind == 4 ? 2048 : 512);
@@ -2301,6 +2309,7 @@ static bool8 UnovaSmall(void)
     return gMpConfig.unovaSprites != MP_UNOVA_SPRITES_GEN5;
 }
 
+bool8 U3D_Gfx_Ready(void);
 static const struct ObjectEventGraphicsInfo *UnovaObjectInfo(u16 code)
 {
     static struct ObjectEventGraphicsInfo sInfo[2][OBJ_EVENT_GFX_UNOVA_COUNT];
@@ -2325,7 +2334,31 @@ static const struct ObjectEventGraphicsInfo *UnovaObjectInfo(u16 code)
     }
     info = &sInfo[small][code];
     if (!U3D_Gfx_Sprite(code, small, &kind, &pal, &tiles))
-        return GetObjectEventGraphicsInfo(OBJ_EVENT_GFX_YOUNGSTER);
+    {
+        // (no sheet: an object Black never draws as a sprite (its object code table's drawType 0: the unseen blockers,
+        // codes 0 and 185; drawType 2: a 3D model, the boulders and the DRAGON SKULL, drawn by u3d.c ObjModelsDraw):
+        // a clear one that stands in the way. The YOUNGSTER is the stand-in only without the pack: before, he stood
+        // in for all of these, the user 2026-11-15)
+        static const u8 sClear[512];
+        static struct SpriteFrameImage sClearImage = {sClear, 512};
+        static struct ObjectEventGraphicsInfo sClearInfo;
+        if (!U3D_Gfx_Ready())
+            return GetObjectEventGraphicsInfo(OBJ_EVENT_GFX_YOUNGSTER);
+        if (sClearInfo.images == NULL)
+        {
+            sClearInfo = *GetObjectEventGraphicsInfo(OBJ_EVENT_GFX_YOUNGSTER);
+            sClearInfo.size = 512;
+            sClearInfo.width = sClearInfo.height = 32;
+            sClearInfo.inanimate = TRUE;   // (no shadow, no steps)
+            sClearInfo.tracks = TRACKS_NONE;
+            sClearInfo.shadowSize = SHADOW_SIZE_S;
+            sClearInfo.oam = &gObjectEventBaseOam_32x32;
+            sClearInfo.subspriteTables = sOamTables_32x32;
+            sClearInfo.anims = sAnimTable_Inanimate;
+            sClearInfo.images = &sClearImage;
+        }
+        return &sClearInfo;
+    }
     if (sBuilt[small][code])
         return info;
     frames = kind == 0 ? 9 : 1;

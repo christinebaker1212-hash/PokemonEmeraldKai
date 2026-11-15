@@ -1,0 +1,8 @@
+# UNOVA's objects Black draws without a sprite sheet of their own (src/unova/u3d_gfx.c, event_object_movement.c
+# UnovaObjectInfo): the unseen blockers (object codes 0 and 185) and the codes past the sheets' table must never show
+# the YOUNGSTER stand-in. Needs the UNOVA packs. Shots u_*.png.
+MODE=1
+TMO=200
+ENV_A="MOEMON_DEBUG_REGION=4"
+EXPECT_A=()
+UNEXPECT_A=("[crash]" "TIMEOUT")

@@ -1,0 +1,8 @@
+# Platinum's objects drawn as their own models (src/sinnoh/s3d_signs.c): the ELITE FOUR's room doors (the way in shuts
+# behind the player, the way out stays shut until the member is beaten: solid people nobody sees, shown by their flags)
+# and the wall before ROTOM's room (solid, its SECRET KEY script), and the BOOKs; GALACTIC HQ's crowds of grunts (pictures wider than a sprite). Needs the 3D pack. Shots m_*.png.
+MODE=1
+TMO=200
+ENV_A="MOEMON_DEBUG_REGION=3"
+EXPECT_A=("local 2 at 15,19" "model object 3 (model 32811) shown" "model object 7 (model 32812) shown")
+UNEXPECT_A=("[crash]" "TIMEOUT" "[test] where map 42.107" "model object 3 (model 32811) gone")

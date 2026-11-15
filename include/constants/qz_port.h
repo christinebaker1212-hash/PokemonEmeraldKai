@@ -1781,13 +1781,13 @@
 #define OBJ_EVENT_GFX_QZ_16199                   0x23E
 #define OBJ_EVENT_GFX_QZ_16200                   0x23F
 #define OBJ_EVENT_GFX_QZ_16201                   0x240
-#define OBJ_EVENT_GFX_QZ_16202                   OBJ_EVENT_GFX_NINJA_BOY
+#define OBJ_EVENT_GFX_QZ_16202                   0x258
 #define OBJ_EVENT_GFX_QZ_16203                   0x241
 #define OBJ_EVENT_GFX_QZ_16204                   0x242
 #define OBJ_EVENT_GFX_QZ_16205                   0x243
 #define OBJ_EVENT_GFX_QZ_16206                   0x244
 #define OBJ_EVENT_GFX_QZ_16207                   0x245
-#define OBJ_EVENT_GFX_QZ_16208                   OBJ_EVENT_GFX_NINJA_BOY
+#define OBJ_EVENT_GFX_QZ_16208                   0x259
 #define OBJ_EVENT_GFX_QZ_16209                   0x246
 #define OBJ_EVENT_GFX_QZ_16210                   0x247
 #define OBJ_EVENT_GFX_QZ_16211                   0x248

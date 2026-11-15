@@ -436,6 +436,20 @@ static u16 PersonScript(u8 local, const u8 *p)
     return Le16(p + 10);
 }
 
+// Black's object code as its place in the object code table, the sprites pack's order (aletheia's
+// FLDMMDL_ObjCodeToTableIndex; tools/unova/gen_maps.py obj_index): the codes past the people (the boulders, the DRAGON
+// SKULL...) sit at the table's end
+static u16 ObjIndex(u16 code)
+{
+    if (code < 0xDF)
+        return code;
+    if (code >= 0x1000 && code < 0x1236)
+        return code - 0xF21;
+    if (code >= 0x2000 && code < 0x200A)
+        return code - 0x1CEB;
+    return 0xA;
+}
+
 // event_object_movement.c TrySpawnObjectEventTemplate: a person's look as a script set it (SetNpcTripleFromTable)
 u16 U3D_Vm_PersonGfx(u8 localId, u16 gfx)
 {
@@ -443,7 +457,7 @@ u16 U3D_Vm_PersonGfx(u8 localId, u16 gfx)
         return gfx;
     OverridesHere();
     if (localId >= 1 && localId <= NPC_OVERRIDES && sNpcCodeOver[localId - 1])
-        return OBJ_EVENT_GFX_UNOVA_FIRST + sNpcCodeOver[localId - 1] - 1;
+        return OBJ_EVENT_GFX_UNOVA_FIRST + ObjIndex(sNpcCodeOver[localId - 1] - 1);
     return gfx;
 }
 
@@ -780,7 +794,7 @@ static void SpawnAdded(void)
         u8 id;
         if (ObjEventId(sAdded[i].local) < OBJECT_EVENTS_COUNT)
             continue;
-        id = SpawnSpecialObjectEventParameterized(OBJ_EVENT_GFX_UNOVA_FIRST + sAdded[i].code, MOVEMENT_TYPE_FACE_DOWN,
+        id = SpawnSpecialObjectEventParameterized(OBJ_EVENT_GFX_UNOVA_FIRST + ObjIndex(sAdded[i].code), MOVEMENT_TYPE_FACE_DOWN,
                                                   sAdded[i].local, MapX(sAdded[i].x) + MAP_OFFSET,
                                                   MapZ(sAdded[i].z) + MAP_OFFSET, 3);
         if (id < OBJECT_EVENTS_COUNT)
@@ -1997,7 +2011,7 @@ static void NpcFromRow(u8 slot, u32 row, bool8 secondary, bool8 look)
         u8 id = ObjEventId(slot + 1);
         sNpcCodeOver[slot] = Le16(t + 8 * row + 4) + 1;
         if (id < OBJECT_EVENTS_COUNT)   // (already on the field: shown at once)
-            ObjectEventSetGraphicsId(&gObjectEvents[id], OBJ_EVENT_GFX_UNOVA_FIRST + Le16(t + 8 * row + 4));
+            ObjectEventSetGraphicsId(&gObjectEvents[id], OBJ_EVENT_GFX_UNOVA_FIRST + ObjIndex(Le16(t + 8 * row + 4)));
     }
     MPNet_Log("u3d vm: npc table: person %u is trainer %u (row %u)", slot, Le16(t + 8 * row + 6), row);
 }
@@ -8770,7 +8784,7 @@ u16 U3D_Vm_ObjCode(u16 code)
     if (code < 0xA2 || code > 0xB1)
         return code;
     v = sWork.work[0x20 + code - 0xA2];
-    return v != 0 && v < OBJ_EVENT_GFX_UNOVA_COUNT ? v : code;
+    return v != 0 && ObjIndex(v) < OBJ_EVENT_GFX_UNOVA_COUNT ? ObjIndex(v) : code;
 }
 
 // (mp_debug.c `mp u3droam`: the roamers moved onto this zone if it's one of theirs, for tests)

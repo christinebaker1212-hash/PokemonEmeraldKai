@@ -28,6 +28,7 @@
 #include "constants/songs.h"
 #include "event_object_movement.h"
 #include "field_camera.h"
+#include "field_player_avatar.h"
 #include "fieldmap.h"
 #include "gpu_regs.h"
 #include "main.h"
@@ -2102,6 +2103,43 @@ static void ExpDraw(int pass)
     }
 }
 
+// Black's objects drawn as its 3D models (its object code table's drawType 2, ov021 fldmmdl_g3dobj.c: the model archive
+// a/0/4/9): the STRENGTH boulders, NACRENE's DRAGON SKULL, PINWHEEL FOREST's and TWIST MOUNTAIN's ground patches, the
+// ABYSSAL RUINS' cube (table entries 792-798: tools/unova/gen_maps.py obj_index), each drawn where its object stands
+// (a clear sprite there: event_object_movement.c UnovaObjectInfo), as long as it's there; the pack's gimmick 248
+// (tools/unova/gimmicks.py OBJMODEL_SETUP) holds the six models
+#define OBJMODEL_OV 248
+static void ObjModelsDraw(int pass)
+{
+    static const s8 sModelOf[7] = {0, -1, 1, 2, 3, 4, 5};   // (table entries 792-798; 793 has no model)
+    static s16 sGim = -2;
+    s32 mi = U3D_MapIndex();
+    u32 i;
+    if (sGim == -2)
+    {
+        sGim = -1;
+        for (i = 0; i < sPack.ngim; i++)
+            if (sPack.gim[i].ov == OBJMODEL_OV)
+                sGim = i;
+    }
+    if (sGim < 0 || mi < 0)
+        return;
+    for (i = 0; i < OBJECT_EVENTS_COUNT; i++)
+    {
+        static const float sRot[9] = {1, 0, 0, 0, 1, 0, 0, 0, 1};
+        const struct ObjectEvent *o = &gObjectEvents[i];
+        s32 code = (s32)OBJ_GFX_ID(o) - (OBJ_EVENT_GFX_UNOVA_FIRST + 792), k, tx, tz;
+        float x, z;
+        if (!o->active || o->invisible || code < 0 || code >= 7 || (k = sModelOf[code]) < 0 || k >= sPack.gim[sGim].n)
+            continue;
+        tx = o->currentCoords.x - MAP_OFFSET + 32 * U3D_MapCellX(mi);
+        tz = o->currentCoords.y - MAP_OFFSET + 32 * U3D_MapCellZ(mi);
+        x = tx * 16.0f + 8.0f, z = tz * 16.0f + 8.0f;
+        DrawKindPose(&sPack.kind[sPack.gim[sGim].m[k].kind], 0xFF, 0, 0, NULL, sRot, x, U3D_GridGround(tx, tz, U3D_ObjectHeight(&gObjectEvents[gPlayerAvatar.objectEventId])), z,
+                     pass);
+    }
+}
+
 // ------------------------------------------------------------------------------------------------ 3D cut-ins
 // Black's FLD3D_CI (ov021 fld3d_ci.c): the field faded out and taken as a still (halved when the sequence says so),
 // the sequence's two models (pack gimmick CI_BASE + sequence, tools/unova/gimmicks.py ci_setup) played over it under
@@ -2936,6 +2974,7 @@ static void Render(void)
                 }
             }
         ExpDraw(pass);   // (the gym's machinery: solid with the map's solid, see-through after)
+        ObjModelsDraw(pass);   // (Black's objects drawn as models: the boulders...)
     }
 }
 

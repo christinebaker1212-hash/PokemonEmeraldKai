@@ -7768,3 +7768,36 @@ The user asked (2026-11-15) whether KANTO's, JOHTO's and SINNOH's post-games wer
   (johto_rival_days), the leaders after the LEAGUE, the BATTLE TOWER, the beasts, LUGIA / HO-OH and the GS BALL.
 - Decided earlier, not gaps: FireRed's KANTO roamer (the beasts are JOHTO's: docs/regions_audit/K3_findings.md),
   the wild tables by GENERATION (Quetzal's modern additions at GEN 5+).
+
+## Objects as the original games draw them (the sprite audit, 2026-11-15)
+The user: stand-ins (a little kid for KANTO's TOWN MAP and the docked S.S. ANNE, a YOUNGSTER where a 3D thing should
+be, things unseen but in the way in SINNOH) are to be the real thing, checked against FireRed, Crystal, Platinum, Black.
+- KANTO matches FireRed object for object (position and picture, tools: compare each map.json with pokefirered's). Its
+  two stand-ins were sizes the Quetzal import couldn't take (tools/quetzal_port/gen_objects.py): the TOWN MAP (32x16, on
+  a 32x32 sheet with its feet's line kept: PADDED) and the S.S. ANNE (128x64: drawn by mp_mappic.c as before, its
+  departure too; its object, kept for its flag, a clear 16x16 sprite: BLANK). New ids go after every other (0x258,
+  0x259) so saved ids never move.
+- JOHTO: Quetzal's maps aren't Crystal's, so each person is matched to Crystal's by their words (their script's texts
+  against pokecrystal's), then checked against the sprite Crystal gives them. Quetzal's finer choices stand (a CAMPER
+  or PSYCHIC where Crystal had its one YOUNGSTER; MAHOGANY's EXPERTS keep the battle pictures they go with); the wrong
+  sex, age or person is fixed: tools/quetzal_port/fix_sprites.py (13 people: TUSCANY, MONICA, WESLEY, a FISHER drawn
+  as a woman, the GRUNTS' sexes, BUENA's receptionist...).
+- SINNOH: Platinum draws ten object kinds as 3D models (pokeplatinum ov5 sObjectEventGfxModelEntries). The signs and
+  mailboxes were already (s3d_signs.c); now the BOOKs too, and the ones its scripts add and remove: the ELITE FOUR's
+  room doors (the way in shuts behind the player, the way out opens once the member is beaten: before, they weren't
+  there and the way out was open) and the wall before ROTOM's room (its SECRET KEY script). They are solid people
+  nobody sees (MOVEMENT_TYPE_INVISIBLE, by their own flags: gen_maps.py sprites.MODEL_OBJECTS) and s3d_signs.c draws
+  the model where each is while its flag says it's there (sSinnohModelObjects from gen_signs.py; the models packed by
+  gymprops.py). GALACTIC HQ's crowds of grunts (64x32 / 128x32 billboards) are kind 5 in the sprites pack
+  (build_gfx.py wide()), drawn whole by the big sprites (S3D_Gfx_Wide, set each frame in s3d_signs.c); new sheets go
+  last (build_gfx.py LATER) so saved ids never move.
+- UNOVA: Black turns an object code into its table entry piecewise (aletheia FLDMMDL_ObjCodeToTableIndex: under 0xDF
+  as is, 0x1000-0x1235 less 0xF21, 0x2000-0x2009 less 0x1CEB, else 10); the maps took codes as entries, so 81 objects
+  (STRENGTH boulders, the DRAGON SKULL, ROUTE 13's letter writer...) found no sheet and showed a YOUNGSTER
+  (gen_maps.py obj_index, u3d_vm.c ObjIndex). A code with no sheet is one Black never draws as a sprite (its table's
+  drawType 0: the blockers, codes 0 and 185; drawType 2: a model): a clear sprite now, the YOUNGSTER only without the
+  pack (event_object_movement.c UnovaObjectInfo). The models (a/0/4/9: bigrock, bigrock2, dragon_bone, tr_grass,
+  tr_ground, cube) are the pack's gimmick 248 (gimmicks.py OBJMODEL_SETUP), drawn where their objects stand
+  (u3d.c ObjModelsDraw). The boulders push with Black's STRENGTH (its event flag 964: field_player_avatar.c
+  TryPushBoulder, fldeff_rocksmash.c MP_ObstacleGfxIs).
+Tests: kanto_sprite_audit, sinnoh_model_objects, unova_sprite_audit.

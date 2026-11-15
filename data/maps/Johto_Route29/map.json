@@ -70,7 +70,7 @@
       "flag": "0"
     },
     {
-      "graphics_id": "OBJ_EVENT_GFX_QZ_17",
+      "graphics_id": "OBJ_EVENT_GFX_QZ_20",
       "x": 25,
       "y": 12,
       "elevation": 0,
@@ -83,7 +83,7 @@
       "flag": "FLAG_JOHTO_HIDE_TUSCANY"
     },
     {
-      "graphics_id": "OBJ_EVENT_GFX_QZ_16",
+      "graphics_id": "OBJ_EVENT_GFX_QZ_16021",
       "x": 6,
       "y": 22,
       "elevation": 0,

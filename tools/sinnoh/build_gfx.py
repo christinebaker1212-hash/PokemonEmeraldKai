@@ -19,7 +19,8 @@ Format (little endian): "S3DG" u32 version 2 (then "TOWN", the TOWN MAP, and "TB
   LUCAS's action sheets: player_actions(); "PKCH")
   u16 sprites: each char name[24] (Platinum's, lower case), u8 kind (0 walking: 9 frames 32x32, 1 still 32x32,
                2 still 16x16, 3 walking with a bow: 10 frames, the POKeMON CENTER nurse), u8 pad, u16 palette[16]
-               (BGR555; 0 transparent), then the frames as GBA 4bpp tiles (4: still 64x64, the big legendaries); then the smaller copy (OPTIONS >
+               (BGR555; 0 transparent), then the frames as GBA 4bpp tiles (4: still 64x64, the big legendaries; 5: a still
+               picture wider than a sprite, 128x32 as an mp_bigsprite frame: wide()); then the smaller copy (OPTIONS >
                DISPLAY > SPRITE SCALING > SINNOH PEOPLE: MIXED; shrink(), or AveonTrainer's sprite: the pad 1, tools/aveon/aveon.py):
                u16 palette[16], the same frames
   u16 pictures: each char name[24] (the class folder), u16 palette[16], then an mp_bigsprite frame:
@@ -41,7 +42,8 @@ SHEETS = ('npc', 'pokemon', 'objects', 'player')   # (player: only DAWN's and LU
 PLAYER_ONLY = ('player_f', 'player_m')
 # sheets taken after the first pack's: last of all, so every sprite before keeps its number (saves keep some: the
 # partner's look, VAR_SINNOH_PARTNER_GFX)
-LATER = ('galactic_hq_door',)
+LATER = ('galactic_hq_door', 'grunts_group_of_3', 'grunts_group_of_4', 'cave_painting_shards_left',
+         'cave_painting_shards_right')   # (the sheets added later go last: the ids saves hold never move)
 # the game's own sprites stay for these (their breaking / cutting animations, the item ball's)
 KEEP_OWN = {'rock_smash', 'cut_tree', 'strength_boulder', 'pokeball', 'ice_rock', 'moss_rock', 'surf_wake'}
 # Platinum's frame for each of the game's nine: down, up, left standing; down x2, up x2, left x2 stepping
@@ -194,6 +196,22 @@ class Padded:
         return self.im.getpalette()
 
 
+def wide(im):
+    """kind 5: a still picture wider than a sprite (GALACTIC HQ's crowds of grunts, 64 or 128 x 32), drawn whole by the
+    game's big sprites (include/mp_bigsprite.h): s16 dx, dy from the sprite's middle (its 64x64 frame: feet at its
+    bottom, the picture's bottom middle there), u16 w, h (128 x 32 always, the picture in the middle), 4 bits a pixel
+    in rows, the low nibble first"""
+    w, h = im.size
+    left = (128 - w) // 2
+    out = bytearray(struct.pack('<hhHH', -64, 0, 128, 32))
+    for y in range(32):
+        for x in range(0, 128, 2):
+            a = im.px(x - left, y) & 15 if left <= x < left + w else 0
+            b = im.px(x + 1 - left, y) & 15 if left <= x + 1 < left + w else 0
+            out.append(a | b << 4)
+    return bytes(out)
+
+
 def sheets(root):
     """[(name, kind, image)] in a fixed order (by name within npc, pokemon, objects)"""
     out, seen = [], set()
@@ -214,7 +232,8 @@ def sheets(root):
             if (w, h) == (16, 32):
                 im, w = Padded(im), 32   # (a 16-wide still sprite in the middle of 32: GALACTIC HQ's security doors)
             kind = 3 if w == 32 and h >= 544 else 0 if w == 32 and h >= 512 else 1 if w == 32 and h in (32, 64, 128) \
-                else 2 if (w, h) == (16, 16) else 4 if w == 64 and h in (64, 128) else None   # (1, 4: the first frame)
+                else 2 if (w, h) == (16, 16) else 4 if w == 64 and h in (64, 128) \
+                else 5 if (w, h) in ((64, 32), (128, 32)) else None   # (1, 4: the first frame; 5: GALACTIC HQ's crowds)
             if kind is None:
                 continue
             seen.add(name)
@@ -354,6 +373,8 @@ def main():
             out += tiles(im, 0, 0, 32, 32)
         elif kind == 4:
             out += tiles(im, 0, 0, 64, 64)
+        elif kind == 5:
+            out += wide(im)
         else:
             out += tiles(im, 0, 0, 16, 16)
         # MIXED's smaller copy: its own palette, then the same frames
@@ -362,6 +383,9 @@ def main():
         else:
             where = [(0, 0)]
         size = 16 if kind == 2 else 64 if kind == 4 else 32
+        if kind == 5:   # (no smaller copy: the same picture)
+            out += palette(im) + wide(im)
+            continue
         if art:
             out += struct.pack('<16H', *art[0])
             for rows in art[1]:

@@ -1,0 +1,43 @@
+pressuntil A field 5000
+wait 30
+mp setflag 0x3471
+mp clearflag 0x3472
+mp clearflag 0x3382
+mp warp 42,103,8,11
+wait 200
+waitfor field 1000
+wait 60
+mp objs
+shot m_aaron_in
+mp where
+press LEFT 8
+wait 20
+press UP 100
+wait 20
+press RIGHT 8
+wait 20
+press UP 40
+wait 60
+mp where
+shot m_aaron_exit_shut
+mp warp 44,9,2,6
+wait 200
+mash B 10 10
+wait 60
+mp objs
+mp face left
+wait 20
+shot m_rotom_wall
+mp warp 44,13,4,11
+wait 200
+waitfor field 1000
+mp face up
+wait 20
+shot m_book
+mp clearflag 0x342A
+mp warp 41,88,15,18
+wait 200
+waitfor field 1000
+wait 30
+shot m_crowds
+quit

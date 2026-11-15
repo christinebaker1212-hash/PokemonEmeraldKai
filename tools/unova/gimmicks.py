@@ -45,6 +45,7 @@ SETUPS = {
     53: ("SKYARROW BRIDGE's traffic (zone 249)", 0x021F3D60),   # (sSoundObjsUnitSetup: two cars each way, the ship)
     54: ("TUBELINE BRIDGE's trains (zone 254)", 0x021F39A0),   # (sSoundObjsBUnitSetup)
     52: ("the BATTLE SUBWAY's trains at the GEAR STATION's platforms (zones 67-76)", 'btrain'),
+    248: ("the object codes Black draws as 3D models (boulders, the DRAGON SKULL...: OBJMODEL_OV)", 'mmdl'),
     171: ('the ELITE FOUR rooms\' entrance scene, slot 1 (zone 140)', 'fk'),
     172: ('the ELITE FOUR rooms\' entrance scene, slot 2 (zone 141)', 'fk'),
     173: ('the ELITE FOUR rooms\' entrance scene, slot 3 (zone 142)', 'fk'),
@@ -398,6 +399,13 @@ def _place64(img):
 D06_SETUP = {'res': [(75, 78, 0), (75, 120, 0), (75, 121, 0), (75, 79, 0), (75, 122, 0), (75, 123, 0), (75, 81, 0)],
              'objs': [(0, 0, 0, [(1, 0), (2, 0)]), (6, 0, 6, []), (3, 0, 3, [(4, 0), (5, 0)])]}
 D06_ZONES = {151: 195, 152: 196, 153: 197}
+
+# the 3D models Black draws for the object codes past its people (FLDMMDL_ObjCodeToTableIndex 792-798: drawType 2, the
+# model archive 0x31 = a/0/4/9, ov021 fldmmdl_g3dobj.c FLDMMDL_G3DOBJ_LoadRes): the STRENGTH boulders bigrock /
+# bigrock2, NACRENE's DRAGON SKULL, PINWHEEL FOREST's and TWIST MOUNTAIN's ground patches, the ABYSSAL RUINS' cube.
+# No place of their own: src/unova/u3d.c ObjModelsDraw draws each where its object stands (gimmick OBJMODEL_OV)
+OBJMODEL_OV = 248
+OBJMODEL_SETUP = {'res': [(49, k, 0) for k in range(6)], 'objs': [(k, 0, k, []) for k in range(6)]}
 D06_STONES, D06_PANELS = 12, 14
 
 
@@ -537,7 +545,7 @@ def _place48(img):
     return [((0.0, 0.0, 0.0), 0, 1)]
 
 
-PLACES = {62: _place62, 59: _place59, 159: _place159, 171: _place_fk, 172: _place_fk, 173: _place_fk, 174: _place_fk, 49: _place49, 50: _place50, 53: _place53, 54: _place54, 58: _place58, 52: _place_btrain, 151: _d06_place(195), 152: _d06_place(196), 153: _d06_place(197), 48: _place48, 64: _place64, 65: _place65, 165: _place65, 38: _place38, 39: _place39, 40: _place40, 41: _place41, 42: _place42, 43: _place43, 44: _place44, 45: _place45,
+PLACES = {248: lambda img: [((0.0, 0.0, 0.0), 0, 1)] * 6, 62: _place62, 59: _place59, 159: _place159, 171: _place_fk, 172: _place_fk, 173: _place_fk, 174: _place_fk, 49: _place49, 50: _place50, 53: _place53, 54: _place54, 58: _place58, 52: _place_btrain, 151: _d06_place(195), 152: _d06_place(196), 153: _d06_place(197), 48: _place48, 64: _place64, 65: _place65, 165: _place65, 38: _place38, 39: _place39, 40: _place40, 41: _place41, 42: _place42, 43: _place43, 44: _place44, 45: _place45,
           46: _place46}   # (the gimmicks drawn so far)
 for _q in range(CI_SEQS):
     SETUPS[CI_BASE + _q] = ('a 3D cut-in, sequence %d' % _q, 'ci')
@@ -552,6 +560,8 @@ def add(pack):
     for ov, place in sorted(PLACES.items()):
         if SETUPS[ov][1] == 'd06':   # (a setup of our own: a field effect's models, CHARGESTONE's stones)
             img, s = None, dict(D06_SETUP, objs=_d06_objs())
+        elif SETUPS[ov][1] == 'mmdl':
+            img, s = None, OBJMODEL_SETUP
         elif SETUPS[ov][1] == 'btrain':
             img, s = None, BTRAIN_SETUP
         elif SETUPS[ov][1] == 'fk':

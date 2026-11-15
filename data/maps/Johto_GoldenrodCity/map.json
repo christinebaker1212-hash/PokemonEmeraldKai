@@ -39,7 +39,7 @@
       "flag": "FLAG_QZ_0x1098"
     },
     {
-      "graphics_id": "OBJ_EVENT_GFX_QZ_55",
+      "graphics_id": "OBJ_EVENT_GFX_QZ_16015",
       "x": 20,
       "y": 30,
       "elevation": 0,
@@ -52,7 +52,7 @@
       "flag": "FLAG_QZ_0x1098"
     },
     {
-      "graphics_id": "OBJ_EVENT_GFX_QZ_16047",
+      "graphics_id": "OBJ_EVENT_GFX_QZ_16048",
       "x": 28,
       "y": 30,
       "elevation": 0,

@@ -79,6 +79,9 @@ SIGNS = re.compile(r'SIGNPOST|SIGNBOARD|MAILBOX|BOOK$')
 # (GALACTIC HQ's security doors and the bollards are Platinum's own sprites that stand in the way: shown, solid)
 HIDDEN = re.compile(r'SIGN|VENT|SNOWBALL|WIFI|INVISIBLE|BERRY_SOIL|MAILBOX|BOOK$|(?<!GALACTIC_HQ_)DOOR|CAVE_PAINTING|_ROCK$|'
                     r'WALL_|BABY_IN_PRAM|^VAR_[1-9A-F]$|GIRATINA_ORIGIN')
+# Platinum's objects drawn as models of their own that its scripts add and remove (tools/sinnoh/gen_signs.py MOVING): solid
+# people nobody sees, the model drawn where one is (src/sinnoh/s3d_signs.c)
+MODEL_OBJECTS = {'OBJ_EVENT_GFX_ELITE_FOUR_ROOM_DOOR', 'OBJ_EVENT_GFX_WALL_BLOCKING_ROTOMS_ROOM'}
 # (the legendaries stand where Platinum puts them: tools/sinnoh/legends.py gives them their battles and when they show)
 
 _own = None

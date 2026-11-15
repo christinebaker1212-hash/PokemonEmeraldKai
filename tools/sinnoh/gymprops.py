@@ -43,8 +43,11 @@ GYM_MODELS = {
         'land_rock', 'portal')],
     # not a gym's: SINNOH's signposts, signboards and mailboxes (Platinum's objects with these models; src/sinnoh/s3d_signs.c,
     # where they stand from tools/sinnoh/gen_signs.py)
+    # (then the BOOKs, the ELITE FOUR's room doors and the wall before ROTOM's room: the rest of Platinum's objects with
+    # models of their own, sObjectEventGfxModelEntries; new ones go last so the numbers above keep)
     'MAP_HEADER_TWINLEAF_TOWN': ['fx:%s.nsbmd' % n for n in (
-        'map_signpost', 'arrow_signpost', 'gym_signpost', 'signboard', 'trainer_tips', 'mailbox')],
+        'map_signpost', 'arrow_signpost', 'gym_signpost', 'signboard', 'trainer_tips', 'mailbox', 'book',
+        'elite_four_room_door', 'rotom_room_wall')],
 }
 
 

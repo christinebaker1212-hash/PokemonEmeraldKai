@@ -1,0 +1,31 @@
+pressuntil A field 5000
+wait 30
+mp warp 50,111,19,23
+wait 200
+waitfor field 1000
+wait 30
+mp objs
+shot u_route7
+mp warp 48,32,32,35
+wait 200
+waitfor field 1000
+wait 30
+mp objs
+shot u_castelia
+mp warp 49,102,40,11
+wait 200
+waitfor field 1000
+wait 30
+shot u_twist
+mp warp 49,55,19,68
+wait 200
+waitfor field 1000
+wait 30
+shot u_pinwheel
+mp warp 49,110,10,14
+wait 200
+waitfor field 1000
+wait 30
+shot u_dragonspiral
+mp objs
+quit

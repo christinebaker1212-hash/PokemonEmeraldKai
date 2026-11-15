@@ -25,6 +25,8 @@ const char *Updater_ExeFile(const char *name);
 struct SinnohSprite { u8 kind, art; const u16 *pal[2]; const u8 *frames[2]; };   // ([1]: MIXED's smaller copy; art: it's
                                                                                 // AveonTrainer's, tools/aveon/aveon.py)
 struct SinnohPic { const u16 *pal; struct MpBigSprite big; };
+#define SINNOH_WIDE_MAX 8   // (kind 5: a still picture wider than a sprite, GALACTIC HQ's crowds: drawn by the big sprites)
+#define SINNOH_WIDE_FRAME (8 + 128 * 32 / 2)
 
 static struct
 {
@@ -32,6 +34,8 @@ static struct
     u8 *data;
     struct SinnohSprite sprites[SINNOH_SPRITE_COUNT];
     struct SinnohPic pics[SINNOH_PIC_COUNT];
+    struct { u16 index; struct MpBigSprite big; } wide[SINNOH_WIDE_MAX];
+    u8 wideCount;
     const u16 *town[2];    // the TOWN MAP's pages (tools/sinnoh/gen_townmap.py picture), RGB555
     u16 townW, townH;
     const u8 *townBlocks[48];   // its FLY spots' blocks (gen_townmap.py blocks: "TBLK"): page, spot, hide, 0, x y w h, pixels
@@ -95,7 +99,8 @@ static void Load(void)
         if (p + 26 + 32 > end)
             goto bad;
         kind = p[24];
-        frames = kind == 0 ? 9 * 512 : kind == 3 ? 10 * 512 : kind == 1 ? 512 : kind == 4 ? 2048 : 128;
+        frames = kind == 0 ? 9 * 512 : kind == 3 ? 10 * 512 : kind == 1 ? 512 : kind == 4 ? 2048
+               : kind == 5 ? SINNOH_WIDE_FRAME : 128;
         if (p + 26 + 2 * (32 + frames) > end)
             goto bad;
         sGfx.sprites[i].kind = kind;
@@ -104,6 +109,14 @@ static void Load(void)
         sGfx.sprites[i].frames[0] = p + 26 + 32;
         sGfx.sprites[i].pal[1] = (const u16 *)(p + 26 + 32 + frames);
         sGfx.sprites[i].frames[1] = p + 26 + 32 + frames + 32;
+        if (kind == 5 && sGfx.wideCount < SINNOH_WIDE_MAX)
+        {
+            sGfx.wide[sGfx.wideCount].index = i;
+            sGfx.wide[sGfx.wideCount].big.frame = sGfx.sprites[i].frames[0];
+            sGfx.wide[sGfx.wideCount].big.bpp = 4;
+            sGfx.wide[sGfx.wideCount].big.colorCount = 16;
+            sGfx.wideCount++;
+        }
         p += 26 + 2 * (32 + frames);
     }
     if (p + 2 > end)
@@ -327,6 +340,18 @@ bool8 S3D_Gfx_SmallIsArt(u16 index)
     if (!sGfx.tried)
         Load();
     return sGfx.ok && index < SINNOH_SPRITE_COUNT && sGfx.sprites[index].art;
+}
+
+// Kind 5's picture (a crowd of GALACTIC grunts, wider than any sprite), for the object's sprite to draw whole; NULL: none
+const struct MpBigSprite *S3D_Gfx_Wide(u16 index)
+{
+    u32 i;
+    if (!sGfx.ok)
+        return NULL;
+    for (i = 0; i < sGfx.wideCount; i++)
+        if (sGfx.wide[i].index == index)
+            return &sGfx.wide[i].big;
+    return NULL;
 }
 
 bool8 S3D_Gfx_Sprite(u16 index, bool8 small, u8 *kind, const u16 **pal, const u8 **frames)

@@ -152,6 +152,15 @@ static void Load(void)
 }
 
 // Black's object code CODE's sprite (SMALL: MIXED's smaller copy); FALSE without the pack or for codes it doesn't draw
+// The people's pack is there (a code it has no sheet for is one Black never draws as a sprite: event_object_movement.c
+// UnovaObjectInfo shows nothing for it, not a stand-in)
+bool8 U3D_Gfx_Ready(void)
+{
+    if (!sGfx.tried)
+        Load();
+    return sGfx.ok;
+}
+
 bool8 U3D_Gfx_Sprite(u16 code, bool8 small, u8 *kind, const u16 **pal, const u8 **frames)
 {
     u32 o;

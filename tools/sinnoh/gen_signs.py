@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""SINNOH's signposts, signboards and mailboxes as Platinum draws them: Platinum's map objects with their own 3D models
+"""SINNOH's signposts, signboards, mailboxes and books as Platinum draws them: Platinum's map objects with their own 3D models
 (res/graphics/field_effects: map_signpost, arrow_signpost, gym_signpost, signboard, trainer_tips, mailbox). The maps
 keep these objects hidden (gen_maps.py: a sign is read where it stands), so nothing showed there (the user, 2026-11-06:
 "A sign is invisible that tells you where you are"). This writes where each one stands, which model and which way it
@@ -22,16 +22,29 @@ KINDS = {
     'OBJ_EVENT_GFX_SIGNBOARD': 'signboard',
     'OBJ_EVENT_GFX_TRAINER_TIPS_SIGNPOST': 'trainer_tips',
     'OBJ_EVENT_GFX_MAILBOX': 'mailbox',
+    'OBJ_EVENT_GFX_BOOK': 'book',
+}
+# Platinum's objects with models of their own that its scripts add and remove (the ELITE FOUR's room doors close behind
+# the player and the way on opens once the member is beaten; the wall before ROTOM's room goes once ROTOM's there): the
+# maps keep them as solid people nobody sees (gen_maps.py, sprites.MODEL_OBJECTS), and s3d_signs.c draws the model
+# where one is while it's there
+MOVING = {
+    'OBJ_EVENT_GFX_ELITE_FOUR_ROOM_DOOR': 'elite_four_room_door',
+    'OBJ_EVENT_GFX_WALL_BLOCKING_ROTOMS_ROOM': 'rotom_room_wall',
 }
 
 
 def main():
     root = sys.argv[1]
     src = open_source(root)
-    rows = []
+    rows, moving = [], []
     for p in places(src, root):
         ev = events(root, p['place'])
-        for o in ev.get('object_events', []):
+        for i, o in enumerate(ev.get('object_events', [])):
+            kind = MOVING.get(o.get('graphics_id'))
+            if kind and inside(p, o['x'], o['z']):
+                moving.append((p['id'], i + 1, '%d /* %s */' % (gymprops.number(src, 'fx:%s.nsbmd' % kind), kind)))
+                continue
             kind = KINDS.get(o.get('graphics_id'))
             if kind and inside(p, o['x'], o['z']):
                 model = '%d /* %s */' % (gymprops.number(src, 'fx:%s.nsbmd' % kind), kind)
@@ -44,8 +57,12 @@ def main():
            'static const struct SinnohSign { u16 map; u8 x, y; u16 model; u8 dir; } sSinnohSigns[] = {']
     out += ['    {%s, %d, %d, %s, %d},' % r for r in rows]
     out.append('};')
+    out += ['// {map, local id, model}: an object of the map drawn as the model while it\'s there',
+            'static const struct SinnohModelObject { u16 map; u8 localId; u16 model; } sSinnohModelObjects[] = {']
+    out += ['    {%s, %d, %s},' % r for r in sorted(moving)]
+    out.append('};')
     open('src/data/sinnoh_signs.h', 'w').write('\n'.join(out) + '\n')
-    print('%d signs on %d maps' % (len(rows), len({r[0] for r in rows})))
+    print('%d signs on %d maps, %d moving' % (len(rows), len({r[0] for r in rows}), len(moving)))
 
 
 if __name__ == '__main__':

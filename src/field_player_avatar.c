@@ -911,9 +911,15 @@ bool8 MP_BoulderFallThroughHole(struct ObjectEvent *boulder)
     return TRUE;
 }
 
+bool8 U3D_Vm_Flag(u16 id);
+bool8 U3D_IsUnovaGroup(u8 mapGroup);
+
 static bool8 TryPushBoulder(s16 x, s16 y, u8 direction)
 {
-    if (FlagGet(FLAG_SYS_USE_STRENGTH))
+    // Moemon Kai: UNOVA's STRENGTH is Black's own event flag 964 (its shared script 10000 sets it: the boulders,
+    // Black's 3D models, fldeff_rocksmash.c MP_ObstacleGfxIs)
+    if (FlagGet(FLAG_SYS_USE_STRENGTH)
+     || (U3D_IsUnovaGroup(gSaveBlock1Ptr->location.mapGroup) && U3D_Vm_Flag(964)))
     {
         u8 objectEventId = GetObjectEventIdByXY(x, y);
 

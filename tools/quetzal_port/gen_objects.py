@@ -39,6 +39,13 @@ NURSE = 16170   # FireRed's nurse: the 10th frame is her bow (nurse_joy_bow in K
 # Quetzal sprites drawn as another one (the id keeps its number): 59, JOHTO's item ball in its caves and on its later
 # routes, is a square box; 15006 is the round POKé BALL the rest of JOHTO's item balls are
 DRAWN_AS = {59: 15006}
+# Sprites in a size Kai's objects have no shape for, imported after the rest (so no other id moves):
+# - FireRed's TOWN MAP on the wall of BLUE's house (32 x 16, one frame: the rip read five more past its end), drawn on
+#   a 32 x 32 sheet with the map along its bottom (its feet's line kept);
+# - FireRed's S.S. ANNE (128 x 64) is drawn by mp_mappic.c as a picture over the map (its departure too): its object,
+#   kept for its flag, is a blank 16 x 16 sprite so nothing stands in for it
+PADDED = {16208: ((32, 32), 1)}
+BLANK = {16202}
 
 
 def read(p):
@@ -62,6 +69,28 @@ def kai_paths():
     return out
 
 
+def reshape(s, png):
+    """PADDED / BLANK: the sprite redrawn on a sheet Kai's objects have a shape for (a file in /tmp, the rip untouched)"""
+    from PIL import Image
+    src = Image.open(png)
+    s = dict(s)
+    if s['id'] in BLANK:
+        (w, h), frames = (16, 16), 1
+    else:
+        (w, h), frames = PADDED[s['id']]
+    out = Image.new('P', (w * frames, h), 0)
+    out.putpalette(src.getpalette())
+    if s['id'] not in BLANK:
+        for f in range(frames):
+            fr = src.crop((f * s['width'], 0, (f + 1) * s['width'], s['height']))
+            out.paste(fr, (f * w + (w - s['width']) // 2, h - s['height']))
+    s.update(width=w, height=h, frames=frames, inanimate=True)
+    import tempfile
+    path = os.path.join(tempfile.gettempdir(), 'qz_reshaped_%d.png' % s['id'])
+    out.save(path)
+    return path, s
+
+
 def main():
     sprites = json.load(open(os.path.join(RIP, 'object_events.json')))
     kai = kai_paths()
@@ -74,7 +103,7 @@ def main():
     pics, tables, infos, pals = [], [], [], []
     n = 0
     # sprites added later (tools/quetzal_rip/var_sprites.py) go last, so the ids saves hold never move
-    late = lambda s: s.get('used_by') == ["(a script's graphics variable)"]
+    late = lambda s: 2 if s['id'] in PADDED or s['id'] in BLANK else 1 if s.get('used_by') == ["(a script's graphics variable)"] else 0
     for s in sorted(sprites, key=lambda s: (late(s), s['id'])):
         q = s['const']
         m = re.match(r'VAR_OBJ_GFX_ID_(\w)', s.get('note', ''))
@@ -85,8 +114,10 @@ def main():
         if match.startswith('kai ') and match[4:] in kai:
             ids[q] = kai[match[4:]]
             continue
-        size = OAM.get((s['width'], s['height']))
         png = os.path.join(RIP, 'pics', 'gfx_%d.png' % s['id'])
+        if s['id'] in PADDED or s['id'] in BLANK:
+            png, s = reshape(s, png)
+        size = OAM.get((s['width'], s['height']))
         if size is None or not os.path.exists(png):
             print('  no import for %s (%dx%d): stand-in' % (q, s['width'], s['height']))
             ids[q] = 'OBJ_EVENT_GFX_NINJA_BOY'
