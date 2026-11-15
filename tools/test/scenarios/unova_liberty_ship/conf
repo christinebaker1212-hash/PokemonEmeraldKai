@@ -1,0 +1,7 @@
+# The LIBERTY ship at CASTELIA's pier (ov062 field_gimmick_62.c: pack gimmick 62, u3d_vm.c): moored with its water
+# moving. Shot ls_pier.png.
+MODE=1
+TMO=200
+ENV_A="MOEMON_DEBUG_REGION=4 MOEMON_DEBUG_PARTY=6:100"
+EXPECT_A=("the LIBERTY ship at the pier" "[lsh] done")
+UNEXPECT_A=("[crash]" "TIMEOUT")

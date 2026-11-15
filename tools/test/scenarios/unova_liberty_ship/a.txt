@@ -1,0 +1,12 @@
+pressuntil A field 6000
+wait 60
+mash B 12 20
+mp u3dclear
+wait 30
+mp u3dzone 235 314 763
+wait 200
+mash B 6 15
+mp where
+shot ls_pier
+echo [lsh] done
+quit

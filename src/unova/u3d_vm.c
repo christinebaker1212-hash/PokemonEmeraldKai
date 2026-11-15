@@ -1095,7 +1095,7 @@ static void BridgeFrame(void);
 static void LeagueFrame(void);
 static void FkStart(u8 slot);
 static void SpPokeFrame(void);
-static bool8 sSpPoke;
+static bool8 sSpPoke, sLibertyShipGone;
 static struct { bool8 on, pending; u8 side; u16 elapsed, frames; float from[3], to[3], bump; u16 from_, to_; }
     sSpMove, sSpSwap;   // (the special POKeMON's ball on its way; ZORUA's smoke's swap waiting)
 static void SwapPeople(u16 a, u16 b);
@@ -4900,8 +4900,9 @@ static void Step(struct Thread *t)
         case U3C_PROC_CallFieldCloseEvent:
         case U3C_RESEARCH_CmdSetSurveyAnswer:   // (the Xtransceiver survey: Wi-Fi's)
             break;
-        case U3C_NAMEIN_SETUP_ScrCmdSetFieldSaveFlag:   // (a field save flag for a scene's restart: Kai saves its own way)
-            break;
+        case U3C_NAMEIN_SETUP_ScrCmdSetFieldSaveFlag:   // the LIBERTY ship gone from CASTELIA's pier when it loads
+            sLibertyShipGone = TRUE;                      // next (ov062's gimmick work 0x34; Black's other gimmicks
+            break;                                        // claiming the slot bring it back: here, being elsewhere)
         case U3C_WORK_CmdGetSaveStatus:   // has a save, a new game, a big save to write: a save there, not new, small
             *WorkPtr(a[0]) = 1;
             *WorkPtr(a[1]) = 0;
@@ -5926,6 +5927,8 @@ void U3D_Vm_FieldShown(void)
         return;
     PlateDoorsRefresh(FALSE);
     sSpPoke = FALSE, sSpMove.on = FALSE, sSpSwap.pending = FALSE;   // (the special POKeMON's: loaded again below)
+    if (CurrentZone() != 235)
+        sLibertyShipGone = FALSE;
     {
         void U3D_TownMapArrive(u16 zone);
         U3D_TownMapArrive(CurrentZone());   // (Black's arrival flags: FLY's towns, src/unova/u3d_townmap.c)
@@ -6004,6 +6007,13 @@ void U3D_Vm_FieldShown(void)
         SoundObjsLoad();
     else if (CurrentZone() == 137 || CurrentZone() == 138)   // (ov049 / ov050: the LEAGUE's hub and the CHAMPION's room)
         LeagueLoad();
+    else if (CurrentZone() == 235)   // (ov062: the LIBERTY ship at the pier, its water moving; gone once it's sailed)
+    {
+        U3D_ExpLoad(62);
+        U3D_ExpTex(0, 0, TRUE, 0, TRUE, TRUE);
+        U3D_ExpHide(0, sLibertyShipGone);
+        MPNet_Log("u3d vm: the LIBERTY ship %s", sLibertyShipGone ? "has sailed" : "at the pier");
+    }
     else if (CurrentZone() == 47 || CurrentZone() == 53 || CurrentZone() == 346)   // (ov059: the special POKeMON)
     {
         U3D_ExpLoad(CurrentZone() == 47 ? 59 : 159);

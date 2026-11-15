@@ -72,8 +72,12 @@ systems. Tick an entry only once it plays as Black's and has been seen running.
       47 / 53 / 346): a distributed POKeMON in the party (CELEBI, MELOETTA, KELDEO...) sent out and back in Black's
       ball models along their arcs, played and waited on as Black's, and in CASTELIA ZORUA's puff of smoke over the
       lost boy, the swap at its frame 15 (pack gimmicks 59 / 159, u3d_vm.c SpPoke*); scenario unova_special_poke
+- [x] LIBERTY GARDEN's ship (ov062 field_gimmick_62.c, 2026-11-15; zone 235): the LIBERTY ship moored at the pier
+      with its water moving (pack gimmick 62); after script command 0x23C it's gone the next time the island loads,
+      until the player has been elsewhere (Black's gimmick work 0x34, which another place's gimmick takes back);
+      scenario unova_liberty_ship
 - [ ] Black's other field gimmicks (arc 0x65's zone table, ov021 gFieldGimmickOverlayIds): the ENTRALINK's gauge and
-      markers (ov060 / ov061), LIBERTY GARDEN's (ov062)
+      markers (ov060 / ov061)
 - [x] Camera shakes (0x148: ABYSSAL RUINS, CHARGESTONE, DRAGONSPIRAL, N's CASTLE; 2026-11-15, scenario
       unova_camera_shake): ShakeTask's swings, their decay and the script's wait (u3d.c U3D_CameraShake)
 - [x] The ELITE FOUR rooms' entrance scenes (ov056 field_fk_demo.c, script command 0x1A2 with the room's slot;

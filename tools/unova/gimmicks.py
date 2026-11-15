@@ -38,6 +38,7 @@ SETUPS = {
     48: ('gate news board (the gates)', 0x021F4EA4),   # (gGateExpObjSetups[1]: the English game's, text mode 0)
     58: ('the lane traffic (ROUTE 4, the DESERT RESORT: zones 326 / 157)', 0x021F3B60),   # (sLaneTrainsUnitSetup)
     49: ("the LEAGUE's lamps (zone 137)", 0x021F3894),   # (gModelsASetup)
+    62: ("the LIBERTY ship at CASTELIA's pier (zone 235)", 0x021F3768),   # (gFieldGimmick62UnitSetup)
     59: ("the special POKeMON's ball and ZORUA's smoke (CASTELIA, zone 47)", 0x021F3E74),   # (sSpPokeGimmickSetup)
     159: ("the special POKeMON's ball (zones 53 / 346)", 0x021F3E84, 59),   # (sSpPokeGimmickPairBSetup: A's alike)
     50: ("the LEAGUE's landing (zone 138)", 0x021F38A4),   # (gModelsBSetup)
@@ -413,6 +414,11 @@ def _place_fk(img):
 
 # the special POKeMON's scenes (ov059 sp_poke_gimmick.c): the ball's way out (model 0) and in (1), and in zone 47
 # ZORUA's smoke (2), all hidden until a script command places them
+# the LIBERTY ship (ov062 field_gimmick_62.c): at gFieldGimmick62ModelPos, its water animation on
+def _place62(img):
+    return [(img.vec(0x021F3790), 0)]
+
+
 def _place59(img):
     return [((0.0, 0.0, 0.0), 0, 1)] * 3
 
@@ -490,7 +496,7 @@ def _place48(img):
     return [((0.0, 0.0, 0.0), 0, 1)]
 
 
-PLACES = {59: _place59, 159: _place159, 171: _place_fk, 172: _place_fk, 173: _place_fk, 174: _place_fk, 49: _place49, 50: _place50, 53: _place53, 54: _place54, 58: _place58, 52: _place_btrain, 151: _d06_place(195), 152: _d06_place(196), 153: _d06_place(197), 48: _place48, 64: _place64, 65: _place65, 165: _place65, 38: _place38, 39: _place39, 40: _place40, 41: _place41, 42: _place42, 43: _place43, 44: _place44, 45: _place45,
+PLACES = {62: _place62, 59: _place59, 159: _place159, 171: _place_fk, 172: _place_fk, 173: _place_fk, 174: _place_fk, 49: _place49, 50: _place50, 53: _place53, 54: _place54, 58: _place58, 52: _place_btrain, 151: _d06_place(195), 152: _d06_place(196), 153: _d06_place(197), 48: _place48, 64: _place64, 65: _place65, 165: _place65, 38: _place38, 39: _place39, 40: _place40, 41: _place41, 42: _place42, 43: _place43, 44: _place44, 45: _place45,
           46: _place46}   # (the gimmicks drawn so far)
 
 
