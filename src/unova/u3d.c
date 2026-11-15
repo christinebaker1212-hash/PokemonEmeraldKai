@@ -123,6 +123,7 @@ static struct
 
 // a flight (SKYLA's cannons): the player's sprite at a world place of Black's units and the view on it
 static struct { bool8 on; float x, y, z; } sFly;
+static struct { u8 spriteId; bool8 on; float x, y, z; } sObjFly[4];   // (people flown along Black's paths, U3D_ObjectFly)
 
 #include "u3d_maps.h"   // sUnovaMaps: each UNOVA map, its zone, where it lies on its matrix (tools/unova/gen_maps.py)
 
@@ -1220,6 +1221,18 @@ void U3D_PlaceSprite(u16 spriteId, s32 x, s32 feetY, s32 *outX, s32 *outY, float
         *depth = d;
         return;
     }
+    {
+        u32 k;
+        for (k = 0; k < ARRAY_COUNT(sObjFly); k++)
+            if (sObjFly[k].on && sObjFly[k].spriteId == spriteId
+             && Project(sObjFly[k].x, sObjFly[k].y, sObjFly[k].z + FEET_TOWARD, &sx, &sy, &d))
+            {
+                *outX = (s32)lroundf(sx);
+                *outY = (s32)lroundf(sy);
+                *depth = d;
+                return;
+            }
+    }
     if (spriteId < MAX_SPRITES && (u8)(sView.frame - sSpriteHFrame[spriteId]) <= 2)
         near = sSpriteH[spriteId];
     if (sHexAny && spriteId < MAX_SPRITES)
@@ -1758,6 +1771,31 @@ float U3D_ExpFrame(u16 model)
 void U3D_PlayerFly(bool8 on, float x, float y, float z)
 {
     sFly.on = on, sFly.x = x, sFly.y = y, sFly.z = z;
+}
+
+// a person's sprite drawn at world point X, Y, Z (Black's people flown along a path, scrcmd_misc.c MMDL_ICA), or not
+void U3D_ObjectFly(u8 spriteId, bool8 on, float x, float y, float z)
+{
+    u32 k, freeSlot = ARRAY_COUNT(sObjFly);
+    for (k = 0; k < ARRAY_COUNT(sObjFly); k++)
+    {
+        if (sObjFly[k].on && sObjFly[k].spriteId == spriteId)
+            break;
+        if (!sObjFly[k].on && freeSlot == ARRAY_COUNT(sObjFly))
+            freeSlot = k;
+    }
+    if (k == ARRAY_COUNT(sObjFly))
+        k = freeSlot;
+    if (k < ARRAY_COUNT(sObjFly))
+        sObjFly[k].spriteId = spriteId, sObjFly[k].on = on, sObjFly[k].x = x, sObjFly[k].y = y, sObjFly[k].z = z;
+}
+
+// the player's place in the world (Black's FIELD_PLAYER_GetPos: the tile's middle, the ground under them)
+void U3D_PlayerWorldPos(float out[3])
+{
+    s32 gtx, gtz;
+    MapToGrid(gSaveBlock1Ptr->pos.x + MAP_OFFSET, gSaveBlock1Ptr->pos.y + MAP_OFFSET, &gtx, &gtz);
+    out[0] = gtx * 16.0f + 8.0f, out[1] = sView.havePlayerH ? sView.playerH : 0.0f, out[2] = gtz * 16.0f + 8.0f;
 }
 
 void U3D_ExpSetY(u16 model, float y)

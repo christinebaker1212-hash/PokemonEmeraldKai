@@ -1,0 +1,8 @@
+# People flown along Black's paths (commands 0x15B-0x15E, archive 0xCB: u3d_icas.h): at the ABUNDANT SHRINE (zone
+# 376) with TORNADUS and THUNDURUS in the party, script 2 flies LANDORUS in along path 2 and away along path 3, from
+# where the player stands. Shots fp_*.png.
+MODE=1
+TMO=400
+ENV_A="MOEMON_DEBUG_REGION=4 MOEMON_DEBUG_PARTY=666:70,667:70"
+EXPECT_A=("a person flown along path 2" "the flown person set down" "[fp] done")
+UNEXPECT_A=("[crash]" "TIMEOUT")

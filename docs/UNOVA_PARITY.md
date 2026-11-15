@@ -41,7 +41,11 @@ systems. Tick an entry only once it plays as Black's and has been seen running.
       unova_camera_shake): ShakeTask's swings, their decay and the script's wait (u3d.c U3D_CameraShake)
 - [ ] 3D cut-ins (RunFld3dCiMain 0x1A1: DESERT RESORT, NACRENE), the ELITE FOUR rooms' entrance flights (FkDemo
       0x1A3 / 0x1A4)
-- [ ] People flown along Black's paths (MmdlIca 0x15B-0x15E: the roamer's fly-by, ABUNDANT SHRINE, ROUTE 7), a person
+- [ ] People flown along Black's paths (built; MmdlIca 0x15B-0x15E: archive 0xCB by tools/unova/gen_icas.py -> u3d_icas.h;
+      u3d.c U3D_ObjectFly draws the person at the path's point from where the player stood, set down on the tile at
+      its end; 2026-11-15, scenario unova_flown_person: the ABUNDANT SHRINE's LANDORUS flies in and out by the logs,
+      but the scene's camera keeps it off the test's shots, so not yet seen on screen)
+- [ ] A person
       rising / circling (0x225 / 0x226, CASTELIA), dropping in (0x247, RELIC CASTLE), event POKeMON's moves
       (0x221-0x228: CASTELIA, MOOR OF ICIRRUS, LOSTLORN FOREST)
 - [ ] The LIGHT STONE's arcs and glow (0x23F, 0x255-0x258: N's CASTLE)

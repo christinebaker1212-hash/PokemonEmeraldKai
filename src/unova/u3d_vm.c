@@ -1083,7 +1083,7 @@ static void DragonReset(void);
 // (BURGH's gym, the honey's trainers: Black's StartScriptedEvent run after its script, PlateDoorsFrame)
 static u8 sPdScripted, sPdScriptedVariant;
 static const float sPdEffectPos[2][3] = {{616, 0, 408}, {328, 0, 472}};   // (gPlateDoorsEffectPos)
-enum { W_BGM_STOPPED = 100, W_EXP_ANIM, W_LIFT_RIDE, W_MUSICAL, W_SUBWAY_MAP, W_BMODEL, W_BMODEL_DOOR, W_SHAKE, W_TIMEFX };
+enum { W_BGM_STOPPED = 100, W_EXP_ANIM, W_LIFT_RIDE, W_MUSICAL, W_SUBWAY_MAP, W_BMODEL, W_BMODEL_DOOR, W_SHAKE, W_TIMEFX, W_ICA };
 static u16 sBModelWait;
 // zone 389's time effect (ov065): sWork.white's TIMEFX_PENDING is Black's isEffectPending (its gimmick save 0x36)
 #define ZONE_TIME_EFFECT 389
@@ -1352,6 +1352,48 @@ static bool8 CrowdTalk(u16 local)
         return FALSE;
     MPNet_Log("u3d vm: a CASTELIA passer-by talked to (script %u)", sCrowdPeople[i].script);
     return Run(sCrowdPeople[i].script, 0x30 + i, TRUE);
+}
+
+// a person flown along a path (MMDL_ICA_Update: a point a field frame; at its end set down on the tile there)
+#include "u3d_icas.h"
+static struct { u8 local, path; bool8 playing; float frame, base[3]; } sIca;
+static void IcaLand(void)
+{
+    u8 id = ObjEventId(sIca.local);
+    const s16 *pt = sIcaPoints[sIcaPaths[sIca.path][0] + sIcaPaths[sIca.path][1] - 1];
+    sIca.playing = FALSE;
+    if (id >= OBJECT_EVENTS_COUNT)
+        return;
+    U3D_ObjectFly(gObjectEvents[id].spriteId, FALSE, 0, 0, 0);
+    MoveObjectEventToMapCoords(&gObjectEvents[id], MapX((u16)floorf((sIca.base[0] + pt[0] / 8.0f) / 16.0f)) + MAP_OFFSET,
+                               MapZ((u16)floorf((sIca.base[2] + pt[2] / 8.0f) / 16.0f)) + MAP_OFFSET);
+    MPNet_Log("u3d vm: the flown person set down");
+}
+
+static void IcaFrame(void)
+{
+    u8 id;
+    u32 f;
+    const s16 *pt;
+    if (!sIca.playing)
+        return;
+    if ((u32)sIca.frame >= sIcaPaths[sIca.path][1])
+    {
+        IcaLand();
+        return;
+    }
+    if ((id = ObjEventId(sIca.local)) >= OBJECT_EVENTS_COUNT)
+    {
+        sIca.playing = FALSE;
+        return;
+    }
+    f = (u32)sIca.frame;
+    pt = sIcaPoints[sIcaPaths[sIca.path][0] + f];
+    U3D_ObjectFly(gObjectEvents[id].spriteId, TRUE, sIca.base[0] + pt[0] / 8.0f, sIca.base[1] + pt[1] / 8.0f,
+                  sIca.base[2] + pt[2] / 8.0f);
+    if (pt[3] != 255)
+        ObjectEventTurn(&gObjectEvents[id], BlackToDir(pt[3]));
+    sIca.frame += 0.5f;
 }
 
 static void TimeFxStart(void)   // (StartEffect: shown, both tracks played, its sound)
@@ -2817,10 +2859,6 @@ static void Step(struct Thread *t)
         case U3C_StopSe:
         case U3C_SAVEANIME_Start:
         case U3C_TurnPlayerToFrontEvent:
-        case U3C_CreateMmdlIcaProc:   // (a person flown along a path of Black's own: the roamer's fly-by; not drawn)
-        case U3C_StartMmdlIcaAnime:
-        case U3C_WaitMmdlIcaAnime:
-        case U3C_EndMmdlIcaProc:
         case U3C_SYMBOL_MAP_ScrCmdSetSubscreenMode:   // (the lower screen's mode: Kai has one screen)
         case U3C_WORK_CmdSetBoxFlags:   // (Black's PC wallpapers the game clear unlocks: Kai's PC keeps its own)
             break;
@@ -4134,6 +4172,28 @@ static void Step(struct Thread *t)
             break;
         // zone 389's time effect (ov065 field_gimmick_time_effect.c; overlays share addresses, so these commands'
         // names are another overlay's): its pending flag set, the effect started, the script waiting for its end
+        // people flown along Black's paths (scrcmd_misc.c MMDL_ICA: archive 0xCB, u3d_icas.h), from where the player
+        // stood: the roamer's fly-by, ABUNDANT SHRINE, ROUTE 7
+        case U3C_CreateMmdlIcaProc:   // person
+            sIca.local = LocalId(V(0)), sIca.playing = FALSE;
+            U3D_PlayerWorldPos(sIca.base);
+            break;
+        case U3C_StartMmdlIcaAnime:   // path
+            if (V(0) < ARRAY_COUNT(sIcaPaths))
+            {
+                sIca.path = V(0), sIca.frame = 0, sIca.playing = TRUE;
+                IcaFrame();
+                MPNet_Log("u3d vm: a person flown along path %u", V(0));
+            }
+            break;
+        case U3C_WaitMmdlIcaAnime:
+            if (sIca.playing)
+                t->wait = W_ICA;
+            break;
+        case U3C_EndMmdlIcaProc:
+            if (sIca.playing)
+                IcaLand();
+            break;
         case U3C_POKEMON_FLD_StartOv55SubProc:   // CASTELIA's crowd (ov055's sub process)
             CrowdStart();
             break;
@@ -4620,6 +4680,10 @@ static void Wait(struct Thread *t)
     }
     case W_LIFT_RIDE:   // (CLAY's mine: Black's lift event, till the lift arrives)
         if (sMineRide.lift < 0 && sPlat.model < 0 && sLiftTex.model < 0)
+            t->wait = W_NONE;
+        break;
+    case W_ICA:   // (the person's flight over: MMDL_ICA_IsDone)
+        if (!sIca.playing)
             t->wait = W_NONE;
         break;
     case W_TIMEFX:   // (zone 389's time effect over: WaitEffectEventMain)
@@ -5410,6 +5474,7 @@ void U3D_Vm_FieldFrame(void)
         PlatStep();
     }
     CrowdFrame();
+    IcaFrame();
     BoatFrame();
 }
 

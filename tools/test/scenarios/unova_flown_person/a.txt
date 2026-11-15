@@ -1,0 +1,19 @@
+pressuntil A field 6000
+wait 60
+mash B 12 20
+mp u3dclear
+wait 30
+mp u3dzone 376 22 3
+wait 200
+mash B 6 15
+mp u3drun 2
+pressuntillog A 3000 flown along path 2
+shotburst fp_fly 200 25
+wait 210
+pressuntillog A 3000 flown along path 3
+shotburst fp_land 100 10
+wait 110
+shot fp_after
+pressuntil B field 3000
+echo [fp] done
+quit

@@ -91,6 +91,8 @@ void U3D_CameraMoveBack(u16 frames);
 void U3D_CameraReset(void);
 void U3D_CameraTurn(u16 pitch, u16 yaw, u16 frames);
 void U3D_CameraLook(u16 frames);
+void U3D_ObjectFly(u8 spriteId, bool8 on, float x, float y, float z);
+void U3D_PlayerWorldPos(float out[3]);
 void U3D_CameraShake(s16 x, s16 y, u16 steps, u8 total, s16 dx, s16 dy, u16 thresh, u16 period);
 bool8 U3D_CameraShaking(void);
 void U3D_CameraMoveMasked(u16 pitch, u16 yaw, s32 dist, s32 x, s32 y, s32 z, u16 frames, u8 mask);
