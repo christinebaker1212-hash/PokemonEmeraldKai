@@ -710,6 +710,23 @@ static int CtrlArgs(u8 code)
     return 0;
 }
 
+// a button's icon in the game's words (CHAR_KEYPAD_ICON and its number) as its letters in a style's font
+static const u8 *KeypadWord(u8 icon)
+{
+    static const u8 sA[] = _("A"), sB[] = _("B"), sL[] = _("L"), sR[] = _("R"), sStart[] = _("START"),
+                    sSelect[] = _("SELECT");
+    switch (icon)
+    {
+    case CHAR_A_BUTTON: return sA;
+    case CHAR_B_BUTTON: return sB;
+    case CHAR_L_BUTTON: return sL;
+    case CHAR_R_BUTTON: return sR;
+    case CHAR_START_BUTTON: return sStart;
+    case CHAR_SELECT_BUTTON: return sSelect;
+    }
+    return NULL;
+}
+
 // one line of S (up to a new line or its end; N bytes at most): its width in F
 static int Width(const struct UiFont *f, const u8 *s, int n)
 {
@@ -721,6 +738,13 @@ static int Width(const struct UiFont *f, const u8 *s, int n)
         {
             if (i < n)
                 i += 1 + CtrlArgs(s[i]);
+            continue;
+        }
+        if (c == CHAR_KEYPAD_ICON && i < n && KeypadWord(s[i]))
+        {
+            const u8 *k = KeypadWord(s[i++]);
+            while (*k != EOS)
+                w += f->g[*k++].adv;
             continue;
         }
         if (c == PLACEHOLDER_BEGIN || c == CHAR_DYNAMIC || c == CHAR_KEYPAD_ICON || c == CHAR_EXTRA_SYMBOL)
@@ -788,6 +812,16 @@ static int Line(struct Surf *s, const struct UiFont *f, const u8 *str, int n, in
         {
             if (i < n)
                 i += 1 + CtrlArgs(str[i]);
+            continue;
+        }
+        if (c == CHAR_KEYPAD_ICON && i < n && KeypadWord(str[i]))
+        {
+            const u8 *k = KeypadWord(str[i++]);
+            while (*k != EOS)
+            {
+                Glyph(s, f, *k, x, y, ink, shadow, outline, clipY);
+                x += f->g[*k++].adv;
+            }
             continue;
         }
         if (c == PLACEHOLDER_BEGIN || c == CHAR_DYNAMIC || c == CHAR_KEYPAD_ICON || c == CHAR_EXTRA_SYMBOL)
@@ -2200,6 +2234,12 @@ static void SummaryScreen(struct UiPack *p, u16 *frame)
     d.str[F_METLV] = w.metLevel;
     d.str[F_METPLACE] = Filtered(w.metPlace, sPlace, sizeof(sPlace));
     d.str[F_HP] = w.hp, d.str[F_MAXHP] = w.maxHp;
+    {
+        static u8 sHp3[12], sMax3[12];
+        Digits(sHp3, w.hpNow, 3);
+        Digits(sMax3, w.hpMax, 3);
+        d.str[F_HP3] = sHp3, d.str[F_MAXHP3] = sMax3;
+    }
     d.frac[F_HPFRAC] = w.hpMax ? (s32)(((s64)w.hpNow << 16) / w.hpMax) : 0;
     d.frac[F_EXP] = w.expFrac;
     d.str[F_EXPPTS] = w.exp, d.str[F_NEXTLV] = w.nextLv, d.str[F_RIBBONS] = w.ribbons;
@@ -2272,9 +2312,29 @@ static void SummaryScreen(struct UiPack *p, u16 *frame)
         if (v.statusSprite < MAX_SPRITES && gSprites[v.statusSprite].inUse && !gSprites[v.statusSprite].invisible)
             d.flags |= C_STATUS | (1u << (3 + StatusOf(status)));
     }
+    if (v.page == 5 && v.journalRows)
+    {
+        // (the page's sentences as running text, a line each: for a style that wraps them its own way)
+        static u8 sJournal[400];
+        u16 n = 0;
+        for (i = 0; i < v.journalRows; i++)
+        {
+            const u8 *t = v.journal[i];
+            if (i > 0 && n < sizeof(sJournal) - 1)
+                sJournal[n++] = v.journalEntry[i] != v.journalEntry[i - 1] ? CHAR_NEWLINE : CHAR_SPACE;
+            if (i > 0 && v.journalEntry[i] == v.journalEntry[i - 1])
+                while (*t == CHAR_SPACE)
+                    t++;   // (a sentence's next row: its indent under the bullet)
+            while (*t != EOS && n < sizeof(sJournal) - 1)
+                sJournal[n++] = *t++;
+        }
+        sJournal[n] = EOS;
+        d.msg[3] = sJournal;
+        d.msgLen[3] = d.msgPrinted[3] = n;
+    }
     if (v.page == 5 && v.journalPages > 1)
     {
-        static u8 sPage[12];
+        static u8 sPage[24];
         u8 *e = Digits(sPage, v.journalPage + 1, 0);
         *e++ = CHAR_SLASH;
         Digits(e, v.journalPages, 0);

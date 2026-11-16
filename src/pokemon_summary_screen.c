@@ -5721,20 +5721,21 @@ void MP_Summary_Words(struct MpSummaryWords *w)
     StringCopyN(w->memo, gStringVar4, sizeof(w->memo) - 1);
     w->memo[sizeof(w->memo) - 1] = EOS;
     w->memoPlain = FALSE;
-    if (!(InBattleFactory() == TRUE || InSlateportBattleTent() == TRUE || IsInGamePartnerMon() == TRUE)
-     && DoesMonOTMatchOwner() == TRUE && sum->metLevel != 0)
+    if (!(InBattleFactory() == TRUE || InSlateportBattleTent() == TRUE || IsInGamePartnerMon() == TRUE))
     {
+        bool8 place = FALSE;
         if (MP_Region_MetMapSec(sum->metGame, sum->metLocation) > MAPSEC_NONE)
         {
             GetMapName(w->metPlace, MP_Region_MetMapSec(sum->metGame, sum->metLocation), 0);
-            w->memoPlain = TRUE;
+            place = TRUE;
         }
         else if (sum->metLocation < MAPSEC_NONE)
         {
             GetMapNameHandleAquaHideout(w->metPlace, sum->metLocation);
-            w->memoPlain = TRUE;
+            place = TRUE;
         }
-        ConvertIntToDecimalStringN(w->metLevel, sum->metLevel, STR_CONV_MODE_LEFT_ALIGN, 3);
+        ConvertIntToDecimalStringN(w->metLevel, sum->metLevel ? sum->metLevel : EGG_HATCH_LEVEL, STR_CONV_MODE_LEFT_ALIGN, 3);
+        w->memoPlain = place && DoesMonOTMatchOwner() == TRUE && sum->metLevel != 0;
     }
     {
         void MP_Form_MonTypes(struct Pokemon *mon, u8 *t0, u8 *t1);

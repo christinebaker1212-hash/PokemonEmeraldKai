@@ -156,7 +156,8 @@ def summary_screen(pack, kind, export):
          U.F_OT: sm['ot'], U.F_IDNO: sm['idno'], U.F_HELD: sm['item'], U.F_NATURE: sm['nature'],
          U.F_ABILITY: sm['ability'], U.F_METLV: str(sm['level']), U.F_METPLACE: sm['place'].rstrip('.'),
          U.F_TYPE1: U.TYPE_NAMES.index(sm['type']), U.F_TYPE2: U.TYPE_NAMES.index(sm['type']),
-         U.F_PAGETITLE: 'MOéMON INFO', U.F_PROMPT: 0, U.F_TEXT0: sm['ability_text']}
+         U.F_PAGETITLE: 'MOéMON INFO', U.F_PROMPT: 0, U.F_TEXT0: sm['ability_text'], U.F_HP3: ' 56',
+         U.F_MAXHP3: ' 56', U.F_HPFRAC: 1.0}
     f = U.C_MALE | U.SM_MEMOPLAIN | U.SM_RENAME
     U.render(pack, specs['sum.0'], d, f, im)
     if export:

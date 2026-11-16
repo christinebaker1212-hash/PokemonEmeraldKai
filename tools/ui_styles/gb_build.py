@@ -450,6 +450,276 @@ class GBPack:
         self.text(t, '{%d}' % U.F_NAME, 0, 3, st.mid, cond=U.C_ALT)
         p.spec(t)
 
+    # ---------------------------------------------------------------------------------------------------- summary
+    TYPE_WORDS = ['NORMAL', 'FIGHTING', 'FLYING', 'POISON', 'GROUND', 'ROCK', 'BUG', 'GHOST', 'STEEL', '???', 'FIRE',
+                  'WATER', 'GRASS', 'ELECTRIC', 'PSYCHIC', 'ICE', 'DRAGON', 'DARK', 'FAIRY']
+    CONTEST_WORDS = ['COOL', 'BEAUTY', 'CUTE', 'SMART', 'TOUGH']
+
+    def words_imgs(self, tag, words, ink=None):
+        """a picture of each word in the Game Boy font (a value shown by its number: IMGSEL)"""
+        st, p = self.st, self.p
+        first = None
+        for i, wd in enumerate(words):
+            im = Image.new('RGBA', (8 * max(1, len(wd)), 8), (0, 0, 0, 0))
+            st.text(im, 0, 0, wd, ink or st.ink)
+            k = p.image('%s.%s%d' % (self.kind, tag, i), im)
+            first = k if first is None else first
+            assert k == first + i
+        return first
+
+    def shape_imgs(self, tag, shape, counts, on, off, perfect=None):
+        """N of a little 8 x 8 shape (stars, hearts) in a row, the rest pale: one picture for each count"""
+        p = self.p
+        first = None
+        for i, (n, total) in enumerate(counts):
+            im = Image.new('RGBA', (8 * total, 8), (0, 0, 0, 0))
+            for k in range(total):
+                col = (perfect if (perfect and n > total) else on) if k < min(n, total) else off
+                for yy in range(8):
+                    for xx in range(8):
+                        if shape[yy] & (0x80 >> xx):
+                            im.putpixel((k * 8 + xx, yy), col + (255,))
+            j = p.image('%s.%s%d' % (self.kind, tag, i), im)
+            first = j if first is None else first
+            assert j == first + i
+        return first
+
+    def summary(self):
+        """KAI's six summary pages as RED's status screens and CRYSTAL's STATS pages lay theirs out: the picture,
+        name and :L above (CRYSTAL's page squares, six), the page's own below: INFO as approved; SKILLS the stats
+        (KAI's IV stars and EVs), EXP POINTS and LEVEL UP; the moves with PP (the picked one's TYPE / POWER / ACC.
+        and its words; for contests its kind, APPEAL and JAM); the POKé BALL and the JOURNAL on the whole
+        screen"""
+        import os
+        import gbstyle
+        from gbstyle import GB
+        st, p, red = self.st, self.p, self.red
+        ink, mid, paper = st.ink, st.mid, st.paper
+        types = self.words_imgs('type', self.TYPE_WORDS)
+        contests = self.words_imgs('contest', self.CONTEST_WORDS)
+        star = (0x10, 0x10, 0x38, 0xFE, 0x7C, 0x38, 0x6C, 0x44)
+        heart = (0x00, 0x6C, 0xFE, 0xFE, 0x7C, 0x38, 0x10, 0x00)
+        pale = tuple((c + 2 * pc) // 3 for c, pc in zip(mid, paper))
+        stars = self.shape_imgs('stars', star, [(0, 3), (1, 3), (2, 3), (3, 3), (4, 3)], ink, pale,
+                                perfect=ink if red else (232, 64, 48))
+        hearts = self.shape_imgs('hearts', heart, [(n, 8) for n in range(9)], ink if red else (232, 64, 48), pale)
+        # the HP bar (as the party's): empty, and each colour's fill
+        empty = Image.new('RGBA', (240, 8), (0, 0, 0, 0))
+        hp_at = (11, 3) if red else (0, 9)
+        st.hp_tiles(empty, hp_at[0], 0, 0.0, 0x6D if red else 0x6B)
+        fills = []
+        keep = gbstyle.hp_colour
+        for tier, col in (('g', GREEN), ('y', YELLOW), ('r', RED)):
+            gbstyle.hp_colour = lambda f, g, y, r, col=col: col
+            full = Image.new('RGBA', (240, 8), (0, 0, 0, 0))
+            st.hp_tiles(full, hp_at[0], 0, 1.0, 0x6D if red else 0x6B)
+            fills.append(p.image('%s.sum.fill.%s' % (self.kind, tier), diff(full, empty)))
+        gbstyle.hp_colour = keep
+        bar = p.image('%s.sum.bar' % self.kind, empty)
+        page_cols = [(232, 96, 184), (96, 200, 72), (72, 136, 232), (232, 160, 72), (160, 120, 232), (88, 184, 200)]
+        light = [(248, 176, 232)] + [tuple((c + 2 * 248) // 3 for c in pc) for pc in page_cols[1:]]
+        stiles = None
+        if not red:
+            tiles = st._tiles_2bpp(os.path.join(st.pret, 'gfx', 'stats', 'stats_tiles.2bpp'))
+            stiles = {0x31 + k: t for k, t in enumerate(tiles)}
+
+        def at(sp, col, row, s_, ink_=None, **k):
+            self.text(sp, s_, col * 8, row * 8, ink_, **k)
+
+        def status(sp, col, row):
+            for word, bit in (('PSN', U.C_PSN), ('PAR', U.C_PAR), ('SLP', U.C_SLP), ('FRZ', U.C_FRZ), ('BRN', U.C_BRN)):
+                at(sp, col, row, word, cond=bit)
+            at(sp, col, row, 'FNT', cond=U.C_STATUS, unless=U.C_PSN | U.C_PAR | U.C_SLP | U.C_FRZ | U.C_BRN)
+            at(sp, col, row, 'OK', unless=U.C_STATUS)
+
+        def top(k, ground, sp, info=True):
+            """the picture and the words above (RED's status screen's top, CRYSTAL's STATS top)"""
+            sp.add(U.OP_ICON, x=32, y=32, a=0)
+            if red:
+                at(sp, 9, 1, '{%d}' % U.F_NAME)
+                self.level(sp, 14 * 8, 2 * 8)
+                if info:
+                    sp.add(U.OP_IMG, x=0, y=24, a=bar)
+                    sp.add(U.OP_BAR, x=0, y=24, a=U.F_HPFRAC, b=fills[0], c=fills[1], d=fills[2])
+                    at(sp, 12, 4, '{%d}/{%d}' % (U.F_HP3, U.F_MAXHP3))
+                    st.at(ground, 9, 6, 'STATUS/')
+                    status(sp, 16, 6)
+                    for r in (1, 2, 4, 5, 6):
+                        st.tile_at(ground, st.bt(0x73), 19, r)
+                    st.tile_at(ground, st.bt(0x77), 19, 7)
+                    for col in range(10, 19):
+                        st.tile_at(ground, st.bt(0x76), col, 7)
+                    st.tile_at(ground, st.bt(0x6F), 9, 7)
+                st.tile_at(ground, st.batt[0x74 - 0x62], 1, 8)
+                at(sp, 2, 8, '.{%d}' % U.F_DEXNO)
+                st.at(ground, 27, 1, '%d/6' % (k + 1))
+            else:
+                ground.paste(paper + (255,), (0, 0, 240, 64))
+                st.tile_at(ground, st.batt[0x74 - 0x60], 8, 0)
+                at(sp, 9, 0, '.{%d}' % U.F_DEXNO)
+                self.level(sp, 14 * 8, 0)
+                at(sp, 18, 0, '♂', MALE_INK, cond=U.C_MALE)
+                at(sp, 18, 0, '♀', FEMALE_INK, cond=U.C_FEMALE)
+                at(sp, 8, 2, '{%d}' % U.F_NAME, unless=U.SM_CHOOSING)
+                at(sp, 9, 4, '/{%d}' % U.F_SPECIES, unless=U.SM_CHOOSING)
+                for j in range(6):
+                    base = 0x3A if j == k else 0x36
+                    for q in range(4):
+                        t, col, row = stiles[base + q], 9 + 2 * j + q % 2, 5 + q // 2
+                        GB.tile(st, ground, t, col * 8, row * 8)
+                        px = ground.load()
+                        for yy in range(8):
+                            for xx in range(8):
+                                if 64 <= t.getpixel((xx, yy)) < 160:
+                                    px[col * 8 + xx, row * 8 + yy] = page_cols[j] + (255,)
+                for col in range(30):
+                    st.tile_at(ground, st.bt(0x62), col, 7)
+
+        def new(k):
+            g = Image.new('RGBA', (240, 160), (paper if red else light[k]) + (255,))
+            return g, U.Spec('sum.%d' % k)
+
+        def done(sp, g, k):
+            sp.ops.insert(0, U.Op(U.OP_IMG, a=p.image('%s.sum%d' % (self.kind, k), g)))
+            p.spec(sp)
+
+        # INFO (as approved)
+        g, sp = new(0)
+        top(0, g, sp)
+        if red:
+            st.at(g, 21, 5, 'SELECT')
+            st.at(g, 22, 6, ':RENAME')
+            st.window(g, (0, 9 * 8, 19 * 8, 160))
+            for j, (lab, fld) in enumerate([('ABILITY/', U.F_ABILITY), ('NATURE/', U.F_NATURE),
+                                           ('MET/', U.F_METPLACE)]):
+                st.at(g, 1, 10 + 3 * j, lab)
+                at(sp, 2, 11 + 3 * j, '{%d}' % fld)
+            for j, (lab, fld) in enumerate([('TYPE1/', None), ('IDNo/', U.F_IDNO), ('OT/', U.F_OT)]):
+                st.at(g, 20, 10 + 3 * j, lab)
+                if fld is None:
+                    sp.add(U.OP_IMGSEL, x=21 * 8, y=11 * 8, a=types, b=U.F_TYPE1)
+                else:
+                    at(sp, 22, 11 + 3 * j, '{%d}' % fld)
+            st.line_box(g, 29, 10, 19, 19)
+        else:
+            for row in range(8, 20):
+                st.tile_at(g, stiles[0x31], 9, row)
+            sp.add(U.OP_IMG, x=0, y=72, a=bar)
+            sp.add(U.OP_BAR, x=0, y=72, a=U.F_HPFRAC, b=fills[0], c=fills[1], d=fills[2])
+            at(sp, 1, 10, '{%d}/{%d}' % (U.F_HP3, U.F_MAXHP3))
+            st.at(g, 0, 12, 'STATUS/')
+            status(sp, 1, 13)
+            st.at(g, 0, 15, 'TYPE/')
+            sp.add(U.OP_IMGSEL, x=8, y=16 * 8, a=types, b=U.F_TYPE1)
+            for j, (lab, fld) in enumerate([('ABILITY/', U.F_ABILITY), ('NATURE/', U.F_NATURE),
+                                           ('MET/', U.F_METPLACE)]):
+                st.at(g, 10, 9 + 3 * j, lab)
+                at(sp, 11, 10 + 3 * j, '{%d}' % fld)
+            at(sp, 16, 18, 'SELECT:RENAME', cond=U.SM_RENAME)
+        done(sp, g, 0)
+        # SKILLS
+        g, sp = new(1)
+        top(1, g, sp)
+        labels = ['HP', 'ATTACK', 'DEFENSE', 'SPCL.ATK', 'SPCL.DEF', 'SPEED']
+        if red:
+            st.window(g, (0, 9 * 8, 19 * 8, 160))
+            rows = [(1, 10 + j, 17, 10 + j) for j in range(6)]
+            st.at(g, 20, 10, 'EXP POINTS')
+            at(sp, 29, 11, '{%d}' % U.F_EXPPTS, align=1)
+            st.at(g, 20, 13, 'LEVEL UP')
+            at(sp, 29, 14, '{%d}' % U.F_NEXTLV, align=1)
+            at(sp, 1, 17, 'START:CLEAR', cond=U.SM_CLEAREV)
+        else:
+            for row in range(8, 20):
+                st.tile_at(g, stiles[0x31], 9, row)
+            st.at(g, 0, 9, 'ID')
+            st.tile_at(g, st.batt[0x74 - 0x60], 2, 9)
+            st.at(g, 3, 9, '/')
+            at(sp, 1, 10, '{%d}' % U.F_IDNO)
+            st.at(g, 0, 11, 'OT/')
+            at(sp, 1, 12, '{%d}' % U.F_OT)
+            st.at(g, 0, 14, 'EXP')
+            at(sp, 9, 15, '{%d}' % U.F_EXPPTS, align=1)
+            st.at(g, 0, 16, 'NEXT LV')
+            at(sp, 9, 17, '{%d}' % U.F_NEXTLV, align=1)
+            at(sp, 0, 18, 'START:CLEAR', cond=U.SM_CLEAREV)
+            rows = [(11, 8 + 2 * j, 29, 9 + 2 * j) for j in range(6)]
+        for j, (lc, lr, vc, vr) in enumerate(rows):
+            st.at(g, lc, lr, labels[j])
+            fld = U.F_STAT0 + j - 1
+            if j == 0:
+                at(sp, vc, vr, '{%d}' % U.F_MAXHP, align=1, unless=U.SM_IV | U.SM_EV)
+            else:
+                at(sp, vc, vr, '{%d}' % fld, align=1, unless=U.SM_IV | U.SM_EV)
+                # (the stat its nature raises or lowers: + or - after it, the Game Boy has no colours for it)
+                at(sp, vc + 1 if not red else vc - 7, vr, '+', cond=U.C_SEL0 << (j - 1), unless=U.SM_IV | U.SM_EV)
+                at(sp, vc + 1 if not red else vc - 7, vr, '-', cond=U.C_SEL0 << (4 + j), unless=U.SM_IV | U.SM_EV)
+            sp.add(U.OP_IMGSEL, x=vc * 8 - 24, y=vr * 8, a=stars, b=U.F_IV0 + j, cond=U.SM_IV)
+            at(sp, vc, vr, '{%d}' % (U.F_EV0 + j), align=1, cond=U.SM_EV)
+        done(sp, g, 1)
+        # the moves
+        for k, contest in ((2, False), (3, True)):
+            g, sp = new(k)
+            top(k, g, sp, info=False)
+            if red:
+                st.window(g, (0, 9 * 8, 240, 160))
+                mcol, ppcol = 2, 11
+                sp.add(U.OP_MSG, x=9 * 8, y=3 * 8, a=1, h=8, n=4, w=160, font=self.font, ink=ink, shadow=mid,
+                       cond=U.SM_CHOOSING)
+                dcol, drow = 20, 10
+            else:
+                for row in range(8, 20):
+                    st.tile_at(g, stiles[0x31], 9, row)
+                mcol, ppcol = 11, 20
+                sp.add(U.OP_MSG, x=8 * 8, y=8, a=1, h=8, n=4, w=176, font=self.font, ink=ink, shadow=mid,
+                       cond=U.SM_CHOOSING)
+                dcol, drow = 0, 9
+                st.at(g, 0, 15, 'ITEM')
+                at(sp, 0, 16, '{%d}' % U.F_HELD, unless=U.SM_CHOOSING, w=72, alt=self.font7 + 1)
+            if contest:
+                at(sp, dcol, drow, 'APPEAL', cond=U.SM_CHOOSING)
+                sp.add(U.OP_IMGSEL, x=dcol * 8 + 8, y=(drow + 1) * 8, a=hearts, b=U.F_APPEAL, cond=U.SM_CHOOSING)
+                at(sp, dcol, drow + 2, 'JAM', cond=U.SM_CHOOSING)
+                sp.add(U.OP_IMGSEL, x=dcol * 8 + 8, y=(drow + 3) * 8, a=hearts, b=U.F_JAM, cond=U.SM_CHOOSING)
+            else:
+                at(sp, dcol, drow, 'POWER/', cond=U.SM_CHOOSING)
+                at(sp, dcol + 8, drow + 1, '{%d}' % U.F_POWER, align=1, cond=U.SM_CHOOSING)
+                at(sp, dcol, drow + 2, 'ACC./', cond=U.SM_CHOOSING)
+                at(sp, dcol + 8, drow + 3, '{%d}' % U.F_ACC, align=1, cond=U.SM_CHOOSING)
+            sp.add(U.OP_LIST, x=0, y=(10 if red else 9) * 8, h=16, n=5)
+            done(sp, g, k)
+            row = U.Spec('sum.%d.row' % k)
+            self.text(row, '▶', (mcol - 1) * 8, 0, cond=U.C_SEL0)
+            self.text(row, '▶', (mcol - 1) * 8, 0, mid, cond=U.B_SWAP, unless=U.C_SEL0)
+            self.text(row, '{%d}' % U.F_NAME, mcol * 8, 0, unless=U.R_EMPTY | U.R_CANCEL)
+            self.text(row, '-', mcol * 8, 0, cond=U.R_EMPTY)
+            self.text(row, 'CANCEL', mcol * 8, 0, cond=U.R_CANCEL)
+            if contest:
+                row.add(U.OP_IMGSEL, x=ppcol * 8, y=8, a=contests, b=U.F_CTYPE, unless=U.R_EMPTY | U.R_CANCEL)
+            else:
+                self.text(row, 'PP', ppcol * 8, 8, unless=U.R_EMPTY | U.R_CANCEL)
+                self.text(row, '{%d}/{%d}' % (U.F_PP, U.F_MAXPP), (ppcol + 8) * 8, 8, align=1,
+                          unless=U.R_EMPTY | U.R_CANCEL)
+            p.spec(row)
+        # the POKé BALL and the JOURNAL: the whole screen
+        for k in (4, 5):
+            g = Image.new('RGBA', (240, 160), paper + (255,))
+            sp = U.Spec('sum.%d' % k)
+            st.window(g, (0, 8, 240, 160))
+            at(sp, 0, 0, '{%d}' % U.F_PAGETITLE)
+            st.at(g, 27, 0, '%d/6' % (k + 1))
+            if k == 4:
+                at(sp, 1, 18, '{%d}' % U.F_NAME)
+                sp.add(U.OP_LIST, x=8, y=16, h=0, n=1)
+            else:
+                at(sp, 1, 2, '{%d}' % U.F_NAME)
+                sp.add(U.OP_MSG, x=8, y=32, a=3, h=8, n=15, w=224, font=self.font, ink=ink, shadow=mid)
+                at(sp, 28, 18, '{%d}' % U.F_JPAGE, align=1, cond=U.S_DOWN)
+            done(sp, g, k)
+            row = U.Spec('sum.%d.row' % k)
+            self.text(row, '{%d}' % U.F_NAME, 0, 4, w=216, alt=self.font7 + 1)
+            p.spec(row)
+
     def make(self):
         self.fonts()
         for kind in ('foe1', 'mine1', 'foe2', 'mine2', 'foe3', 'mine3'):
@@ -459,6 +729,7 @@ class GBPack:
         self.options()
         self.bag()
         self.popups()
+        self.summary()
         if not self.red:
             self.p.spec(words_spec(self.p, 'start', ACCOUNT))
         return self.p
