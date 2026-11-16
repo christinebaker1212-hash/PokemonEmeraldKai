@@ -11,14 +11,13 @@ MALE_INK, FEMALE_INK = (56, 112, 232), (232, 64, 104)
 GREEN, YELLOW, RED = (48, 184, 72), (232, 184, 0), (232, 64, 48)
 EXP_BLUE = (32, 136, 248)
 
-# Crystal's MENU ACCOUNT words for each START entry (its own where it has one; KAI's extras in the same voice)
-ACCOUNT = {
-    'POKEDEX': ('MOéMON', 'database'), 'POKEMON': ('Party', 'status'), 'BAG': ('Contains', 'items'),
-    'POKENAV': ('Trainer\'s', 'key device'), 'POKEGEAR': ('Trainer\'s', 'key device'), 'CGEAR': ('Trainer\'s', 'key device'),
-    'PLAYER': ('Your own', 'status'), 'SAVE': ('Save your', 'progress'), 'OPTION': ('Change', 'settings'),
-    'EXIT': ('Close this', 'menu'), 'GARDEN': ('Visit the', 'GARDEN'), 'RETIRE': ('Quit and', 'go home'),
-    'REST': ('Save and', 'rest'),
-}
+# Crystal's MENU ACCOUNT words for each START entry, by start_menu.c's MENU_ACTION_* (its own where it has one: POKéDEX,
+# PARTY, PACK, POKéGEAR, status, SAVE, OPTION, EXIT; KAI's extras in the same voice, ten letters a line at most)
+ACCOUNT = [('MOéMON', 'database'), ('Party', 'status'), ('Contains', 'items'), ('Trainer\'s', 'key device'),
+           ('Your own', 'status'), ('Save your', 'progress'), ('Change', 'settings'), ('Close this', 'menu'),
+           ('Quit and', 'go home'), ('Your own', 'status'), ('Save and', 'rest'), ('Quit and', 'go home'),
+           ('Contains', 'items'), ('Play with', 'friends'), ('Visit the', 'GARDEN'), ('Trainer\'s', 'key device'),
+           ('Trainer\'s', 'key device')]
 
 
 class GBPack:
@@ -306,7 +305,27 @@ class GBPack:
         for kind in ('foe1', 'mine1', 'foe2', 'mine2', 'foe3', 'mine3'):
             self.p.spec(self.hud(kind))
         self.panels()
+        if not self.red:
+            self.p.spec(words_spec(self.p, 'start', ACCOUNT))
         return self.p
+
+
+def words_spec(p, menu, lines):
+    """a style's words for each entry of a menu (uipack.py: words.<menu>)"""
+    sp = U.Spec('words.' + menu)
+    for entry, ls in enumerate(lines):
+        for k, t in enumerate(ls):
+            if t:
+                sp.add(U.OP_TEXT, a=p.string(t), b=entry, c=k)
+    return sp
+
+
+def map_spec(menu, values):
+    """a style's value for each entry of a menu (uipack.py: map.<menu>)"""
+    sp = U.Spec('map.' + menu)
+    for entry, v in enumerate(values):
+        sp.add(U.OP_IMG, b=entry, c=v)
+    return sp
 
 
 def diff(a, b):

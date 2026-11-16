@@ -8,11 +8,17 @@ import sys
 sys.path.insert(0, os.path.join(os.path.dirname(os.path.abspath(__file__)), '..', 'sinnoh'))
 import nds  # noqa: E402
 
+# Gen 4's Latin codes in order (pret/pokeplatinum tools/msgenc/charmap.txt, 0x121-0x1E2 and 0x1E8-0x1E9)
+LATIN = ('0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz'
+         'ÀÁÂÃÄÅÆÇÈÉÊËÌÍÎÏÐÑÒÓÔÕÖ×ØÙÚÛÜÝÞßàáâãäåæçèéêëìíîïðñòóôõö÷øùúûüýþÿŒœŞşªº¹²³$¡¿!?,.…·/‘’“”„《》()♂♀+-*#=&~:;'
+         '♠♣♥♦★◉●■▲◆@♪%☀☁☂☃☺♚♛☹↗↘☽ ⁴₧₦')
 # Gen 4's codes for what the mock-ups write (pokeplatinum's charmap): digits, letters, the punctuation used
 GEN4 = {**{str(i): 0x121 + i for i in range(10)}, **{chr(65 + i): 0x12B + i for i in range(26)},
         **{chr(97 + i): 0x145 + i for i in range(26)}, '!': 0x1AB, '?': 0x1AC, ',': 0x1AD, '.': 0x1AE,
         '…': 0x1AF, '/': 0x1B1, "'": 0x1B3, '(': 0x1B9, ')': 0x1BA, '♂': 0x1BB, '♀': 0x1BC, '+': 0x1BD,
         '-': 0x1BE, ':': 0x1C4, ';': 0x1C5, 'é': 0x188, ' ': 0x1DE, '&': 0x1C2, '%': 0x1D2}
+# every Latin character Platinum's fonts have (KAI's words in them: the game's own text), "'" as its ’
+FULL = dict({c: 0x121 + i for i, c in enumerate(LATIN)}, **{'°': 0x1E8, '_': 0x1E9}, **GEN4)
 
 
 class Platinum:
@@ -24,7 +30,7 @@ class Platinum:
         self.height = 16
 
     def glyph(self, ch):
-        i = GEN4.get(ch, 0x1AC) - 1
+        i = FULL.get(ch, 0x1AC) - 1
         g = self.d[self.hs + i * 64:self.hs + i * 64 + 64]
         rows = [[0] * 16 for _ in range(16)]
         for t in range(4):

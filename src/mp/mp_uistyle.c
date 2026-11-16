@@ -88,6 +88,7 @@ enum { OP_IMG = 1, OP_TEXT, OP_BAR, OP_FILL, OP_MSG, OP_LONG, OP_BACKING, OP_IMG
 #define F_TEXT0 40
 #define F_EXP 64
 #define F_HPFRAC 65
+#define F_ICON0 70   // (a list row's icon, a style's own: START's from its map.start)
 #define C_LV3 (1u << 0)
 #define C_MALE (1u << 1)
 #define C_FEMALE (1u << 2)
@@ -99,9 +100,11 @@ enum { OP_IMG = 1, OP_TEXT, OP_BAR, OP_FILL, OP_MSG, OP_LONG, OP_BACKING, OP_IMG
 #define C_EXP (1u << 21)
 #define C_LV1 (1u << 22)
 #define C_ALT (1u << 23)
+#define C_MOEWORD (1u << 25)   // the battle's POKéMON command reads MOéMON (OPTIONS > CREATURES)
+#define C_STDCMD (1u << 26)    // the battle's commands are FIGHT, BAG, POKéMON, RUN (a style's own lettering fits)
 #define OP_SIZE 38
 
-struct UiImg { u16 w, h; const u8 *px; const u8 *a; s16 *cols; u16 nCols; };   // (px: u16s, unaligned)
+struct UiImg { u16 w, h; s16 dx, dy; const u8 *px; const u8 *a; s16 *cols; u16 nCols; };   // (px: u16s, unaligned)
 struct UiGlyph { u8 adv; s8 dx, dy; u8 w, h; u32 off; };
 struct UiFont { u8 cellH; struct UiGlyph g[256]; const u8 *pix; u32 n; };
 struct UiOp { u8 kind, font, align, flags; u32 cond, unless; s16 x, y; u16 a, b, c, d, e, ink, shadow, outline, w, h, n; };
@@ -153,7 +156,7 @@ static struct UiPack *ParsePack(u8 *d, u32 size)
     p->data = d, p->size = size;
 #define NEED(n) do { if (o + (u32)(n) > size) goto bad; } while (0)
     NEED(0);
-    if (size < 18 || memcmp(d, "UIS1", 4) != 0 || Rd16(d + 4) != 1)
+    if (size < 18 || memcmp(d, "UIS1", 4) != 0 || Rd16(d + 4) != 2)
         goto bad;
     p->nImg = Rd16(d + 6), p->nFont = Rd16(d + 8), p->nSpec = Rd16(d + 10), p->nStr = Rd16(d + 12);
     p->img = calloc(p->nImg + 1, sizeof(*p->img));
@@ -167,9 +170,10 @@ static struct UiPack *ParsePack(u8 *d, u32 size)
     {
         struct UiImg *im = &p->img[i];
         u8 alpha;
-        NEED(8);
-        im->w = Rd16(d + o), im->h = Rd16(d + o + 2), alpha = d[o + 4];
-        o += 8;
+        NEED(12);
+        im->w = Rd16(d + o), im->h = Rd16(d + o + 2), alpha = d[o + 8];
+        im->dx = (s16)Rd16(d + o + 4), im->dy = (s16)Rd16(d + o + 6);
+        o += 12;
         NEED((u32)im->w * im->h * 2);
         im->px = d + o;
         o += (u32)im->w * im->h * 2;
@@ -451,6 +455,7 @@ static void Put(struct Surf *s, int x, int y, u16 c, u8 alpha)
 static void DrawImg(struct Surf *s, const struct UiImg *im, int x, int y)
 {
     int i, j;
+    x += im->dx, y += im->dy;
     for (j = 0; j < im->h; j++)
         for (i = 0; i < im->w; i++)
         {
@@ -469,6 +474,7 @@ static void BlendImg(struct Surf *s, const struct UiImg *im, int x, int y, int e
         DrawImg(s, im, x, y);
         return;
     }
+    x += im->dx, y += im->dy;
     for (j = 0; j < im->h; j++)
         for (i = 0; i < im->w; i++)
         {
@@ -508,20 +514,31 @@ static void BarCols(struct UiImg *im)
 
 static void DrawBar(struct Surf *s, struct UiPack *p, const struct UiOp *op, s32 frac, int x, int y)
 {
-    u16 id = frac > 32768 ? op->b : frac > 13107 ? op->c : op->d;
+    // (its colour as the games pick it, by the pixels filled: over half green, over a fifth yellow, else red)
     struct UiImg *im;
-    int n, k, j;
+    u16 id;
+    int n, k, j, cols;
+    if (op->b >= p->nImg)
+        return;
+    BarCols(&p->img[op->b]);
+    cols = p->img[op->b].nCols;
+    if (cols == 0)
+        return;
+    n = (frac * cols + 32768) >> 16;
+    if (frac > 0 && n == 0)
+        n = 1;   // (a sliver for anything above nothing)
+    if (n > cols)
+        n = cols;
+    id = n > cols * 50 / 100 ? op->b : n > cols * 20 / 100 ? op->c : op->d;
     if (id >= p->nImg)
         return;
     im = &p->img[id];
     BarCols(im);
     if (im->cols == NULL || im->nCols == 0)
         return;
-    n = (frac * im->nCols + 32768) >> 16;
-    if (frac > 0 && n == 0)
-        n = 1;   // (a sliver for anything above nothing)
     if (n > im->nCols)
         n = im->nCols;
+    x += im->dx, y += im->dy;
     for (k = 0; k < n; k++)
     {
         int cx = im->cols[op->e ? im->nCols - 1 - k : k];
@@ -588,7 +605,28 @@ static int Width(const struct UiFont *f, const u8 *s, int n)
     return w;
 }
 
-static void Glyph(struct Surf *s, const struct UiFont *f, u8 c, int x, int y, u16 ink, u16 shadow, u16 outline)
+static int sGlyphEvb;   // (a style's text blended as its window is: the DS's BLDALPHA, EVB sixteenths)
+
+static void PutBlend(struct Surf *s, int x, int y, u16 c)
+{
+    int k;
+    u16 u, o = 0;
+    if (!sGlyphEvb || s->a || x < 0 || y < 0 || x >= s->w || y >= s->h)
+    {
+        Put(s, x, y, c, 255);
+        return;
+    }
+    u = s->px[y * s->w + x];
+    for (k = 0; k < 3; k++)
+    {
+        u32 v = ((c >> (5 * k)) & 31) + ((((u >> (5 * k)) & 31) * sGlyphEvb) >> 4);
+        o |= (v > 31 ? 31 : v) << (5 * k);
+    }
+    s->px[y * s->w + x] = Fade(s, o) | 0x8000;
+}
+
+static void Glyph(struct Surf *s, const struct UiFont *f, u8 c, int x, int y, u16 ink, u16 shadow, u16 outline,
+                  int clipY)
 {
     const struct UiGlyph *g = &f->g[c];
     const u8 *pix;
@@ -602,14 +640,14 @@ static void Glyph(struct Surf *s, const struct UiFont *f, u8 c, int x, int y, u1
         for (i = 0; i < g->w; i++)
         {
             u8 v = pix[j * g->w + i];
-            if (v && (cols[v] & 0x8000))
-                Put(s, x + g->dx + i, y + g->dy + j, cols[v], 255);
+            if (v && (cols[v] & 0x8000) && y + g->dy + j < clipY)
+                PutBlend(s, x + g->dx + i, y + g->dy + j, cols[v]);
         }
 }
 
 // one line of S in F from (x, y): the x after it
 static int Line(struct Surf *s, const struct UiFont *f, const u8 *str, int n, int x, int y, u16 ink, u16 shadow,
-                u16 outline)
+                u16 outline, int clipY)
 {
     int i = 0;
     while (i < n && str[i] != EOS && str[i] != CHAR_NEWLINE)
@@ -628,7 +666,7 @@ static int Line(struct Surf *s, const struct UiFont *f, const u8 *str, int n, in
         }
         if (c == CHAR_PROMPT_SCROLL || c == CHAR_PROMPT_CLEAR)
             continue;
-        Glyph(s, f, c, x, y, ink, shadow, outline);
+        Glyph(s, f, c, x, y, ink, shadow, outline, clipY);
         x += f->g[c].adv;
     }
     return x;
@@ -716,7 +754,8 @@ static int FlowPage(const struct UiFont *f, const u8 *t, int from, int to, int m
 // OP_MSG: window A's words as far as they're printed, their page only (a new page clears them): from (x, y) N lines H
 // apart, lines wider than W wrapped; a page of more lines than N closes them up to rows B apart from y D (C of them
 // at most, the box's whole inside), and past that the last ones printed show (\l scrolls them)
-static void Msg(struct Surf *s, struct UiPack *p, const struct UiOp *op, const struct UiData *d, int x, int y, int oy)
+static void Msg(struct Surf *s, struct UiPack *p, const struct UiOp *op, const struct UiData *d, int x, int y, int oy,
+                int *regs)
 {
     const struct UiFont *f;
     const u8 *t;
@@ -760,6 +799,16 @@ static void Msg(struct Surf *s, struct UiPack *p, const struct UiOp *op, const s
     if (pageTo > len)
         pageTo = len;
     nl = FlowPage(f, t, pageFrom, pageTo, op->w);
+    if (nl > op->n && op->e && op->e - 1 < p->nFont && !op->b)
+    {
+        // (E: a narrower font for a page that would need more lines than the box has)
+        const struct UiFont *f2 = &p->font[op->e - 1];
+        int nl2 = FlowPage(f2, t, pageFrom, pageTo, op->w);
+        if (nl2 <= op->n)
+            f = f2, nl = nl2;
+        else
+            nl = FlowPage(f, t, pageFrom, pageTo, op->w);
+    }
     {
         // (the line the last printed letter is on)
         int nShown = 0;
@@ -792,8 +841,14 @@ static void Msg(struct Surf *s, struct UiPack *p, const struct UiOp *op, const s
         }
         for (k = sLineStart[i]; k < sLineEnd[i] && sFlow[k].src < shown; k++)
         {
-            Glyph(s, f, sFlow[k].c, lx, y0 + (i - first) * step, op->ink, op->shadow, op->outline);
+            Glyph(s, f, sFlow[k].c, lx, y0 + (i - first) * step, op->ink, op->shadow, op->outline, 0x7FFF);
             lx += f->g[sFlow[k].c].adv;
+        }
+        if (k > sLineStart[i] || i == lastLine)
+        {
+            // (where the words end: a style's ▼ goes after them)
+            regs[(op->flags >> 1) & 7] = lx - (x - op->x);
+            regs[((op->flags >> 1) + 1) & 7] = y0 + (i - first) * step - oy;
         }
     }
 }
@@ -828,6 +883,8 @@ static void DrawSpec(struct UiPack *p, const struct UiSpec *sp, struct UiData *d
     {
         const struct UiOp *op = &sp->ops[k];
         int x, y;
+        if ((flags & op->cond) != op->cond || (flags & op->unless))
+            continue;
         if (op->kind == OP_LONG)
         {
             if (op->font < p->nFont && op->a < NFIELDS && d->str[op->a]
@@ -835,10 +892,9 @@ static void DrawSpec(struct UiPack *p, const struct UiSpec *sp, struct UiData *d
                 flags |= C_LONG;
             continue;
         }
-        if ((flags & op->cond) != op->cond || (flags & op->unless))
-            continue;
+        sGlyphEvb = (op->flags >> 5) & 7;
         x = op->x + ((op->flags & 1) ? regs[(op->flags >> 1) & 7] : 0) + ox;
-        y = op->y + oy;
+        y = op->y + ((op->flags & 0x10) ? regs[((op->flags >> 1) + 1) & 7] : 0) + oy;
         switch (op->kind)
         {
         case OP_IMG:
@@ -879,11 +935,12 @@ static void DrawSpec(struct UiPack *p, const struct UiSpec *sp, struct UiData *d
                 x -= wd;
             else if (op->align == 2)
                 x -= wd / 2;
-            regs[(op->flags >> 1) & 7] = Line(s, f, buf, n, x, y, op->ink, op->shadow, op->outline) - ox;
+            regs[(op->flags >> 1) & 7] = Line(s, f, buf, n, x, y, op->ink, op->shadow, op->outline,
+                                              op->h ? y + op->h : 0x7FFF) - ox;
             break;
         }
         case OP_MSG:
-            Msg(s, p, op, d, x, y, oy);
+            Msg(s, p, op, d, x, y, oy, regs);
             break;
         case OP_BAR:
             DrawBar(s, p, op, op->a < NFIELDS ? d->frac[op->a] : 0, x, y);
@@ -896,6 +953,7 @@ static void DrawSpec(struct UiPack *p, const struct UiSpec *sp, struct UiData *d
             break;
         }
     }
+    sGlyphEvb = 0;
     if (s == &cv)
     {
         // (the canvas: its rows kept, placed in the spec's W x H, the backing behind its drawn pixels)
@@ -1131,8 +1189,9 @@ static void BattleHuds(struct UiPack *p, u16 *frame)
             x = sSingleRect[side][0] + box->x + box->x2 - sSingleHome[side][0];
             y = sSingleRect[side][1] + box->y + box->y2 - sSingleHome[side][1];
         }
-        snprintf(name, sizeof(name), "%s", kind);
-        if ((sp = FindSpec(p, name)) == NULL)
+        // (a style's box for this spot on the screen when it has one: Black's gauges stand differently per spot)
+        snprintf(name, sizeof(name), "%s.%d", kind, pos);
+        if ((sp = FindSpec(p, name)) == NULL && (sp = FindSpec(p, kind)) == NULL)
             continue;
         memset(&d, 0, sizeof(d));
         d.str[F_NAME] = h->name;
@@ -1147,7 +1206,7 @@ static void BattleHuds(struct UiPack *p, u16 *frame)
         d.flags = (h->level >= 100 ? C_LV3 : h->level < 10 ? C_LV1 : 0)
                 | (h->gender == 1 ? C_MALE : h->gender == 2 ? C_FEMALE : 0)
                 | (h->status ? (C_STATUS | (C_PSN << (h->status - 1))) : 0)
-                | (side == B_SIDE_PLAYER && !IsDoubleBattle() && !IS_TRIPLE_BATTLE() ? C_EXP : 0);
+                | (side == B_SIDE_PLAYER ? C_EXP : 0);   // (a style's box shows it where its game does)
         MP_FadeFit_FromPalette(&fit, OBJ_PLTT_ID(box->oam.paletteNum));
         DrawSpec(p, sp, &d, frame, x, y, &fit);
     }
@@ -1230,9 +1289,15 @@ static void BattlePanel(struct UiPack *p, u16 *frame)
     {
         int i;
         sp = FindSpec(p, "b.cmd");
+        static const u8 sFight[] = _("FIGHT"), sBag[] = _("BAG"), sMon[] = _("POKéMON"), sMoe[] = _("MOéMON"),
+                        sRun[] = _("RUN");
         SplitMenu(sCap[B_WIN_ACTION_MENU].text, sCap[B_WIN_ACTION_MENU].len, labels);
         for (i = 0; i < 4; i++)
             d.str[F_ITEM0 + i] = labels[i];
+        if (StringCompare(labels[0], sFight) == 0 && StringCompare(labels[1], sBag) == 0
+         && StringCompare(labels[3], sRun) == 0
+         && (StringCompare(labels[2], sMon) == 0 || StringCompare(labels[2], sMoe) == 0))
+            d.flags |= C_STDCMD | (StringCompare(labels[2], sMoe) == 0 ? C_MOEWORD : 0);
         d.flags |= C_SEL0 << (gActionSelectionCursor[sChooser] & 3);
     }
     else if (vofs == DISPLAY_HEIGHT * 2)
@@ -1324,15 +1389,52 @@ static void BattlePanel(struct UiPack *p, u16 *frame)
 }
 
 // ---------------------------------------------------------------------------------------------------- the field
-// Crystal's MENU ACCOUNT: a word for each START entry (MENU_ACTION_*: start_menu.c's order)
-static const u8 sAcct[][2][16] = {
-    {_("MOéMON"), _("database")}, {_("Party"), _("status")}, {_("Contains"), _("items")},
-    {_("Trainer's"), _("key device")}, {_("Your own"), _("status")}, {_("Save your"), _("progress")},
-    {_("Change"), _("settings")}, {_("Close this"), _("menu")}, {_("Quit and"), _("go home")},
-    {_("Your own"), _("status")}, {_("Save and"), _("rest")}, {_("Quit and"), _("go home")},
-    {_("Contains"), _("items")}, {_("Play with"), _("friends")}, {_("Visit the"), _("GARDEN")},
-    {_("Trainer's"), _("key device")}, {_("Trainer's"), _("key device")},
-};
+// a style's own value for entry ENTRY of a menu (its map.<menu> spec: START's icons), DEF when it has none
+static int Lookup(const struct UiPack *p, const char *menu, u8 entry, int def)
+{
+    char name[24];
+    const struct UiSpec *sp;
+    u16 k;
+    snprintf(name, sizeof(name), "map.%s", menu);
+    if ((sp = FindSpec(p, name)) == NULL)
+        return def;
+    for (k = 0; k < sp->nOps; k++)
+        if (sp->ops[k].b == entry)
+            return sp->ops[k].c;
+    return def;
+}
+
+// a style's own words for entry ENTRY of a menu (its words.<menu> spec: Crystal's MENU ACCOUNT, FireRed's help bar),
+// line LINE, as the game's text options show them (MOéMON / POKéMON), into OUT
+static const u8 *Words(const struct UiPack *p, const char *menu, u8 entry, u8 line, u8 *out, int cap)
+{
+    char name[24];
+    const struct UiSpec *sp;
+    const u8 *f;
+    u16 k;
+    int n;
+    snprintf(name, sizeof(name), "words.%s", menu);
+    if ((sp = FindSpec(p, name)) == NULL)
+        return NULL;
+    for (k = 0; k < sp->nOps; k++)
+    {
+        const struct UiOp *op = &sp->ops[k];
+        if (op->kind != OP_TEXT || op->b != entry || op->c != line || op->a >= p->nStr)
+            continue;
+        n = p->strLen[op->a] < cap - 1 ? p->strLen[op->a] : cap - 1;
+        memcpy(out, p->str[op->a], n);
+        out[n] = EOS;
+        f = MP_TextOpts_Filter(out, WINDOWS_MAX);
+        if (f != out)
+        {
+            for (n = 0; n < cap - 1 && f[n] != EOS; n++)
+                out[n] = f[n];
+            out[n] = EOS;
+        }
+        return out;
+    }
+    return NULL;
+}
 
 static void StartMenu(struct UiPack *p, u16 *frame)
 {
@@ -1352,13 +1454,22 @@ static void StartMenu(struct UiPack *p, u16 *frame)
     memset(&d, 0, sizeof(d));
     for (i = 0; i < count && i < 10; i++)
     {
+        const u8 *f;
+        int n;
         StringExpandPlaceholders(expanded[i], names[i]);
+        f = MP_TextOpts_Filter(expanded[i], WINDOWS_MAX);   // (as START prints them: MOéMON / POKéMON)
+        for (n = 0; f != expanded[i] && n < (int)sizeof(expanded[i]) - 1 && f[n] != EOS; n++)
+            expanded[i][n] = f[n];
+        if (f != expanded[i])
+            expanded[i][n] = EOS;
         d.str[F_ITEM0 + i] = expanded[i];
+        d.val[F_ICON0 + i] = Lookup(p, "start", actions[i], 0);
     }
-    if (cursor < count && actions[cursor] < ARRAY_COUNT(sAcct))
+    if (cursor < count)
     {
-        d.str[F_TEXT0 + 30] = sAcct[actions[cursor]][0];
-        d.str[F_TEXT0 + 31] = sAcct[actions[cursor]][1];
+        static u8 sLine[2][64];
+        d.str[F_TEXT0 + 30] = Words(p, "start", actions[cursor], 0, sLine[0], sizeof(sLine[0]));
+        d.str[F_TEXT0 + 31] = Words(p, "start", actions[cursor], 1, sLine[1], sizeof(sLine[1]));
     }
     d.flags = C_SEL0 << (cursor < 10 ? cursor : 0);
     MP_FadeFit_FromPalette(&fit, BG_PLTT_ID(15));

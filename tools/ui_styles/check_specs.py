@@ -20,20 +20,24 @@ def hud_data(m):
         d[U.F_HP], d[U.F_MAXHP] = m['hp'], m['maxhp']
     if 'exp' in m:
         d[U.F_EXP] = float(m['exp'])
-    flags = (U.C_MALE if m['sex'] == 'm' else U.C_FEMALE if m['sex'] == 'f' else 0)
+    flags = (U.C_MALE if m.get('sex') == 'm' else U.C_FEMALE if m.get('sex') == 'f' else 0)
     flags |= U.C_LV3 if m['level'] >= 100 else U.C_LV1 if m['level'] < 10 else 0
     return d, flags
 
 
+POS = {'foe2': (1, 3), 'mine2': (0, 2)}     # (a box's B_POSITION_*, for a style with one spec per spot)
+
+
 def huds(pack, specs, im, rects, mons, kind, exp=False):
-    for r, m in zip(rects, mons):
+    for k, (r, m) in enumerate(zip(rects, mons)):
         d, f = hud_data(m)
         if exp and 'exp' in m:
             f |= U.C_EXP
-        U.render(pack, specs['hud.' + kind], d, f, im, (r[0], r[1]))
+        sp = specs.get('hud.%s.%d' % (kind, POS[kind][k])) if kind in POS else None
+        U.render(pack, sp or specs['hud.' + kind], d, f, im, (r[0], r[1]))
 
 
-def screens(pack, kai, account=None):
+def screens(pack, kai, account=None, icons=None):
     specs = {s.name: s for s in pack.specs}
     out = {}
     cmd = {U.F_TEXT0 + 1: U.encode('\n'.join(C.PROMPT))}
@@ -47,7 +51,7 @@ def screens(pack, kai, account=None):
             huds(pack, specs, im, [Lo.SINGLE_MINE], [C.MINE], 'mine1', exp=True)
         elif layout == 'double':
             huds(pack, specs, im, Lo.DOUBLE_FOES, C.DOUBLE_FOES, 'foe2')
-            huds(pack, specs, im, Lo.DOUBLE_MINE, C.DOUBLE_MINE, 'mine2')
+            huds(pack, specs, im, Lo.DOUBLE_MINE, C.DOUBLE_MINE, 'mine2', exp=True)
         else:
             huds(pack, specs, im, Lo.TRIPLE_FOES, C.TRIPLE_FOES, 'foe3')
             huds(pack, specs, im, Lo.TRIPLE_MINE, C.TRIPLE_MINE, 'mine3')
@@ -58,7 +62,7 @@ def screens(pack, kai, account=None):
                 d[U.F_ITEM0 + 8 + i] = mv[3]
             U.render(pack, specs['b.moves'], d, U.C_SEL0, im)
         else:
-            U.render(pack, specs['b.cmd'], cmd, U.C_SEL0, im)
+            U.render(pack, specs['b.cmd'], cmd, U.C_SEL0 | U.C_STDCMD | U.C_MOEWORD, im)
         out[name] = im
     im = C.shot(kai, 'f_mart')
     U.render(pack, specs['f.msg'], {U.F_TEXT0: C.MESSAGE}, U.C_WAIT, im)
@@ -67,8 +71,56 @@ def screens(pack, kai, account=None):
     d = {U.F_ITEM0 + i: s for i, s in enumerate(C.START_MENU)}
     if account:
         d[U.F_TEXT0 + 30], d[U.F_TEXT0 + 31] = account
+    for i, k in enumerate(icons or []):
+        d[U.F_ICON0 + i] = k
     U.render(pack, specs['start.%d' % len(C.START_MENU)], d, U.C_SEL0, im)
     out['start_menu'] = im
+    return out
+
+
+# names, levels, genders and HP the approved screens don't show: each box kind drawn by the pack and by the mock-up's
+# own code, over a plain ground
+VARIANTS = [dict(name='MASQUERAIN', sex='f', level=100, hp=13, maxhp=200, exp=0.9),
+            dict(name='MEW', sex=None, level=5, hp=1, maxhp=20, exp=0.0),
+            dict(name='SHEDINJA', sex='m', level=55, hp=1, maxhp=1, exp=0.5),
+            dict(name='PEWTERCRUN', sex='m', level=9, hp=99, maxhp=200, exp=1.0),
+            dict(name='WWWWWWWWWW', sex='f', level=99, hp=150, maxhp=200, exp=0.2)]
+
+
+def variants(pack, mock, kind):
+    specs = {s.name: s for s in pack.specs}
+    out = []
+    for kinds, rects in ((('foe', 'foe1', False), Lo.SINGLE_FOE), (('mine', 'mine1', True), Lo.SINGLE_MINE),
+                         (('foe2', 'foe2', False), Lo.DOUBLE_FOES[1]), (('mine2', 'mine2', False), Lo.DOUBLE_MINE[1]),
+                         (('foe3', 'foe3', False), Lo.TRIPLE_FOES[2]), (('mine3', 'mine3', False), Lo.TRIPLE_MINE[2])):
+        mk, sk, exp = kinds
+        for m in VARIANTS:
+            m = dict(m)
+            if m['level'] >= 100:
+                m['exp'] = 0.0      # (the game's EXP bar is empty at Lv100: mp_uistyle.c ExpOf)
+            exp = exp or mk == 'mine2'
+            if mk.startswith('foe'):
+                m['hp'] = m['hp'] / m['maxhp']
+                del m['maxhp']
+            want = Image.new('RGBA', (240, 160), (40, 120, 80, 255))
+            got = want.copy()
+            try:
+                mock.hud(want, rects, m, mk)
+            except ValueError as e:
+                out.append((sk, m['name'], 'mock-up refuses: %s' % e))
+                continue
+            d, f = hud_data(m)
+            if exp and 'exp' in m:
+                f |= U.C_EXP
+            pos = {'foe2': 3, 'mine2': 2}.get(sk)
+            sp = specs.get('hud.%s.%d' % (sk, pos)) if pos is not None else None
+            U.render(pack, sp or specs['hud.' + sk], d, f, got, (rects[0], rects[1]))
+            out.append((sk, m['name'], compare(got, want)))
+            if compare(got, want) != 'same':
+                got.save('/tmp/claude-0/-home-user/a6424581-b487-50fe-8bae-5e1098371be0/scratchpad/var_%s_%s_%s.png'
+                         % (kind, sk, m['name']))
+                want.save('/tmp/claude-0/-home-user/a6424581-b487-50fe-8bae-5e1098371be0/scratchpad/varw_%s_%s_%s.png'
+                          % (kind, sk, m['name']))
     return out
 
 
@@ -91,6 +143,22 @@ def main():
             b = gb_build.GBPack(kind, src)
             pack, mock = b.make(), gb_build.GB(kind, src, kai, None)
             got = screens(pack, kai, ('MOéMON', 'database') if kind == 'crystal' else None)
+        elif kind == 'platinum':
+            import pt_build
+            pret, rom = src.split(':', 1)
+            b = pt_build.PTPack(pret, rom)
+            pack, mock = b.make(), pt_build.Platinum(rom, kai, None)
+            got = screens(pack, kai, None, icons=[0, 1, 2, 3, 4, 5, 6])
+        elif kind == 'black':
+            import bw_build
+            pack, mock = bw_build.BWPack(src).make(), bw_build.Black(src, kai, None)
+            got = screens(pack, kai, None)
+        elif kind == 'firered':
+            import fr_build
+            pack, mock = fr_build.FRPack(src).make(), fr_build.FireRed(src, kai, None)
+            got = screens(pack, kai, ('The MOéDEX keeps your record of', 'every MOéMON seen and caught.'))
+        for sk, name, res in variants(pack, mock, kind):
+            print(kind, 'variant', sk, name, res)
         for name, im in got.items():
             want = getattr(mock, name)()
             if name == 'battle_triple':   # (KAI's own type icons beside the cards: the game draws those, not a style)

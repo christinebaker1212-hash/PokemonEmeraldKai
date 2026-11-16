@@ -9,7 +9,8 @@ done in Python, so a spec can be checked against the approved mock-up before the
 
 The pack (little-endian):
     'UIS1' u16 version u16 nImages u16 nFonts u16 nSpecs u16 nStrings u32 0
-    images:  u16 w u16 h u8 alpha(0/1) u8 0 u16 0, w*h u16 colours (BGR555, bit 15 = drawn), [w*h u8 alpha]
+    images:  u16 w u16 h s16 dx s16 dy u8 alpha(0/1) u8 0 u16 0, w*h u16 colours (BGR555, bit 15 = drawn),
+             [w*h u8 alpha]: the picture's drawn area, (dx, dy) from its own top-left
     fonts:   u8 cellH u8 0 u16 0, 256 x (u8 adv s8 dx s8 dy u8 w u8 h u8 0 u16 0 u32 offset), u32 nBytes, bytes:
              a byte a pixel, 0 clear, 1 ink, 2 shadow, 3 outline
     specs:   char name[24] u16 w u16 h u16 canvasW u16 canvasH u16 nOps u16 0, ops (OP_SIZE bytes each)
@@ -19,7 +20,7 @@ import struct
 
 from PIL import Image
 
-VERSION = 1
+VERSION = 2
 
 # ------------------------------------------------------------------------------------------------- the game's charset
 _CHARMAP = None
@@ -95,20 +96,30 @@ C_WAIT = 1 << 20        # a message waiting for A
 C_EXP = 1 << 21         # the box shows an EXP bar (the player's own, singles)
 C_LV1 = 1 << 22         # a level of one digit
 C_ALT = 1 << 23         # the move's info box shows something other than its PP and type (R's view, a gimmick)
+C_MOEWORD = 1 << 25     # the battle's POKéMON command reads MOéMON
+C_STDCMD = 1 << 26      # the battle's commands are FIGHT, BAG, POKéMON, RUN
 C_ROWS0 = 1 << 24       # (a list's rows: drawn row i when i < the rows, the op's N; not a bit)
+
+TYPE_NAMES = ['NORMAL', 'FIGHTING', 'FLYING', 'POISON', 'GROUND', 'ROCK', 'BUG', 'GHOST', 'STEEL', '???', 'FIRE',
+              'WATER', 'GRASS', 'ELECTRIC', 'PSYCHIC', 'ICE', 'DRAGON', 'DARK', 'FAIRY']   # (include/constants/pokemon.h)
 
 STATUS_BITS = {'PSN': C_PSN, 'PAR': C_PAR, 'SLP': C_SLP, 'FRZ': C_FRZ, 'BRN': C_BRN}
 
 # ------------------------------------------------------------------------------------------------- ops
 OP_IMG = 1        # image A at (x, y)
 OP_TEXT = 2       # string A in font F, colours ink/shadow/outline, align (0 left, 1 right, 2 centre), up to width W
-#                   (wider: font B, or 0); the x after it into register R
+#                   (wider: font B, or 0); the x after it into register R; H: nothing drawn from H rows below y
 OP_BAR = 3        # bar: field A (a fraction, F_HP: hp / maxhp, F_EXP...) through fill images B (green), C (yellow),
 #                   D (red) at (x, y); E the fill's direction (0 from the left, 1 from the right)
 OP_FILL = 4       # rectangle (x, y, w, h) in colour ink, alpha in A (255 solid)
 OP_MSG = 5        # captured window A's words, their page: lines from (x, y) H apart, N of them, font F; a line wider
 #                   than W wrapped at its last space that fits; a page of more lines than N closes them up to rows B
-#                   apart from y D, C of them (past that the last ones printed show)
+#                   apart from y D, C of them (past that the last ones printed show), or (no B) in font E - 1 when
+#                   that fits them in N; where the last line ends into
+#                   register R (x) and R + 1 (its y)
+# (an op with REL is placed from register R's x, with RELY from register R + 1's y)
+# a spec named words.<menu> holds a style's words for each entry of a menu: OP_TEXT ops, A the string, B the entry
+# (start_menu.c MENU_ACTION_*), C its line; one named map.<menu> a value for each (any op: B the entry, C the value)
 OP_LONG = 6       # set C_LONG when field A's width in font F is over W
 OP_BACKING = 7    # (a canvas spec) colour ink at alpha A behind the drawn pixels' box, B pixels round it
 OP_IMGSEL = 8     # image A + (the field B's value, a list's row type...) at (x, y)
@@ -116,6 +127,7 @@ OP_ROWMAP = 9     # (a canvas spec) the canvas's rows kept, string A (a byte a r
 OP_BLEND = 10     # image A over (x, y) blended as the DS's BLDALPHA: each pixel its colour plus EVB/16 of what's under
 F_EXP = 64
 F_HPFRAC = 65
+F_ICON0 = 70           # a list row's icon (START's: the style's map.start of each entry)
 
 OP_FMT = '<BBBBIIhhHHHHHHHHHHH'
 OP_SIZE = struct.calcsize(OP_FMT)
@@ -129,14 +141,14 @@ def rgb555(c):
 
 class Op:
     def __init__(self, kind, x=0, y=0, a=0, b=0, c=0, d=0, e=0, font=0, ink=None, shadow=None, outline=None,
-                 align=0, w=0, h=0, n=0, reg=0, cond=0, unless=0, rel=False):
+                 align=0, w=0, h=0, n=0, reg=0, cond=0, unless=0, rel=False, rely=False, evb=0):
         self.kind, self.x, self.y, self.a, self.b, self.c, self.d, self.e = kind, x, y, a, b, c, d, e
         self.font, self.ink, self.shadow, self.outline = font, ink, shadow, outline
         self.align, self.w, self.h, self.n, self.reg = align, w, h, n, reg
-        self.cond, self.unless, self.rel = cond, unless, rel
+        self.cond, self.unless, self.rel, self.rely, self.evb = cond, unless, rel, rely, evb
 
     def pack(self):
-        flags = (1 if self.rel else 0) | (self.reg & 7) << 1
+        flags = (1 if self.rel else 0) | (self.reg & 7) << 1 | (0x10 if self.rely else 0) | (self.evb & 7) << 5
         col = lambda c: 0 if c is None else rgb555(c) | 0x8000   # noqa: E731
         return struct.pack(OP_FMT, self.kind, self.font, self.align, flags, self.cond, self.unless, self.x, self.y,
                            self.a, self.b, self.c, self.d, self.e, col(self.ink), col(self.shadow),
@@ -237,10 +249,13 @@ class Pack:
         out = bytearray(struct.pack('<4sHHHHHI', b'UIS1', VERSION, len(self.images), len(self.fonts),
                                     len(self.specs), len(self.strings), 0))
         for im in self.images:
+            bb = im.getbbox() or (0, 0, 1, 1)
+            dx, dy = bb[0], bb[1]
+            im = im.crop(bb)          # (only what's drawn is kept: the game draws it from (dx, dy))
             w, h = im.size
             p = im.load()
             alpha = any(0 < p[x, y][3] < 255 for y in range(h) for x in range(w))
-            out += struct.pack('<HHBBH', w, h, 1 if alpha else 0, 0, 0)
+            out += struct.pack('<HHhhBBH', w, h, dx, dy, 1 if alpha else 0, 0, 0)
             for y in range(h):
                 for x in range(w):
                     c = p[x, y]
@@ -276,7 +291,7 @@ class Pack:
 
 
 # ------------------------------------------------------------------------------------------------- the game's drawing
-def glyph_draw(dst, f, x, y, code, ink, shadow, outline):
+def glyph_draw(dst, f, x, y, code, ink, shadow, outline, clip=None, evb=0):
     g = f.glyphs.get(code)
     if g is None:
         return 0
@@ -287,8 +302,14 @@ def glyph_draw(dst, f, x, y, code, ink, shadow, outline):
         for xx, v in enumerate(row):
             c = cols[v]
             X, Y = x + dx + xx, y + dy + yy
+            if clip is not None and Y >= clip:
+                continue
             if v and c is not None and 0 <= X < dst.width and 0 <= Y < dst.height:
-                p[X, Y] = tuple(c[:3]) + (255,)
+                if evb:     # (blended as the style's window is: its colour plus EVB / 16 of what's under it)
+                    u = p[X, Y]
+                    p[X, Y] = tuple(min(248, c[k] + (u[k] * evb >> 4) & 0xF8) for k in range(3)) + (255,)
+                else:
+                    p[X, Y] = tuple(c[:3]) + (255,)
     return adv
 
 
@@ -339,19 +360,22 @@ def render(pack, sp, data, flags, dst=None, at=(0, 0)):
              if not isinstance(v, float)}
     rowmap, place, backing = None, (0, 0), None
     for op in sp.ops:
+        if (flags & op.cond) != op.cond or (flags & op.unless):
+            continue
         if op.kind == OP_LONG:
             f = pack.fonts[op.font]
             if width(f, texts.get(op.a, b'')) > op.w:
                 flags |= C_LONG
             continue
-        if (flags & op.cond) != op.cond or (flags & op.unless):
-            continue
         x = op.x + (regs[op.reg] if op.rel else 0) + ox
-        y = op.y + oy
+        y = op.y + (regs[(op.reg + 1) & 7] if op.rely else 0) + oy
         if op.kind == OP_IMG:
             _paste(canvas, pack.images[op.a], x, y)
         elif op.kind == OP_IMGSEL:
-            _paste(canvas, pack.images[op.a + int(data.get(op.b, 0))], x, y)
+            v = data.get(op.b, 0)
+            if isinstance(v, str):      # (a type's name: its number in KAI's TYPE_* order)
+                v = TYPE_NAMES.index(v) if v in TYPE_NAMES else 0
+            _paste(canvas, pack.images[op.a + int(v)], x, y)
         elif op.kind == OP_BLEND:
             _blend(canvas, pack.images[op.a], x, y, op.b)
         elif op.kind == OP_FILL:
@@ -364,11 +388,16 @@ def render(pack, sp, data, flags, dst=None, at=(0, 0)):
             wd = width(f, s)
             x0 = x - (wd if op.align == 1 else wd // 2 if op.align == 2 else 0)
             for code in s:
-                x0 += glyph_draw(canvas, f, x0, y, code, op.ink, op.shadow, op.outline)
+                x0 += glyph_draw(canvas, f, x0, y, code, op.ink, op.shadow, op.outline,
+                                 clip=y + op.h if op.h else None, evb=op.evb)
             regs[op.reg] = x0 - ox
         elif op.kind == OP_MSG:
             f = pack.fonts[op.font]
             lines = flow(f, texts.get(F_TEXT0 + op.a, b''), op.w)
+            if len(lines) > op.n and op.e and not op.b:
+                lines2 = flow(pack.fonts[op.e - 1], texts.get(F_TEXT0 + op.a, b''), op.w)
+                if len(lines2) <= op.n:
+                    f, lines = pack.fonts[op.e - 1], lines2
             if len(lines) <= op.n or not op.b:
                 rows, step, y0 = op.n, op.h, y
             else:
@@ -376,7 +405,8 @@ def render(pack, sp, data, flags, dst=None, at=(0, 0)):
             for i, line in enumerate(lines[-rows:] if rows else []):
                 x0 = x - (width(f, line) if op.align == 1 else 0)
                 for code in line:
-                    x0 += glyph_draw(canvas, f, x0, y0 + i * step, code, op.ink, op.shadow, op.outline)
+                    x0 += glyph_draw(canvas, f, x0, y0 + i * step, code, op.ink, op.shadow, op.outline, evb=op.evb)
+                regs[op.reg], regs[(op.reg + 1) & 7] = x0 - ox, y0 + i * step - oy
         elif op.kind == OP_BAR:
             _bar(canvas, pack, op, data.get(op.a, 0.0), x, y)
         elif op.kind == OP_BACKING:
@@ -422,14 +452,16 @@ def _blend(dst, im, x, y, evb):
 def _bar(dst, pack, op, frac, x, y):
     """the bar's fill: the fill picture of its colour (green over half, yellow over a fifth, red), its columns
     (left to right, or right to left) as far as FRAC goes; a sliver for anything above nothing"""
-    tier = op.b if frac > 0.5 else op.c if frac > 0.2 else op.d
+    green = pack.images[op.b]
+    ncols = len([cx for cx in range(green.width) if any(green.getpixel((cx, cy))[3] for cy in range(green.height))])
+    n = min(ncols, int(frac * ncols + 0.5))
+    if frac > 0 and n == 0:
+        n = 1
+    tier = op.b if n > ncols * 50 // 100 else op.c if n > ncols * 20 // 100 else op.d
     im = pack.images[tier]
     cols = [cx for cx in range(im.width) if any(im.getpixel((cx, cy))[3] for cy in range(im.height))]
     if op.e:
         cols = cols[::-1]
-    n = round(frac * len(cols))
-    if frac > 0 and n == 0:
-        n = 1
     keep = set(cols[:n])
     part = Image.new('RGBA', im.size, (0, 0, 0, 0))
     q, p = im.load(), part.load()
