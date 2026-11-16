@@ -5626,6 +5626,7 @@ bool8 MP_Summary_View(struct MpSummaryView *v)
             v->own[v->nOwn++] = sMonSummaryScreen->spriteIds[i];
     v->markings = sMonSummaryScreen->markingsSprite;
     v->ballBox = v->page == PSS_PAGE_BALL ? sMpBallLineCount : 0;
+    v->ballIcon = v->page == PSS_PAGE_BALL ? sMpBall.iconSprite : SPRITE_NONE;
     v->journalRows = 0;
     if (v->page == PSS_PAGE_JOURNAL && sMpJournal != NULL)
     {

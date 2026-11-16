@@ -93,6 +93,7 @@ struct MpSummaryView
     u8 own[32], nOwn;                // the summary's own sprites a style draws its own of (type icons, the move frame)
     struct Sprite *markings;
     u8 ballBox;                      // the POKé BALL page's lines (MP_Summary_BallLine)
+    u8 ballIcon;                     // ... its ball's picture (Kai's place for it: from its box's corner, 88, 32)
     const u8 *journal[8];            // the JOURNAL's rows on its page, the sentence each belongs to
     u8 journalEntry[8], journalRows, journalPage, journalPages;
 };

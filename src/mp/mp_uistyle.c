@@ -129,6 +129,9 @@ enum { OP_IMG = 1, OP_TEXT, OP_BAR, OP_FILL, OP_MSG, OP_LONG, OP_BACKING, OP_IMG
 #define F_PAGENO 156   // (val)
 #define F_JPAGE 157    // the JOURNAL's page of pages
 #define F_CTYPE 158    // a move row's contest type (val)
+#define F_PROMPT 159   // the summary: what A does (val: 0 CANCEL, 1 IV RATING, 2 EVs, 3 STATS, 4 INFO, 5 SWITCH, 6 MORE,
+                       // 7 nothing)
+#define F_PAGETITLE 160
 #define C_LV3 (1u << 0)
 #define C_MALE (1u << 1)
 #define C_FEMALE (1u << 2)
@@ -160,7 +163,6 @@ enum { OP_IMG = 1, OP_TEXT, OP_BAR, OP_FILL, OP_MSG, OP_LONG, OP_BACKING, OP_IMG
 #define SM_EV (1u << 20)       // the summary: the SKILLS page shows EVs
 #define SM_IV (1u << 21)       // ... IV stars
 #define SM_CHOOSING (1u << 23) // ... a move picked (its words shown)
-#define SM_SHINY (1u << 25)
 #define SM_LEARN (1u << 26)    // ... the fifth move row is a move to learn
 #define SM_TWOTYPES (1u << 27)
 #define SM_MEMOPLAIN (1u << 28) // ... met there at that level by its own trainer
@@ -2246,8 +2248,16 @@ static void SummaryScreen(struct UiPack *p, u16 *frame)
         d.flags |= SM_LEARN;
     if (v.canRename)
         d.flags |= SM_RENAME;
-    if (w.shiny)
-        d.flags |= SM_SHINY;
+    {
+        // (the page's title as KAI's words say it: POKéMON or MOéMON as OPTIONS > CREATURES has it)
+        static const u8 sT0[] = _("MOéMON INFO"), sT1[] = _("MOéMON SKILLS"), sT2[] = _("BATTLE MOVES"),
+                        sT3[] = _("CONTEST MOVES"), sT4[] = _("POKé BALL"), sT5[] = _("JOURNAL");
+        static const u8 *const sTitles[6] = {sT0, sT1, sT2, sT3, sT4, sT5};
+        static u8 sTitle[24];
+        d.str[F_PAGETITLE] = Filtered(sTitles[v.page % 6], sTitle, sizeof(sTitle));
+    }
+    d.val[F_PROMPT] = v.page == 1 ? 1 + v.statsView : (v.page == 2 || v.page == 3) ? (v.choosing ? 5 : 4)
+                    : v.page == 5 ? (v.journalPages > 1 ? 6 : 7) : 0;
     if (v.isEgg)
         d.flags |= SM_EGG;
     {
@@ -2339,6 +2349,8 @@ static void SummaryScreen(struct UiPack *p, u16 *frame)
         skip[nSkip++] = v.own[i] + 1;
     if (v.markings)
         skip[nSkip++] = (v.markings - gSprites) + 1;
+    if (v.ballIcon < MAX_SPRITES)
+        skip[nSkip++] = v.ballIcon + 1;
     IconPlaces(sp, d.flags, icon);
     for (wi = 0; wi < 4; wi++)
     {
@@ -2360,6 +2372,9 @@ static void SummaryScreen(struct UiPack *p, u16 *frame)
             continue;
         RedrawSprite(frame, s, icon[wi][0] - (s->x + s->x2), icon[wi][1] - (s->y + s->y2));
     }
+    // (the POKé BALL page's ball where the style's box puts the page's lines)
+    if (v.ballIcon < MAX_SPRITES && list && gSprites[v.ballIcon].inUse && !gSprites[v.ballIcon].invisible)
+        RedrawSprite(frame, &gSprites[v.ballIcon], list->x - 88, list->y - 32);
 }
 
 // ---------------------------------------------------------------------------------------------------- pop-ups

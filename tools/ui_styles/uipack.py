@@ -146,6 +146,15 @@ OP_SNAP = 14      # the last field or battle frame the game showed (a style's BA
 F_QTY, F_QTY2, F_TAG = 93, 94, 95         # a BAG row's count, its count two wide, the button it's registered to
 B_CLOSE, B_QTY, B_TAG, B_SWAP = 1 << 27, 1 << 28, 1 << 29, 1 << 30   # a BAG row: CLOSE BAG, has a count, a button, moved
 SNAP = -1                                 # (render()'s DATA: the picture OP_SNAP draws)
+# the summary (src/mp/mp_uistyle.c SummaryScreen: MP_Summary_Words)
+(F_SPECIES, F_DEXNO, F_OT, F_IDNO, F_HELD, F_NATURE, F_ABILITY, F_METLV, F_METPLACE, F_EXPPTS,
+ F_NEXTLV) = range(96, 107)
+F_STAT0, F_IV0, F_EV0, F_TYPE1, F_TYPE2 = 107, 112, 118, 124, 125
+F_POWER, F_ACC, F_APPEAL, F_JAM, F_RIBBONS, F_PAGENO, F_JPAGE, F_CTYPE, F_PROMPT, F_PAGETITLE = range(151, 161)
+SM_EV, SM_IV, SM_CHOOSING = 1 << 20, 1 << 21, 1 << 23
+SM_LEARN, SM_TWOTYPES, SM_MEMOPLAIN, SM_RENAME, SM_CLEAREV, SM_EGG = (1 << 26, 1 << 27, 1 << 28, 1 << 29, 1 << 30,
+                                                                      1 << 31)
+R_NEW, R_CANCEL, R_EMPTY = 1 << 27, 1 << 28, 1 << 29   # (a summary move row: the move to learn, CANCEL, none)
 F_CHOICE0, F_NCHOICE, F_CUR, F_CURSTR, F_HINT, F_TITLE = 80, 88, 89, 90, 91, 92
 S_UP, S_DOWN = 1 << 27, 1 << 28           # (a whole screen's list) more rows above, below
 S_PAGE, S_HINT = 1 << 29, 1 << 30         # OPTIONS: a page's title in place of the tabs; a line about the row

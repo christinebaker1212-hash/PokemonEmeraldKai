@@ -147,6 +147,25 @@ def bag_screen(pack, kind, kai, export):
     return im
 
 
+def summary_screen(pack, kind, export):
+    """the summary's INFO page as the game draws it (src/mp/mp_uistyle.c SummaryScreen) with the mock-ups' words"""
+    specs = {s.name: s for s in pack.specs}
+    im = Image.new('RGBA', (C.W, C.H), (0, 0, 0, 255))
+    sm = C.SUMMARY
+    d = {U.F_NAME: sm['name'], U.F_LEVEL: str(sm['level']), U.F_DEXNO: sm['no'], U.F_SPECIES: sm['species'],
+         U.F_OT: sm['ot'], U.F_IDNO: sm['idno'], U.F_HELD: sm['item'], U.F_NATURE: sm['nature'],
+         U.F_ABILITY: sm['ability'], U.F_METLV: str(sm['level']), U.F_METPLACE: sm['place'].rstrip('.'),
+         U.F_TYPE1: U.TYPE_NAMES.index(sm['type']), U.F_TYPE2: U.TYPE_NAMES.index(sm['type']),
+         U.F_PAGETITLE: 'MOéMON INFO', U.F_PROMPT: 0, U.F_TEXT0: sm['ability_text']}
+    f = U.C_MALE | U.SM_MEMOPLAIN | U.SM_RENAME
+    U.render(pack, specs['sum.0'], d, f, im)
+    if export:
+        icon = [op for op in specs['sum.0'].ops if op.kind == U.OP_ICON and op.a == 0]
+        if icon:
+            C.paste(im, C.creature(export, 280), icon[0].x - 32, icon[0].y - 32)
+    return im
+
+
 # names, levels, genders and HP the approved screens don't show: each box kind drawn by the pack and by the mock-up's
 # own code, over a plain ground
 VARIANTS = [dict(name='MASQUERAIN', sex='f', level=100, hp=13, maxhp=200, exp=0.9),
@@ -253,6 +272,8 @@ def main():
             got = screens(pack, kai, ('The MOéDEX keeps your record of', 'every MOéMON seen and caught.'))
         if any(sp.name == 'o' for sp in pack.specs):
             got['options'] = options_screen(pack, kind)
+        if any(sp.name == 'sum.0' for sp in pack.specs) and os.environ.get('MOEMON_EXPORT'):
+            got['summary'] = summary_screen(pack, kind, os.environ.get('MOEMON_EXPORT'))
         if any(sp.name == 'bag' for sp in pack.specs):
             got['bag'] = bag_screen(pack, kind, kai, os.environ.get('MOEMON_EXPORT'))
         export = os.environ.get('MOEMON_EXPORT')

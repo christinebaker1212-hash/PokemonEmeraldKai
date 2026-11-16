@@ -426,6 +426,297 @@ class FRPack:
         self.text(t, '{%d}' % U.F_NAME, 0, 0, ((172, 172, 172), (222, 222, 213)), cond=U.C_ALT)
         p.spec(t)
 
+    # ---------------------------------------------------------------------------------------------------- summary
+    TYPE_OFFSETS = [0x20, 0x64, 0x60, 0x80, 0x48, 0x44, 0x6C, 0x68, 0x88, 0xA4, 0x24, 0x28, 0x2C, 0x40, 0x84, 0x4C,
+                    0xA0, 0x8C]   # (list_menu.c sMenuInfoIcons, KAI's TYPE_* order; FAIRY made below)
+    CONTEST = [('COOL', (232, 64, 48)), ('BEAUTY', (64, 120, 232)), ('CUTE', (240, 120, 184)),
+               ('SMART', (72, 176, 72)), ('TOUGH', (216, 176, 32))]
+
+    def fr_icon(self, off, w=32):
+        import os
+        st = self.st
+        sheet = Image.open(os.path.join(st.g, 'interface', 'menu_info.png'))
+        pal = F.jasc(os.path.join(st.g, 'interface', 'pokemon_types.pal'))
+        sx, sy = (off % 16) * 8, (off // 16) * 8
+        im = Image.new('RGBA', (w, 12), (0, 0, 0, 0))
+        sp, q = sheet.load(), im.load()
+        for yy in range(12):
+            for xx in range(w):
+                v = sp[sx + xx, sy + yy] % 16
+                if v:
+                    q[xx, yy] = pal[v][:3] + (255,)
+        return im
+
+    def plate_icon(self, word, col, w=32):
+        """a type icon's plate (NORMAL's, its letters cleared) in COL with WORD in white in FireRed's small font"""
+        base = self.fr_icon(0x20, w)
+        px = base.load()
+        edge = px[0, 5]
+        out = Image.new('RGBA', base.size, (0, 0, 0, 0))
+        q = out.load()
+        dark = tuple(max(0, c - 72) for c in col)
+        for y in range(base.height):
+            for x in range(base.width):
+                if px[x, y][3] == 0:
+                    continue
+                inner = 1 <= x < base.width - 1 and 1 <= y < base.height - 1
+                q[x, y] = (col if inner else dark) + (255,)
+        tw = self.st.measure(word, 's')
+        self.st.text(out, (w - tw) // 2, -2, word, (255, 255, 255), dark, font='s')
+        return out
+
+    def summary(self):
+        """KAI's six summary pages in FireRed's: the header (its page dots widened to six, the page's title, ◀▶ PAGE
+        and what A does), the picture panel; INFO as approved (fr.py summary_page); SKILLS on page_skills (HP, the
+        five stats, nature's in red / blue, IV stars or EVs, EXP., NEXT LV., ABILITY); the moves on page_moves (type,
+        name, PP), the move picked in the moves_info panel (POWER, ACCURACY, EFFECT; for contests APPEAL and JAM
+        hearts); the POKé BALL and the JOURNAL in FireRed's window"""
+        import os
+        import struct
+        st, p = self.st, self.p
+        a = st.a
+        bg = Image.open(os.path.join(st.g, 'summary_screen', 'bg.png'))
+        pal = F.png_pal(bg)
+        d = open(os.path.join(st.g, 'summary_screen', 'moves_info_page.bin'), 'rb').read()
+        ent0 = list(struct.unpack('<%dH' % (len(d) // 2), d))
+        base = 0x159
+
+        def header_ents(ent, k):
+            ent = list(ent)
+            for row in (0, 1):
+                band, blue = ent[row * 32], ent[row * 32 + 19]
+                t = lambda n: base + n + 16 * row  # noqa: E731
+                if k < 5:
+                    new = [band] * 10 + [t(49)] * k + [t(17), t(16)] + [t(18)] * (5 - k) + [t(21)] + [blue] * 14
+                else:
+                    new = [band] * 10 + [t(49)] * 5 + [t(17), t(48)] + [blue] * 15
+                ent[row * 32:row * 32 + 32] = new[:32]
+            return ent
+
+        def ground(k, moves_base=False, overlay=None, oh=20):
+            im = Image.new('RGBA', (240, 160), pal[0][:3] + (255,))
+            if moves_base:
+                d2 = open(os.path.join(st.g, 'summary_screen', 'moves_page.bin'), 'rb').read()
+                e2 = list(struct.unpack('<%dH' % (len(d2) // 2), d2))[:32 * 20]
+                F.paste(im, a._tilemap('summary_screen/bg.png', None, pal, 32, 20, entries=header_ents(e2, k)), 0, 0)
+            else:
+                F.paste(im, a._tilemap('summary_screen/bg.png', None, pal, 32, 20, entries=header_ents(ent0, k)), 0, 0)
+            for ov in overlay or []:
+                F.paste(im, a._tilemap('summary_screen/bg.png', 'summary_screen/' + ov, pal, 32, oh), 0, 0)
+            return im
+        # the header's right: ◀▶ PAGE and what A does (one picture each), its words in white
+        labels = ['CANCEL', 'IV RATING', 'EVs', 'STATS', 'INFO', 'SWITCH', 'MORE', '']
+        first = None
+        for i, lab in enumerate(labels):
+            im = Image.new('RGBA', (240, 16), (0, 0, 0, 0))
+            x = 236 - st.measure('PAGE', 's') - (st.measure(lab, 's') + 8 if lab else 0) - 8 - 4
+            x = st.key(im, x, 2, 'LEFTRIGHT')
+            x = st.text(im, x, 0, 'PAGE', *F.WHITE, font='s') + 4
+            if lab:
+                x = st.key(im, x, 2, 'A')
+                st.text(im, x, 0, lab, *F.WHITE, font='s')
+            k = p.image('fr.sum.prompt%d' % i, im)
+            first = k if first is None else first
+            assert k == first + i
+        prompt = first
+        # type icons (FAIRY a plate of its own) and the contest kinds
+        tfirst = None
+        for i, off in enumerate(self.TYPE_OFFSETS + [None]):
+            ic = self.fr_icon(off) if off is not None else self.plate_icon('FAIRY', (232, 120, 200))
+            k = p.image('fr.type%d' % i, ic)
+            tfirst = k if tfirst is None else tfirst
+            assert k == tfirst + i
+        cfirst = None
+        for i, (word, col) in enumerate(self.CONTEST):
+            k = p.image('fr.contest%d' % i, self.plate_icon(word, col))
+            cfirst = k if cfirst is None else cfirst
+            assert k == cfirst + i
+        ink = (pal[6 * 16 + 14][:3], pal[6 * 16 + 10][:3])
+        if sum(ink[0]) > 500:
+            ink = ((65, 65, 65), (222, 213, 180))
+        red, blue = ((230, 8, 8), (255, 189, 115)), ((40, 96, 216), (164, 197, 246))
+        rename = Image.new('RGBA', (240, 160), (0, 0, 0, 0))
+        w = 24 + 2 + st.measure('RENAME', 's')
+        kx = st.key(rename, 228 - w, 146, 'SELECT')
+        st.text(rename, kx + 2, 144, 'RENAME', *ink, font='s')
+        stars = []
+        for n, col in ((0, None), (1, (65, 65, 65)), (2, (65, 65, 65)), (3, (65, 65, 65)), (3, (230, 8, 8))):
+            im = Image.new('RGBA', (24, 8), (0, 0, 0, 0))
+            shape = (0x10, 0x10, 0x38, 0xFE, 0x7C, 0x38, 0x6C, 0x44)
+            for i in range(3):
+                c = col if i < n else (190, 190, 180)
+                for yy in range(8):
+                    for xx in range(8):
+                        if shape[yy] & (0x80 >> xx):
+                            im.putpixel((i * 8 + xx, yy), c + (255,))
+            stars.append(p.image('fr.stars%d%s' % (n, '' if col != (230, 8, 8) else 'r'), im))
+        assert stars == list(range(stars[0], stars[0] + 5))
+
+        def common(sp, k, pic=True, row=(4, 18, F.WHITE, F.MALE_W, F.FEMALE_W)):
+            # (a title wider than the band before the page dots in the small font)
+            self.text(sp, '{%d}' % U.F_PAGETITLE, 4, 1, F.WHITE, w=76, b=self.fs + 1)
+            sp.add(U.OP_IMGSEL, x=0, y=0, a=prompt, b=U.F_PROMPT)
+            if row is None:
+                return
+            x, y, inkr, male, female = row
+            self.text(sp, '{LV}{%d}' % U.F_LEVEL, x, y, inkr, unless=U.SM_EGG)
+            self.text(sp, '{%d}' % U.F_NAME, x + 36, y, inkr)
+            self.text(sp, '♂', x + 101, y, male, cond=U.C_MALE)
+            self.text(sp, '♀', x + 101, y, female, cond=U.C_FEMALE)
+            if pic:
+                sp.add(U.OP_ICON, x=60, y=64, a=0)
+                sp.add(U.OP_ICON, x=104, y=88, a=2)
+
+        # INFO
+        sp = U.Spec('sum.0')
+        self.img(sp, 'fr.sum.info', ground(0, overlay=['page_info.bin']))
+        common(sp, 0)
+        self.text(sp, '{%d}' % U.F_DEXNO, 167, 21, ink, unless=U.SM_EGG)
+        self.text(sp, '{%d}' % U.F_SPECIES, 167, 35, ink, unless=U.SM_EGG)
+        sp.add(U.OP_IMGSEL, x=167, y=52, a=tfirst, b=U.F_TYPE1, unless=U.SM_EGG)
+        sp.add(U.OP_IMGSEL, x=201, y=52, a=tfirst, b=U.F_TYPE2, cond=U.SM_TWOTYPES, unless=U.SM_EGG)
+        self.text(sp, '{%d}' % U.F_OT, 167, 65, ink, unless=U.SM_EGG)
+        self.text(sp, '{%d}' % U.F_IDNO, 167, 80, ink, unless=U.SM_EGG)
+        self.text(sp, '{%d}' % U.F_HELD, 167, 95, ink, w=238 - 167, b=self.fs + 1, unless=U.SM_EGG)
+        self.text(sp, '{%d} nature.' % U.F_NATURE, 8, 115, ink, cond=U.SM_MEMOPLAIN)
+        self.text(sp, 'Met in {%d} at {LV}{%d}.' % (U.F_METPLACE, U.F_METLV), 8, 129, ink, cond=U.SM_MEMOPLAIN,
+                  w=224, b=self.fs + 1)
+        sp.add(U.OP_MSG, x=8, y=115, a=2, h=14, n=2, w=224, b=10, c=3, d=114, font=self.fn, ink=ink[0],
+               shadow=ink[1], unless=U.SM_MEMOPLAIN)
+        sp.add(U.OP_MSG, x=167, y=21, a=0, h=14, n=5, w=70, e=self.fs + 1, font=self.fn, ink=ink[0], shadow=ink[1],
+               cond=U.SM_EGG)
+        self.img(sp, 'fr.sum.rename', rename, cond=U.SM_RENAME)
+        p.spec(sp)
+        # SKILLS
+        sp = U.Spec('sum.1')
+        self.img(sp, 'fr.sum.skills', ground(1, overlay=['page_skills.bin']))
+        common(sp, 1)
+        self.text(sp, '{%d}/{%d}' % (U.F_HP, U.F_MAXHP), 236, 21, ink, align=1, unless=U.SM_IV | U.SM_EV)
+        sp.add(U.OP_IMGSEL, x=212, y=24, a=stars[0], b=U.F_IV0, cond=U.SM_IV)
+        self.text(sp, '{%d}' % U.F_EV0, 236, 21, ink, align=1, cond=U.SM_EV)
+        for i in range(5):
+            y = 40 + 13 * i
+            self.text(sp, '{%d}' % (U.F_STAT0 + i), 236, y, red, align=1, cond=U.C_SEL0 << i,
+                      unless=U.SM_IV | U.SM_EV)
+            self.text(sp, '{%d}' % (U.F_STAT0 + i), 236, y, blue, align=1, cond=U.C_SEL0 << (5 + i),
+                      unless=U.SM_IV | U.SM_EV)
+            self.text(sp, '{%d}' % (U.F_STAT0 + i), 236, y, ink, align=1,
+                      unless=U.SM_IV | U.SM_EV | (U.C_SEL0 << i) | (U.C_SEL0 << (5 + i)))
+            sp.add(U.OP_IMGSEL, x=210, y=y + 3, a=stars[0], b=U.F_IV0 + 1 + i, cond=U.SM_IV)
+            self.text(sp, '{%d}' % (U.F_EV0 + 1 + i), 236, y, ink, align=1, cond=U.SM_EV)
+        self.text(sp, '{%d}' % U.F_EXPPTS, 236, 105, ink, align=1)
+        self.text(sp, 'NEXT LV.', 170, 119, ink, 's')
+        self.text(sp, '{%d}' % U.F_NEXTLV, 236, 117, ink, align=1)
+        self.text(sp, '{%d}' % U.F_ABILITY, 72, 130, ink, w=78, b=self.fs + 1)
+        sp.add(U.OP_MSG, x=8, y=144, a=0, h=14, n=1, w=228, e=self.fs + 1, font=self.fn, ink=ink[0], shadow=ink[1])
+        clear = Image.new('RGBA', (240, 160), (0, 0, 0, 0))
+        kx = st.key(clear, 168, 132, 'START')
+        st.text(clear, kx + 2, 130, 'CLEAR', *ink, font='s')
+        self.img(sp, 'fr.sum.clear', clear, cond=U.SM_CLEAREV)
+        p.spec(sp)
+        # the moves pages (normal: the picture; choosing: the move's panel)
+        for k, contest in ((2, False), (3, True)):
+            sp = U.Spec('sum.%d' % k)
+            self.img(sp, 'fr.sum.moves%d' % k, ground(k, overlay=['page_moves.bin'], oh=32), unless=U.SM_CHOOSING)
+            info = ground(k, moves_base=True, overlay=['page_moves_info.bin'])
+            mv = Image.new('RGBA', (240, 160), (0, 0, 0, 0))
+            F.paste(mv, a._tilemap('summary_screen/bg.png', 'summary_screen/page_moves.bin', pal, 32, 32), 0, 0)
+            F.paste(info, mv.crop((120, 0, 240, 160)), 120, 0)
+            if contest:
+                # (APPEAL and JAM where POWER and ACCURACY are: their pills' words written again)
+                pill = self.fr_icon(0xC0, 40)
+                for word, y in (('APPEAL', 58), ('JAM', 72)):
+                    pl = pill.copy()
+                    px = pl.load()
+                    from collections import Counter
+                    cols = Counter(px[xx, yy] for yy in range(12) for xx in range(40) if px[xx, yy][3])
+                    body = cols.most_common(1)[0][0]
+                    for yy in range(1, 11):
+                        for xx in range(2, 38):
+                            if px[xx, yy][3] and px[xx, yy] != body and px[xx - 1, yy][3] and px[xx + 1, yy][3] \
+                                    and px[xx, yy - 1][3] and px[xx, yy + 1][3]:
+                                px[xx, yy] = body
+                    st.text(pl, (40 - st.measure(word, 's')) // 2, -2, word, (255, 255, 255), (98, 98, 98), font='s')
+                    F.paste(info, pl, 6, y)
+            self.img(sp, 'fr.sum.moves%di' % k, info, cond=U.SM_CHOOSING)
+            common(sp, k, pic=False)
+            sp.add(U.OP_ICON, x=60, y=64, a=0, unless=U.SM_CHOOSING)
+            sp.add(U.OP_ICON, x=104, y=88, a=2, unless=U.SM_CHOOSING)
+            sp.add(U.OP_IMGSEL, x=8, y=34, a=tfirst, b=U.F_TYPE1, cond=U.SM_CHOOSING, unless=U.SM_EGG)
+            sp.add(U.OP_IMGSEL, x=42, y=34, a=tfirst, b=U.F_TYPE2, cond=U.SM_CHOOSING | U.SM_TWOTYPES)
+            if contest:
+                for i, (fld, y) in enumerate(((U.F_APPEAL, 60), (U.F_JAM, 74))):
+                    hearts = []
+                    for n in range(9):
+                        im = Image.new('RGBA', (64, 8), (0, 0, 0, 0))
+                        for h in range(8):
+                            col = (230, 8, 8) if h < n else (190, 190, 180)
+                            for yy, row in enumerate((0x6C, 0xFE, 0xFE, 0x7C, 0x38, 0x10, 0x00, 0x00)):
+                                for xx in range(7):
+                                    if row & (0x80 >> xx):
+                                        im.putpixel((h * 8 + xx, yy + 1), col + (255,))
+                        hearts.append(p.image('fr.hearts%d' % n, im))
+                    sp.add(U.OP_IMGSEL, x=50, y=y, a=hearts[0], b=fld, cond=U.SM_CHOOSING)
+            else:
+                self.text(sp, '{%d}' % U.F_POWER, 80, 57, ink, align=1, cond=U.SM_CHOOSING)
+                self.text(sp, '{%d}' % U.F_ACC, 80, 71, ink, align=1, cond=U.SM_CHOOSING)
+            sp.add(U.OP_MSG, x=8, y=97, a=1, h=14, n=4, w=106, e=self.fs + 1, font=self.fn, ink=ink[0],
+                   shadow=ink[1], cond=U.SM_CHOOSING)
+            sp.add(U.OP_LIST, x=0, y=22, h=28, n=5)
+            p.spec(sp)
+            row = U.Spec('sum.%d.row' % k)
+            cur = Image.open(os.path.join(st.g, 'summary_screen', 'move_selection_cursor_left.png')).convert('RGBA')
+            cur2 = Image.open(os.path.join(st.g, 'summary_screen', 'move_selection_cursor_right.png')).convert('RGBA')
+            frames = []
+            for half in (0, 32):
+                fr_ = Image.new('RGBA', (128, 32), (0, 0, 0, 0))
+                fr_.alpha_composite(cur.crop((0, half, 64, half + 32)), (0, 0))
+                fr_.alpha_composite(cur2.crop((0, half, 64, half + 32)), (64, 0))
+                bb = fr_.getbbox()
+                fr_ = fr_.crop(bb)
+                # (cut to the box: 114 x 26 round it)
+                w_, h_ = fr_.size
+                outf = Image.new('RGBA', (114, h_), (0, 0, 0, 0))
+                outf.alpha_composite(fr_.crop((0, 0, 57, h_)), (0, 0))
+                outf.alpha_composite(fr_.crop((w_ - 57, 0, w_, h_)), (57, 0))
+                frames.append(outf)
+            self.img(row, 'fr.sum.cursor', frames[0], 126, -2, cond=U.C_SEL0)
+            self.img(row, 'fr.sum.cursor2', frames[1], 126, -2, cond=U.B_SWAP, unless=U.C_SEL0)
+            if contest:
+                row.add(U.OP_IMGSEL, x=130, y=2, a=cfirst, b=U.F_CTYPE, unless=U.R_EMPTY | U.R_CANCEL)
+            else:
+                row.add(U.OP_IMGSEL, x=130, y=2, a=tfirst, b=U.F_TYPE, unless=U.R_EMPTY | U.R_CANCEL)
+            self.text(row, '{%d}' % U.F_NAME, 164, 0, ink, w=72, b=self.fs + 1, unless=U.R_EMPTY | U.R_CANCEL)
+            self.text(row, 'PP', 164, 10, ink, 's', unless=U.R_EMPTY | U.R_CANCEL)
+            self.text(row, '{%d}/{%d}' % (U.F_PP, U.F_MAXPP), 236, 10, ink, 's', align=1,
+                      unless=U.R_EMPTY | U.R_CANCEL)
+            self.text(row, '-', 164, 0, ink, cond=U.R_EMPTY)
+            self.text(row, 'CANCEL', 164, 4, ink, cond=U.R_CANCEL)
+            p.spec(row)
+        # the POKé BALL and the JOURNAL: FireRed's window under the header (the page's lines where KAI prints them
+        # in its box; the POKéMON named in the window's free corner, or over the JOURNAL's rows)
+        for k in (4, 5):
+            sp = U.Spec('sum.%d' % k)
+            g = ground(k)
+            st.frame(g, (0, 16, 240, 160))
+            self.img(sp, 'fr.sum.win%d' % k, g)
+            if k == 4:
+                common(sp, k, pic=False, row=None)
+                self.text(sp, '{%d}' % U.F_NAME, 216, 26, F.STD, align=1)
+                self.text(sp, '♂', 219, 26, F.MALE, cond=U.C_MALE)
+                self.text(sp, '♀', 219, 26, F.FEMALE, cond=U.C_FEMALE)
+                sp.add(U.OP_LIST, x=12, y=24, h=0, n=1)
+            else:
+                common(sp, k, pic=False, row=(12, 24, F.STD, F.MALE, F.FEMALE))
+                sp.add(U.OP_LIST, x=10, y=40, h=14, n=7)
+                self.text(sp, '{%d}' % U.F_JPAGE, 228, 139, F.STD, 's', align=1, cond=U.S_DOWN)
+            p.spec(sp)
+            row = U.Spec('sum.%d.row' % k)
+            if k == 5:
+                row.add(U.OP_FILL, x=0, y=0, w=220, h=14, ink=(232, 240, 255), a=255, cond=U.R_NEW)
+            self.text(row, '{%d}' % U.F_NAME, 2 if k == 5 else 0, -1 if k == 5 else 0, F.STD, w=216, b=self.fs + 1)
+            p.spec(row)
+
     def make(self):
         self.fonts()
         for kind in ('foe', 'mine', 'foe2', 'mine2', 'foe3', 'mine3'):
@@ -435,4 +726,5 @@ class FRPack:
         self.options()
         self.bag()
         self.popups()
+        self.summary()
         return self.p
