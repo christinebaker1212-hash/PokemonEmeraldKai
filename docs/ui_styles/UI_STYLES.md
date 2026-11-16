@@ -4,9 +4,9 @@ The user's request (2026-11-15): a style selector for the whole interface, KAI (
 RED, CRYSTAL, FIRERED, PLATINUM, BLACK, each from its own game's art, over Kai's own single, double and triple battle
 layouts; a mock-up of every style on every screen it changes, shown for approval before anything is built.
 
-**Status (2026-11-16): the second pass is done and waiting for approval** (the first mock-ups were not approved:
-"everything other than Emerald looks extremely rough"). All five styles are redone from their own games' art (below)
-and pass the checker, the worst case too. Nothing in the game yet.
+**Status (2026-11-16): approved, to be built** ("Approved, build the UI STYLE option."), with two fixes asked for
+the same day: RED's party HP bars lost their bottom line (the fill was painted over it; fixed), and BLACK's interface,
+its battles above all, "needing a rework" (done: the third pass below, shown again). Nothing in the game yet.
 
 The user's rules for the second pass: readability first; as much of each original's style as possible; KAI's fitment,
 above all in Double and Triple Battles; each original game's own menu layouts (never KAI's layout in another game's
@@ -23,7 +23,7 @@ and tabs stay; each style draws them.
 
 The message box, the START menu, a battle's command (single, double, triple), its moves, the party, the summary, the
 BAG, OPTIONS: `docs/ui_styles/mockups/<screen>.png` shows one screen in all six styles, `<style>.png` one style on all
-ten screens, `<style>/<screen>.png` each at 2x.
+ten screens (mockups.py also writes `<style>/<screen>.png`, each at 2x, not kept here).
 
 ## Each style's art
 
@@ -41,8 +41,9 @@ ten screens, `<style>/<screen>.png` each at 2x.
   in the game's number window over the art's "/", Triple Battle cards cut from its doubles box, both battle textbox
   palettes; the message box (menu_message), START with its help bar, the party slots (party_menu.h), the summary
   (six page dots), the BAG (pocket arrows beside the bag, eight pocket pips, START: SORT), OPTION (its help bar).
-- tools/ui_styles/check.py runs with every render (and again on the battles with ten-letter names at level 100 and
-  999 HP: `worst/<style>.png`; RED / CRYSTAL draw an eleventh name tile at a 7-pixel pitch as their games never needed,
+- tools/ui_styles/check.py runs with every render (and again with KAI's longest words: ten-letter names at level 100
+  with 999 HP in the battles, six of them in the party, and a summary with a 7-letter OT, a 12-letter Ability, a
+  13-letter item (PEWTERCRUNCHY) and a 16-letter place (EVER GRANDE CITY): `worst/<style>.png`; RED / CRYSTAL draw an eleventh name tile at a 7-pixel pitch as their games never needed,
   and print level 100 without the :L as PrintLevel does) and writes report.txt: anything drawn outside KAI's boxes, one-pixel
   seams, text overlapping text, text inked over other art (seen by drawing each screen again without its words), text
   off the screen. A finding that is the original game's own layout is listed with its reason, never hidden.
@@ -63,19 +64,33 @@ ten screens, `<style>/<screen>.png` each at 2x.
   them (its writes of the name, gender, level, bar and number tiles into the frame, its actors' offsets read from
   overlay 94): no box, the name floating over the scene, the bar running in from the screen's edge to its arrow's
   point at KAI's box (outside KAI's rectangles, as Black's own; the checker lists it), the player's EXP bar a row
-  under it. A double's box has no HP numbers (as Black's), its empty dark band shortened to KAI's height; a triple
-  card is Black's triple gauge with its plain bar shortened, its name / gender / Lv / level row from the card's
-  left (for a ten-letter name at level 100, the only row too wide, the Lv mark gives way and the digits stay).
-  The battle's message window is Black's (dark, blended over the scene as btlv_scu.c blends it); FIGHT / BAG / RUN /
-  MOéMON are Black's touch screen cut down to KAI's panel (the POKé BALL's band squashed column by column, keeping its
-  outlines and FIGHT!; the buttons' roofs and words kept; POKéMON spelt MOéMON from the button's own letters); the
-  moves are Black's move buttons in each type's own palette (overlay 94's table), the chosen move's type icon and PP
-  on a button of its own. The field's talk balloon, the X menu (its buttons, icons and lit button, two by two;
-  EXIT as the touch bar's return button), the party's plates, the summary's info page (its header re-spelt
-  MOéMON INFO from its own letters), the BAG (each pocket's own tab as Black draws it; POKé BALLS, BATTLE ITEMS and
-  FAVORITES, which Black lacks, take the X menu's POKé BALL, the battle BAG's mark and the registered item's check)
-  and OPTIONS (Black's six bars for KAI's six rows, KAI's tabs on its title bar). Pieces bigger than KAI's room are
-  cut down the way pixel art is: runs of identical rows or columns taken out (bw.py carve()), never scaled.
+  under it. A double's box has no HP numbers (as Black's), its empty dark band shortened to KAI's height. A triple
+  card follows KAI's own card: the name and gender floating on its first row, the Lv icon and level then Black's
+  bar pieces (its point, HP label, gauge and cap, the plain white between them out, the gauge as long as the card
+  allows) on its second, so a ten-letter name at level 100 fits whole.
+  The battle's message window is Black's (dark, blended over the scene as btlv_scu.c blends it). The commands are
+  four of Black's white-edged mesh buttons (the touch screen's long button 0x6B with its middle rows taken out, so its
+  bevelled ends meet again as they did) in KAI's order, FIGHT! BAG / MOéMON RUN, on the touch screen's POKé BALL (red
+  half, black band, white half), each with the touch screen's own lettering (POKéMON spelt MOéMON from its own
+  letters); the D-pad cursor is Black's four pink arcs (btlv_input.c, a/0/1/1 0x77 / 0x78), standing out from the
+  chosen button and clipped to it so they frame its ends. (Black's own command screen, a big FIGHT over three
+  buttons, can't hold its lettering in KAI's 120 x 48: tried, the words met the panel's edges.) The moves are Black's
+  move buttons in each type's palette, cut down the same way, the cursor on the first; the chosen move's type icon
+  and PP on a button of its own.
+  The field's talk balloon; START in KAI's own column (it used to spread over half the field and the player): Black's
+  X-menu ground and folder-tab buttons one under another, the chosen one lit, the words in Black's letters on each
+  tab's raised part (Black's icons, 20 to 28 pixels tall, leave no room for readable words in the column, so they go;
+  EXIT the touch bar's return button). The party's plates (HP as the plate prints it, the maximum after the slash).
+  The summary's INFO page with KAI's INFO in Black's places: Dex No., Name, Type, OT, ID No. and Ability on its six
+  rows, the Ability's description in the grey band, the trainer memo on the seventh row and the white box under it,
+  the nickname, gender and level in the box at the top right, SELECT: RENAME in the box at the bottom right (its
+  header re-spelt MOéMON INFO from its own letters). The BAG (each pocket's own tab as Black draws it; POKé BALLS,
+  BATTLE ITEMS and FAVORITES, which Black lacks, take the X menu's POKé BALL, the battle BAG's mark and the
+  registered item's check) and OPTIONS (Black's six bars for KAI's six rows, each two rows shorter so all six sit
+  whole under the title bar, KAI's tabs on it). Pieces bigger than KAI's room are cut down the way pixel art is: runs
+  of identical rows or columns taken out (bw.py carve()), never scaled.
+- Fixes found by the wider worst case (2026-11-16): FIRERED prints a held item longer than FireRed's own 12 letters
+  in its small font; PLATINUM writes the met place without a stop, as its memo does, so Lv100 EVER GRANDE CITY fits.
 
     python3 tools/ui_styles/mockups.py KAI_SHOTS EXPORT OUT --pokered DIR --pokecrystal DIR --pokefirered DIR \
             --platinum ROM --black ROM

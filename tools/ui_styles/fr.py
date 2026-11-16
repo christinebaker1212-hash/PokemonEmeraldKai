@@ -85,7 +85,9 @@ class FireRed(Style):
     # (what check.py finds that is FireRed's own layout: party_menu.h sPartyBoxInfoRects puts a wide slot's level,
     # gender and HP numbers on its lower band, their foot on the slot's edge and the "/" reaching up to the bar,
     # as the game itself and KAI's Emerald party screen show)
-    ORIGINAL = [('party', 'collide', ['{LV}22', '{LV}20', '{LV}18', '♂', '♀', '55/', '55', '47/', '47', '42/', '42'],
+    # (party_menu.h sPartyBoxInfoRects: a slot's second row, the level, gender and HP, ends on the slot's foot)
+    ORIGINAL = [('party', 'collide',
+                 lambda f: re.search(r'\)-\(\d+,(31|55|79|103|127)\)$', f) is not None,
                  "FireRed's own party slot layout")]
 
     def __init__(self, root, kai, export):
@@ -545,7 +547,8 @@ class FireRed(Style):
         self.type_icon(im, 167, 52, s['type'])
         self.text(im, 167, 65, s['ot'], *ink)
         self.text(im, 167, 80, s['idno'], *ink)
-        self.text(im, 167, 95, s['item'], *ink)
+        # (FireRed's names are 12 letters at most, KAI's 13: one that runs past the pane is in FireRed's small font)
+        self.text(im, 167, 95, s['item'], *ink, **({} if self.measure(s['item']) <= 238 - 167 else {'font': 's'}))
         self.text(im, 8, 115, s['nature'] + ' nature.', *ink)
         self.text(im, 8, 129, 'Met in %s at {LV}%d.' % (s['place'].rstrip('.'), s['level']), *ink)
         # KAI's RENAME, in FireRed's keypad style, on the memo's empty third line

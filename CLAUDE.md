@@ -186,8 +186,9 @@ Read `BUILDING_COOP.md` first for the architecture and build steps. The player
 docs are in `dist_extras/README.txt` (shipped next to the exe).
 
 **UI STYLE** (the user, 2026-11-15: OPTIONS > DISPLAY > UI STYLE, KAI / RED / CRYSTAL / FIRERED / PLATINUM / BLACK over
-Kai's own layouts): **mock-ups shown, waiting for approval; build nothing before it**. `docs/ui_styles/UI_STYLES.md`,
-mock-ups docs/ui_styles/mockups/ from tools/ui_styles/mockups.py.
+Kai's own layouts): **approved to build (2026-11-16)**; BLACK reworked the same day at the user's request and shown
+again. `docs/ui_styles/UI_STYLES.md`, mock-ups docs/ui_styles/mockups/ from tools/ui_styles/mockups.py (its checker,
+worst case included, must pass).
 
 **The GBA's limits are not this game's** (the user, 2026-11-13: "this isn't a GBA game, this is a PC port"): any time
 something would go over a GBA limit (tiles, palettes, colours, sprites, VRAM, OAM, screen size...), ask the user how

@@ -145,9 +145,26 @@ def log_text(style):
 def worst_case(make, kai):
     """the battle screens again with the longest words a box must hold (ten-letter names, level 100, 999 HP), checked
     the same way: a style must never cut a name or a level, nor let them run into anything"""
+    import sys
     import base
+    import common
     saved = {k: getattr(base, k) for k in ('FOE', 'MINE', 'DOUBLE_FOES', 'DOUBLE_MINE', 'TRIPLE_FOES', 'TRIPLE_MINE')}
     names = ['MASQUERAIN', 'CHARMELEON', 'BUTTERFREE']
+    # (the party and the summary too: Kai's six slots full, each with the longest words they show)
+    party = [dict(name=names[i % 3], sex='mf'[i % 2], level=100, hp=999, maxhp=999, species=s)
+             for i, s in enumerate((280, 283, 286, 288, 277, 290))]
+    # (Kai's limits: names 10 letters, OT 7, Abilities 12, held items 13 (PEWTERCRUNCHY), places 16 (EVER GRANDE
+    # CITY))
+    summary = dict(common.SUMMARY, name='MASQUERAIN', species='MASQUERAIN', level=100, ot='WWWWWWW',
+                   ability='COMPOUNDEYES', nature='SERIOUS', item='PEWTERCRUNCHY', met='met at Lv100,',
+                   place='EVER GRANDE CITY.')
+    held = []      # (every module that took its own name for the PARTY / SUMMARY lists, put back afterwards)
+    for mod in list(sys.modules.values()):
+        for k, v in (('PARTY', party), ('SUMMARY', summary)):
+            if getattr(mod, k, None) is getattr(common, k):
+                held.append((mod, k, getattr(mod, k)))
+    for mod, k, _ in held:
+        setattr(mod, k, party if k == 'PARTY' else summary)
 
     def big(d, i):
         d = dict(d, name=names[i % 3], level=100)
@@ -158,7 +175,7 @@ def worst_case(make, kai):
         base.FOE, base.MINE = big(saved['FOE'], 0), big(saved['MINE'], 1)
         for k in ('DOUBLE_FOES', 'DOUBLE_MINE', 'TRIPLE_FOES', 'TRIPLE_MINE'):
             setattr(base, k, [big(m, i) for i, m in enumerate(saved[k])])
-        screens = ('battle_single', 'battle_double', 'battle_triple')
+        screens = ('battle_single', 'battle_double', 'battle_triple', 'party', 'summary')
 
         def run(st, wordless=False):
             if wordless:
@@ -182,3 +199,5 @@ def worst_case(make, kai):
     finally:
         for k, v in saved.items():
             setattr(base, k, v)
+        for mod, k, v in held:
+            setattr(mod, k, v)

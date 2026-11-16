@@ -951,7 +951,8 @@ class Platinum(Style):
         # KAI's TRAINER MEMO on the stripes
         my = top + len(right_rows) + 1
         self.text(im, X(112), my, s['nature'] + ' nature.', *self.SUM_INK['black'])
-        self.text(im, X(112) - 2, my + 16, 'Lv%d, %s' % (s['level'], s['place']), *self.SUM_INK['black'])
+        # (as Platinum's memo writes a place: no stop after it; so KAI's longest, Lv100 EVER GRANDE CITY, fits)
+        self.text(im, X(112) - 2, my + 16, 'Lv%d %s' % (s['level'], s['place'].rstrip('.')), *self.SUM_INK['black'])
 
     def page_art(self, png, scr, pal):
         src = Image.open(png)

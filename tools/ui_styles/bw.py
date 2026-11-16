@@ -339,10 +339,9 @@ class Black(Style):
         self._rect = tuple(r)
         foe = kind.startswith('foe')
         if kind in ('foe3', 'mine3'):
-            pic, inks = self.triple_card(foe, x1 - x0, y1 - y0, m)
+            pic, inks, floats = self.triple_card(foe, x1 - x0, y1 - y0, m)
             paste(im, pic, x0, y0)
-            self.seam_ok.setdefault(self._rect, []).extend([(x0, y0, x1, y0 + 10),
-                                                            (x1 - 12, y0, x1 + 2, y1) if foe else (x0 - 2, y0, x0 + 8, y1)])
+            self.seam_ok.setdefault(self._rect, []).extend([(x0 + a, y0 + b, x0 + c, y0 + d) for a, b, c, d in floats])
             for (a, b, c, d), s in inks:
                 self.inks.append(((x0 + a, y0 + b, x0 + c, y0 + d), s))
             return
@@ -397,47 +396,60 @@ class Black(Style):
         self.seam_ok.setdefault(self._rect, []).extend([rows, point] + ([] if foe else gaps))
 
     def triple_card(self, foe, w, h, m):
-        """a Triple Battle's card: Black's triple gauge (0xAB / 0xAE) with the plain bar on either side of the HP
-        gauge shortened to the card's width; above it the name, the gender, the Lv icon (lifted from the frame) and
-        the level, one after another as Black's own row puts them, from the card's left. Where a ten-letter name at
-        level 100 is wider than the card, that name is written in KAI's small font (as PLATINUM's cards do)"""
-        g = self.gauge(1 if foe else 0, 2, m, numbers=False, name=False)
+        """a Triple Battle's card in KAI's card's own order (the name and gender on its first row, the level and
+        the HP bar on its second), from Black's triple gauge (0xAB / 0xAE): the name row floating as Black's, the
+        frame's Lv icon lifted off and the level's digits beside it, then the bar's own pieces (the arrow's point,
+        the HP label, the gauge, its cap) with the plain white between them taken out and the gauge shortened to
+        the columns the card has left, filled as far as the HP goes"""
+        side = 1 if foe else 0
+        frac = m['hp'] / m['maxhp'] if 'maxhp' in m else m['hp']
+        g = self.gauge(side, 2, m, numbers=False, name=False)
         P = self.gauge_parts()['pal']
-        # the frame's Lv icon (the orange pixels in the name row) lifted off
         lv_box = (86, 6, 98, 16) if foe else (79, 6, 91, 16)
         lv = g.crop(lv_box)
         lv = lv.crop(lv.getbbox())
         g.paste((0, 0, 0, 0), lv_box)
+        # (the gauge's columns: where a full bar and an empty one differ)
+        full = self.gauge(side, 2, dict(m, hp=1, maxhp=1), numbers=False, name=False)
+        empty = self.gauge(side, 2, dict(m, hp=0, maxhp=1), numbers=False, name=False)
+        a_, b_ = full.load(), empty.load()
+        gauge_cols = [x for x in range(g.width) if any(a_[x, y] != b_[x, y] for y in range(g.height))]
+        g0, g1 = gauge_cols[0], gauge_cols[-1] + 1
+        px = round((g1 - g0) * frac)
+        bar = g.crop((0, 14, g.getbbox()[2], 25))          # (the bar's rows, the arrow's point with them)
+        q = bar.load()
+        plain = 30 if foe else 20                        # (a column of the plain white bar)
+
+        def same(x):
+            return all(q[x, y] == q[plain, y] for y in range(bar.height))
         if foe:
-            # (the bar: plain 0-32, the HP label 33-46, the gauge 47-96, plain 97-117, the arrow's point 118-127: the
-            # plain on the right shortened to two columns, then the plain on the left to what the card has room for)
-            right = min(19, g.getbbox()[2] - w)
-            g = carve(g, 'x', right, 97, 118) if right > 0 else g
-            left = g.getbbox()[2] - w
-            g = carve(g, 'x', left, 0, 33) if left > 0 else g
+            label0 = next(x for x in range(plain, g0) if not same(x))
+            tip = next(x for x in range(g1 + 1, bar.width) if not same(x))
+            pieces = list(range(label0, g0)), [g1, g1 + 1] + list(range(tip, bar.width))
         else:
-            # (the point 0-4, plain 5-39, the HP label 40-53, the gauge 54-104, plain on: the plain before the label
-            # shortened so the gauge ends two columns inside the card)
-            g = carve(g, 'x', max(0, 107 - w), 5, 40)
-            g = g.crop((0, 0, w, g.height))
-        bb = g.getbbox()
+            tip1 = next(x for x in range(1, plain) if same(x))
+            label0 = next(x for x in range(plain, g0) if not same(x))
+            pieces = list(range(0, tip1 + 1)) + list(range(label0, g0)), [g1, g1 + 1]
+        lvw = lv.width + 1 + dsfont.width(self.fsub, '100')     # (the room the widest level takes)
+        room = w - lvw - 1 - len(pieces[0]) - len(pieces[1])
+        n = round(room * frac)
+        filled, gone = list(range(g0, g0 + px)), list(range(g0 + px, g1))
+        cols = (filled[:n] + gone[:room - n]) if gone else filled[:room]
+        while len(cols) < room:                          # (a nearly full gauge: its last empty column again)
+            cols.append(cols[-1])
+        bar = _rebuild(bar, 'x', pieces[0] + cols + pieces[1])
         card = Image.new('RGBA', (w, h), (0, 0, 0, 0))
-        dy = (h - (bb[3] - 6)) // 2 - 6     # (the words' ink starts on the canvas's row 6)
-        paste(card, g, 0, dy)
+        by = h - bar.height + 1                          # (the bar's foot on the card's last row)
+        paste(card, bar, w - bar.width, by)
         ink, sh = rgb(P[1]), rgb(P[4])
-        parts = self.gauge_parts()['parts']
-        gender = {'m': 0, 'f': 1}.get(m.get('sex'), 2)
-        x0 = 2
-        lvw = dsfont.width(self.fsub, str(m['level']))
-        nw = dsfont.width(self.fsub, m['name'])
-        # (Black's own row, name / gender / Lv / level, is wider than KAI's card only for a ten-letter name at a
-        # level of three digits: then the Lv mark gives way, the level's digits stay)
-        mark = x0 + nw + (8 if gender < 2 else 0) + 1 + lv.width + lvw <= w
         inks = []
-        y = 5 + dy
-        x = self.draw(card, self.fsub, x0, y, m['name'], ink, sh)
-        self.log(None, x0, y, self.fsub, m['name'], ink, sh)
+        # (the name row: Black's floating letters, the gender mark two columns after them)
+        y = by - 12
+        x = self.draw(card, self.fsub, 1, y, m['name'], ink, sh)
+        self.log(None, 1, y, self.fsub, m['name'], ink, sh)
         inks.append(self.inks.pop())
+        gender = {'m': 0, 'f': 1}.get(m.get('sex'), 2)
+        parts = self.gauge_parts()['parts']
         if gender < 2:
             gt = Image.new('RGBA', (8, 16), (0, 0, 0, 0))
             gp = gt.load()
@@ -445,15 +457,19 @@ class Black(Style):
                 for j, v in enumerate(t):
                     if v:
                         gp[j % 8, k * 8 + j // 8] = rgb(P[v]) + (255,)
-            paste(card, gt, x, y - 5)
-            x += 8
-        if mark:
-            paste(card, lv, x + 1, y + 2 + (lv_box[1] + 2 - 6) - 1)
-            x += 1 + lv.width
-        self.draw(card, self.fsub, x, y, str(m['level']), ink, sh)
-        self.log(None, x, y, self.fsub, str(m['level']), ink, sh)
+            paste(card, gt, x + 1, y - 5)
+        # (the level: the Lv icon and its digits before the bar, on the bar's white rows)
+        ly = by + 3
+        paste(card, lv, 1, ly + 1)
+        dx = 1 + lv.width + 1
+        self.draw(card, self.fsub, dx, ly - 3, str(m['level']), ink, sh)
+        self.log(None, dx, ly - 3, self.fsub, str(m['level']), ink, sh)
         inks.append(self.inks.pop())
-        return card, inks
+        # (where the scene shows between Black's floating letters, marks and the arrow's point's steps)
+        bx = w - bar.width
+        point = (bx + bar.width - len(pieces[1]) + 2, by - 3, w + 1, h) if foe else (bx - 1, by - 3, bx + 8, h)
+        floats = [(0, y - 1, x + 10, y + 13), (0, ly - 3, lvw + 3, h), point]
+        return card, inks, floats
 
     def kai_small(self, im, x, y, s, ink, shadow):
         """S in KAI's small font (graphics/fonts/latin_small.png, widths from src/fonts.c), Black's colours"""
@@ -633,40 +649,116 @@ class Black(Style):
                 q[x, y] = c
         return out
 
+    def ball(self):
+        """the touch screen's POKé BALL without its buttons: the ground (0x71 / 0x72) under 0x68's first block"""
+        if not getattr(self, '_ball', None):
+            a = self.GAUGE
+            P = self.pal(a, 0x5C)
+            out = Image.new('RGBA', (256, 192), (0, 0, 0, 255))
+            for ch, sc in ((0x71, 0x72), (0x5B, 0x68)):
+                out.alpha_composite(self.screen(a, ch, sc, None, palette=P).crop((0, 0, 256, 192)))
+            self._ball = out
+        return self._ball.copy()
+
+    MESH = {(56, 56, 56), (64, 64, 64), (72, 72, 72)}      # (the buttons' mesh)
+
+    def command_words(self):
+        """BAG, RUN and MOéMON as the touch screen letters them on its buttons (POKéMON spelt MOéMON from its own
+        letters first): each word's coloured letters and their dark outline lifted off the mesh"""
+        if not getattr(self, '_cw', None):
+            t = self.touch()
+            self.relabel(t, (193, 159, 248, 175), self.MESH, [4, 1, 3, 4, 1, 6])
+            p = t.load()
+            out = {}
+            for key, (bx0, bx1) in (('BAG', (0, 90)), ('RUN', (90, 170)), ('MOéMON', (170, 256))):
+                pts = [(x, y) for y in range(150, 192) for x in range(bx0, bx1)
+                       if max(p[x, y][:3]) - min(p[x, y][:3]) >= 48]
+                X0, X1 = min(q[0] for q in pts) - 1, max(q[0] for q in pts) + 2
+                Y0, Y1 = min(q[1] for q in pts) - 1, max(q[1] for q in pts) + 2
+                word = Image.new('RGBA', (X1 - X0, Y1 - Y0), (0, 0, 0, 0))
+                q = word.load()
+                for y in range(Y1 - Y0):
+                    for x in range(X1 - X0):
+                        c = p[X0 + x, Y0 + y]
+                        if c[:3] in OUTLINE or max(c[:3]) - min(c[:3]) >= 48:
+                            q[x, y] = c
+                out[key] = word
+            self._cw = out
+        return self._cw
+
+    def command_button(self, w, h):
+        """one of Black's white-edged mesh buttons (the touch screen's long button, 0x6B's first, (265, 225) to
+        (503, 271)) W x H: its middle rows taken out, so its bevelled ends meet again a row apart as they did (the
+        bar is the same above and below its middle), then its mesh shortened by whole repeats of five columns"""
+        a = self.GAUGE
+        b = self.screen(a, 0x5B, 0x6B, None, palette=self.pal(a, 0x5C)).crop((265, 225, 503, 271))
+        return self.shorten_button(b, w, h)
+
+    def arcs(self, im, x0, y0, x1, y1, out=0):
+        """Black's D-pad cursor (btlv_input.c BTLV_INPUT_UpdateButtonActors: a/0/1/1 0x77 / 0x78, palette 0x74):
+        its four pink arcs on the corners of the chosen button's rectangle. Black's buttons are big enough for the
+        arcs to sit in their corners; on a smaller button they stand OUT pixels further out on every side and only
+        what falls on the button is drawn, so each pair meets on the button's end as one bracket"""
+        a = self.GAUGE
+        ts, P = L.tiles(self.U(a, 0x77))[0], self.pal(a, 0x74)
+        layer = Image.new('RGBA', im.size, (0, 0, 0, 0))
+        for k, (ax, ay) in enumerate(((x0 - out, y0 - out), (x0 - out, y1 + out), (x1 + out, y0 - out),
+                                      (x1 + out, y1 + out))):
+            pic, ox, oy = self.cell(a, 0x78, ts, P, k)
+            layer.paste(pic, (ax + ox, ay + oy), pic)
+        mask = Image.new('L', im.size, 0)
+        mask.paste(255, (x0, y0, x1, y1))
+        clipped = Image.new('RGBA', im.size, (0, 0, 0, 0))
+        clipped.paste(layer, (0, 0), mask)
+        im.alpha_composite(clipped)
+
+    def fight_word(self):
+        """FIGHT! as the touch screen letters it in the POKé BALL's band: its red letters and their black outline"""
+        t = self.touch()
+        p = t.load()
+        RED = (200, 0, 56)
+        pts = [(x, y) for y in range(60, 110) for x in range(64, 192) if p[x, y][:3] == RED]
+        X0, X1 = min(q[0] for q in pts) - 1, max(q[0] for q in pts) + 2
+        Y0, Y1 = min(q[1] for q in pts) - 1, max(q[1] for q in pts) + 2
+        word = Image.new('RGBA', (X1 - X0, Y1 - Y0), (0, 0, 0, 0))
+        q = word.load()
+        for y in range(Y0, Y1):
+            for x in range(X0, X1):
+                c = p[x, y][:3]
+                near = any(p[x + dx, y + dy][:3] == RED for dx in (-1, 0, 1) for dy in (-1, 0, 1))
+                if c == RED or (c == (0, 0, 0) and near):
+                    q[x - X0, y - Y0] = p[x, y]
+        return word
+
     def battle_menu(self, im, r=Lo.BATTLE_MENU):
-        """Black's command screen in KAI's room for it: the POKé BALL's band with FIGHT! over the three buttons,
-        each cut down by whole runs of rows and columns (the ball's red and white, the button's roofs and mesh), the
-        words kept; POKéMON spelt MOéMON from its own letters"""
+        """Black's command screen in KAI's room for it: its four commands on Black's white-edged mesh buttons (the
+        touch screen's long button cut down, ends kept), FIGHT! / BAG over MOéMON / RUN as KAI orders them, on the
+        touch screen's POKé BALL (one of its plain columns: the red half, the black band, the white half, each
+        shortened by whole rows) with each command's own lettering (POKéMON spelt MOéMON from its own letters); the
+        D-pad's cursor, Black's pink arcs, on FIGHT!"""
         x0, y0, x1, y1 = r
         w, h = x1 - x0, y1 - y0
-        t = self.touch()
-        mesh = {(56, 56, 56), (64, 64, 64), (72, 72, 72)}
-        self.relabel(t, (193, 159, 248, 175), mesh, [4, 1, 3, 4, 1, 6])
-        bh = 24                          # (the band's rows; the buttons get the rest)
-        band = t.crop((0, 40, 256, 120))
-        # (the band's ends beyond the oval, and the oval's flat top either side of FIGHT!, shortened alike)
-        for n_, lo_, hi_ in ((43, 206, 256), (25, 155, 182), (25, 74, 101), (43, 0, 50)):
-            band = carve(band, 'x', n_, lo_, hi_)
-        band = self.squash_band(band, bh)
-        # each button on its own: (its columns, its rows, where its word is)
-        row = Image.new('RGBA', (w, h - bh))
-        row.paste(t.crop((0, 120, w, 120 + h - bh)).resize((1, 1)).resize((w, h - bh)), (0, 0))
-        # each button: its roof's top rows and its word's rows (Black's buttons run on under the screen's foot)
-        specs = [((0, 80), list(range(132, 144)) + list(range(162, 174))),
-                 ((92, 170), list(range(150, 162)) + list(range(172, 184))),
-                 ((176, 256), list(range(132, 144)) + list(range(162, 174)))]
-        widths = [34, 28, 54]
-        xs = [0, 36, 66]
-        for ((bx0, bx1), rows), bw_, bx in zip(specs, widths, xs):
-            b_ = _rebuild(t.crop((bx0, 0, bx1, 192)), 'y', rows)
-            q = b_.load()
-            lab = [x for x in range(b_.width) for y in range(b_.height) if max(q[x, y][:3]) - min(q[x, y][:3]) >= 48]
-            b_ = carve(b_, 'x', b_.width - bw_, 0, b_.width, keep_out=[(min(lab) - 2, max(lab) + 3)])
-            row.alpha_composite(b_, (bx, h - bh - b_.height))
-        out = Image.new('RGBA', (w, h))
-        out.paste(band, (0, 0))
-        out.paste(row, (0, bh))
+        ball = self.ball()
+        rows = [33] * 19 + [77, 78, 79] + [80, 85, 88, 93] + [96, 97, 98] + [99] * 19
+        col = _rebuild(ball.crop((24, 0, 25, 192)), 'y', rows)
+        out = col.resize((w, h))           # (one plain column, repeated across: every column of it the same)
+        words = self.command_words()
+        words = dict(words, FIGHT=self.fight_word())
+        bh = 22
+        cols = [(1, 74), (76, 43)]
+        place = {'FIGHT': (0, 0), 'BAG': (1, 0), 'MOéMON': (0, 1), 'RUN': (1, 1)}
+        rects = {}
+        for key, (c, rr) in place.items():
+            bx, bw_ = cols[c]
+            by = 0 if rr == 0 else h - bh
+            bt = self.command_button(bw_, bh)
+            out.alpha_composite(bt, (bx, by))
+            wd = words[key]
+            out.alpha_composite(wd, (bx + (bw_ - wd.width) // 2, by + (bh - wd.height + 1) // 2))
+            rects[key] = (bx, by, bx + bw_, by + bh)
         paste(im, out, x0, y0)
+        a, b, c, d = rects['FIGHT']
+        self.arcs(im, x0 + a, y0 + b, x0 + c, y0 + d, out=4)
 
     # the move buttons (btlv_input.c BTLV_INPUT_DrawWazaButtons): a type's palette (overlay 94's d_0220A5F0) into
     # the button's palette row; the type icons (a/0/8/3: 0x22 + type, cell 0x3B, palette 0x21 at the row
@@ -692,9 +784,19 @@ class Black(Style):
         tp = self.pal(a, self.TYPE_PAL[self.TYPES.index(kind)])
         P[9 * 16:10 * 16] = tp[:16]
         b = self.screen(a, 0x5B, 0x68, None, palette=P).crop((258, 225, 383, 272))
-        b = carve(b, 'x', b.width - w, 12, b.width - 12)
-        b = carve(b, 'y', b.height - h, 8, b.height - 8)
-        return b
+        return self.shorten_button(b, w, h)
+
+    @staticmethod
+    def shorten_button(b, w, h):
+        """one of Black's bevelled buttons W x H: its middle rows taken out where it is taller (a button is the
+        same above and below its middle, so its bevelled ends meet again a row apart, as they did), then its mesh
+        shortened by whole repeats of its five columns"""
+        b = b.crop(b.getbbox())
+        if b.height > h:
+            top = (h + 1) // 2
+            b = _rebuild(b, 'y', list(range(top)) + list(range(b.height - (h - top), b.height)))
+            b = b.crop(b.getbbox())
+        return carve(b, 'x', b.width - w, 14, b.width - 14)
 
     def move_panel(self, im):
         x0, y0, x1, y1 = Lo.MOVES
@@ -713,6 +815,7 @@ class Black(Style):
             paste(im, self.move_button(kind, bw_, bh_), bx, by)
             # (Black's small letters: the cut-down button's inside is ten rows, its main font's eleven)
             self.text(im, bx + bw_ // 2, by + 5, n, ink, sh, 's', 'c')
+        self.arcs(im, x0, y0, x0 + bw_, y0 + bh_, out=4)
         # (the chosen move's own row from its button: the type's icon and its PP, on the same button)
         x0, y0, x1, y1 = Lo.MOVE_INFO
         n, pp, mx, kind = MOVES[0]
@@ -789,40 +892,47 @@ class Black(Style):
         return im.crop(im.getbbox())
 
     def start_menu(self):
-        """Black's X menu (field_menu.c) at the screen's right: its ground (0x0E: the grid between two grey bars),
-        its six buttons two by two (0x10) with their icons and words, the chosen one Black's lit button (cell 28);
-        KAI's seventh row, EXIT, on the bottom bar as Black's return button (a/0/8/3's touch bar)"""
+        """Black's X menu (field_menu.c) in KAI's own column for the START menu (layout.py START): its ground (0x0E:
+        the grid between two grey bars) cut down by whole repeats of the grid, its folder-tab buttons (0x10's tab,
+        the chosen one Black's lit button, cell 28) one under another, each cut to the column's width and to a row
+        of words by whole runs of columns and rows, its word in Black's letters. (Black's icons, 20 to 28 pixels
+        tall, leave no room for readable words in KAI's column: the words stay, the icons go.) KAI's seventh row,
+        EXIT, on the bottom bar as Black's return button (a/0/8/3's touch bar)"""
         from common import START_MENU
         im = shot(self.kai, 'f_town')
         A = self.XMENU
-        W_, H_ = 152, 160
-        x0, y0 = W - W_, 0
-        bg = self.screen(A, 2, 0x0E, 0)
+        x0, y0, x1, y1 = Lo.START
+        W_, H_ = x1 - x0, y1 - y0
+        bg = self.screen(A, 2, 0x0E, 0).crop((0, 0, 256, 192))
         bg = carve(bg, 'x', bg.width - W_, 8, 248)
-        bg = carve(bg, 'y', bg.height - H_, 0, bg.height, keep_out=[(10, 24), (164, 182)])
+        bg = carve(bg, 'y', bg.height - H_, 24, 160)
         paste(im, bg, x0, y0)
-        tabs = self.screen(A, 2, 0x10, 0)
-        tab = tabs.crop((3, 24, 126, 67))
-        tw, th = 72, 36
-        tab = carve(carve(tab, 'x', tab.width - tw, 40, tab.width - 6), 'y', tab.height - th, 12, tab.height - 8)
+        tw, th = W_ - 4, 20
+
+        def cut(pic, under):
+            """a tab W x H: its raised part made 16 columns longer (a column of its plain dark repeated) so a word
+            sits on it whole, its rows from the top and its foot (and the grey line under it), its lower part
+            shortened by whole columns"""
+            pic = widen(pic, 'x', 16, 10)
+            keep = list(range(th - 3 - under)) + list(range(37, 40 + under))
+            pic = _rebuild(pic, 'y', keep)
+            return carve(pic, 'x', pic.width - tw, 33 + 16 + th - 1, pic.width - 3)   # (past the shading's diagonal)
+        tab = cut(self.screen(A, 2, 0x10, 0).crop((3, 24, 126, 67)), 1)
         lit, _, _ = self.cell(A, 28, self.tiles(A, 13), self.pal(A, 1))
-        lit = lit.crop(lit.getbbox())
-        lit = carve(carve(lit, 'x', lit.width - tw, 40, lit.width - 6), 'y', lit.height - th, 12, lit.height - 8)
+        lit = cut(lit.crop(lit.getbbox()), 0)
         ink, sh = self.XINK
         items = [k for k in START_MENU if k != 'EXIT']
         for i, key in enumerate(items):
-            bx, by = x0 + 3 + (i % 2) * (tw + 2), y0 + 14 + (i // 2) * (th + 6)
+            bx, by = x0 + 2, y0 + 2 + i * th           # (one under another, each tab's grey foot between them)
             paste(im, lit if i == 0 else tab, bx, by)
-            ic = self.x_icon(key)
-            paste(im, ic, bx + 4 + (22 - ic.width) // 2, by + (th - ic.height) // 2)
-            self.text(im, bx + 26, by + (th - 16) // 2 + 1, key, ink, sh, 'n' if self.measure(key) <= tw - 29 else 's')
+            self.text(im, bx + 7, by + 3, key, ink, sh)
         # (EXIT: the bottom bar's return button)
         T = 'a/0/8/3'
         ret, _, _ = self.cell(T, 21, self.tiles(T, 20), self.pal(T, 19), 1)
         ret = ret.crop(ret.getbbox())
-        ex = x0 + W_ - 8 - ret.width
-        paste(im, ret, ex, y0 + H_ - 4 - ret.height - 4)
-        self.text(im, ex - 4, y0 + H_ - 18, 'EXIT', ink, sh, 'n', 'r')
+        ex = x1 - 3 - ret.width
+        paste(im, ret, ex, y1 - 2 - ret.height)
+        self.text(im, ex - 3, y1 - 15, 'EXIT', ink, sh, 'n', 'r')
         return im
 
     # --------------------------------------------------------------------------------------------- the party
@@ -873,9 +983,11 @@ class Black(Style):
             self.text(im, x + 104, y + 3, '♂' if m['sex'] == 'm' else '♀', gi[0], gi[1])
             paste(im, self.party_hp(m['hp'] / m['maxhp']), x + 42, y + 17)
             self.text(im, x + 8, y + 26, 'Lv%d' % m['level'], ink, sh, 's')
-            self.text(im, x + 74, y + 26, '%d' % m['hp'], ink, sh, 's', 'r')
-            self.text(im, x + 76, y + 26, '/', ink, sh, 's')
-            self.text(im, x + 110, y + 26, '%d' % m['maxhp'], ink, sh, 's', 'r')
+            # (plist_plate.c: the current HP ending before the slash, the maximum starting after it, under the
+            # bar's right half)
+            self.text(im, x + 76, y + 26, '%d' % m['hp'], ink, sh, 's', 'r')
+            self.text(im, x + 77, y + 26, '/', ink, sh, 's')
+            self.text(im, x + 84, y + 26, '%d' % m['maxhp'], ink, sh, 's')
         # (the foot: Black's balloon with the prompt, the return button for CANCEL)
         paste(im, self.balloon(168, 24), 0, 136)
         self.text(im, 10, 140, 'Choose a MOéMON.', *self.INK)
@@ -919,12 +1031,21 @@ class Black(Style):
         return im
 
     def summary_page(self, im):
+        """Black's INFO page (a/0/7/8: screens 70 and 63) from its row 6 down under the touch screen's title bar,
+        holding KAI's INFO page: its six bullet rows Dex No., Name, Type, OT, ID No. and Ability (Black's EXP
+        row), the grey band the Ability's description, the seventh row and the white box under it the trainer
+        memo (nature; level and place met, as PLATINUM writes it), the white box at the top right the nickname,
+        gender and level, the box at the bottom right SELECT's RENAME"""
         from common import SUMMARY as S_, MINE, creature
         A = self.SUMMARY_ARC
         top = Image.new('RGBA', (256, 192), (0, 0, 0, 255))
         top.alpha_composite(self.screen(A, 8, 70, 0).crop((0, 0, 256, 192)))
         top.alpha_composite(self.screen(A, 8, 63, 0).crop((0, 0, 256, 192)))
-        paste(im, top.crop((0, 8, 240, 152)), 0, 16)
+        c = 6                                  # (Black's row c at the screen's row 16)
+        paste(im, top.crop((0, c, 240, c + 144)), 0, 16)
+
+        def Y(by):                             # (a row of Black's page on the screen)
+            return by - c + 16
         # (the header: the touch screen's title bar, its POKéMON INFO spelt MOéMON INFO from its own letters)
         bar = self.screen(A, 9, 65, 1).crop((0, 8, 256, 24))
         q = bar.load()
@@ -946,26 +1067,29 @@ class Black(Style):
                         im.putpixel((cx + dx, 7 + dy), ti + (255,))
         lab, lsh = (248, 248, 248), (128, 128, 128)
         ink, sh = self.INK
-        rows = [('Dex No.', S_['no']), ('Name', S_['name']), ('Type', None), ('OT', S_['ot']), ('ID No.', S_['idno'])]
+        # (the six bullet rows, 16 apart from Black's row 16: their labels on the navy, values on the white)
+        rows = [('Dex No.', S_['no']), ('Name', S_['species']), ('Type', None), ('OT', S_['ot']),
+                ('ID No.', S_['idno']), ('Ability', S_['ability'])]
         for i, (k, v) in enumerate(rows):
-            y = 16 + 16 * i + 1
+            y = Y(16 * (i + 1)) - 7
             self.text(im, 16, y, k, lab, lsh)
-            if v is not None:
-                self.text(im, 86, y, v, ink, sh)
-        paste(im, self.type_icon(S_['type']), 86, 16 + 32 + 1)
-        self.text(im, 16, 97, 'Item', lab, lsh)
-        self.text(im, 86, 97, S_['item'], lab, lsh)
-        self.text(im, 58, 113, '%s nature.' % S_['nature'], ink, sh)
-        self.text(im, 16, 130, '%s %s' % (S_['met'], S_['place']), lab, lsh, 's')
-        self.text(im, 30, 145, 'Ability', ink, sh, 's')
-        self.text(im, 72, 145, S_['ability'], ink, sh, 's')
-        # (the POKéMON on the grid, its name and level above it)
+            if v is not None:                  # (the white column ends after five rows: the sixth is navy across)
+                self.text(im, 83, y, v, *((ink, sh) if i < 5 else (lab, lsh)))
+        paste(im, self.type_icon(S_['type']), 83, Y(48) - 5)
+        # (the band: the Ability's description; the seventh row and its box: the trainer memo)
+        self.text(im, 110, Y(112) - 7, S_['ability_text'], ink, sh, 's', 'c')
+        self.text(im, 16, Y(128) - 7, '%s nature.' % S_['nature'], lab, lsh)
+        lv = S_['met'].replace('met at ', '').rstrip(',')
+        self.text(im, 28, Y(144) - 7, '%s, %s' % (lv, S_['place']), ink, sh, 's')
+        self.text(im, 200, Y(144) - 5, 'SELECT: RENAME', ink, sh, 's', 'c')
+        # (the box at the top right: the nickname and gender on its white, the level on its grey; the POKéMON on
+        # the grid under it)
         gi = self.MALE_INK if S_['sex'] == 'm' else self.FEMALE_INK
-        nx = self.text(im, 159, 19, S_['name'], ink, sh)          # (on the white panel at the top right)
-        self.text(im, nx + 1, 19, '♂' if S_['sex'] == 'm' else '♀', gi[0], gi[1])
-        self.text(im, 166, 42, 'Lv%d' % S_['level'], lab, lsh, 's')
+        nx = self.text(im, 163, Y(12) - 6, S_['name'], ink, sh, 's')
+        self.text(im, nx + 2, Y(12) - 6, '♂' if S_['sex'] == 'm' else '♀', gi[0], gi[1], 's')
+        self.text(im, 236, Y(24) - 7, 'Lv%d' % S_['level'], lab, lsh, 's', 'r')
         pic = creature(self.export, MINE['species'])
-        paste(im, pic, 196 - pic.width // 2, 46)
+        paste(im, pic, 196 - pic.width // 2, Y(36))
 
     # --------------------------------------------------------------------------------------------- the BAG
     BAG = 'a/0/8/8'
@@ -1042,10 +1166,16 @@ class Black(Style):
         one, as the others), each row's name and its choices on the bar"""
         from common import OPTION_ROWS, OPTION_TABS
         A = 'a/0/2/7'
+        # (the rows: the sixth bar like the five above it, each bar two of its plain middle rows shorter, so the
+        # six sit whole under the title bar, which on the DS covers the first one's top)
+        rows = Image.new('RGBA', (256, 192), (0, 0, 0, 255))
+        rows.alpha_composite(self.screen(A, 0, 2, 1).crop((0, 0, 256, 192)))
+        rows.paste(rows.crop((0, 114, 256, 138)), (0, 138))
+        for k in range(5, -1, -1):                   # (from the last bar up, so each bar's rows stay put)
+            rows = carve(rows, 'y', 2, 22 + 24 * k, 38 + 24 * k)
         m = Image.new('RGBA', (256, 192), (0, 0, 0, 255))
-        m.alpha_composite(self.screen(A, 0, 2, 1).crop((0, 0, 256, 192)))
+        m.paste(rows.crop((0, 12, 256, 180)), (0, 18))
         m.alpha_composite(self.screen(A, 13, 14, 1).crop((0, 0, 256, 192)))
-        m.paste(m.crop((0, 116, 256, 140)), (0, 140))            # (the sixth bar like the five above it)
         m = carve(m.crop((0, 0, 256, 160)), 'x', 16, 20, 236)
         paste(im, m, 0, 0)
         green, gsh = (96, 248, 144), (8, 64, 48)
@@ -1058,7 +1188,7 @@ class Black(Style):
         chosen = {'UI STYLE': self.name, 'THEME': 'LIGHT', 'FRAME': 'TYPE 1', 'SHADOWS': 'ON',
                   'BATTLE ANIMS': 'MODERN', 'TYPE ICONS': 'ON'}
         for i, (label, vals) in enumerate(OPTION_ROWS):
-            ty = [24, 46, 70, 94, 118, 142][i]          # (each of Black's bars' first row)
+            ty = 24 + 22 * i + 3                        # (each bar's middle)
             self.text(im, 8, ty, label, white, wsh, 's')
             if vals is None:
                 self.text(im, 232, ty, chosen[label], green, gsh, 's', 'r')

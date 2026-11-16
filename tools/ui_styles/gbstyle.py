@@ -179,9 +179,9 @@ class GB(Style):
             part = max(0, min(8, n - 8 * k))
             t = steps[part]
             self.tile(im, t, x + 8 * k, y)
-            for yy in range(3, 6):
+            for yy in range(3, 5):   # (the fill's own rows, the grey ones: the outline above and below stays)
                 for xx in range(part):
-                    if t.getpixel((xx, yy)) < 160:
+                    if 64 <= t.getpixel((xx, yy)) < 160:
                         p[x + 8 * k + xx, y + yy] = col + (255,)
         self.tile(im, end, x + 8 * tiles, y)
         return x + 8 * tiles + 8
