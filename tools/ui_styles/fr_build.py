@@ -364,6 +364,51 @@ class FRPack:
         row.add(U.OP_FILL, x=16, y=0, w=208, h=13, ink=(255, 255, 255), a=48, unless=U.C_SEL0)
         p.spec(row)
 
+    # ---------------------------------------------------------------------------------------------------- BAG
+    def bag(self):
+        """fr.py bag_page(): FireRed's BAG (item_menu bg, the bag, the pocket arrows), the pocket's name on the
+        band, KAI's eight pockets as pips, five rows 16 apart (the count in the small font, a registered item's
+        button where its count would be), the red ▶, START: SORT, the item's icon and its words beside it"""
+        import os
+        st, p = self.st, self.p
+        a = st.a
+        ground = Image.new('RGBA', (240, 160), (0, 0, 0, 255))
+        bg = Image.open(os.path.join(st.g, 'item_menu', 'bg.png'))
+        ground.paste(a._tilemap('item_menu/bg.png', 'item_menu/bg.bin', F.png_pal(bg), 32, 20), (0, 0))
+        bagpic = a._sheet('interface/bag_male.png', F.png_pal(Image.open(os.path.join(st.g, 'interface',
+                                                                                         'bag_male.png'))))
+        F.paste(ground, bagpic.crop((0, 0, 64, 64)), 40 - 32, 68 - 32)
+        st.arrow(ground, 8 - 8, 72 - 8, left=True)
+        st.arrow(ground, 72 - 8, 72 - 8, left=False)
+        kx = st.key(ground, 160, 91, 'START')
+        st.text(ground, kx + 2, 89, 'SORT', font='s')
+        sp = U.Spec('bag')
+        self.img(sp, 'fr.bag.ground', ground)
+        self.text(sp, '{%d}' % U.F_TITLE, 44, 9, F.WHITE, align=2)
+        for i in range(8):
+            x = 8 + i * 9
+            pip = Image.new('RGBA', (6, 6), (98, 98, 98, 255))
+            on = pip.copy()
+            pip.paste((148, 205, 205, 255), (1, 1, 5, 5))
+            on.paste((255, 255, 255, 255), (1, 1, 5, 5))
+            self.img(sp, 'fr.bag.pip', pip, x, 97, unless=U.C_SEL0 << i)
+            self.img(sp, 'fr.bag.pip.on', on, x, 97, cond=U.C_SEL0 << i)
+        chev = Image.new('RGBA', (16, 16), (0, 0, 0, 0))
+        st.arrow(chev, 0, 0, left=True)
+        self.img(sp, 'fr.o.up', chev.transpose(Image.ROTATE_270), 152, 0, cond=U.S_UP)
+        self.img(sp, 'fr.o.down', chev.transpose(Image.ROTATE_90), 136, 92, cond=U.S_DOWN)
+        sp.add(U.OP_ICON, x=22, y=136, a=1)
+        sp.add(U.OP_MSG, x=40, y=115, a=0, h=14, n=3, w=196, font=self.fn, ink=F.WHITE[0], shadow=F.WHITE[1])
+        sp.add(U.OP_LIST, x=0, y=10, h=16, n=5)
+        p.spec(sp)
+        row = U.Spec('bag.row')
+        self.text(row, '▶', 89, 0, F.RED, cond=U.C_SEL0)
+        self.text(row, '▶', 89, 0, F.STD, cond=U.B_SWAP, unless=U.C_SEL0)
+        self.text(row, '{%d}' % U.F_NAME, 97, 0, F.STD, w=100, b=self.fs + 1)
+        self.text(row, '×{%d}' % U.F_QTY2, 198, 0, F.STD, 's', cond=U.B_QTY)
+        self.text(row, '{%d}' % U.F_TAG, 230, 0, F.STD, 's', cond=U.B_TAG, align=1)
+        p.spec(row)
+
     def make(self):
         self.fonts()
         for kind in ('foe', 'mine', 'foe2', 'mine2', 'foe3', 'mine3'):
@@ -371,4 +416,5 @@ class FRPack:
         self.panels()
         self.party()
         self.options()
+        self.bag()
         return self.p

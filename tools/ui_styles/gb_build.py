@@ -381,6 +381,60 @@ class GBPack:
             self.text(row, ':{%d}' % U.F_CURSTR, 80, 8, cond=U.O_VALUE)
         p.spec(row)
 
+    # ---------------------------------------------------------------------------------------------------- BAG
+    def bag(self):
+        """gbstyle.py bag_page(): RED's ITEM box over the field (four rows, two rows each, the count on the second,
+        ◀ the pocket ▶ across the top, ▼ for more) and its words below; CRYSTAL's PACK (the header with START:SORT,
+        the PACK and the pocket's name under it, five rows, CANCEL for CLOSE BAG) and its words below; more words
+        than fit close up to a row apart"""
+        st, p = self.st, self.p
+        from gbstyle import GB
+        sp = U.Spec('bag')
+        if self.red:
+            frame = Image.new('RGBA', (240, 160), (0, 0, 0, 0))
+            st.window(frame, (32, 0, 240, 88))
+            st.window(frame, (0, 88, 240, 160))
+            sp.add(U.OP_SNAP)
+            sp.add(U.OP_IMG, a=p.image('red.bag.frame', frame))
+            self.text(sp, '◀{%d}▶' % U.F_TITLE, 148, 8, align=3)
+            self.text(sp, '▼', 224, 72, cond=U.S_DOWN)
+            sp.add(U.OP_MSG, x=8, y=96, a=0, h=16, n=4, w=224, b=8, c=7, d=96, font=self.font, ink=st.ink,
+                   shadow=st.mid)
+            sp.add(U.OP_LIST, x=0, y=16, h=16, n=4)
+            col_name, col_qty, col_cur = 6, 24, 5
+        else:
+            import os
+            ground = Image.new('RGBA', (240, 160), (120, 152, 248, 255))
+            ground.paste((16, 16, 24, 255), (0, 0, 240, 8))
+            menu = st._tiles(os.path.join(st.pret, 'gfx', 'pack', 'pack_menu.png'))
+            for col in range(20):
+                GB.tile(st, ground, menu[0x28 + col], col * 8, 0, st.paper, (16, 16, 24))
+            st.at(ground, 20, 0, 'START:SORT', st.paper)
+            blue = [(248, 248, 248), (120, 152, 248), (24, 56, 200), (16, 16, 24)]
+            pic = st.gbc_picture(st.pack_png, blue, (0, 0, 40, 24))
+            ground.alpha_composite(pic, (24, 24))
+            st.fill(ground, (0, 56, 80, 64), st.paper)
+            st.fill(ground, (80, 8, 240, 88), st.paper)
+            st.window(ground, (0, 96, 240, 160))
+            sp.add(U.OP_IMG, a=p.image('crystal.bag.ground', ground))
+            self.text(sp, '{%d}' % U.F_TITLE, 40, 56, align=3)
+            self.text(sp, '▼', 232, 80, cond=U.S_DOWN)
+            sp.add(U.OP_MSG, x=8, y=104, a=0, h=16, n=3, w=224, b=8, c=6, d=104, font=self.font, ink=st.ink,
+                   shadow=st.mid)
+            sp.add(U.OP_LIST, x=0, y=16, h=16, n=5)
+            col_name, col_qty, col_cur = 12, 26, 11
+        p.spec(sp)
+        row = U.Spec('bag.row')
+        self.text(row, '▶', col_cur * 8, 0, cond=U.C_SEL0)
+        if self.red:
+            self.text(row, '{%d}' % U.F_NAME, col_name * 8, 0)
+        else:
+            self.text(row, '{%d}' % U.F_NAME, col_name * 8, 0, unless=U.B_CLOSE)
+            self.text(row, 'CANCEL', col_name * 8, 0, cond=U.B_CLOSE)
+        self.text(row, '×{%d}' % U.F_QTY2, col_qty * 8, 8, cond=U.B_QTY)
+        self.text(row, '{%d}' % U.F_TAG, 232, 8, cond=U.B_TAG, align=1)
+        p.spec(row)
+
     def make(self):
         self.fonts()
         for kind in ('foe1', 'mine1', 'foe2', 'mine2', 'foe3', 'mine3'):
@@ -388,6 +442,7 @@ class GBPack:
         self.panels()
         self.party()
         self.options()
+        self.bag()
         if not self.red:
             self.p.spec(words_spec(self.p, 'start', ACCOUNT))
         return self.p

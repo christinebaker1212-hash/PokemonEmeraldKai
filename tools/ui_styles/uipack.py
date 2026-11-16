@@ -142,6 +142,10 @@ OP_CHOICES = 12   # an OPTIONS row's choices (fields A...: F_NCHOICE of them, F_
 #                   N apart (ALIGN 0 from x, 1 ending at x + W), the one on in ink / shadow, the rest in colours C / D;
 #                   only the one on when they don't fit (font E - 1 when it's wider than W); glyph B just before the one on
 OP_LIST = 13      # (a screen's) its list: N rows from (x, y), H apart, each drawn with the screen's '<name>.row' spec
+OP_SNAP = 14      # the last field or battle frame the game showed (a style's BAG drawn over it, as RED's ITEM box is)
+F_QTY, F_QTY2, F_TAG = 93, 94, 95         # a BAG row's count, its count two wide, the button it's registered to
+B_CLOSE, B_QTY, B_TAG, B_SWAP = 1 << 27, 1 << 28, 1 << 29, 1 << 30   # a BAG row: CLOSE BAG, has a count, a button, moved
+SNAP = -1                                 # (render()'s DATA: the picture OP_SNAP draws)
 F_CHOICE0, F_NCHOICE, F_CUR, F_CURSTR, F_HINT, F_TITLE = 80, 88, 89, 90, 91, 92
 S_UP, S_DOWN = 1 << 27, 1 << 28           # (a whole screen's list) more rows above, below
 S_PAGE, S_HINT = 1 << 29, 1 << 30         # OPTIONS: a page's title in place of the tabs; a line about the row
@@ -381,7 +385,7 @@ def render(pack, sp, data, flags, dst=None, at=(0, 0), text_only=False):
     ox, oy = (0, 0) if sp.canvas else at
     regs = [0] * 8
     texts = {k: (v if isinstance(v, (bytes, bytearray)) else encode(str(v))) for k, v in data.items()
-             if not isinstance(v, float)}
+             if not isinstance(v, float) and k != SNAP}
     rowmap, place, backing = None, (0, 0), None
     for op in sp.ops:
         if (flags & op.cond) != op.cond or (flags & op.unless):
@@ -389,6 +393,10 @@ def render(pack, sp, data, flags, dst=None, at=(0, 0), text_only=False):
         if text_only and op.kind not in (OP_TEXT, OP_LONG, OP_CHOICES):
             continue
         if op.kind == OP_LIST:
+            continue
+        if op.kind == OP_SNAP:
+            if data.get(SNAP) is not None:
+                canvas.paste(data[SNAP].convert('RGBA'), (0, 0))
             continue
         if op.kind == OP_LONG:
             f = pack.fonts[op.font]

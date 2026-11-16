@@ -115,6 +115,38 @@ def options_screen(pack, kind):
     return im
 
 
+def bag_screen(pack, kind, kai, export):
+    """the BAG's MEDICINE pocket as the game draws it (src/mp/mp_uistyle.c BagScreen) with the mock-ups' rows"""
+    specs = {s.name: s for s in pack.specs}
+    im = Image.new('RGBA', (C.W, C.H), (0, 0, 0, 255))
+    view = C.POCKETS.index(C.BAG_POCKET)
+    flags = U.C_SEL0 << view
+    lst = [op for op in specs['bag'].ops if op.kind == U.OP_LIST and (flags & op.cond) == op.cond
+           and not flags & op.unless][0]
+    rows = [(n, q) for n, q, _ in C.BAG_ITEMS] + [('CLOSE BAG', None)]
+    if lst.n < len(rows):
+        flags |= U.S_DOWN
+    # (the description: the mock-ups' own lines where they keep them, else the words to wrap)
+    desc = '\n'.join(C.BAG_DESC) if kind in ('platinum', 'black') else ' '.join(C.BAG_DESC)
+    d = {U.F_TITLE: C.BAG_POCKET, U.F_CUR: view, U.F_TEXT0: desc, U.SNAP: C.shot(kai, 'f_town')}
+    U.render(pack, specs['bag'], d, flags, im)
+    if export:
+        icon = [op for op in specs['bag'].ops if op.kind == U.OP_ICON and op.a == 1]
+        ic = C.item_icon(export, C.BAG_ITEMS[0][2])
+        if icon and ic is not None:
+            C.paste(im, ic, icon[0].x - 16, icon[0].y - 16)
+    for i, (n, q) in enumerate(rows[:lst.n]):
+        rd = {U.F_NAME: n}
+        f = U.C_SEL0 if i == 0 else 0
+        if q is None:
+            f |= U.B_CLOSE
+        else:
+            rd[U.F_QTY], rd[U.F_QTY2] = str(q), '%2d' % q
+            f |= U.B_QTY
+        U.render(pack, specs['bag.row'], rd, f, im, (lst.x, lst.y + i * lst.h))
+    return im
+
+
 # names, levels, genders and HP the approved screens don't show: each box kind drawn by the pack and by the mock-up's
 # own code, over a plain ground
 VARIANTS = [dict(name='MASQUERAIN', sex='f', level=100, hp=13, maxhp=200, exp=0.9),
@@ -221,6 +253,8 @@ def main():
             got = screens(pack, kai, ('The MOéDEX keeps your record of', 'every MOéMON seen and caught.'))
         if any(sp.name == 'o' for sp in pack.specs):
             got['options'] = options_screen(pack, kind)
+        if any(sp.name == 'bag' for sp in pack.specs):
+            got['bag'] = bag_screen(pack, kind, kai, os.environ.get('MOEMON_EXPORT'))
         export = os.environ.get('MOEMON_EXPORT')
         if export and any(sp.name == 'party' for sp in pack.specs):
             mock.export = export

@@ -550,10 +550,8 @@ class PTPack:
         self.text(sp, '{%d}' % U.F_TITLE, 4, 0, self.fn, *ink, cond=U.S_PAGE)
         self.text(sp, 'L R  Tab     A  Choose     B  Back', 16, 136, self.fm, *ink, unless=U.S_HINT)
         self.text(sp, '{%d}' % U.F_HINT, 16, 136, self.fm, *ink, cond=U.S_HINT, w=200, b=self.fsmall + 1)
-        more = Image.new('RGBA', (16, 16), (0, 0, 0, 0))
-        st.scroll_cursor(more, 0, 0)
-        self.img(sp, 'pt.o.down', more, 114, 117, cond=U.S_DOWN)
-        self.img(sp, 'pt.o.up', more.transpose(Image.FLIP_TOP_BOTTOM), 114, 11, cond=U.S_UP)
+        self.img(sp, 'pt.arrow.down', st.list_arrow(False), 112, 116, cond=U.S_DOWN)
+        self.img(sp, 'pt.arrow.up', st.list_arrow(True), 112, 12, cond=U.S_UP)
         sp.add(U.OP_LIST, x=0, y=ty * 8, h=16, n=th // 2)
         p.spec(sp)
         # a row: the cursor's red outline (tilemap.bin's rows: tile 3 the corners, 4 the edge), the name, the choices
@@ -582,6 +580,38 @@ class PTPack:
                 shadow=red[1], c=U.col(ink[0]), d=U.col(ink[1]), cond=U.O_ALL)
         p.spec(row)
 
+    # ---------------------------------------------------------------------------------------------------- BAG
+    def bag(self):
+        """pt.py bag_page(): Platinum's BAG ground, KAI's eight pockets on the plate's bar (the open one red), the
+        pocket's name, four rows (the highlight on the cursor's, the count after its x, a registered item's button
+        in the count's place), START SORT, the scroll cursor when more rows follow (turned over for rows above), the
+        item's icon in the band's white box and its words beside it (closer when they take a fourth line)"""
+        st, p = self.st, self.p
+        ground, Ly = st.bag_ground()
+        dark, lite = (16, 24, 32), (172, 189, 189)
+        sp = U.Spec('bag')
+        self.img(sp, 'pt.bag.ground', ground)
+        for i, (grey, red) in enumerate(st.pocket_icons()):
+            self.img(sp, 'pt.bag.pocket%d' % i, grey, 4 + 12 * i, Ly[90] - 2, unless=U.C_SEL0 << i)
+            self.img(sp, 'pt.bag.pocket%d.on' % i, red, 4 + 12 * i, Ly[90] - 2, cond=U.C_SEL0 << i)
+        self.text(sp, '{%d}' % U.F_TITLE, 52, Ly[106], self.fn, dark, lite, align=2)
+        self.text(sp, 'START  SORT', 226, 13 + 16 * 4 + 2, self.fn, (106, 139, 180), (164, 180, 205), align=1)
+        self.img(sp, 'pt.arrow.down', st.list_arrow(False), 108, 13 + 16 * 4, cond=U.S_DOWN)
+        self.img(sp, 'pt.arrow.up', st.list_arrow(True), 108, -4, cond=U.S_UP)
+        sp.add(U.OP_ICON, x=22, y=138, a=1)
+        sp.add(U.OP_MSG, x=40, y=112, a=0, h=16, n=3, w=196, b=12, c=4, d=110, font=self.fn, ink=(255, 255, 255),
+               shadow=(0, 0, 0))
+        sp.add(U.OP_LIST, x=0, y=13, h=16, n=4)
+        p.spec(sp)
+        row = U.Spec('bag.row')
+        self.img(row, 'pt.bag.highlight', st.item_highlight(), 110, 0, cond=U.C_SEL0)
+        self.img(row, 'pt.bag.highlight', st.item_highlight(), 110, 0, cond=U.B_SWAP, unless=U.C_SEL0)
+        self.text(row, '{%d}' % U.F_NAME, 116, 0, self.fn, dark, lite, w=78, b=self.fsmall + 1)
+        self.text(row, 'x', 196, 0, self.fn, dark, lite, cond=U.B_QTY)
+        self.text(row, '{%d}' % U.F_QTY, 226, 0, self.fn, dark, lite, align=1, cond=U.B_QTY)
+        self.text(row, '{%d}' % U.F_TAG, 226, 0, self.fsmall, dark, lite, align=1, cond=U.B_TAG)
+        p.spec(row)
+
     def make(self):
         self.fonts()
         for kind in ('foe1', 'mine1', 'foe2', 'mine2', 'foe3', 'mine3'):
@@ -589,4 +619,5 @@ class PTPack:
         self.panels()
         self.party()
         self.options()
+        self.bag()
         return self.p

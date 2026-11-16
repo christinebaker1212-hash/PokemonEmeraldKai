@@ -610,8 +610,9 @@ class GB(Style):
         self.text(im, 28 * 8, 9 * 8, '▼')
         self.cursor(im, 5 * 8, 2 * 8)
         self.window(im, (0, 88, 240, 160))
-        for k, ln in enumerate(wrap(' '.join(BAG_DESC), 28)[:4]):
-            self.at(im, 1, 12 + 2 * k, ln)
+        lines = wrap(' '.join(BAG_DESC), 28)
+        for k, ln in enumerate(lines[:7]):     # (more than four lines close up to a row apart)
+            self.at(im, 1, 12 + (2 * k if len(lines) <= 4 else k), ln)
 
     def pack(self, im):
         """Crystal's PACK (engine/items/pack.asm): the header strip along row 0 (its own tiles, from
@@ -635,9 +636,11 @@ class GB(Style):
             self.at(im, 26, 3 + 2 * i, '×%2d' % q)
         self.at(im, 12, 10, 'CANCEL')
         self.cursor(im, 11 * 8, 2 * 8)
-        self.window(im, (0, 11 * 8, W, H))
-        for k, ln in enumerate(wrap(' '.join(BAG_DESC), 28)[:4]):
-            self.at(im, 1, 12 + 2 * k, ln)
+        # (the words' box from row 12, as Crystal's text box: the list's last count, on row 11, stays clear of it)
+        self.window(im, (0, 12 * 8, W, H))
+        lines = wrap(' '.join(BAG_DESC), 28)
+        for k, ln in enumerate(lines[:6]):     # (more than three lines close up to a row apart)
+            self.at(im, 1, 13 + (2 * k if len(lines) <= 3 else k), ln)
 
     def options_page(self, im):
         """the OPTION screen: KAI's tabs in a bar of three rows (L / R), then the rows as each game prints them:

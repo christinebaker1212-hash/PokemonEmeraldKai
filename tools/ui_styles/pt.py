@@ -965,22 +965,16 @@ class Platinum(Style):
         return self.map_rows(ts, ents, mw // 8, 0, 0, 32, 24, pal)
 
     # ---------------------------------------------------------------------------------------------- the BAG
-    def bag_page(self, im):
-        """Platinum's BAG (src/applications/bag): its sky, the BAG label, the bag on its pedestal (here beside the
-        label, as KAI sets its bag beside its title: the bag is 58 tall and the GBA's screen 32 shorter), the
-        pocket plate (its icon bar holding KAI's eight pockets, Platinum's icons, the current red; the pocket's
-        name in its dark field; the plate's POCKET tab left out for the room), the list in item_list_border's white
-        panel (FONT_SYSTEM, TEXT_COLOR(1, 2, 0), the count at ITEM_COUNT_START_POS) with the item highlight on the
-        cursor's row and KAI's START SORT under the items, and the purple description band with the item's icon in
-        its white box and the words in TEXT_COLOR(15, 14, 0) from x 40"""
-        from common import BAG_ITEMS, BAG_DESC, BAG_POCKET, POCKETS, item_icon
+    def bag_ground(self):
+        """bag_page()'s ground: the sky, the BAG label, the bag on its pedestal, the pocket plate, the list's panel and
+        the description band (Ly: the plate's rows from the page's own)"""
         d = os.path.join(R, 'res', 'graphics', 'bag')
         pal = self.jasc(os.path.join(d, 'bag_ui_main.pal'))
         ts = self.gray_tiles(os.path.join(d, 'bag_ui_main_tileset.png'))
         mw, _, ents = self.nscr(os.path.join(d, 'bag_ui_main.NSCR'))
         page = self.map_rows(ts, ents, mw // 8, 0, 0, 32, 24, pal)
         pp = page.load()
-        dark, lite = (16, 24, 32), (172, 189, 189)
+        im = Image.new('RGBA', (W, H), (0, 0, 0, 255))
         # left column: the label and sky rows 0-17 and 52-83 (the pedestal), the plate 84-123 and one orange row,
         # rows 140-191 the description band
         rows = list(range(0, 18)) + list(range(35, 84)) + list(range(84, 124)) + [124] + list(range(140, 192))
@@ -1007,27 +1001,55 @@ class Platinum(Style):
         bag = bag.crop(bag.getbbox())
         Ly = {sy: i for i, sy in enumerate(rows)}
         paste(im, bag, 72 - bag.width // 2, Ly[76] - bag.height)
-        # the pocket icons on the plate's bar (KAI's eight: FAVORITES has MAIL's place and envelope)
+        return im, Ly
+
+    POCKET_ORDER = [0, 1, 2, 3, 4, 6, 7, 5]   # (KAI's eight on Platinum's icons: FAVORITES has MAIL's envelope)
+
+    def pocket_icons(self):
+        """each pocket's icon on the plate's bar: (grey, red) for KAI's eight"""
+        d = os.path.join(R, 'res', 'graphics', 'bag')
         icons = self.indexed(os.path.join(d, 'pocket_selector_icons.png'))
-        order = [0, 1, 2, 3, 4, 6, 7, 5]
+        return [(icons.crop((32 * k, 0, 32 * k + 16, 16)), icons.crop((32 * k + 16, 0, 32 * k + 32, 16)))
+                for k in self.POCKET_ORDER]
+
+    def list_arrow(self, up):
+        """more rows: bag/pocket_selector_arrows' up arrow (its second frame), turned over for down"""
+        d = os.path.join(R, 'res', 'graphics', 'bag')
+        a = self.indexed(os.path.join(d, 'pocket_selector_arrows.png')).crop((0, 16, 16, 32))
+        return a if up else a.transpose(Image.FLIP_TOP_BOTTOM)
+
+    def item_highlight(self):
+        d = os.path.join(R, 'res', 'graphics', 'bag')
+        hl = self.indexed(os.path.join(d, 'item_highlight.png'))
+        return self.slice9(hl.crop(hl.getbbox()), 124, 16, 4, 4, 4, 4)
+
+    def bag_page(self, im):
+        """Platinum's BAG (src/applications/bag): its sky, the BAG label, the bag on its pedestal (here beside the
+        label, as KAI sets its bag beside its title: the bag is 58 tall and the GBA's screen 32 shorter), the
+        pocket plate (its icon bar holding KAI's eight pockets, Platinum's icons, the current red; the pocket's
+        name in its dark field; the plate's POCKET tab left out for the room), the list in item_list_border's white
+        panel (FONT_SYSTEM, TEXT_COLOR(1, 2, 0), the count at ITEM_COUNT_START_POS) with the item highlight on the
+        cursor's row and KAI's START SORT under the items, its scroll cursor when more rows follow, and the purple
+        description band with the item's icon in its white box and the words in TEXT_COLOR(15, 14, 0) from x 40"""
+        from common import BAG_ITEMS, BAG_DESC, BAG_POCKET, POCKETS, item_icon
+        ground, Ly = self.bag_ground()
+        paste(im, ground, 0, 0)
+        dark, lite = (16, 24, 32), (172, 189, 189)
         cur = POCKETS.index(BAG_POCKET)
-        for i, k in enumerate(order):
-            ic = icons.crop((32 * k + (16 if i == cur else 0), 0, 32 * k + 16 + (16 if i == cur else 0), 16))
-            paste(im, ic, 4 + 12 * i, Ly[90] - 2)
-        name = BAG_POCKET
-        self.text(im, 52, Ly[106], name, dark, lite, align='c')
+        for i, (grey, red) in enumerate(self.pocket_icons()):
+            paste(im, red if i == cur else grey, 4 + 12 * i, Ly[90] - 2)
+        self.text(im, 52, Ly[106], BAG_POCKET, dark, lite, align='c')
         # the list: FONT_SYSTEM rows 16 apart from the panel's top
         ly0 = 13
-        hl = self.indexed(os.path.join(d, 'item_highlight.png'))
-        hl = hl.crop(hl.getbbox())
         for i, (n, q, _item) in enumerate(BAG_ITEMS):
             y = ly0 + 16 * i
             if i == 0:
-                paste(im, self.slice9(hl, 124, 16, 4, 4, 4, 4), 110, y)
+                paste(im, self.item_highlight(), 110, y)
             self.text(im, 116, y, n, dark, lite)
             self.text(im, 196, y, 'x', dark, lite)
             self.text(im, 226, y, str(q), dark, lite, align='r')
         self.text(im, 226, ly0 + 16 * 4 + 2, 'START  SORT', (106, 139, 180), (164, 180, 205), align='r')
+        paste(im, self.list_arrow(False), 108, ly0 + 16 * 4)     # (CLOSE BAG below)
         # the description band
         ic = item_icon(self.export, 13)
         if ic:

@@ -623,10 +623,78 @@ class BWPack:
                 c=U.col(dim), d=U.col(wsh), cond=U.O_ALL)
         p.spec(row)
 
+    # ---------------------------------------------------------------------------------------------------- BAG
+    def bag(self):
+        """bw.py bag_page(): Black's BAG ground, the pocket's name and its own tab, the eight pockets as marks
+        between << and >>, four rows on Black's row plates (the count at the right, a registered item's button in
+        its place, the touch bar's arrow at the cursor's), START: SORT, small wedges for more rows, the balloon with
+        the item's icon and its words (closer when they take a fourth line)"""
+        from bw import carve
+        from common import POCKETS
+        st, p = self.st, self.p
+        A = st.BAG
+        lab, lsh = (248, 248, 248), (64, 64, 96)
+        ground = Image.new('RGBA', (240, 160), (0, 0, 0, 255))
+        bg = st.screen(A, 3, 5, 4).crop((0, 0, 256, 168))
+        bg = carve(carve(bg, 'x', 16, 0, 240), 'y', 8, 20, 150)
+        BW.paste(ground, bg, 0, 0)
+        T = 'a/0/8/3'
+        for k, frame in ((0, 4), (1, 5)):
+            ar, _, _ = st.cell(T, 21, st.tiles(T, 20), st.pal(T, 19), frame)
+            ar = ar.crop(ar.getbbox())
+            BW.paste(ground, ar, 4 if k == 0 else 100 - ar.width, 84 - ar.height // 2)
+        px = ground.load()
+        n = len(POCKETS)
+        for i in range(n):
+            x = 52 - (n * 7) // 2 + i * 7
+            for dy in range(4):
+                for dx in range(4):
+                    if dx in (0, 3) or dy in (0, 3):
+                        px[x + dx, 82 + dy] = lab + (255,)
+        st.text(ground, 232, 92, 'START: SORT', lab, lsh, 's', 'r')
+        BW.paste(ground, st.balloon(240, 56), 0, 104)
+        sp = U.Spec('bag')
+        self.img(sp, 'bw.bag.ground', ground)
+        self.text(sp, '{%d}' % U.F_TITLE, 52, 4, self.fm, lab, lsh, align=2)
+        first = None
+        for i, name in enumerate(POCKETS):
+            ic = st.pocket_icon(name, True)
+            c = Image.new('RGBA', (64, 48), (0, 0, 0, 0))
+            c.alpha_composite(ic, (32 - ic.width // 2, 24 - ic.height // 2))
+            k = p.image('bw.bag.pocket%d' % i, c)
+            first = k if first is None else first
+            assert k == first + i
+        sp.add(U.OP_IMGSEL, x=52 - 32, y=50 - 24, a=first, b=U.F_CUR)
+        dot = Image.new('RGBA', (2, 2), lab + (255,))
+        for i in range(n):
+            self.img(sp, 'bw.bag.mark', dot, 52 - (n * 7) // 2 + i * 7 + 1, 83, cond=U.C_SEL0 << i)
+        self.img(sp, 'bw.bag.down', st.wedge(), 112, 95, cond=U.S_DOWN)
+        self.img(sp, 'bw.bag.up', st.wedge(True), 112, 1, cond=U.S_UP)
+        sp.add(U.OP_ICON, x=22, y=132, a=1)
+        sp.add(U.OP_MSG, x=38, y=109, a=0, h=15, n=3, w=196, b=11, c=4, d=108, font=self.fm, ink=st.INK[0],
+               shadow=st.INK[1])
+        sp.add(U.OP_LIST, x=0, y=6, h=21, n=4)
+        p.spec(sp)
+        plate = st.screen(A, 0x21, 0x23, 0x22)
+        plate = plate.crop(plate.getbbox())
+        plate = carve(carve(plate, 'y', plate.height - 20, 6, plate.height - 6), 'x', plate.width - 128, 20, 120)
+        arrow, _, _ = st.cell(T, 21, st.tiles(T, 20), st.pal(T, 19), 5)
+        arrow = arrow.crop(arrow.getbbox())
+        row = U.Spec('bag.row')
+        self.img(row, 'bw.bag.plate', plate, 108, 0)
+        self.text(row, '{%d}' % U.F_NAME, 118, 2, self.fm, lab, (64, 64, 72), w=84, b=self.fs + 1)
+        self.text(row, 'x{%d}' % U.F_QTY, 232, 2, self.fm, lab, (64, 64, 72), align=1, cond=U.B_QTY)
+        self.text(row, '{%d}' % U.F_TAG, 232, 2, self.fs, lab, (64, 64, 72), align=1, cond=U.B_TAG)
+        ay = (18 - arrow.height) // 2
+        self.img(row, 'bw.bag.cursor', arrow, 108 - arrow.width + 2, ay, cond=U.C_SEL0)
+        self.img(row, 'bw.bag.cursor', arrow, 108 - arrow.width + 2, ay, cond=U.B_SWAP, unless=U.C_SEL0)
+        p.spec(row)
+
     def make(self):
         self.fonts()
         self.huds()
         self.panels()
         self.party()
         self.options()
+        self.bag()
         return self.p

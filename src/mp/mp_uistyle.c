@@ -29,6 +29,7 @@
 #include "pokemon.h"
 #include "sprite.h"
 #include "string_util.h"
+#include "task.h"
 #include "text.h"
 #include "window.h"
 #include "constants/battle.h"
@@ -41,6 +42,7 @@
 const char *Updater_ExeFile(const char *name);
 bool8 MP_StartMenu_State(u8 *actions, u8 *count, u8 *cursor, const u8 **names);
 bool8 MP_MoveInfoView(void);
+void MP_ScrollArrows_Sprites(u8 taskId, u8 *top, u8 *bottom);
 extern bool8 gMpUiMoveTypeAlt;
 void MP_AsciiToGame(u8 *dst, const char *src, int maxLen);
 
@@ -75,7 +77,7 @@ u8 MP_UiStyle_FromKey(const char *key)
 // ---------------------------------------------------------------------------------------------------- the pack
 // (the numbers tools/ui_styles/uipack.py writes)
 enum { OP_IMG = 1, OP_TEXT, OP_BAR, OP_FILL, OP_MSG, OP_LONG, OP_BACKING, OP_IMGSEL, OP_ROWMAP, OP_BLEND, OP_ICON, OP_CHOICES,
-       OP_LIST };
+       OP_LIST, OP_SNAP };
 #define FIELD_CODE 0xFD
 #define NFIELDS 96
 #define F_NAME 1
@@ -98,6 +100,9 @@ enum { OP_IMG = 1, OP_TEXT, OP_BAR, OP_FILL, OP_MSG, OP_LONG, OP_BACKING, OP_IMG
 #define F_CURSTR 90
 #define F_HINT 91
 #define F_TITLE 92
+#define F_QTY 93       // a BAG row's count, its count two wide ("%2d"), the button it's registered to
+#define F_QTY2 94
+#define F_TAG 95
 #define C_LV3 (1u << 0)
 #define C_MALE (1u << 1)
 #define C_FEMALE (1u << 2)
@@ -122,6 +127,10 @@ enum { OP_IMG = 1, OP_TEXT, OP_BAR, OP_FILL, OP_MSG, OP_LONG, OP_BACKING, OP_IMG
 #define S_HINT (1u << 30)      // OPTIONS: the line under the rows says something about the row
 #define O_ALL (1u << 31)       // an OPTIONS row: its choices all shown (two or three of them), not just the one on
 #define O_VALUE (1u << 27)     // ... it has a value (a row that opens a page has none)
+#define B_CLOSE (1u << 27)     // a BAG row: CLOSE BAG
+#define B_QTY (1u << 28)       // ... it has a count
+#define B_TAG (1u << 29)       // ... it's registered to a button
+#define B_SWAP (1u << 30)      // ... it's being moved (SELECT)
 #define OP_SIZE 38
 
 struct UiImg { u16 w, h; s16 dx, dy; const u8 *px; const u8 *a; s16 *cols; u16 nCols; };   // (px: u16s, unaligned)
@@ -877,6 +886,8 @@ static u16 sCanvasPx[DISPLAY_WIDTH * DISPLAY_HEIGHT];
 static u8 sCanvasA[DISPLAY_WIDTH * DISPLAY_HEIGHT];
 
 static bool8 sTextOnly;   // (a spec's words drawn again, over Kai's sprites: DrawSpecText)
+static u16 sSnap[DISPLAY_WIDTH * DISPLAY_HEIGHT];   // (the last field or battle frame: OP_SNAP)
+static bool8 sSnapOk;
 
 // an OPTIONS row's choices (fields A...; F_NCHOICE of them, F_CUR the one on) from (x, y) in W: all of them N apart
 // (ALIGN 0 from x, 1 ending at x + W), the one on in the ink / shadow, the others in C / D; only the one on when they
@@ -1010,6 +1021,14 @@ static void DrawSpec(struct UiPack *p, const struct UiSpec *sp, struct UiData *d
             break;
         case OP_CHOICES:
             Choices(s, p, op, d, x, y);
+            break;
+        case OP_SNAP:   // (the last field or battle frame shown: a style whose menus open over it)
+            if (s == &fr && sSnapOk)
+            {
+                int i;
+                for (i = 0; i < DISPLAY_WIDTH * DISPLAY_HEIGHT; i++)
+                    frame[i] = Fade(&fr, sSnap[i]) | 0x8000;
+            }
             break;
         case OP_BAR:
             DrawBar(s, p, op, op->a < NFIELDS ? d->frac[op->a] : 0, x, y);
@@ -1932,10 +1951,115 @@ static void OptionsScreen(struct UiPack *p, u16 *frame)
     }
 }
 
+// the BAG in a style: its spec "bag" (the screen: the pocket, the description, the item's icon where its ICON 1 says)
+// and its OP_LIST's rows, each drawn with "bag.row"; Kai's pop-ups (what to do, how many, SORT) put back over it
+static void BagScreen(struct UiPack *p, u16 *frame)
+{
+    static struct MpBagView v;
+    static u16 sTop;
+    struct UiData d;
+    struct MpFadeFit fit;
+    const struct UiSpec *sp, *rowSp;
+    const struct UiOp *list = NULL;
+    u8 skip[24], nSkip = 0, top, bottom, w;
+    s16 icon[4][2];
+    int vis, k, i;
+
+    if (!MP_Bag_View(&v) || (sp = FindSpec(p, "bag")) == NULL || (rowSp = FindSpec(p, "bag.row")) == NULL)
+        return;
+    memcpy(sKaiFrame, frame, sizeof(sKaiFrame));
+    memset(&d, 0, sizeof(d));
+    d.flags |= C_SEL0 << v.view;
+    d.val[F_CUR] = v.view;
+    for (k = 0; k < sp->nOps && list == NULL; k++)
+        if (sp->ops[k].kind == OP_LIST && (d.flags & sp->ops[k].cond) == sp->ops[k].cond
+         && !(d.flags & sp->ops[k].unless))
+            list = &sp->ops[k];
+    if (list == NULL || list->n == 0)
+        return;
+    vis = list->n;
+    if (v.cursor < sTop)
+        sTop = v.cursor;
+    else if (v.cursor >= sTop + vis)
+        sTop = v.cursor - vis + 1;
+    if (sTop + vis > v.rows)
+        sTop = v.rows > vis ? v.rows - vis : 0;
+    if (sTop > 0)
+        d.flags |= S_UP;
+    if (sTop + vis < v.rows)
+        d.flags |= S_DOWN;
+    MP_FadeFit_FromPalette(&fit, BG_PLTT_ID(0));
+    {
+        static u8 sName[24], sDesc[220];
+        d.str[F_TITLE] = Filtered(v.pocketName, sName, sizeof(sName));
+        if (v.desc)
+        {
+            d.msg[0] = Filtered(v.desc, sDesc, sizeof(sDesc));
+            d.msgLen[0] = d.msgPrinted[0] = StringLength(d.msg[0]);
+        }
+    }
+    DrawSpec(p, sp, &d, frame, 0, 0, &fit);
+    for (i = 0; i < vis && sTop + i < v.rows; i++)
+    {
+        static u8 sRowName[48], sQty[12], sQty2[12], sTag[8];
+        struct UiData rd;
+        s32 qty;
+        const u8 *name;
+        memset(&rd, 0, sizeof(rd));
+        name = MP_Bag_RowView(sTop + i, &qty, sTag);
+        if (name == NULL)
+            continue;
+        rd.str[F_NAME] = Filtered(name, sRowName, sizeof(sRowName));
+        if (v.closeRow && sTop + i == v.rows - 1)
+            rd.flags |= B_CLOSE;
+        if (qty >= 0)
+        {
+            Digits(sQty, qty, 0);
+            Digits(sQty2, qty, 2);
+            rd.str[F_QTY] = sQty, rd.str[F_QTY2] = sQty2;
+            rd.flags |= B_QTY;
+        }
+        if (sTag[0] != EOS)
+        {
+            rd.str[F_TAG] = sTag;
+            rd.flags |= B_TAG;
+        }
+        if (sTop + i == v.cursor)
+            rd.flags |= C_SEL0;
+        if (v.swapFrom == sTop + i)
+            rd.flags |= B_SWAP;
+        DrawSpec(p, rowSp, &rd, frame, list->x, list->y + i * list->h, &fit);
+    }
+    // the sprites: the BAG's own and its scroll arrows stay hidden (the style draws its own), the item's icon where
+    // the style puts it, the rest (a pop-up's arrows) as Kai draws them
+    for (i = 0; i < v.nOwn && nSkip < (int)sizeof(skip) - 2; i++)
+        skip[nSkip++] = v.own[i] + 1;
+    if (v.arrowTask != TASK_NONE)
+    {
+        MP_ScrollArrows_Sprites(v.arrowTask, &top, &bottom);
+        if (top < MAX_SPRITES)
+            skip[nSkip++] = top + 1;
+        if (bottom < MAX_SPRITES)
+            skip[nSkip++] = bottom + 1;
+    }
+    RedrawSprites(frame, skip, nSkip);
+    IconPlaces(sp, d.flags, icon);
+    if (icon[1][0] >= 0 && v.itemSprite < MAX_SPRITES && gSprites[v.itemSprite].inUse)
+    {
+        struct Sprite *it = &gSprites[v.itemSprite];
+        RedrawSprite(frame, it, icon[1][0] - (it->x + it->x2), icon[1][1] - (it->y + it->y2));
+    }
+    // Kai's pop-ups as Kai draws them
+    for (w = 0; w < WINDOWS_MAX; w++)
+        if (w != v.listWin && w != v.descWin && w != v.nameWin && w != v.tmWin[0] && w != v.tmWin[1]
+         && gWindows[w].tileData != NULL && sFramed[w])
+            PasteKaiWindow(frame, w);
+}
+
 // ---------------------------------------------------------------------------------------------------- each frame
 s16 gMpUiHideBg0[4];
 static u8 sDrawing;   // what this frame draws: 1 the battle, 2 the field's message box, 4 START, 8 the battle's panel,
-                      // 16 the party, 32 OPTIONS
+                      // 16 the party, 32 OPTIONS, 64 the BAG
 
 // the game's own healthbox sprites (its two halves and its bar) drawn or not
 static void HideHealthboxes(bool8 hide)
@@ -1992,9 +2116,15 @@ void MP_UiStyle_PreFrame(void)
         return;
     {
         static struct MpOptionsView v;
+        static struct MpBagView b;
         if (MP_Options_View(&v))
         {
             sDrawing |= 32;
+            return;
+        }
+        if (MP_Bag_View(&b))
+        {
+            sDrawing |= 64;
             return;
         }
     }
@@ -2033,7 +2163,15 @@ void MP_UiStyle_Composite(u16 *frame)
 {
     struct UiPack *p;
     u8 style = MP_UiStyle_Active();
-    if (style == UISTYLE_KAI || sDrawing == 0 || (p = GetPack(style)) == NULL)
+    if (style == UISTYLE_KAI)
+        return;
+    // (the field or the battle as last seen in full light: a style whose BAG opens over it, as RED's ITEM box does)
+    if ((InField() || InBattle()) && !gPaletteFade.active && gPaletteFade.y == 0)
+    {
+        memcpy(sSnap, frame, sizeof(sSnap));
+        sSnapOk = TRUE;
+    }
+    if (sDrawing == 0 || (p = GetPack(style)) == NULL)
         return;
     if (sDrawing & 1)
     {
@@ -2050,4 +2188,6 @@ void MP_UiStyle_Composite(u16 *frame)
         PartyScreen(p, frame);
     if (sDrawing & 32)
         OptionsScreen(p, frame);
+    if (sDrawing & 64)
+        BagScreen(p, frame);
 }

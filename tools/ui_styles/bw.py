@@ -1115,6 +1115,14 @@ class Black(Style):
             im, _, _ = self.cell(T, 21, self.tiles(T, 20), self.pal(T, 19), 7)
         return im.crop(im.getbbox())
 
+    @staticmethod
+    def wedge(up=False):
+        """more rows: a small white wedge (OPTIONS' too)"""
+        w = Image.new('RGBA', (7, 4), (0, 0, 0, 0))
+        for k in range(4):
+            w.paste((248, 248, 248, 255), (k, k, 7 - k, k + 1))
+        return w.transpose(Image.FLIP_TOP_BOTTOM) if up else w
+
     def bag_page(self, im):
         from common import BAG_DESC, BAG_ITEMS, BAG_POCKET, POCKETS, item_icon
         A = self.BAG
@@ -1155,6 +1163,7 @@ class Black(Style):
             if i == 0:
                 paste(im, arrow, 108 - arrow.width + 2, y + (18 - arrow.height) // 2)
         self.text(im, 232, 92, 'START: SORT', lab, lsh, 's', 'r')
+        paste(im, self.wedge(), 112, 95)      # (CLOSE BAG below)
         paste(im, self.balloon(240, 56), 0, 104)
         ic = item_icon(self.export, BAG_ITEMS[0][2])
         if ic is not None:

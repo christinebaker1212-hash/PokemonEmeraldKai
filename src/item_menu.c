@@ -6,6 +6,7 @@
 #include "battle_controllers.h"
 #include "battle_pyramid.h"
 #include "mp.h"
+#include "mp_uistyle.h"
 #include "frontier_util.h"
 #include "battle_pyramid_bag.h"
 #include "berry_tag_screen.h"
@@ -168,6 +169,7 @@ static void Task_HandleSwappingItemsInput(u8);
 static void DoItemSwap(u8);
 static void CancelItemSwap(u8);
 static void PrintTMHMMoveData(u16);
+static void MpTmDescription(u16);
 static void PrintContextMenuItems(u8);
 static void PrintContextMenuItemGrid(u8, u8, u8);
 static void Task_ItemContext_SingleRow(u8);
@@ -208,6 +210,8 @@ static void ItemMenu_MpRegisterL(u8 taskId);
 static void ItemMenu_MpRegisterR(u8 taskId);
 static void ItemMenu_MpRegisterX(u8 taskId);
 static u8 sMpRegText[4][24];   // the button choices' labels (button icons + OFF)
+static const u8 *sMpDescShown;  // what the description box says (UI STYLE: MP_Bag_View)
+static u8 sMpDesc[200];
 static u8 sMpFavText[16];      // FAVORITE or UNFAVORITE, for the item the menu is open on
 static void ItemMenu_Favorite(u8 taskId);
 static void ItemMenu_UseOutOfBattle(u8);
@@ -1160,8 +1164,8 @@ static void PrintItemDescription(int itemIndex)
     if (itemIndex != LIST_CANCEL)
     {
         // Moemon Co-op: wrapped to the description box (mp_itemdesc.c)
-        MP_ItemDesc_Print(WIN_DESCRIPTION, GetItemDescription(ViewItem(itemIndex)), 0, 1, 190, 48,
-                          sFontColorTable[COLORID_DESC], PIXEL_FILL(0));
+        sMpDescShown = GetItemDescription(ViewItem(itemIndex));
+        MP_ItemDesc_Print(WIN_DESCRIPTION, sMpDescShown, 0, 1, 190, 48, sFontColorTable[COLORID_DESC], PIXEL_FILL(0));
         return;
     }
     else
@@ -1178,6 +1182,9 @@ static void PrintItemDescription(int itemIndex)
 // Moemon Co-op: white on the description box's purple (lined up with the design's text)
 static void PrintBagDescription(const u8 *str)
 {
+    StringCopyN(sMpDesc, str, sizeof(sMpDesc) - 1);
+    sMpDesc[sizeof(sMpDesc) - 1] = EOS;
+    sMpDescShown = sMpDesc;
     BagMenu_Print(WIN_DESCRIPTION, FONT_NORMAL, str, 0, 1, 0, 0, 0, COLORID_DESC);
 }
 
@@ -1826,6 +1833,7 @@ static void OpenContextMenu(u8 taskId)
     {
         ClearWindowTilemap(WIN_DESCRIPTION);
         PrintTMHMMoveData(gSpecialVar_ItemId);
+        MpTmDescription(gSpecialVar_ItemId);
         PutWindowTilemap(WIN_TMHM_INFO_ICONS);
         PutWindowTilemap(WIN_TMHM_INFO);
         ScheduleBgCopyTilemapToVram(0);
@@ -1991,6 +1999,7 @@ static void ItemMenu_UseOutOfBattle(u8 taskId)
         else
         {
             FillWindowPixelBuffer(WIN_DESCRIPTION, PIXEL_FILL(0));
+            sMpDescShown = NULL;
             ScheduleBgCopyTilemapToVram(0);
             if (GetItemPocket(gSpecialVar_ItemId) != POCKET_BERRIES)
                 GetItemFieldFunc(gSpecialVar_ItemId)(taskId);
@@ -3012,4 +3021,99 @@ static void PrintTMHMMoveData(u16 itemId)
 
         CopyWindowToVram(WIN_TMHM_INFO, COPYWIN_GFX);
     }
+}
+
+// ---------------------------------------------------------------------------
+// Moemon Co-op: what the BAG shows, for OPTIONS > DISPLAY > UI STYLE (src/mp/mp_uistyle.c draws it in a style)
+
+// a TM's move as words (UI STYLE's description box: Kai shows it in its own TM windows)
+static void MpTmDescription(u16 itemId)
+{
+    u16 move = ItemIdToBattleMoveId(itemId);
+    u8 *p = sMpDesc;
+    u8 num[8];
+    p = StringCopy(p, gMoveNames[move]);
+    *p++ = CHAR_NEWLINE;
+    p = StringCopy(p, gTypeNames[gBattleMoves[move].type]);
+    *p++ = CHAR_SPACE;
+    *p++ = CHAR_SPACE;
+    p = StringCopy(p, gText_Power);
+    *p++ = CHAR_SPACE;
+    if (gBattleMoves[move].power >= 2)
+        ConvertIntToDecimalStringN(num, gBattleMoves[move].power, STR_CONV_MODE_LEFT_ALIGN, 3);
+    else
+        StringCopy(num, gText_ThreeDashes);
+    p = StringCopy(p, num);
+    *p++ = CHAR_SPACE;
+    *p++ = CHAR_SPACE;
+    p = StringCopy(p, gText_Accuracy2);
+    *p++ = CHAR_SPACE;
+    if (gBattleMoves[move].accuracy)
+        ConvertIntToDecimalStringN(num, gBattleMoves[move].accuracy, STR_CONV_MODE_LEFT_ALIGN, 3);
+    else
+        StringCopy(num, gText_ThreeDashes);
+    p = StringCopy(p, num);
+    *p = EOS;
+    sMpDescShown = sMpDesc;
+}
+
+bool8 MP_Bag_View(struct MpBagView *v)
+{
+    u8 i;
+    if (gMain.callback2 != CB2_BagMenuRun || gBagMenu == NULL || sListBuffer2 == NULL)
+        return FALSE;
+    v->view = gBagPosition.pocket % BAG_VIEWS;
+    v->location = gBagPosition.location;
+    v->rows = gBagMenu->numItemStacks[v->view];
+    v->top = gBagPosition.scrollPosition[v->view];
+    v->cursor = gBagPosition.scrollPosition[v->view] + gBagPosition.cursorPosition[v->view];
+    v->closeRow = !gBagMenu->hideCloseBagText;
+    v->swapFrom = gBagMenu->toSwapPos == NOT_SWAPPING ? -1 : gBagMenu->toSwapPos;
+    v->pocketName = sViewNames[v->view];
+    v->desc = sMpDescShown;
+    v->itemSprite = gBagMenu->spriteIds[ITEMMENUSPRITE_ITEM + (gBagMenu->itemIconSlot ^ 1)];
+    v->nOwn = 0;
+    for (i = 0; i < ITEMMENUSPRITE_COUNT && v->nOwn < ARRAY_COUNT(v->own); i++)
+        if (gBagMenu->spriteIds[i] != SPRITE_NONE)
+            v->own[v->nOwn++] = gBagMenu->spriteIds[i];
+    v->listWin = WIN_ITEM_LIST, v->descWin = WIN_DESCRIPTION, v->nameWin = WIN_POCKET_NAME;
+    v->tmWin[0] = WIN_TMHM_INFO_ICONS, v->tmWin[1] = WIN_TMHM_INFO;
+    v->arrowTask = gBagMenu->pocketScrollArrowsTask;
+    return TRUE;
+}
+
+// row ROW of the shown pocket: its name ("!" first when it's new), its count (*QTY, -1 none: a key item), the button
+// it's registered to in TAG ("SELECT", "L", "R", "F"; empty: none)
+const u8 *MP_Bag_RowView(u16 row, s32 *qty, u8 *tag)
+{
+    u8 v = gBagPosition.pocket % BAG_VIEWS;
+    u16 itemId;
+    *qty = -1;
+    tag[0] = EOS;
+    if (sListBuffer2 == NULL || row >= gBagMenu->numItemStacks[v])
+        return NULL;
+    if (row == gBagMenu->numItemStacks[v] - 1 && !gBagMenu->hideCloseBagText)
+        return sListBuffer2->name[row];
+    itemId = ViewItem(row);
+    if (GetItemPocket(itemId) == POCKET_BERRIES
+     || (GetItemPocket(itemId) != POCKET_KEY_ITEMS && GetItemImportance(itemId) == FALSE))
+        *qty = ViewQuantity(row);
+    else if (gSaveBlock1Ptr->registeredItem != ITEM_NONE && gSaveBlock1Ptr->registeredItem == itemId)
+    {
+        extern const u8 gText_Select[];
+        StringCopy(tag, gText_Select);
+    }
+    else if (itemId != ITEM_NONE)
+    {
+        static const char *const sKeys[MP_REG_SLOTS] = {"L", "R", "F"};
+        u8 slot;
+        void MP_AsciiToGame(u8 *dst, const char *src, int maxLen);
+        for (slot = 0; slot < MP_REG_SLOTS; slot++)
+            if (MP_RegisteredItem(slot) == itemId)
+            {
+                MP_AsciiToGame(tag, sKeys[slot], 4);
+                break;
+            }
+    }
+    return sListBuffer2->name[row];
 }

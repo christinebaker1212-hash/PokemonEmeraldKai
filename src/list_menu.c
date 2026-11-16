@@ -1451,3 +1451,15 @@ static void ListMenuRemoveRedArrowCursorObject(u8 taskId)
     DestroySprite(&gSprites[data->spriteId]);
     DestroyTask(taskId);
 }
+
+// Moemon Co-op: a scroll arrow pair's two sprites (UI STYLE draws a screen's own arrows in their place)
+void MP_ScrollArrows_Sprites(u8 taskId, u8 *top, u8 *bottom)
+{
+    struct ScrollIndicatorPair *data;
+    *top = *bottom = MAX_SPRITES;
+    if (taskId >= NUM_TASKS || !gTasks[taskId].isActive || gTasks[taskId].func != Task_ScrollIndicatorArrowPair)
+        return;
+    data = (void *)gTasks[taskId].data;
+    *top = data->topSpriteId;
+    *bottom = data->bottomSpriteId;
+}
