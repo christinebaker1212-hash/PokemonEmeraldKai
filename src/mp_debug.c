@@ -3882,6 +3882,12 @@ void MP_TestCommand(const char *cmd, const char *arg)
         void CB2_ReturnToField(void);
         ShowFrontierPass(CB2_ReturnToField);
     }
+    else if (strcmp(cmd, "partymenu") == 0)
+    {
+        // partymenu - the party screen as START opens it (back to the field)
+        void CB2_PartyMenuFromStartMenu(void);
+        SetMainCallback2(CB2_PartyMenuFromStartMenu);
+    }
     else if (strcmp(cmd, "options") == 0)
     {
         // options - the OPTIONS screen (back to the field)

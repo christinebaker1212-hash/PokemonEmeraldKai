@@ -432,6 +432,9 @@ static bool8 NavPlace(u8 style, u8 kind, u8 i, s8 *x, s8 *y)
     case MP_UINAV_PARTY:     // (0-5 the slots, 6 CONFIRM, 7 CANCEL)
         if (style == UISTYLE_RED || style == UISTYLE_CRYSTAL)
         {
+            // (the Game Boy's list has no CANCEL: B closes it, and the cursor goes round the POKéMON)
+            if (i == 7)
+                return FALSE;
             *x = 0, *y = i;
             return TRUE;
         }
@@ -2812,9 +2815,14 @@ static void SummaryScreen(struct UiPack *p, u16 *frame)
 // keeps Kai's inside, the sprite with it
 static bool8 SpriteOver(const struct WindowTemplate *t, const struct Sprite *s);
 
+static u8 sDrawing;   // what this frame draws: 1 the battle, 2 the field's message box, 4 START, 8 the battle's panel,
+                      // 16 the party, 32 OPTIONS, 64 the BAG, 128 the summary
+
 static bool8 SpritesOver(const struct WindowTemplate *t)
 {
     int i;
+    if (sDrawing & 16)
+        return FALSE;   // (the party screen: its icons are the style's to draw, at its own places, under the pop-up)
     for (i = 0; i < MAX_SPRITES; i++)
         if (SpriteOver(t, &gSprites[i]))
             return TRUE;
@@ -2917,6 +2925,8 @@ static void PopUpFrame(u16 *frame, const struct UiImg *im, int x0, int y0, int x
         }
 }
 
+static u8 sOrder[WINDOWS_MAX], sOrderCount;
+
 static void PopUps(struct UiPack *p, u16 *frame)
 {
     const struct UiSpec *ws = FindSpec(p, "win"), *wt = FindSpec(p, "win.text");
@@ -2924,7 +2934,8 @@ static void PopUps(struct UiPack *p, u16 *frame)
     const struct UiFont *f = NULL;
     u16 fill = 0x7FFF;
     struct MpFadeFit fit;
-    u8 w, k;
+    u8 w, k, oi;
+    int drawn[8][4], nDrawn = 0;   // (the pop-ups drawn so far this frame)
     int put[40][3], nPut, j, cellH = 16;   // (the lines drawn in a window: their y, first and last x)
     static u8 sLines[40][64], sFg[40];
     bool8 fits;
@@ -2943,12 +2954,30 @@ static void PopUps(struct UiPack *p, u16 *frame)
     if (f)
         cellH = f->cellH;
     MP_FadeFit_FromPalette(&fit, BG_PLTT_ID(15));
-    for (w = 0; w < WINDOWS_MAX; w++)
+    // (the lower windows first: a menu opened over a message at the foot is drawn over it)
     {
-        const struct WindowTemplate *t = &gWindows[w].window;
+        u8 order[WINDOWS_MAX], n = 0, a, b;
+        for (w = 0; w < WINDOWS_MAX; w++)
+            if (!(sHandled & (1u << w)) && PopUpShown(w))
+                order[n++] = w;
+        for (a = 1; a < n; a++)
+            for (b = a; b > 0; b--)
+            {
+                const struct WindowTemplate *t1 = &gWindows[order[b - 1]].window, *t2 = &gWindows[order[b]].window;
+                if (t1->tilemapTop >= t2->tilemapTop)
+                    break;
+                w = order[b - 1], order[b - 1] = order[b], order[b] = w;
+            }
+        for (k = 0; k < n; k++)
+            sOrder[k] = order[k];
+        sOrderCount = n;
+    }
+    for (oi = 0; oi < sOrderCount; oi++)
+    {
+        const struct WindowTemplate *t;
         int x0, y0, ww;
-        if ((sHandled & (1u << w)) || !PopUpShown(w))
-            continue;
+        w = sOrder[oi];
+        t = &gWindows[w].window;
         // (faded as the window's own palette is: palette 15 is the field's window colours, not the battle's)
         MP_FadeFit_FromPalette(&fit, BG_PLTT_ID(t->paletteNum & 15));
         if (AtFoot(w))
@@ -2996,6 +3025,27 @@ static void PopUps(struct UiPack *p, u16 *frame)
                 ln++;
             }
         }
+        // (lines the style's letters make wider than Kai's window: the window grows to hold them, toward the
+        // screen's middle, a window against the right edge leftward, as the Game Boy games' menus open)
+        if (fits && nPut > 0 && sBox[w][0] < 0)
+        {
+            int right = x0 + ww, need = 0;
+            for (j = 0; j < nPut; j++)
+                if (put[j][2] + 2 - right > need)
+                    need = put[j][2] + 2 - right;
+            if (need > 0)
+            {
+                need = (need + 7) & ~7;
+                if (right + need <= DISPLAY_WIDTH - 8 && x0 + ww / 2 < DISPLAY_WIDTH / 2)
+                    ww = x0 <= 8 ? DISPLAY_WIDTH - 2 * x0 : ww + need;   // (one from the left edge: across, as theirs)
+                else if (x0 - need >= 8)
+                {
+                    for (j = 0; j < nPut; j++)
+                        put[j][1] -= need, put[j][2] -= need;
+                    x0 -= need, ww += need;
+                }
+            }
+        }
         // (the style's letters only where every line stays inside the window, clear of the others: else the window
         // keeps Kai's own words and pictures, as Kai laid them out, in the style's frame)
         for (j = 0; j < nPut && fits; j++)
@@ -3007,6 +3057,20 @@ static void PopUps(struct UiPack *p, u16 *frame)
                 if (put[i2][0] != put[j][0] && abs(put[i2][0] - put[j][0]) < cellH - 3
                  && put[i2][1] < put[j][2] && put[j][1] < put[i2][2])
                     fits = FALSE;
+        }
+        // (a pop-up the style widened over one drawn before it: this one goes up to sit just above that one)
+        if (fits && sBox[w][0] < 0)
+        {
+            int d;
+            for (d = 0; d < nDrawn; d++)
+                if (x0 < drawn[d][2] && drawn[d][0] < x0 + ww && y0 < drawn[d][3] && drawn[d][1] < y0 + t->height * 8
+                 && y0 < drawn[d][1] && drawn[d][1] - 16 - t->height * 8 >= 8)
+                    y0 = drawn[d][1] - 16 - t->height * 8;
+        }
+        if (sBox[w][0] < 0 && nDrawn < (int)ARRAY_COUNT(drawn))
+        {
+            drawn[nDrawn][0] = x0, drawn[nDrawn][1] = y0, drawn[nDrawn][2] = x0 + ww;
+            drawn[nDrawn][3] = y0 + t->height * 8, nDrawn++;
         }
         if (sBox[w][0] >= 0)
         {
@@ -3055,8 +3119,6 @@ static void PopUps(struct UiPack *p, u16 *frame)
 s16 gMpUiHideBg0[4];
 s16 gMpUiHideRects[MP_UI_HIDE_RECTS][4];
 u8 gMpUiHideCount;
-static u8 sDrawing;   // what this frame draws: 1 the battle, 2 the field's message box, 4 START, 8 the battle's panel,
-                      // 16 the party, 32 OPTIONS, 64 the BAG, 128 the summary
 
 // the game's own healthbox sprites (its two halves and its bar) drawn or not
 // a healthbox's own sprite (its two halves, its bar): never another sprite that took its number while the battle
