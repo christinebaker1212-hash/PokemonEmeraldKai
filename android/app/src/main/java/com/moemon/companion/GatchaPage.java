@@ -14,7 +14,7 @@ import java.util.Random;
  * pieces) and gives them; this page plays a reel of its own to show them: cells race past, slow and stop on the
  * pull's best prize (SUPER RARE and up flash), then every prize of the pull in a list.
  * Banners: < > (STANDARD, PICKUP, TRAINING, POKé BALLS); the free pulls (the daily one on each banner, the weekly 10 on
- * STANDARD), a TICKET, one pull or ten.
+ * STANDARD), a TICKET, one pull or ten (TICKETS make up what pulls lack for ten, as in the game).
  */
 public class GatchaPage extends Page {
     static final String[] RARITY = {"N", "U", "R", "SR", "SSR", "UR", "EX"};
@@ -273,7 +273,7 @@ public class GatchaPage extends Page {
         JSONArray b = bs == null ? null : bs.optJSONArray(banner);
         int pulls = kai == null ? 0 : kai.optInt("pulls"), tickets = kai == null ? 0 : kai.optInt("tickets");
         int free1 = b == null ? 0 : b.optInt(2), free10 = b == null ? 0 : b.optInt(3);
-        return new int[]{free10 > 0 ? 1 : 0, free1 > 0 ? 1 : 0, tickets > 0 ? 1 : 0, pulls >= 1 ? 1 : 0, pulls >= 10 ? 1 : 0};
+        return new int[]{free10 > 0 ? 1 : 0, free1 > 0 ? 1 : 0, tickets > 0 ? 1 : 0, pulls >= 1 ? 1 : 0, pulls + tickets >= 10 ? 1 : 0};
     }
 
     private static final String[] HOW_NAMES = {"FREE x10", "FREE x1", "TICKET x1", "PULL x1", "PULL x10"};
