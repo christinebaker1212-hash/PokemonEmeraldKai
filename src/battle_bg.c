@@ -765,6 +765,8 @@ void LoadBattleMenuWindowGfx(void)
     }
 }
 
+void MP_BattlePic_AfterKaiBg(void);   // Moemon Kai (mp_battlepic.c)
+
 void DrawMainBattleBackground(void)
 {
     if (!(MP_BG_TYPE_FLAGS & (BATTLE_TYPE_LINK | BATTLE_TYPE_FRONTIER | BATTLE_TYPE_EREADER_TRAINER | BATTLE_TYPE_RECORDED_LINK)) && (U3D_BattleBg(U3D_BBG_ALL) || S3D_BattleBg(S3D_BBG_ALL)))
@@ -864,6 +866,7 @@ void DrawMainBattleBackground(void)
             break;
         }
     }
+    MP_BattlePic_AfterKaiBg();   // Moemon Kai: RED's / CRYSTAL's plain background (WHITE BG, mp_battlepic.c)
 }
 
 void LoadBattleTextboxAndBackground(void)
@@ -1427,6 +1430,7 @@ bool8 LoadChosenBattleElement(u8 caseId)
                 break;
             }
         }
+        MP_BattlePic_AfterKaiBg();   // Moemon Kai: RED's / CRYSTAL's plain background (WHITE BG, mp_battlepic.c)
         break;
     case 6:
         LoadBattleMenuWindowGfx();

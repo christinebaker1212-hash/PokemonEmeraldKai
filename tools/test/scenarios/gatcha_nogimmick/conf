@@ -1,0 +1,8 @@
+# MoeGatcha with the battle GIMMICKS OFF at GEN 9 (MEGA / Z-MOVES / DYNAMAX / TERA OFF): no MEGA STONE or Z-CRYSTAL among
+# the prizes (the user, 2026-11-16: "Z moves are off, yet Z crystals appear")
+MODE=1
+GEN=9
+TMO=120
+ENV_A="MOEMON_GIMMICKS=2222"
+EXPECT_A=("gatchadump gen 9")
+CHECK="python3 tools/test/check_gatcha_gen.py 9 nogimmick"

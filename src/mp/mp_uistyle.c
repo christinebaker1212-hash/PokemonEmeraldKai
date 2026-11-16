@@ -1618,7 +1618,7 @@ static void BattleHuds(struct UiPack *p, u16 *frame)
         const struct UiSpec *sp;
         struct MpFadeFit fit;
         u8 side, pos, lv[12], hp[12], mhp[12], hp3[12], mhp3[12];
-        s16 x, y;
+        s16 x, y, bob;
         const char *kind;
         char name[24];
 
@@ -1629,6 +1629,8 @@ static void BattleHuds(struct UiPack *p, u16 *frame)
         box = &gSprites[gHealthboxSpriteIds[b]];
         if (!box->inUse || box->invisible)
             continue;
+        // (RED's and CRYSTAL's boxes stand still while it's your turn: the Game Boy's never bobbed, the user 2026-11-16)
+        bob = MP_UiStyle_Active() == UISTYLE_RED || MP_UiStyle_Active() == UISTYLE_CRYSTAL ? 0 : box->y2;
         side = GetBattlerSide(b);
         pos = GetBattlerPosition(b);
         if (IS_TRIPLE_BATTLE())
@@ -1643,7 +1645,7 @@ static void BattleHuds(struct UiPack *p, u16 *frame)
                 continue;
             kind = side == B_SIDE_OPPONENT ? "hud.foe3" : "hud.mine3";
             x = (side == B_SIDE_OPPONENT ? sTripleFoe[sFoeRow[pos]][0] : sTripleMine[sTeamRow[pos]][0]) + box->x2;
-            y = (side == B_SIDE_OPPONENT ? sTripleFoe[sFoeRow[pos]][1] : sTripleMine[sTeamRow[pos]][1]) + box->y2;
+            y = (side == B_SIDE_OPPONENT ? sTripleFoe[sFoeRow[pos]][1] : sTripleMine[sTeamRow[pos]][1]) + bob;
         }
         else if (IsDoubleBattle())
         {
@@ -1651,13 +1653,13 @@ static void BattleHuds(struct UiPack *p, u16 *frame)
                 continue;
             kind = side == B_SIDE_OPPONENT ? "hud.foe2" : "hud.mine2";
             x = sDoubleRect[pos][0] + box->x + box->x2 - sDoubleHome[pos][0];
-            y = sDoubleRect[pos][1] + box->y + box->y2 - sDoubleHome[pos][1];
+            y = sDoubleRect[pos][1] + box->y + bob - sDoubleHome[pos][1];
         }
         else
         {
             kind = side == B_SIDE_OPPONENT ? "hud.foe1" : "hud.mine1";
             x = sSingleRect[side][0] + box->x + box->x2 - sSingleHome[side][0];
-            y = sSingleRect[side][1] + box->y + box->y2 - sSingleHome[side][1];
+            y = sSingleRect[side][1] + box->y + bob - sSingleHome[side][1];
         }
         // (a style's box for this spot on the screen when it has one: Black's gauges stand differently per spot)
         snprintf(name, sizeof(name), "%s.%d", kind, pos);
@@ -1678,7 +1680,8 @@ static void BattleHuds(struct UiPack *p, u16 *frame)
                 | (h->status ? (C_STATUS | (C_PSN << (h->status - 1))) : 0)
                 | (side == B_SIDE_PLAYER ? C_EXP : 0)    // (a style's box shows it where its game does)
                 | (h->caught ? C_CAUGHT : 0)
-                | (gMpConfig.uiNoWhiteBg ? C_NOBG : 0);   // (RED's and CRYSTAL's boxes: OPTIONS > DISPLAY > WHITE BG)
+                | C_NOBG;   // (RED's and CRYSTAL's boxes stand on the background itself: WHITE BG ON makes the whole
+                            // background plain, mp_battlepic.c, so no paper of their own, the user 2026-11-16)
         MP_FadeFit_FromPalette(&fit, OBJ_PLTT_ID(box->oam.paletteNum));
         DrawSpec(p, sp, &d, frame, x, y, &fit);
     }
@@ -3348,10 +3351,59 @@ void MP_UiStyle_PreFrame(void)
     }
 }
 
+// The battle's opening window (battle_intro.c: WIN0 / WIN1 open over the scene while outside them nothing is shown):
+// what a style draws in battle shows only inside them, as Kai's own message box does (the user, 2026-11-16: the
+// styles' box was there before the screen faded in). FALSE: no window hides the message box's layer now
+static bool8 InWindow(u16 h, u16 v, int x, int y)
+{
+    int l = h >> 8, r = h & 0xFF, t = v >> 8, b = v & 0xFF;
+    bool8 inX = l <= r ? (x >= l && x < r) : (x >= l || x < r);
+    bool8 inY = t <= b ? (y >= t && y < b) : (y >= t || y < b);
+    return inX && inY;
+}
+
+static bool8 BattleWindowClips(void)
+{
+    u16 cnt = REG_DISPCNT;
+    return InBattle() && (cnt & (DISPCNT_WIN0_ON | DISPCNT_WIN1_ON)) && !(REG_WINOUT & 1);
+}
+
+static void ClipToBattleWindow(u16 *frame, const u16 *before)
+{
+    u16 cnt = REG_DISPCNT;
+    int x, y;
+    for (y = 0; y < DISPLAY_HEIGHT; y++)
+        for (x = 0; x < DISPLAY_WIDTH; x++)
+        {
+            bool8 in = ((cnt & DISPCNT_WIN0_ON) && InWindow(REG_WIN0H, REG_WIN0V, x, y))
+                    || ((cnt & DISPCNT_WIN1_ON) && InWindow(REG_WIN1H, REG_WIN1V, x, y));
+            if (!in)
+                frame[y * DISPLAY_WIDTH + x] = before[y * DISPLAY_WIDTH + x];
+        }
+}
+
+// CRYSTAL's battles with WHITE BG ON: its time of day's light over the whole scene above the message box (the
+// POKeMON, the boxes and the plain background alike: the user, 2026-11-16), mp_battlepic.c
+static void TintBattleScene(u16 *frame)
+{
+    u16 tint;
+    s32 i, tr, tg, tb;
+    if (!MP_BattlePic_SceneTint(&tint))
+        return;
+    tr = tint & 31, tg = (tint >> 5) & 31, tb = (tint >> 10) & 31;
+    for (i = 0; i < DISPLAY_WIDTH * 112; i++)
+    {
+        u16 c = frame[i];
+        frame[i] = (c & 0x8000) | (((c & 31) * tr / 31)) | ((((c >> 5) & 31) * tg / 31) << 5) | ((((c >> 10) & 31) * tb / 31) << 10);
+    }
+}
+
 void MP_UiStyle_Composite(u16 *frame)
 {
+    static u16 sBefore[DISPLAY_WIDTH * DISPLAY_HEIGHT];
     struct UiPack *p;
     u8 style = MP_UiStyle_Active();
+    bool8 clip;
     sHandled = 0;
     if (style == UISTYLE_KAI)
         return;
@@ -3363,10 +3415,14 @@ void MP_UiStyle_Composite(u16 *frame)
     }
     if ((p = GetPack(style)) == NULL)
         return;
+    if ((clip = BattleWindowClips()))
+        memcpy(sBefore, frame, sizeof(sBefore));
     if (sDrawing & 1)
     {
         if (InBattle() && MP_OBJ_LAYER_SHOWN())
             BattleHuds(p, frame);
+        if (InBattle())
+            TintBattleScene(frame);
         if ((sDrawing & 8) && InBattle())
             BattlePanel(p, frame);
     }
@@ -3385,4 +3441,6 @@ void MP_UiStyle_Composite(u16 *frame)
     // (Kai's pop-ups on the field, in battle and over a style's own screens)
     if (InField() || InBattle() || (sDrawing & (16 | 32 | 64 | 128)))
         PopUps(p, frame);
+    if (clip)
+        ClipToBattleWindow(frame, sBefore);
 }

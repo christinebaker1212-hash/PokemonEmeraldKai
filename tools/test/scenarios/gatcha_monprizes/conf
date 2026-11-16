@@ -1,8 +1,8 @@
-# MoeGatcha's Moemon prizes on POKe BALLS (1.131.0, the user 2026-11-06: the banner drew few pulls): they come in a
-# special ball that shows as that ball. No Moemon with perfect IVs anywhere (the user, 2026-11-06), TRAINING included.
-# Several pulls opening on a rigged UR / SSR (gatcharig).
+# MoeGatcha's POKe BALLS banner: BALLS and ball effects only since 1.201.0 (the user, 2026-11-16: no special Moemon
+# rewards there), so ten-pulls on it rigged to UR / SSR give no Moemon; no Moemon with perfect IVs anywhere (the user,
+# 2026-11-06), TRAINING included. Several pulls opening on a rigged UR / SSR (gatcharig).
 MODE=1
 TMO=240
 ENV_A="MOEMON_DEBUG_PARTY=280:15"
-EXPECT_A=("gatcha: it comes in ball item")
-UNEXPECT_A=("[crash]" "TIMEOUT" "PERFECT")
+EXPECT_A=("gatchapull: ok, 10 prizes" "gatcha: 10 pull(s), best rarity 5" "gatcha: 10 pull(s), best rarity 4")
+UNEXPECT_A=("[crash]" "TIMEOUT" "PERFECT" "gatcha: it comes in ball item" "at the party's average" "gatcha: event mon")

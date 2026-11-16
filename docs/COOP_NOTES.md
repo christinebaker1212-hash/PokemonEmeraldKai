@@ -3365,6 +3365,37 @@ times... Reserve shininess in Pokemon to SSR or better. SR odds are too good." m
   MP_Ball_SetCaught; the note names the ball), legendary ones at UR, shiny at EX.
 - Test gatcha_monprizes (rigged UR / SSR pulls on both banners); gatcha_gen3 / gatcha_gen9 count the PICKUPs.
 
+## The MoeGatcha rework (1.201.0)
+
+The user (2026-11-16): tickets with pulls for a 10-pull, no special Pokémon on the POKé BALL banner and better prizes
+there, more PICKUPs changing every day, fewer BERRIES, GEN / gimmick settings respected (Z-CRYSTALS with Z-MOVES off),
+a more appealing STANDARD; balanced so rewards aren't "too incredible": the user picked progress-scaled prizes,
+bundles not singles, POINTS with an EXCHANGE, and points for pulls made before. mp_gatcha.c:
+- PULL x1 / x10 spend pulls, then TICKETS for the rest (SpendPulls; the phone's too). The TICKET row is gone.
+- Prize sizes by TIER (PrizeTier: the region the player is in, badges 0-2 / 3-5 / 6-8 / LEAGUE beaten; `mp gatchatier
+  N`): rows of sCommonTiered / sUncommonTiered / sRareTiered / sSuperTiered / sSSuperTiered / sPickupRareTiered give
+  four sizes of one bundle (POKé BALL x10 -> ULTRA BALL x15, SUPER POTION x5 -> FULL RESTORE x3, $1000 -> $8000...),
+  BuildItems lays the tier's column into the pools at SetupBanners (sCommonNow, sUncommonNow, sRare...).
+- More kinds: HEART SCALES, BATTLE SETs (X items), TREAT SETs, type boosters, held items (EXP. SHARE, AMULET COIN,
+  FOCUS BAND...), BIG NUGGET / COMET SHARD (GEN 5 on), a random uncaught Moemon at U (MON(EV_RANDOM)), three
+  Generation 1-3 Moemon a day in STANDARD (DAILY_CLASSIC 3, sClassicDaily 78 long).
+- BERRIES: none at N / U; SITRUS / LUM at R plus a BLOCK BERRIES set (where CORNN, MAGOST, RABUTA, NOMEL come from:
+  item_audit.py), a PINCH BERRIES set at SR, the e-Reader's as two RARE BERRIES sets and STARF at SSR. K_SET sets can
+  be shorter than six (ITEM_NONE ends them).
+- GatchaItemAllowed: the GENERATION and MP_Gimmick_ItemAllowed (MEGA STONES / Z-CRYSTALS only while that gimmick is
+  on). Test gatcha_nogimmick (MOEMON_GIMMICKS=2222).
+- POKé BALLS: no Moemon (EV_BALLED stays for old code paths only); SPECIAL BALLS / LEGEND BALLS sets, MASTER BALLS
+  from SSR, more ball effect pieces, a piece is one not yet had while there are any (RollPrizes tries 24 times).
+- PICKUP every day (PickupDay = StandardDay; DayPick spreads the generations), 38 at GEN 3 and 88 at GEN 9 (STRONG2 /
+  STRONG3 favourites of every generation). The reroll vote counts days ("gatcha:voteday").
+- POINTS (POINTS_KEY "gatcha:points"): one a pull (RollPrizes), the achievements' "pull" count given once for pulls
+  made before (BackfillPoints). The EXCHANGE row: SELECT shows the banner's next prize, A then A again exchanges it
+  through the reel (sExchangeRarity / sExchangeDef: no points, pity counts or achievements). STANDARD: today's legends
+  200; PICKUP: its Moemon 150; TRAINING: RARE CANDY x10, VITAMIN SET x2, PP MAX x5 at 40; POKé BALLS: a new ball
+  effect 30, MASTER BALL 100, ASTRAL BALL 120. Header "PULLS n  TICKETS n  PTS n".
+- Tests gatcha_gen3 / gatcha_gen9 / gatcha_nogimmick (check_gatcha_gen.py: no BERRIES at N / U, no Moemon on POKé
+  BALLS), gatcha_monprizes, gatcha_vote, gatcha_free.
+
 ## Wild odds with STATIC / MAGNET PULL (1.131.0)
 
 The user (2026-11-06): in VIRIDIAN FOREST "certain Pokémon that are supposed to be rare" came up very often.
@@ -7893,6 +7924,14 @@ docs/ui_styles/UI_STYLES.md ("Building it" for the game's side).
   mp_uistyle.c StyleMonIcon where the party spec places Kai's icon, its frame Kai's icon's own. EXTENDED (Crystal
   Clear's icons) shows only once a pack has set 1 (MP_UiStyle_HasIconSet): Crystal Clear keeps them in a form not
   found by reading the ROM alone.
+- 1.201.0 (the user, 2026-11-16): WHITE BG ON makes RED's and CRYSTAL's whole battle background plain (every region's
+  scene and Kai's: mp_battlepic.c PlainBackground, through the full-colour picture hook, MP_BattlePic_AfterKaiBg after
+  Kai's BG3 loads, battle_bg.c), and the boxes have no paper of their own any more (C_NOBG always). CRYSTAL lays its
+  time of day's light over the whole scene above the message box (the background, the POKéMON, the boxes:
+  mp_uistyle.c TintBattleScene, MP_BattlePic_SceneTint: the white of pokecrystal's bg_tiles.pal, MORN 4-9 28,31,16,
+  DAY 10-17 27,31,27, NITE 18-3 15,14,24). RED's and CRYSTAL's boxes don't bob on the player's turn (BattleHuds drops
+  the healthbox's y2). Every style's drawing in battle shows only inside the intro's opening window (WIN0 / WIN1 while
+  WINOUT hides BG0: ClipToBattleWindow), so the message box opens with the screen as Kai's does.
 Tests: ui_style_battles, ui_style_screens, ui_style_dpad, ui_style_party_battles, coop_move_swap;
 tools/ui_styles/check_specs.py.
 

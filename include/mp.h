@@ -1260,6 +1260,8 @@ s32 MP_Gatcha_FreeStock(u8 b, bool8 ten);
 const char *MP_Gatcha_RarityName(u8 r);
 const char *MP_Gatcha_PhonePull(u8 banner, u8 how, struct MpGatchaPrize *out, u8 *count);
 s32 MP_Gatcha_Tickets(void);          // MOEGATCHA TICKETS: one pull on any banner
+s32 MP_Gatcha_Points(void);           // MOEGATCHA POINTS: one a pull, spent at the EXCHANGE
+void MP_Gatcha_SetTier(u8 tier);      // test builds: the prizes' size (0-3; 0xFF: the region's own)
 void MP_Gatcha_OnRelay(u8 from, const u8 *data, u16 len);   // the weekly PICKUP vote
 void MP_Gatcha_VoteUpdate(void);
 void MP_Gatcha_AddTickets(s32 n);

@@ -11,7 +11,7 @@
 // dark, the Moemon's silhouette rises to legendary battle music, then the
 // reveal (its cry, rainbow, stars) and friends online hear about it.
 // Event Moemon carry the moves of real Generation 3 event Pokémon.
-// Banners (L/R): STANDARD, PICKUP (a featured event Moemon each week),
+// Banners (L/R): STANDARD, PICKUP (featured Moemon, new every day),
 // TRAINING (candies, vitamins) and POKé BALLS, each with its own pity count.
 // SUPER/ULTRA RAREs: a "?" box that looks RARE, maybe a stop one short, a
 // charge-up with color changes, then a burst with rays, a stamp and confetti.
@@ -66,6 +66,7 @@
 #include "constants/region_map_sections.h"
 #include "platform_text.h"
 #include "mp_region.h"
+#include "battle_gimmick.h"
 
 void MP_AsciiToGame(u8 *dst, const char *src, int maxLen);
 void MP_GameToAscii(char *dst, const u8 *src, int maxLen);
@@ -382,41 +383,91 @@ static u8 GatchaItemGen(u16 item)
         return 6;
     if (item >= ITEM_NORMALIUM_Z && item <= ITEM_FAIRIUM_Z)
         return 7;
+    if (item == ITEM_BIG_NUGGET || item == ITEM_COMET_SHARD)
+        return 5;   // (Black's, from GEN 5)
     return MP_Gen_OfItem(item);
 }
 
 
-enum { SET_VITAMINS, SET_BALLS, SET_APRICORN };
+enum { SET_VITAMINS, SET_BALLS, SET_APRICORN, SET_X_ITEMS, SET_PINCH, SET_EREADER_A, SET_EREADER_B, SET_TREATS,
+       SET_SPECIAL_BALLS, SET_LEGEND_BALLS, SET_BLOCK_BERRIES };
+// (ITEM_NONE ends a set shorter than six)
 static const u16 sSets[][6] = {
     [SET_VITAMINS] = {ITEM_HP_UP, ITEM_PROTEIN, ITEM_IRON, ITEM_CALCIUM, ITEM_ZINC, ITEM_CARBOS},
     [SET_BALLS]    = {ITEM_NET_BALL, ITEM_DIVE_BALL, ITEM_NEST_BALL, ITEM_REPEAT_BALL, ITEM_TIMER_BALL, ITEM_LUXURY_BALL},
     // The special balls (only from the BALL banner): the six with catch bonuses from the old days
     [SET_APRICORN] = {ITEM_LOVE_BALL, ITEM_LEVEL_BALL, ITEM_LURE_BALL, ITEM_MOON_BALL, ITEM_HEAVY_BALL, ITEM_FAST_BALL},
-};
-static const char *const sSetNames[] = {[SET_VITAMINS] = "VITAMIN SET", [SET_BALLS] = "BALL SET", [SET_APRICORN] = "APRICORN SET"};
-
-static const struct PrizeDef sCommon[] = {
-    ITEM(ITEM_POKE_BALL, 10, 10), ITEM(ITEM_GREAT_BALL, 5, 10), ITEM(ITEM_SUPER_POTION, 5, 10),
-    ITEM(ITEM_HYPER_POTION, 3, 8), ITEM(ITEM_REVIVE, 2, 8), ITEM(ITEM_ETHER, 2, 6), ITEM(ITEM_FULL_HEAL, 3, 6),
-    ITEM(ITEM_MAX_REPEL, 3, 6), MONEY(500, 10), MONEY(1000, 8),
-    // Berries: the everyday ones in fives
-    ITEM(ITEM_ORAN_BERRY, 5, 3), ITEM(ITEM_PECHA_BERRY, 5, 3), ITEM(ITEM_CHERI_BERRY, 5, 3),
-    ITEM(ITEM_RAWST_BERRY, 5, 3), ITEM(ITEM_ASPEAR_BERRY, 5, 3), ITEM(ITEM_CHESTO_BERRY, 5, 3),
+    [SET_X_ITEMS]  = {ITEM_X_ATTACK, ITEM_X_DEFEND, ITEM_X_SPEED, ITEM_X_SPECIAL, ITEM_X_ACCURACY, ITEM_DIRE_HIT},
+    // Berries come in sets now (the user, 2026-11-16: "too many berries"): Mirage Island's pinch ones, the e-Reader's
+    [SET_PINCH]    = {ITEM_LIECHI_BERRY, ITEM_GANLON_BERRY, ITEM_SALAC_BERRY, ITEM_PETAYA_BERRY, ITEM_APICOT_BERRY, ITEM_LANSAT_BERRY},
+    [SET_EREADER_A] = {ITEM_PUMKIN_BERRY, ITEM_DRASH_BERRY, ITEM_EGGANT_BERRY, ITEM_STRIB_BERRY, ITEM_CHILAN_BERRY, ITEM_NUTPEA_BERRY},
+    [SET_EREADER_B] = {ITEM_GINEMA_BERRY, ITEM_KUO_BERRY, ITEM_YAGO_BERRY, ITEM_TOUGA_BERRY, ITEM_NINIKU_BERRY, ITEM_TOPO_BERRY},
     // Local specialties from other regions (heal all status, like the LAVA COOKIE)
-    ITEM(ITEM_OLD_GATEAU, 2, 2), ITEM(ITEM_CASTELIACONE, 2, 2), ITEM(ITEM_LUMIOSE_GALETTE, 2, 2),
-    ITEM(ITEM_SHALOUR_SABLE, 2, 2), ITEM(ITEM_BIG_MALASADA, 2, 2), ITEM(ITEM_PEWTER_CRUNCHIES, 2, 2),
-    ITEM(ITEM_RAGE_CANDY_BAR, 2, 2),
+    [SET_TREATS]   = {ITEM_OLD_GATEAU, ITEM_CASTELIACONE, ITEM_LUMIOSE_GALETTE, ITEM_SHALOUR_SABLE, ITEM_BIG_MALASADA, ITEM_RAGE_CANDY_BAR},
+    [SET_SPECIAL_BALLS] = {ITEM_QUICK_BALL, ITEM_DUSK_BALL, ITEM_DREAM_BALL, ITEM_HEAL_BALL, ITEM_FRIEND_BALL, ITEM_PREMIER_BALL},
+    [SET_LEGEND_BALLS]  = {ITEM_MASTER_BALL, ITEM_ASTRAL_BALL},
+    // the rare POKeBLOCK BERRIES (the MoeGatcha is where the first four come from)
+    [SET_BLOCK_BERRIES] = {ITEM_CORNN_BERRY, ITEM_MAGOST_BERRY, ITEM_RABUTA_BERRY, ITEM_NOMEL_BERRY, ITEM_SPELON_BERRY, ITEM_PAMTRE_BERRY},
+};
+static const char *const sSetNames[] = {
+    [SET_VITAMINS] = "VITAMIN SET", [SET_BALLS] = "BALL SET", [SET_APRICORN] = "APRICORN SET", [SET_X_ITEMS] = "BATTLE SET",
+    [SET_PINCH] = "PINCH BERRIES", [SET_EREADER_A] = "RARE BERRIES", [SET_EREADER_B] = "RARE BERRIES",
+    [SET_TREATS] = "TREAT SET", [SET_SPECIAL_BALLS] = "SPECIAL BALLS", [SET_LEGEND_BALLS] = "LEGEND BALLS",
+    [SET_BLOCK_BERRIES] = "BLOCK BERRIES",
+};
+
+// Prizes that grow with the player (the user, 2026-11-16: "paltry rewards", but balanced): each row is one prize in
+// four sizes, by the TIER of the region the player is in (PrizeTier: badges 0-2, 3-5, 6-8, its LEAGUE beaten), and
+// each a bundle, never a single POTION. SetupBanners picks the column into the pools (sCommonNow ...)
+#define TIERS 4
+static const struct PrizeDef sCommonTiered[][TIERS] = {
+    {ITEM(ITEM_POKE_BALL, 10, 12), ITEM(ITEM_GREAT_BALL, 10, 12), ITEM(ITEM_ULTRA_BALL, 8, 12), ITEM(ITEM_ULTRA_BALL, 15, 12)},
+    {ITEM(ITEM_SUPER_POTION, 5, 12), ITEM(ITEM_HYPER_POTION, 5, 12), ITEM(ITEM_MAX_POTION, 4, 12), ITEM(ITEM_FULL_RESTORE, 3, 12)},
+    {ITEM(ITEM_REVIVE, 2, 9), ITEM(ITEM_REVIVE, 4, 9), ITEM(ITEM_REVIVE, 6, 9), ITEM(ITEM_MAX_REVIVE, 2, 9)},
+    {ITEM(ITEM_FULL_HEAL, 3, 6), ITEM(ITEM_FULL_HEAL, 5, 6), ITEM(ITEM_FULL_HEAL, 8, 6), ITEM(ITEM_FULL_HEAL, 10, 6)},
+    {ITEM(ITEM_SUPER_REPEL, 4, 6), ITEM(ITEM_SUPER_REPEL, 6, 6), ITEM(ITEM_MAX_REPEL, 5, 6), ITEM(ITEM_MAX_REPEL, 8, 6)},
+    {ITEM(ITEM_ETHER, 3, 6), ITEM(ITEM_ETHER, 5, 6), ITEM(ITEM_ELIXIR, 3, 6), ITEM(ITEM_MAX_ELIXIR, 2, 6)},
+    {SET(SET_X_ITEMS, 1, 5), SET(SET_X_ITEMS, 2, 5), SET(SET_X_ITEMS, 3, 5), SET(SET_X_ITEMS, 5, 5)},
+    {ITEM(ITEM_PEARL, 3, 5), ITEM(ITEM_BIG_PEARL, 1, 5), ITEM(ITEM_STARDUST, 5, 5), ITEM(ITEM_NUGGET, 2, 5)},
+    {MONEY(1000, 10), MONEY(2000, 10), MONEY(4000, 10), MONEY(8000, 10)},
+};
+static const struct PrizeDef sCommon[] = {
+    ITEM(ITEM_HEART_SCALE, 3, 4),   // a move remembered
+    SET(SET_TREATS, 2, 3),
+};
+static const struct PrizeDef sUncommonTiered[][TIERS] = {
+    {ITEM(ITEM_GREAT_BALL, 10, 10), ITEM(ITEM_ULTRA_BALL, 6, 10), ITEM(ITEM_ULTRA_BALL, 12, 10), ITEM(ITEM_ULTRA_BALL, 20, 10)},
+    {ITEM(ITEM_RARE_CANDY, 1, 12), ITEM(ITEM_RARE_CANDY, 2, 12), ITEM(ITEM_RARE_CANDY, 2, 12), ITEM(ITEM_RARE_CANDY, 3, 12)},
+    {ITEM(ITEM_FULL_RESTORE, 1, 8), ITEM(ITEM_FULL_RESTORE, 2, 8), ITEM(ITEM_FULL_RESTORE, 3, 8), ITEM(ITEM_FULL_RESTORE, 5, 8)},
+    {ITEM(ITEM_MAX_REVIVE, 1, 6), ITEM(ITEM_MAX_REVIVE, 2, 6), ITEM(ITEM_MAX_REVIVE, 3, 6), ITEM(ITEM_MAX_REVIVE, 4, 6)},
+    {ITEM(ITEM_NUGGET, 1, 8), ITEM(ITEM_NUGGET, 1, 8), ITEM(ITEM_NUGGET, 2, 8), ITEM(ITEM_NUGGET, 3, 8)},
+    {ITEM(ITEM_ELIXIR, 2, 6), ITEM(ITEM_ELIXIR, 3, 6), ITEM(ITEM_MAX_ELIXIR, 2, 6), ITEM(ITEM_MAX_ELIXIR, 3, 6)},
+    {SET(SET_BALLS, 1, 6), SET(SET_BALLS, 2, 6), SET(SET_BALLS, 3, 6), SET(SET_BALLS, 5, 6)},
+    {MONEY(3000, 10), MONEY(5000, 10), MONEY(8000, 10), MONEY(12000, 10)},
 };
 static const struct PrizeDef sUncommon[] = {
-    ITEM(ITEM_ULTRA_BALL, 5, 10), ITEM(ITEM_RARE_CANDY, 1, 12), ITEM(ITEM_FULL_RESTORE, 2, 8),
-    ITEM(ITEM_MAX_REVIVE, 1, 8), ITEM(ITEM_NUGGET, 1, 8), ITEM(ITEM_ELIXIR, 2, 6), ITEM(ITEM_TIMER_BALL, 5, 6),
-    ITEM(ITEM_PROTEIN, 1, 4), ITEM(ITEM_IRON, 1, 4), ITEM(ITEM_CALCIUM, 1, 4), ITEM(ITEM_ZINC, 1, 4),
-    ITEM(ITEM_CARBOS, 1, 4), ITEM(ITEM_HP_UP, 1, 4), MONEY(2000, 10),
-    // Berries: LEPPA / PERSIM, POKeBLOCK ones and the friendship ones
-    ITEM(ITEM_LEPPA_BERRY, 3, 3), ITEM(ITEM_PERSIM_BERRY, 3, 3), ITEM(ITEM_RAZZ_BERRY, 5, 2), ITEM(ITEM_BLUK_BERRY, 5, 2),
-    ITEM(ITEM_NANAB_BERRY, 5, 2), ITEM(ITEM_WEPEAR_BERRY, 5, 2), ITEM(ITEM_PINAP_BERRY, 5, 2),
-    ITEM(ITEM_POMEG_BERRY, 3, 2), ITEM(ITEM_KELPSY_BERRY, 3, 2), ITEM(ITEM_QUALOT_BERRY, 3, 2),
-    ITEM(ITEM_HONDEW_BERRY, 3, 2), ITEM(ITEM_GREPA_BERRY, 3, 2), ITEM(ITEM_TAMATO_BERRY, 3, 2),
+    ITEM(ITEM_HP_UP, 2, 3), ITEM(ITEM_PROTEIN, 2, 3), ITEM(ITEM_IRON, 2, 3), ITEM(ITEM_CALCIUM, 2, 3), ITEM(ITEM_ZINC, 2, 3),
+    ITEM(ITEM_CARBOS, 2, 3),
+    MON(EV_RANDOM, 6),   // a Moemon, one the POKeDEX hasn't caught when there's one
+    ITEM(ITEM_HEART_SCALE, 5, 3),
+    // The type boosters to hold
+    ITEM(ITEM_CHARCOAL, 1, 1), ITEM(ITEM_MYSTIC_WATER, 1, 1), ITEM(ITEM_MAGNET, 1, 1), ITEM(ITEM_MIRACLE_SEED, 1, 1),
+    ITEM(ITEM_NEVER_MELT_ICE, 1, 1), ITEM(ITEM_BLACK_BELT, 1, 1), ITEM(ITEM_POISON_BARB, 1, 1), ITEM(ITEM_SOFT_SAND, 1, 1),
+    ITEM(ITEM_SHARP_BEAK, 1, 1), ITEM(ITEM_TWISTED_SPOON, 1, 1), ITEM(ITEM_SILVER_POWDER, 1, 1), ITEM(ITEM_HARD_STONE, 1, 1),
+    ITEM(ITEM_SPELL_TAG, 1, 1), ITEM(ITEM_DRAGON_FANG, 1, 1), ITEM(ITEM_BLACK_GLASSES, 1, 1), ITEM(ITEM_METAL_COAT, 1, 1),
+    ITEM(ITEM_SILK_SCARF, 1, 1),
+};
+static const struct PrizeDef sRareTiered[][TIERS] = {
+    {ITEM(ITEM_RARE_CANDY, 2, 12), ITEM(ITEM_RARE_CANDY, 3, 12), ITEM(ITEM_RARE_CANDY, 3, 12), ITEM(ITEM_RARE_CANDY, 4, 12)},
+    {MONEY(6000, 8), MONEY(10000, 8), MONEY(15000, 8), MONEY(20000, 8)},
+};
+static const struct PrizeDef sSuperTiered[][TIERS] = {
+    {ITEM(ITEM_RARE_CANDY, 4, 12), ITEM(ITEM_RARE_CANDY, 5, 12), ITEM(ITEM_RARE_CANDY, 6, 12), ITEM(ITEM_RARE_CANDY, 8, 12)},
+    {MONEY(10000, 10), MONEY(15000, 10), MONEY(20000, 10), MONEY(30000, 10)},
+};
+static const struct PrizeDef sSSuperTiered[][TIERS] = {
+    {ITEM(ITEM_RARE_CANDY, 8, 10), ITEM(ITEM_RARE_CANDY, 10, 10), ITEM(ITEM_RARE_CANDY, 12, 10), ITEM(ITEM_RARE_CANDY, 15, 10)},
+    {MONEY(20000, 10), MONEY(30000, 10), MONEY(40000, 10), MONEY(50000, 10)},
 };
 // STANDARD's R, SR, UR and EX pools change every day (SetupStandard): four
 // event Moemon from sDailyMons among the R items (shiny at SR) and six
@@ -424,17 +475,17 @@ static const struct PrizeDef sUncommon[] = {
 #define DAILY_MONS    4
 #define DAILY_LEGENDS 6
 static const struct PrizeDef sRareItems[] = {
-    ITEM(ITEM_RARE_CANDY, 2, 12), ITEM(ITEM_PP_UP, 2, 8), ITEM(ITEM_MAX_ELIXIR, 2, 6),
+    ITEM(ITEM_PP_UP, 2, 8), ITEM(ITEM_MAX_ELIXIR, 2, 6), ITEM(ITEM_HEART_SCALE, 8, 3), ITEM(ITEM_BIG_NUGGET, 1, 3),
     ITEM(ITEM_FIRE_STONE, 1, 3), ITEM(ITEM_WATER_STONE, 1, 3), ITEM(ITEM_THUNDER_STONE, 1, 3),
     ITEM(ITEM_LEAF_STONE, 1, 3), ITEM(ITEM_MOON_STONE, 1, 3), ITEM(ITEM_LEFTOVERS, 1, 4),
     ITEM(ITEM_LUCKY_EGG, 1, 4), ITEM(ITEM_KINGS_ROCK, 1, 3), ITEM(ITEM_CHOICE_BAND, 1, 3),
     ITEM(ITEM_SCOPE_LENS, 1, 3), ITEM(ITEM_SHELL_BELL, 1, 3), ITEM(ITEM_PROTEIN, 3, 2), ITEM(ITEM_CARBOS, 3, 2),
-    ITEM(ITEM_EVIOLITE, 1, 3), ITEM(ITEM_QUICK_POWDER, 1, 2),
-    MONEY(5000, 8),
-    // Berries: SITRUS, LUM and the rare POKeBLOCK ones
-    ITEM(ITEM_SITRUS_BERRY, 3, 4), ITEM(ITEM_LUM_BERRY, 2, 4), ITEM(ITEM_CORNN_BERRY, 2, 1), ITEM(ITEM_MAGOST_BERRY, 2, 1),
-    ITEM(ITEM_RABUTA_BERRY, 2, 1), ITEM(ITEM_NOMEL_BERRY, 2, 1), ITEM(ITEM_SPELON_BERRY, 2, 1), ITEM(ITEM_PAMTRE_BERRY, 2, 1),
-    ITEM(ITEM_WATMEL_BERRY, 2, 1), ITEM(ITEM_DURIN_BERRY, 2, 1), ITEM(ITEM_BELUE_BERRY, 2, 1),
+    ITEM(ITEM_EVIOLITE, 1, 3), ITEM(ITEM_QUICK_POWDER, 1, 2), ITEM(ITEM_EXP_SHARE, 1, 2), ITEM(ITEM_AMULET_COIN, 1, 2),
+    ITEM(ITEM_FOCUS_BAND, 1, 2), ITEM(ITEM_QUICK_CLAW, 1, 2), ITEM(ITEM_BRIGHT_POWDER, 1, 1), ITEM(ITEM_WHITE_HERB, 1, 1),
+    ITEM(ITEM_MENTAL_HERB, 1, 1),
+    SET(SET_VITAMINS, 1, 4),
+    // Berries: only SITRUS and LUM here
+    ITEM(ITEM_SITRUS_BERRY, 3, 2), ITEM(ITEM_LUM_BERRY, 2, 2), SET(SET_BLOCK_BERRIES, 1, 1),
     // Later generations' held items and evolution items (only from their GENERATION on)
     ITEM(ITEM_LIFE_ORB, 1, 3), ITEM(ITEM_CHOICE_SCARF, 1, 2), ITEM(ITEM_CHOICE_SPECS, 1, 2), ITEM(ITEM_FOCUS_SASH, 1, 2),
     ITEM(ITEM_EXPERT_BELT, 1, 2), ITEM(ITEM_SHINY_STONE, 1, 2), ITEM(ITEM_DUSK_STONE, 1, 2), ITEM(ITEM_DAWN_STONE, 1, 2),
@@ -449,28 +500,25 @@ static const struct PrizeDef sRareItems[] = {
     ITEM(ITEM_BOOSTER_ENERGY, 1, 2), ITEM(ITEM_METAL_ALLOY, 1, 1),                                 // GEN 9
 };
 static const struct PrizeDef sSuperItems[] = {
-    ITEM(ITEM_PP_MAX, 2, 10), ITEM(ITEM_RARE_CANDY, 4, 12), MONEY(10000, 10), ITEM(ITEM_LEFTOVERS, 1, 6),
-    ITEM(ITEM_LUCKY_EGG, 1, 6),
+    ITEM(ITEM_PP_MAX, 2, 10), ITEM(ITEM_LEFTOVERS, 1, 6), ITEM(ITEM_LUCKY_EGG, 1, 6), ITEM(ITEM_CHOICE_BAND, 1, 3),
+    ITEM(ITEM_SCOPE_LENS, 1, 3), SET(SET_VITAMINS, 2, 6), ITEM(ITEM_BIG_NUGGET, 2, 4), ITEM(ITEM_COMET_SHARD, 1, 3),
     FX(4),   // a ball effect piece (more of them on the POKe BALLS banner)
-    // Berries: the pinch ones from Mirage Island
-    ITEM(ITEM_LIECHI_BERRY, 1, 2), ITEM(ITEM_GANLON_BERRY, 1, 2), ITEM(ITEM_SALAC_BERRY, 1, 2),
-    ITEM(ITEM_PETAYA_BERRY, 1, 2), ITEM(ITEM_APICOT_BERRY, 1, 2),
+    SET(SET_PINCH, 1, 2),   // the pinch BERRIES from Mirage Island
 };
 #define LATER_GENS 6   // GENERATION 4-9: one more daily Moemon and one more daily legend each
-#define DAILY_CLASSIC 1 // and one Generation 1-3 Moemon a day from a long list (sClassicDaily)
+#define DAILY_CLASSIC 3 // and three Generation 1-3 Moemon a day from a long list (sClassicDaily)
 #define DAILY_MAX (DAILY_MONS + DAILY_CLASSIC + LATER_GENS)
 // R: today's Moemon; SR: another batch of them (never shiny: shiny Moemon are SSR and up, the user 2026-11-06);
 // SSR: today's R batch shiny, and the RED GYARADOS
-static struct PrizeDef sRare[ARRAY_COUNT(sRareItems) + DAILY_MAX];
-static struct PrizeDef sSuper[ARRAY_COUNT(sSuperItems) + DAILY_MAX];
+static struct PrizeDef sRare[ARRAY_COUNT(sRareTiered) + ARRAY_COUNT(sRareItems) + DAILY_MAX];
+static struct PrizeDef sSuper[ARRAY_COUNT(sSuperTiered) + ARRAY_COUNT(sSuperItems) + DAILY_MAX];
+// the items' part of each (the tiered rows' column, then the rest), today's Moemon after it
+#define RARE_ITEMS   (ARRAY_COUNT(sRareTiered) + ARRAY_COUNT(sRareItems))
+#define SUPER_ITEMS  (ARRAY_COUNT(sSuperTiered) + ARRAY_COUNT(sSuperItems))
 static const struct PrizeDef sSSuperItems[] = {
-    ITEM(ITEM_MASTER_BALL, 1, 5), ITEM(ITEM_RARE_CANDY, 8, 10), MONEY(20000, 10), ITEM(ITEM_PP_MAX, 5, 8),
-    SET(SET_VITAMINS, 2, 8),
-    // Berries: LANSAT, STARF and the e-Reader Berries (found nowhere else)
-    ITEM(ITEM_LANSAT_BERRY, 1, 3), ITEM(ITEM_STARF_BERRY, 1, 3),
-    ITEM(ITEM_PUMKIN_BERRY, 2, 2), ITEM(ITEM_DRASH_BERRY, 2, 2), ITEM(ITEM_EGGANT_BERRY, 2, 2), ITEM(ITEM_STRIB_BERRY, 2, 2),
-    ITEM(ITEM_CHILAN_BERRY, 2, 2), ITEM(ITEM_NUTPEA_BERRY, 2, 2), ITEM(ITEM_GINEMA_BERRY, 2, 2), ITEM(ITEM_KUO_BERRY, 2, 2),
-    ITEM(ITEM_YAGO_BERRY, 2, 2), ITEM(ITEM_TOUGA_BERRY, 2, 2), ITEM(ITEM_NINIKU_BERRY, 2, 2), ITEM(ITEM_TOPO_BERRY, 2, 2),
+    ITEM(ITEM_MASTER_BALL, 1, 5), ITEM(ITEM_PP_MAX, 5, 8), SET(SET_VITAMINS, 3, 8), ITEM(ITEM_COMET_SHARD, 2, 4),
+    // Berries: STARF and the e-Reader Berries (found nowhere else), as sets
+    SET(SET_EREADER_A, 1, 1), SET(SET_EREADER_B, 1, 1), ITEM(ITEM_STARF_BERRY, 1, 1),
     // MEGA STONES (GEN 6 on) and Z-CRYSTALS (GEN 7 on)
     ITEM(ITEM_VENUSAURITE, 1, 1), ITEM(ITEM_CHARIZARDITE_X, 1, 1), ITEM(ITEM_CHARIZARDITE_Y, 1, 1),
     ITEM(ITEM_BLASTOISINITE, 1, 1), ITEM(ITEM_GENGARITE, 1, 1), ITEM(ITEM_GYARADOSITE, 1, 1), ITEM(ITEM_TYRANITARITE, 1, 1),
@@ -479,7 +527,41 @@ static const struct PrizeDef sSSuperItems[] = {
     ITEM(ITEM_NORMALIUM_Z, 1, 1), ITEM(ITEM_FIRIUM_Z, 1, 1), ITEM(ITEM_WATERIUM_Z, 1, 1), ITEM(ITEM_GRASSIUM_Z, 1, 1),
     ITEM(ITEM_ELECTRIUM_Z, 1, 1), ITEM(ITEM_PSYCHIUM_Z, 1, 1), ITEM(ITEM_DRAGONIUM_Z, 1, 1), ITEM(ITEM_FAIRIUM_Z, 1, 1),
 };
-static struct PrizeDef sSSuper[ARRAY_COUNT(sSSuperItems) + DAILY_MAX + 1];
+static struct PrizeDef sSSuper[ARRAY_COUNT(sSSuperTiered) + ARRAY_COUNT(sSSuperItems) + DAILY_MAX + 1];
+#define SSUPER_ITEMS (ARRAY_COUNT(sSSuperTiered) + ARRAY_COUNT(sSSuperItems))
+static struct PrizeDef sCommonNow[ARRAY_COUNT(sCommonTiered) + ARRAY_COUNT(sCommon)];
+static struct PrizeDef sUncommonNow[ARRAY_COUNT(sUncommonTiered) + ARRAY_COUNT(sUncommon)];
+
+// The prizes' size: the region the player is in, by its badges (ORRE counts 8) and its LEAGUE
+static u8 sTierOverride = 0xFF;   // test builds: mp gatchatier N
+
+static u8 PrizeTier(void)
+{
+    u8 badges;
+    if (sTierOverride < TIERS)
+        return sTierOverride;
+    if (MP_Region_ClearedHere())
+        return 3;
+    badges = MP_Region_ScaleBadges();
+    return badges >= 6 ? 2 : badges >= 3 ? 1 : 0;
+}
+
+void MP_Gatcha_SetTier(u8 tier)
+{
+    sTierOverride = tier;
+}
+
+// A pool's items: the tier's column of the tiered rows, then the rest; how many
+static u8 BuildItems(struct PrizeDef *out, const struct PrizeDef (*tiered)[TIERS], u8 tieredCount,
+                     const struct PrizeDef *flat, u8 flatCount)
+{
+    u8 i, n = 0, t = PrizeTier();
+    for (i = 0; i < tieredCount; i++)
+        out[n++] = tiered[i][t];
+    for (i = 0; i < flatCount; i++)
+        out[n++] = flat[i];
+    return n;
+}
 // Legendary and mythical Moemon: UR only, shiny ones EX only
 static struct PrizeDef sUltra[DAILY_LEGENDS + LATER_GENS];
 static struct PrizeDef sEx[DAILY_LEGENDS + LATER_GENS];
@@ -492,6 +574,15 @@ static const u16 sClassicDaily[] = {
     SPECIES_HOUNDOUR, SPECIES_SNEASEL, SPECIES_LARVITAR, SPECIES_SKARMORY, SPECIES_HERACROSS, SPECIES_MILTANK,
     SPECIES_TREECKO, SPECIES_TORCHIC, SPECIES_MUDKIP, SPECIES_RALTS, SPECIES_ARON, SPECIES_TRAPINCH,
     SPECIES_ABSOL, SPECIES_SNORUNT, SPECIES_SPHEAL, SPECIES_BAGON, SPECIES_BELDUM, SPECIES_FEEBAS,
+    // (1.201.0: more of them, three a day)
+    SPECIES_PIKACHU, SPECIES_VULPIX, SPECIES_GROWLITHE, SPECIES_PONYTA, SPECIES_MACHOP, SPECIES_GEODUDE,
+    SPECIES_MAGNEMITE, SPECIES_ONIX, SPECIES_CUBONE, SPECIES_KANGASKHAN, SPECIES_TAUROS, SPECIES_CHANSEY,
+    SPECIES_DRATINI, SPECIES_OMANYTE, SPECIES_KABUTO, SPECIES_AERODACTYL, SPECIES_PINSIR, SPECIES_JYNX,
+    SPECIES_CHIKORITA, SPECIES_CYNDAQUIL, SPECIES_TOTODILE, SPECIES_TOGEPI, SPECIES_SUDOWOODO, SPECIES_GLIGAR,
+    SPECIES_SCIZOR, SPECIES_STANTLER, SPECIES_SMEARGLE, SPECIES_TEDDIURSA, SPECIES_HOPPIP, SPECIES_DUNSPARCE,
+    SPECIES_SHROOMISH, SPECIES_SABLEYE, SPECIES_MAWILE, SPECIES_MEDITITE, SPECIES_ELECTRIKE, SPECIES_ROSELIA,
+    SPECIES_CARVANHA, SPECIES_NUMEL, SPECIES_SPOINK, SPECIES_SWABLU, SPECIES_ZANGOOSE, SPECIES_SEVIPER,
+    SPECIES_LILEEP, SPECIES_ANORITH, SPECIES_SHUPPET, SPECIES_DUSKULL, SPECIES_TROPIUS, SPECIES_CHIMECHO,
 };
 
 // Each later GENERATION's daily Moemon, taking turns day by day (0 ends a list)
@@ -617,8 +708,10 @@ static u8 FillDailyMons(struct PrizeDef *defs, u8 batch, u8 weight)
     TodaysMons(mons, batch);
     for (i = 0; i < DAILY_MONS; i++)
         defs[n++] = (struct PrizeDef)MON(mons[i], weight);
-    defs[n++] = (struct PrizeDef){K_MON, EV_SPECIES, sClassicDaily[DayPick(ARRAY_COUNT(sClassicDaily), StandardDay(), batch * 9)],
-                                  weight, FALSE};
+    for (i = 0; i < DAILY_CLASSIC; i++)
+        defs[n++] = (struct PrizeDef){K_MON, EV_SPECIES,
+                                      sClassicDaily[DayPick(ARRAY_COUNT(sClassicDaily), StandardDay() * DAILY_CLASSIC + i, batch * 9)],
+                                      weight, FALSE};
     for (i = 0; i < LATER_GENS && 4 + i <= GatchaGen(); i++)
         defs[n++] = (struct PrizeDef){K_MON, EV_SPECIES, GenDaily(sGenDailyMons[i], GEN_DAILY_MAX, StandardDay(), batch * 5 + i),
                                       weight, FALSE};
@@ -630,15 +723,17 @@ static void SetupStandard(void)
 {
     const u8 *legends = sDailyLegends[StandardDay() % 7];
     u8 i, n;
-    memcpy(sRare, sRareItems, sizeof(sRareItems));
-    memcpy(sSuper, sSuperItems, sizeof(sSuperItems));
-    memcpy(sSSuper, sSSuperItems, sizeof(sSSuperItems));
-    sDailyMonCount = FillDailyMons(sRare + ARRAY_COUNT(sRareItems), 0, 4);
-    FillDailyMons(sSuper + ARRAY_COUNT(sSuperItems), 1, 3);
-    n = FillDailyMons(sSSuper + ARRAY_COUNT(sSSuperItems), 0, 2);
+    BuildItems(sCommonNow, sCommonTiered, ARRAY_COUNT(sCommonTiered), sCommon, ARRAY_COUNT(sCommon));
+    BuildItems(sUncommonNow, sUncommonTiered, ARRAY_COUNT(sUncommonTiered), sUncommon, ARRAY_COUNT(sUncommon));
+    BuildItems(sRare, sRareTiered, ARRAY_COUNT(sRareTiered), sRareItems, ARRAY_COUNT(sRareItems));
+    BuildItems(sSuper, sSuperTiered, ARRAY_COUNT(sSuperTiered), sSuperItems, ARRAY_COUNT(sSuperItems));
+    BuildItems(sSSuper, sSSuperTiered, ARRAY_COUNT(sSSuperTiered), sSSuperItems, ARRAY_COUNT(sSSuperItems));
+    sDailyMonCount = FillDailyMons(sRare + RARE_ITEMS, 0, 4);
+    FillDailyMons(sSuper + SUPER_ITEMS, 1, 3);
+    n = FillDailyMons(sSSuper + SSUPER_ITEMS, 0, 2);
     for (i = 0; i < n; i++)
-        sSSuper[ARRAY_COUNT(sSSuperItems) + i].shiny = TRUE;
-    sSSuper[ARRAY_COUNT(sSSuperItems) + n] = (struct PrizeDef)SHINY(EV_GYARADOS, 2);   // the RED GYARADOS, always shiny
+        sSSuper[SSUPER_ITEMS + i].shiny = TRUE;
+    sSSuper[SSUPER_ITEMS + n] = (struct PrizeDef)SHINY(EV_GYARADOS, 2);   // the RED GYARADOS, always shiny
     for (i = 0; i < 4; i++)
     {
         sUltra[i] = (struct PrizeDef)MON(legends[i], LegendWeight(legends[i]));
@@ -728,28 +823,31 @@ static const struct PrizeDef sBallRare[] = {
     ITEM(ITEM_NEST_BALL, 10, 5), ITEM(ITEM_REPEAT_BALL, 10, 5), ITEM(ITEM_TIMER_BALL, 10, 5), SET(SET_BALLS, 3, 8),
     // The strong all-rounders, like the TIMER BALL
     ITEM(ITEM_QUICK_BALL, 3, 5), ITEM(ITEM_DUSK_BALL, 3, 5), ITEM(ITEM_DREAM_BALL, 3, 5), SET(SET_APRICORN, 1, 6),
-    FX(12),   // POKe BALL colors and ball effect pieces
+    SET(SET_SPECIAL_BALLS, 1, 6),
+    FX(16),   // POKe BALL colors and ball effect pieces
 };
+// (no Moemon on this banner any more: its prizes are BALLS and the looks of them, the user 2026-11-16; a ball effect
+// piece is one the player hasn't got when there's one left, RollPrizes)
 static const struct PrizeDef sBallSuper[] = {
     SET(SET_BALLS, 5, 10), ITEM(ITEM_ULTRA_BALL, 30, 8), ITEM(ITEM_LUXURY_BALL, 20, 6),
     SET(SET_APRICORN, 3, 8), ITEM(ITEM_QUICK_BALL, 10, 6), ITEM(ITEM_DUSK_BALL, 10, 6), ITEM(ITEM_DREAM_BALL, 10, 6),
-    FX(12), MON(EV_BALLED, 10),   // (1.131.0) a Moemon that comes in a special ball (EV_BALLED)
+    SET(SET_SPECIAL_BALLS, 3, 8), FX(18),
 };
 static const struct PrizeDef sBallSSuper[] = {
     SET(SET_BALLS, 10, 10), ITEM(ITEM_ULTRA_BALL, 60, 6), ITEM(ITEM_LUXURY_BALL, 40, 4),
     SET(SET_APRICORN, 6, 8), ITEM(ITEM_QUICK_BALL, 25, 5), ITEM(ITEM_DUSK_BALL, 25, 5),
-    FX(10), MON(EV_BALLED, 14),
+    SET(SET_SPECIAL_BALLS, 6, 8), ITEM(ITEM_MASTER_BALL, 1, 6), FX(16),
 };
 static const struct PrizeDef sBallUltra[] = {
-    ITEM(ITEM_MASTER_BALL, 1, 10), ITEM(ITEM_ASTRAL_BALL, 1, 10), SET(SET_BALLS, 20, 6), SET(SET_APRICORN, 12, 6),
-    MON(EV_BALLED_LEGEND, 12),
+    ITEM(ITEM_MASTER_BALL, 2, 10), ITEM(ITEM_ASTRAL_BALL, 1, 10), SET(SET_BALLS, 20, 6), SET(SET_APRICORN, 12, 6),
+    SET(SET_SPECIAL_BALLS, 12, 6), FX(10),
 };
 static const struct PrizeDef sBallEx[] = {
-    ITEM(ITEM_MASTER_BALL, 2, 10), ITEM(ITEM_ASTRAL_BALL, 2, 10), SET(SET_BALLS, 40, 6), SET(SET_APRICORN, 25, 6),
-    SHINY(EV_BALLED, 6), SHINY(EV_BALLED_LEGEND, 10),
+    SET(SET_LEGEND_BALLS, 3, 14), ITEM(ITEM_MASTER_BALL, 5, 8), ITEM(ITEM_ASTRAL_BALL, 3, 8), SET(SET_BALLS, 40, 6),
+    SET(SET_APRICORN, 25, 6), SET(SET_SPECIAL_BALLS, 25, 6),
 };
 
-// PICKUP banner: a new one every week. Every UR is one of its Moemon (picked
+// PICKUP banner: a new one every day. Every UR is one of its Moemon (picked
 // at random each time), every EX one of them shiny
 struct Pickup { u8 mons[3]; u8 count; u16 species[3]; };   // species: EV_SPECIES* ones (later generations)
 static const struct Pickup sPickups[] = {
@@ -794,6 +892,19 @@ static const struct Pickup sPickups[] = {
     LEGENDS3(REGIELEKI, REGIDRAGO, KUBFU), STRONG3(DRAGAPULT, CORVIKNIGHT, TOXTRICITY), LEGENDS3(ZARUDE, CALYREX, GLASTRIER),
     LEGENDS3(KORAIDON, MIRAIDON, TERAPAGOS), STARTERS(SPRIGATITO, FUECOCO, QUAXLY),
     LEGENDS3(WO_CHIEN, CHIEN_PAO, TING_LU), STRONG3(BAXCALIBUR, TINKATON, KINGAMBIT), LEGENDS3(OGERPON, PECHARUNT, OKIDOGI),
+    // 1.201.0: a new PICKUP every day (the user, 2026-11-16), so many more of them: favourites of every GENERATION
+    STRONG3(GENGAR, ALAKAZAM, MACHAMP), STRONG3(SCIZOR, HERACROSS, PINSIR), STRONG3(AERODACTYL, KABUTOPS, OMASTAR),
+    STRONG3(CRADILY, ARMALDO, RELICANTH), STRONG3(BLISSEY, SKARMORY, STEELIX), STRONG2(SLAKING, FLYGON),
+    STRONG3(ARCANINE, NINETALES, RAPIDASH), STRONG3(KINGDRA, AMPHAROS, HOUNDOOM), STRONG3(SCEPTILE, BLAZIKEN, SWAMPERT),
+    STRONG3(VENUSAUR, CHARIZARD, BLASTOISE), STRONG3(MEGANIUM, TYPHLOSION, FERALIGATR), STRONG3(SHEDINJA, BANETTE, DUSCLOPS),
+    STRONG3(TOGEKISS, WEAVILE, MAMOSWINE), STRONG2(LEAFEON, GLACEON), STRONG3(ELECTIVIRE, MAGMORTAR, RHYPERIOR),
+    STRONG3(TORTERRA, INFERNAPE, EMPOLEON), STRONG3(ROSERADE, FROSLASS, GALLADE),
+    STRONG3(CHANDELURE, HAXORUS, EXCADRILL), STRONG3(SERPERIOR, EMBOAR, SAMUROTT), STRONG3(KROOKODILE, CONKELDURR, SCRAFTY),
+    STRONG3(BRAVIARY, MANDIBUZZ, BOUFFALANT),
+    STRONG3(TALONFLAME, GRENINJA, HAWLUCHA), STRONG3(TYRANTRUM, AURORUS, NOIVERN), STRONG3(FLORGES, DRAGALGE, CLAWITZER),
+    STRONG3(DECIDUEYE, INCINEROAR, PRIMARINA), STRONG3(TOXAPEX, GOLISOPOD, SALAZZLE), STRONG3(TSAREENA, MUDSDALE, BEWEAR),
+    STRONG3(CINDERACE, RILLABOOM, INTELEON), STRONG3(GRIMMSNARL, HATTERENE, ALCREMIE), STRONG3(DURALUDON, COPPERAJAH, CENTISKORCH),
+    STRONG3(MEOWSCARADA, SKELEDIRGE, QUAQUAVAL), STRONG3(GHOLDENGO, ANNIHILAPE, GARGANACL), STRONG3(ARMAROUGE, CERULEDGE, CYCLIZAR),
 #undef LEGENDS3
 #undef STARTERS
 #undef STRONG3
@@ -841,9 +952,13 @@ static u8 sPickupCount;
 // PICKUP's R: today's Moemon (STANDARD's R batch) among a few items
 static const struct PrizeDef sPickupRareItems[] = {
     MON(EV_ZIGZAGOON, 3), MON(EV_PICHU, 3), MON(EV_SKITTY, 3), MON(EV_SWABLU, 3),
-    ITEM(ITEM_RARE_CANDY, 2, 12), ITEM(ITEM_PP_UP, 2, 8), MONEY(5000, 8),
+    ITEM(ITEM_PP_UP, 2, 8), SET(SET_VITAMINS, 1, 4),
 };
-static struct PrizeDef sPickupRare[ARRAY_COUNT(sPickupRareItems) + DAILY_MAX];
+static const struct PrizeDef sPickupRareTiered[][TIERS] = {
+    {ITEM(ITEM_RARE_CANDY, 2, 12), ITEM(ITEM_RARE_CANDY, 3, 12), ITEM(ITEM_RARE_CANDY, 3, 12), ITEM(ITEM_RARE_CANDY, 4, 12)},
+    {MONEY(6000, 8), MONEY(10000, 8), MONEY(15000, 8), MONEY(20000, 8)},
+};
+static struct PrizeDef sPickupRare[ARRAY_COUNT(sPickupRareTiered) + ARRAY_COUNT(sPickupRareItems) + DAILY_MAX];
 
 enum { BANNER_STANDARD, BANNER_PICKUP, BANNER_TRAINING, BANNER_BALLS, BANNER_COUNT };
 
@@ -861,13 +976,13 @@ struct BannerDef
 static struct BannerDef sBanners[BANNER_COUNT] = {
     [BANNER_STANDARD] = {
         "STANDARD", "Event Moemon, items and money!",
-        {{sCommon, ARRAY_COUNT(sCommon)}, {sUncommon, ARRAY_COUNT(sUncommon)}, {sRare, ARRAY_COUNT(sRare)},
+        {{sCommonNow, ARRAY_COUNT(sCommonNow)}, {sUncommonNow, ARRAY_COUNT(sUncommonNow)}, {sRare, ARRAY_COUNT(sRare)},
          {sSuper, ARRAY_COUNT(sSuper)}, {sSSuper, ARRAY_COUNT(sSSuper)}, {sUltra, ARRAY_COUNT(sUltra)}, {sEx, ARRAY_COUNT(sEx)}},
         {5400, 2800, 1350, 300, 120, 25, 5}, 0,
     },
     [BANNER_PICKUP] = {
         "PICKUP", NULL,   // tagline names the featured Moemon
-        {{sCommon, ARRAY_COUNT(sCommon)}, {sUncommon, ARRAY_COUNT(sUncommon)}, {sPickupRare, ARRAY_COUNT(sPickupRare)},
+        {{sCommonNow, ARRAY_COUNT(sCommonNow)}, {sUncommonNow, ARRAY_COUNT(sUncommonNow)}, {sPickupRare, ARRAY_COUNT(sPickupRare)},
          {sSuper, ARRAY_COUNT(sSuper)}, {sSSuper, ARRAY_COUNT(sSSuper)}, {sPickupUltra, 1}, {sPickupEx, 1}},   // counts set by SetupPickup
         {5350, 2800, 1350, 300, 150, 45, 5}, RGB(31, 10, 20),
     },
@@ -878,7 +993,7 @@ static struct BannerDef sBanners[BANNER_COUNT] = {
         {5300, 2800, 1350, 300, 200, 40, 10}, RGB(31, 17, 2),
     },
     [BANNER_BALLS] = {
-        "POKE BALLS", "Rare BALLS, effects + Moemon in them!",
+        "POKE BALLS", "Rare BALLS and ball effects!",
         {{sBallCommon, ARRAY_COUNT(sBallCommon)}, {sBallUncommon, ARRAY_COUNT(sBallUncommon)}, {sBallRare, ARRAY_COUNT(sBallRare)},
          {sBallSuper, ARRAY_COUNT(sBallSuper)}, {sBallSSuper, ARRAY_COUNT(sBallSSuper)}, {sBallUltra, ARRAY_COUNT(sBallUltra)}, {sBallEx, ARRAY_COUNT(sBallEx)}},
         {5300, 2800, 1350, 300, 200, 40, 10}, RGB(6, 18, 31),
@@ -895,14 +1010,20 @@ void MP_Gatcha_SetPickup(s8 n)
     sPickupOverride = n;
 }
 
-// A PICKUP vote that passed this week (friends online choose; see the vote below)
-#define VOTE_WEEK_KEY "gatcha:votewk"     // week number + 1 of the vote
+// A PICKUP vote that passed today (friends online choose; see the vote below)
+#define VOTE_WEEK_KEY "gatcha:voteday"    // day number + 1 of the vote (PICKUPs change every day since 1.201.0)
 #define VOTE_PICK_KEY "gatcha:votepick"   // the PICKUP it chose
+
+// The PICKUP changes every day (the user, 2026-11-16: "they must rotate daily rather than weekly")
+static s32 PickupDay(void)
+{
+    return StandardDay();
+}
 
 static s8 VotedPickup(void)
 {
     s32 pick = MP_SaveData_Get(VOTE_PICK_KEY);
-    if (MP_SaveData_Get(VOTE_WEEK_KEY) != MP_WeekNumber() + 1 || pick < 0 || pick >= (s32)ARRAY_COUNT(sPickups))
+    if (MP_SaveData_Get(VOTE_WEEK_KEY) != PickupDay() + 1 || pick < 0 || pick >= (s32)ARRAY_COUNT(sPickups))
         return -1;
     return pick;
 }
@@ -924,7 +1045,7 @@ static u8 ThisWeeksPickupIndex(void)
         return sPickupOverride;
     if (voted >= 0 && PickupAllowed(voted))
         return voted;
-    return AllowedPickup(MP_WeekNumber() % AllowedPickupCount());
+    return AllowedPickup(DayPick(AllowedPickupCount(), PickupDay(), 3));   // every one in turn, the generations mixed
 }
 
 static const struct Pickup *ThisWeeksPickup(void)
@@ -959,7 +1080,7 @@ static bool8 PickupIsRandom(void)
     return ThisWeeksPickup()->mons[0] == EV_RANDOM;
 }
 
-// This week's PICKUP: every UR is one of its Moemon, every EX one of them shiny
+// Today's PICKUP: every UR is one of its Moemon, every EX one of them shiny
 static void SetupPickup(void)
 {
     const struct Pickup *pu = ThisWeeksPickup();
@@ -1033,6 +1154,47 @@ s32 MP_Gatcha_Tickets(void)
 void MP_Gatcha_AddTickets(s32 n)
 {
     MP_SaveData_Add(TICKETS_KEY, n);
+}
+
+// Pulls for a PULL x1 / x10: pulls first, then MOEGATCHA TICKETS make up the rest (the user, 2026-11-16)
+static bool8 CanSpendPulls(u8 n)
+{
+    return MP_Gatcha_Pulls() + MP_Gatcha_Tickets() >= n;
+}
+
+static bool8 SpendPulls(u8 n)
+{
+    s32 pulls = MP_Gatcha_Pulls(), use;
+    if (!CanSpendPulls(n))
+        return FALSE;
+    use = pulls < n ? (pulls < 0 ? 0 : pulls) : n;
+    MP_Gatcha_AddPulls(-use);
+    if (n - use > 0)
+        MP_Gatcha_AddTickets(-(n - use));
+    return TRUE;
+}
+
+// MOEGATCHA POINTS: one for every pull, spent at the EXCHANGE on a prize of your choice (the user's pick, 2026-11-16).
+// Pulls made before 1.201.0 count too, once (the achievements' own count of every pull, "pull")
+#define POINTS_KEY      "gatcha:points"
+#define POINTS_BACK_KEY "gatcha:pointsback"
+
+static void BackfillPoints(void)
+{
+    s32 n;
+    if (MP_SaveData_Get(POINTS_BACK_KEY))
+        return;
+    n = MP_Achieve_GetCount("pull");
+    MP_SaveData_Set(POINTS_BACK_KEY, 1);
+    if (n > 0)
+        MP_SaveData_Add(POINTS_KEY, n);
+    MPNet_Log("gatcha: points for the %d pulls made before (%d points)", (int)n, (int)MP_SaveData_Get(POINTS_KEY));
+}
+
+s32 MP_Gatcha_Points(void)
+{
+    BackfillPoints();
+    return MP_SaveData_Get(POINTS_KEY);
 }
 
 // Free pulls everyone has waiting (the CO-OP menu shows them)
@@ -1215,6 +1377,7 @@ void MP_Gatcha_GrantFree(void)
     static s32 sCheckedDay;
     s32 today = MP_Today();
     MP_Gatcha_BackfillTickets();
+    BackfillPoints();
     if (today == sCheckedDay)
         return;
     sCheckedDay = today;
@@ -1235,6 +1398,13 @@ void MP_Gatcha_GrantFree(void)
     }
 }
 
+// An item the GENERATION allows, and its battle GIMMICK (MEGA STONES, Z-CRYSTALS: not while that gimmick is OFF, the
+// user 2026-11-16, host's rules online)
+static bool8 GatchaItemAllowed(u16 item)
+{
+    return GatchaItemGen(item) <= GatchaGen() && MP_Gimmick_ItemAllowed(item);
+}
+
 // A prize the GENERATION allows: its items, its Moemon
 static bool8 DefAllowed(const struct PrizeDef *def)
 {
@@ -1242,10 +1412,10 @@ static bool8 DefAllowed(const struct PrizeDef *def)
     switch (def->kind)
     {
     case K_ITEM:
-        return GatchaItemGen(def->id) <= gen;
+        return GatchaItemAllowed(def->id);
     case K_SET:
         for (i = 0; i < ARRAY_COUNT(sSets[0]); i++)
-            if (sSets[def->id][i] != ITEM_NONE && GatchaItemGen(sSets[def->id][i]) > gen)
+            if (sSets[def->id][i] != ITEM_NONE && !GatchaItemAllowed(sSets[def->id][i]))
                 return FALSE;
         return TRUE;
     case K_MON:
@@ -1611,8 +1781,8 @@ static void GivePrize(struct Result *res)
     }
     case K_SET:
     {
-        u8 i, missed = 0;
-        for (i = 0; i < ARRAY_COUNT(sSets[0]); i++)
+        u8 i, missed = 0, n = 0;
+        for (i = 0; i < ARRAY_COUNT(sSets[0]) && sSets[def->id][i] != ITEM_NONE; i++, n++)
             if (!AddBagItem(sSets[def->id][i], def->qty))
                 missed++;
         if (missed)
@@ -1621,7 +1791,7 @@ static void GivePrize(struct Result *res)
             snprintf(res->note, sizeof(res->note), "Some didn't fit: $%d instead.", 1000 * missed);
         }
         else
-            snprintf(res->note, sizeof(res->note), "x%u of each of the six!", (unsigned)def->qty);
+            snprintf(res->note, sizeof(res->note), n == 6 ? "x%u of each of the six!" : "x%u of each!", (unsigned)def->qty);
         break;
     }
     default:
@@ -1704,7 +1874,7 @@ static u16 sSpritePalThemed[16] = {
 
 enum { GS_FADE_IN, GS_MENU, GS_SPIN, GS_NUDGE, GS_HYPE, GS_EVENT, GS_REVEAL, GS_GRID, GS_EXIT };
 // GS_EXIT + 1: GS_FORCE (small tweaks)
-#define GS_VOTE_PICK  (GS_EXIT + 2)   // "reroll this week's PICKUP?" before asking
+#define GS_VOTE_PICK  (GS_EXIT + 2)   // "reroll today's PICKUP?" before asking
 #define GS_VOTE_ASKED (GS_EXIT + 3)   // a friend asks while this screen is open
 
 #define NO_CELL (-0x7FFFFFFF)   // a live icon slot that shows nothing (cells can be negative)
@@ -1729,6 +1899,8 @@ struct GatchaState
     u8 state;
     u8 cursor;
     u8 menuRows[6];   // MENU_ROWS
+    u8 offer;          // the EXCHANGE's prize shown (SELECT: the next one)
+    bool8 confirm;     // A once on EXCHANGE: "A again to exchange"
     u8 menuCount;
     u16 timer;
     float pos, spinFrom, spinTo;
@@ -1756,7 +1928,7 @@ struct GatchaState
     u16 stampTimer;
     s16 shake;          // amplitude in 1/16 px
     u16 pickupPic;      // the featured Moemon on the PICKUP banner (0xFFFF: none)
-    u8 pickupShown;     // which of this week's PICKUP Moemon stands there
+    u8 pickupShown;     // which of today's PICKUP Moemon stands there
     u8 tagPage;         // STANDARD: the tagline, or today's featured Moemon
     u16 tagTimer;
     u16 pickupTimer;
@@ -1779,7 +1951,7 @@ static u16 sBg1Hofs;
 static EWRAM_DATA u16 *sBg1Map = NULL;
 static EWRAM_DATA u16 *sBg3Map = NULL;
 
-enum { MENU_FREE10, MENU_FREE1, MENU_TICKET, MENU_ONE, MENU_TEN, MENU_BACK, MENU_ROWS };
+enum { MENU_FREE10, MENU_FREE1, MENU_ONE, MENU_TEN, MENU_EXCHANGE, MENU_BACK, MENU_ROWS };   // (TICKETS: PULL x1 / x10)
 
 // ---------------------------------------------------------------------------
 // Generated graphics
@@ -2755,13 +2927,17 @@ static void DrawHeader(void)
     FillWindowPixelBuffer(WIN_TITLE, PIXEL_FILL(0));
     PrintAscii(WIN_TITLE, FONT_NORMAL, 2, 1, 0, TC_GOLD, "MOEGATCHA");
     if (MP_Gatcha_Tickets() > 0)
-        snprintf(line, sizeof(line), "PULLS %d  TICKETS %d", (int)MP_Gatcha_Pulls(), (int)MP_Gatcha_Tickets());
+        snprintf(line, sizeof(line), "PULLS %d  TICKETS %d  PTS %d", (int)MP_Gatcha_Pulls(), (int)MP_Gatcha_Tickets(),
+                 (int)MP_Gatcha_Points());
     else
-        snprintf(line, sizeof(line), "PULLS: %d", (int)MP_Gatcha_Pulls());
+        snprintf(line, sizeof(line), "PULLS %d  PTS %d", (int)MP_Gatcha_Pulls(), (int)MP_Gatcha_Points());
     {
-        u8 buf[40];
-        MP_AsciiToGame(buf, line, 38);
-        Print(WIN_TITLE, FONT_NORMAL, 28 * 8 - 4 - GetStringWidth(FONT_NORMAL, buf, 0), 1, 0, TC_WHITE, buf);
+        u8 buf[48];
+        u8 font = FONT_NORMAL;
+        MP_AsciiToGame(buf, line, 46);
+        if (GetStringWidth(font, buf, 0) > 28 * 8 - 70)
+            font = FONT_SMALL;
+        Print(WIN_TITLE, font, 28 * 8 - 4 - GetStringWidth(font, buf, 0), font == FONT_SMALL ? 2 : 1, 0, TC_WHITE, buf);
     }
     CopyWindowToVram(WIN_TITLE, COPYWIN_FULL);
 
@@ -2819,6 +2995,122 @@ static void DrawNameLine(const struct PrizeDef *def, u8 rarity, u32 amount, bool
     CopyWindowToVram(WIN_NAME, COPYWIN_FULL);
 }
 
+// ---------------------------------------------------------------------------
+// The EXCHANGE: MOEGATCHA POINTS (one a pull) for a prize of your choice from the banner's own: STANDARD's legends of
+// the day, PICKUP's Moemon, TRAINING's and POKe BALLS' best. Dear enough that pulling stays the way to get things
+// (a legend about as many points as pulls it takes the pity count to promise one), so a long dry run always ends
+// somewhere. SELECT on the row shows the next prize; A, then A again, exchanges it (the reel plays as for a pull,
+// but it's not a pull: no points, no pity counts, no achievements)
+struct Offer { struct PrizeDef def; u8 rarity; u16 cost; };
+#define OFFERS_MAX 12
+static struct PrizeDef sExchangeDef;
+static s8 sExchangeRarity = -1;   // the exchange's prize is next (RollPrizes)
+static void StartSpin(u8 count);
+static void DrawMenu(void);
+
+static u8 Offers(struct Offer *out)
+{
+    static const struct Offer sTraining[] = {
+        {ITEM(ITEM_RARE_CANDY, 10, 1), R_SSR, 40}, {SET(SET_VITAMINS, 2, 1), R_SSR, 40}, {ITEM(ITEM_PP_MAX, 5, 1), R_SSR, 40},
+    };
+    static const struct Offer sBalls[] = {
+        {FX(1), R_SR, 30}, {ITEM(ITEM_MASTER_BALL, 1, 1), R_SSR, 100}, {ITEM(ITEM_ASTRAL_BALL, 1, 1), R_UR, 120},
+    };
+    u8 n = 0, i;
+    switch (sBanner)
+    {
+    case BANNER_STANDARD:
+        for (i = 0; i < sDailyLegendCount && n < OFFERS_MAX; i++)
+            if (DefAllowed(&sUltra[i]))
+                out[n].def = sUltra[i], out[n].rarity = R_UR, out[n++].cost = 200;
+        break;
+    case BANNER_PICKUP:
+        for (i = 0; i < sPickupCount && n < OFFERS_MAX; i++)
+            out[n].def = sPickupUltra[i], out[n].rarity = R_UR, out[n++].cost = 150;
+        break;
+    case BANNER_TRAINING:
+        for (i = 0; i < ARRAY_COUNT(sTraining); i++)
+            out[n++] = sTraining[i];
+        break;
+    case BANNER_BALLS:
+        for (i = 0; i < ARRAY_COUNT(sBalls); i++)
+            if (DefAllowed(&sBalls[i].def))
+                out[n++] = sBalls[i];
+        break;
+    }
+    return n;
+}
+
+// The prize shown on the EXCHANGE row (FALSE: none)
+static bool8 ShownOffer(struct Offer *o)
+{
+    struct Offer offers[OFFERS_MAX];
+    u8 n = Offers(offers);
+    if (n == 0)
+        return FALSE;
+    *o = offers[sG->offer % n];
+    return TRUE;
+}
+
+static bool8 ExchangeAffordable(void)
+{
+    struct Offer o;
+    return ShownOffer(&o) && MP_Gatcha_Points() >= o.cost;
+}
+
+static void ExchangeInfo(char *info, int size)
+{
+    struct Offer o;
+    u8 name[40];
+    char a[40];
+    if (!ShownOffer(&o))
+    {
+        snprintf(info, size, "Nothing to exchange here today.");
+        return;
+    }
+    if (o.def.kind == K_FX)
+        snprintf(a, sizeof(a), "A NEW BALL EFFECT");
+    else
+    {
+        PrizeName(&o.def, o.def.qty, name);
+        MP_GameToAscii(a, name, sizeof(a) - 1);
+    }
+    if (sG->confirm)
+        snprintf(info, size, "A again: %s for %d PTS?", a, (int)o.cost);
+    else
+        snprintf(info, size, "{SELECT} %s: %d PTS (you %d)", a, (int)o.cost, (int)MP_Gatcha_Points());
+}
+
+static void ExchangeA(void)
+{
+    struct Offer o;
+    if (!ShownOffer(&o))
+    {
+        PlaySE(SE_FAILURE);
+        return;
+    }
+    if (MP_Gatcha_Points() < o.cost)
+    {
+        PlaySE(SE_FAILURE);
+        DrawHelp("Not enough POINTS yet: every pull gives one.");
+        return;
+    }
+    if (!sG->confirm)
+    {
+        sG->confirm = TRUE;
+        PlaySE(SE_SELECT);
+        DrawMenu();
+        return;
+    }
+    sG->confirm = FALSE;
+    MP_SaveData_Add(POINTS_KEY, -(s32)o.cost);
+    sExchangeDef = o.def;
+    sExchangeRarity = o.rarity;
+    MPNet_Log("gatcha: exchange on banner %d: %d points (%d left)", sBanner, (int)o.cost, (int)MP_Gatcha_Points());
+    PlaySE(SE_SHOP);
+    StartSpin(1);
+}
+
 static void BuildMenu(void)
 {
     sG->menuCount = 0;
@@ -2826,10 +3118,9 @@ static void BuildMenu(void)
         sG->menuRows[sG->menuCount++] = MENU_FREE10;
     if (Free1Stock(sBanner) > 0)
         sG->menuRows[sG->menuCount++] = MENU_FREE1;
-    if (MP_Gatcha_Tickets() > 0)
-        sG->menuRows[sG->menuCount++] = MENU_TICKET;
     sG->menuRows[sG->menuCount++] = MENU_ONE;
     sG->menuRows[sG->menuCount++] = MENU_TEN;
+    sG->menuRows[sG->menuCount++] = MENU_EXCHANGE;
     sG->menuRows[sG->menuCount++] = MENU_BACK;
     if (sG->cursor >= sG->menuCount)
         sG->cursor = 0;
@@ -2888,7 +3179,7 @@ static void DrawBannerLine(void)
         }
         else
         {
-            defs = sRare + ARRAY_COUNT(sRareItems);
+            defs = sRare + RARE_ITEMS;
             from = (page - legendPages) * 2;
             count = min(2, sDailyMonCount - from);
             n = snprintf(line, sizeof(line), "TODAY'S R:");
@@ -2937,7 +3228,7 @@ static void DestroyPickupPic(void)
     }
 }
 
-// This week's PICKUP Moemon, standing next to the banner (taking turns when
+// Today's PICKUP Moemon, standing next to the banner (taking turns when
 // there are several). One not seen yet is only a shadow.
 static void ShowPickupPic(void)
 {
@@ -2976,6 +3267,8 @@ static void SwitchBanner(s8 dir)
 {
     s32 c = CenterCell(), i;
     sBanner = (sBanner + BANNER_COUNT + dir) % BANNER_COUNT;
+    sG->offer = 0;
+    sG->confirm = FALSE;
     PlaySE(SE_DEX_PAGE);
     LoadThemedPalettes();
     for (i = c - 8; i <= sG->genUpTo; i++)
@@ -2996,7 +3289,7 @@ static void DrawOddsLine(void)
     u8 i;
     if (sBanner == BANNER_PICKUP && (sG->tagPage & 1) && gMpLocalId >= 0 && FriendsOnline() > 0 && VotedPickup() < 0)
     {
-        DrawHelp("{SELECT} Vote to reroll this week's PICKUP");
+        DrawHelp("{SELECT} Vote to reroll today's PICKUP");
         return;
     }
     {
@@ -3024,9 +3317,9 @@ static void DrawMenu(void)
     static const char *const sLabels[] = {
         [MENU_FREE10] = "FREE x10",
         [MENU_FREE1]  = "FREE x1",
-        [MENU_TICKET] = "TICKET",
         [MENU_ONE]    = "PULL x1",
         [MENU_TEN]    = "PULL x10",
+        [MENU_EXCHANGE] = "EXCHANGE",
         [MENU_BACK]   = "BACK",
     };
     char info[80];
@@ -3038,8 +3331,9 @@ static void DrawMenu(void)
         bool8 sel = i == sG->cursor;
         u8 r = sG->menuRows[i];
         int x = (i % 3) * 64 + 2, y = (i / 3) * 12 + 2;
-        u8 fg = sel ? TC_GOLD : (r <= MENU_TICKET ? TC_RARITY + R_SR : TC_WHITE);
-        if ((r == MENU_ONE && MP_Gatcha_Pulls() < 1) || (r == MENU_TEN && MP_Gatcha_Pulls() < 10))
+        u8 fg = sel ? TC_GOLD : (r <= MENU_FREE1 ? TC_RARITY + R_SR : TC_WHITE);
+        if ((r == MENU_ONE && !CanSpendPulls(1)) || (r == MENU_TEN && !CanSpendPulls(10))
+         || (r == MENU_EXCHANGE && !ExchangeAffordable()))
             fg = sel ? TC_GOLD : TC_DIM;
         PrintAscii(WIN_MENU, FONT_NORMAL, x, y - 1, TC_PANEL, fg, sel ? ">" : "");
         PrintAscii(WIN_MENU, FONT_NORMAL, x + 9, y - 1, TC_PANEL, fg, sLabels[r]);
@@ -3048,9 +3342,27 @@ static void DrawMenu(void)
     {
     case MENU_FREE10: snprintf(info, sizeof(info), "Free 10-pull, one a week. Waiting: %d", (int)Free10Stock()); break;
     case MENU_FREE1:  snprintf(info, sizeof(info), "Free pull, one a day per banner. Waiting: %d", (int)Free1Stock(sBanner)); break;
-    case MENU_TICKET: snprintf(info, sizeof(info), "TICKET: 1 pull on any banner. You have %d.", (int)MP_Gatcha_Tickets()); break;
-    case MENU_ONE:    snprintf(info, sizeof(info), "Uses 1 pull."); break;
-    case MENU_TEN:    snprintf(info, sizeof(info), "Uses 10 pulls. One RARE+ guaranteed!"); break;
+    case MENU_ONE:
+        if (MP_Gatcha_Pulls() < 1 && MP_Gatcha_Tickets() > 0)
+            snprintf(info, sizeof(info), "Uses 1 TICKET. You have %d.", (int)MP_Gatcha_Tickets());
+        else
+            snprintf(info, sizeof(info), "Uses 1 pull.");
+        break;
+    case MENU_TEN:
+    {
+        s32 pulls = MP_Gatcha_Pulls(), tickets = MP_Gatcha_Tickets();
+        if (pulls >= 10)
+            snprintf(info, sizeof(info), "Uses 10 pulls. One RARE+ guaranteed!");
+        else if (pulls + tickets >= 10)
+            snprintf(info, sizeof(info), "Uses %d pull%s + %d TICKET%s. RARE+ guaranteed!", (int)(pulls < 0 ? 0 : pulls),
+                     pulls == 1 ? "" : "s", (int)(10 - (pulls < 0 ? 0 : pulls)), 10 - pulls == 1 ? "" : "S");
+        else
+            snprintf(info, sizeof(info), "10 pulls or TICKETS. One RARE+ guaranteed!");
+        break;
+    }
+    case MENU_EXCHANGE:
+        ExchangeInfo(info, sizeof(info));
+        break;
     default:          snprintf(info, sizeof(info), "Back to the CO-OP menu."); break;
     }
     PrintAscii(WIN_MENU, FONT_SMALL, 8, 28, TC_PANEL, TC_GREY, info);
@@ -3257,15 +3569,24 @@ static bool8 TrainingBonusDef(const struct PrizeDef *def)
 static u8 RollPrizes(struct Result *results, u8 count)
 {
     u8 i, best = 0;
-    bool8 gotRare = FALSE;
+    bool8 gotRare = FALSE, exchange = sExchangeRarity >= 0;
     StirRandom();
     MP_SaveData_Hold(TRUE);   // (one write of the save's side file for the whole pull, not one per pity count)
     for (i = 0; i < count; i++)
     {
         struct Result *r = &results[i];
         bool8 lastChance = (count == 10 && i == count - 1 && !gotRare);
-        r->rarity = RollRarity(lastChance);
-        r->def = PickPrize(r->rarity);
+        if (exchange)
+        {
+            // the EXCHANGE's prize: no pity counts touched
+            r->rarity = sExchangeRarity;
+            r->def = &sExchangeDef;
+        }
+        else
+        {
+            r->rarity = RollRarity(lastChance);
+            r->def = PickPrize(r->rarity);
+        }
         if (i == 0 && sRigDef)
             r->def = sRigDef;
         sRigDef = NULL;
@@ -3278,9 +3599,16 @@ static u8 RollPrizes(struct Result *results, u8 count)
         }
         else if (r->def->kind == K_FX && r->def->qty == 0)
         {
-            // which ball effect piece: decided now (any of them: one already had becomes a TICKET)
+            // which ball effect piece: decided now, one not had yet while there are any (one already had becomes a TICKET)
+            u8 tries, kind, index, count = MP_BallUnlock_PrizeCount();
             sRandDefs[i] = *r->def;
-            sRandDefs[i].qty = MP_BallUnlock_PrizeCount() ? 1 + Random() % MP_BallUnlock_PrizeCount() : 0;
+            sRandDefs[i].qty = 0;
+            for (tries = 0; count && tries < 24; tries++)
+            {
+                sRandDefs[i].qty = 1 + Random() % count;
+                if (!MP_BallUnlock_Prize(sRandDefs[i].qty - 1, &kind, &index) || !MP_BallUnlock_Has(kind, index))
+                    break;
+            }
             r->def = &sRandDefs[i];
         }
         else if (sBanner == BANNER_TRAINING && TrainingBonusDef(r->def))
@@ -3312,14 +3640,20 @@ static u8 RollPrizes(struct Result *results, u8 count)
         }
         MPNet_Log("gatcha: results%s", list);
     }
-    // achievements: pulls made, and the rarest prize
-    MP_Achieve_Count("pull", count);
-    if (results[best].rarity >= R_SR)
-        MP_Achieve_Unlock("sr");
-    if (results[best].rarity >= R_SSR)
-        MP_Achieve_Unlock("ssr");
-    if (results[best].rarity >= R_UR)
-        MP_Achieve_Unlock("ur");
+    // achievements: pulls made, and the rarest prize; a POINT a pull (not for the EXCHANGE's prize)
+    sExchangeRarity = -1;
+    if (!exchange)
+    {
+        BackfillPoints();
+        MP_SaveData_Add(POINTS_KEY, count);
+        MP_Achieve_Count("pull", count);
+        if (results[best].rarity >= R_SR)
+            MP_Achieve_Unlock("sr");
+        if (results[best].rarity >= R_SSR)
+            MP_Achieve_Unlock("ssr");
+        if (results[best].rarity >= R_UR)
+            MP_Achieve_Unlock("ur");
+    }
     MP_SaveData_Hold(FALSE);
     SaveAfterPull();
     return best;
@@ -3885,10 +4219,10 @@ static void CB2_Gatcha(void)
 
 // ---------------------------------------------------------------------------
 // PICKUP reroll vote: on the PICKUP banner, SELECT asks everyone online
-// whether to reroll this week's PICKUP. Nobody picks the new one: if more
+// whether to reroll today's PICKUP. Nobody picks the new one: if more
 // than half say YES (the asker counts), a random different PICKUP is drawn
-// and revealed to everyone, for the rest of the week; pity counts stay. Once a
-// vote has passed there are no more that week. Friends who come online later
+// and revealed to everyone, for the rest of the day; pity counts stay. Once a
+// vote has passed there are no more that day. Friends who come online later
 // get the result from whoever has it.
 
 
@@ -3920,7 +4254,7 @@ static struct
     u16 askTimer;
     u8 taskId;
     u16 cursor;
-    // Friends we've told about this week's vote
+    // Friends we've told about today's vote
     bool8 told[MP_MAX_PLAYERS];
     bool8 changed;   // the PICKUP changed: the open screen catches up
 } sVote = {.taskId = TASK_NONE};
@@ -3976,17 +4310,17 @@ static void ApplyVote(u8 pickup, bool8 passed, u8 yes, u8 total, s32 week)
         ShowVoteNote(line);
         return;
     }
-    if (week != MP_WeekNumber() || VotedPickup() >= 0 || pickup >= ARRAY_COUNT(sPickups))
+    if (week != PickupDay() || VotedPickup() >= 0 || pickup >= ARRAY_COUNT(sPickups))
     {
         MPNet_Log("gatcha: vote for pickup %d passed but not used here (week %d/%d, voted %d)", pickup, (int)week,
-                  (int)MP_WeekNumber(), VotedPickup());
+                  (int)PickupDay(), VotedPickup());
         return;
     }
     MP_SaveData_Set(VOTE_WEEK_KEY, week + 1);
     MP_SaveData_Set(VOTE_PICK_KEY, pickup);
     memset(sVote.told, 0, sizeof(sVote.told));
     sVote.changed = TRUE;
-    MPNet_Log("gatcha: vote passed, this week's pickup is %d (%d/%d)", pickup, yes, total);
+    MPNet_Log("gatcha: vote passed, today's pickup is %d (%d/%d)", pickup, yes, total);
     snprintf(line, sizeof(line), "New PICKUP! (%d/%d YES)\nUR: %s", yes, total, label);
     ShowVoteNote(line);
 }
@@ -3997,7 +4331,7 @@ static void FinishVote(bool8 cancelled)
     bool8 passed = !cancelled && sVote.yes * 2 > sVote.total;
     if (passed)
     {
-        // The surprise: any PICKUP but this week's
+        // The surprise: any PICKUP but today's
         u8 cur = ThisWeeksPickupIndex(), n = AllowedPickupCount(), k;
         k = n > 1 ? Random() % (n - 1) : 0;
         pickup = AllowedPickup(k);
@@ -4035,7 +4369,7 @@ static void StartVote(void)
     sVote.yes = 1;
     sVote.total = 1 + FriendsOnline();
     sVote.timer = 0;
-    sVote.week = MP_WeekNumber();
+    sVote.week = PickupDay();
     msg[0] = GV_ASK;
     msg[1] = sVote.id;
     msg[2] = ThisWeeksPickupIndex();   // the one it would replace
@@ -4070,7 +4404,7 @@ static void DrawVotePrompt(void)
     char line[64], name[16];
     VoterName(sVote.from, name);
     MpUi_Begin("PICKUP VOTE");
-    snprintf(line, sizeof(line), "%s wants to reroll this week's PICKUP!", name);
+    snprintf(line, sizeof(line), "%s wants to reroll today's PICKUP!", name);
     MpUi_TextAscii(0, line);
     MpUi_TextAscii(1, "The new one is a surprise...");
     MpUi_RowAscii(3, sVote.cursor == 0, "YES", NULL);
@@ -4118,10 +4452,10 @@ void MP_Gatcha_OnRelay(u8 from, const u8 *data, u16 len)
             }
             FinishVote(TRUE);
         }
-        if (sVote.pending || GetS32(data + 3) != MP_WeekNumber() || VotedPickup() >= 0)
+        if (sVote.pending || GetS32(data + 3) != PickupDay() || VotedPickup() >= 0)
         {
             if (!sVote.pending && VotedPickup() >= 0)
-                msg[2] = VA_NO;   // this week's was chosen already
+                msg[2] = VA_NO;   // today's was chosen already
             MP_SendRelay(from, msg, sizeof(msg));
             return;
         }
@@ -4158,15 +4492,15 @@ void MP_Gatcha_OnRelay(u8 from, const u8 *data, u16 len)
         ApplyVote(data[2], data[3] == 1, data[4], data[5], GetS32(data + 6));
         break;
     case GV_STATE:
-        // A friend's group already picked this week's PICKUP
-        if (len >= 6 && VotedPickup() < 0 && GetS32(data + 2) == MP_WeekNumber() && data[1] < ARRAY_COUNT(sPickups))
+        // A friend's group already picked today's PICKUP
+        if (len >= 6 && VotedPickup() < 0 && GetS32(data + 2) == PickupDay() && data[1] < ARRAY_COUNT(sPickups))
         {
             char label[48], line[96];
-            MP_SaveData_Set(VOTE_WEEK_KEY, MP_WeekNumber() + 1);
+            MP_SaveData_Set(VOTE_WEEK_KEY, PickupDay() + 1);
             MP_SaveData_Set(VOTE_PICK_KEY, data[1]);
             sVote.changed = TRUE;
             ShortPickupLabel(data[1], label, sizeof(label));
-            MPNet_Log("gatcha: player %d says this week's pickup is %d", from + 1, data[1]);
+            MPNet_Log("gatcha: player %d says today's pickup is %d", from + 1, data[1]);
             snprintf(line, sizeof(line), "Friends' new PICKUP!\nUR: %s", label);
             ShowVoteNote(line);
         }
@@ -4213,7 +4547,7 @@ void MP_Gatcha_VoteUpdate(void)
             DrawVotePrompt();
         }
     }
-    // Tell friends who come online about this week's vote
+    // Tell friends who come online about today's vote
     for (i = 0; i < MP_MAX_PLAYERS; i++)
     {
         if (i == gMpLocalId || !gMpPlayers[i].present || !gMpPlayers[i].hasInfo)
@@ -4226,32 +4560,35 @@ void MP_Gatcha_VoteUpdate(void)
             u8 msg[6];
             msg[0] = GV_STATE;
             msg[1] = VotedPickup();
-            PutS32(msg + 2, MP_WeekNumber());
+            PutS32(msg + 2, PickupDay());
             MP_SendRelay(i, msg, sizeof(msg));
             sVote.told[i] = TRUE;
         }
     }
 }
 
-// Today's STANDARD (with the GENERATION's additions) and this week's PICKUP
+// Today's STANDARD (with the GENERATION's additions) and today's PICKUP
 static void SetupBanners(void)
 {
     SetupStandard();
-    sBanners[BANNER_STANDARD].pools[R_R].count = ARRAY_COUNT(sRareItems) + sDailyMonCount;
-    sBanners[BANNER_STANDARD].pools[R_SR].count = ARRAY_COUNT(sSuperItems) + sDailyMonCount;
-    sBanners[BANNER_STANDARD].pools[R_SSR].count = ARRAY_COUNT(sSSuperItems) + sDailyMonCount + 1;
-    sBanners[BANNER_PICKUP].pools[R_SR].count = ARRAY_COUNT(sSuperItems) + sDailyMonCount;
-    sBanners[BANNER_PICKUP].pools[R_SSR].count = ARRAY_COUNT(sSSuperItems) + sDailyMonCount + 1;
-    memcpy(sPickupRare, sPickupRareItems, sizeof(sPickupRareItems));
-    memcpy(sPickupRare + ARRAY_COUNT(sPickupRareItems), sRare + ARRAY_COUNT(sRareItems), sDailyMonCount * sizeof(struct PrizeDef));
-    sBanners[BANNER_PICKUP].pools[R_R].count = ARRAY_COUNT(sPickupRareItems) + sDailyMonCount;
+    sBanners[BANNER_STANDARD].pools[R_R].count = RARE_ITEMS + sDailyMonCount;
+    sBanners[BANNER_STANDARD].pools[R_SR].count = SUPER_ITEMS + sDailyMonCount;
+    sBanners[BANNER_STANDARD].pools[R_SSR].count = SSUPER_ITEMS + sDailyMonCount + 1;
+    sBanners[BANNER_PICKUP].pools[R_SR].count = SUPER_ITEMS + sDailyMonCount;
+    sBanners[BANNER_PICKUP].pools[R_SSR].count = SSUPER_ITEMS + sDailyMonCount + 1;
+    {
+        u8 n = BuildItems(sPickupRare, sPickupRareTiered, ARRAY_COUNT(sPickupRareTiered), sPickupRareItems,
+                          ARRAY_COUNT(sPickupRareItems));
+        memcpy(sPickupRare + n, sRare + RARE_ITEMS, sDailyMonCount * sizeof(struct PrizeDef));
+        sBanners[BANNER_PICKUP].pools[R_R].count = n + sDailyMonCount;
+    }
     sBanners[BANNER_STANDARD].pools[R_UR].count = sDailyLegendCount;
     sBanners[BANNER_STANDARD].pools[R_EX].count = sDailyLegendCount;
     SetupPickup();
 }
 
 // Test builds (mp gatchadump): every banner's prizes the GENERATION allows, by rarity (i = item, m = Moemon species,
-// s = a set, $ = money, f = a ball effect piece; * = shiny), and this week's PICKUP
+// s = a set, $ = money, f = a ball effect piece; * = shiny), and today's PICKUP
 void MP_Gatcha_DebugDump(void)
 {
     u8 b, r, keep = sBanner;
@@ -4324,7 +4661,7 @@ void MP_Gatcha_DebugReel(void)
     printf(" closest repeat %d\n", (int)closest);
 }
 
-// The reel shows another banner's (or another week's) prizes
+// The reel shows another banner's (or another day's) prizes
 static void RefillReel(void)
 {
     s32 c = CenterCell(), i;
@@ -4362,7 +4699,7 @@ static void DrawVoteAsked(void)
     char line[64], name[16];
     VoterName(sVote.from, name);
     FillWindowPixelBuffer(WIN_MENU, PIXEL_FILL(TC_PANEL));
-    snprintf(line, sizeof(line), "%s: reroll this week's PICKUP?", name);
+    snprintf(line, sizeof(line), "%s: reroll today's PICKUP?", name);
     PrintFitted(1, TC_GOLD, line);
     PrintFitted(14, TC_WHITE, "The new one is a surprise...");
     CopyWindowToVram(WIN_MENU, COPYWIN_FULL);
@@ -4376,7 +4713,7 @@ static void TryStartVotePick(void)
     if (gMpLocalId < 0 || FriendsOnline() == 0)
         why = "A PICKUP reroll vote needs friends online.";
     else if (VotedPickup() >= 0)
-        why = "This week's PICKUP was rerolled already.";
+        why = "Today's PICKUP was rerolled already.";
     else if (sVote.active || sVote.pending)
         why = "A vote is going on right now.";
     else if (sVote.retry)
@@ -4558,8 +4895,22 @@ static void Task_Gatcha(u8 taskId)
             else
                 DrawOddsLine();
         }
-        if (JOY_NEW(L_BUTTON | R_BUTTON))
+        if (sG->confirm && JOY_NEW(A_BUTTON | B_BUTTON | SELECT_BUTTON | DPAD_ANY | L_BUTTON | R_BUTTON)
+         && !(JOY_NEW(A_BUTTON) && sG->menuRows[sG->cursor] == MENU_EXCHANGE))
+        {
+            // anything but A again: not now
+            sG->confirm = FALSE;
+            PlaySE(SE_SELECT);
+            DrawMenu();
+        }
+        else if (JOY_NEW(L_BUTTON | R_BUTTON))
             SwitchBanner(JOY_NEW(R_BUTTON) ? 1 : -1);
+        else if (JOY_NEW(SELECT_BUTTON) && sG->menuRows[sG->cursor] == MENU_EXCHANGE)
+        {
+            sG->offer++;
+            PlaySE(SE_SELECT);
+            DrawMenu();
+        }
         else if (JOY_NEW(SELECT_BUTTON) && sBanner == BANNER_PICKUP)
             TryStartVotePick();
         else if (JOY_NEW(DPAD_ANY))
@@ -4604,24 +4955,18 @@ static void Task_Gatcha(u8 taskId)
                 PlaySE(SE_SHOP);
                 StartSpin(1);
             }
-            else if (row == MENU_TICKET && MP_Gatcha_Tickets() > 0)
+            else if (row == MENU_ONE && SpendPulls(1))
             {
-                MP_Gatcha_AddTickets(-1);
                 PlaySE(SE_SHOP);
                 StartSpin(1);
             }
-            else if (row == MENU_ONE && MP_Gatcha_Pulls() >= 1)
+            else if (row == MENU_TEN && SpendPulls(10))
             {
-                MP_Gatcha_AddPulls(-1);
-                PlaySE(SE_SHOP);
-                StartSpin(1);
-            }
-            else if (row == MENU_TEN && MP_Gatcha_Pulls() >= 10)
-            {
-                MP_Gatcha_AddPulls(-10);
                 PlaySE(SE_SHOP);
                 StartSpin(10);
             }
+            else if (row == MENU_EXCHANGE)
+                ExchangeA();
             else
             {
                 PlaySE(SE_FAILURE);
@@ -5038,10 +5383,10 @@ const char *MP_Gatcha_PhonePull(u8 banner, u8 how, struct MpGatchaPrize *out, u8
         AddFree1(banner, -1), n = 1;
     else if (how == 2 && MP_Gatcha_Tickets() > 0)
         MP_Gatcha_AddTickets(-1), n = 1;
-    else if (how == 3 && MP_Gatcha_Pulls() >= 1)
-        MP_Gatcha_AddPulls(-1), n = 1;
-    else if (how == 4 && MP_Gatcha_Pulls() >= 10)
-        MP_Gatcha_AddPulls(-10), n = 10;
+    else if (how == 3 && SpendPulls(1))
+        n = 1;
+    else if (how == 4 && SpendPulls(10))
+        n = 10;
     else
         return "nopulls";
     sBanner = banner;

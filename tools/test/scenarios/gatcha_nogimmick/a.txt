@@ -1,0 +1,4 @@
+pressuntil A field 5000
+wait 100
+mp gatchadump
+quit

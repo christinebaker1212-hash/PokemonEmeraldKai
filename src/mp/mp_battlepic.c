@@ -14,6 +14,9 @@
 #include "main.h"
 #include "palette.h"
 #include "mp.h"
+#include "mp_uistyle.h"
+#include "rtc.h"
+#include "constants/rgb.h"
 
 extern void (*gMpBgPictureLine)(int line, u16 *layer, s32 x0, s32 y0, s32 dx, s32 dy);
 extern int gMpBgPictureBg;
@@ -97,9 +100,61 @@ static void Line(int line, u16 *layer, s32 x0, s32 y0, s32 dx, s32 dy)
             layer[x] = Faded(row[(x0 >> 8) & (PIC_W - 1)]);
 }
 
+// RED's and CRYSTAL's battles with WHITE BG ON (the user, 2026-11-16): the whole background a plain colour, as the
+// Game Boy's were: RED's white, CRYSTAL's the white of its own palettes at that time of day (pokecrystal
+// gfx/tilesets/bg_tiles.pal: MORN 4-9, DAY 10-17, NITE 18-3), every region's scene and Kai's alike
+static bool8 PlainBackground(u16 *color)
+{
+    u8 style = MP_UiStyle_Active();
+    if ((style != UISTYLE_RED && style != UISTYLE_CRYSTAL) || gMpConfig.uiNoWhiteBg)
+        return FALSE;
+    *color = RGB(31, 31, 31);   // (CRYSTAL's light of the time of day goes over the whole scene: MP_BattlePic_SceneTint)
+    return TRUE;
+}
+
+// CRYSTAL's battles with WHITE BG ON: the light of the time of day over the scene (mp_uistyle.c TintBattleScene),
+// the white of its own palettes then (pokecrystal gfx/tilesets/bg_tiles.pal: MORN 4-9, DAY 10-17, NITE 18-3)
+bool8 MP_BattlePic_SceneTint(u16 *tint)
+{
+    u8 hour;
+    if (MP_UiStyle_Active() != UISTYLE_CRYSTAL || gMpConfig.uiNoWhiteBg)
+        return FALSE;
+    RtcCalcLocalTime();
+    hour = gLocalTime.hours;
+    *tint = hour >= 4 && hour < 10 ? RGB(28, 31, 16) : hour >= 10 && hour < 18 ? RGB(27, 31, 27) : RGB(15, 14, 24);
+    return TRUE;
+}
+
+static void ShowPlain(u16 color)
+{
+    u32 i;
+    for (i = 0; i < ARRAY_COUNT(sPic); i++)
+        sPic[i] = color;
+    sOn = TRUE;
+    gPlttBufferUnfaded[BG_PLTT_ID(2)] = gPlttBufferFaded[BG_PLTT_ID(2)] = SIG_A;
+    gPlttBufferUnfaded[BG_PLTT_ID(3)] = gPlttBufferFaded[BG_PLTT_ID(3)] = SIG_B;
+    sFadeFrame = ~0u;
+    gMpBgPictureBg = 3;
+    gMpBgPictureLine = Line;
+}
+
+// After Kai's own battle background is loaded (battle_bg.c): the plain one over it when WHITE BG asks for it
+void MP_BattlePic_AfterKaiBg(void)
+{
+    u16 color;
+    if (PlainBackground(&color))
+        ShowPlain(color);
+}
+
 // Draw PIXELS (512 x 128 BGR555, BG3's map space) as the battle's background from now on, BG3's palettes 2-4 loaded
 void MP_BattlePic_Show(const u16 *pixels)
 {
+    u16 color;
+    if (PlainBackground(&color))
+    {
+        ShowPlain(color);
+        return;
+    }
     memcpy(sPic, pixels, sizeof(sPic));
     sOn = TRUE;
     gPlttBufferUnfaded[BG_PLTT_ID(2)] = gPlttBufferFaded[BG_PLTT_ID(2)] = SIG_A;
@@ -112,6 +167,12 @@ void MP_BattlePic_Show(const u16 *pixels)
 // Stop drawing it (Kai's own background, or a region without a picture for this battle)
 void MP_BattlePic_Hide(void)
 {
+    u16 color;
+    if (gMain.inBattle && PlainBackground(&color))
+    {
+        ShowPlain(color);
+        return;
+    }
     sOn = FALSE;
     if (gMpBgPictureLine == Line)
     {

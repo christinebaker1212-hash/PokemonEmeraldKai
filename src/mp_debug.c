@@ -3187,7 +3187,25 @@ void MP_TestCommand(const char *cmd, const char *arg)
     }
     else if (strcmp(cmd, "gatchastock") == 0)
     {
-        printf("[test] gatcha tickets %d free %d\n", (int)MP_Gatcha_Tickets(), (int)MP_Gatcha_FreeWaiting());
+        printf("[test] gatcha tickets %d free %d points %d pulls %d\n", (int)MP_Gatcha_Tickets(), (int)MP_Gatcha_FreeWaiting(),
+               (int)MP_Gatcha_Points(), (int)MP_SaveData_Get("gatcha:pulls"));
+    }
+    else if (strcmp(cmd, "gatchatier") == 0)
+    {
+        // gatchatier N - the MoeGatcha's prizes in size N (0-3: badges 0-2, 3-5, 6-8, LEAGUE beaten; -1 the region's own)
+        int t = -1;
+        sscanf(arg, "%d", &t);
+        MP_Gatcha_SetTier(t < 0 ? 0xFF : t);
+    }
+    else if (strcmp(cmd, "gatchatickets") == 0)
+    {
+        // gatchatickets N - N more MOEGATCHA TICKETS
+        MP_Gatcha_AddTickets(atoi(arg));
+    }
+    else if (strcmp(cmd, "gatchapoints") == 0)
+    {
+        // gatchapoints N - N more MOEGATCHA POINTS
+        MP_SaveData_Add("gatcha:points", atoi(arg));
     }
     else if (strcmp(cmd, "gatcharig") == 0)
     {

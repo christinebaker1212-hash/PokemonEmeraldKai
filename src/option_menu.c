@@ -1427,8 +1427,10 @@ static bool8 HintText(u8 *buf)
                                              : gMpConfig.uiMenuMons == MP_MENU_MONS_EXTENDED ? "THE PARTY'S POKEMON AS CRYSTAL CLEAR DRAWS THEM"
                                                                                                : "THE PARTY'S POKEMON AS THE GAME BOY GAME DREW THEM");
     else if (opt == OPT_WHITEBG)
-        snprintf(ascii, sizeof(ascii), "%s", gMpConfig.uiNoWhiteBg ? "THE BATTLE BOXES WITH NOTHING BEHIND THEM"
-                                                                   : "THE BATTLE BOXES ON THE GAME BOY'S WHITE");
+        snprintf(ascii, sizeof(ascii), "%s", gMpConfig.uiNoWhiteBg ? "THE BATTLE'S OWN BACKGROUND"
+                                                                   : MP_UiStyle_Active() == UISTYLE_CRYSTAL
+                                                                   ? "A PLAIN BATTLE, LIT BY THE TIME OF DAY"
+                                                                   : "A PLAIN WHITE BATTLE, AS ON THE GAME BOY");
     else if (opt == OPT_THEME && MP_UiStyle_Active() == UISTYLE_KAI)
         snprintf(ascii, sizeof(ascii), "%s", gMpConfig.menuTheme == MP_MENU_THEME_DARK ? "EVERY WINDOW AND MESSAGE IN DARK COLORS"
                                                                                           : "THE GAME'S OWN LIGHT WINDOWS");

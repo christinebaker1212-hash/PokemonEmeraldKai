@@ -143,4 +143,6 @@ bool8 MP_UiStyle_HasIconSet(u8 style, u8 set);   // OPTIONS > DISPLAY > MENU POK
 bool8 MP_BattleMoveSwapping(u8 battler, u8 *to);
 bool8 MP_BattleChoosingMove(u8 battler);           // battle_controller_player.c: its move menu is up   // battle_controller_player.c: SELECT's move swap, the move it's on
 
+bool8 MP_BattlePic_SceneTint(u16 *tint);   // CRYSTAL's battles, WHITE BG ON: the time of day's light (mp_battlepic.c)
+
 #endif // GUARD_MP_UISTYLE_H

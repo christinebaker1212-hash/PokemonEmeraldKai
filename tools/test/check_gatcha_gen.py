@@ -3,14 +3,18 @@
 banners are the MoeGatcha as it always was, with nothing from a later generation; at a later GENERATION its Moemon and
 items join (STANDARD's daily picks, PICKUPs, held items, MEGA STONES from 6, Z-CRYSTALS from 7).
 
-    python3 tools/test/check_gatcha_gen.py GEN RESULT_DIR
+Since 1.201.0 (the MoeGatcha rework): no BERRIES among the N / U prizes, no Moemon on the POKe BALLS banner, and with
+the battle GIMMICKS turned OFF (MOEMON_GIMMICKS=2222) no MEGA STONE or Z-CRYSTAL anywhere.
+
+    python3 tools/test/check_gatcha_gen.py GEN [nogimmick] RESULT_DIR
 """
 import os
 import re
 import sys
 
 REPO = os.path.abspath(os.path.join(os.path.dirname(os.path.abspath(__file__)), '..', '..'))
-gen, d = int(sys.argv[1]), sys.argv[2]
+gen, d = int(sys.argv[1]), sys.argv[-1]
+nogimmick = 'nogimmick' in sys.argv[2:-1]
 src = open(os.path.join(REPO, 'include/constants/species.h')).read()
 num = {m.group(1): int(m.group(2)) for m in re.finditer(r'#define SPECIES_(\w+) (\d+)\b', src)}
 log = open(os.path.join(d, 'a.log'), errors='replace').read()
@@ -29,8 +33,8 @@ species = [int(x[1:].rstrip('*')) for v in pools.values() for x in v if x.starts
 items = [int(x[1:]) for v in pools.values() for x in v if x.startswith('i')]
 bad = []
 if gen == 3:
-    if m.group(2) != '26':
-        bad.append('GEN 3 has %s PICKUPs, not 26 (the first 19 and 7 more since 1.131.0)' % m.group(2))
+    if m.group(2) != '38':
+        bad.append('GEN 3 has %s PICKUPs, not 38 (the first 19, 7 more since 1.131.0, 12 more since 1.201.0)' % m.group(2))
     bad += ['later Moemon %d' % s for s in species if s > num['CHIMECHO']]
     bad += ['later item %d' % i for i in items if 389 <= i <= 396 or i >= 400]
     if len(pools['STANDARD UR']) != 6:
@@ -40,16 +44,29 @@ else:
     if len(later) != gen - 3:
         bad.append('STANDARD UR has %d later legends at GEN %d (one per later generation)' % (len(later), gen))
     want = {418: 4, 544: 6, 553: 6, 600: 7, 539: 9, 441: 4}   # LIFE ORB, ASSAULT VEST, a MEGA STONE, a Z-CRYSTAL...
+    if nogimmick:
+        want = {i: g for i, g in want.items() if not 553 <= i <= 617}
     for i, g in want.items():
         if (g <= gen) != (i in items):
             bad.append('item %d (GEN %d) %s at GEN %d' % (i, g, 'missing' if g <= gen else 'there', gen))
-    want_pickups = 26 + sum([6, 6, 4, 5, 5, 5][:gen - 3])   # each later GENERATION's PICKUPs (1.131.0)
+    want_pickups = 38 + sum([11, 10, 7, 8, 8, 8][:gen - 3])   # each later GENERATION's PICKUPs (1.131.0, 1.201.0)
     if int(m.group(2)) != want_pickups:
         bad.append('%s PICKUPs at GEN %d, not %d' % (m.group(2), gen, want_pickups))
     # shiny Moemon only from SSR up (the user, 2026-11-06)
     for name, v in pools.items():
         if name.split()[-1] in ('N', 'U', 'R', 'SR') and any(x.endswith('*') for x in v):
             bad.append('a shiny Moemon in %s' % name)
+items_h = open(os.path.join(REPO, 'include/constants/items.h')).read()
+inum = {m.group(1): int(m.group(2)) for m in re.finditer(r'#define ITEM_(\w+) +(\d+)\b', items_h)}
+berries = {v for k, v in inum.items() if k.endswith('_BERRY')}
+for name, v in pools.items():
+    if name.split()[-1] in ('N', 'U') and any(x.startswith('i') and int(x[1:]) in berries for x in v):
+        bad.append('BERRIES in %s' % name)
+    if name.startswith('POKE BALLS') and any(x.startswith('m') for x in v):
+        bad.append('a Moemon on %s' % name)
+gimmicky = [i for i in items if 553 <= i <= 617]
+if nogimmick and gimmicky:
+    bad.append('MEGA STONES / Z-CRYSTALS with the GIMMICKS OFF: %s' % sorted(set(gimmicky))[:8])
 for b in bad:
     print('FAIL', b)
 print('%d prizes checked at GEN %d: %s' % (len(species) + len(items), gen, 'ok' if not bad else '%d problems' % len(bad)))
