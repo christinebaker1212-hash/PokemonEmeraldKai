@@ -186,9 +186,12 @@ Read `BUILDING_COOP.md` first for the architecture and build steps. The player
 docs are in `dist_extras/README.txt` (shipped next to the exe).
 
 **UI STYLE** (the user, 2026-11-15: OPTIONS > DISPLAY > UI STYLE, KAI / RED / CRYSTAL / FIRERED / PLATINUM / BLACK over
-Kai's own layouts): **approved to build (2026-11-16)**; BLACK reworked the same day at the user's request and shown
-again. `docs/ui_styles/UI_STYLES.md`, mock-ups docs/ui_styles/mockups/ from tools/ui_styles/mockups.py (its checker,
-worst case included, must pass).
+Kai's own layouts): **built (1.200.0)**: battles, message box, START, party, OPTIONS, BAG, the summary's six pages and
+Kai's own pop-ups (menus, YES / NO, the save's box, the battle's boxes) in every style ("the Emerald menu displays over
+the new UI styles. It's jarring": never again). `docs/ui_styles/UI_STYLES.md` ("Building it"), COOP_NOTES "UI STYLE";
+packs from tools/ui_styles/build_pack.py (PLATINUM / BLACK from the ROMs, by the release), src/mp/mp_uistyle.c;
+mock-ups docs/ui_styles/mockups/ (tools/ui_styles/mockups.py, its checker must pass); check_specs.py compares packs
+with the mock-ups pixel for pixel; tests ui_style_battles, ui_style_screens.
 
 **The GBA's limits are not this game's** (the user, 2026-11-13: "this isn't a GBA game, this is a PC port"): any time
 something would go over a GBA limit (tiles, palettes, colours, sprites, VRAM, OAM, screen size...), ask the user how

@@ -4,9 +4,11 @@ The user's request (2026-11-15): a style selector for the whole interface, KAI (
 RED, CRYSTAL, FIRERED, PLATINUM, BLACK, each from its own game's art, over Kai's own single, double and triple battle
 layouts; a mock-up of every style on every screen it changes, shown for approval before anything is built.
 
-**Status (2026-11-16): approved, to be built** ("Approved, build the UI STYLE option."), with two fixes asked for
-the same day: RED's party HP bars lost their bottom line (the fill was painted over it; fixed), and BLACK's interface,
-its battles above all, "needing a rework" (done: the third pass below, shown again). Nothing in the game yet.
+**Status (2026-11-16): built, in the game from 1.200.0** ("Approved, build the UI STYLE option."), with two fixes
+asked for the same day: RED's party HP bars lost their bottom line (the fill was painted over it; fixed), and BLACK's
+interface, its battles above all, "needing a rework" (done: the third pass below, shown again). Then (the user, the
+same day): "when selecting something in a menu, or saving, the Emerald menu displays over the new UI styles. It's
+jarring. Let's correct this anywhere it would occur": KAI's own pop-ups are drawn in the style too ("Building it").
 
 The user's rules for the second pass: readability first; as much of each original's style as possible; KAI's fitment,
 above all in Double and Triple Battles; each original game's own menu layouts (never KAI's layout in another game's
@@ -94,3 +96,30 @@ ten screens (mockups.py also writes `<style>/<screen>.png`, each at 2x, not kept
 
     python3 tools/ui_styles/mockups.py KAI_SHOTS EXPORT OUT --pokered DIR --pokecrystal DIR --pokefirered DIR \
             --platinum ROM --black ROM
+
+## Building it (1.200.0)
+
+The game never draws a style itself from code: each style is a pack of pictures, fonts, strings and drawing specs that
+tools/ui_styles/build_pack.py makes from the same mock-up code (uipack.py: the format, the ops, fields and flags;
+`<style>_build.py` per style), and src/mp/mp_uistyle.c reads and draws over KAI's finished frame.
+- Packs: uistyle/red.pak, crystal.pak, firered.pak (from the pret decomps, committed); sinnoh/ui_platinum.pak and
+  unova/ui_black.pak (from the user's ROMs: built by the release from its secrets, never committed;
+  tools/ui_styles/fetch_platinum.sh fetches pokeplatinum's interface art at the mock-ups' commit). A style whose pack
+  isn't there keeps KAI's look (the log says so).
+- check_specs.py draws each pack's specs as the game does (uipack.render) and the mock-ups' own code, pixel for
+  pixel: the battles (every box kind with five worst-case names / levels / HP), the message box, START, OPTIONS, the
+  BAG, the party, the summary's INFO page. Usage at the top of the file (KAI_SHOTS, MOEMON_EXPORT, CHECK_OUT).
+- What the game draws in a style: the battle boxes, the command and move panels and the battle's message; the field's
+  message box; START; the party; OPTIONS (five tabs); the BAG (eight pockets, SORT); the summary's six pages (INFO,
+  SKILLS with IV stars / EVs, BATTLE MOVES and CONTEST MOVES with the picked move's numbers and words, POKé BALL,
+  JOURNAL; RENAME on SELECT; the title follows OPTIONS > CREATURES); and KAI's own pop-ups everywhere on the field, in
+  battle and over a style's screens: menus, YES / NO, the save's box, a shop's lists (menu.c's frames, PopUps), the
+  battle's own boxes (HandleBattleWindow: YES / NO with its cursor, the level up's stats), each in the style's window
+  frame and letters, red / grey words kept red / grey, KAI's button icons and extra symbols (+, Lv, PP, ID) as the
+  style's letters. KAI's words, menus and layouts stay; only how they look changes.
+- How the summary's pages are built per style: FIRERED, RED and CRYSTAL on their games' own status screens; PLATINUM on
+  its page NSCRs with the rows each page needs (pt.py summary_ground's pick: the move rows' light stripe whole and ten of
+  the dark one's rows, PP in its special digits); BLACK on its INFO (screen 63), STATS (73) and lined (64) pages of
+  a/0/7/8, the contest icons spelt from its type icons' own letters (bw_build.py contest_icon).
+- Tests: scenarios ui_style_battles, ui_style_screens (the summary's pages and OPTIONS in every style; shots looked at
+  by hand), check_specs.py for every style after any spec change.

@@ -7822,3 +7822,24 @@ rows, nothing over the cells).
   tools/sinnoh/build_scratch.py (rom_pack.sh, the release's PLATINUM_ROM_URL secret; never committed); words:
   scratch_off_cards_app through the names table (tv_data.py TEXT_BANKS).
 Test: sinnoh_scratch (`mp scratch`, `mp scratchcell [VALUE|w]`).
+
+## UI STYLE (1.200.0)
+
+OPTIONS > DISPLAY > UI STYLE: KAI (the default), RED, CRYSTAL, FIRERED, PLATINUM, BLACK, a setting per save file
+(gMpConfig.uiStyle; `mp uistyle NAME` in tests). Design, approval and how each style's art was made:
+docs/ui_styles/UI_STYLES.md ("Building it" for the game's side).
+- src/mp/mp_uistyle.c reads a style's pack (uistyle/*.pak, sinnoh/ui_platinum.pak, unova/ui_black.pak) and draws over
+  KAI's finished frame (MP_UiStyle_Composite): the battle boxes and panels, the field's message box, START, the party,
+  OPTIONS, the BAG, the summary, then KAI's pop-ups (PopUps). What it draws over is hidden first (gMpUiHideRects,
+  gMpUiHideBg0, sprites' mpNoDraw), so KAI's own boxes never show through.
+- Words come from KAI itself: every text printer's string and position is captured per window (text.c
+  MP_UiStyle_TextPrinted / TextRun, window.c WindowShown / WindowFilled / WindowRectFilled), the screens' own numbers
+  through small view functions (MP_Bag_View, MP_Options_View, MP_Summary_View / Words / BallLine, the party's state).
+- Pop-ups: a window is one when menu.c framed it (MP_UiStyle_Framed: dialogue or standard frame) or the battle drew a
+  box round it (MP_UiStyle_BattleBox from HandleBattleWindow: YES / NO, the level up's stats); its frame is the
+  style's "win" picture, its words "win.text" (C_SEL0 red, C_ALT grey), faded as its own window's palette. A message
+  box at the screen's foot is the style's message box. A message ending on its last \p keeps that page up (Msg).
+- KAI's button icons and extra symbols ({PLUS}, {LV_2}, PP, ID...) are the style's letters (KeypadWord, SymbolWord).
+- Fields past 160: F_CREATURES (1 when the game says POKéMON) for BLACK's re-spelt title.
+Tests: ui_style_battles, ui_style_screens; tools/ui_styles/check_specs.py.
+
