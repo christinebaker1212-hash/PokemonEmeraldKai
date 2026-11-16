@@ -95,6 +95,8 @@ class GB(Style):
     def glyph(self, ch):
         if ch == '◀':
             return self.font[0xED - 0x80].transpose(Image.FLIP_LEFT_RIGHT)
+        if ch == '…':
+            return self.extra[0x75 - 0x60]   # (charmap.asm's "…", $75: font_extra)
         if ch == '&' and self.kind == 'crystal':
             return self.font[0xE9 - 0x80]   # (Crystal's own &: charmap.asm $E9)
         if ch in self.SYNTH:

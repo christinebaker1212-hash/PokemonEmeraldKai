@@ -1699,7 +1699,8 @@ static u16 Bg0VOffset(void)
 
 static bool8 InBattle(void)
 {
-    return gMain.inBattle && gMain.callback2 == BattleMainCB2;
+    bool8 MP_DexCaughtPageShown(void);   // (pokedex.c: a catch's MOéDEX page over the battle, not the battle's own)
+    return gMain.inBattle && gMain.callback2 == BattleMainCB2 && !MP_DexCaughtPageShown();
 }
 
 static bool8 InField(void)

@@ -4794,6 +4794,13 @@ u8 DisplayCaughtMonDexPage(u16 dexNum, u32 otId, u32 personality)
     return taskId;
 }
 
+// Moemon Kai: UI STYLE (mp_uistyle.c): the caught POKéMON's page is up over the battle
+bool8 MP_DexCaughtPageShown(void)
+{
+    return FuncIsActiveTask(Task_DisplayCaughtMonDexPage) || FuncIsActiveTask(Task_HandleCaughtMonPageInput)
+        || FuncIsActiveTask(Task_ExitCaughtMonPage);
+}
+
 static void Task_DisplayCaughtMonDexPage(u8 taskId)
 {
     u8 spriteId;
