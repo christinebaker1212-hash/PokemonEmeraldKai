@@ -130,6 +130,7 @@ enum
     OPT_THEME,        // Moemon Co-op: DISPLAY > THEME DEFAULT / DARK (every window's colors: mp_darktheme.c)
     OPT_UISTYLE,      // Moemon Kai: DISPLAY > UI STYLE KAI / RED / CRYSTAL / FIRERED / PLATINUM / BLACK (mp_uistyle.c)
     OPT_WHITEBG,      // Moemon Kai: DISPLAY > WHITE BG ON / OFF, RED's and CRYSTAL's battle boxes on white or clear
+    OPT_MENUMONS,     // Moemon Kai: DISPLAY > MENU POKeMON ORIGINAL (/ EXTENDED) / KAI: RED's and CRYSTAL's party icons
     OPT_CLOSE,
 };
 #define SC_RULE(opt) ((opt) - OPT_SC_ON)
@@ -299,6 +300,10 @@ static const u8 sText_SpriteScale[] = _("SPRITE SCALING");
 static const u8 sText_Shadows[] = _("SHADOWS");
 static const u8 sText_Theme[] = _("THEME");
 static const u8 sText_WhiteBg[] = _("WHITE BG");
+static const u8 sText_MenuMons[] = _("MENU POKéMON");
+static const u8 sText_MenuMonsOriginal[] = _("ORIGINAL");
+static const u8 sText_MenuMonsExtended[] = _("EXTENDED");
+static const u8 sText_MenuMonsKai[] = _("KAI");
 static const u8 sText_ThemeDefault[] = _("DEFAULT");
 static const u8 sText_ByStyle[] = _("UI STYLE'S");   // (FRAME and THEME while a UI STYLE draws its own windows)
 static const u8 sText_ThemeDark[] = _("DARK");
@@ -528,7 +533,10 @@ static void BuildRows(void)
         AddRow(OPT_THEME, 0);
         AddRow(OPT_UISTYLE, 0);
         if (gMpConfig.uiStyle == UISTYLE_RED || gMpConfig.uiStyle == UISTYLE_CRYSTAL)
+        {
             AddRow(OPT_WHITEBG, 0);   // (the Game Boy styles' own)
+            AddRow(OPT_MENUMONS, 0);
+        }
         break;
     case TAB_CONTROLS:
         AddRow(OPT_PADSELECT, 0);
@@ -557,6 +565,12 @@ static void BuildRows(void)
 
 // ---------------------------------------------------------------------------
 // Values
+
+// MENU POKéMON's EXTENDED: CRYSTAL's, once its pack has Crystal Clear's icons
+static bool8 MenuMonsExtended(void)
+{
+    return gMpConfig.uiStyle == UISTYLE_CRYSTAL && MP_UiStyle_HasIconSet(UISTYLE_CRYSTAL, 1);
+}
 
 static int Wrap(int v, int n)
 {
@@ -612,6 +626,16 @@ static u8 Choices(u8 row, const u8 **names, u8 *buf)
     case OPT_ANNOUNCER:
         names[0] = sText_Off, names[1] = sText_English, names[2] = sText_Japanese;
         return 3;
+    case OPT_MENUMONS:
+        // (RED: its icons or KAI's; CRYSTAL: its own, Crystal Clear's or KAI's)
+        names[0] = sText_MenuMonsOriginal;
+        if (MenuMonsExtended())
+        {
+            names[1] = sText_MenuMonsExtended, names[2] = sText_MenuMonsKai;
+            return 3;
+        }
+        names[1] = sText_MenuMonsKai;
+        return 2;
     case OPT_THEME:
         if (MP_UiStyle_Active() != UISTYLE_KAI)
             break;   // (a UI STYLE draws its own windows: shown as the style's, below)
@@ -915,6 +939,10 @@ static u8 Current(u8 row)
     case OPT_THEME:       return gMpConfig.menuTheme % MP_MENU_THEME_COUNT;
     case OPT_UISTYLE:     return gMpConfig.uiStyle % UISTYLE_COUNT;
     case OPT_WHITEBG:     return !gMpConfig.uiNoWhiteBg;
+    case OPT_MENUMONS:
+        if (MenuMonsExtended())
+            return gMpConfig.uiMenuMons % MP_MENU_MONS_COUNT;
+        return gMpConfig.uiMenuMons == MP_MENU_MONS_KAI;
     case OPT_BGMUTE:      return gMpConfig.muteInBackground != 0;
     case OPT_ANNOUNCER:   return gMpConfig.noAnnouncer ? 0 : gMpConfig.announcerJp ? 2 : 1;
     case OPT_BADGEFADE:   return MP_TCard_Fade();
@@ -1041,6 +1069,13 @@ static void Change(u8 row, int dir)
         gMpConfig.menuTheme = Wrap(gMpConfig.menuTheme + (dir ? dir : 1), MP_MENU_THEME_COUNT);
         MPNet_Log("theme: %s", gMpConfig.menuTheme == MP_MENU_THEME_DARK ? "dark" : "default");
         OptionMenu_LoadThemePalettes();   // seen at once, on this screen too
+        break;
+    case OPT_MENUMONS:
+        if (MenuMonsExtended())
+            gMpConfig.uiMenuMons = Wrap(gMpConfig.uiMenuMons % MP_MENU_MONS_COUNT + (dir ? dir : 1), MP_MENU_MONS_COUNT);
+        else
+            gMpConfig.uiMenuMons = gMpConfig.uiMenuMons == MP_MENU_MONS_KAI ? MP_MENU_MONS_ORIGINAL : MP_MENU_MONS_KAI;
+        MPNet_Log("menu pokemon: %d", gMpConfig.uiMenuMons);
         break;
     case OPT_WHITEBG:
         gMpConfig.uiNoWhiteBg = !gMpConfig.uiNoWhiteBg;
@@ -1181,6 +1216,7 @@ static const u8 *RowLabel(u8 row, u8 *buf)
     case OPT_THEME: return sText_Theme;
     case OPT_UISTYLE: return sText_UiStyle;
     case OPT_WHITEBG: return sText_WhiteBg;
+    case OPT_MENUMONS: return sText_MenuMons;
     case OPT_BGMUTE:  return sText_BgMute;
     case OPT_ANNOUNCER: return sText_Announcer;
     case OPT_BADGEFADE:   return sText_BadgeFade;
@@ -1386,6 +1422,10 @@ static bool8 HintText(u8 *buf)
         };
         snprintf(ascii, sizeof(ascii), "%s", sDesc[gMpConfig.uiStyle % UISTYLE_COUNT]);
     }
+    else if (opt == OPT_MENUMONS)
+        snprintf(ascii, sizeof(ascii), "%s", gMpConfig.uiMenuMons == MP_MENU_MONS_KAI ? "THE PARTY'S POKEMON AS KAI DRAWS THEM"
+                                             : gMpConfig.uiMenuMons == MP_MENU_MONS_EXTENDED ? "THE PARTY'S POKEMON AS CRYSTAL CLEAR DRAWS THEM"
+                                                                                               : "THE PARTY'S POKEMON AS THE GAME BOY GAME DREW THEM");
     else if (opt == OPT_WHITEBG)
         snprintf(ascii, sizeof(ascii), "%s", gMpConfig.uiNoWhiteBg ? "THE BATTLE BOXES WITH NOTHING BEHIND THEM"
                                                                    : "THE BATTLE BOXES ON THE GAME BOY'S WHITE");

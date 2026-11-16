@@ -83,7 +83,7 @@ u8 MP_UiStyle_FromKey(const char *key)
 // ---------------------------------------------------------------------------------------------------- the pack
 // (the numbers tools/ui_styles/uipack.py writes)
 enum { OP_IMG = 1, OP_TEXT, OP_BAR, OP_FILL, OP_MSG, OP_LONG, OP_BACKING, OP_IMGSEL, OP_ROWMAP, OP_BLEND, OP_ICON, OP_CHOICES,
-       OP_LIST, OP_SNAP };
+       OP_LIST, OP_SNAP, OP_ICONSET };
 #define FIELD_CODE 0xFD
 #define NFIELDS 192
 #define F_NAME 1
@@ -2090,6 +2090,57 @@ static void PasteKaiWindow(u16 *frame, u8 w)
             frame[y * DISPLAY_WIDTH + x] = sKaiFrame[y * DISPLAY_WIDTH + x];
 }
 
+// OPTIONS > DISPLAY > MENU POKéMON: the style's own party icon for SPECIES (an EGG: EGG), in its set (0 ORIGINAL, 1
+// EXTENDED), drawn with its middle at (X, Y); FALSE when the setting is KAI's or the style has none
+static bool8 StyleMonIcon(struct UiPack *p, struct Surf *s, u16 species, bool8 egg, u8 frameNo, int x, int y)
+{
+    const struct UiSpec *sp;
+    u8 want = gMpConfig.uiMenuMons, set;
+    u16 k;
+    if (want == MP_MENU_MONS_KAI || (sp = FindSpec(p, "icons")) == NULL)
+        return FALSE;
+    // (EXTENDED where the style has it, else ORIGINAL)
+    for (set = want == MP_MENU_MONS_EXTENDED ? 1 : 0, k = 0; ; k++)
+    {
+        const struct UiOp *op;
+        u16 nat, len;
+        u32 id;
+        if (k >= sp->nOps)
+        {
+            if (set == 0)
+                return FALSE;
+            set = 0, k = 0;
+        }
+        op = &sp->ops[k];
+        if (op->kind != OP_ICONSET || op->d != set || op->a >= p->nStr)
+            continue;
+        len = p->strLen[op->a];
+        if (len < 2)
+            return FALSE;
+        nat = egg ? 0 : SpeciesToNationalPokedexNum(species);
+        id = (nat > 0 && nat < len - 1) ? p->str[op->a][nat] : egg ? p->str[op->a][0] : p->str[op->a][len - 1];
+        if (id >= op->c)
+            return FALSE;
+        id = op->b + 2 * id + (frameNo & 1);
+        if (id >= p->nImg)
+            return FALSE;
+        DrawImg(s, &p->img[id], x - p->img[id].w / 2, y - p->img[id].h / 2);
+        return TRUE;
+    }
+}
+
+// OPTIONS: whether STYLE's pack has the party icons of SET (0 ORIGINAL, 1 EXTENDED)
+bool8 MP_UiStyle_HasIconSet(u8 style, u8 set)
+{
+    struct UiPack *p = GetPack(style);
+    const struct UiSpec *sp = p ? FindSpec(p, "icons") : NULL;
+    u16 k;
+    for (k = 0; sp && k < sp->nOps; k++)
+        if (sp->ops[k].kind == OP_ICONSET && sp->ops[k].d == set)
+            return TRUE;
+    return FALSE;
+}
+
 // where a spec's ICON ops whose conditions hold put Kai's sprites: OUT[a] = (x, y) of the sprite's middle, -1 none
 static void IconPlaces(const struct UiSpec *sp, u32 flags, s16 out[5][2])
 {
@@ -2267,7 +2318,15 @@ static void PartyScreen(struct UiPack *p, u16 *frame)
         if (mon == NULL || !mon->inUse || places[i][0][0] < 0)
             continue;
         mx = places[i][0][0] - mon->x, my = places[i][0][1] - mon->y;
-        RedrawSprite(frame, mon, mx, my);
+        {
+            // (OPTIONS > DISPLAY > MENU POKéMON: the style's own icon, its two frames as Kai's icon turns its own)
+            struct Surf is = {frame, NULL, DISPLAY_WIDTH, DISPLAY_HEIGHT, &fit};
+            u8 fr = mon->anims ? mon->anims[mon->animNum][mon->animCmdIndex].frame.imageValue : 0;
+            if (!StyleMonIcon(p, &is, GetMonData(&gPlayerParty[i], MON_DATA_SPECIES),
+                              GetMonData(&gPlayerParty[i], MON_DATA_IS_EGG), fr, places[i][0][0],
+                              places[i][0][1] + mon->y2))
+                RedrawSprite(frame, mon, mx, my);
+        }
         if (st.itemSprite[i] < MAX_SPRITES)
         {
             struct Sprite *it = &gSprites[st.itemSprite[i]];

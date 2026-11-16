@@ -279,6 +279,7 @@ struct MpConfig
     u8 stadiumStyle;          // OPTIONS > BATTLE > STADIUM SETTINGS > STYLE: STADIUM's screens (MP_STADIUM_STYLE_*)
     u8 uiStyle;               // OPTIONS > DISPLAY > UI STYLE: UISTYLE_* (mp_uistyle.h: KAI, RED, CRYSTAL, FIRERED...)
     u8 uiNoWhiteBg;           // OPTIONS > DISPLAY > WHITE BG (RED / CRYSTAL): 1 OFF = the battle boxes without their white
+    u8 uiMenuMons;            // OPTIONS > DISPLAY > MENU POKeMON (RED / CRYSTAL): MP_MENU_MONS_* (the party's icons)
     // The options the save itself holds (TEXT SPEED, FRAME...) and the TRAINER CARD's two, kept with the other settings
     // so another save file follows File 1's (save_slots.c; the user, 2026-11-11). gameOptSet: which ones the file has
     u8 gameOpt[16];           // MP_GAMEOPT_*
@@ -534,6 +535,7 @@ void MP_ItemDesc_Print(u8 windowId, const u8 *desc, u8 x, u8 y, u16 width, u16 h
 void MP_ItemDesc_Update(void);
 void MP_BattleWeather_TurnStart(void);        // battle_main.c: a turn begins (the field's weather showed until then)
 void MP_BattleWeather_Composite(u16 *frame);   // mp_battleweather.c: rain, hail, sandstorm and sunlight in battle
+enum { MP_MENU_MONS_ORIGINAL, MP_MENU_MONS_EXTENDED, MP_MENU_MONS_KAI, MP_MENU_MONS_COUNT };   // (gMpConfig.uiMenuMons)
 #define MP_BATTLE_WEATHER_STATE 5                 // B_COMM_MP_WEATHER: the battle's weather, the field's, settled
 void MP_BattleWeather_LinkState(u8 *state);       // battle_controllers.c: the master's, for the others' screens
 void MP_BattleWeather_OnLinkState(const u8 *state, u16 size);   // ... the others: the master's weather now

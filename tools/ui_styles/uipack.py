@@ -145,6 +145,9 @@ OP_CHOICES = 12   # an OPTIONS row's choices (fields A...: F_NCHOICE of them, F_
 #                   N apart (ALIGN 0 from x, 1 ending at x + W), the one on in ink / shadow, the rest in colours C / D;
 #                   only the one on when they don't fit (font E - 1 when it's wider than W); glyph B just before the one on
 OP_LIST = 13      # (a screen's) its list: N rows from (x, y), H apart, each drawn with the screen's '<name>.row' spec
+OP_ICONSET = 15   # (spec "icons") a style's own party icons: string A a byte a national POKéDEX number (0 the EGG, the last
+                  # any other) giving its icon, pictures from B (icon i's two frames B + 2i, B + 2i + 1), C of them; D the set
+                  # (0 ORIGINAL, 1 EXTENDED: OPTIONS > DISPLAY > MENU POKéMON)
 OP_SNAP = 14      # the last field or battle frame the game showed (a style's BAG drawn over it, as RED's ITEM box is)
 F_QTY, F_QTY2, F_TAG = 93, 94, 95         # a BAG row's count, its count two wide, the button it's registered to
 B_CLOSE, B_QTY, B_TAG, B_SWAP = 1 << 27, 1 << 28, 1 << 29, 1 << 30   # a BAG row: CLOSE BAG, has a count, a button, moved

@@ -785,8 +785,33 @@ class GBPack:
             self.text(row, '{%d}' % U.F_NAME, 0, 4, w=216, alt=self.font7 + 1)
             p.spec(row)
 
+    def menu_icons(self):
+        """the party's POKéMON as the Game Boy game drew them (gb_icons.py: its own icons for its own POKéMON, the same
+        decisions carried to every other), in the style's shades: OPTIONS > DISPLAY > MENU POKéMON ORIGINAL"""
+        import gb_icons
+        st, p = self.st, self.p
+        frames, table, names, _ = gb_icons.icons(self.kind, st.pret)
+        light = tuple((a + b) // 2 for a, b in zip(st.mid, st.paper))
+        cols = [st.ink, st.mid, light]
+        base = None
+        for i, pair in enumerate(frames):
+            for f, rows in enumerate(pair):
+                im = Image.new('RGBA', (16, 16), (0, 0, 0, 0))
+                for y, r in enumerate(rows):
+                    for x, v in enumerate(r):
+                        if v < 3:
+                            im.putpixel((x, y), cols[v] + (255,))
+                k = p.image('gbicon.%d.%d' % (i, f), im)
+                base = k if base is None else base
+                assert k == base + 2 * i + f
+        default = names.index('ICON_MON' if self.red else 'ICON_MONSTER')
+        sp = U.Spec('icons')
+        sp.add(U.OP_ICONSET, a=p.string(table + bytes([default])), b=base, c=len(frames), d=0)
+        p.spec(sp)
+
     def make(self):
         self.fonts()
+        self.menu_icons()
         for kind in ('foe1', 'mine1', 'foe2', 'mine2', 'foe3', 'mine3'):
             self.p.spec(self.hud(kind))
         self.panels()

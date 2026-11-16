@@ -620,6 +620,9 @@ static void LoadConfig(void)
         else if (strcmp(key, "shadows") == 0) gMpConfig.noShadows = atoi(val) == 0;
         else if (strcmp(key, "ui_style") == 0) gMpConfig.uiStyle = MP_UiStyle_FromKey(val);
         else if (strcmp(key, "ui_white_bg") == 0) gMpConfig.uiNoWhiteBg = atoi(val) == 0;
+        else if (strcmp(key, "ui_menu_mons") == 0)
+            gMpConfig.uiMenuMons = strcmp(val, "kai") == 0 ? MP_MENU_MONS_KAI : strcmp(val, "extended") == 0 ? MP_MENU_MONS_EXTENDED
+                                                                                                     : MP_MENU_MONS_ORIGINAL;
         else if (strcmp(key, "menu_theme") == 0) gMpConfig.menuTheme = strcmp(val, "dark") == 0 ? MP_MENU_THEME_DARK : MP_MENU_THEME_DEFAULT;
         else if (strcmp(key, "mute_in_background") == 0) gMpConfig.muteInBackground = atoi(val) != 0;
         else if (strcmp(key, "stadium_announcer") == 0) gMpConfig.noAnnouncer = atoi(val) == 0;
@@ -806,6 +809,9 @@ void MP_SaveConfig(void)
         "ui_style = %s\n"
         "; OPTIONS > DISPLAY > WHITE BG (RED and CRYSTAL): 1 = the battle boxes on the Game Boy's white, 0 = clear\n"
         "ui_white_bg = %d\n"
+        "; OPTIONS > DISPLAY > MENU POKEMON (RED and CRYSTAL): original (the Game Boy game's icons), extended (CRYSTAL:\n"
+        "; Crystal Clear's) or kai\n"
+        "ui_menu_mons = %s\n"
         "; OPTIONS > GAME > MUTE IN BACKGROUND: 1 = no sound while the game's window isn't in focus\n"
         "mute_in_background = %d\n"
         "; OPTIONS > BATTLE > ANNOUNCER: 1 = POKEMON STADIUM's announcer calls its battles, 0 = quiet\n"
@@ -835,7 +841,7 @@ void MP_SaveConfig(void)
         gMpConfig.cardArt == MP_CARD_ART_GAME_BOY ? "gameboy" : gMpConfig.cardArt == MP_CARD_ART_FULL_CARD ? "full_card"
                                                                                                          : "printed_art",
         gMpConfig.cardBack == MP_CARD_BACK_PIXEL ? "pixel" : "printed", gMpConfig.cardScaling,
-        gMpConfig.battleAnims ? "modern" : "classic", !gMpConfig.noShadows, gMpConfig.menuTheme == MP_MENU_THEME_DARK ? "dark" : "default", MP_UiStyle_Key(gMpConfig.uiStyle), !gMpConfig.uiNoWhiteBg, gMpConfig.muteInBackground, !gMpConfig.noAnnouncer, gMpConfig.announcerJp,
+        gMpConfig.battleAnims ? "modern" : "classic", !gMpConfig.noShadows, gMpConfig.menuTheme == MP_MENU_THEME_DARK ? "dark" : "default", MP_UiStyle_Key(gMpConfig.uiStyle), !gMpConfig.uiNoWhiteBg, gMpConfig.uiMenuMons == MP_MENU_MONS_KAI ? "kai" : gMpConfig.uiMenuMons == MP_MENU_MONS_EXTENDED ? "extended" : "original", gMpConfig.muteInBackground, !gMpConfig.noAnnouncer, gMpConfig.announcerJp,
         gMpConfig.stadiumStyle == MP_STADIUM_STYLE_STADIUM1 ? "pokestadium" : gMpConfig.stadiumStyle == MP_STADIUM_STYLE_STADIUM2 ? "pokestadium2" : "original",
         gMpConfig.lobby);
     {

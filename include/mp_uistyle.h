@@ -139,6 +139,7 @@ extern u8 gMpUiHideCount;
 void MP_UiStyle_PreFrame(void);          // VDraw, before the frame is drawn: what's hidden
 void MP_UiStyle_Composite(u16 *frame);   // VDraw, after: the style's pieces over it
 
+bool8 MP_UiStyle_HasIconSet(u8 style, u8 set);   // OPTIONS > DISPLAY > MENU POKéMON: 0 ORIGINAL, 1 EXTENDED
 bool8 MP_BattleMoveSwapping(u8 battler, u8 *to);
 bool8 MP_BattleChoosingMove(u8 battler);           // battle_controller_player.c: its move menu is up   // battle_controller_player.c: SELECT's move swap, the move it's on
 
