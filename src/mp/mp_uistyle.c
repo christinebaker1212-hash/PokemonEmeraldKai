@@ -74,7 +74,8 @@ u8 MP_UiStyle_FromKey(const char *key)
 
 // ---------------------------------------------------------------------------------------------------- the pack
 // (the numbers tools/ui_styles/uipack.py writes)
-enum { OP_IMG = 1, OP_TEXT, OP_BAR, OP_FILL, OP_MSG, OP_LONG, OP_BACKING, OP_IMGSEL, OP_ROWMAP, OP_BLEND, OP_ICON };
+enum { OP_IMG = 1, OP_TEXT, OP_BAR, OP_FILL, OP_MSG, OP_LONG, OP_BACKING, OP_IMGSEL, OP_ROWMAP, OP_BLEND, OP_ICON, OP_CHOICES,
+       OP_LIST };
 #define FIELD_CODE 0xFD
 #define NFIELDS 96
 #define F_NAME 1
@@ -91,6 +92,12 @@ enum { OP_IMG = 1, OP_TEXT, OP_BAR, OP_FILL, OP_MSG, OP_LONG, OP_BACKING, OP_IMG
 #define F_EXP 64
 #define F_HPFRAC 65
 #define F_ICON0 70   // (a list row's icon, a style's own: START's from its map.start)
+#define F_CHOICE0 80   // an OPTIONS row's choices (80-87), how many (val), the one on (val), its name, the line under
+#define F_NCHOICE 88   // the rows, a page's title
+#define F_CUR 89
+#define F_CURSTR 90
+#define F_HINT 91
+#define F_TITLE 92
 #define C_LV3 (1u << 0)
 #define C_MALE (1u << 1)
 #define C_FEMALE (1u << 2)
@@ -109,6 +116,12 @@ enum { OP_IMG = 1, OP_TEXT, OP_BAR, OP_FILL, OP_MSG, OP_LONG, OP_BACKING, OP_IMG
 #define P_DESC (1u << 29)      // ... its description in its HP's place (ABLE, NOT ABLE...)
 #define P_FAINT (1u << 30)     // ... fainted
 #define P_SWITCH (1u << 31)    // ... picked to switch
+#define S_UP (1u << 27)        // a whole screen's list (not a party slot's): more rows above
+#define S_DOWN (1u << 28)      // ... more below
+#define S_PAGE (1u << 29)      // OPTIONS: a page's title in place of the tabs
+#define S_HINT (1u << 30)      // OPTIONS: the line under the rows says something about the row
+#define O_ALL (1u << 31)       // an OPTIONS row: its choices all shown (two or three of them), not just the one on
+#define O_VALUE (1u << 27)     // ... it has a value (a row that opens a page has none)
 #define OP_SIZE 38
 
 struct UiImg { u16 w, h; s16 dx, dy; const u8 *px; const u8 *a; s16 *cols; u16 nCols; };   // (px: u16s, unaligned)
@@ -865,6 +878,46 @@ static u8 sCanvasA[DISPLAY_WIDTH * DISPLAY_HEIGHT];
 
 static bool8 sTextOnly;   // (a spec's words drawn again, over Kai's sprites: DrawSpecText)
 
+// an OPTIONS row's choices (fields A...; F_NCHOICE of them, F_CUR the one on) from (x, y) in W: all of them N apart
+// (ALIGN 0 from x, 1 ending at x + W), the one on in the ink / shadow, the others in C / D; only the one on when they
+// don't fit (in font E - 1 when it's wider than W); the mark B (a glyph) just before the one on
+static void Choices(struct Surf *s, struct UiPack *p, const struct UiOp *op, const struct UiData *d, int x, int y)
+{
+    const struct UiFont *f;
+    int n = d->val[F_NCHOICE], cur = d->val[F_CUR], total = 0, i, at;
+    if (op->font >= p->nFont || n <= 0 || n > 8 || op->a + n > NFIELDS)
+        return;
+    f = &p->font[op->font];
+    for (i = 0; i < n; i++)
+        total += (d->str[op->a + i] ? Width(f, d->str[op->a + i], 255) : 0) + (i ? op->n : 0);
+    if (total > op->w || n == 1)
+    {
+        const u8 *t = cur >= 0 && cur < n ? d->str[op->a + cur] : NULL;
+        int wd;
+        if (t == NULL)
+            return;
+        if (op->e && op->e - 1 < p->nFont && Width(f, t, 255) > op->w)
+            f = &p->font[op->e - 1];
+        wd = Width(f, t, 255);
+        at = op->align == 1 ? x + op->w - wd : x;
+        if (op->b)
+            Glyph(s, f, op->b, at - f->g[op->b].adv, y, op->ink, op->shadow, op->outline, 0x7FFF);
+        Line(s, f, t, 255, at, y, op->ink, op->shadow, op->outline, 0x7FFF);
+        return;
+    }
+    at = op->align == 1 ? x + op->w - total : x;
+    for (i = 0; i < n; i++)
+    {
+        const u8 *t = d->str[op->a + i];
+        bool8 on = i == cur;
+        if (t == NULL)
+            continue;
+        if (on && op->b)
+            Glyph(s, f, op->b, at - f->g[op->b].adv, y, op->ink, op->shadow, op->outline, 0x7FFF);
+        at = Line(s, f, t, 255, at, y, on ? op->ink : op->c, on ? op->shadow : op->d, op->outline, 0x7FFF) + op->n;
+    }
+}
+
 // spec SP over FRAME with its top-left at (ax, ay)
 static void DrawSpec(struct UiPack *p, const struct UiSpec *sp, struct UiData *d, u16 *frame, int ax, int ay,
                      const struct MpFadeFit *fit)
@@ -894,7 +947,7 @@ static void DrawSpec(struct UiPack *p, const struct UiSpec *sp, struct UiData *d
         int x, y;
         if ((flags & op->cond) != op->cond || (flags & op->unless))
             continue;
-        if (sTextOnly && op->kind != OP_TEXT && op->kind != OP_LONG)
+        if (sTextOnly && op->kind != OP_TEXT && op->kind != OP_LONG && op->kind != OP_CHOICES)
             continue;
         if (op->kind == OP_LONG)
         {
@@ -946,12 +999,17 @@ static void DrawSpec(struct UiPack *p, const struct UiSpec *sp, struct UiData *d
                 x -= wd;
             else if (op->align == 2)
                 x -= wd / 2;
+            else if (op->align == 3)   // (centred on the Game Boy's 8-pixel grid)
+                x = ((x - wd / 2) / 8) * 8;
             regs[(op->flags >> 1) & 7] = Line(s, f, buf, n, x, y, op->ink, op->shadow, op->outline,
                                               op->h ? y + op->h : 0x7FFF) - ox;
             break;
         }
         case OP_MSG:
             Msg(s, p, op, d, x, y, oy, regs);
+            break;
+        case OP_CHOICES:
+            Choices(s, p, op, d, x, y);
             break;
         case OP_BAR:
             DrawBar(s, p, op, op->a < NFIELDS ? d->frac[op->a] : 0, x, y);
@@ -1799,9 +1857,85 @@ static void PartyScreen(struct UiPack *p, u16 *frame)
     }
 }
 
+// OPTIONS in a style: its spec "o" (the screen: tabs, or a page's title; the line under the rows), its OP_LIST's rows
+// each drawn with "o.row" from (x, y) H apart, N of them (the style's own scrolling, the cursor's row always shown)
+static void OptionsScreen(struct UiPack *p, u16 *frame)
+{
+    static struct MpOptionsView v;
+    static u8 sTop;
+    struct UiData d;
+    struct MpFadeFit fit;
+    const struct UiSpec *sp, *rowSp;
+    const struct UiOp *list = NULL;
+    u8 title[48], hint[72];
+    int vis, k, i;
+
+    if (!MP_Options_View(&v) || (sp = FindSpec(p, "o")) == NULL || (rowSp = FindSpec(p, "o.row")) == NULL)
+        return;
+    memset(&d, 0, sizeof(d));
+    if (v.page)
+        d.flags |= S_PAGE;
+    else
+        d.flags |= C_SEL0 << v.tab;
+    if (!v.plainHint)
+        d.flags |= S_HINT;
+    // (the first list whose conditions hold: a style can show fewer rows while the line under them is up)
+    for (k = 0; k < sp->nOps && list == NULL; k++)
+        if (sp->ops[k].kind == OP_LIST && (d.flags & sp->ops[k].cond) == sp->ops[k].cond
+         && !(d.flags & sp->ops[k].unless))
+            list = &sp->ops[k];
+    if (list == NULL || list->n == 0)
+        return;
+    vis = list->n;
+    if (v.sel < sTop)
+        sTop = v.sel;
+    else if (v.sel >= sTop + vis)
+        sTop = v.sel - vis + 1;
+    if (sTop + vis > v.rows)
+        sTop = v.rows > vis ? v.rows - vis : 0;
+    MP_FadeFit_FromPalette(&fit, BG_PLTT_ID(0));
+    for (i = 0; i < v.nTabs && i < 5; i++)
+        d.str[F_ITEM0 + i] = v.tabs[i];
+    if (v.page)
+        d.str[F_TITLE] = Filtered(v.title, title, sizeof(title));
+    d.str[F_HINT] = Filtered(v.hint, hint, sizeof(hint));
+    d.msg[0] = d.str[F_HINT];   // (for a style that wraps it: OP_MSG 0)
+    d.msgLen[0] = d.msgPrinted[0] = StringLength(d.str[F_HINT]);
+    if (sTop > 0)
+        d.flags |= S_UP;
+    if (sTop + vis < v.rows)
+        d.flags |= S_DOWN;
+    DrawSpec(p, sp, &d, frame, 0, 0, &fit);
+    for (i = 0; i < vis && sTop + i < v.rows; i++)
+    {
+        static u8 sBuf[40], sLbuf[40], sLabel[48];
+        const u8 *label, *names[8];
+        u8 cur, n, j;
+        struct UiData rd;
+        memset(&rd, 0, sizeof(rd));
+        n = MP_Options_RowView(sTop + i, &label, names, &cur, sBuf, sLbuf);
+        rd.str[F_NAME] = Filtered(label, sLabel, sizeof(sLabel));
+        for (j = 0; j < n && j < 8; j++)
+            rd.str[F_CHOICE0 + j] = names[j];   // (as written: CREATURES' and NAME CASE's own words)
+        rd.val[F_NCHOICE] = n;
+        rd.val[F_CUR] = cur;
+        if (n)
+        {
+            rd.str[F_CURSTR] = names[n == 1 ? 0 : cur];
+            rd.flags |= O_VALUE;
+        }
+        if (n >= 2 && n <= 3)
+            rd.flags |= O_ALL;
+        if (sTop + i == v.sel)
+            rd.flags |= C_SEL0;
+        DrawSpec(p, rowSp, &rd, frame, list->x, list->y + i * list->h, &fit);
+    }
+}
+
 // ---------------------------------------------------------------------------------------------------- each frame
 s16 gMpUiHideBg0[4];
-static u8 sDrawing;   // what this frame draws: 1 the battle, 2 the field's message box, 4 START
+static u8 sDrawing;   // what this frame draws: 1 the battle, 2 the field's message box, 4 START, 8 the battle's panel,
+                      // 16 the party, 32 OPTIONS
 
 // the game's own healthbox sprites (its two halves and its bar) drawn or not
 static void HideHealthboxes(bool8 hide)
@@ -1856,6 +1990,14 @@ void MP_UiStyle_PreFrame(void)
     }
     if (style == UISTYLE_KAI)
         return;
+    {
+        static struct MpOptionsView v;
+        if (MP_Options_View(&v))
+        {
+            sDrawing |= 32;
+            return;
+        }
+    }
     if (InBattle())
     {
         u16 vofs = Bg0VOffset();
@@ -1906,4 +2048,6 @@ void MP_UiStyle_Composite(u16 *frame)
         StartMenu(p, frame);
     if (sDrawing & 16)
         PartyScreen(p, frame);
+    if (sDrawing & 32)
+        OptionsScreen(p, frame);
 }

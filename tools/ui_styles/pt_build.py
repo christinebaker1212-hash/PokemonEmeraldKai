@@ -520,10 +520,73 @@ class PTPack:
                       unless=off)
             p.spec(sp)
 
+    # ---------------------------------------------------------------------------------------------------- OPTIONS
+    def options(self):
+        """pt.py options_page(): Platinum's OPTIONS (the backdrop, the entries' system-frame window, a row each 16
+        pixels, the choices from x 108, the chosen red; the red cursor round the cursor's row), KAI's tabs along the
+        top (or a page's title), and in the message box KAI's buttons, or what the row does (in KAI's small font
+        when Platinum's is too wide); the message box's scroll cursor at the window's edges for more rows"""
+        from common import OPTION_TABS
+        st, p = self.st, self.p
+        d = os.path.join(R, 'res', 'graphics', 'options_menu')
+        src = Image.open(os.path.join(d, 'tiles.png'))
+        sp_ = src.getpalette()
+        tpal = [tuple(sp_[3 * v:3 * v + 3]) for v in range(16)]
+        ink, red = st.FIELD_INK, ((232, 32, 16), (248, 168, 184))
+        tx, ty, tw, th = 1, 3, 28, 12
+        ground = Image.new('RGBA', (240, 160), tpal[1] + (255,))
+        st.std_frame(ground, tx, ty, tw, th, 'standard_system')
+        ground.paste((255, 255, 255, 255), (tx * 8, ty * 8, (tx + tw) * 8, (ty + th) * 8))
+        st.message_frame(ground, 2, 17, 25, 2)
+        sp = U.Spec('o')
+        self.img(sp, 'pt.o.ground', ground)
+        widths = [st.measure(t) for t in OPTION_TABS]
+        gap = (232 - sum(widths)) // (len(OPTION_TABS) - 1)
+        x = 4
+        for i, w in enumerate(widths):
+            self.text(sp, '{%d}' % (U.F_ITEM0 + i), x, 0, self.fn, *red, cond=U.C_SEL0 << i, unless=U.S_PAGE)
+            self.text(sp, '{%d}' % (U.F_ITEM0 + i), x, 0, self.fn, *ink, unless=U.S_PAGE | (U.C_SEL0 << i))
+            x += w + gap
+        self.text(sp, '{%d}' % U.F_TITLE, 4, 0, self.fn, *ink, cond=U.S_PAGE)
+        self.text(sp, 'L R  Tab     A  Choose     B  Back', 16, 136, self.fm, *ink, unless=U.S_HINT)
+        self.text(sp, '{%d}' % U.F_HINT, 16, 136, self.fm, *ink, cond=U.S_HINT, w=200, b=self.fsmall + 1)
+        more = Image.new('RGBA', (16, 16), (0, 0, 0, 0))
+        st.scroll_cursor(more, 0, 0)
+        self.img(sp, 'pt.o.down', more, 114, 117, cond=U.S_DOWN)
+        self.img(sp, 'pt.o.up', more.transpose(Image.FLIP_TOP_BOTTOM), 114, 11, cond=U.S_UP)
+        sp.add(U.OP_LIST, x=0, y=ty * 8, h=16, n=th // 2)
+        p.spec(sp)
+        # a row: the cursor's red outline (tilemap.bin's rows: tile 3 the corners, 4 the edge), the name, the choices
+        px = src.load()
+
+        def tile(k, hf=False, vf=False):
+            t = Image.new('RGBA', (8, 8), (0, 0, 0, 0))
+            for y in range(8):
+                for xx in range(8):
+                    v = px[k * 8 + xx, y]
+                    if v:
+                        t.putpixel((7 - xx if hf else xx, 7 - y if vf else y), tpal[v] + (255,))
+            return t
+        cur = Image.new('RGBA', (tw * 8, 16), (0, 0, 0, 0))
+        for c in range(tw):
+            k = 3 if c in (0, tw - 1) else 4
+            hf = c == tw - 1
+            cur.alpha_composite(tile(k, hf, False), (c * 8, 0))
+            cur.alpha_composite(tile(k, hf, True), (c * 8, 8))
+        row = U.Spec('o.row')
+        self.img(row, 'pt.o.cursor', cur, tx * 8, 0, cond=U.C_SEL0)
+        self.text(row, '{%d}' % U.F_NAME, tx * 8 + 6, 0, self.fn, *ink, w=92, b=self.fsmall + 1)
+        self.text(row, '{%d}' % U.F_CURSTR, tx * 8 + 100, 0, self.fn, *red, cond=U.O_VALUE, unless=U.O_ALL, w=120,
+                  b=self.fsmall + 1)
+        row.add(U.OP_CHOICES, x=tx * 8 + 100, y=0, w=120, n=10, a=U.F_CHOICE0, font=self.fn, ink=red[0],
+                shadow=red[1], c=U.col(ink[0]), d=U.col(ink[1]), cond=U.O_ALL)
+        p.spec(row)
+
     def make(self):
         self.fonts()
         for kind in ('foe1', 'mine1', 'foe2', 'mine2', 'foe3', 'mine3'):
             self.p.spec(self.hud(kind))
         self.panels()
         self.party()
+        self.options()
         return self.p

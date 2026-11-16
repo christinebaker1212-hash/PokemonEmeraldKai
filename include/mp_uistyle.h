@@ -51,6 +51,18 @@ struct MpPartyState
 };
 bool8 MP_PartyMenu_GetState(struct MpPartyState *st);
 
+// OPTIONS (option_menu.c): its tabs or a page's title, its rows, the line under them
+struct MpOptionsView
+{
+    u8 tab, nTabs, rows, sel;
+    const u8 *tabs[5];
+    bool8 page;           // a page of a row's own (title in TITLE) in place of the tabs
+    bool8 plainHint;      // the line under the rows is the screen's own (L / R: TABS ...), nothing about the row
+    u8 title[40], hint[64];
+};
+bool8 MP_Options_View(struct MpOptionsView *v);
+u8 MP_Options_RowView(u8 row, const u8 **label, const u8 **names, u8 *cur, u8 *buf, u8 *lbuf);   // (NAMES: 8)
+
 // the renderer (gba_easy_draw.c): BG0's pixels a style draws in place of, this frame (y0 <= line < y1, x0 <= x < x1)
 extern s16 gMpUiHideBg0[4];
 void MP_UiStyle_PreFrame(void);          // VDraw, before the frame is drawn: what's hidden

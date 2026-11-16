@@ -347,12 +347,47 @@ class GBPack:
             self.text(sp, '{%d}' % (U.F_TEXT0 + 1), 48, y + 11, cond=U.P_DESC, unless=U.P_EMPTY)
             p.spec(sp)
 
+    # ---------------------------------------------------------------------------------------------------- OPTION
+    def options(self):
+        """gbstyle.py options_page(): the tab (or a page's title) in the ink bar, L / R; six rows two tiles apart, the
+        name, then on the row under it CRYSTAL's ":" and the value at column 10, RED's choices with ▶ at the one on
+        (or ◀ the one on ▶ when there are more than three); ▶ at the picked row; a line about the row on the last two
+        rows, ▼ when more rows follow"""
+        from common import OPTION_TABS
+        st, p = self.st, self.p
+        ground = Image.new('RGBA', (240, 160), st.paper + (255,))
+        st.fill(ground, (0, 0, 240, 24), st.ink)
+        st.at(ground, 1, 1, 'L', st.paper)
+        st.at(ground, 28, 1, 'R', st.paper)
+        st.window(ground, (0, 24, 240, 160))
+        sp = U.Spec('o')
+        sp.add(U.OP_IMG, a=p.image('%s.o.ground' % self.kind, ground))
+        for i in range(len(OPTION_TABS)):
+            self.text(sp, '◀ {%d} ▶' % (U.F_ITEM0 + i), 120, 8, st.paper, cond=U.C_SEL0 << i, unless=U.S_PAGE,
+                      align=3)
+        self.text(sp, '{%d}' % U.F_TITLE, 120, 8, st.paper, cond=U.S_PAGE, align=3)
+        sp.add(U.OP_MSG, x=8, y=128, a=0, h=8, n=2, w=216, font=self.font, ink=st.ink, shadow=st.mid, cond=U.S_HINT)
+        self.text(sp, '▼', 224, 136, cond=U.S_DOWN)
+        sp.add(U.OP_LIST, x=0, y=32, h=16, n=6)
+        p.spec(sp)
+        row = U.Spec('o.row')
+        self.text(row, '▶', 8, 0, cond=U.C_SEL0)
+        self.text(row, '{%d}' % U.F_NAME, 16, 0)
+        if self.red:
+            self.text(row, '◀ {%d} ▶' % U.F_CURSTR, 24, 8, cond=U.O_VALUE, unless=U.O_ALL)
+            row.add(U.OP_CHOICES, x=24, y=8, w=208, n=16, a=U.F_CHOICE0, b=U.encode('▶')[0], font=self.font,
+                    ink=st.ink, shadow=st.mid, c=U.col(st.ink), d=U.col(st.mid), cond=U.O_ALL)
+        else:
+            self.text(row, ':{%d}' % U.F_CURSTR, 80, 8, cond=U.O_VALUE)
+        p.spec(row)
+
     def make(self):
         self.fonts()
         for kind in ('foe1', 'mine1', 'foe2', 'mine2', 'foe3', 'mine3'):
             self.p.spec(self.hud(kind))
         self.panels()
         self.party()
+        self.options()
         if not self.red:
             self.p.spec(words_spec(self.p, 'start', ACCOUNT))
         return self.p

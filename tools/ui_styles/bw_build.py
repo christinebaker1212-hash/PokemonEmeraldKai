@@ -579,9 +579,54 @@ class BWPack:
             self.text(sp, '{%d}' % (U.F_TEXT0 + 1), x + 42, y + 24, self.fm, pi, ps, cond=U.P_DESC, unless=off)
             p.spec(sp)
 
+    # ---------------------------------------------------------------------------------------------------- OPTIONS
+    def options(self):
+        """bw.py options_page(): Black's OPTIONS, KAI's tabs (or a page's title) on the title bar, a row on each of
+        its six bars, the cursor's bar lit as Black lights it (palette 7), the name and the choices (the one on green)
+        on the bar; a line about the row on the title bar's look turned over at the foot, five rows then"""
+        from common import OPTION_TABS
+        st, p = self.st, self.p
+        green, gsh = (96, 248, 144), (8, 64, 48)
+        white, wsh = (248, 248, 248), (48, 48, 64)
+        dim = (152, 136, 216)
+        ground = st.options_ground(None)
+        sp = U.Spec('o')
+        self.img(sp, 'bw.o.ground', ground)
+        x = 4
+        for i, t in enumerate(OPTION_TABS):
+            self.text(sp, '{%d}' % (U.F_ITEM0 + i), x, 11, self.fs, green, gsh, cond=U.C_SEL0 << i, unless=U.S_PAGE)
+            self.text(sp, '{%d}' % (U.F_ITEM0 + i), x, 11, self.fs, (160, 160, 160), (40, 40, 40),
+                      unless=U.S_PAGE | (U.C_SEL0 << i))
+            x += st.measure(t, 's') + 7
+        self.text(sp, '{%d}' % U.F_TITLE, 4, 11, self.fs, green, gsh, cond=U.S_PAGE)
+        foot = Image.new('RGBA', (240, 26), (0, 0, 0, 255))
+        foot.paste(ground.crop((0, 0, 240, 24)).transpose(Image.FLIP_TOP_BOTTOM), (0, 2))
+        self.img(sp, 'bw.o.foot', foot, 0, 134, cond=U.S_HINT)
+        self.text(sp, '{%d}' % U.F_HINT, 8, 139, self.fs, white, wsh, cond=U.S_HINT)
+        # (more rows: small white wedges, at the title bar's end and under the last bar)
+        wedge = Image.new('RGBA', (7, 4), (0, 0, 0, 0))
+        for k in range(4):
+            wedge.paste(white + (255,), (k, k, 7 - k, k + 1))
+        self.img(sp, 'bw.o.down', wedge, 229, 156, cond=U.S_DOWN)
+        self.img(sp, 'bw.o.up', wedge.transpose(Image.FLIP_TOP_BOTTOM), 229, 15, cond=U.S_UP)
+        sp.add(U.OP_LIST, x=0, y=27, h=22, n=6, unless=U.S_HINT)
+        sp.add(U.OP_LIST, x=0, y=27, h=22, n=5, cond=U.S_HINT)
+        p.spec(sp)
+        # the lit bars: each bar's own pixels lit, drawn under the row's words
+        row = U.Spec('o.row')
+        lit = st.options_ground(0)
+        band = diff(lit.crop((0, 24, 240, 46)), ground.crop((0, 24, 240, 46)))
+        self.img(row, 'bw.o.lit', band, 0, -3, cond=U.C_SEL0)
+        self.text(row, '{%d}' % U.F_NAME, 8, 0, self.fs, white, wsh)
+        self.text(row, '{%d}' % U.F_CURSTR, 232, 0, self.fs, green, gsh, align=1, cond=U.O_VALUE, unless=U.O_ALL)
+        row.add(U.OP_CHOICES, x=112, y=0, w=120, n=8, a=U.F_CHOICE0, align=1, font=self.fs, ink=green, shadow=gsh,
+                c=U.col(dim), d=U.col(wsh), cond=U.O_ALL)
+        p.spec(row)
+
     def make(self):
         self.fonts()
         self.huds()
         self.panels()
         self.party()
+        self.options()
         return self.p

@@ -48,6 +48,8 @@ def kai_codes():
     out = {}
     for ch, c in charmap().items():
         out.setdefault(c, ch)
+    for ch, c in EXTRA_CODES.items():
+        out[c] = ch
     return out
 
 
@@ -62,9 +64,13 @@ F_PP, F_MAXPP, F_TYPE = 32, 33, 34
 F_TEXT0 = 40           # a captured window's words (the battle's message, its prompt...): F_TEXT0 + window
 
 
+EXTRA_CODES = {'◀': 0x7B, '▼': 0x7A}   # (characters the game's charset has no letter for, at its LEFT_ARROW and
+#                                        DOWN_ARROW codes; a style's font draws them)
+
+
 def encode(s):
     """S in the game's charset; '{N}' writes field N; '{LV}' the level mark; '\\n' a new line"""
-    out, i, cm = bytearray(), 0, charmap()
+    out, i, cm = bytearray(), 0, dict(charmap(), **EXTRA_CODES)
     while i < len(s):
         if s[i] == '{':
             j = s.index('}', i)
@@ -107,7 +113,8 @@ STATUS_BITS = {'PSN': C_PSN, 'PAR': C_PAR, 'SLP': C_SLP, 'FRZ': C_FRZ, 'BRN': C_
 
 # ------------------------------------------------------------------------------------------------- ops
 OP_IMG = 1        # image A at (x, y)
-OP_TEXT = 2       # string A in font F, colours ink/shadow/outline, align (0 left, 1 right, 2 centre), up to width W
+OP_TEXT = 2       # string A in font F, colours ink/shadow/outline, align (0 left, 1 right, 2 centre, 3 centre on the
+#                   8-pixel grid), up to width W
 #                   (wider: font B, or 0); the x after it into register R; H: nothing drawn from H rows below y
 OP_BAR = 3        # bar: field A (a fraction, F_HP: hp / maxhp, F_EXP...) through fill images B (green), C (yellow),
 #                   D (red) at (x, y); E the fill's direction (0 from the left, 1 from the right)
@@ -131,6 +138,20 @@ P_EMPTY, P_EGG, P_DESC, P_FAINT, P_SWITCH = 1 << 27, 1 << 28, 1 << 29, 1 << 30, 
 F_EXP = 64
 F_HPFRAC = 65
 F_ICON0 = 70           # a list row's icon (START's: the style's map.start of each entry)
+OP_CHOICES = 12   # an OPTIONS row's choices (fields A...: F_NCHOICE of them, F_CUR the one on) from (x, y) in W: all of them
+#                   N apart (ALIGN 0 from x, 1 ending at x + W), the one on in ink / shadow, the rest in colours C / D;
+#                   only the one on when they don't fit (font E - 1 when it's wider than W); glyph B just before the one on
+OP_LIST = 13      # (a screen's) its list: N rows from (x, y), H apart, each drawn with the screen's '<name>.row' spec
+F_CHOICE0, F_NCHOICE, F_CUR, F_CURSTR, F_HINT, F_TITLE = 80, 88, 89, 90, 91, 92
+S_UP, S_DOWN = 1 << 27, 1 << 28           # (a whole screen's list) more rows above, below
+S_PAGE, S_HINT = 1 << 29, 1 << 30         # OPTIONS: a page's title in place of the tabs; a line about the row
+O_ALL = 1 << 31                           # an OPTIONS row shows all its choices (two or three)
+O_VALUE = 1 << 27                         # ... it has a value (a row opening a page has none)
+
+
+def col(c):
+    """a colour as an op's C / D field holds it"""
+    return rgb555(c) | 0x8000
 
 OP_FMT = '<BBBBIIhhHHHHHHHHHHH'
 OP_SIZE = struct.calcsize(OP_FMT)
@@ -365,7 +386,9 @@ def render(pack, sp, data, flags, dst=None, at=(0, 0), text_only=False):
     for op in sp.ops:
         if (flags & op.cond) != op.cond or (flags & op.unless):
             continue
-        if text_only and op.kind not in (OP_TEXT, OP_LONG):
+        if text_only and op.kind not in (OP_TEXT, OP_LONG, OP_CHOICES):
+            continue
+        if op.kind == OP_LIST:
             continue
         if op.kind == OP_LONG:
             f = pack.fonts[op.font]
@@ -392,6 +415,8 @@ def render(pack, sp, data, flags, dst=None, at=(0, 0), text_only=False):
                 f = pack.fonts[op.b - 1]
             wd = width(f, s)
             x0 = x - (wd if op.align == 1 else wd // 2 if op.align == 2 else 0)
+            if op.align == 3:     # (centred on the Game Boy's 8-pixel grid)
+                x0 = int((x - wd // 2) / 8) * 8
             for code in s:
                 x0 += glyph_draw(canvas, f, x0, y, code, op.ink, op.shadow, op.outline,
                                  clip=y + op.h if op.h else None, evb=op.evb)
@@ -414,6 +439,8 @@ def render(pack, sp, data, flags, dst=None, at=(0, 0), text_only=False):
                 regs[op.reg], regs[(op.reg + 1) & 7] = x0 - ox, y0 + i * step - oy
         elif op.kind == OP_BAR:
             _bar(canvas, pack, op, data.get(op.a, 0.0), x, y)
+        elif op.kind == OP_CHOICES:
+            _choices(canvas, pack, op, data, x, y)
         elif op.kind == OP_BACKING:
             backing = op
         elif op.kind == OP_ROWMAP:
@@ -435,6 +462,42 @@ def render(pack, sp, data, flags, dst=None, at=(0, 0), text_only=False):
         _paste(area, canvas, place[0], place[1])
         _paste(dst, area, at[0], at[1])
     return dst
+
+
+def _choices(dst, pack, op, data, x, y):
+    """OP_CHOICES as src/mp/mp_uistyle.c Choices draws it"""
+    def c555(v):
+        return None if not v else ((v & 31) << 3, (v >> 5 & 31) << 3, (v >> 10 & 31) << 3)
+    n, cur = int(data.get(F_NCHOICE, 0)), int(data.get(F_CUR, 0))
+    if n <= 0:
+        return
+    f = pack.fonts[op.font]
+    names = [encode(data[op.a + i]) if isinstance(data.get(op.a + i), str) else data.get(op.a + i, b'')
+             for i in range(n)]
+    total = sum(width(f, t) for t in names) + op.n * (n - 1)
+    mark = op.b
+
+    def line(t, x0, ink, sh):
+        for code in t:
+            x0 += glyph_draw(dst, f, x0, y, code, ink, sh, op.outline)
+        return x0
+    if total > op.w or n == 1:
+        t = names[cur] if 0 <= cur < n else None
+        if t is None:
+            return
+        if op.e and width(f, t) > op.w:
+            f = pack.fonts[op.e - 1]
+        at = x + op.w - width(f, t) if op.align == 1 else x
+        if mark:
+            glyph_draw(dst, f, at - f.glyphs[mark][0], y, mark, op.ink, op.shadow, op.outline)
+        line(t, at, op.ink, op.shadow)
+        return
+    at = x + op.w - total if op.align == 1 else x
+    for i, t in enumerate(names):
+        on = i == cur
+        if on and mark:
+            glyph_draw(dst, f, at - f.glyphs[mark][0], y, mark, op.ink, op.shadow, op.outline)
+        at = line(t, at, op.ink if on else c555(op.c), op.shadow if on else c555(op.d)) + op.n
 
 
 def _paste(dst, im, x, y):

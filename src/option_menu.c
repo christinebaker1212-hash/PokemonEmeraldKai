@@ -577,7 +577,7 @@ static u8 FriendPlace(const struct MpSpecFriend *fr)
     return fr->popout ? 4 : fr->side;
 }
 
-// The row's choices: how many, which one is on, and their names. A row with a free-form value (a name, a count)
+// The row's choices: how many, which one is on, and their names (NAMES holds 8). A row with a free-form value (a name, a count)
 // has one choice, written into buf.
 static u8 Choices(u8 row, const u8 **names, u8 *buf)
 {
@@ -1225,7 +1225,7 @@ static void DrawChoice(const u8 *text, int x, s16 y, bool8 on, u8 fontId)
 
 static void DrawRowValue(u8 row)
 {
-    const u8 *names[5];
+    const u8 *names[8];   // (GENERATION has seven, UI STYLE six)
     u8 buf[40];
     u8 n = Choices(row, names, buf), cur = Current(row), i;
     s16 y = ROW_Y(row);
@@ -1263,14 +1263,13 @@ static void DrawRowValue(u8 row)
     gMpTextFilterOff = FALSE;
 }
 
-// The line under the rows: what the row does, or what's going on
-static void DrawHint(void)
+// The line under the rows: what the row does, or what's going on (into BUF, 64 bytes; TRUE: the screen's own line,
+// nothing about the row)
+static bool8 HintText(u8 *buf)
 {
     char ascii[64];
-    u8 buf[64];
     u8 opt = sRowCount ? sRows[sSel].opt : OPT_CLOSE, arg = sRows[sSel].arg;
-    static const u8 sColors[] = {TEXT_COLOR_WHITE, TEXT_COLOR_DARK_GRAY, TEXT_COLOR_LIGHT_GRAY};
-    int y = OPTION_VISIBLE_ROWS * OPTION_ROW_H + 1;
+    bool8 plain = FALSE;
 
     if (Gamepad_IsSelecting())
         snprintf(ascii, sizeof(ascii), "PRESS ANY BUTTON ON THE CONTROLLER TO USE");
@@ -1343,7 +1342,7 @@ static void DrawHint(void)
         snprintf(ascii, sizeof(ascii), "%s", gMpConfig.unovaSprites == MP_UNOVA_SPRITES_GEN5 ? "BLACK'S OWN SPRITES"
                  : "FRLG-STYLE GEN 5, GEN 3 MATCHES, OR SHRUNK");
     else if (opt == OPT_SPRITESCALE)
-        snprintf(ascii, sizeof(ascii), "A: SINNOH'S AND UNOVA'S PEOPLE, FOLLOWERS, THE GARDEN");
+        snprintf(ascii, sizeof(ascii), "A: SINNOH'S, UNOVA'S PEOPLE; FOLLOWERS; GARDEN");
     else if (opt == OPT_STADIUM)
         snprintf(ascii, sizeof(ascii), "A: THE STADIUM'S LOOK AND ANNOUNCER");
     else if (opt == OPT_ST_STYLE)
@@ -1432,7 +1431,7 @@ static void DrawHint(void)
     else if (opt == OPT_FINDER)
         snprintf(ascii, sizeof(ascii), "RIGHT STICK CLICK / G: SHOW OR HIDE IT");
     else if (opt == OPT_STREAMER)
-        snprintf(ascii, sizeof(ascii), "%s", gMpConfig.streamer ? "TRAINERS' NAMES AND NICKNAMES SHOWN AS OTHERS"
+        snprintf(ascii, sizeof(ascii), "%s", gMpConfig.streamer ? "TRAINER NAMES AND NICKNAMES SHOWN AS OTHERS"
                                                                 : "NAMES SHOWN AS THEY ARE");
     else if (opt == OPT_FR_PLACE)
         snprintf(ascii, sizeof(ascii), "%s", MP_Spectate_Friend(arg, FALSE)->popout ? "CLOSING ITS WINDOW HIDES IT" : "WHICH SIDE OF YOUR SCREEN");
@@ -1446,68 +1445,63 @@ static void DrawHint(void)
             snprintf(ascii, sizeof(ascii), "1X TO 4X");
     }
     else
+    {
         snprintf(ascii, sizeof(ascii), "L / R: TABS     MOEMON EMERALD KAI V1.0");
+        plain = TRUE;
+    }
     MP_AsciiToGame(buf, ascii, 60);
+    return plain;
+}
+
+static void DrawHint(void)
+{
+    u8 buf[64];
+    static const u8 sColors[] = {TEXT_COLOR_WHITE, TEXT_COLOR_DARK_GRAY, TEXT_COLOR_LIGHT_GRAY};
+    int y = OPTION_VISIBLE_ROWS * OPTION_ROW_H + 1;
+    HintText(buf);
     FillWindowPixelRect(WIN_OPTIONS, PIXEL_FILL(1), 0, y - 1, 26 * 8, OPTION_ROW_H);
     AddTextPrinterParameterized3(WIN_OPTIONS, FONT_SMALL, (26 * 8 - GetStringWidth(FONT_SMALL, buf, 0)) / 2, y, sColors,
                                  TEXT_SKIP_DRAW, buf);
 }
 
+// A page's title ("BATTLE > LEVEL SCALING"...) into BUF (40 bytes): FALSE on a tab's own rows
+static bool8 PageTitle(u8 *buf)
+{
+    const u8 *tab, *page;
+    u8 *p;
+    if (sFightPage)
+        tab = sTabNames[TAB_CONTROLS], page = sText_FightKeys;
+    else if (sStadiumPage)
+        tab = sTabNames[TAB_BATTLE], page = sText_StadiumSettings;
+    else if (sSpritePage)
+        tab = sTabNames[TAB_DISPLAY], page = sText_SpriteScale;
+    else if (sScalePage)
+        tab = sTabNames[TAB_BATTLE], page = sText_LevelScale;
+    else if (sFriendPage)
+        tab = sText_TabCoop, page = NULL;
+    else
+        return FALSE;
+    p = StringCopy(buf, tab);
+    *p++ = CHAR_SPACE;
+    *p++ = CHAR_GREATER_THAN;
+    *p++ = CHAR_SPACE;
+    if (page)
+        StringCopy(p, page);
+    else
+    {
+        p = StringCopyN(p, gMpPlayers[sFriendPage - 1].name, PLAYER_NAME_LENGTH);
+        *p = EOS;
+    }
+    return TRUE;
+}
+
 static void DrawHeader(void)
 {
     int i, x = 8;
+    u8 title[40];
     FillWindowPixelBuffer(WIN_HEADER, PIXEL_FILL(1));
-    if (sFightPage)
-    {
-        u8 buf[40];
-        u8 *p = StringCopy(buf, sTabNames[TAB_CONTROLS]);
-        *p++ = CHAR_SPACE;
-        *p++ = CHAR_GREATER_THAN;
-        *p++ = CHAR_SPACE;
-        StringCopy(p, sText_FightKeys);
-        AddTextPrinterParameterized(WIN_HEADER, FONT_NORMAL, buf, 8, 1, TEXT_SKIP_DRAW, NULL);
-    }
-    else if (sStadiumPage)
-    {
-        u8 buf[40];
-        u8 *p = StringCopy(buf, sTabNames[TAB_BATTLE]);
-        *p++ = CHAR_SPACE;
-        *p++ = CHAR_GREATER_THAN;
-        *p++ = CHAR_SPACE;
-        StringCopy(p, sText_StadiumSettings);
-        AddTextPrinterParameterized(WIN_HEADER, FONT_NORMAL, buf, 8, 1, TEXT_SKIP_DRAW, NULL);
-    }
-    else if (sSpritePage)
-    {
-        u8 buf[40];
-        u8 *p = StringCopy(buf, sTabNames[TAB_DISPLAY]);
-        *p++ = CHAR_SPACE;
-        *p++ = CHAR_GREATER_THAN;
-        *p++ = CHAR_SPACE;
-        StringCopy(p, sText_SpriteScale);
-        AddTextPrinterParameterized(WIN_HEADER, FONT_NORMAL, buf, 8, 1, TEXT_SKIP_DRAW, NULL);
-    }
-    else if (sScalePage)
-    {
-        u8 buf[40];
-        u8 *p = StringCopy(buf, sTabNames[TAB_BATTLE]);
-        *p++ = CHAR_SPACE;
-        *p++ = CHAR_GREATER_THAN;
-        *p++ = CHAR_SPACE;
-        StringCopy(p, sText_LevelScale);
-        AddTextPrinterParameterized(WIN_HEADER, FONT_NORMAL, buf, 8, 1, TEXT_SKIP_DRAW, NULL);
-    }
-    else if (sFriendPage)
-    {
-        u8 buf[32];
-        u8 *p = StringCopy(buf, sText_TabCoop);
-        *p++ = CHAR_SPACE;
-        *p++ = CHAR_GREATER_THAN;
-        *p++ = CHAR_SPACE;
-        p = StringCopyN(p, gMpPlayers[sFriendPage - 1].name, PLAYER_NAME_LENGTH);
-        *p = EOS;
-        AddTextPrinterParameterized(WIN_HEADER, FONT_NORMAL, buf, 8, 1, TEXT_SKIP_DRAW, NULL);
-    }
+    if (PageTitle(title))
+        AddTextPrinterParameterized(WIN_HEADER, FONT_NORMAL, title, 8, 1, TEXT_SKIP_DRAW, NULL);
     else
     {
         // the tabs, the one shown in red, spread over the header (1.63.14: five; the gaps shrink to fit)
@@ -1557,7 +1551,7 @@ static u32 ShownKey(void)
     u8 i, j;
     for (i = 0; i < sRowCount; i++)
     {
-        const u8 *names[5];
+        const u8 *names[8];   // (GENERATION has seven, UI STYLE six)
         u8 buf[40], n = Choices(i, names, buf);
         key = key * 33 + sRows[i].opt * 7 + sRows[i].arg;
         key = key * 33 + Current(i);
@@ -2019,4 +2013,36 @@ static void DrawBgWindowFrames(void)
     FillBgTilemapBufferRect(1, TILE_BOT_CORNER_R, 28, 19,  1,  1,  7);
 
     CopyBgTilemapBufferToVram(1);
+}
+
+// ---------------------------------------------------------------------------
+// Moemon Co-op: what the screen shows, for OPTIONS > DISPLAY > UI STYLE (src/mp/mp_uistyle.c draws it in a style)
+bool8 MP_Options_View(struct MpOptionsView *v)
+{
+    u8 i;
+    if (gMain.callback2 != MainCB2 || sRowCount == 0)
+        return FALSE;
+    v->tab = sTab;
+    v->nTabs = TAB_COUNT;
+    for (i = 0; i < TAB_COUNT && i < ARRAY_COUNT(v->tabs); i++)
+        v->tabs[i] = sTabNames[i];
+    v->page = PageTitle(v->title);
+    v->rows = sRowCount;
+    v->sel = sSel;
+    v->plainHint = HintText(v->hint);
+    return TRUE;
+}
+
+// row ROW: its label and choices (NAMES, N of them, the one on in *CUR); BUF / LBUF (40 bytes) hold made-up ones
+u8 MP_Options_RowView(u8 row, const u8 **label, const u8 **names, u8 *cur, u8 *buf, u8 *lbuf)
+{
+    u8 n;
+    if (row >= sRowCount)
+        return 0;
+    *label = RowLabel(row, lbuf);
+    n = Choices(row, names, buf);
+    *cur = Current(row);
+    if (n > 1 && *cur >= n)
+        *cur = 0;
+    return n;
 }

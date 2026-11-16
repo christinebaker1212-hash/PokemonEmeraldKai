@@ -15,7 +15,8 @@ from common import (BAG_DESC, BAG_ITEMS, BAG_POCKET, OPTION_ROWS, OPTION_TABS, S
 CODES = {**{chr(65 + i): 0x80 + i for i in range(26)}, **{chr(97 + i): 0xA0 + i for i in range(26)},
          **{str(i): 0xF6 + i for i in range(10)}, '(': 0x9A, ')': 0x9B, ':': 0x9C, ';': 0x9D, '[': 0x9E, ']': 0x9F,
          'é': 0xBA, "'": 0xE0, '-': 0xE3, '?': 0xE6, '!': 0xE7, '.': 0xE8, '▶': 0xED, '▼': 0xEE, '♂': 0xEF,
-         '¥': 0xF0, '×': 0xF1, '/': 0xF3, ',': 0xF4, '♀': 0xF5, '&': 0xE7}
+         '¥': 0xF0, '×': 0xF1, '/': 0xF3, ',': 0xF4, '♀': 0xF5, '&': 0xE7,
+         '’': 0xE0, '‘': 0xE0}   # (the game's ' is its ’)
 
 
 def wrap(s, n):
@@ -85,9 +86,21 @@ class GB(Style):
                 elif paper is not None:
                     p[X, Y] = paper + (255,)
 
+    # letters KAI's words use that the Game Boy fonts don't have, drawn in their thin strokes
+    SYNTH = {'+': ('........', '........', '...#....', '...#....', '.#####..', '...#....', '...#....', '........'),
+             '=': ('........', '........', '........', '.######.', '........', '.######.', '........', '........'),
+             '%': ('........', '.##...#.', '.##..#..', '....#...', '...#....', '..#..##.', '.#...##.', '........')}
+
     def glyph(self, ch):
         if ch == '◀':
             return self.font[0xED - 0x80].transpose(Image.FLIP_LEFT_RIGHT)
+        if ch in self.SYNTH:
+            t = Image.new('L', (8, 8), 255)
+            for y, row in enumerate(self.SYNTH[ch]):
+                for x, c in enumerate(row):
+                    if c == '#':
+                        t.putpixel((x, y), 0)
+            return t
         c = 0xEA if (ch == 'é' and self.kind == 'crystal') else CODES.get(ch, 0xE6)
         return self.font[c - 0x80]
 
@@ -644,8 +657,8 @@ class GB(Style):
             self.at(im, 2, r, name)
             if self.kind == 'crystal':
                 self.at(im, 10, r + 1, ':' + (self.name if vals is None else vals[-1]))
-            elif vals is None:
-                self.at(im, 3, r + 1, '◀ ' + self.name + ' ▶')
+            elif vals is None or len(vals) == 1:   # (UI STYLE's six, FRAME's twenty: the one on between arrows)
+                self.at(im, 3, r + 1, '◀ ' + (self.name if vals is None else vals[0]) + ' ▶')
             else:
                 col = 3
                 for k, v in enumerate(vals):

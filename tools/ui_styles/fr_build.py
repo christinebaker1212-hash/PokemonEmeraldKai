@@ -314,10 +314,61 @@ class FRPack:
             self.text(sp, '{%d}' % (U.F_TEXT0 + 1), x + desc[0], y + desc[1], ink, 's', cond=U.P_DESC, unless=off)
             p.spec(sp)
 
+    # ---------------------------------------------------------------------------------------------------- OPTION
+    def options(self):
+        """fr.py options_page(): FireRed's OPTION (the help bar, the header window with KAI's tabs, the list window),
+        seven rows 13 apart, each its name and the chosen value in red, the rows not picked lightened; a page's title
+        in the header; a line about the row in the help bar's place; FireRed's scroll arrows for more rows"""
+        from common import OPTION_TABS
+        st, p = self.st, self.p
+        ground = Image.new('RGBA', (240, 160), (0, 0, 0, 255))
+        st.frame(ground, (8, 16, 232, 48), 'std')
+        st.frame(ground, (8, 48, 232, 160))
+        sp = U.Spec('o')
+        self.img(sp, 'fr.o.ground', ground)
+        bar = Image.new('RGBA', (240, 16), F.BLUE_BAR + (255,))
+        keys = bar.copy()
+        x = 228 - (8 + st.measure('PICK', 's') + 4 + 8 + st.measure('SWITCH', 's') + 4 + 32 +
+                   st.measure('TAB', 's') + 4 + 16 + st.measure('CANCEL', 's'))
+        x = st.key(keys, x, 2, 'UPDOWN')
+        x = st.text(keys, x, 0, 'PICK', *F.WHITE, font='s') + 4
+        x = st.key(keys, x, 2, 'LEFTRIGHT')
+        x = st.text(keys, x, 0, 'SWITCH', *F.WHITE, font='s') + 4
+        x = st.key(keys, x, 2, 'L')
+        x = st.key(keys, x, 2, 'R')
+        x = st.text(keys, x, 0, 'TAB', *F.WHITE, font='s') + 4
+        x = st.key(keys, x, 2, 'A')
+        x = st.key(keys, x, 2, 'B')
+        st.text(keys, x, 0, 'CANCEL', *F.WHITE, font='s')
+        self.img(sp, 'fr.o.keys', keys, 0, 0, unless=U.S_HINT)
+        self.img(sp, 'fr.o.bar', bar, 0, 0, cond=U.S_HINT)
+        self.text(sp, '{%d}' % U.F_HINT, 4, 0, F.WHITE, 's', cond=U.S_HINT)
+        # KAI's tabs where FireRed writes OPTION (the gaps as the mock-up's), the open one red; a page's title
+        gap = (208 - sum(st.measure(t) for t in OPTION_TABS)) // (len(OPTION_TABS) - 1)
+        x = 16
+        for i, t in enumerate(OPTION_TABS):
+            self.text(sp, '{%d}' % (U.F_ITEM0 + i), x, 25, F.RED, cond=U.C_SEL0 << i, unless=U.S_PAGE)
+            self.text(sp, '{%d}' % (U.F_ITEM0 + i), x, 25, F.STD, unless=U.S_PAGE | (U.C_SEL0 << i))
+            x += st.measure(t) + gap
+        self.text(sp, '{%d}' % U.F_TITLE, 16, 25, F.STD, cond=U.S_PAGE, w=208, b=self.fs + 1)
+        # (list_menu.c's scroll arrows: red_arrow's chevron turned up and down, on the list window's edges)
+        chev = Image.new('RGBA', (16, 16), (0, 0, 0, 0))
+        st.arrow(chev, 0, 0, left=True)
+        self.img(sp, 'fr.o.up', chev.transpose(Image.ROTATE_270), 112, 42, cond=U.S_UP)
+        self.img(sp, 'fr.o.down', chev.transpose(Image.ROTATE_90), 112, 150, cond=U.S_DOWN)
+        sp.add(U.OP_LIST, x=0, y=58, h=13, n=7)
+        p.spec(sp)
+        row = U.Spec('o.row')
+        self.text(row, '{%d}' % U.F_NAME, 24, 0, F.STD, w=118, b=self.fs + 1)
+        self.text(row, '{%d}' % U.F_CURSTR, 146, 0, F.RED, w=78, b=self.fs + 1)
+        row.add(U.OP_FILL, x=16, y=0, w=208, h=13, ink=(255, 255, 255), a=48, unless=U.C_SEL0)
+        p.spec(row)
+
     def make(self):
         self.fonts()
         for kind in ('foe', 'mine', 'foe2', 'mine2', 'foe3', 'mine3'):
             self.p.spec(self.hud(kind))
         self.panels()
         self.party()
+        self.options()
         return self.p

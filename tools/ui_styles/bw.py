@@ -152,8 +152,9 @@ class Black(Style):
     def tiles(self, arc, i):
         return [list(t) for t in L.tiles(self.U(arc, i))[0]]
 
-    def screen(self, arc, ch, scr, pal, ts=None, palette=None):
-        """a BG map whole (every 256 x 256 block where the DS keeps it), colour 0 of each tile clear"""
+    def screen(self, arc, ch, scr, pal, ts=None, palette=None, rows_pal=None):
+        """a BG map whole (every 256 x 256 block where the DS keeps it), colour 0 of each tile clear; ROWS_PAL
+        (y0, y1, n): the tiles in those pixel rows in palette N (a row's highlight, as BG_SYS_FillTileMap sets it)"""
         ts = ts or L.tiles(self.U(arc, ch))
         tl, depth = ts
         w, h, ents = L.screen(self.U(arc, scr))
@@ -170,6 +171,8 @@ class Black(Style):
             if tx >= w or ty >= h:
                 continue
             t, hf, vf, pn = e & 0x3FF, (e >> 10) & 1, (e >> 11) & 1, e >> 12
+            if rows_pal and rows_pal[0] <= ty < rows_pal[1]:
+                pn = rows_pal[2]
             if t >= len(tl):
                 continue
             for i, v in enumerate(tl[t]):
@@ -1160,24 +1163,37 @@ class Black(Style):
             self.text(im, 38, 109 + 15 * k, line, *self.INK)
 
     # --------------------------------------------------------------------------------------------- OPTIONS
-    def options_page(self, im):
-        """Black's OPTIONS (option_menu.c, a/0/2/7: the rows 0x02 over character 0x00, the title bar 0x0E over 0x0D,
-        palette 0x01): KAI's five tabs on the title bar, its six rows on Black's six bars (the sixth, Black's grey
-        one, as the others), each row's name and its choices on the bar"""
-        from common import OPTION_ROWS, OPTION_TABS
+    def options_ground(self, sel=None):
+        """Black's OPTIONS backdrop (option_menu.c, a/0/2/7: the rows 0x02 over character 0x00, the title bar 0x0E
+        over 0x0D, palette 0x01): the sixth bar like the five above it, each bar two of its plain middle rows shorter
+        so the six sit whole under the title bar; bar SEL lit as OPTION_MENU_DrawList lights the cursor's (palette 7)"""
         A = 'a/0/2/7'
-        # (the rows: the sixth bar like the five above it, each bar two of its plain middle rows shorter, so the
-        # six sit whole under the title bar, which on the DS covers the first one's top)
         rows = Image.new('RGBA', (256, 192), (0, 0, 0, 255))
-        rows.alpha_composite(self.screen(A, 0, 2, 1).crop((0, 0, 256, 192)))
-        rows.paste(rows.crop((0, 114, 256, 138)), (0, 138))
+        lit = None if sel is None else (16 + 24 * min(sel, 4), 16 + 24 * min(sel, 4) + 24, 7)
+        rows.alpha_composite(self.screen(A, 0, 2, 1, rows_pal=lit).crop((0, 0, 256, 192)))
+        if sel == 5:      # (the sixth bar is the fifth's copy: lit, it's the lit fifth's)
+            lit5 = Image.new('RGBA', (256, 192), (0, 0, 0, 255))
+            lit5.alpha_composite(self.screen(A, 0, 2, 1, rows_pal=(112, 136, 7)).crop((0, 0, 256, 192)))
+            rows.paste(lit5.crop((0, 114, 256, 138)), (0, 138))
+        else:
+            rows.paste(rows.crop((0, 114, 256, 138)), (0, 138))
+            if sel == 4:   # (... and the fifth, lit, isn't the sixth's)
+                plain = Image.new('RGBA', (256, 192), (0, 0, 0, 255))
+                plain.alpha_composite(self.screen(A, 0, 2, 1).crop((0, 0, 256, 192)))
+                rows.paste(plain.crop((0, 114, 256, 138)), (0, 138))
         for k in range(5, -1, -1):                   # (from the last bar up, so each bar's rows stay put)
             rows = carve(rows, 'y', 2, 22 + 24 * k, 38 + 24 * k)
         m = Image.new('RGBA', (256, 192), (0, 0, 0, 255))
         m.paste(rows.crop((0, 12, 256, 180)), (0, 18))
         m.alpha_composite(self.screen(A, 13, 14, 1).crop((0, 0, 256, 192)))
-        m = carve(m.crop((0, 0, 256, 160)), 'x', 16, 20, 236)
-        paste(im, m, 0, 0)
+        return carve(m.crop((0, 0, 256, 160)), 'x', 16, 20, 236)
+
+    def options_page(self, im):
+        """Black's OPTIONS (option_menu.c, a/0/2/7: the rows 0x02 over character 0x00, the title bar 0x0E over 0x0D,
+        palette 0x01): KAI's five tabs on the title bar, its six rows on Black's six bars (the sixth, Black's grey
+        one, as the others), each row's name and its choices on the bar"""
+        from common import OPTION_ROWS, OPTION_TABS
+        paste(im, self.options_ground(0), 0, 0)
         green, gsh = (96, 248, 144), (8, 64, 48)
         white, wsh = (248, 248, 248), (48, 48, 64)
         dim = (152, 136, 216)

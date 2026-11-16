@@ -647,11 +647,6 @@ class FireRed(Style):
             y = 58 + i * 13
             self.text(im, 24, y, name)
             self.text(im, 146, y, val, *RED)
-        # (the picked row stands out as FireRed's does: the others lightened)
-        px = im.load()
-        for y in range(56, 152):
-            if 58 <= y < 58 + 14:
-                continue
-            for x in range(16, 224):
-                r, g, b, al = px[x, y]
-                px[x, y] = (r + (255 - r) * 3 // 16, g + (255 - g) * 3 // 16, b + (255 - b) * 3 // 16, al)
+        # (the picked row stands out as FireRed's does: the others lightened, white over them at 48 / 255)
+        for i in range(1, len(OPTION_ROWS)):
+            paste(im, Image.new('RGBA', (208, 13), (255, 255, 255, 48)), 16, 58 + 13 * i)

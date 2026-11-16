@@ -80,6 +80,41 @@ def screens(pack, kai, account=None, icons=None):
     return out
 
 
+# the OPTIONS rows the mock-ups show chosen, by style (the mock-ups' own choices; UI STYLE is the style's own name)
+OPTION_CHOSEN = {
+    'red': None, 'crystal': None, 'platinum': None,            # (the last of each row's choices)
+    'firered': {'THEME': 'LIGHT', 'FRAME': 'TYPE 1', 'SHADOWS': 'ON', 'BATTLE ANIMS': 'MODERN', 'TYPE ICONS': 'ON'},
+    'black': {'THEME': 'LIGHT', 'FRAME': 'TYPE 1', 'SHADOWS': 'ON', 'BATTLE ANIMS': 'MODERN', 'TYPE ICONS': 'ON'},
+}
+
+
+def options_screen(pack, kind):
+    """OPTIONS' DISPLAY tab as the game draws it (src/mp/mp_uistyle.c OptionsScreen) with the mock-ups' rows"""
+    specs = {s.name: s for s in pack.specs}
+    im = Image.new('RGBA', (C.W, C.H), (0, 0, 0, 255))
+    d = {U.F_ITEM0 + i: t for i, t in enumerate(C.OPTION_TABS)}
+    d[U.F_HINT] = 'L / R: TABS     MOEMON EMERALD KAI V1.0'
+    flags = U.C_SEL0 << C.OPTION_TABS.index('DISPLAY')
+    U.render(pack, specs['o'], d, flags, im)
+    lst = [op for op in specs['o'].ops if op.kind == U.OP_LIST and (flags & op.cond) == op.cond
+           and not flags & op.unless][0]
+    chosen = OPTION_CHOSEN[kind]
+    for i, (label, vals) in enumerate(C.OPTION_ROWS[:lst.n]):
+        names = [s.upper() for s in C.STYLES] if vals is None else list(vals)
+        if vals is None:
+            cur = names.index(kind.upper())
+        elif chosen is None:
+            cur = len(names) - 1
+        else:
+            cur = names.index(chosen[label])
+        rd = {U.F_NAME: label, U.F_NCHOICE: len(names), U.F_CUR: cur, U.F_CURSTR: names[cur]}
+        for k, n in enumerate(names):
+            rd[U.F_CHOICE0 + k] = n
+        f = (U.C_SEL0 if i == 0 else 0) | (U.O_ALL if 2 <= len(names) <= 3 else 0) | U.O_VALUE
+        U.render(pack, specs['o.row'], rd, f, im, (lst.x, lst.y + i * lst.h))
+    return im
+
+
 # names, levels, genders and HP the approved screens don't show: each box kind drawn by the pack and by the mock-up's
 # own code, over a plain ground
 VARIANTS = [dict(name='MASQUERAIN', sex='f', level=100, hp=13, maxhp=200, exp=0.9),
@@ -184,6 +219,8 @@ def main():
             import fr_build
             pack, mock = fr_build.FRPack(src).make(), fr_build.FireRed(src, kai, None)
             got = screens(pack, kai, ('The MOéDEX keeps your record of', 'every MOéMON seen and caught.'))
+        if any(sp.name == 'o' for sp in pack.specs):
+            got['options'] = options_screen(pack, kind)
         export = os.environ.get('MOEMON_EXPORT')
         if export and any(sp.name == 'party' for sp in pack.specs):
             mock.export = export
