@@ -1,0 +1,43 @@
+#ifndef GUARD_MP_UISTYLE_H
+#define GUARD_MP_UISTYLE_H
+
+// Moemon Kai: OPTIONS > DISPLAY > UI STYLE (docs/ui_styles/UI_STYLES.md): the battle's boxes and panels, the field's
+// message box and START drawn in RED's, CRYSTAL's, FIRERED's, PLATINUM's or BLACK's own look, from the style's pack
+// (tools/ui_styles/build_pack.py), over the frame the game draws (its own boxes hidden there). src/mp/mp_uistyle.c
+
+enum
+{
+    UISTYLE_KAI,
+    UISTYLE_RED,
+    UISTYLE_CRYSTAL,
+    UISTYLE_FIRERED,
+    UISTYLE_PLATINUM,
+    UISTYLE_BLACK,
+    UISTYLE_COUNT
+};
+
+struct Pokemon;
+
+u8 MP_UiStyle_Active(void);              // the style in effect: the one chosen when its pack is there, else KAI
+bool8 MP_UiStyle_Available(u8 style);    // its pack is there (KAI always)
+const char *MP_UiStyle_Name(u8 style);   // "KAI", "RED"...
+const char *MP_UiStyle_Key(u8 style);    // its moemon_coop.ini value: "kai", "red"...
+u8 MP_UiStyle_FromKey(const char *key);
+void MP_UiStyle_Changed(void);           // OPTIONS changed it (its pack loaded now)
+
+// the game's text printers (text.c AddTextPrinter, window.c FillWindowPixelBuffer): what each window prints
+void MP_UiStyle_TextPrinted(u8 windowId, const u8 *str);
+void MP_UiStyle_WindowFilled(u8 windowId);
+
+// the battle's boxes (battle_interface.c), for every battle
+void MP_UiStyle_HudUpdate(u8 battler, struct Pokemon *mon, bool8 hpToo);
+void MP_UiStyle_HudBar(u8 battler, s32 hp, s32 maxHp);
+void MP_UiStyle_HudExp(u8 battler, s32 exp, s32 expMax);
+bool8 MP_UiStyle_DrawsHealthboxes(void);  // the game's healthbox sprites aren't drawn (CreateBattlerHealthboxSprites)
+
+// the renderer (gba_easy_draw.c): BG0's pixels a style draws in place of, this frame (y0 <= line < y1, x0 <= x < x1)
+extern s16 gMpUiHideBg0[4];
+void MP_UiStyle_PreFrame(void);          // VDraw, before the frame is drawn: what's hidden
+void MP_UiStyle_Composite(u16 *frame);   // VDraw, after: the style's pieces over it
+
+#endif // GUARD_MP_UISTYLE_H

@@ -17,7 +17,7 @@ class Style:
 
     def __init__(self, kai, export):
         self.kai, self.export = kai, export
-        self.icons = [self.kai_type_icon(os.path.join(kai, 'icon%d.png' % k)) for k in range(6)]
+        self.icons = [self.kai_type_icon(os.path.join(kai, 'icon%d.png' % k)) for k in range(6)] if kai else []
         self.inks, self.logs = [], {}
 
     @staticmethod
