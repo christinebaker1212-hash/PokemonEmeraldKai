@@ -25,6 +25,7 @@
 #include "party_menu.h"
 #include "constants/party_menu.h"
 #include "overworld.h"
+#include "gpu_regs.h"
 #include "palette.h"
 #include "pokemon.h"
 #include "sprite.h"
@@ -43,6 +44,7 @@ const char *Updater_ExeFile(const char *name);
 bool8 MP_StartMenu_State(u8 *actions, u8 *count, u8 *cursor, const u8 **names);
 bool8 MP_MoveInfoView(void);
 void MP_ScrollArrows_Sprites(u8 taskId, u8 *top, u8 *bottom);
+u8 GetStartMenuWindowId(void);
 extern bool8 gMpUiMoveTypeAlt;
 void MP_AsciiToGame(u8 *dst, const char *src, int maxLen);
 
@@ -79,7 +81,7 @@ u8 MP_UiStyle_FromKey(const char *key)
 enum { OP_IMG = 1, OP_TEXT, OP_BAR, OP_FILL, OP_MSG, OP_LONG, OP_BACKING, OP_IMGSEL, OP_ROWMAP, OP_BLEND, OP_ICON, OP_CHOICES,
        OP_LIST, OP_SNAP };
 #define FIELD_CODE 0xFD
-#define NFIELDS 96
+#define NFIELDS 192
 #define F_NAME 1
 #define F_LEVEL 2
 #define F_HP 3
@@ -103,6 +105,30 @@ enum { OP_IMG = 1, OP_TEXT, OP_BAR, OP_FILL, OP_MSG, OP_LONG, OP_BACKING, OP_IMG
 #define F_QTY 93       // a BAG row's count, its count two wide ("%2d"), the button it's registered to
 #define F_QTY2 94
 #define F_TAG 95
+#define F_SPECIES 96   // the summary: its words (MP_Summary_Words)
+#define F_DEXNO 97
+#define F_OT 98
+#define F_IDNO 99
+#define F_HELD 100
+#define F_NATURE 101
+#define F_ABILITY 102
+#define F_METLV 103
+#define F_METPLACE 104
+#define F_EXPPTS 105
+#define F_NEXTLV 106
+#define F_STAT0 107    // ATK DEF SP.ATK SP.DEF SPEED (107-111)
+#define F_IV0 112      // HP ... SPEED: stars 0-3, 4 a perfect 31 (vals, 112-117)
+#define F_EV0 118      // HP ... SPEED (118-123)
+#define F_TYPE1 124    // (vals)
+#define F_TYPE2 125
+#define F_POWER 151
+#define F_ACC 152
+#define F_APPEAL 153   // (vals: hearts)
+#define F_JAM 154
+#define F_RIBBONS 155
+#define F_PAGENO 156   // (val)
+#define F_JPAGE 157    // the JOURNAL's page of pages
+#define F_CTYPE 158    // a move row's contest type (val)
 #define C_LV3 (1u << 0)
 #define C_MALE (1u << 1)
 #define C_FEMALE (1u << 2)
@@ -131,6 +157,19 @@ enum { OP_IMG = 1, OP_TEXT, OP_BAR, OP_FILL, OP_MSG, OP_LONG, OP_BACKING, OP_IMG
 #define B_QTY (1u << 28)       // ... it has a count
 #define B_TAG (1u << 29)       // ... it's registered to a button
 #define B_SWAP (1u << 30)      // ... it's being moved (SELECT)
+#define SM_EV (1u << 20)       // the summary: the SKILLS page shows EVs
+#define SM_IV (1u << 21)       // ... IV stars
+#define SM_CHOOSING (1u << 23) // ... a move picked (its words shown)
+#define SM_SHINY (1u << 25)
+#define SM_LEARN (1u << 26)    // ... the fifth move row is a move to learn
+#define SM_TWOTYPES (1u << 27)
+#define SM_MEMOPLAIN (1u << 28) // ... met there at that level by its own trainer
+#define SM_RENAME (1u << 29)   // ... SELECT renames it
+#define SM_CLEAREV (1u << 30)  // ... START clears its EVs (the EV view)
+#define SM_EGG (1u << 31)
+#define R_NEW (1u << 27)       // a summary move row: the move to learn
+#define R_CANCEL (1u << 28)    // ... CANCEL (choosing a move)
+#define R_EMPTY (1u << 29)     // ... no move
 #define OP_SIZE 38
 
 struct UiImg { u16 w, h; s16 dx, dy; const u8 *px; const u8 *a; s16 *cols; u16 nCols; };   // (px: u16s, unaligned)
@@ -363,6 +402,14 @@ struct Capture
 };
 static struct Capture sCap[WINDOWS_MAX];
 static u8 sFramed[WINDOWS_MAX];   // 1 its dialogue frame drawn, 2 the standard frame, 0 neither
+// (each window's words line by line as printed, where and in what colour: a pop-up drawn in a style's own font)
+#define RUNS 16
+struct Run { u8 x, y, fg, lineH; u16 kaiW; u8 text[64]; };   // (LINEH: its new lines' spacing)
+static struct Run sRuns[WINDOWS_MAX][RUNS];
+static u8 sRunCount[WINDOWS_MAX];
+static bool8 sShown[WINDOWS_MAX];
+static u32 sHandled;   // the windows a screen drew itself this frame
+
 
 void MP_UiStyle_Framed(u8 windowId, u8 kind)
 {
@@ -394,15 +441,68 @@ void MP_UiStyle_WindowFilled(u8 windowId)
     MP_TextPrinter_Cur(windowId, &active, &state);
     if (active)   // (the printer clearing its own page: its words go on)
         return;
+    sRunCount[windowId] = 0;
     sCap[windowId].len = 0;
     sCap[windowId].text[0] = EOS;
     sCap[windowId].base = NULL;
+}
+
+void MP_UiStyle_TextRun(u8 windowId, const u8 *str, u8 x, u8 y, u8 fontId, u8 fg, u8 letterSpacing, u8 lineSpacing)
+{
+    struct Run *r;
+    u8 k, n;
+    if (windowId >= WINDOWS_MAX || str == NULL)
+        return;
+    for (k = 0; k < sRunCount[windowId] && (sRuns[windowId][k].x != x || sRuns[windowId][k].y != y); k++)
+        ;
+    if (k == RUNS)
+    {
+        memmove(&sRuns[windowId][0], &sRuns[windowId][1], sizeof(struct Run) * (RUNS - 1));
+        k = RUNS - 1;
+    }
+    else if (k == sRunCount[windowId])
+        sRunCount[windowId]++;
+    r = &sRuns[windowId][k];
+    r->x = x, r->y = y, r->fg = fg;
+    for (n = 0; n < sizeof(r->text) - 1 && str[n] != EOS; n++)
+        r->text[n] = str[n];
+    r->text[n] = EOS;
+    r->kaiW = GetStringWidth(fontId, r->text, letterSpacing);
+    r->lineH = GetFontAttribute(fontId, FONTATTR_MAX_LETTER_HEIGHT) + lineSpacing;
+    if (r->lineH < 8 || r->lineH > 24)
+        r->lineH = 16;
+}
+
+void MP_UiStyle_WindowRectFilled(u8 windowId, u16 x, u16 y, u16 w, u16 h)
+{
+    u8 k = 0;
+    if (windowId >= WINDOWS_MAX)
+        return;
+    while (k < sRunCount[windowId])
+    {
+        struct Run *r = &sRuns[windowId][k];
+        if (r->x >= x && r->x < x + w && r->y >= y && r->y < y + h)
+        {
+            memmove(r, r + 1, sizeof(struct Run) * (sRunCount[windowId] - k - 1));
+            sRunCount[windowId]--;
+            continue;
+        }
+        k++;
+    }
+}
+
+void MP_UiStyle_WindowShown(u8 windowId, bool8 shown)
+{
+    if (windowId < WINDOWS_MAX)
+        sShown[windowId] = shown;
 }
 
 void MP_UiStyle_WindowGone(u8 windowId)
 {
     if (windowId >= WINDOWS_MAX)
         return;
+    sRunCount[windowId] = 0;
+    sShown[windowId] = FALSE;
     sFramed[windowId] = 0;
     sCap[windowId].len = 0;
     sCap[windowId].text[0] = EOS;
@@ -1536,6 +1636,8 @@ static void StartMenu(struct UiPack *p, u16 *frame)
 
     if (!MP_StartMenu_State(actions, &count, &cursor, names) || count == 0)
         return;
+    if (GetStartMenuWindowId() < WINDOWS_MAX)
+        sHandled |= 1u << GetStartMenuWindowId();
     snprintf(specName, sizeof(specName), "start.%d", count > 10 ? 10 : count);
     if ((sp = FindSpec(p, specName)) == NULL)
         return;
@@ -1573,7 +1675,8 @@ static bool8 FieldMessageShown(void)
     return TRUE;
 }
 
-static void FieldMessage(struct UiPack *p, u16 *frame)
+// window W's words in the style's message box (the field's, or a screen's at the foot of the screen)
+static void MessageBox(struct UiPack *p, u16 *frame, u8 w)
 {
     const struct UiSpec *sp = FindSpec(p, "f.msg");
     struct UiData d;
@@ -1582,14 +1685,20 @@ static void FieldMessage(struct UiPack *p, u16 *frame)
     if (sp == NULL)
         return;
     memset(&d, 0, sizeof(d));
-    d.msg[0] = sCap[0].text;
-    d.msgLen[0] = sCap[0].len;
-    d.msgPrinted[0] = Printed(0, &waiting);
+    d.msg[0] = sCap[w].text;
+    d.msgLen[0] = sCap[w].len;
+    d.msgPrinted[0] = Printed(w, &waiting);
     d.msgHold[0] = waiting;
     if (waiting)
         d.flags |= C_WAIT;
     MP_FadeFit_FromPalette(&fit, BG_PLTT_ID(15));
     DrawSpec(p, sp, &d, frame, 0, 0, &fit);
+    sHandled |= 1u << w;
+}
+
+static void FieldMessage(struct UiPack *p, u16 *frame)
+{
+    MessageBox(p, frame, 0);
 }
 
 // only SP's words (a screen's words over Kai's sprites, as the original screens print theirs over their icons)
@@ -1865,15 +1974,13 @@ static void PartyScreen(struct UiPack *p, u16 *frame)
     for (i = 0; i < PARTY_SIZE; i++)
         if (slotSpec[i])
             DrawSpecText(p, slotSpec[i], &sSlotData[i], frame, &fit);
-    // Kai's pop-ups (what to do, which move...) as Kai draws them
-    for (w = 0; w < WINDOWS_MAX; w++)
-    {
-        bool8 own = w == 6 || (w == st.msgWin && !popup);
-        for (i = 0; i < PARTY_SIZE; i++)
-            own |= w == st.window[i];
-        if (!own && gWindows[w].tileData != NULL && sFramed[w])
-            PasteKaiWindow(frame, w);
-    }
+    // (its own windows drawn; Kai's pop-ups (what to do, which move...) in the style: PopUps)
+    sHandled |= 1u << 6;
+    if (st.msgWin < WINDOWS_MAX && !popup)
+        sHandled |= 1u << st.msgWin;
+    for (i = 0; i < PARTY_SIZE; i++)
+        if (st.window[i] < WINDOWS_MAX)
+            sHandled |= 1u << st.window[i];
 }
 
 // OPTIONS in a style: its spec "o" (the screen: tabs, or a page's title; the line under the rows), its OP_LIST's rows
@@ -1961,7 +2068,7 @@ static void BagScreen(struct UiPack *p, u16 *frame)
     struct MpFadeFit fit;
     const struct UiSpec *sp, *rowSp;
     const struct UiOp *list = NULL;
-    u8 skip[24], nSkip = 0, top, bottom, w;
+    u8 skip[24], nSkip = 0, top, bottom;
     s16 icon[4][2];
     int vis, k, i;
 
@@ -2049,17 +2156,345 @@ static void BagScreen(struct UiPack *p, u16 *frame)
         struct Sprite *it = &gSprites[v.itemSprite];
         RedrawSprite(frame, it, icon[1][0] - (it->x + it->x2), icon[1][1] - (it->y + it->y2));
     }
-    // Kai's pop-ups as Kai draws them
+    // (its own windows drawn; Kai's pop-ups in the style: PopUps)
+    sHandled |= (1u << v.listWin) | (1u << v.descWin) | (1u << v.nameWin) | (1u << v.tmWin[0]) | (1u << v.tmWin[1]);
+}
+
+// the summary in a style: "sum.<page>" (or "sum") over the whole screen; on the move pages each move's row with
+// "sum.<page>.row" where the page's OP_LIST says; the POKé BALL page's lines with "sum.4.line" from its OP_LIST's
+// corner, the JOURNAL's rows with "sum.5.row"; the POKéMON's picture, its status and POKé BALL where the page's
+// ICON 0 / 2 / 3 say, Kai's pop-ups put back over it
+static void SummaryScreen(struct UiPack *p, u16 *frame)
+{
+    static struct MpSummaryView v;
+    static struct MpSummaryWords w;
+    static struct UiData d;
+    static u8 sMemo[200], sNick[32], sSpecies[24], sOt[16], sItem[32], sPlace[40];
+    struct MpFadeFit fit;
+    const struct UiSpec *sp, *rowSp;
+    const struct UiOp *list = NULL;
+    char name[24];
+    u8 skip[40], nSkip = 0, i, k, wi;
+    s16 icon[4][2];
+    u32 status;
+
+    if (!MP_Summary_View(&v))
+        return;
+    snprintf(name, sizeof(name), "sum.%d", v.page);
+    if ((sp = FindSpec(p, name)) == NULL && (sp = FindSpec(p, "sum")) == NULL)
+        return;
+    memcpy(sKaiFrame, frame, sizeof(sKaiFrame));
+    MP_Summary_Words(&w);
+    memset(&d, 0, sizeof(d));
+    d.str[F_NAME] = Filtered(w.nick, sNick, sizeof(sNick));
+    d.str[F_SPECIES] = Filtered(w.species, sSpecies, sizeof(sSpecies));
+    d.str[F_LEVEL] = w.level;
+    d.str[F_DEXNO] = w.dexNo;
+    d.str[F_OT] = Filtered(w.ot, sOt, sizeof(sOt));
+    d.str[F_IDNO] = w.idNo;
+    d.str[F_HELD] = Filtered(w.item, sItem, sizeof(sItem));
+    d.str[F_NATURE] = w.nature;
+    d.str[F_ABILITY] = w.ability;
+    d.str[F_METLV] = w.metLevel;
+    d.str[F_METPLACE] = Filtered(w.metPlace, sPlace, sizeof(sPlace));
+    d.str[F_HP] = w.hp, d.str[F_MAXHP] = w.maxHp;
+    d.frac[F_HPFRAC] = w.hpMax ? (s32)(((s64)w.hpNow << 16) / w.hpMax) : 0;
+    d.frac[F_EXP] = w.expFrac;
+    d.str[F_EXPPTS] = w.exp, d.str[F_NEXTLV] = w.nextLv, d.str[F_RIBBONS] = w.ribbons;
+    for (i = 0; i < 5; i++)
+    {
+        d.str[F_STAT0 + i] = w.stat[i];
+        if (w.statNature[i] == 1)
+            d.flags |= C_SEL0 << i;
+        else if (w.statNature[i] == 2)
+            d.flags |= C_SEL0 << (5 + i);
+    }
+    for (i = 0; i < 6; i++)
+    {
+        d.val[F_IV0 + i] = w.ivStars[i];
+        d.str[F_EV0 + i] = w.ev[i];
+    }
+    d.val[F_TYPE1] = w.type1, d.val[F_TYPE2] = w.type2;
+    if (w.type1 != w.type2)
+        d.flags |= SM_TWOTYPES;
+    d.str[F_POWER] = w.power, d.str[F_ACC] = w.accuracy;
+    d.val[F_APPEAL] = w.appeal, d.val[F_JAM] = w.jam;
+    d.val[F_PAGENO] = v.page;
+    if (w.abilityDesc)
+    {
+        d.msg[0] = w.abilityDesc;
+        d.msgLen[0] = d.msgPrinted[0] = StringLength(w.abilityDesc);
+    }
+    if (v.choosing)
+    {
+        const u8 *desc = v.page == 3 ? w.contestDesc : w.moveDesc;
+        d.flags |= SM_CHOOSING;
+        if (desc && w.move[v.moveCursor < 5 ? v.moveCursor : 0] != MOVE_NONE)
+        {
+            d.msg[1] = desc;
+            d.msgLen[1] = d.msgPrinted[1] = StringLength(desc);
+        }
+    }
+    d.msg[2] = Filtered(w.memo, sMemo, sizeof(sMemo));
+    d.msgLen[2] = d.msgPrinted[2] = StringLength(d.msg[2]);
+    if (w.memoPlain)
+        d.flags |= SM_MEMOPLAIN;
+    d.flags |= v.statsView == 1 ? SM_IV : v.statsView == 2 ? SM_EV : 0;
+    if (v.statsView == 2 && v.canClearEvs)
+        d.flags |= SM_CLEAREV;
+    if (v.learning)
+        d.flags |= SM_LEARN;
+    if (v.canRename)
+        d.flags |= SM_RENAME;
+    if (w.shiny)
+        d.flags |= SM_SHINY;
+    if (v.isEgg)
+        d.flags |= SM_EGG;
+    {
+        u8 level = v.mon ? GetMonData(v.mon, MON_DATA_LEVEL) : 1;
+        u8 g = v.mon ? GetMonGender(v.mon) : MON_GENDERLESS;
+        u16 species = v.mon ? GetMonData(v.mon, MON_DATA_SPECIES) : 0;
+        d.flags |= level >= 100 ? C_LV3 : level < 10 ? C_LV1 : 0;
+        if (!v.isEgg && !((species == SPECIES_NIDORAN_F || species == SPECIES_NIDORAN_M)
+                          && StringCompare(w.nick, gSpeciesNames[species]) == 0))
+            d.flags |= g == MON_MALE ? C_MALE : g == MON_FEMALE ? C_FEMALE : 0;
+        status = v.mon ? GetMonData(v.mon, MON_DATA_STATUS) : 0;
+        if (v.statusSprite < MAX_SPRITES && gSprites[v.statusSprite].inUse && !gSprites[v.statusSprite].invisible)
+            d.flags |= C_STATUS | (1u << (3 + StatusOf(status)));
+    }
+    if (v.page == 5 && v.journalPages > 1)
+    {
+        static u8 sPage[12];
+        u8 *e = Digits(sPage, v.journalPage + 1, 0);
+        *e++ = CHAR_SLASH;
+        Digits(e, v.journalPages, 0);
+        d.str[F_JPAGE] = sPage;
+        d.flags |= S_DOWN;
+    }
+    MP_FadeFit_FromPalette(&fit, BG_PLTT_ID(0));
+    DrawSpec(p, sp, &d, frame, 0, 0, &fit);
+    for (k = 0; k < sp->nOps && list == NULL; k++)
+        if (sp->ops[k].kind == OP_LIST)
+            list = &sp->ops[k];
+    snprintf(name, sizeof(name), "sum.%d.row", v.page);
+    rowSp = FindSpec(p, name);
+    if (list && rowSp && (v.page == 2 || v.page == 3))
+    {
+        // the moves: four, and a fifth row for the move to learn, or CANCEL while one is picked
+        u8 rows = v.learning || v.choosing ? 5 : 4;
+        for (i = 0; i < rows && i < list->n; i++)
+        {
+            struct UiData rd;
+            memset(&rd, 0, sizeof(rd));
+            if (i == 4 && !v.learning)
+                rd.flags |= R_CANCEL;
+            else if (w.move[i] == MOVE_NONE)
+                rd.flags |= R_EMPTY;
+            else
+            {
+                rd.str[F_NAME] = w.moveName[i];
+                rd.str[F_PP] = w.pp[i], rd.str[F_MAXPP] = w.maxPp[i];
+                rd.val[F_TYPE] = w.moveType[i];
+                rd.val[F_CTYPE] = w.contestType[i];
+                if (i == 4)
+                    rd.flags |= R_NEW;
+            }
+            if (v.choosing && v.moveCursor == i)
+                rd.flags |= C_SEL0;
+            if (v.swapping && v.moveSwap == i && v.moveSwap != v.moveCursor)
+                rd.flags |= B_SWAP;
+            DrawSpec(p, rowSp, &rd, frame, list->x, list->y + i * list->h, &fit);
+        }
+    }
+    else if (list && rowSp && v.page == 4)
+    {
+        // the POKé BALL page's lines, where Kai prints them in its box
+        for (i = 0; i < v.ballBox; i++)
+        {
+            struct UiData rd;
+            u8 x, y;
+            const u8 *t = MP_Summary_BallLine(i, &x, &y);
+            if (t == NULL)
+                break;
+            memset(&rd, 0, sizeof(rd));
+            rd.str[F_NAME] = t;
+            DrawSpec(p, rowSp, &rd, frame, list->x + x, list->y + y, &fit);
+        }
+    }
+    else if (list && rowSp && v.page == 5)
+    {
+        for (i = 0; i < v.journalRows && i < list->n; i++)
+        {
+            struct UiData rd;
+            memset(&rd, 0, sizeof(rd));
+            rd.str[F_NAME] = v.journal[i];
+            if (v.journalEntry[i] & 1)
+                rd.flags |= R_NEW;   // (every other sentence's stripe)
+            DrawSpec(p, rowSp, &rd, frame, list->x, list->y + i * list->h, &fit);
+        }
+    }
+    // the sprites: the summary's type icons, move frame and markings stay hidden (the style draws its own); the
+    // picture, status and POKé BALL where the style puts them; the rest (the POKé BALL page's ball) as Kai draws them
+    for (i = 0; i < v.nOwn && nSkip < (int)sizeof(skip) - 4; i++)
+        skip[nSkip++] = v.own[i] + 1;
+    if (v.markings)
+        skip[nSkip++] = (v.markings - gSprites) + 1;
+    IconPlaces(sp, d.flags, icon);
+    for (wi = 0; wi < 4; wi++)
+    {
+        static const u8 sWhich[4] = {0, 0xFF, 2, 1};   // ICON a: 0 the picture, 2 its status, 3 its POKé BALL
+        u8 id = sWhich[wi] == 0 ? v.monSprite : sWhich[wi] == 2 ? v.statusSprite : sWhich[wi] == 1 ? v.ballSprite : MAX_SPRITES;
+        if (wi == 1 || id >= MAX_SPRITES)
+            continue;
+        skip[nSkip++] = id + 1;
+    }
+    RedrawSprites(frame, skip, nSkip);
+    for (wi = 0; wi < 4; wi++)
+    {
+        u8 id = wi == 0 ? v.monSprite : wi == 2 ? v.statusSprite : wi == 3 ? v.ballSprite : MAX_SPRITES;
+        struct Sprite *s;
+        if (id >= MAX_SPRITES || icon[wi][0] < 0)
+            continue;
+        s = &gSprites[id];
+        if (!s->inUse || s->invisible)
+            continue;
+        RedrawSprite(frame, s, icon[wi][0] - (s->x + s->x2), icon[wi][1] - (s->y + s->y2));
+    }
+}
+
+// ---------------------------------------------------------------------------------------------------- pop-ups
+// Kai's own pop-ups (a menu, YES / NO, the save's box, a shop's lists...) in the style: its window frame ("win": a
+// 24 x 24 picture of its 3 x 3 frame tiles, its fill) round the window, the window's words as printed, in the
+// style's font ("win.text": C_SEL0 the red ones, C_ALT the pale ones); a message box at the foot of the screen in
+// the style's message box. A window a screen drew itself is left alone (sHandled).
+static bool8 PopUpShown(u8 w)
+{
+    const struct WindowTemplate *t = &gWindows[w].window;
+    if (w >= WINDOWS_MAX || gWindows[w].tileData == NULL || !sFramed[w] || !sShown[w] || t->bg > 3 || t->width == 0)
+        return FALSE;
+    return (GetGpuReg(REG_OFFSET_DISPCNT) & (DISPCNT_BG0_ON << t->bg)) != 0;
+}
+
+static bool8 AtFoot(u8 w)
+{
+    const struct WindowTemplate *t = &gWindows[w].window;
+    return sFramed[w] == 1 && t->tilemapTop >= 13 && t->width >= 26;
+}
+
+static void PopUpFrame(u16 *frame, const struct UiImg *im, int x0, int y0, int x1, int y1, u16 fill,
+                       const struct MpFadeFit *fit)
+{
+    struct Surf fr = {frame, NULL, DISPLAY_WIDTH, DISPLAY_HEIGHT, fit};
+    int x, y;
+    for (y = y0; y < y1; y++)
+        for (x = x0; x < x1; x++)
+            Put(&fr, x, y, fill, 255);
+    if (im == NULL)
+        return;
+    // (the frame's tiles: corners, edges along, from the picture's 3 x 3)
+    for (y = y0 - 8; y < y1 + 8; y += 8)
+        for (x = x0 - 8; x < x1 + 8; x += 8)
+        {
+            int tx = x < x0 ? 0 : x >= x1 ? 2 : 1, ty = y < y0 ? 0 : y >= y1 ? 2 : 1, i, j;
+            if (tx == 1 && ty == 1)
+                continue;
+            for (j = 0; j < 8; j++)
+                for (i = 0; i < 8; i++)
+                {
+                    int sx = tx * 8 + i - im->dx, sy = ty * 8 + j - im->dy;
+                    u16 c;
+                    if (sx < 0 || sy < 0 || sx >= im->w || sy >= im->h)
+                        continue;
+                    c = Rd16(im->px + 2 * (sy * im->w + sx));
+                    if (c & 0x8000)
+                        Put(&fr, x + i, y + j, c, im->a ? im->a[sy * im->w + sx] : 255);
+                }
+        }
+}
+
+static void PopUps(struct UiPack *p, u16 *frame)
+{
+    const struct UiSpec *ws = FindSpec(p, "win"), *wt = FindSpec(p, "win.text");
+    const struct UiImg *im = NULL;
+    const struct UiFont *f = NULL;
+    u16 fill = 0x7FFF;
+    struct MpFadeFit fit;
+    u8 w, k;
+    if (ws == NULL || wt == NULL)
+        return;
+    for (k = 0; k < ws->nOps; k++)
+    {
+        if (ws->ops[k].kind == OP_IMG && ws->ops[k].a < p->nImg && im == NULL)
+            im = &p->img[ws->ops[k].a];
+        else if (ws->ops[k].kind == OP_FILL)
+            fill = ws->ops[k].ink;
+    }
+    for (k = 0; k < wt->nOps && f == NULL; k++)
+        if (wt->ops[k].kind == OP_TEXT && wt->ops[k].font < p->nFont)
+            f = &p->font[wt->ops[k].font];
+    MP_FadeFit_FromPalette(&fit, BG_PLTT_ID(15));
     for (w = 0; w < WINDOWS_MAX; w++)
-        if (w != v.listWin && w != v.descWin && w != v.nameWin && w != v.tmWin[0] && w != v.tmWin[1]
-         && gWindows[w].tileData != NULL && sFramed[w])
-            PasteKaiWindow(frame, w);
+    {
+        const struct WindowTemplate *t = &gWindows[w].window;
+        int x0, y0, ww;
+        if ((sHandled & (1u << w)) || !PopUpShown(w))
+            continue;
+        if (AtFoot(w))
+        {
+            MessageBox(p, frame, w);
+            continue;
+        }
+        x0 = t->tilemapLeft * 8, y0 = t->tilemapTop * 8, ww = t->width * 8;
+        PopUpFrame(frame, im, x0, y0, x0 + ww, y0 + t->height * 8, fill, &fit);
+        for (k = 0; k < sRunCount[w]; k++)
+        {
+            struct Run *r = &sRuns[w][k];
+            const u8 *line = r->text;
+            int ln = 0;
+            // (each of its lines: YES / NO is one string, a new line between)
+            while (*line != EOS && ln < 8)
+            {
+                static u8 sLine[64];
+                struct UiData d;
+                int n = 0, x = x0 + r->x, sw;
+                while (line[n] != EOS && line[n] != CHAR_NEWLINE && n < (int)sizeof(sLine) - 1)
+                {
+                    sLine[n] = line[n];
+                    n++;
+                }
+                sLine[n] = EOS;
+                sw = f ? Width(f, sLine, 255) : r->kaiW;
+                memset(&d, 0, sizeof(d));
+                d.str[F_NAME] = sLine;
+                if (r->fg == TEXT_COLOR_RED || r->fg == TEXT_COLOR_LIGHT_RED)
+                    d.flags |= C_SEL0;
+                else if (r->fg == TEXT_COLOR_LIGHT_GRAY || r->fg == TEXT_COLOR_GREEN || r->fg == TEXT_COLOR_LIGHT_GREEN)
+                    d.flags |= C_ALT;
+                // (a line Kai set against the window's right edge stays there; one too wide for the style's letters
+                // is moved in)
+                if (r->x > 0 && r->x + r->kaiW >= ww - 3 && ln == 0)
+                    x = x0 + ww - sw;
+                else if (x + sw > x0 + ww)
+                    x = x0 + ww - sw;
+                if (x < x0)
+                    x = x0;
+                DrawSpec(p, wt, &d, frame, x, y0 + r->y + ln * r->lineH, &fit);
+                line += n;
+                if (*line == CHAR_NEWLINE)
+                    line++;
+                ln++;
+            }
+        }
+        sHandled |= 1u << w;
+    }
 }
 
 // ---------------------------------------------------------------------------------------------------- each frame
 s16 gMpUiHideBg0[4];
+s16 gMpUiHideRects[MP_UI_HIDE_RECTS][4];
+u8 gMpUiHideCount;
 static u8 sDrawing;   // what this frame draws: 1 the battle, 2 the field's message box, 4 START, 8 the battle's panel,
-                      // 16 the party, 32 OPTIONS, 64 the BAG
+                      // 16 the party, 32 OPTIONS, 64 the BAG, 128 the summary
 
 // the game's own healthbox sprites (its two halves and its bar) drawn or not
 static void HideHealthboxes(bool8 hide)
@@ -2088,7 +2523,25 @@ void MP_UiStyle_PreFrame(void)
     u8 style = MP_UiStyle_Active();
     static bool8 sHid;
     gMpUiHideBg0[0] = gMpUiHideBg0[2] = 0;
+    gMpUiHideCount = 0;
     sDrawing = 0;
+    if (style != UISTYLE_KAI && (InField() || InBattle()) && GetPack(style) && FindSpec(GetPack(style), "win"))
+    {
+        // (Kai's pop-ups on BG0: the style draws its own there, PopUps; their frames not drawn under it)
+        u8 w, startWin = InField() ? GetStartMenuWindowId() : WINDOW_NONE;
+        for (w = 0; w < WINDOWS_MAX && gMpUiHideCount < MP_UI_HIDE_RECTS; w++)
+        {
+            const struct WindowTemplate *t = &gWindows[w].window;
+            s16 *r;
+            int side;
+            if (w == startWin || !PopUpShown(w) || t->bg != 0)
+                continue;
+            side = sFramed[w] == 1 ? 24 : 8;
+            r = gMpUiHideRects[gMpUiHideCount++];
+            r[0] = t->tilemapLeft * 8 - side, r[1] = t->tilemapTop * 8 - 8;
+            r[2] = (t->tilemapLeft + t->width) * 8 + side, r[3] = (t->tilemapTop + t->height) * 8 + 8;
+        }
+    }
     if (InBattle() && (style != UISTYLE_KAI || sHid))
     {
         HideHealthboxes(style != UISTYLE_KAI);
@@ -2127,6 +2580,14 @@ void MP_UiStyle_PreFrame(void)
             sDrawing |= 64;
             return;
         }
+        {
+            static struct MpSummaryView sv;
+            if (MP_Summary_View(&sv) && GetPack(style) && FindSpec(GetPack(style), "sum.0"))
+            {
+                sDrawing |= 128;
+                return;
+            }
+        }
     }
     if (InBattle())
     {
@@ -2163,6 +2624,7 @@ void MP_UiStyle_Composite(u16 *frame)
 {
     struct UiPack *p;
     u8 style = MP_UiStyle_Active();
+    sHandled = 0;
     if (style == UISTYLE_KAI)
         return;
     // (the field or the battle as last seen in full light: a style whose BAG opens over it, as RED's ITEM box does)
@@ -2171,7 +2633,7 @@ void MP_UiStyle_Composite(u16 *frame)
         memcpy(sSnap, frame, sizeof(sSnap));
         sSnapOk = TRUE;
     }
-    if (sDrawing == 0 || (p = GetPack(style)) == NULL)
+    if ((p = GetPack(style)) == NULL)
         return;
     if (sDrawing & 1)
     {
@@ -2190,4 +2652,9 @@ void MP_UiStyle_Composite(u16 *frame)
         OptionsScreen(p, frame);
     if (sDrawing & 64)
         BagScreen(p, frame);
+    if (sDrawing & 128)
+        SummaryScreen(p, frame);
+    // (Kai's pop-ups on the field, in battle and over a style's own screens)
+    if (InField() || InBattle() || (sDrawing & (16 | 32 | 64 | 128)))
+        PopUps(p, frame);
 }

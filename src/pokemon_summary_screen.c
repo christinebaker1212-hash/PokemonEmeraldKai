@@ -2,6 +2,7 @@
 #include "global.h"
 #include "mp_region.h"
 #include "mp.h"
+#include "mp_uistyle.h"
 #include "naming_screen.h"
 #include "main.h"
 #include "battle.h"
@@ -3177,15 +3178,33 @@ static u16 MpBall_SelectedStyle(void)
                              MP_BallStyle_ItemCanDecorate(item) ? sMpBall.decoration : 0) | MP_BallStyle_ForItem(item);
 }
 
+// (what the page says, line by line: UI STYLE draws it in a style, MP_Summary_BallLine)
+#define MPBALL_LINES 12
+static EWRAM_DATA struct { u8 x, y; u8 text[48]; } sMpBallLines[MPBALL_LINES] = {0};
+static EWRAM_DATA u8 sMpBallLineCount = 0;
+
+static void MpBall_Keep(const u8 *text, u8 x, u8 y)
+{
+    if (sMpBallLineCount >= MPBALL_LINES)
+        return;
+    sMpBallLines[sMpBallLineCount].x = x;
+    sMpBallLines[sMpBallLineCount].y = y;
+    StringCopyN(sMpBallLines[sMpBallLineCount].text, text, sizeof(sMpBallLines[0].text) - 1);
+    sMpBallLines[sMpBallLineCount].text[sizeof(sMpBallLines[0].text) - 1] = EOS;
+    sMpBallLineCount++;
+}
+
 static void MpBall_Print(const char *ascii, u8 x, u8 y, u8 colorId)
 {
     u8 text[64];
     MP_AsciiToGame(text, ascii, sizeof(text) - 1);
+    MpBall_Keep(text, x, y);
     AddTextPrinterParameterized4(sMpBall.bodyWindow, FONT_NORMAL, x, y, 0, 0, sTextColors[colorId], TEXT_SKIP_DRAW, text);
 }
 
 static void MpBall_PrintGame(const u8 *text, u8 x, u8 y, u8 colorId)
 {
+    MpBall_Keep(text, x, y);
     AddTextPrinterParameterized4(sMpBall.bodyWindow, FONT_NORMAL, x, y, 0, 0, sTextColors[colorId], TEXT_SKIP_DRAW, text);
 }
 
@@ -3218,6 +3237,7 @@ static void MpBall_Draw(void)
     if (sMpBall.bodyWindow == WINDOW_NONE)
         return;
     FillWindowPixelBuffer(sMpBall.bodyWindow, PIXEL_FILL(0));
+    sMpBallLineCount = 0;
     CopyItemName(item, name);
     MP_GameToAscii((char *)nameAscii, name, sizeof(nameAscii) - 1);
 
@@ -5574,4 +5594,229 @@ bool8 MP_SummaryScreen_IsOpen(void)
 u8 MP_TypeIconPal(u8 type)
 {
     return sMoveTypeToOamPaletteNum[type] - 13;
+}
+
+// ---------------------------------------------------------------------------
+// Moemon Co-op: what the summary shows, for OPTIONS > DISPLAY > UI STYLE (src/mp/mp_uistyle.c draws it in a style)
+bool8 MP_Summary_View(struct MpSummaryView *v)
+{
+    u8 i;
+    if (gMain.callback2 != MainCB2 || sMonSummaryScreen == NULL)
+        return FALSE;
+    v->mon = &sMonSummaryScreen->currentMon;
+    v->page = sMonSummaryScreen->currPageIndex;
+    v->isEgg = sMonSummaryScreen->summary.isEgg;
+    v->statsView = sMpStatsView;
+    v->choosing = FuncIsActiveTask(Task_HandleInput_MoveSelect) || FuncIsActiveTask(Task_HandleInput_MovePositionSwitch)
+               || FuncIsActiveTask(Task_HandleReplaceMoveInput);
+    v->swapping = FuncIsActiveTask(Task_HandleInput_MovePositionSwitch);
+    v->learning = sMonSummaryScreen->mode == SUMMARY_MODE_SELECT_MOVE;
+    v->newMove = sMonSummaryScreen->newMove;
+    v->moveCursor = sMonSummaryScreen->firstMoveIndex;
+    v->moveSwap = sMonSummaryScreen->secondMoveIndex;
+    v->canRename = MpCanRename();
+    v->canClearEvs = MpCanClearEvs();
+    v->clearAsk = sMpClearAsk;
+    v->monSprite = sMonSummaryScreen->spriteIds[SPRITE_ARR_ID_MON];
+    v->ballSprite = sMonSummaryScreen->spriteIds[SPRITE_ARR_ID_BALL];
+    v->statusSprite = sMonSummaryScreen->spriteIds[SPRITE_ARR_ID_STATUS];
+    v->nOwn = 0;
+    for (i = SPRITE_ARR_ID_TYPE; i < SPRITE_ARR_ID_COUNT && v->nOwn < ARRAY_COUNT(v->own); i++)
+        if (sMonSummaryScreen->spriteIds[i] != SPRITE_NONE)
+            v->own[v->nOwn++] = sMonSummaryScreen->spriteIds[i];
+    v->markings = sMonSummaryScreen->markingsSprite;
+    v->ballBox = v->page == PSS_PAGE_BALL ? sMpBallLineCount : 0;
+    v->journalRows = 0;
+    if (v->page == PSS_PAGE_JOURNAL && sMpJournal != NULL)
+    {
+        for (i = 0; i < MPJ_ROWS - 1; i++)
+        {
+            u16 r = sMpJournal->page * (MPJ_ROWS - 1) + i;
+            if (r >= sMpJournal->rowCount)
+                break;
+            v->journal[i] = sMpJournal->rows[r];
+            v->journalEntry[i] = sMpJournal->rowEntry[r];
+        }
+        v->journalRows = i;
+        v->journalPage = sMpJournal->page;
+        v->journalPages = sMpJournal->pages;
+    }
+    return TRUE;
+}
+
+// the POKé BALL page's line K as it was printed (its place in the page's box)
+const u8 *MP_Summary_BallLine(u8 k, u8 *x, u8 *y)
+{
+    if (k >= sMpBallLineCount)
+        return NULL;
+    *x = sMpBallLines[k].x;
+    *y = sMpBallLines[k].y;
+    return sMpBallLines[k].text;
+}
+
+// the summary's words for a style, from the same tables the pages print from
+void MP_Summary_Words(struct MpSummaryWords *w)
+{
+    struct PokeSummary *sum = &sMonSummaryScreen->summary;
+    struct Pokemon *mon = &sMonSummaryScreen->currentMon;
+    u16 dexNum = SpeciesToPokedexNum(sum->species), ability, base;
+    u8 i, stats[5] = {0, 1, 3, 4, 2};   // (ATK DEF SP.ATK SP.DEF SPEED in gNatureStatTable's order)
+    u16 values[5];
+
+    memset(w, 0, sizeof(*w));
+    GetMonNickname(mon, w->nick);
+    if (sum->isEgg)
+    {
+        // (an EGG: its state where the Ability goes, its memo as PrintEggState / PrintEggMemo say them)
+        if (sum->sanity == TRUE || sum->friendship > 40)
+            w->abilityDesc = gText_EggWillTakeALongTime;
+        else if (sum->friendship <= 5)
+            w->abilityDesc = gText_EggAboutToHatch;
+        else if (sum->friendship <= 10)
+            w->abilityDesc = gText_EggWillHatchSoon;
+        else
+            w->abilityDesc = gText_EggWillTakeSomeTime;
+        if (sum->sanity == 1)
+            StringCopy(w->memo, gText_OddEggFoundByCouple);
+        else if (sum->metLocation == METLOC_FATEFUL_ENCOUNTER)
+            StringCopy(w->memo, gText_PeculiarEggNicePlace);
+        else if (DidMonComeFromGBAGames() == FALSE || DoesMonOTMatchOwner() == FALSE)
+            StringCopy(w->memo, gText_PeculiarEggTrade);
+        else if (sum->metLocation == METLOC_SPECIAL_EGG)
+            StringCopy(w->memo, DidMonComeFromRSE() == TRUE ? gText_EggFromHotSprings : gText_EggFromTraveler);
+        else
+            StringCopy(w->memo, gText_OddEggFoundByCouple);
+        w->type1 = w->type2 = TYPE_MYSTERY;
+        w->ability = gText_EmptyString5;
+        return;
+    }
+    StringCopy(w->species, gSpeciesNames[sum->species2]);
+    if (dexNum == 0xFFFF && sum->species != SPECIES_NONE && sum->species < NUM_SPECIES)
+    {
+        dexNum = SpeciesToNationalPokedexNum(sum->species);
+        if (dexNum == 0)
+            dexNum = 0xFFFF;
+    }
+    if (dexNum != 0xFFFF)
+        ConvertIntToDecimalStringN(w->dexNo, dexNum, STR_CONV_MODE_LEADING_ZEROS, dexNum > 999 ? 4 : 3);
+    w->sealed = MP_Gen_SealedMon(mon);
+    w->shiny = IsMonShiny(mon);
+    ConvertIntToDecimalStringN(w->level, sum->level, STR_CONV_MODE_LEFT_ALIGN, 3);
+    w->hideOT = InBattleFactory() == TRUE || InSlateportBattleTent() == TRUE;
+    StringCopyN(w->ot, sum->OTName, sizeof(w->ot) - 1);
+    w->ot[sizeof(w->ot) - 1] = EOS;
+    w->otFemale = sum->OTGender != 0;
+    ConvertIntToDecimalStringN(w->idNo, (u16)sum->OTID, STR_CONV_MODE_LEADING_ZEROS, 5);
+    if (sum->item == ITEM_NONE)
+        StringCopy(w->item, gText_None);
+    else
+        CopyItemName(sum->item, w->item);
+    StringCopy(w->nature, gNatureNamePointers[sum->nature]);
+    ability = GetMonAbility(mon);
+    w->ability = gAbilityNames[ability];
+    w->abilityDesc = gAbilityDescriptionPointers[ability];
+    // (the trainer memo: KAI's own words, and the met place and level for a style's own phrasing when it's plain)
+    BufferMonTrainerMemo();
+    StringCopyN(w->memo, gStringVar4, sizeof(w->memo) - 1);
+    w->memo[sizeof(w->memo) - 1] = EOS;
+    w->memoPlain = FALSE;
+    if (!(InBattleFactory() == TRUE || InSlateportBattleTent() == TRUE || IsInGamePartnerMon() == TRUE)
+     && DoesMonOTMatchOwner() == TRUE && sum->metLevel != 0)
+    {
+        if (MP_Region_MetMapSec(sum->metGame, sum->metLocation) > MAPSEC_NONE)
+        {
+            GetMapName(w->metPlace, MP_Region_MetMapSec(sum->metGame, sum->metLocation), 0);
+            w->memoPlain = TRUE;
+        }
+        else if (sum->metLocation < MAPSEC_NONE)
+        {
+            GetMapNameHandleAquaHideout(w->metPlace, sum->metLocation);
+            w->memoPlain = TRUE;
+        }
+        ConvertIntToDecimalStringN(w->metLevel, sum->metLevel, STR_CONV_MODE_LEFT_ALIGN, 3);
+    }
+    {
+        void MP_Form_MonTypes(struct Pokemon *mon, u8 *t0, u8 *t1);
+        MP_Form_MonTypes(mon, &w->type1, &w->type2);   // (its form's: src/mp/mp_forms.c)
+    }
+    // SKILLS
+    ConvertIntToDecimalStringN(w->hp, sum->currentHP, STR_CONV_MODE_LEFT_ALIGN, 3);
+    ConvertIntToDecimalStringN(w->maxHp, sum->maxHP, STR_CONV_MODE_LEFT_ALIGN, 3);
+    w->hpNow = sum->currentHP, w->hpMax = sum->maxHP;
+    values[0] = sum->atk, values[1] = sum->def, values[2] = sum->spatk, values[3] = sum->spdef, values[4] = sum->speed;
+    for (i = 0; i < 5; i++)
+    {
+        s8 effect = gNatureStatTable[sum->nature][stats[i]];
+        ConvertIntToDecimalStringN(w->stat[i], values[i], STR_CONV_MODE_LEFT_ALIGN, 3);
+        w->statNature[i] = effect > 0 ? 1 : effect < 0 ? 2 : 0;
+    }
+    for (i = 0; i < 6; i++)
+    {
+        static const u8 sIv[6] = {MON_DATA_HP_IV, MON_DATA_ATK_IV, MON_DATA_DEF_IV,
+                                  MON_DATA_SPATK_IV, MON_DATA_SPDEF_IV, MON_DATA_SPEED_IV};
+        u8 iv = GetMonData(mon, sIv[i]), ev = GetMonData(mon, sIv[i] - MON_DATA_HP_IV + MON_DATA_HP_EV);
+        w->ivStars[i] = iv == 31 ? 4 : MpIvStars(iv);
+        ConvertIntToDecimalStringN(w->ev[i], ev, STR_CONV_MODE_LEFT_ALIGN, 3);
+    }
+    ConvertIntToDecimalStringN(w->exp, sum->exp, STR_CONV_MODE_LEFT_ALIGN, 7);
+    if (sum->level < MAX_LEVEL)
+    {
+        u32 lo = gExperienceTables[gSpeciesInfo[sum->species].growthRate][sum->level];
+        u32 hi = gExperienceTables[gSpeciesInfo[sum->species].growthRate][sum->level + 1];
+        ConvertIntToDecimalStringN(w->nextLv, hi - sum->exp, STR_CONV_MODE_LEFT_ALIGN, 7);
+        w->expFrac = hi > lo ? (s32)(((s64)(sum->exp - lo) << 16) / (hi - lo)) : 0;
+    }
+    else
+    {
+        StringCopy(w->nextLv, gText_ThreeDashes);
+        w->expFrac = 0;
+    }
+    if (sum->ribbonCount == 0)
+        StringCopy(w->ribbons, gText_None);
+    else
+        ConvertIntToDecimalStringN(w->ribbons, sum->ribbonCount, STR_CONV_MODE_LEFT_ALIGN, 2);
+    // MOVES (the fifth: the one to learn)
+    for (i = 0; i < MAX_MON_MOVES + 1; i++)
+    {
+        u16 move = i < MAX_MON_MOVES ? sum->moves[i] : sMonSummaryScreen->newMove;
+        w->move[i] = move;
+        if (move == MOVE_NONE)
+            continue;
+        StringCopy(w->moveName[i], gMoveNames[move]);
+        w->moveType[i] = gBattleMoves[move].type;
+        w->contestType[i] = gContestMoves[move].contestCategory;
+        if (i < MAX_MON_MOVES)
+        {
+            ConvertIntToDecimalStringN(w->pp[i], sum->pp[i], STR_CONV_MODE_LEFT_ALIGN, 2);
+            ConvertIntToDecimalStringN(w->maxPp[i], CalculatePPWithBonus(move, sum->ppBonuses, i), STR_CONV_MODE_LEFT_ALIGN, 2);
+        }
+        else
+        {
+            ConvertIntToDecimalStringN(w->pp[i], gBattleMoves[move].pp, STR_CONV_MODE_LEFT_ALIGN, 2);
+            StringCopy(w->maxPp[i], w->pp[i]);
+        }
+    }
+    // the move picked (choosing one): its power, accuracy and words, or its appeal and jam
+    if (sMonSummaryScreen->firstMoveIndex <= MAX_MON_MOVES)
+    {
+        u16 move = w->move[sMonSummaryScreen->firstMoveIndex];
+        if (move != MOVE_NONE)
+        {
+            base = IS_MAKER_MOVE(move) && Maker_MoveBase(move) ? Maker_MoveBase(move) : move;
+            if (gBattleMoves[move].power < 2)
+                StringCopy(w->power, gText_ThreeDashes);
+            else
+                ConvertIntToDecimalStringN(w->power, gBattleMoves[move].power, STR_CONV_MODE_LEFT_ALIGN, 3);
+            if (gBattleMoves[move].accuracy == 0)
+                StringCopy(w->accuracy, gText_ThreeDashes);
+            else
+                ConvertIntToDecimalStringN(w->accuracy, gBattleMoves[move].accuracy, STR_CONV_MODE_LEFT_ALIGN, 3);
+            w->moveDesc = gMoveDescriptionPointers[base - 1];
+            w->contestDesc = gContestEffectDescriptionPointers[gContestMoves[move].effect];
+            w->appeal = gContestEffects[gContestMoves[move].effect].appeal;
+            w->jam = gContestEffects[gContestMoves[move].effect].jam;
+            w->appeal = w->appeal == 0xFF ? 0 : w->appeal / 10;
+            w->jam = w->jam == 0xFF ? 0 : w->jam / 10;
+        }
+    }
 }

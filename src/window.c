@@ -325,6 +325,8 @@ void PutWindowTilemap(u8 windowId)
 {
     struct Window windowLocal = gWindows[windowId];
 
+    MP_UiStyle_WindowShown(windowId, TRUE);   // Moemon Kai: UI STYLE
+
     WriteSequenceToBgTilemapBuffer(
         windowLocal.window.bg,
         GetBgAttribute(windowLocal.window.bg, BG_ATTR_BASETILE) + windowLocal.window.baseBlock,
@@ -362,6 +364,8 @@ void PutWindowRectTilemapOverridePalette(u8 windowId, u8 x, u8 y, u8 width, u8 h
 void ClearWindowTilemap(u8 windowId)
 {
     struct Window windowLocal = gWindows[windowId];
+
+    MP_UiStyle_WindowShown(windowId, FALSE);   // Moemon Kai: UI STYLE
 
     FillBgTilemapBufferRect(
         windowLocal.window.bg,
@@ -441,6 +445,7 @@ void FillWindowPixelRect(u8 windowId, u8 fillValue, u16 x, u16 y, u16 width, u16
     pixelRect.height = 8 * gWindows[windowId].window.height;
 
     FillBitmapRect4Bit(&pixelRect, x, y, width, height, fillValue);
+    MP_UiStyle_WindowRectFilled(windowId, x, y, width, height);   // Moemon Kai: UI STYLE (the words there gone)
 }
 
 void CopyToWindowPixelBuffer(u8 windowId, const void *src, u16 size, u16 tileOffset)

@@ -690,6 +690,21 @@ class BWPack:
         self.img(row, 'bw.bag.cursor', arrow, 108 - arrow.width + 2, ay, cond=U.B_SWAP, unless=U.C_SEL0)
         p.spec(row)
 
+    # ---------------------------------------------------------------------------------------------------- pop-ups
+    def popups(self):
+        """KAI's own pop-ups (menus, YES / NO, the save's box) in Black's balloon and font (mp_uistyle.c PopUps):
+        the red ones red, the pale ones grey"""
+        st, p = self.st, self.p
+        sp = U.Spec('win')
+        self.img(sp, 'bw.win', st.balloon(24, 24))
+        sp.add(U.OP_FILL, w=0, h=0, ink=(248, 248, 248), a=255)
+        p.spec(sp)
+        t = U.Spec('win.text')
+        self.text(t, '{%d}' % U.F_NAME, 0, 0, self.fm, *st.INK, unless=U.C_SEL0 | U.C_ALT)
+        self.text(t, '{%d}' % U.F_NAME, 0, 0, self.fm, (232, 64, 48), (248, 168, 168), cond=U.C_SEL0)
+        self.text(t, '{%d}' % U.F_NAME, 0, 0, self.fm, (168, 168, 168), (216, 216, 216), cond=U.C_ALT)
+        p.spec(t)
+
     def make(self):
         self.fonts()
         self.huds()
@@ -697,4 +712,5 @@ class BWPack:
         self.party()
         self.options()
         self.bag()
+        self.popups()
         return self.p

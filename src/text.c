@@ -308,6 +308,9 @@ bool16 AddTextPrinter(struct TextPrinterTemplate *printerTemplate, u8 speed, Tex
     sTempTextPrinter.printerTemplate.currentChar = MP_TextOpts_Filter(printerTemplate->currentChar, printerTemplate->windowId);
     // Moemon Kai: UI STYLE keeps each window's words (it draws them again in its own font: mp_uistyle.c)
     MP_UiStyle_TextPrinted(printerTemplate->windowId, sTempTextPrinter.printerTemplate.currentChar);
+    MP_UiStyle_TextRun(printerTemplate->windowId, sTempTextPrinter.printerTemplate.currentChar, printerTemplate->x,
+                       printerTemplate->y, printerTemplate->fontId, printerTemplate->fgColor, printerTemplate->letterSpacing,
+                       printerTemplate->lineSpacing);
     sTempTextPrinter.callback = callback;
     sTempTextPrinter.minLetterSpacing = 0;
     sTempTextPrinter.japanese = 0;

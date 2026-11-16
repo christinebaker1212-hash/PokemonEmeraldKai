@@ -29,6 +29,9 @@ void MP_UiStyle_Changed(void);           // OPTIONS changed it (its pack loaded 
 void MP_UiStyle_TextPrinted(u8 windowId, const u8 *str);
 void MP_UiStyle_WindowFilled(u8 windowId);
 void MP_UiStyle_WindowGone(u8 windowId);  // (window.c RemoveWindow)
+void MP_UiStyle_TextRun(u8 windowId, const u8 *str, u8 x, u8 y, u8 fontId, u8 fg, u8 letterSpacing, u8 lineSpacing);   // (text.c)
+void MP_UiStyle_WindowRectFilled(u8 windowId, u16 x, u16 y, u16 w, u16 h);   // (window.c FillWindowPixelRect)
+void MP_UiStyle_WindowShown(u8 windowId, bool8 shown);   // (window.c Put / ClearWindowTilemap)
 void MP_UiStyle_Framed(u8 windowId, u8 kind);   // menu.c: its frame drawn (1 dialogue, 2 standard) or cleared (0)
 const u8 *MP_TextPrinter_Cur(u8 windowId, bool8 *active, u8 *state);   // text.c: where its printer is
 
@@ -77,10 +80,50 @@ struct MpBagView
 };
 bool8 MP_Bag_View(struct MpBagView *v);
 const u8 *MP_Bag_RowView(u16 row, s32 *qty, u8 *tag);   // (TAG: 8 bytes)
+
+// the summary (pokemon_summary_screen.c): the POKéMON, the page, choosing a move, the KAI pages' own words
+struct MpSummaryView
+{
+    struct Pokemon *mon;
+    u8 page, statsView;              // (PSS_PAGE_*: INFO, SKILLS, BATTLE MOVES, CONTEST MOVES, POKé BALL, JOURNAL)
+    bool8 isEgg, choosing, swapping, learning, canRename, canClearEvs, clearAsk;
+    u16 newMove;
+    u8 moveCursor, moveSwap;         // (the move picked, 4 the new one or CANCEL; the one it moves to)
+    u8 monSprite, ballSprite, statusSprite;
+    u8 own[32], nOwn;                // the summary's own sprites a style draws its own of (type icons, the move frame)
+    struct Sprite *markings;
+    u8 ballBox;                      // the POKé BALL page's lines (MP_Summary_BallLine)
+    const u8 *journal[8];            // the JOURNAL's rows on its page, the sentence each belongs to
+    u8 journalEntry[8], journalRows, journalPage, journalPages;
+};
+bool8 MP_Summary_View(struct MpSummaryView *v);
+struct MpSummaryWords
+{
+    u8 nick[24], species[16], dexNo[8], level[4], ot[12], idNo[8], item[24], nature[16], metPlace[32], metLevel[4];
+    u8 memo[160];                    // (KAI's own trainer memo, with its colours)
+    bool8 memoPlain;                 // met there at that level by its own trainer (a style may say it its own way)
+    bool8 sealed, shiny, hideOT, otFemale;
+    const u8 *ability, *abilityDesc;
+    u8 type1, type2;
+    u8 hp[4], maxHp[4], stat[5][4], statNature[5];   // (ATK DEF SP.ATK SP.DEF SPEED; 1 raised, 2 lowered)
+    u16 hpNow, hpMax;
+    u8 ivStars[6], ev[6][4];         // (HP first; stars 0-3, 4: a perfect 31)
+    u8 exp[8], nextLv[8], ribbons[4];
+    s32 expFrac;
+    u16 move[5];
+    u8 moveName[5][16], pp[5][4], maxPp[5][4], moveType[5], contestType[5];
+    u8 power[4], accuracy[4], appeal, jam;
+    const u8 *moveDesc, *contestDesc;
+};
+void MP_Summary_Words(struct MpSummaryWords *w);
+const u8 *MP_Summary_BallLine(u8 k, u8 *x, u8 *y);
 u8 MP_Options_RowView(u8 row, const u8 **label, const u8 **names, u8 *cur, u8 *buf, u8 *lbuf);   // (NAMES: 8)
 
 // the renderer (gba_easy_draw.c): BG0's pixels a style draws in place of, this frame (y0 <= line < y1, x0 <= x < x1)
 extern s16 gMpUiHideBg0[4];
+#define MP_UI_HIDE_RECTS 8
+extern s16 gMpUiHideRects[MP_UI_HIDE_RECTS][4];   // (and more: a style's pop-ups where Kai's are)
+extern u8 gMpUiHideCount;
 void MP_UiStyle_PreFrame(void);          // VDraw, before the frame is drawn: what's hidden
 void MP_UiStyle_Composite(u16 *frame);   // VDraw, after: the style's pieces over it
 

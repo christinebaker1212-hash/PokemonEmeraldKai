@@ -435,6 +435,21 @@ class GBPack:
         self.text(row, '{%d}' % U.F_TAG, 232, 8, cond=U.B_TAG, align=1)
         p.spec(row)
 
+    # ---------------------------------------------------------------------------------------------------- pop-ups
+    def popups(self):
+        """KAI's own pop-ups (menus, YES / NO, the save's box) in the Game Boy's box and font (mp_uistyle.c PopUps)"""
+        st, p = self.st, self.p
+        frame = Image.new('RGBA', (24, 24), (0, 0, 0, 0))
+        st.window(frame, (0, 0, 24, 24))
+        sp = U.Spec('win')
+        sp.add(U.OP_IMG, a=p.image('%s.win' % self.kind, frame))
+        sp.add(U.OP_FILL, w=0, h=0, ink=st.paper, a=255)
+        p.spec(sp)
+        t = U.Spec('win.text')
+        self.text(t, '{%d}' % U.F_NAME, 0, 3, unless=U.C_ALT)
+        self.text(t, '{%d}' % U.F_NAME, 0, 3, st.mid, cond=U.C_ALT)
+        p.spec(t)
+
     def make(self):
         self.fonts()
         for kind in ('foe1', 'mine1', 'foe2', 'mine2', 'foe3', 'mine3'):
@@ -443,6 +458,7 @@ class GBPack:
         self.party()
         self.options()
         self.bag()
+        self.popups()
         if not self.red:
             self.p.spec(words_spec(self.p, 'start', ACCOUNT))
         return self.p

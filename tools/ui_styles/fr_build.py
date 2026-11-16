@@ -409,6 +409,23 @@ class FRPack:
         self.text(row, '{%d}' % U.F_TAG, 230, 0, F.STD, 's', cond=U.B_TAG, align=1)
         p.spec(row)
 
+    # ---------------------------------------------------------------------------------------------------- pop-ups
+    def popups(self):
+        """KAI's own pop-ups (menus, YES / NO, the save's box) in FireRed's window frame and font (mp_uistyle.c
+        PopUps): the red ones red, the pale ones grey"""
+        st, p = self.st, self.p
+        frame = Image.new('RGBA', (24, 24), (0, 0, 0, 0))
+        st.frame(frame, (0, 0, 24, 24))
+        sp = U.Spec('win')
+        self.img(sp, 'fr.win', frame)
+        sp.add(U.OP_FILL, w=0, h=0, ink=(255, 255, 255), a=255)
+        p.spec(sp)
+        t = U.Spec('win.text')
+        self.text(t, '{%d}' % U.F_NAME, 0, 0, F.STD, unless=U.C_SEL0 | U.C_ALT)
+        self.text(t, '{%d}' % U.F_NAME, 0, 0, F.RED, cond=U.C_SEL0)
+        self.text(t, '{%d}' % U.F_NAME, 0, 0, ((172, 172, 172), (222, 222, 213)), cond=U.C_ALT)
+        p.spec(t)
+
     def make(self):
         self.fonts()
         for kind in ('foe', 'mine', 'foe2', 'mine2', 'foe3', 'mine3'):
@@ -417,4 +434,5 @@ class FRPack:
         self.party()
         self.options()
         self.bag()
+        self.popups()
         return self.p

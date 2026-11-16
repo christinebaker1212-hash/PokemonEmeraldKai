@@ -93,6 +93,11 @@ static void RenderBGScanline(int bgNum, uint16_t control, uint16_t hoffs, uint16
         for (int x = gMpUiHideBg0[0]; x < gMpUiHideBg0[2] && x < DISPLAY_WIDTH; x++)
             line[x] = 0;
     }
+    if (bgNum == 0)
+        for (int r = 0; r < gMpUiHideCount && r < MP_UI_HIDE_RECTS; r++)
+            if (lineNum >= gMpUiHideRects[r][1] && lineNum < gMpUiHideRects[r][3])
+                for (int x = gMpUiHideRects[r][0] < 0 ? 0 : gMpUiHideRects[r][0]; x < gMpUiHideRects[r][2] && x < DISPLAY_WIDTH; x++)
+                    line[x] = 0;
     // Moemon Co-op: the battle scene's layers in battle weather (mp_battleweather.c: the sandstorm, and dimmer in
     // rain and hail, brighter in sunlight)
     if (gMpScenePixel && (gMpSceneLayers & (1 << bgNum)))

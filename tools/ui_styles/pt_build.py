@@ -612,6 +612,24 @@ class PTPack:
         self.text(row, '{%d}' % U.F_TAG, 226, 0, self.fsmall, dark, lite, align=1, cond=U.B_TAG)
         p.spec(row)
 
+    # ---------------------------------------------------------------------------------------------------- pop-ups
+    def popups(self):
+        """KAI's own pop-ups (menus, YES / NO, the save's box) in Platinum's field window frame and message font
+        (mp_uistyle.c PopUps): the red ones red, the pale ones grey"""
+        st, p = self.st, self.p
+        frame = Image.new('RGBA', (24, 24), (0, 0, 0, 0))
+        st.std_frame(frame, 1, 1, 1, 1)
+        sp = U.Spec('win')
+        self.img(sp, 'pt.win', frame)
+        sp.add(U.OP_FILL, w=0, h=0, ink=(255, 255, 255), a=255)
+        p.spec(sp)
+        fi, fs = st.FIELD_INK
+        t = U.Spec('win.text')
+        self.text(t, '{%d}' % U.F_NAME, 0, -1, self.fm, fi, fs, unless=U.C_SEL0 | U.C_ALT)
+        self.text(t, '{%d}' % U.F_NAME, 0, -1, self.fm, (232, 32, 16), (248, 168, 184), cond=U.C_SEL0)
+        self.text(t, '{%d}' % U.F_NAME, 0, -1, self.fm, (168, 168, 176), (216, 216, 216), cond=U.C_ALT)
+        p.spec(t)
+
     def make(self):
         self.fonts()
         for kind in ('foe1', 'mine1', 'foe2', 'mine2', 'foe3', 'mine3'):
@@ -620,4 +638,5 @@ class PTPack:
         self.party()
         self.options()
         self.bag()
+        self.popups()
         return self.p
