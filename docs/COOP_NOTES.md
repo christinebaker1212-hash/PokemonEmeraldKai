@@ -7865,5 +7865,24 @@ docs/ui_styles/UI_STYLES.md ("Building it" for the game's side).
   Every menu's opening, closing and switching was recorded frame by frame in every style against KAI (START, BAG,
   party, its submenu, the summary, OPTIONS, SAVE, the CO-OP menu, a message box, the battle's panels, a whole turn,
   the BAG and party from battle): START's rows printing before the style's START showed was the one flash.
-Tests: ui_style_battles, ui_style_screens, ui_style_dpad, ui_style_party_battles; tools/ui_styles/check_specs.py.
+- 1.200.5: closing START, a pop-up or the field's message no longer shows Kai's for a frame (the hidden places stay
+  hidden three frames after they close, the screen showing the old tiles that long: PreFrame's tails). The field's
+  message box is hidden where BG0's scroll puts it (the map name's pop-up slides away by scrolling BG0, the message's
+  tiles with it: HideKaiMessageBox). The caught ball in every style's battle boxes (C_CAUGHT, set by HudUpdate as
+  TryAddPokeballIconToHealthbox decides): FIRERED's healthbox element 70, PLATINUM's parts tile 59 at x 8 of the bar
+  row (healthbox.c sCaughtIconVRAMTransfer), BLACK's parts tile 0x360 left of the name (btlv_gauge.c
+  BTLV_GAUGE_DrawCaughtIcon; boxes move in where it would be off the screen), CRYSTAL's $5D at hlcoord 1, 1 sitting on
+  the bracket's corner (doubles and triples too), RED none; KAI's triple cards draw the healthbox's own tile
+  (battle_interface.c MP_CaughtBallGfx). SELECT's move swap shows the held move (C_HELD0: grey arrow / corners / ring)
+  and works in link battles: the swap goes to the others' games (MPR_BATTLE_MOVESWAP, protocol 83,
+  battle_controller_player.c MP_Battle_OnMoveSwap). The move panel keeps the moves it was given once one is picked
+  (the battle reuses that buffer: MP_BattleChoosingMove). OPTIONS > DISPLAY > WHITE BG (RED / CRYSTAL only:
+  ui_white_bg, C_NOBG drops the boxes' OP_BACKING); THEME is KAI's alone (mp_darktheme.c MP_Theme_Dark, shown as UI
+  STYLE'S). RED / CRYSTAL's party has no CANCEL (NavPlace leaves 7 out, the cursor goes round). Pop-ups on the party
+  screen are the style's (its icons don't count as sprites over them), a pop-up grows to hold the style's wider
+  letters (one at the left edge across the screen, one at the right leftward), lower ones are drawn first and a
+  widened one pushes the one over it up. The MOéDEX page after a catch has no battle drawn over it
+  (pokedex.c MP_DexCaughtPageShown). The Game Boy fonts have "…" (font_extra $75).
+Tests: ui_style_battles, ui_style_screens, ui_style_dpad, ui_style_party_battles, coop_move_swap;
+tools/ui_styles/check_specs.py.
 
