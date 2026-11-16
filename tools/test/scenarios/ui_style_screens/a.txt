@@ -1,0 +1,153 @@
+pressuntil A field 5000
+mp textspeed 2
+mp uistyle red
+wait 4
+mp summary
+waitfor summary 300
+wait 40
+rendershot red_sum0
+press RIGHT 1
+wait 40
+rendershot red_sum1
+press RIGHT 1
+wait 40
+rendershot red_sum2
+press RIGHT 1
+wait 40
+rendershot red_sum3
+press RIGHT 1
+wait 40
+rendershot red_sum4
+press RIGHT 1
+wait 40
+rendershot red_sum5
+press B 1
+pressuntil B field 600
+wait 20
+mp options
+wait 60
+rendershot red_options
+press B 1
+pressuntil B field 600
+wait 20
+mp uistyle crystal
+wait 4
+mp summary
+waitfor summary 300
+wait 40
+rendershot crystal_sum0
+press RIGHT 1
+wait 40
+rendershot crystal_sum1
+press RIGHT 1
+wait 40
+rendershot crystal_sum2
+press RIGHT 1
+wait 40
+rendershot crystal_sum3
+press RIGHT 1
+wait 40
+rendershot crystal_sum4
+press RIGHT 1
+wait 40
+rendershot crystal_sum5
+press B 1
+pressuntil B field 600
+wait 20
+mp options
+wait 60
+rendershot crystal_options
+press B 1
+pressuntil B field 600
+wait 20
+mp uistyle firered
+wait 4
+mp summary
+waitfor summary 300
+wait 40
+rendershot firered_sum0
+press RIGHT 1
+wait 40
+rendershot firered_sum1
+press RIGHT 1
+wait 40
+rendershot firered_sum2
+press RIGHT 1
+wait 40
+rendershot firered_sum3
+press RIGHT 1
+wait 40
+rendershot firered_sum4
+press RIGHT 1
+wait 40
+rendershot firered_sum5
+press B 1
+pressuntil B field 600
+wait 20
+mp options
+wait 60
+rendershot firered_options
+press B 1
+pressuntil B field 600
+wait 20
+mp uistyle platinum
+wait 4
+mp summary
+waitfor summary 300
+wait 40
+rendershot platinum_sum0
+press RIGHT 1
+wait 40
+rendershot platinum_sum1
+press RIGHT 1
+wait 40
+rendershot platinum_sum2
+press RIGHT 1
+wait 40
+rendershot platinum_sum3
+press RIGHT 1
+wait 40
+rendershot platinum_sum4
+press RIGHT 1
+wait 40
+rendershot platinum_sum5
+press B 1
+pressuntil B field 600
+wait 20
+mp options
+wait 60
+rendershot platinum_options
+press B 1
+pressuntil B field 600
+wait 20
+mp uistyle black
+wait 4
+mp summary
+waitfor summary 300
+wait 40
+rendershot black_sum0
+press RIGHT 1
+wait 40
+rendershot black_sum1
+press RIGHT 1
+wait 40
+rendershot black_sum2
+press RIGHT 1
+wait 40
+rendershot black_sum3
+press RIGHT 1
+wait 40
+rendershot black_sum4
+press RIGHT 1
+wait 40
+rendershot black_sum5
+press B 1
+pressuntil B field 600
+wait 20
+mp options
+wait 60
+rendershot black_options
+press B 1
+pressuntil B field 600
+wait 20
+quit

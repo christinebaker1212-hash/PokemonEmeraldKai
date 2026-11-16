@@ -709,11 +709,14 @@ class GBPack:
             at(sp, 0, 0, '{%d}' % U.F_PAGETITLE)
             st.at(g, 27, 0, '%d/6' % (k + 1))
             if k == 4:
-                at(sp, 1, 18, '{%d}' % U.F_NAME)
+                at(sp, 13, 0, '{%d}' % U.F_NAME)   # (on the title's row: the page's lines take the box to its foot)
                 sp.add(U.OP_LIST, x=8, y=16, h=0, n=1)
             else:
                 at(sp, 1, 2, '{%d}' % U.F_NAME)
-                sp.add(U.OP_MSG, x=8, y=32, a=3, h=8, n=15, w=224, font=self.font, ink=ink, shadow=mid)
+                # (a blank row between lines as the games' own text has them; a page that needs more rows than that
+                # gives them all, eight pixels apart)
+                sp.add(U.OP_MSG, x=8, y=32, a=3, h=16, n=7, b=8, c=15, d=32, w=224, font=self.font, ink=ink,
+                       shadow=mid)
                 at(sp, 28, 18, '{%d}' % U.F_JPAGE, align=1, cond=U.S_DOWN)
             done(sp, g, k)
             row = U.Spec('sum.%d.row' % k)

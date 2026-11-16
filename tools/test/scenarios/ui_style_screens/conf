@@ -1,0 +1,7 @@
+# UI STYLE (OPTIONS > DISPLAY > UI STYLE): the summary's six pages and OPTIONS in RED, CRYSTAL, FIRERED, PLATINUM and
+# BLACK (PLATINUM / BLACK only where their packs were built from the ROMs; shots looked at by hand)
+MODE=1
+TMO=240
+ENV_A="MOEMON_DEBUG_PARTY=280:24"
+EXPECT_A=("ui style: RED" "ui style: CRYSTAL" "ui style: FIRERED")
+UNEXPECT_A=("[crash]")
