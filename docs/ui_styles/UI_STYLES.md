@@ -126,4 +126,5 @@ tools/ui_styles/build_pack.py makes from the same mock-up code (uipack.py: the f
   follows the pocket and the player's gender (C_FEMALE) in each style that has one; BLACK's cursor is a ring traced
   round the button's own shape (bw.py command_rings / move_rings). COOP_NOTES "UI STYLE (1.200.0)" has the details.
 - Tests: scenarios ui_style_battles, ui_style_screens (the summary's pages and OPTIONS in every style; shots looked at
-  by hand), ui_style_dpad, check_specs.py for every style after any spec change.
+  by hand), ui_style_dpad, ui_style_party_battles (the party from a Triple Battle; since 1.200.4 every battle's party
+  is the style's screen), check_specs.py for every style after any spec change.

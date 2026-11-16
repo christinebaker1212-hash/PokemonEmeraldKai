@@ -2090,9 +2090,23 @@ static const u8 *Filtered(const u8 *str, u8 *buf, int cap)
     return buf;
 }
 
+// the style's party screen for every layout a battle uses (single, double, triple, co-op multi: the games these
+// styles come from show one party screen whatever the battle); only the multi battle's showcase stays Kai's
+static bool8 PartyLayoutStyled(u8 layout)
+{
+    return layout != PARTY_LAYOUT_MULTI_SHOWCASE;
+}
+
+// (party_menu.c: the party a style draws moves as the style's single screen does, whatever its layout)
+bool8 MP_UiStyle_PartyStyled(void)
+{
+    u8 style = MP_UiStyle_Active();
+    return style != UISTYLE_KAI && FindSpec(GetPack(style), "party") != NULL && PartyLayoutStyled(gPartyMenu.layout);
+}
+
 static bool8 PartyScreenShown(struct MpPartyState *st)
 {
-    return MP_UiStyle_Active() != UISTYLE_KAI && MP_PartyMenu_GetState(st) && st->layout == PARTY_LAYOUT_SINGLE;
+    return MP_UiStyle_Active() != UISTYLE_KAI && MP_PartyMenu_GetState(st) && PartyLayoutStyled(st->layout);
 }
 
 static void PartyScreen(struct UiPack *p, u16 *frame)
@@ -3090,7 +3104,7 @@ void MP_UiStyle_PreFrame(void)
         struct MpPartyState st;
         if (MP_PartyMenu_GetState(&st))
         {
-            bool8 hide = style != UISTYLE_KAI && st.layout == PARTY_LAYOUT_SINGLE;
+            bool8 hide = style != UISTYLE_KAI && PartyLayoutStyled(st.layout);
             u8 i;
             for (i = 0; i < PARTY_SIZE; i++)
                 if (st.ballSprite[i] < MAX_SPRITES)

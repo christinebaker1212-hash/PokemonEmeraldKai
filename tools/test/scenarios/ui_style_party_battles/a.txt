@@ -1,0 +1,21 @@
+pressuntil A field 5000
+mp textspeed 2
+mp uistyle black
+mp triple 288:3 286:3 290:3
+pressuntil A action 4000
+wait 20
+press DOWN 1
+wait 8
+press A 1
+wait 90
+rendershot bw_triple_party
+press RIGHT 1
+wait 10
+rendershot bw_triple_right
+press DOWN 1
+wait 10
+rendershot bw_triple_down
+press B 1
+wait 90
+rendershot bw_triple_back
+quit

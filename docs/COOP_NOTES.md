@@ -7859,5 +7859,11 @@ docs/ui_styles/UI_STYLES.md ("Building it" for the game's side).
     style's START shows whole at once instead of KAI's rows printing first.
   - The controller-only buttons (LT, RT, LS, RS, the west / north face buttons) are letters too, named for the pad in
     hand (KeypadWord).
-Tests: ui_style_battles, ui_style_screens, ui_style_dpad; tools/ui_styles/check_specs.py.
+- 1.200.4: the party from a Double, Triple or co-op multi battle is the style's own party screen too (the games these
+  styles copy have one party screen for every battle): mp_uistyle.c PartyLayoutStyled (every layout but the multi
+  battle's showcase), party_menu.c moves the cursor as the style's single screen does (MP_UiStyle_PartyStyled).
+  Every menu's opening, closing and switching was recorded frame by frame in every style against KAI (START, BAG,
+  party, its submenu, the summary, OPTIONS, SAVE, the CO-OP menu, a message box, the battle's panels, a whole turn,
+  the BAG and party from battle): START's rows printing before the style's START showed was the one flash.
+Tests: ui_style_battles, ui_style_screens, ui_style_dpad, ui_style_party_battles; tools/ui_styles/check_specs.py.
 

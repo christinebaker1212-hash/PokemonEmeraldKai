@@ -1692,7 +1692,9 @@ static void UpdateCurrentPartySelection(s8 *slotPtr, s8 movementDir)
     s8 newSlotId = *slotPtr;
     u8 layout = gPartyMenu.layout;
 
-    if (layout == PARTY_LAYOUT_SINGLE && MP_UiStyle_NavOwn(MP_UINAV_PARTY))
+    // Moemon Kai: UI STYLE: a style draws its own party screen in every battle's layout, so it moves as that does
+    bool8 styled = MP_UiStyle_PartyStyled();
+    if ((layout == PARTY_LAYOUT_SINGLE || styled) && MP_UiStyle_NavOwn(MP_UINAV_PARTY))
     {
         // Moemon Kai: UI STYLE: a party the style lays out in a list or two columns, moved round as it's laid out
         u32 usable = (1u << (PARTY_SIZE + 1)) | ((1u << gPlayerPartyCount) - 1);
@@ -1702,7 +1704,7 @@ static void UpdateCurrentPartySelection(s8 *slotPtr, s8 movementDir)
                                       : movementDir == MENU_DIR_DOWN ? DPAD_DOWN : movementDir == MENU_DIR_LEFT
                                       ? DPAD_LEFT : DPAD_RIGHT, usable, TRUE);
     }
-    else if (layout == PARTY_LAYOUT_SINGLE)
+    else if (layout == PARTY_LAYOUT_SINGLE || styled)
         UpdatePartySelectionSingleLayout(slotPtr, movementDir);
     else if (layout == PARTY_LAYOUT_TRIPLE)
         UpdatePartySelectionTripleLayout(slotPtr, movementDir);

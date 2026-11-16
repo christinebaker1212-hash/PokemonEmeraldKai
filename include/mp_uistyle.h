@@ -63,6 +63,7 @@ struct MpPartyState
     const u8 *desc[6];   // (a slot's description in place of its HP: ABLE, NOT ABLE...)
 };
 bool8 MP_PartyMenu_GetState(struct MpPartyState *st);
+bool8 MP_UiStyle_PartyStyled(void);   // (a style draws the party screen now, whatever its layout: it moves as the style's)
 
 // OPTIONS (option_menu.c): its tabs or a page's title, its rows, the line under them
 struct MpOptionsView
