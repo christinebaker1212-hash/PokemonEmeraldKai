@@ -437,7 +437,7 @@ class GB(Style):
         self.cursor(im, 168, 16)
         if self.kind == 'crystal':   # (Crystal's MENU ACCOUNT, _DrawMenuAccount: a box 10 tiles wide, three rows
             # inside, the words on its 1st and 3rd)
-            self.window(im, (0, 120, 80, 160))
+            self.window(im, (0, 120, 96, 160))
             self.at(im, 1, 16, 'MOéMON')
             self.at(im, 1, 18, 'database')
         return im

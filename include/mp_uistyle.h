@@ -28,12 +28,16 @@ void MP_UiStyle_Changed(void);           // OPTIONS changed it (its pack loaded 
 // the game's text printers (text.c AddTextPrinter, window.c FillWindowPixelBuffer): what each window prints
 void MP_UiStyle_TextPrinted(u8 windowId, const u8 *str);
 void MP_UiStyle_WindowFilled(u8 windowId);
+void MP_UiStyle_WindowGone(u8 windowId);  // (window.c RemoveWindow)
+void MP_UiStyle_Framed(u8 windowId, u8 kind);   // menu.c: its frame drawn (1 dialogue, 2 standard) or cleared (0)
+const u8 *MP_TextPrinter_Cur(u8 windowId, bool8 *active, u8 *state);   // text.c: where its printer is
 
 // the battle's boxes (battle_interface.c), for every battle
 void MP_UiStyle_HudUpdate(u8 battler, struct Pokemon *mon, bool8 hpToo);
 void MP_UiStyle_HudBar(u8 battler, s32 hp, s32 maxHp);
 void MP_UiStyle_HudExp(u8 battler, s32 exp, s32 expMax);
 bool8 MP_UiStyle_DrawsHealthboxes(void);  // the game's healthbox sprites aren't drawn (CreateBattlerHealthboxSprites)
+void MP_UiStyle_SetChooser(u8 battler);   // the player's battler choosing an action or move now
 
 // the renderer (gba_easy_draw.c): BG0's pixels a style draws in place of, this frame (y0 <= line < y1, x0 <= x < x1)
 extern s16 gMpUiHideBg0[4];

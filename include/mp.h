@@ -277,6 +277,7 @@ struct MpConfig
     u8 noAnnouncer;           // OPTIONS > BATTLE > ANNOUNCER: 0 ON (POKeMON STADIUM's announcer: mp_stadium_announcer.c), 1 OFF
     u8 announcerJp;           // ... its voices: 0 ENGLISH (Pokemon Stadium's), 1 JAPANESE (POKEMON STADIUM 2's)
     u8 stadiumStyle;          // OPTIONS > BATTLE > STADIUM SETTINGS > STYLE: STADIUM's screens (MP_STADIUM_STYLE_*)
+    u8 uiStyle;               // OPTIONS > DISPLAY > UI STYLE: UISTYLE_* (mp_uistyle.h: KAI, RED, CRYSTAL, FIRERED...)
     // The options the save itself holds (TEXT SPEED, FRAME...) and the TRAINER CARD's two, kept with the other settings
     // so another save file follows File 1's (save_slots.c; the user, 2026-11-11). gameOptSet: which ones the file has
     u8 gameOpt[16];           // MP_GAMEOPT_*

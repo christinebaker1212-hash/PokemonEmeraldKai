@@ -252,13 +252,15 @@ class GBPack:
         # the battle's message: the whole panel, two lines (hlcoord 1, 14 / 1, 16)
         sp = U.Spec('b.msg')
         sp.add(U.OP_IMG, x=0, y=112, a=self.window_img('w.240x48', (0, 112, 240, 160)))
-        sp.add(U.OP_MSG, x=8, y=128, a=0, h=16, n=2, font=self.font, ink=st.ink, shadow=st.mid)
+        sp.add(U.OP_MSG, x=8, y=128, a=0, h=16, n=2, w=216, b=8, c=4, d=120, font=self.font, ink=st.ink,
+               shadow=st.mid)
         p.spec(sp)
         # the command: the prompt's box, the menu's box, ▶ on the chosen one
         sp = U.Spec('b.cmd')
         sp.add(U.OP_IMG, x=0, y=112, a=self.window_img('w.120x48', Lo.BATTLE_MSG))
         sp.add(U.OP_IMG, x=120, y=112, a=self.window_img('w.120x48', Lo.BATTLE_MENU))
-        sp.add(U.OP_MSG, x=8, y=128, a=1, h=16, n=2, font=self.font, ink=st.ink, shadow=st.mid)
+        sp.add(U.OP_MSG, x=8, y=128, a=1, h=16, n=2, w=104, b=8, c=4, d=120, font=self.font, ink=st.ink,
+               shadow=st.mid)
         for i in range(4):
             x, y = 136 + (i % 2) * 56, 128 + (i // 2) * 16
             self.text(sp, '{%d}' % (U.F_ITEM0 + i), x, y)
@@ -274,12 +276,13 @@ class GBPack:
         self.text(sp, 'TYPE/', 168, 120, unless=U.C_ALT)
         self.text(sp, '{%d}' % U.F_TYPE, 176, 128, unless=U.C_ALT)
         self.text(sp, '{%d}/{%d}' % (U.F_PP, U.F_MAXPP), 232, 140, align=1)
-        sp.add(U.OP_MSG, x=168, y=120, a=10, h=8, n=1, font=self.font7, ink=st.ink, shadow=st.mid, cond=U.C_ALT)
+        sp.add(U.OP_MSG, x=168, y=120, a=10, h=8, n=2, font=self.font7, ink=st.ink, shadow=st.mid, cond=U.C_ALT)
         p.spec(sp)
         # the field's message box: two lines, ▼ waiting
         sp = U.Spec('f.msg')
         sp.add(U.OP_IMG, x=0, y=112, a=self.window_img('w.240x48', Lo.FIELD_MSG))
-        sp.add(U.OP_MSG, x=8, y=128, a=0, h=16, n=2, font=self.font, ink=st.ink, shadow=st.mid)
+        sp.add(U.OP_MSG, x=8, y=128, a=0, h=16, n=2, w=216, b=8, c=4, d=120, font=self.font, ink=st.ink,
+               shadow=st.mid)
         arrow = Image.new('RGBA', (8, 8), (0, 0, 0, 0))
         GB.text(st, arrow, 0, 0, '▼')
         sp.add(U.OP_IMG, x=224, y=144, a=p.image('arrow', arrow), cond=U.C_WAIT)
@@ -292,7 +295,8 @@ class GBPack:
                 self.text(sp, '{%d}' % (U.F_ITEM0 + i), 176, 16 + 16 * i)
                 self.text(sp, '▶', 168, 16 + 16 * i, cond=U.C_SEL0 << i)
             if not self.red:
-                sp.add(U.OP_IMG, x=0, y=120, a=self.window_img('w.account', (0, 120, 80, 160)))
+                # (ten tiles of words, as Crystal's own: "Close this", "key device")
+                sp.add(U.OP_IMG, x=0, y=120, a=self.window_img('w.account', (0, 120, 96, 160)))
                 self.text(sp, '{%d}' % (U.F_TEXT0 + 30), 8, 128)
                 self.text(sp, '{%d}' % (U.F_TEXT0 + 31), 8, 144)
             p.spec(sp)

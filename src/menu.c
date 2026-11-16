@@ -8,6 +8,7 @@
 #include "graphics.h"
 #include "main.h"
 #include "menu.h"
+#include "mp_uistyle.h"
 #include "menu_helpers.h"
 #include "palette.h"
 #include "pokedex.h"
@@ -216,6 +217,7 @@ void LoadMessageBoxAndBorderGfx(void)
 
 void DrawDialogueFrame(u8 windowId, bool8 copyToVram)
 {
+    MP_UiStyle_Framed(windowId, 1);   // Moemon Kai: UI STYLE
     CallWindowFunction(windowId, WindowFunc_DrawDialogueFrame);
     FillWindowPixelBuffer(windowId, PIXEL_FILL(1));
     PutWindowTilemap(windowId);
@@ -225,6 +227,7 @@ void DrawDialogueFrame(u8 windowId, bool8 copyToVram)
 
 void DrawStdWindowFrame(u8 windowId, bool8 copyToVram)
 {
+    MP_UiStyle_Framed(windowId, 2);   // Moemon Kai: UI STYLE
     CallWindowFunction(windowId, WindowFunc_DrawStandardFrame);
     FillWindowPixelBuffer(windowId, PIXEL_FILL(1));
     PutWindowTilemap(windowId);
@@ -234,6 +237,7 @@ void DrawStdWindowFrame(u8 windowId, bool8 copyToVram)
 
 void ClearDialogWindowAndFrame(u8 windowId, bool8 copyToVram)
 {
+    MP_UiStyle_Framed(windowId, 0);   // Moemon Kai: UI STYLE
     CallWindowFunction(windowId, WindowFunc_ClearDialogWindowAndFrame);
     FillWindowPixelBuffer(windowId, PIXEL_FILL(1));
     ClearWindowTilemap(windowId);
@@ -243,6 +247,7 @@ void ClearDialogWindowAndFrame(u8 windowId, bool8 copyToVram)
 
 void ClearStdWindowAndFrame(u8 windowId, bool8 copyToVram)
 {
+    MP_UiStyle_Framed(windowId, 0);   // Moemon Kai: UI STYLE
     CallWindowFunction(windowId, WindowFunc_ClearStdWindowAndFrame);
     FillWindowPixelBuffer(windowId, PIXEL_FILL(1));
     ClearWindowTilemap(windowId);
@@ -582,6 +587,7 @@ void EraseFieldMessageBox(bool8 copyToVram)
 
 void DrawDialogFrameWithCustomTileAndPalette(u8 windowId, bool8 copyToVram, u16 tileNum, u8 paletteNum)
 {
+    MP_UiStyle_Framed(windowId, 1);   // Moemon Kai: UI STYLE
     sTileNum = tileNum;
     sPaletteNum = paletteNum;
     CallWindowFunction(windowId, WindowFunc_DrawDialogFrameWithCustomTileAndPalette);
@@ -699,6 +705,7 @@ static void WindowFunc_DrawDialogFrameWithCustomTileAndPalette(u8 bg, u8 tilemap
 
 void ClearDialogWindowAndFrameToTransparent(u8 windowId, bool8 copyToVram)
 {
+    MP_UiStyle_Framed(windowId, 0);   // Moemon Kai: UI STYLE
     // The palette slot doesn't matter, since the tiles are transparent.
     CallWindowFunction(windowId, WindowFunc_ClearDialogWindowAndFrameNullPalette);
     FillWindowPixelBuffer(windowId, PIXEL_FILL(0));
@@ -714,6 +721,7 @@ static void WindowFunc_ClearDialogWindowAndFrameNullPalette(u8 bg, u8 tilemapLef
 
 void DrawStdFrameWithCustomTileAndPalette(u8 windowId, bool8 copyToVram, u16 baseTileNum, u8 paletteNum)
 {
+    MP_UiStyle_Framed(windowId, 2);   // Moemon Kai: UI STYLE
     sTileNum = baseTileNum;
     sPaletteNum = paletteNum;
     CallWindowFunction(windowId, WindowFunc_DrawStdFrameWithCustomTileAndPalette);
@@ -726,6 +734,7 @@ void DrawStdFrameWithCustomTileAndPalette(u8 windowId, bool8 copyToVram, u16 bas
 // Never used.
 void DrawStdFrameWithCustomTile(u8 windowId, bool8 copyToVram, u16 baseTileNum)
 {
+    MP_UiStyle_Framed(windowId, 2);   // Moemon Kai: UI STYLE
     sTileNum = baseTileNum;
     sPaletteNum = GetWindowAttribute(windowId, WINDOW_PALETTE_NUM);
     CallWindowFunction(windowId, WindowFunc_DrawStdFrameWithCustomTileAndPalette);
@@ -797,6 +806,7 @@ static void WindowFunc_DrawStdFrameWithCustomTileAndPalette(u8 bg, u8 tilemapLef
 
 void ClearStdWindowAndFrameToTransparent(u8 windowId, bool8 copyToVram)
 {
+    MP_UiStyle_Framed(windowId, 0);   // Moemon Kai: UI STYLE
     CallWindowFunction(windowId, WindowFunc_ClearStdWindowAndFrameToTransparent);
     FillWindowPixelBuffer(windowId, PIXEL_FILL(0));
     ClearWindowTilemap(windowId);

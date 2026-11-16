@@ -2,6 +2,7 @@
 #include <math.h>
 #include "global.h"
 #include "mp.h"
+#include "mp_uistyle.h"
 #include "palette.h"
 #include "mp_bigsprite.h"
 #include <stdbool.h>
@@ -86,6 +87,12 @@ static void RenderBGScanline_(int bgNum, uint16_t control, uint16_t hoffs, uint1
 static void RenderBGScanline(int bgNum, uint16_t control, uint16_t hoffs, uint16_t voffs, int lineNum, uint16_t *line)
 {
     RenderBGScanline_(bgNum, control, hoffs, voffs, lineNum, line);
+    // Moemon Kai: UI STYLE draws its own box here (BG0's pixels there not drawn: mp_uistyle.c)
+    if (bgNum == 0 && gMpUiHideBg0[2] > gMpUiHideBg0[0] && lineNum >= gMpUiHideBg0[1] && lineNum < gMpUiHideBg0[3])
+    {
+        for (int x = gMpUiHideBg0[0]; x < gMpUiHideBg0[2] && x < DISPLAY_WIDTH; x++)
+            line[x] = 0;
+    }
     // Moemon Co-op: the battle scene's layers in battle weather (mp_battleweather.c: the sandstorm, and dimmer in
     // rain and hail, brighter in sunlight)
     if (gMpScenePixel && (gMpSceneLayers & (1 << bgNum)))

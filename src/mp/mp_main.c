@@ -14,6 +14,7 @@
 #include "save_slots.h"
 #include "mp_region.h"
 #include "mp.h"
+#include "mp_uistyle.h"
 #include "mp_tcard.h"
 #include "text_window.h"
 #include "gba/m4a_internal.h"
@@ -617,6 +618,7 @@ static void LoadConfig(void)
         else if (strcmp(key, "card_scaling") == 0) gMpConfig.cardScaling = atoi(val) != 0;
         else if (strcmp(key, "battle_anims") == 0) gMpConfig.battleAnims = strcmp(val, "modern") == 0;
         else if (strcmp(key, "shadows") == 0) gMpConfig.noShadows = atoi(val) == 0;
+        else if (strcmp(key, "ui_style") == 0) gMpConfig.uiStyle = MP_UiStyle_FromKey(val);
         else if (strcmp(key, "menu_theme") == 0) gMpConfig.menuTheme = strcmp(val, "dark") == 0 ? MP_MENU_THEME_DARK : MP_MENU_THEME_DEFAULT;
         else if (strcmp(key, "mute_in_background") == 0) gMpConfig.muteInBackground = atoi(val) != 0;
         else if (strcmp(key, "stadium_announcer") == 0) gMpConfig.noAnnouncer = atoi(val) == 0;
@@ -799,6 +801,8 @@ void MP_SaveConfig(void)
         "shadows = %d\n"
         "; OPTIONS > DISPLAY > THEME: default or dark (every window, message and menu dark)\n"
         "menu_theme = %s\n"
+        "; OPTIONS > DISPLAY > UI STYLE: kai, red, crystal, firered, platinum or black (battles, messages, menus)\n"
+        "ui_style = %s\n"
         "; OPTIONS > GAME > MUTE IN BACKGROUND: 1 = no sound while the game's window isn't in focus\n"
         "mute_in_background = %d\n"
         "; OPTIONS > BATTLE > ANNOUNCER: 1 = POKEMON STADIUM's announcer calls its battles, 0 = quiet\n"
@@ -828,7 +832,7 @@ void MP_SaveConfig(void)
         gMpConfig.cardArt == MP_CARD_ART_GAME_BOY ? "gameboy" : gMpConfig.cardArt == MP_CARD_ART_FULL_CARD ? "full_card"
                                                                                                          : "printed_art",
         gMpConfig.cardBack == MP_CARD_BACK_PIXEL ? "pixel" : "printed", gMpConfig.cardScaling,
-        gMpConfig.battleAnims ? "modern" : "classic", !gMpConfig.noShadows, gMpConfig.menuTheme == MP_MENU_THEME_DARK ? "dark" : "default", gMpConfig.muteInBackground, !gMpConfig.noAnnouncer, gMpConfig.announcerJp,
+        gMpConfig.battleAnims ? "modern" : "classic", !gMpConfig.noShadows, gMpConfig.menuTheme == MP_MENU_THEME_DARK ? "dark" : "default", MP_UiStyle_Key(gMpConfig.uiStyle), gMpConfig.muteInBackground, !gMpConfig.noAnnouncer, gMpConfig.announcerJp,
         gMpConfig.stadiumStyle == MP_STADIUM_STYLE_STADIUM1 ? "pokestadium" : gMpConfig.stadiumStyle == MP_STADIUM_STYLE_STADIUM2 ? "pokestadium2" : "original",
         gMpConfig.lobby);
     {

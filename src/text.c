@@ -13,6 +13,7 @@
 #include "menu.h"
 #include "dynamic_placeholder_text_util.h"
 #include "fonts.h"
+#include "mp_uistyle.h"
 
 static u16 RenderText(struct TextPrinter *);
 static u32 RenderFont(struct TextPrinter *);
@@ -305,6 +306,8 @@ bool16 AddTextPrinter(struct TextPrinterTemplate *printerTemplate, u8 speed, Tex
     sTempTextPrinter.printerTemplate = *printerTemplate;
     // Moemon Co-op: OPTIONS > NAME CASE / CREATURES (a filtered copy; the source stays as it is)
     sTempTextPrinter.printerTemplate.currentChar = MP_TextOpts_Filter(printerTemplate->currentChar, printerTemplate->windowId);
+    // Moemon Kai: UI STYLE keeps each window's words (it draws them again in its own font: mp_uistyle.c)
+    MP_UiStyle_TextPrinted(printerTemplate->windowId, sTempTextPrinter.printerTemplate.currentChar);
     sTempTextPrinter.callback = callback;
     sTempTextPrinter.minLetterSpacing = 0;
     sTempTextPrinter.japanese = 0;
@@ -333,6 +336,19 @@ bool16 AddTextPrinter(struct TextPrinterTemplate *printerTemplate, u8 speed, Tex
     }
     gDisableTextPrinters = FALSE;
     return TRUE;
+}
+
+// Moemon Kai: UI STYLE: where window W's printer is in its words, whether it's printing, and its state
+const u8 *MP_TextPrinter_Cur(u8 windowId, bool8 *active, u8 *state)
+{
+    if (windowId >= WINDOWS_MAX)
+    {
+        *active = FALSE, *state = 0;
+        return NULL;
+    }
+    *active = sTextPrinters[windowId].active;
+    *state = sTextPrinters[windowId].state;
+    return sTextPrinters[windowId].printerTemplate.currentChar;
 }
 
 void RunTextPrinters(void)

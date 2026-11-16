@@ -3,6 +3,7 @@
 #include "malloc.h"
 #include "bg.h"
 #include "blit.h"
+#include "mp_uistyle.h"
 
 // This global is set to 0 and never changed.
 COMMON_DATA u8 gTransparentTileNumber = 0;
@@ -30,6 +31,9 @@ bool16 InitWindows(const struct WindowTemplate *templates)
     int j;
     u8 bgLayer;
     u16 attrib;
+
+    for (i = 0; i < WINDOWS_MAX; i++)
+        MP_UiStyle_WindowGone(i);   // Moemon Kai: UI STYLE (every window new)
     u8 *allocatedTilemapBuffer;
     int allocatedBaseBlock;
 
@@ -223,6 +227,7 @@ void RemoveWindow(u8 windowId)
         BgTileAllocOp(bgLayer, gWindows[windowId].window.baseBlock, gWindows[windowId].window.width * gWindows[windowId].window.height, 2);
 
     gWindows[windowId].window = sDummyWindowTemplate;
+    MP_UiStyle_WindowGone(windowId);   // Moemon Kai: UI STYLE
 
     if (GetNumActiveWindowsOnBg(bgLayer) == 0)
     {
@@ -451,6 +456,7 @@ void FillWindowPixelBuffer(u8 windowId, u8 fillValue)
 {
     int fillSize = gWindows[windowId].window.width * gWindows[windowId].window.height;
     CpuFastFill8(fillValue, gWindows[windowId].tileData, 32 * fillSize);
+    MP_UiStyle_WindowFilled(windowId);   // Moemon Kai: UI STYLE (its words gone too)
 }
 
 #define MOVE_TILES_DOWN(a)                                                      \

@@ -578,7 +578,7 @@ void AddSpritesToOamBuffer(void)
     while (i < MAX_SPRITES)
     {
         struct Sprite *sprite = &gSprites[sSpriteOrder[i]];
-        if (sprite->inUse && !sprite->invisible)
+        if (sprite->inUse && !sprite->invisible && !sprite->mpNoDraw)   // (Moemon Kai: mpNoDraw, drawn by UI STYLE)
         {
             u16 first = oamIndex;
             bool8 full = AddSpriteToOamBuffer(sprite, &oamIndex);

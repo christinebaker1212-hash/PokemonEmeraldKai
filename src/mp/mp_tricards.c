@@ -35,6 +35,7 @@
 #include "constants/species.h"
 #include "data.h"
 #include "mp.h"
+#include "mp_uistyle.h"
 
 #include "mp_tricard_gfx.h"
 
@@ -461,6 +462,8 @@ void MP_TriCards_Composite(u16 *frame)
 
     if (!sActive || !IS_TRIPLE_BATTLE() || !gMain.inBattle || gMain.callback2 != BattleMainCB2 || !MP_OBJ_LAYER_SHOWN())
         return;
+    if (MP_UiStyle_DrawsHealthboxes())
+        return;   // Moemon Kai: UI STYLE draws the cards in its own look (mp_uistyle.c)
     slot = IndexOfSpritePaletteTag(TAG_TRICARD_PAL);
     if (slot == 0xFF)
         return;

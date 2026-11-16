@@ -42,6 +42,7 @@ u8 TrySavingData(u8 saveType);
 #include "mp_life.h"
 #include "platform.h"
 #include "save_slots.h"
+#include "mp_uistyle.h"
 #include "rtc.h"
 #include "gba/defines.h"
 #include "gba/m4a_internal.h"
@@ -984,6 +985,7 @@ void VDraw(void)
 
     memset(image, 0, sizeof(sFrameImage));
     MP_World_PrepareLights();   // Moemon Co-op: friends' lights in dark caves (window 0)
+    MP_UiStyle_PreFrame();      // Moemon Kai: UI STYLE: the game's boxes it draws in place of (mp_uistyle.c)
     DrawFrame(image);
     MP_Candy_Composite(image);      // Moemon Co-op: the CANDY JAR's picture under everything drawn
     MP_BagUI_Composite(image);      // ... and the BAG's
@@ -1019,6 +1021,7 @@ void VDraw(void)
         MP_MakerAnim_Composite(image);   // ... Moemon Maker: a move's own animation (src/maker/maker_anims.c)
     }
     MP_TriCards_Composite(image);   // Moemon Co-op: Triple Battle cards over the frame
+    MP_UiStyle_Composite(image);    // Moemon Kai: ... or UI STYLE's boxes, panels, message box and START
     MP_TypeIcons_Composite(image);  // ... type icons by the healthboxes (OPTIONS > TYPE ICONS)
     MP_LegacyAnim_Composite(image); // ... GENESIS / EPOCH BALL throws (Red's / Crystal's own)
     MP_AstralFx_Composite(image);   // ... the ASTRAL BALL's silver sparkles

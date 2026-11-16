@@ -509,6 +509,24 @@ static void RemoveExtraStartMenuWindows(void)
     }
 }
 
+// Moemon Kai: UI STYLE draws START in its own look (mp_uistyle.c): its entries, their names and the cursor while the
+// menu is up
+bool8 MP_StartMenu_State(u8 *actions, u8 *count, u8 *cursor, const u8 **names)
+{
+    u8 i;
+    if (GetStartMenuWindowId() == WINDOW_NONE || sInitStartMenuData[0] < 5 || sNumStartMenuActions == 0
+     || sNumStartMenuActions > ARRAY_COUNT(sCurrentStartMenuActions))
+        return FALSE;
+    for (i = 0; i < sNumStartMenuActions; i++)
+    {
+        actions[i] = sCurrentStartMenuActions[i];
+        names[i] = sStartMenuItems[sCurrentStartMenuActions[i]].text;
+    }
+    *count = sNumStartMenuActions;
+    *cursor = sStartMenuCursorPos;
+    return TRUE;
+}
+
 // Moemon Kai PC: y of the first entry (no top margin when 9 entries must fit)
 static u8 StartMenuTopY(void)
 {

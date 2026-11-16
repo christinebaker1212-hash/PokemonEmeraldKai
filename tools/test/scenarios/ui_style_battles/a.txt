@@ -1,0 +1,23 @@
+pressuntil A field 5000
+mp uistyle red
+mp textspeed 2
+mp wild 286:8
+pressuntil A action 4000
+wait 30
+rendershot red_cmd
+press A 2
+wait 30
+rendershot red_moves
+press B 2
+wait 20
+mp uistyle crystal
+wait 4
+rendershot crystal_cmd
+press A 2
+wait 30
+rendershot crystal_moves
+press A 2
+wait 20
+shotburst crystal_msg 120 6
+wait 200
+quit

@@ -3381,6 +3381,15 @@ void MP_TestCommand(const char *cmd, const char *arg)
         MP_AsciiToGame(buf, arg, 190);
         MP_ShowPopupText(buf);
     }
+    else if (strcmp(cmd, "uistyle") == 0)
+    {
+        // uistyle kai|red|crystal|firered|platinum|black - OPTIONS > DISPLAY > UI STYLE (mp_uistyle.c)
+        u8 MP_UiStyle_FromKey(const char *key);
+        u8 MP_UiStyle_Active(void);
+        const char *MP_UiStyle_Name(u8 style);
+        gMpConfig.uiStyle = MP_UiStyle_FromKey(arg);
+        printf("[test] uistyle %s (active %s)\n", arg, MP_UiStyle_Name(MP_UiStyle_Active()));
+    }
     else if (strcmp(cmd, "theme") == 0)
     {
         // theme dark|default - OPTIONS > DISPLAY > THEME (palettes already loaded keep theirs until reloaded)

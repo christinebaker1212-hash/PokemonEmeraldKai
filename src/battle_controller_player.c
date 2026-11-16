@@ -9,6 +9,7 @@
 #include "battle_anim.h"
 #include "battle_arena.h"
 #include "battle_controllers.h"
+#include "mp_uistyle.h"
 #include "battle_dome.h"
 #include "battle_interface.h"
 #include "battle_message.h"
@@ -105,6 +106,7 @@ static void HandleInputChooseTarget(void);
 static void HandleInputChooseAction(void);
 static void HandleInputChooseMove(void);
 static bool8 sMpMoveInfo;   // Moemon Co-op QoL: move info view (R)
+bool8 gMpUiMoveTypeAlt;     // Moemon Kai: the type's window shows something else (R's view, a gimmick): UI STYLE
 // Moemon Kai: START in the move list picks a gimmick to use with the move (battle_gimmick.h); its line shows it
 static u8 sMpGimmick;
 static u16 sMpGimmickHint;
@@ -458,6 +460,8 @@ static void MpHandleAutoThrowAsk(void)
 static void HandleInputChooseAction(void)
 {
     u16 itemId = gBattleBufferA[gActiveBattler][2] | (gBattleBufferA[gActiveBattler][3] << 8);
+
+    MP_UiStyle_SetChooser(gActiveBattler);   // Moemon Kai: UI STYLE's panel shows this battler's cursor
 
     DoBounceEffect(gActiveBattler, BOUNCE_HEALTHBOX, 7, 1);
     DoBounceEffect(gActiveBattler, BOUNCE_MON, 7, 1);
@@ -938,6 +942,8 @@ static void HandleInputChooseMove(void)
 {
     bool32 canSelectTarget = FALSE;
     struct ChooseMoveStruct *moveInfo = (struct ChooseMoveStruct *)(&gBattleBufferA[gActiveBattler][4]);
+
+    MP_UiStyle_SetChooser(gActiveBattler);   // Moemon Kai: UI STYLE
 
     if (JOY_HELD(DPAD_ANY) && gSaveBlock2Ptr->optionsButtonMode == OPTIONS_BUTTON_MODE_L_EQUALS_A)
         gPlayerDpadHoldFrames++;
@@ -2164,6 +2170,13 @@ static void MpDisplayMoveInfo(void)
     }
     (void)txtPtr;
     BattlePutTextOnWindow(gDisplayedStringBattle, B_WIN_MOVE_TYPE);
+    gMpUiMoveTypeAlt = TRUE;
+}
+
+// Moemon Kai: UI STYLE: R's view of the move (its power and accuracy in the PP and type's places)
+bool8 MP_MoveInfoView(void)
+{
+    return sMpMoveInfo;
 }
 
 static void MoveSelectionDisplayPPNumber(void)
@@ -2210,8 +2223,10 @@ static void MoveSelectionDisplayMoveType(void)
             txtPtr = StringCopy(txtPtr, sStart);
         StringCopy(txtPtr, MP_Gimmick_MenuLabel(g, moveInfo->monTypes[0]));
         BattlePutTextOnWindow(gDisplayedStringBattle, B_WIN_MOVE_TYPE);
+        gMpUiMoveTypeAlt = TRUE;
         return;
     }
+    gMpUiMoveTypeAlt = FALSE;
 
     txtPtr = StringCopy(gDisplayedStringBattle, gText_MoveInterfaceType);
     *(txtPtr)++ = EXT_CTRL_CODE_BEGIN;

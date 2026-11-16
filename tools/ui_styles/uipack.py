@@ -106,7 +106,9 @@ OP_TEXT = 2       # string A in font F, colours ink/shadow/outline, align (0 lef
 OP_BAR = 3        # bar: field A (a fraction, F_HP: hp / maxhp, F_EXP...) through fill images B (green), C (yellow),
 #                   D (red) at (x, y); E the fill's direction (0 from the left, 1 from the right)
 OP_FILL = 4       # rectangle (x, y, w, h) in colour ink, alpha in A (255 solid)
-OP_MSG = 5        # captured window A's words: lines from (x, y), H the line's height, N the lines shown, font F
+OP_MSG = 5        # captured window A's words, their page: lines from (x, y) H apart, N of them, font F; a line wider
+#                   than W wrapped at its last space that fits; a page of more lines than N closes them up to rows B
+#                   apart from y D, C of them (past that the last ones printed show)
 OP_LONG = 6       # set C_LONG when field A's width in font F is over W
 OP_BACKING = 7    # (a canvas spec) colour ink at alpha A behind the drawn pixels' box, B pixels round it
 OP_IMGSEL = 8     # image A + (the field B's value, a list's row type...) at (x, y)
@@ -307,6 +309,24 @@ def width(f, b):
     return sum(f.glyphs.get(c, (0,))[0] for c in b if c not in (NEWLINE,))
 
 
+def flow(f, b, maxw):
+    """the last page of B in lines (src/mp/mp_uistyle.c FlowPage): its own lines, any wider than MAXW broken at the
+    last space that fits"""
+    page = b.split(bytes([0xFB]))[-1]          # (CHAR_PROMPT_CLEAR)
+    out = []
+    for line in page.replace(bytes([0xFA]), bytes([NEWLINE])).split(bytes([NEWLINE])):
+        cur = bytearray()
+        for c in line:
+            cur.append(c)
+            if maxw and width(f, cur) > maxw:
+                sp = cur.rfind(0x00)
+                if sp > 0:
+                    out.append(bytes(cur[:sp]))
+                    cur = cur[sp + 1:]
+        out.append(bytes(cur))
+    return out
+
+
 def render(pack, sp, data, flags, dst=None, at=(0, 0)):
     """SP drawn as the game draws it: DATA {field: bytes, a number or a fraction}, FLAGS its condition bits; onto DST
     at AT (a new picture when DST is None). Returns the picture"""
@@ -348,11 +368,15 @@ def render(pack, sp, data, flags, dst=None, at=(0, 0)):
             regs[op.reg] = x0 - ox
         elif op.kind == OP_MSG:
             f = pack.fonts[op.font]
-            lines = texts.get(F_TEXT0 + op.a, b'').split(bytes([NEWLINE]))[-op.n:] if op.n else []
-            for i, line in enumerate(lines):
-                x0 = x
+            lines = flow(f, texts.get(F_TEXT0 + op.a, b''), op.w)
+            if len(lines) <= op.n or not op.b:
+                rows, step, y0 = op.n, op.h, y
+            else:
+                rows, step, y0 = op.c or op.n, op.b, op.d + oy
+            for i, line in enumerate(lines[-rows:] if rows else []):
+                x0 = x - (width(f, line) if op.align == 1 else 0)
                 for code in line:
-                    x0 += glyph_draw(canvas, f, x0, y + i * op.h, code, op.ink, op.shadow, op.outline)
+                    x0 += glyph_draw(canvas, f, x0, y0 + i * step, code, op.ink, op.shadow, op.outline)
         elif op.kind == OP_BAR:
             _bar(canvas, pack, op, data.get(op.a, 0.0), x, y)
         elif op.kind == OP_BACKING:

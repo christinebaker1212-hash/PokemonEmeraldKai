@@ -261,6 +261,8 @@ struct Sprite
     u8 mpFade;              // Moemon Kai: drawn see-through: 1-15 sixteenths of it over the backgrounds (0: solid)
     u8 mpPlaceWith;         // Moemon Kai: on a 3D map, moved by the view as this sprite (its id + 1) is, never by the
                             // ground under its own spot (a speech bubble over a head: its halves stay together on slopes)
+    bool8 mpNoDraw;         // Moemon Kai: kept (it moves, animates, is read) but not drawn: something else draws it
+                            // (UI STYLE's battle boxes in the healthboxes' place: mp_uistyle.c)
 };
 
 struct OamMatrix

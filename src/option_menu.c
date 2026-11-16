@@ -13,6 +13,7 @@
 #include "international_string_util.h"
 #include "list_menu.h"
 #include "mp.h"
+#include "mp_uistyle.h"
 #include "mp_tcard.h"
 #include "mp_spritescale.h"
 #include "main.h"
@@ -127,6 +128,7 @@ enum
     OPT_TITLE,        // Moemon Kai: GAME > RETURN TO MAIN MENU (from the field: a save, then a soft reset)
     OPT_PHONE,        // Moemon Co-op: CO-OP > PHONE LINK (A: pairing and the phones, src/mp/mp_phone.c)
     OPT_THEME,        // Moemon Co-op: DISPLAY > THEME DEFAULT / DARK (every window's colors: mp_darktheme.c)
+    OPT_UISTYLE,      // Moemon Kai: DISPLAY > UI STYLE KAI / RED / CRYSTAL / FIRERED / PLATINUM / BLACK (mp_uistyle.c)
     OPT_CLOSE,
 };
 #define SC_RULE(opt) ((opt) - OPT_SC_ON)
@@ -297,6 +299,13 @@ static const u8 sText_Shadows[] = _("SHADOWS");
 static const u8 sText_Theme[] = _("THEME");
 static const u8 sText_ThemeDefault[] = _("DEFAULT");
 static const u8 sText_ThemeDark[] = _("DARK");
+static const u8 sText_UiStyle[] = _("UI STYLE");
+static const u8 sText_UiKai[] = _("KAI");
+static const u8 sText_UiRed[] = _("RED");
+static const u8 sText_UiCrystal[] = _("CRYSTAL");
+static const u8 sText_UiFireRed[] = _("FIRERED");
+static const u8 sText_UiPlatinum[] = _("PLATINUM");
+static const u8 sText_UiBlack[] = _("BLACK");
 static const u8 sText_BgMute[] = _("MUTE IN BACKGROUND");
 static const u8 sText_Announcer[] = _("ANNOUNCER VOICE");
 static const u8 sText_StadiumSettings[] = _("STADIUM SETTINGS");
@@ -514,6 +523,7 @@ static void BuildRows(void)
         AddRow(OPT_SPRITESCALE, 0);
         AddRow(OPT_SHADOWS, 0);
         AddRow(OPT_THEME, 0);
+        AddRow(OPT_UISTYLE, 0);
         break;
     case TAB_CONTROLS:
         AddRow(OPT_PADSELECT, 0);
@@ -599,6 +609,10 @@ static u8 Choices(u8 row, const u8 **names, u8 *buf)
     case OPT_THEME:
         names[MP_MENU_THEME_DEFAULT] = sText_ThemeDefault, names[MP_MENU_THEME_DARK] = sText_ThemeDark;
         return MP_MENU_THEME_COUNT;
+    case OPT_UISTYLE:
+        names[UISTYLE_KAI] = sText_UiKai, names[UISTYLE_RED] = sText_UiRed, names[UISTYLE_CRYSTAL] = sText_UiCrystal;
+        names[UISTYLE_FIRERED] = sText_UiFireRed, names[UISTYLE_PLATINUM] = sText_UiPlatinum, names[UISTYLE_BLACK] = sText_UiBlack;
+        return UISTYLE_COUNT;
     case OPT_ST_STYLE:
         names[MP_STADIUM_STYLE_ORIGINAL] = sText_StOriginal, names[MP_STADIUM_STYLE_STADIUM1] = sText_StStadium1;
         names[MP_STADIUM_STYLE_STADIUM2] = sText_StStadium2;
@@ -882,6 +896,7 @@ static u8 Current(u8 row)
     case OPT_UNOVASPRITES: return gMpConfig.unovaSprites % 2;
     case OPT_SHADOWS:     return !gMpConfig.noShadows;
     case OPT_THEME:       return gMpConfig.menuTheme % MP_MENU_THEME_COUNT;
+    case OPT_UISTYLE:     return gMpConfig.uiStyle % UISTYLE_COUNT;
     case OPT_BGMUTE:      return gMpConfig.muteInBackground != 0;
     case OPT_ANNOUNCER:   return gMpConfig.noAnnouncer ? 0 : gMpConfig.announcerJp ? 2 : 1;
     case OPT_BADGEFADE:   return MP_TCard_Fade();
@@ -985,6 +1000,20 @@ static void Change(u8 row, int dir)
         gMpConfig.muteInBackground = !gMpConfig.muteInBackground;
         MPNet_Log("mute in background: %d", gMpConfig.muteInBackground);
         break;
+    case OPT_UISTYLE:
+    {
+        // (a style whose pictures aren't beside the game is passed over)
+        int v = gMpConfig.uiStyle % UISTYLE_COUNT, k;
+        for (k = 0; k < UISTYLE_COUNT; k++)
+        {
+            v = Wrap(v + (dir ? dir : 1), UISTYLE_COUNT);
+            if (MP_UiStyle_Available(v))
+                break;
+        }
+        gMpConfig.uiStyle = v;
+        MP_UiStyle_Changed();
+        break;
+    }
     case OPT_THEME:
         gMpConfig.menuTheme = Wrap(gMpConfig.menuTheme + (dir ? dir : 1), MP_MENU_THEME_COUNT);
         MPNet_Log("theme: %s", gMpConfig.menuTheme == MP_MENU_THEME_DARK ? "dark" : "default");
@@ -1123,6 +1152,7 @@ static const u8 *RowLabel(u8 row, u8 *buf)
     case OPT_UNOVASPRITES: return sText_UnovaPeople;
     case OPT_SHADOWS: return sText_Shadows;
     case OPT_THEME: return sText_Theme;
+    case OPT_UISTYLE: return sText_UiStyle;
     case OPT_BGMUTE:  return sText_BgMute;
     case OPT_ANNOUNCER: return sText_Announcer;
     case OPT_BADGEFADE:   return sText_BadgeFade;
@@ -1320,6 +1350,15 @@ static void DrawHint(void)
         snprintf(ascii, sizeof(ascii), "%s", gMpConfig.stadiumStyle == MP_STADIUM_STYLE_STADIUM1 ? "THE STADIUM'S SCREENS AS THE FIRST STADIUM'S"
                                              : gMpConfig.stadiumStyle == MP_STADIUM_STYLE_STADIUM2 ? "THE STADIUM'S SCREENS AS STADIUM 2'S"
                                                                                                     : "THE STADIUM'S SCREENS IN THE GAME'S STYLE");
+    else if (opt == OPT_UISTYLE)
+    {
+        static const char *const sDesc[UISTYLE_COUNT] = {
+            "BATTLES, MESSAGES AND MENUS IN KAI'S LOOK", "BATTLES, MESSAGES AND MENUS AS IN RED",
+            "BATTLES, MESSAGES AND MENUS AS IN CRYSTAL", "BATTLES, MESSAGES AND MENUS AS IN FIRERED",
+            "BATTLES, MESSAGES AND MENUS AS IN PLATINUM", "BATTLES, MESSAGES AND MENUS AS IN BLACK",
+        };
+        snprintf(ascii, sizeof(ascii), "%s", sDesc[gMpConfig.uiStyle % UISTYLE_COUNT]);
+    }
     else if (opt == OPT_THEME)
         snprintf(ascii, sizeof(ascii), "%s", gMpConfig.menuTheme == MP_MENU_THEME_DARK ? "EVERY WINDOW AND MESSAGE IN DARK COLORS"
                                                                                           : "THE GAME'S OWN LIGHT WINDOWS");

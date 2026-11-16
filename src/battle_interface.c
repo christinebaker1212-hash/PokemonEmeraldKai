@@ -23,6 +23,7 @@
 #include "data.h"
 #include "pokemon_summary_screen.h"
 #include "strings.h"
+#include "mp_uistyle.h"
 #include "constants/battle_anim.h"
 #include "constants/rgb.h"
 #include "constants/songs.h"
@@ -2199,6 +2200,7 @@ void UpdateHealthboxAttribute(u8 healthboxSpriteId, struct Pokemon *mon, u8 elem
             MPNet_Log("battle: healthbox %d refreshed while its bar moves", battler);
             if (IS_TRIPLE_BATTLE())
                 MP_TriCards_Update(battler, mon, FALSE);
+            MP_UiStyle_HudUpdate(battler, mon, FALSE);   // Moemon Kai: UI STYLE
             UpdateLvlInHealthbox(healthboxSpriteId, GetMonData(mon, MON_DATA_LEVEL));
             if (GetBattlerSide(battler) == B_SIDE_PLAYER)
                 UpdateHpTextInHealthbox(healthboxSpriteId, GetMonData(mon, MON_DATA_MAX_HP), HP_MAX);
@@ -2209,6 +2211,7 @@ void UpdateHealthboxAttribute(u8 healthboxSpriteId, struct Pokemon *mon, u8 elem
     }
     if (IS_TRIPLE_BATTLE())   // Moemon Co-op: the card
         MP_TriCards_Update(battler, mon, elementId == HEALTHBOX_ALL);
+    MP_UiStyle_HudUpdate(battler, mon, elementId == HEALTHBOX_ALL);   // Moemon Kai: UI STYLE's boxes
 
     if (elementId == HEALTHBOX_ALL && !IsDoubleBattle())
         GetBattlerSide(battler); // Pointless function call.
@@ -2348,6 +2351,17 @@ s32 MoveBattleBar(u8 battler, u8 healthboxSpriteId, u8 whichBar, u8 unused)
         if (shown > bar->maxValue)
             shown = bar->maxValue;
         MP_TriCards_SetBarHp(battler, shown, bar->maxValue);
+    }
+    // Moemon Kai: UI STYLE's boxes show the bars where they are
+    {
+        struct BattleBarInfo *bar = &gBattleSpritesDataPtr->battleBars[battler];
+        s32 shown = (currentBarValue == -1) ? bar->oldValue - bar->receivedValue : currentBarValue;
+        if (shown > bar->maxValue)
+            shown = bar->maxValue;
+        if (whichBar == HEALTH_BAR)
+            MP_UiStyle_HudBar(battler, shown, bar->maxValue);
+        else
+            MP_UiStyle_HudExp(battler, shown, bar->maxValue);
     }
 
     // Moemon Co-op: a bar that has reached its end stays there. The stock code set currValue to 0 here, so any call
