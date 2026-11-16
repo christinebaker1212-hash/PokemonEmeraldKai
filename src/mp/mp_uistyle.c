@@ -26,6 +26,7 @@
 #include "constants/party_menu.h"
 #include "overworld.h"
 #include "gpu_regs.h"
+#include "bg.h"
 #include "palette.h"
 #include "pokemon.h"
 #include "sprite.h"
@@ -406,18 +407,39 @@ struct Capture
 static struct Capture sCap[WINDOWS_MAX];
 static u8 sFramed[WINDOWS_MAX];   // 1 its dialogue frame drawn, 2 the standard frame, 0 neither
 // (each window's words line by line as printed, where and in what colour: a pop-up drawn in a style's own font)
-#define RUNS 16
+#define RUNS 32
 struct Run { u8 x, y, fg, lineH; u16 kaiW; u8 text[64]; };   // (LINEH: its new lines' spacing)
 static struct Run sRuns[WINDOWS_MAX][RUNS];
 static u8 sRunCount[WINDOWS_MAX];
 static bool8 sShown[WINDOWS_MAX];
+static s8 sBox[WINDOWS_MAX][4];   // a battle box round a window (HandleBattleWindow): its inside in tiles, x0 < 0 none
 static u32 sHandled;   // the windows a screen drew itself this frame
 
 
 void MP_UiStyle_Framed(u8 windowId, u8 kind)
 {
     if (windowId < WINDOWS_MAX)
-        sFramed[windowId] = kind;
+        sFramed[windowId] = kind, sBox[windowId][0] = -1;
+}
+
+// the battle's own boxes (YES / NO, the level up's stats: HandleBattleWindow draws their frames as tiles round
+// windows of their own): the windows inside one framed (in the style's pop-up) or no longer, the box's inside kept
+// (YES / NO's cursor is a tile in it, left of its window)
+void MP_UiStyle_BattleBox(u8 x0, u8 y0, u8 x1, u8 y1, bool8 bg1, bool8 clear)
+{
+    u8 w;
+    for (w = 0; w < WINDOWS_MAX; w++)
+    {
+        const struct WindowTemplate *t = &gWindows[w].window;
+        if (gWindows[w].tileData == NULL || t->bg != (bg1 ? 1 : 0) || t->width == 0)
+            continue;
+        if (t->tilemapLeft <= x0 || t->tilemapLeft + t->width - 1 >= x1 || t->tilemapTop <= y0
+         || t->tilemapTop + t->height - 1 >= y1)
+            continue;
+        sFramed[w] = clear ? 0 : 2;
+        sBox[w][0] = clear ? -1 : x0 + 1;
+        sBox[w][1] = y0 + 1, sBox[w][2] = x1 - 1, sBox[w][3] = y1 - 1;
+    }
 }
 
 void MP_UiStyle_TextPrinted(u8 windowId, const u8 *str)
@@ -507,6 +529,7 @@ void MP_UiStyle_WindowGone(u8 windowId)
     sRunCount[windowId] = 0;
     sShown[windowId] = FALSE;
     sFramed[windowId] = 0;
+    sBox[windowId][0] = -1;
     sCap[windowId].len = 0;
     sCap[windowId].text[0] = EOS;
     sCap[windowId].base = NULL;
@@ -728,6 +751,46 @@ static const u8 *KeypadWord(u8 icon)
     return NULL;
 }
 
+// one of the game's extra symbols (CHAR_EXTRA_SYMBOL and its number: the level up's +, a second Lv, PP, ID...) as
+// the style's own letters
+static const u8 *SymbolWord(u8 sym)
+{
+    static const u8 sUp[] = _("{UP_ARROW}"), sDown[] = _("{DOWN_ARROW}"), sLeft[] = _("{LEFT_ARROW}"),
+                    sRight[] = _("{RIGHT_ARROW}"), sPlus[] = _("+"), sLv[] = _("{LV}"), sPp[] = _("PP"), sId[] = _("ID"),
+                    sNo[] = _("No"), sOpen[] = _("("), sClose[] = _(")");
+    static u8 sDigit[2];
+    switch (sym)
+    {
+    case 0x00: return sUp;
+    case 0x01: return sDown;
+    case 0x02: return sLeft;
+    case 0x03: return sRight;
+    case 0x04: return sPlus;
+    case 0x05: return sLv;
+    case 0x06: return sPp;
+    case 0x07: return sId;
+    case 0x08: return sNo;
+    case 0x13: return sOpen;
+    case 0x14: return sClose;
+    }
+    if (sym >= 0x0A && sym <= 0x12)   // (the circled 1-9)
+    {
+        sDigit[0] = CHAR_1 + (sym - 0x0A), sDigit[1] = EOS;
+        return sDigit;
+    }
+    return NULL;
+}
+
+// a two-byte code (a button's icon, an extra symbol) as the letters it stands for, or NULL
+static const u8 *CodeWord(u8 c, u8 arg)
+{
+    if (c == CHAR_KEYPAD_ICON)
+        return KeypadWord(arg);
+    if (c == CHAR_EXTRA_SYMBOL)
+        return SymbolWord(arg);
+    return NULL;
+}
+
 // one line of S (up to a new line or its end; N bytes at most): its width in F
 static int Width(const struct UiFont *f, const u8 *s, int n)
 {
@@ -741,9 +804,9 @@ static int Width(const struct UiFont *f, const u8 *s, int n)
                 i += 1 + CtrlArgs(s[i]);
             continue;
         }
-        if (c == CHAR_KEYPAD_ICON && i < n && KeypadWord(s[i]))
+        if ((c == CHAR_KEYPAD_ICON || c == CHAR_EXTRA_SYMBOL) && i < n && CodeWord(c, s[i]))
         {
-            const u8 *k = KeypadWord(s[i++]);
+            const u8 *k = CodeWord(c, s[i++]);
             while (*k != EOS)
                 w += f->g[*k++].adv;
             continue;
@@ -815,9 +878,9 @@ static int Line(struct Surf *s, const struct UiFont *f, const u8 *str, int n, in
                 i += 1 + CtrlArgs(str[i]);
             continue;
         }
-        if (c == CHAR_KEYPAD_ICON && i < n && KeypadWord(str[i]))
+        if ((c == CHAR_KEYPAD_ICON || c == CHAR_EXTRA_SYMBOL) && i < n && CodeWord(c, str[i]))
         {
-            const u8 *k = KeypadWord(str[i++]);
+            const u8 *k = CodeWord(c, str[i++]);
             while (*k != EOS)
             {
                 Glyph(s, f, *k, x, y, ink, shadow, outline, clipY);
@@ -953,6 +1016,30 @@ static void Msg(struct Surf *s, struct UiPack *p, const struct UiOp *op, const s
         }
         if (c == CHAR_PROMPT_CLEAR)
             pageFrom = i + 1;
+    }
+    if (pageFrom > 0 && pageFrom >= len && shown >= len)
+    {
+        // (the words ending on a \p, nothing after it: Kai leaves that last page up, as the battle's GREW TO LV. does
+        // under the level up's box)
+        int last = pageFrom - 1;
+        pageFrom = 0;
+        for (i = 0; i < last; i++)
+        {
+            u8 c = t[i];
+            if (c == EXT_CTRL_CODE_BEGIN)
+            {
+                if (i + 1 < len)
+                    i += 1 + CtrlArgs(t[i + 1]);
+                continue;
+            }
+            if (c == PLACEHOLDER_BEGIN || c == CHAR_DYNAMIC || c == CHAR_KEYPAD_ICON || c == CHAR_EXTRA_SYMBOL)
+            {
+                i++;
+                continue;
+            }
+            if (c == CHAR_PROMPT_CLEAR)
+                pageFrom = i + 1;
+        }
     }
     for (pageTo = pageFrom; pageTo < len && t[pageTo] != CHAR_PROMPT_CLEAR; pageTo++)
     {
@@ -1508,6 +1595,7 @@ static void BattlePanel(struct UiPack *p, u16 *frame)
         if (w == B_WIN_MSG)
             waiting = wt;
     }
+
     if (vofs == 0)
         sp = FindSpec(p, "b.msg");
     else if (vofs == DISPLAY_HEIGHT)
@@ -2499,6 +2587,7 @@ static void PopUps(struct UiPack *p, u16 *frame)
     u16 fill = 0x7FFF;
     struct MpFadeFit fit;
     u8 w, k;
+    int put[40][3], nPut, j;   // (the lines drawn in a window: their y, first and last x)
     if (ws == NULL || wt == NULL)
         return;
     for (k = 0; k < ws->nOps; k++)
@@ -2518,13 +2607,35 @@ static void PopUps(struct UiPack *p, u16 *frame)
         int x0, y0, ww;
         if ((sHandled & (1u << w)) || !PopUpShown(w))
             continue;
+        // (faded as the window's own palette is: palette 15 is the field's window colours, not the battle's)
+        MP_FadeFit_FromPalette(&fit, BG_PLTT_ID(t->paletteNum & 15));
         if (AtFoot(w))
         {
             MessageBox(p, frame, w);
             continue;
         }
         x0 = t->tilemapLeft * 8, y0 = t->tilemapTop * 8, ww = t->width * 8;
-        PopUpFrame(frame, im, x0, y0, x0 + ww, y0 + t->height * 8, fill, &fit);
+        if (sBox[w][0] >= 0)
+        {
+            // (a battle box: the frame round its inside; YES / NO's cursor, a tile left of the window, the style's)
+            const u16 *map = GetBgTilemapBuffer(t->bg);
+            int cx, cy;
+            PopUpFrame(frame, im, sBox[w][0] * 8, sBox[w][1] * 8, (sBox[w][2] + 1) * 8, (sBox[w][3] + 1) * 8,
+                       fill, &fit);
+            for (cy = sBox[w][1]; map && cy <= sBox[w][3]; cy++)
+                for (cx = sBox[w][0]; cx < t->tilemapLeft; cx++)
+                    if ((map[cy * 32 + cx] & 0x3FF) == 1)
+                    {
+                        static const u8 sArrow[] = _("▶");
+                        struct UiData d;
+                        memset(&d, 0, sizeof(d));
+                        d.str[F_NAME] = sArrow;
+                        DrawSpec(p, wt, &d, frame, cx * 8, cy * 8 + 1, &fit);
+                    }
+        }
+        else
+            PopUpFrame(frame, im, x0, y0, x0 + ww, y0 + t->height * 8, fill, &fit);
+        nPut = 0;
         for (k = 0; k < sRunCount[w]; k++)
         {
             struct Run *r = &sRuns[w][k];
@@ -2557,6 +2668,16 @@ static void PopUps(struct UiPack *p, u16 *frame)
                     x = x0 + ww - sw;
                 if (x < x0)
                     x = x0;
+                // (a run Kai set after another on its line, which the style's wider letters reach: moved past it,
+                // as the level up's + after DEFENSE)
+                for (j = 0; j < nPut; j++)
+                    if (put[j][0] == r->y + ln * r->lineH && put[j][1] < x && put[j][2] >= x)
+                        x = put[j][2] + 1;
+                if (nPut < (int)ARRAY_COUNT(put))
+                {
+                    put[nPut][0] = r->y + ln * r->lineH, put[nPut][1] = x, put[nPut][2] = x + sw;
+                    nPut++;
+                }
                 DrawSpec(p, wt, &d, frame, x, y0 + r->y + ln * r->lineH, &fit);
                 line += n;
                 if (*line == CHAR_NEWLINE)

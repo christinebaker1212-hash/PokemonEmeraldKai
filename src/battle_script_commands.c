@@ -11,6 +11,7 @@ u16 MP_RegionVictorySong(u16 song);   // Moemon Kai (pokemon.c)
 #include "battle_gimmick.h"
 #include "mp_region.h"   // Moemon Kai: Gen 5-9
 #include "mp.h"
+#include "mp_uistyle.h"
 #include "mp/mp_join.h"
 #include "battle.h"
 #include "battle_message.h"
@@ -11390,6 +11391,8 @@ void HandleBattleWindow(u8 xStart, u8 yStart, u8 xEnd, u8 yEnd, u8 flags)
 {
     s32 destY, destX;
     u16 var = 0;
+
+    MP_UiStyle_BattleBox(xStart, yStart, xEnd, yEnd, (flags & WINDOW_BG1) != 0, (flags & WINDOW_CLEAR) != 0);   // Moemon Kai: UI STYLE
 
     for (destY = yStart; destY <= yEnd; destY++)
     {
