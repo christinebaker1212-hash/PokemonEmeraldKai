@@ -1,0 +1,49 @@
+pressuntil A field 5000
+mp textspeed 2
+mp uistyle platinum
+mp wild 286:8
+pressuntil A action 4000
+wait 30
+rendershot pt_cmd0
+press DOWN 1
+wait 10
+rendershot pt_cmd_down
+press LEFT 1
+wait 10
+rendershot pt_cmd_left
+press UP 1
+wait 10
+rendershot pt_cmd_up
+press DOWN 1
+wait 6
+press RIGHT 1
+wait 10
+rendershot pt_cmd_mon
+press A 1
+wait 90
+rendershot pt_party0
+press RIGHT 1
+wait 10
+rendershot pt_party_right
+press DOWN 1
+wait 10
+rendershot pt_party_down
+press B 1
+wait 90
+mp uistyle red
+wait 10
+press UP 1
+wait 6
+press A 1
+wait 30
+rendershot red_moves0
+press DOWN 1
+wait 10
+rendershot red_moves_down1
+press DOWN 1
+wait 10
+rendershot red_moves_down2
+press RIGHT 1
+wait 10
+rendershot red_moves_right
+quit

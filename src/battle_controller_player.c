@@ -560,6 +560,18 @@ static void HandleInputChooseAction(void)
         }
         PlayerBufferExecCompleted();
     }
+    else if (JOY_NEW(DPAD_ANY) && MP_UiStyle_NavOwn(MP_UINAV_COMMAND))
+    {
+        // Moemon Kai: UI STYLE: the D-pad as the style lays the four out
+        int to = MP_UiStyle_NavMove(MP_UINAV_COMMAND, gActionSelectionCursor[gActiveBattler], gMain.newKeys, 0xF, FALSE);
+        if (to != gActionSelectionCursor[gActiveBattler])
+        {
+            PlaySE(SE_SELECT);
+            ActionSelectionDestroyCursorAt(gActionSelectionCursor[gActiveBattler]);
+            gActionSelectionCursor[gActiveBattler] = to;
+            ActionSelectionCreateCursorAt(gActionSelectionCursor[gActiveBattler], 0);
+        }
+    }
     else if (JOY_NEW(DPAD_LEFT))
     {
         if (gActionSelectionCursor[gActiveBattler] & 1) // if is B_ACTION_USE_ITEM or B_ACTION_RUN
@@ -1057,6 +1069,21 @@ static void HandleInputChooseMove(void)
         BtlController_EmitTwoReturnValues(B_COMM_TO_ENGINE, B_ACTION_EXEC_SCRIPT, 0xFFFF);
         PlayerBufferExecCompleted();
     }
+    else if (JOY_NEW(DPAD_ANY) && MP_UiStyle_NavOwn(MP_UINAV_MOVES))
+    {
+        // Moemon Kai: UI STYLE: the D-pad as the style lays the moves out
+        int to = MP_UiStyle_NavMove(MP_UINAV_MOVES, gMoveSelectionCursor[gActiveBattler], gMain.newKeys,
+                                    (1u << gNumberOfMovesToChoose) - 1, FALSE);
+        if (to != gMoveSelectionCursor[gActiveBattler])
+        {
+            MoveSelectionDestroyCursorAt(gMoveSelectionCursor[gActiveBattler]);
+            gMoveSelectionCursor[gActiveBattler] = to;
+            PlaySE(SE_SELECT);
+            MoveSelectionCreateCursorAt(gMoveSelectionCursor[gActiveBattler], 0);
+            MoveSelectionDisplayPPNumber();
+            MoveSelectionDisplayMoveType();
+        }
+    }
     else if (JOY_NEW(DPAD_LEFT))
     {
         if (gMoveSelectionCursor[gActiveBattler] & 1)
@@ -1284,6 +1311,25 @@ static void HandleMoveSwitching(void)
         MoveSelectionDisplayPPString();
         MoveSelectionDisplayPPNumber();
         MoveSelectionDisplayMoveType();
+    }
+    else if (JOY_NEW(DPAD_ANY) && MP_UiStyle_NavOwn(MP_UINAV_MOVES))
+    {
+        // Moemon Kai: UI STYLE: the D-pad as the style lays the moves out
+        int to = MP_UiStyle_NavMove(MP_UINAV_MOVES, gMultiUsePlayerCursor, gMain.newKeys,
+                                    (1u << gNumberOfMovesToChoose) - 1, FALSE);
+        if (to != gMultiUsePlayerCursor)
+        {
+            if (gMultiUsePlayerCursor == gMoveSelectionCursor[gActiveBattler])
+                MoveSelectionCreateCursorAt(gMoveSelectionCursor[gActiveBattler], 29);
+            else
+                MoveSelectionDestroyCursorAt(gMultiUsePlayerCursor);
+            gMultiUsePlayerCursor = to;
+            PlaySE(SE_SELECT);
+            if (gMultiUsePlayerCursor == gMoveSelectionCursor[gActiveBattler])
+                MoveSelectionCreateCursorAt(gMultiUsePlayerCursor, 0);
+            else
+                MoveSelectionCreateCursorAt(gMultiUsePlayerCursor, 27);
+        }
     }
     else if (JOY_NEW(DPAD_LEFT))
     {

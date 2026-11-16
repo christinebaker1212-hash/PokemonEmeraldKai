@@ -381,6 +381,103 @@ u8 MP_UiStyle_Active(void)
     return GetPack(s) ? s : UISTYLE_KAI;
 }
 
+// ---------------------------------------------------------------------------------------------------- the D-pad
+// A style that lays a menu out other than KAI does (RED's moves a list, PLATINUM's FIGHT above the other three, a
+// party in a list or two columns) moves its cursor as it's laid out: each entry's place on the style's own grid, the
+// D-pad going to the nearest entry that way. KAI's own layouts keep KAI's own code.
+static bool8 NavPlace(u8 style, u8 kind, u8 i, s8 *x, s8 *y)
+{
+    switch (kind)
+    {
+    case MP_UINAV_COMMAND:   // (0 FIGHT, 1 BAG, 2 POKéMON, 3 RUN)
+        if (style == UISTYLE_PLATINUM)
+        {
+            // (FIGHT across the top; BAG, RUN, POKéMON along the foot)
+            static const s8 sX[4] = {2, 0, 4, 2}, sY[4] = {0, 1, 1, 1};
+            *x = sX[i & 3], *y = sY[i & 3];
+            return TRUE;
+        }
+        return FALSE;
+    case MP_UINAV_MOVES:     // (the four moves)
+        if (style == UISTYLE_RED || style == UISTYLE_CRYSTAL)
+        {
+            *x = 0, *y = i;
+            return TRUE;
+        }
+        return FALSE;
+    case MP_UINAV_PARTY:     // (0-5 the slots, 6 CONFIRM, 7 CANCEL)
+        if (style == UISTYLE_RED || style == UISTYLE_CRYSTAL)
+        {
+            *x = 0, *y = i;
+            return TRUE;
+        }
+        if (style == UISTYLE_PLATINUM || style == UISTYLE_BLACK)
+        {
+            if (i < 6)
+                *x = (i & 1) * 2, *y = i / 2;
+            else
+                *x = i == 6 ? 0 : 2, *y = 3;
+            return TRUE;
+        }
+        return FALSE;
+    }
+    return FALSE;
+}
+
+bool8 MP_UiStyle_NavOwn(u8 kind)
+{
+    s8 x, y;
+    return NavPlace(MP_UiStyle_Active(), kind, 0, &x, &y);
+}
+
+int MP_UiStyle_NavMove(u8 kind, int cur, u16 keys, u32 usable, bool8 wrap)
+{
+    u8 style = MP_UiStyle_Active();
+    s8 cx, cy, x, y;
+    int dx = 0, dy = 0, i, best = -1, bestMain = 0, bestSide = 0;
+    if (!NavPlace(style, kind, cur, &cx, &cy))
+        return cur;
+    if (keys & DPAD_UP)
+        dy = -1;
+    else if (keys & DPAD_DOWN)
+        dy = 1;
+    else if (keys & DPAD_LEFT)
+        dx = -1;
+    else if (keys & DPAD_RIGHT)
+        dx = 1;
+    else
+        return cur;
+    for (i = 0; i < 32; i++)
+    {
+        int main, side;
+        if (i == cur || !(usable & (1u << i)) || !NavPlace(style, kind, i, &x, &y))
+            continue;
+        main = dx ? (x - cx) * dx : (y - cy) * dy;
+        side = dx ? abs(y - cy) : abs(x - cx);
+        if (main <= 0 || (dx && side > 0))   // (left and right stay on their row)
+            continue;
+        if (best < 0 || main < bestMain || (main == bestMain && side < bestSide))
+            best = i, bestMain = main, bestSide = side;
+    }
+    if (best < 0 && wrap && dy)
+    {
+        // (round to the far end, the nearest column there)
+        for (i = 0; i < 32; i++)
+        {
+            int main, side;
+            if (i == cur || !(usable & (1u << i)) || !NavPlace(style, kind, i, &x, &y))
+                continue;
+            main = (cy - y) * dy;
+            side = abs(x - cx);
+            if (main <= 0)
+                continue;
+            if (best < 0 || main > bestMain || (main == bestMain && side < bestSide))
+                best = i, bestMain = main, bestSide = side;
+        }
+    }
+    return best < 0 ? cur : best;
+}
+
 void MP_UiStyle_Changed(void)
 {
     MPNet_Log("ui style: %s", sNames[MP_UiStyle_Active()]);

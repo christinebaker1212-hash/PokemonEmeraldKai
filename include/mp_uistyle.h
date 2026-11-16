@@ -33,6 +33,11 @@ void MP_UiStyle_TextRun(u8 windowId, const u8 *str, u8 x, u8 y, u8 fontId, u8 fg
 void MP_UiStyle_WindowRectFilled(u8 windowId, u16 x, u16 y, u16 w, u16 h);   // (window.c FillWindowPixelRect)
 void MP_UiStyle_WindowShown(u8 windowId, bool8 shown);   // (window.c Put / ClearWindowTilemap)
 void MP_UiStyle_Framed(u8 windowId, u8 kind);   // menu.c: its frame drawn (1 dialogue, 2 standard) or cleared (0)
+enum { MP_UINAV_COMMAND, MP_UINAV_MOVES, MP_UINAV_PARTY };
+// a menu the style lays out other than KAI: its D-pad (NavOwn TRUE), the entry the D-pad in KEYS goes to from CUR
+// among the USABLE ones (a bit each), round the far end in WRAP
+bool8 MP_UiStyle_NavOwn(u8 kind);
+int MP_UiStyle_NavMove(u8 kind, int cur, u16 keys, u32 usable, bool8 wrap);
 void MP_UiStyle_BattleBox(u8 x0, u8 y0, u8 x1, u8 y1, bool8 bg1, bool8 clear);   // battle_script_commands.c HandleBattleWindow
 const u8 *MP_TextPrinter_Cur(u8 windowId, bool8 *active, u8 *state);   // text.c: where its printer is
 
