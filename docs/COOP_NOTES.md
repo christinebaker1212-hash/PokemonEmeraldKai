@@ -7883,6 +7883,16 @@ docs/ui_styles/UI_STYLES.md ("Building it" for the game's side).
   letters (one at the left edge across the screen, one at the right leftward), lower ones are drawn first and a
   widened one pushes the one over it up. The MOéDEX page after a catch has no battle drawn over it
   (pokedex.c MP_DexCaughtPageShown). The Game Boy fonts have "…" (font_extra $75).
+- MENU POKéMON (OPTIONS > DISPLAY, RED / CRYSTAL; ui_menu_mons original / extended / kai): the party screen's icons
+  as the Game Boy game drew them. tools/ui_styles/gb_icons.py: the games' own picks for their 151 / 251 (pret's
+  data/pokemon/menu_icons.asm; RED's ten built from its sprite sheets as its symmetric OAM writer lays them, the
+  helix from the fossil sprite, the ball and helix shaking a pixel), every later POKéMON given its evolution line's
+  icon (nearest stage) or the icon the game gave most to its POKéMON of the same body shape and first type, then
+  shape, then type (data/species_shapes.csv from PokeAPI). Packs carry spec "icons" (OP_ICONSET: a byte a national
+  number, 0 the EGG, the last any other; pictures B + 2 * icon + frame; set 0 ORIGINAL, 1 EXTENDED), drawn by
+  mp_uistyle.c StyleMonIcon where the party spec places Kai's icon, its frame Kai's icon's own. EXTENDED (Crystal
+  Clear's icons) shows only once a pack has set 1 (MP_UiStyle_HasIconSet): Crystal Clear keeps them in a form not
+  found by reading the ROM alone.
 Tests: ui_style_battles, ui_style_screens, ui_style_dpad, ui_style_party_battles, coop_move_swap;
 tools/ui_styles/check_specs.py.
 
