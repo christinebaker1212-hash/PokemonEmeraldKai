@@ -1772,8 +1772,13 @@ static void BattlePanel(struct UiPack *p, u16 *frame)
     }
     else if (vofs == DISPLAY_HEIGHT * 2)
     {
-        struct ChooseMoveStruct *mi = (struct ChooseMoveStruct *)(&gBattleBufferA[sChooser][4]);
+        // (the moves as the menu was given them: once a move is picked the battle reuses that buffer while the
+        // panel is still up, so the last one seen choosing is kept)
+        static struct ChooseMoveStruct sMoves;
+        struct ChooseMoveStruct *mi = &sMoves;
         u8 cur = gMoveSelectionCursor[sChooser] & 3, i, to, held = 0xFF;
+        if (MP_BattleChoosingMove(sChooser))
+            memcpy(&sMoves, &gBattleBufferA[sChooser][4], sizeof(sMoves));
         u16 move;
         // (SELECT's swap: the cursor on the move it would swap with, the held one marked: C_HELD0)
         if (MP_BattleMoveSwapping(sChooser, &to))
@@ -3086,6 +3091,18 @@ static void HideHealthboxes(bool8 hide)
     }
 }
 
+// Kai's field message box (BG0 rows 112-159) hidden where it shows: the map name's pop-up slides away by scrolling BG0
+// (map_name_popup.c), and the message box's tiles go up with it while a message is open
+static void HideKaiMessageBox(void)
+{
+    int v = Bg0VOffset() & 0xFF;
+    if (v >= 128)
+        v -= 256;
+    gMpUiHideBg0[0] = 0, gMpUiHideBg0[2] = DISPLAY_WIDTH;
+    gMpUiHideBg0[1] = 112 - v < 0 ? 0 : 112 - v;
+    gMpUiHideBg0[3] = DISPLAY_HEIGHT - v > DISPLAY_HEIGHT ? DISPLAY_HEIGHT : DISPLAY_HEIGHT - v;
+}
+
 void MP_UiStyle_PreFrame(void)
 {
     u8 style = MP_UiStyle_Active();
@@ -3200,12 +3217,12 @@ void MP_UiStyle_PreFrame(void)
             memcpy(gMpUiHideBg0, sStartRect, sizeof(sStartRect));
         else if (FieldMessageShown())
         {
-            gMpUiHideBg0[0] = 0, gMpUiHideBg0[1] = 112, gMpUiHideBg0[2] = DISPLAY_WIDTH, gMpUiHideBg0[3] = DISPLAY_HEIGHT;
+            HideKaiMessageBox();
             sMsgTail = 3;
             sDrawing |= 2;
         }
         else if (sMsgTail && --sMsgTail)   // (the message box just closed: the same, its old tiles kept hidden)
-            gMpUiHideBg0[0] = 0, gMpUiHideBg0[1] = 112, gMpUiHideBg0[2] = DISPLAY_WIDTH, gMpUiHideBg0[3] = DISPLAY_HEIGHT;
+            HideKaiMessageBox();
     }
 }
 

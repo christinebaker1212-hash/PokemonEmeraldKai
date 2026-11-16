@@ -1198,6 +1198,13 @@ void MP_Battle_OnMoveSwap(u8 battler, u8 a, u8 b)
     MPNet_Log("battle: battler %u swapped moves %u and %u", battler, a, b);
 }
 
+// Moemon Kai: UI STYLE (mp_uistyle.c): whether BATTLER's move menu is up (its buffer holds the moves)
+bool8 MP_BattleChoosingMove(u8 battler)
+{
+    return battler < MAX_BATTLERS_COUNT && (gBattlerControllerFuncs[battler] == HandleInputChooseMove
+                                            || gBattlerControllerFuncs[battler] == HandleMoveSwitching);
+}
+
 // Moemon Kai: UI STYLE (mp_uistyle.c): whether BATTLER is choosing the move to swap with (SELECT), and which it's on
 bool8 MP_BattleMoveSwapping(u8 battler, u8 *to)
 {
