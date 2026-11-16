@@ -69,8 +69,8 @@ def main():
         import pt
         makers['PLATINUM'] = lambda: pt.Platinum(o.platinum, o.kai, o.export)
     if o.black and 'BLACK' in want:
-        import ds
-        makers['BLACK'] = lambda: ds.Black(o.black, o.kai, o.export)
+        import bw
+        makers['BLACK'] = lambda: bw.Black(o.black, o.kai, o.export)
     report = []
     for name, make in makers.items():
         st = make()

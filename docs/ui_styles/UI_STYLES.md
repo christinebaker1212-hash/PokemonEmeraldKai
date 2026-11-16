@@ -4,9 +4,9 @@ The user's request (2026-11-15): a style selector for the whole interface, KAI (
 RED, CRYSTAL, FIRERED, PLATINUM, BLACK, each from its own game's art, over Kai's own single, double and triple battle
 layouts; a mock-up of every style on every screen it changes, shown for approval before anything is built.
 
-**Status (2026-11-15): first mock-ups not approved ("everything other than Emerald looks extremely rough"); the
-second pass is under way.** RED, CRYSTAL, FIRERED and PLATINUM are redone (below) and pass the checker, the worst case
-too; BLACK is still the first pass and is being redone the same way, from Black's own ROM. Nothing in the game yet.
+**Status (2026-11-16): the second pass is done and waiting for approval** (the first mock-ups were not approved:
+"everything other than Emerald looks extremely rough"). All five styles are redone from their own games' art (below)
+and pass the checker, the worst case too. Nothing in the game yet.
 
 The user's rules for the second pass: readability first; as much of each original's style as possible; KAI's fitment,
 above all in Double and Triple Battles; each original game's own menu layouts (never KAI's layout in another game's
@@ -58,8 +58,24 @@ ten screens, `<style>/<screen>.png` each at 2x.
   with CANCEL); the summary its pages (the six page tabs as its icons, RENAME on SELECT, the trainer memo in place of
   the EXP rows); the BAG its screen and bag (eight pocket icons under the bag, FAVORITES as the MAIL pocket's icon,
   START: SORT), OPTIONS its frame with KAI's five tabs.
-- BLACK (tools/ui_styles/ds.py, first pass, being redone): its own font from the ROM (a/0/2/3, NFTR); Gen 5's dark slanted HP bars, flat round
-  buttons, the menu as a grid of tiles, the BAG's ring of pockets, drawn in its colours.
+- BLACK (tools/ui_styles/bw.py): everything from the user's Black ROM, put together the way the decomp
+  (Project-Holon/aletheia) says Black puts it together. The battle gauges are built exactly as btlv_gauge.c builds
+  them (its writes of the name, gender, level, bar and number tiles into the frame, its actors' offsets read from
+  overlay 94): no box, the name floating over the scene, the bar running in from the screen's edge to its arrow's
+  point at KAI's box (outside KAI's rectangles, as Black's own; the checker lists it), the player's EXP bar a row
+  under it. A double's box has no HP numbers (as Black's), its empty dark band shortened to KAI's height; a triple
+  card is Black's triple gauge with its plain bar shortened, its name / gender / Lv / level row from the card's
+  left (for a ten-letter name at level 100, the only row too wide, the Lv mark gives way and the digits stay).
+  The battle's message window is Black's (dark, blended over the scene as btlv_scu.c blends it); FIGHT / BAG / RUN /
+  MOéMON are Black's touch screen cut down to KAI's panel (the POKé BALL's band squashed column by column, keeping its
+  outlines and FIGHT!; the buttons' roofs and words kept; POKéMON spelt MOéMON from the button's own letters); the
+  moves are Black's move buttons in each type's own palette (overlay 94's table), the chosen move's type icon and PP
+  on a button of its own. The field's talk balloon, the X menu (its buttons, icons and lit button, two by two;
+  EXIT as the touch bar's return button), the party's plates, the summary's info page (its header re-spelt
+  MOéMON INFO from its own letters), the BAG (each pocket's own tab as Black draws it; POKé BALLS, BATTLE ITEMS and
+  FAVORITES, which Black lacks, take the X menu's POKé BALL, the battle BAG's mark and the registered item's check)
+  and OPTIONS (Black's six bars for KAI's six rows, KAI's tabs on its title bar). Pieces bigger than KAI's room are
+  cut down the way pixel art is: runs of identical rows or columns taken out (bw.py carve()), never scaled.
 
     python3 tools/ui_styles/mockups.py KAI_SHOTS EXPORT OUT --pokered DIR --pokecrystal DIR --pokefirered DIR \
             --platinum ROM --black ROM

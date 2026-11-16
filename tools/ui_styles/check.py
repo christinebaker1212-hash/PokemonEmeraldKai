@@ -108,7 +108,7 @@ def check_style(style, screens, kai, bare=None):
     for f in out:
         why = next((w for (screen, kind, words, w) in allowed
                     if f.startswith('%s %s:' % (screen, kind)) and
-                    (words is None or any('"%s"' % t in f for t in words))), None)
+                    (words is None or (words(f) if callable(words) else any('"%s"' % t in f for t in words)))), None)
         (kept if why else found).append(f if not why else f + '  [allowed: %s]' % why)
     return found, kept
 
