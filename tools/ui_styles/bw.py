@@ -1033,6 +1033,49 @@ class Black(Style):
             x += lets[i].width + gap
         return im
 
+    SUMMARY_TABS = ['«INFO»', '«STATS»', '«BATTLE MOVES»', '«CONTEST MOVES»', '«POKé BALL»', '«JOURNAL»']
+
+    def summary_bar(self, k):
+        """the touch screen's title bar (a/0/7/8: screens 65 and its kin, «STATUS» / «STATS» / «BATTLE MOVES»...)
+        with its POKéMON INFO taken off (the title: summary_title), KAI's page K as Black names its pages between
+        « », six dots for the six pages (page K's filled) before it"""
+        A = self.SUMMARY_ARC
+        bar = self.screen(A, 9, 65, 1).crop((0, 8, 256, 24))
+        q = bar.load()
+        bar = bar.crop((0, 0, 240, 16))
+        bp = bar.load()
+        for x in list(range(0, 150)) + list(range(150, 240)):
+            for y in range(1, 15):
+                bp[x, y] = q[100, y]
+        ti, ts_ = self.TEAL
+        lab = self.SUMMARY_TABS[k]
+        self.text(bar, 236, 2, lab, ti, ts_, 's', 'r')
+        x0 = min(152, 236 - self.measure(lab, 's') - 42)
+        for j in range(6):
+            cx = x0 + j * 7
+            for dy in range(3):
+                for dx in range(3):
+                    if j == k or dx in (0, 2) or dy in (0, 2):
+                        bar.putpixel((cx + dx, 7 + dy), ti + (255,))
+        return bar
+
+    def summary_title(self, moe=True):
+        """the bar's own POKéMON INFO (x 0-103), or MOéMON INFO spelt from its own letters"""
+        A = self.SUMMARY_ARC
+        bar = self.screen(A, 9, 65, 1).crop((0, 8, 256, 24))
+        if moe:
+            ground = bar.load()[100, 8][:3]
+            self.respell(bar, (4, 4, 100, 12), [4, 5, 3, 4, 5, 6, None, 7, 8, 9, 10], ground)
+        return bar.crop((0, 0, 104, 16))
+
+    def summary_top(self, scr, ch=8):
+        """Black's page SCR (character CH) over its grid (screen 70), 256 x 192"""
+        A = self.SUMMARY_ARC
+        top = Image.new('RGBA', (256, 192), (0, 0, 0, 255))
+        top.alpha_composite(self.screen(A, 8, 70, 0).crop((0, 0, 256, 192)))
+        top.alpha_composite(self.screen(A, ch, scr, 0).crop((0, 0, 256, 192)))
+        return top
+
     def summary_page(self, im):
         """Black's INFO page (a/0/7/8: screens 70 and 63) from its row 6 down under the touch screen's title bar,
         holding KAI's INFO page: its six bullet rows Dex No., Name, Type, OT, ID No. and Ability (Black's EXP
@@ -1040,34 +1083,16 @@ class Black(Style):
         memo (nature; level and place met, as PLATINUM writes it), the white box at the top right the nickname,
         gender and level, the box at the bottom right SELECT's RENAME"""
         from common import SUMMARY as S_, MINE, creature
-        A = self.SUMMARY_ARC
-        top = Image.new('RGBA', (256, 192), (0, 0, 0, 255))
-        top.alpha_composite(self.screen(A, 8, 70, 0).crop((0, 0, 256, 192)))
-        top.alpha_composite(self.screen(A, 8, 63, 0).crop((0, 0, 256, 192)))
+        top = self.summary_top(63)
         c = 6                                  # (Black's row c at the screen's row 16)
         paste(im, top.crop((0, c, 240, c + 144)), 0, 16)
 
         def Y(by):                             # (a row of Black's page on the screen)
             return by - c + 16
-        # (the header: the touch screen's title bar, its POKéMON INFO spelt MOéMON INFO from its own letters)
-        bar = self.screen(A, 9, 65, 1).crop((0, 8, 256, 24))
-        q = bar.load()
-        ground = q[100, 8][:3]
-        self.respell(bar, (4, 4, 100, 12), [4, 5, 3, 4, 5, 6, None, 7, 8, 9, 10], ground)
-        bar = bar.crop((0, 0, 240, 16))
-        bp = bar.load()
-        for x in range(150, 240):              # (its «STATUS» taken off: KAI's page name and six pages there)
-            for y in range(1, 15):
-                bp[x, y] = q[100, y]
-        paste(im, bar, 0, 0)
-        ti, ts_ = self.TEAL
-        self.text(im, 236, 2, '«INFO»', ti, ts_, 's', 'r')
-        for k in range(6):
-            cx = 152 + k * 7
-            for dy in range(3):
-                for dx in range(3):
-                    if k == 0 or dx in (0, 2) or dy in (0, 2):
-                        im.putpixel((cx + dx, 7 + dy), ti + (255,))
+        # (the header: the touch screen's title bar, its POKéMON INFO spelt MOéMON INFO from its own letters; its
+        # «STATUS» taken off: KAI's page name and six pages there)
+        paste(im, self.summary_bar(0), 0, 0)
+        paste(im, self.summary_title(), 0, 0)
         lab, lsh = (248, 248, 248), (128, 128, 128)
         ink, sh = self.INK
         # (the six bullet rows, 16 apart from Black's row 16: their labels on the navy, values on the white)

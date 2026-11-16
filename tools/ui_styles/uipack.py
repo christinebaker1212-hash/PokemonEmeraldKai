@@ -151,6 +151,7 @@ SNAP = -1                                 # (render()'s DATA: the picture OP_SNA
  F_NEXTLV) = range(96, 107)
 F_STAT0, F_IV0, F_EV0, F_TYPE1, F_TYPE2 = 107, 112, 118, 124, 125
 F_POWER, F_ACC, F_APPEAL, F_JAM, F_RIBBONS, F_PAGENO, F_JPAGE, F_CTYPE, F_PROMPT, F_PAGETITLE = range(151, 161)
+F_CREATURES = 161       # (val) 1 when the game says POKéMON (OPTIONS > CREATURES), 0 MOéMON
 SM_EV, SM_IV, SM_CHOOSING = 1 << 20, 1 << 21, 1 << 23
 SM_LEARN, SM_TWOTYPES, SM_MEMOPLAIN, SM_RENAME, SM_CLEAREV, SM_EGG = (1 << 26, 1 << 27, 1 << 28, 1 << 29, 1 << 30,
                                                                       1 << 31)

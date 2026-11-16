@@ -875,6 +875,77 @@ class Platinum(Style):
                                 out.putpixel((x - x0 + tx * 8 + xx, y - y0 + ty * 8 + yy), pal[v] + (255,))
         return out
 
+    TABS = [0, 2, 4, 5, 3, 1, 7]   # (Platinum's tab cells for KAI's six pages and EXIT)
+
+    def summary_ground(self, page='page_info', k=0, choosing=False, pick=None):
+        """a summary page's ground: the header, the left column (name plate, picture panel, ITEM plate; while a move
+        is picked Platinum's move_info panel), KAI's tabs (page K's the big one) and the right panel; INFO's right
+        panel its rows 28-117 and the stripes under them, every other page's fitted into the room by leaving out
+        rows that repeat the one beside them (GBPack.kept_rows). Returns (im, Ly, Y, X): the left column's rows,
+        the right panel's (a page row to the screen's) and its columns"""
+        d = os.path.join(R, 'res', 'graphics', 'pokemon_summary_screen')
+        pal = self.jasc(os.path.join(d, 'tiles_main.pal'))
+        pg = self.page_art(os.path.join(d, 'tiles_main.png'), os.path.join(d, page + '.NSCR'), pal)
+        pp = pg.load()
+        im = Image.new('RGBA', (W, H), pp[2, 100][:3] + (255,))
+        paste(im, pg.crop((0, 0, 240, 16)), 0, 0)
+        left_rows = list(range(16, 20)) + list(range(21, 55)) + list(range(55, 59)) + list(range(70, 135)) + [135] + \
+            list(range(156, 192))
+        for oy, sy in enumerate(left_rows):
+            for x in range(104):
+                im.putpixel((x, 16 + oy), pp[x, sy])
+        Ly = {sy: 16 + i for i, sy in enumerate(left_rows)}
+        rcols = (list(range(104, 168)) + list(range(184, 252)))[:136]
+        if page == 'page_info':
+            right_rows = list(range(28, 118))
+            top = 160 - len(right_rows) - 34
+            for oy, sy in enumerate(right_rows):
+                for ox, sx in enumerate(rcols):
+                    im.putpixel((104 + ox, top + oy), pp[sx, sy])
+            stripe = [pp[120, y] for y in range(118, 150)]
+            for i in range(34):
+                y = top + len(right_rows) + i
+                for ox, sx in enumerate(rcols):
+                    c = pp[sx, 118 + i % 32]
+                    im.putpixel((104 + ox, y), c if sx < 106 else stripe[i % 32])
+            rows = {sy: top + i for i, sy in enumerate(right_rows)}
+        else:
+            from gb_build import GBPack
+            panel = Image.new('RGBA', (len(rcols), 164), (0, 0, 0, 0))
+            q = panel.load()
+            for y in range(164):
+                for ox, sx in enumerate(rcols):
+                    q[ox, y] = pp[sx, 28 + y]
+            kept = [r - 28 for r in pick] if pick else GBPack.kept_rows(panel, 160 - 36)
+            top = 36
+            for oy, sy in enumerate(kept):
+                for ox in range(len(rcols)):
+                    im.putpixel((104 + ox, top + oy), q[ox, sy])
+            rows = {28 + sy: top + i for i, sy in enumerate(kept)}
+        if choosing:
+            mi = self.page_art(os.path.join(d, 'tiles_main.png'), os.path.join(d, 'move_info.NSCR'), pal)
+            mp = mi.load()
+            cols = list(range(0, 48)) + list(range(76, 132))
+            for y in range(16, 160):
+                sy = 24 + (y - 16) if y < 88 else 56 + (y - 88) % 16 + 16
+                for ox, sx in enumerate(cols):
+                    im.putpixel((ox, y), mp[sx, sy])
+        base = 172 - (24 + (len(self.TABS) - 1) * 16) // 2
+        x = base
+        for i, t in enumerate(self.TABS):
+            cell = self.cell_sprite(os.path.join(d, 'tabs.png'), os.path.join(d, 'tabs_cell.json'), t + (8 if i == k else 0))
+            paste(im, cell, x, 16)
+            x += cell.width
+
+        def Y(sy):
+            ks = sorted(rows)
+            for r in ks:
+                if r >= sy:
+                    return rows[r]
+            return rows[ks[-1]]
+        X = lambda x: 104 + rcols.index(x) if x in rcols else None  # noqa: E731
+        return im, Ly, Y, X
+
     def summary_page(self, im):
         """Platinum's INFO page (pokemon_summary_screen/page_info) made 240 x 160: the header; KAI's six pages as
         Platinum's tabs under it (INFO, SKILLS, BATTLE MOVES, CONTEST MOVES, the BALL page as CONDITION's, the
@@ -883,47 +954,12 @@ class Platinum(Style):
         rows (POKéDEX No., NAME, TYPE, OT, ID No.) with sixteen of its columns out before the values, and under them
         KAI's TRAINER MEMO on the stripes; RENAME in the header's prompt"""
         from common import SUMMARY, creature
-        d = os.path.join(R, 'res', 'graphics', 'pokemon_summary_screen')
-        pal = self.jasc(os.path.join(d, 'tiles_main.pal'))
-        page = self.page_art(os.path.join(d, 'tiles_main.png'), os.path.join(d, 'page_info.NSCR'), pal)
-        pp = page.load()
         s = SUMMARY
-        im.paste(pp[2, 100][:3] + (255,), (0, 0, W, H))
-        # header (rows 0-15; its 240 left columns)
-        paste(im, page.crop((0, 0, 240, 16)), 0, 0)
-        # left column: rows kept (header 0-15, then 16-19, the plate 21-54, 55-58, the picture 70-134, 135, the
-        # ITEM plate 156-191)
-        left_rows = list(range(16, 20)) + list(range(21, 55)) + list(range(55, 59)) + list(range(70, 135)) + [135] + \
-            list(range(156, 192))
-        for oy, sy in enumerate(left_rows):
-            for x in range(104):
-                im.putpixel((x, 16 + oy), pp[x, sy])
-        Ly = {sy: 16 + i for i, sy in enumerate(left_rows)}
-        # right panel: columns 104-167 and 184-255 less 252-255 (136); rows 30-117, then the stripes 118-149 drawn
-        # without the EXP boxes, then the foot
-        rcols = list(range(104, 168)) + list(range(184, 252)) + [252, 253, 254, 255][:0]
-        rcols = rcols[:136]
+        g, Ly, Y, X = self.summary_ground()
+        paste(im, g, 0, 0)
+        Ry = {sy: Y(sy) for sy in range(28, 118)}
+        top = 160 - 90 - 34
         right_rows = list(range(28, 118))
-        top = 160 - len(right_rows) - 34
-        for oy, sy in enumerate(right_rows):
-            for ox, sx in enumerate(rcols):
-                im.putpixel((104 + ox, top + oy), pp[sx, sy])
-        Ry = {sy: top + i for i, sy in enumerate(right_rows)}
-        stripe = [pp[120, y] for y in range(118, 150)]
-        for i in range(34):
-            y = top + len(right_rows) + i
-            for ox, sx in enumerate(rcols):
-                c = pp[sx, 118 + i % 32]
-                im.putpixel((104 + ox, y), c if sx < 106 else stripe[i % 32])
-        X = lambda x: 104 + rcols.index(x) if x in rcols else None  # noqa: E731
-        # the tabs (16 x 16, the current 24 x 16) under the header, centred
-        tabs = [0, 2, 4, 5, 3, 1, 7]
-        base = 172 - (24 + (len(tabs) - 1) * 16) // 2
-        x = base
-        for i, k in enumerate(tabs):
-            cell = self.cell_sprite(os.path.join(d, 'tabs.png'), os.path.join(d, 'tabs_cell.json'), k + (8 if i == 0 else 0))
-            paste(im, cell, x, 16)
-            x += cell.width
         # the header's words: the page, and KAI's RENAME where Platinum prompts
         self.text(im, 8, 0, 'MOéMON INFO', *self.SUM_INK['white'])
         self.text(im, 236, 0, 'SELECT RENAME', *self.SUM_INK['white'], align='r')

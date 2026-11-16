@@ -86,6 +86,10 @@ class PTPack:
         f.add(0x00, 8, 0, 0, [])
         f.add(0xBA, 8, 0, 0, [[v if v in (1, 2) else 0 for v in r] for r in st.special_glyph(10)])       # (/)
         f.add(0x34, 16, 0, 0, [[v if v in (1, 2) else 0 for v in r] for r in st.special_glyph(11, 16)])  # (Lv.)
+        # (a P drawn as the set's own D (special 15-16, 'ID'), for the summary's PP where the system font's twelve
+        # rows don't fit)
+        P = ['........', '####+...', '##++#+..', '##+.#+..', '####++..', '##+++...', '##+.....', '++......']
+        f.add(0xCA, 7, 0, 0, [[{'#': 1, '+': 2}.get(c, 0) for c in r] for r in P])
         self.fdig = self.p.font('pt.digits', f)
 
     # ---------------------------------------------------------------------------------------------------- helpers
@@ -630,6 +634,227 @@ class PTPack:
         self.text(t, '{%d}' % U.F_NAME, 0, -1, self.fm, (168, 168, 176), (216, 216, 216), cond=U.C_ALT)
         p.spec(t)
 
+    # ---------------------------------------------------------------------------------------------------- summary
+    def summary(self):
+        """KAI's six summary pages in Platinum's (pt.py summary_ground): INFO as approved; SKILLS on page_skills (HP
+        and its bar, the five stats, nature's red / blue, IV stars or EVs, EXP. POINTS, NEXT LV., the Ability and its
+        words); the moves on page_battle_moves / page_contest_moves (type or contest icon, name, PP), the picked one in
+        Platinum's move_info panel (POWER, ACCURACY or APPEAL / JAM hearts, its words), the frame on its row; the
+        POKé BALL and the JOURNAL on page_memo's stripes; the page's title and what A does in the header"""
+        st, p = self.st, self.p
+        W_, BK, BL, RD = st.SUM_INK['white'], st.SUM_INK['black'], st.SUM_INK['blue'], st.SUM_INK['red']
+        tfirst = None
+        for i, t in enumerate(U.TYPE_NAMES):
+            ic = self.fairy_icon() if t == 'FAIRY' else st.type_icon(t if t != '???' else 'NORMAL')
+            k = p.image('pt.type%d' % i, ic)
+            tfirst = k if tfirst is None else tfirst
+            assert k == tfirst + i
+        cfirst = None
+        # (Platinum's own contest icons, beside its type icons)
+        for i, word in enumerate(('COOL', 'BEAUTY', 'CUTE', 'SMART', 'TOUGH')):
+            k = p.image('pt.contest%d' % i, st.type_icon(word))
+            cfirst = k if cfirst is None else cfirst
+            assert k == cfirst + i
+        labels = ['', 'A  IV RATING', 'A  EVs', 'A  STATS', 'A  INFO', 'A  SWITCH', 'A  MORE', '']
+        pfirst = None
+        for i, lab in enumerate(labels):
+            im = Image.new('RGBA', (240, 16), (0, 0, 0, 0))
+            if lab:
+                st.text(im, 236, 0, lab, *W_, align='r')
+            k = p.image('pt.sum.prompt%d' % i, im)
+            pfirst = k if pfirst is None else pfirst
+            assert k == pfirst + i
+        star = (0x10, 0x10, 0x38, 0xFE, 0x7C, 0x38, 0x6C, 0x44)
+        heart = (0x00, 0xD8, 0xF8, 0xF8, 0x70, 0x20, 0x00, 0x00)
+
+        def shapes(tag, shape, counts, total, on, off, perfect=None, pitch=8):
+            first = None
+            for i, n in enumerate(counts):
+                im = Image.new('RGBA', (pitch * total, 8), (0, 0, 0, 0))
+                for j in range(total):
+                    col = (perfect if perfect and n > total else on) if j < min(n, total) else off
+                    for yy in range(8):
+                        for xx in range(8):
+                            if shape[yy] & (0x80 >> xx):
+                                im.putpixel((j * pitch + xx, yy), col + (255,))
+                k = p.image('pt.%s%d' % (tag, i), im)
+                first = k if first is None else first
+                assert k == first + i
+            return first
+        stars = shapes('stars', star, [0, 1, 2, 3, 4], 3, BK[0], (190, 196, 196), perfect=RD[0])
+        hearts = shapes('hearts', heart, range(9), 8, RD[0], (190, 196, 196), pitch=6)
+        # HP and EXP bars: a plain red / yellow / green fill over Platinum's bar art
+        fills = []
+        for t, c in zip('gyr', ((88, 208, 128), (248, 224, 56), (248, 88, 56))):
+            im = Image.new('RGBA', (48, 3), c + (255,))
+            fills.append(p.image('pt.sum.hp.%s' % t, im))
+        expfill = p.image('pt.sum.exp', Image.new('RGBA', (64, 2), (64, 200, 248, 255)))
+
+        def common(sp, Ly, k):
+            self.text(sp, '{%d}' % U.F_PAGETITLE, 8, 0, self.fn, *W_)
+            if k == 0:
+                self.text(sp, 'SELECT RENAME', 236, 0, self.fn, *W_, align=1, cond=U.SM_RENAME)
+            else:
+                sp.add(U.OP_IMGSEL, x=0, y=0, a=pfirst, b=U.F_PROMPT)
+
+        def left(sp, Ly, ability=False):
+            ny = Ly[24]
+            self.text(sp, '{%d}' % U.F_NAME, 24, ny, self.fn, *W_)
+            self.text(sp, '♂', 24 + 64, ny, self.fn, *BL, cond=U.C_MALE)
+            self.text(sp, '♀', 24 + 64, ny, self.fn, *RD, cond=U.C_FEMALE)
+            self.text(sp, '{LV}{%d}' % U.F_LEVEL, 8, Ly[42], self.fdig, *BK, unless=U.SM_EGG)
+            sp.add(U.OP_ICON, x=52, y=Ly[102], a=0)
+            sp.add(U.OP_ICON, x=90, y=Ly[42] + 6, a=2)
+            if ability:
+                self.text(sp, 'Ability', 8, Ly[160], self.fn, *W_)
+                self.text(sp, '{%d}' % U.F_ABILITY, 8, Ly[176], self.fn, *BK, w=92, b=self.fsmall + 1)
+                return
+            self.text(sp, 'Item', 8, Ly[160], self.fn, *W_)
+            self.text(sp, '{%d}' % U.F_HELD, 8, Ly[176], self.fn, *BK, w=92, b=self.fsmall + 1)
+
+        # INFO (as approved)
+        g, Ly, Y, X = st.summary_ground('page_info', 0)
+        sp = U.Spec('sum.0')
+        self.img(sp, 'pt.sum0', g)
+        common(sp, Ly, 0)
+        left(sp, Ly)
+        top = 160 - 90 - 34
+        rows = [('Moédex No.', U.F_DEXNO, 192, 48), ('Name', U.F_SPECIES, 184, 64), ('Type', None, 0, 0),
+                ('OT', U.F_OT, 184, 64), ('ID No.', U.F_IDNO, 200, 32)]
+        for i, (label, fld, wx, ww) in enumerate(rows):
+            y = Y(40 + 16 * i)
+            self.text(sp, label.replace('Moédex', 'Moédex'), X(112), y, self.fn, *W_)
+            if fld is not None:
+                cx = X(wx) + ww // 2 if X(wx) else X(184) + 32
+                self.text(sp, '{%d}' % fld, cx, y, self.fn, *(BL if label == 'OT' else BK), align=2)
+        sp.add(U.OP_IMGSEL, x=X(200), y=Y(72), a=tfirst, b=U.F_TYPE1, unless=U.SM_EGG)
+        sp.add(U.OP_IMGSEL, x=X(200) + 34, y=Y(72), a=tfirst, b=U.F_TYPE2, cond=U.SM_TWOTYPES, unless=U.SM_EGG)
+        my = top + 90 + 1
+        self.text(sp, '{%d} nature.' % U.F_NATURE, X(112), my, self.fn, *BK, cond=U.SM_MEMOPLAIN)
+        self.text(sp, 'Lv{%d} {%d}' % (U.F_METLV, U.F_METPLACE), X(112) - 2, my + 16, self.fn, *BK,
+                  cond=U.SM_MEMOPLAIN, w=130, b=self.fsmall + 1)
+        sp.add(U.OP_MSG, x=X(112), y=my, a=2, h=16, n=2, w=130, e=self.fsmall + 1, font=self.fn, ink=BK[0],
+               shadow=BK[1], unless=U.SM_MEMOPLAIN)
+        p.spec(sp)
+        # SKILLS
+        # (its rows chosen: the HP box and bar whole, each stat's stripe two rows shorter, EXP's box, the foot)
+        pick = list(range(28, 56))
+        for i in range(5):
+            pick += [y for y in range(56 + 16 * i, 72 + 16 * i) if y - (56 + 16 * i) not in (6, 7, 8, 9)]
+        pick += list(range(136, 160))
+        pick += list(range(160, 192))[:124 - len(pick)]
+        g, Ly, Y, X = st.summary_ground('page_skills', 1, pick=pick)
+        sp = U.Spec('sum.1')
+        self.img(sp, 'pt.sum1', g)
+        common(sp, Ly, 1)
+        left(sp, Ly, ability=True)
+        self.text(sp, 'HP', X(112), Y(32), self.fn, *W_)
+        self.text(sp, '{%d}/{%d}' % (U.F_HP, U.F_MAXHP), X(248), Y(32), self.fn, *BK, align=1,
+                  unless=U.SM_IV | U.SM_EV)
+        sp.add(U.OP_IMGSEL, x=X(224), y=Y(36), a=stars, b=U.F_IV0, cond=U.SM_IV)
+        self.text(sp, '{%d}' % U.F_EV0, X(248), Y(32), self.fn, *BK, align=1, cond=U.SM_EV)
+        sp.add(U.OP_BAR, x=X(194), y=Y(51), a=U.F_HPFRAC, b=fills[0], c=fills[1], d=fills[2])
+        names = ['Attack', 'Defense', 'Sp. Atk', 'Sp. Def', 'Speed']
+        for i, nm in enumerate(names):
+            y = Y(56 + 16 * i)
+            self.text(sp, nm, X(112), y, self.fn, *W_)
+            self.text(sp, '{%d}' % (U.F_STAT0 + i), X(240), y, self.fn, *RD, align=1, cond=U.C_SEL0 << i,
+                      unless=U.SM_IV | U.SM_EV)
+            self.text(sp, '{%d}' % (U.F_STAT0 + i), X(240), y, self.fn, *BL, align=1, cond=U.C_SEL0 << (5 + i),
+                      unless=U.SM_IV | U.SM_EV)
+            self.text(sp, '{%d}' % (U.F_STAT0 + i), X(240), y, self.fn, *BK, align=1,
+                      unless=U.SM_IV | U.SM_EV | (U.C_SEL0 << i) | (U.C_SEL0 << (5 + i)))
+            sp.add(U.OP_IMGSEL, x=X(216), y=y + 4, a=stars, b=U.F_IV0 + 1 + i, cond=U.SM_IV)
+            self.text(sp, '{%d}' % (U.F_EV0 + 1 + i), X(240), y, self.fn, *BK, align=1, cond=U.SM_EV)
+        self.text(sp, 'Exp. Points', X(112), Y(136), self.fn, *W_)
+        self.text(sp, '{%d}' % U.F_EXPPTS, X(248), Y(136), self.fn, *W_, align=1)
+        self.text(sp, 'Next Lv.', X(160), Y(148), self.fn, *BK)
+        self.text(sp, '{%d}' % U.F_NEXTLV, X(248), Y(148), self.fn, *BK, align=1)
+        self.text(sp, 'START  CLEAR', X(248), Y(160), self.fn, *BL, align=1, cond=U.SM_CLEAREV)
+        p.spec(sp)
+        # the moves
+        for k, contest in ((2, False), (3, True)):
+            nscr = 'page_contest_moves' if contest else 'page_battle_moves'
+            sp = U.Spec('sum.%d' % k)
+            # (each move's 32 rows, its light stripe (icon and name) whole and ten of the dark one's eighteen (PP),
+            # five moves under three rows of the panel's top)
+            pick = [29, 30, 31]
+            for i in range(5):
+                pick += list(range(50 + 32 * i, 64 + 32 * i)) + list(range(64 + 32 * min(i, 3), 74 + 32 * min(i, 3)))
+            g, Ly, Y, X = st.summary_ground(nscr, k, pick=pick)
+            self.img(sp, 'pt.sum%d' % k, g, unless=U.SM_CHOOSING)
+            g2, _, Y2, X2 = st.summary_ground(nscr + '_select_mode', k, choosing=True, pick=pick)
+            self.img(sp, 'pt.sum%dc' % k, g2, cond=U.SM_CHOOSING)
+            common(sp, Ly, k)
+            # (the normal page's left column; picked, the move's panel)
+            ny = Ly[24]
+            self.text(sp, '{%d}' % U.F_NAME, 24, ny, self.fn, *W_, unless=U.SM_CHOOSING)
+            self.text(sp, '♂', 88, ny, self.fn, *BL, cond=U.C_MALE, unless=U.SM_CHOOSING)
+            self.text(sp, '♀', 88, ny, self.fn, *RD, cond=U.C_FEMALE, unless=U.SM_CHOOSING)
+            self.text(sp, '{LV}{%d}' % U.F_LEVEL, 8, Ly[42], self.fdig, *BK, unless=U.SM_CHOOSING | U.SM_EGG)
+            sp.add(U.OP_ICON, x=52, y=Ly[102], a=0, unless=U.SM_CHOOSING)
+            self.text(sp, 'Item', 8, Ly[160], self.fn, *W_, unless=U.SM_CHOOSING)
+            self.text(sp, '{%d}' % U.F_HELD, 8, Ly[176], self.fn, *BK, w=92, b=self.fsmall + 1, unless=U.SM_CHOOSING)
+            if contest:
+                self.text(sp, 'Appeal', 4, 18, self.fn, *W_, cond=U.SM_CHOOSING)
+                sp.add(U.OP_IMGSEL, x=46, y=23, a=hearts, b=U.F_APPEAL, cond=U.SM_CHOOSING)
+                self.text(sp, 'Jam', 4, 34, self.fn, *W_, cond=U.SM_CHOOSING)
+                sp.add(U.OP_IMGSEL, x=46, y=39, a=hearts, b=U.F_JAM, cond=U.SM_CHOOSING)
+            else:
+                self.text(sp, 'Power', 4, 18, self.fn, *W_, cond=U.SM_CHOOSING)
+                self.text(sp, '{%d}' % U.F_POWER, 98, 18, self.fn, *W_, align=1, cond=U.SM_CHOOSING)
+                self.text(sp, 'Accuracy', 4, 34, self.fn, *W_, cond=U.SM_CHOOSING)
+                self.text(sp, '{%d}' % U.F_ACC, 93, 34, self.fn, *BK, align=1, cond=U.SM_CHOOSING)
+            sp.add(U.OP_MSG, x=4, y=50, a=1, h=14, n=7, w=96, e=self.fsmall + 1, font=self.fn, ink=BK[0],
+                   shadow=BK[1], cond=U.SM_CHOOSING)
+            y0 = Y2(50)
+            sp.add(U.OP_LIST, x=0, y=y0, h=24, n=5)
+            p.spec(sp)
+            row = U.Spec('sum.%d.row' % k)
+            frame = Image.new('RGBA', (X(251) - X(184) + 4, 18), (0, 0, 0, 0))
+            frame.paste((232, 32, 16, 255), (0, 0, frame.width, 2))
+            frame.paste((232, 32, 16, 255), (0, 16, frame.width, 18))
+            frame.paste((232, 32, 16, 255), (0, 0, 2, 18))
+            frame.paste((232, 32, 16, 255), (frame.width - 2, 0, frame.width, 18))
+            blue = frame.copy()
+            px = blue.load()
+            for yy in range(16):
+                for xx in range(blue.width):
+                    if px[xx, yy][3]:
+                        px[xx, yy] = (0, 115, 255, 255)
+            self.img(row, 'pt.sum.frame', frame, X(184) - 2, -2, cond=U.C_SEL0)
+            self.img(row, 'pt.sum.frame2', blue, X(184) - 2, -2, cond=U.B_SWAP, unless=U.C_SEL0)
+            if contest:
+                row.add(U.OP_IMGSEL, x=X(136), y=-1, a=cfirst, b=U.F_CTYPE, unless=U.R_EMPTY | U.R_CANCEL)
+            else:
+                row.add(U.OP_IMGSEL, x=X(136), y=-1, a=tfirst, b=U.F_TYPE, unless=U.R_EMPTY | U.R_CANCEL)
+            self.text(row, '{%d}' % U.F_NAME, X(188), -2, self.fn, *BK, w=X(250) - X(188), b=self.fsmall + 1,
+                      unless=U.R_EMPTY | U.R_CANCEL)
+            # (PP in the special characters' digits: the dark stripe's ten rows hold their eight)
+            self.text(row, 'PP', X(188), 15, self.fdig, *W_, unless=U.R_EMPTY | U.R_CANCEL)
+            self.text(row, '{%d}/{%d}' % (U.F_PP, U.F_MAXPP), X(249), 15, self.fdig, *W_, align=1,
+                      unless=U.R_EMPTY | U.R_CANCEL)
+            self.text(row, '-', X(188), -2, self.fn, *BK, cond=U.R_EMPTY)
+            self.text(row, 'CANCEL', X(188), -2, self.fn, *BK, cond=U.R_CANCEL)
+            p.spec(row)
+        # the POKé BALL and the JOURNAL on page_memo's stripes
+        for k in (4, 5):
+            g, Ly, Y, X = st.summary_ground('page_memo', k)
+            sp = U.Spec('sum.%d' % k)
+            self.img(sp, 'pt.sum%d' % k, g)
+            common(sp, Ly, k)
+            left(sp, Ly)
+            if k == 4:
+                sp.add(U.OP_LIST, x=104, y=36, h=14, n=1)
+            else:
+                sp.add(U.OP_MSG, x=110, y=38, a=3, h=16, n=7, w=126, e=self.fsmall + 1, font=self.fn, ink=BK[0],
+                       shadow=BK[1])
+                self.text(sp, '{%d}' % U.F_JPAGE, 236, 144, self.fn, *BK, align=1, cond=U.S_DOWN)
+            p.spec(sp)
+            row = U.Spec('sum.%d.row' % k)
+            self.text(row, '{%d}' % U.F_NAME, 0, 0, self.fn, *BK, w=132, b=self.fsmall + 1)
+            p.spec(row)
+
     def make(self):
         self.fonts()
         for kind in ('foe1', 'mine1', 'foe2', 'mine2', 'foe3', 'mine3'):
@@ -639,4 +864,5 @@ class PTPack:
         self.options()
         self.bag()
         self.popups()
+        self.summary()
         return self.p

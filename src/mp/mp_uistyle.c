@@ -132,6 +132,7 @@ enum { OP_IMG = 1, OP_TEXT, OP_BAR, OP_FILL, OP_MSG, OP_LONG, OP_BACKING, OP_IMG
 #define F_PROMPT 159   // the summary: what A does (val: 0 CANCEL, 1 IV RATING, 2 EVs, 3 STATS, 4 INFO, 5 SWITCH, 6 MORE,
                        // 7 nothing)
 #define F_PAGETITLE 160
+#define F_CREATURES 161   // (val) 1 when the game says POKéMON (OPTIONS > CREATURES), 0 MOéMON
 #define C_LV3 (1u << 0)
 #define C_MALE (1u << 1)
 #define C_FEMALE (1u << 2)
@@ -2266,6 +2267,7 @@ static void SummaryScreen(struct UiPack *p, u16 *frame)
     {
         d.msg[0] = w.abilityDesc;
         d.msgLen[0] = d.msgPrinted[0] = StringLength(w.abilityDesc);
+        d.str[F_TEXT0] = w.abilityDesc;   // (a style that prints it on one line)
     }
     if (v.choosing)
     {
@@ -2293,8 +2295,9 @@ static void SummaryScreen(struct UiPack *p, u16 *frame)
         static const u8 sT0[] = _("MOéMON INFO"), sT1[] = _("MOéMON SKILLS"), sT2[] = _("BATTLE MOVES"),
                         sT3[] = _("CONTEST MOVES"), sT4[] = _("POKé BALL"), sT5[] = _("JOURNAL");
         static const u8 *const sTitles[6] = {sT0, sT1, sT2, sT3, sT4, sT5};
-        static u8 sTitle[24];
+        static u8 sTitle[24], sWord[24];
         d.str[F_PAGETITLE] = Filtered(sTitles[v.page % 6], sTitle, sizeof(sTitle));
+        d.val[F_CREATURES] = Filtered(sT0, sWord, sizeof(sWord))[0] == CHAR_P;
     }
     d.val[F_PROMPT] = v.page == 1 ? 1 + v.statsView : (v.page == 2 || v.page == 3) ? (v.choosing ? 5 : 4)
                     : v.page == 5 ? (v.journalPages > 1 ? 6 : 7) : 0;
@@ -2378,7 +2381,8 @@ static void SummaryScreen(struct UiPack *p, u16 *frame)
     }
     else if (list && rowSp && v.page == 4)
     {
-        // the POKé BALL page's lines, where Kai prints them in its box
+        // the POKé BALL page's lines, where Kai prints them in its box (a list's h, when set, the sixteenths of
+        // Kai's line spacing the style's own box gives them)
         for (i = 0; i < v.ballBox; i++)
         {
             struct UiData rd;
@@ -2388,7 +2392,7 @@ static void SummaryScreen(struct UiPack *p, u16 *frame)
                 break;
             memset(&rd, 0, sizeof(rd));
             rd.str[F_NAME] = t;
-            DrawSpec(p, rowSp, &rd, frame, list->x + x, list->y + y, &fit);
+            DrawSpec(p, rowSp, &rd, frame, list->x + x, list->y + (list->h ? y * list->h / 16 : y), &fit);
         }
     }
     else if (list && rowSp && v.page == 5)
