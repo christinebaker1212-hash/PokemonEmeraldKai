@@ -46,6 +46,7 @@
 #include "overworld.h"
 #include "palette.h"
 #include "party_menu.h"
+#include "mp_uistyle.h"
 #include "player_pc.h"
 #include "pokemon.h"
 #include "pokemon_icon.h"
@@ -227,6 +228,8 @@ struct PartyMenuBox
 static EWRAM_DATA struct PartyMenuInternal *sPartyMenuInternal = NULL;
 EWRAM_DATA struct PartyMenu gPartyMenu = {0};
 static EWRAM_DATA struct PartyMenuBox *sPartyMenuBoxes = NULL;
+// Moemon Kai: UI STYLE (mp_uistyle.c) shows a slot's description (ABLE, NOT ABLE, SEALED...) in place of its HP
+static const u8 *sMpSlotDesc[PARTY_SIZE];
 static EWRAM_DATA u8 *sPartyBgGfxTilemap = NULL;
 static EWRAM_DATA u8 *sPartyBgTilemapBuffer = NULL;
 EWRAM_DATA bool8 gPartyMenuUseExitCallback = 0;
@@ -980,6 +983,7 @@ static void DisplayPartyPokemonData(u8 slot)
     }
     else
     {
+        sMpSlotDesc[slot] = NULL;   // (Moemon Kai: UI STYLE: its HP shown)
         sPartyMenuBoxes[slot].infoRects->blitFunc(sPartyMenuBoxes[slot].windowId, 0, 0, 0, 0, FALSE);
         DisplayPartyPokemonNickname(&gPlayerParty[slot], &sPartyMenuBoxes[slot], 0);
         DisplayPartyPokemonLevelCheck(&gPlayerParty[slot], &sPartyMenuBoxes[slot], 0);
@@ -2836,6 +2840,8 @@ static void DisplayPartyPokemonHPBar(u16 hp, u16 maxhp, struct PartyMenuBox *men
 
 static void DisplayPartyPokemonDescriptionText(u8 stringID, struct PartyMenuBox *menuBox, u8 c)
 {
+    if (sPartyMenuBoxes && menuBox >= sPartyMenuBoxes && menuBox < sPartyMenuBoxes + PARTY_SIZE)
+        sMpSlotDesc[menuBox - sPartyMenuBoxes] = c == 2 ? NULL : sDescriptionStringTable[stringID];
     if (c)
     {
         int width = ((menuBox->infoRects->descTextLeft % 8) + menuBox->infoRects->descTextWidth + 7) / 8;
@@ -7464,4 +7470,31 @@ u16 MP_PhoneTmMove(struct Pokemon *mon, u16 item, bool8 *knows)
         return 0;
     }
     return CanMonLearnTMTutor(mon, item, 0) == CAN_LEARN_MOVE ? ItemIdToBattleMoveId(item) : 0;
+}
+
+// Moemon Kai: UI STYLE (mp_uistyle.c): the party screen's state while it's up
+bool8 MP_PartyMenu_GetState(struct MpPartyState *st)
+{
+    u8 i;
+    if (gMain.callback2 != CB2_UpdatePartyMenu || sPartyMenuInternal == NULL || sPartyMenuBoxes == NULL)
+        return FALSE;
+    st->layout = gPartyMenu.layout;
+    st->menuType = gPartyMenu.menuType;
+    st->slot = gPartyMenu.slotId;
+    st->slot2 = gPartyMenu.slotId2;
+    st->action = gPartyMenu.action;
+    st->chooseHalf = sPartyMenuInternal->chooseHalf;
+    st->msgWin = sPartyMenuInternal->windowId[1];
+    st->cancelBall = sPartyMenuInternal->spriteIdCancelPokeball;
+    st->confirmBall = sPartyMenuInternal->spriteIdConfirmPokeball;
+    for (i = 0; i < PARTY_SIZE; i++)
+    {
+        st->monSprite[i] = sPartyMenuBoxes[i].monSpriteId;
+        st->itemSprite[i] = sPartyMenuBoxes[i].itemSpriteId;
+        st->ballSprite[i] = sPartyMenuBoxes[i].pokeballSpriteId;
+        st->statusSprite[i] = sPartyMenuBoxes[i].statusSpriteId;
+        st->desc[i] = sMpSlotDesc[i];
+        st->window[i] = sPartyMenuBoxes[i].windowId;
+    }
+    return TRUE;
 }

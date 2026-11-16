@@ -22,6 +22,8 @@
 #include "battle_main.h"
 #include "field_message_box.h"
 #include "menu.h"
+#include "party_menu.h"
+#include "constants/party_menu.h"
 #include "overworld.h"
 #include "palette.h"
 #include "pokemon.h"
@@ -72,7 +74,7 @@ u8 MP_UiStyle_FromKey(const char *key)
 
 // ---------------------------------------------------------------------------------------------------- the pack
 // (the numbers tools/ui_styles/uipack.py writes)
-enum { OP_IMG = 1, OP_TEXT, OP_BAR, OP_FILL, OP_MSG, OP_LONG, OP_BACKING, OP_IMGSEL, OP_ROWMAP, OP_BLEND };
+enum { OP_IMG = 1, OP_TEXT, OP_BAR, OP_FILL, OP_MSG, OP_LONG, OP_BACKING, OP_IMGSEL, OP_ROWMAP, OP_BLEND, OP_ICON };
 #define FIELD_CODE 0xFD
 #define NFIELDS 96
 #define F_NAME 1
@@ -102,6 +104,11 @@ enum { OP_IMG = 1, OP_TEXT, OP_BAR, OP_FILL, OP_MSG, OP_LONG, OP_BACKING, OP_IMG
 #define C_ALT (1u << 23)
 #define C_MOEWORD (1u << 25)   // the battle's POKéMON command reads MOéMON (OPTIONS > CREATURES)
 #define C_STDCMD (1u << 26)    // the battle's commands are FIGHT, BAG, POKéMON, RUN (a style's own lettering fits)
+#define P_EMPTY (1u << 27)     // a party slot: nobody in it
+#define P_EGG (1u << 28)       // ... an EGG (its name only)
+#define P_DESC (1u << 29)      // ... its description in its HP's place (ABLE, NOT ABLE...)
+#define P_FAINT (1u << 30)     // ... fainted
+#define P_SWITCH (1u << 31)    // ... picked to switch
 #define OP_SIZE 38
 
 struct UiImg { u16 w, h; s16 dx, dy; const u8 *px; const u8 *a; s16 *cols; u16 nCols; };   // (px: u16s, unaligned)
@@ -856,6 +863,8 @@ static void Msg(struct Surf *s, struct UiPack *p, const struct UiOp *op, const s
 static u16 sCanvasPx[DISPLAY_WIDTH * DISPLAY_HEIGHT];
 static u8 sCanvasA[DISPLAY_WIDTH * DISPLAY_HEIGHT];
 
+static bool8 sTextOnly;   // (a spec's words drawn again, over Kai's sprites: DrawSpecText)
+
 // spec SP over FRAME with its top-left at (ax, ay)
 static void DrawSpec(struct UiPack *p, const struct UiSpec *sp, struct UiData *d, u16 *frame, int ax, int ay,
                      const struct MpFadeFit *fit)
@@ -884,6 +893,8 @@ static void DrawSpec(struct UiPack *p, const struct UiSpec *sp, struct UiData *d
         const struct UiOp *op = &sp->ops[k];
         int x, y;
         if ((flags & op->cond) != op->cond || (flags & op->unless))
+            continue;
+        if (sTextOnly && op->kind != OP_TEXT && op->kind != OP_LONG)
             continue;
         if (op->kind == OP_LONG)
         {
@@ -1504,6 +1515,290 @@ static void FieldMessage(struct UiPack *p, u16 *frame)
     DrawSpec(p, sp, &d, frame, 0, 0, &fit);
 }
 
+// only SP's words (a screen's words over Kai's sprites, as the original screens print theirs over their icons)
+static void DrawSpecText(struct UiPack *p, const struct UiSpec *sp, struct UiData *d, u16 *frame,
+                         const struct MpFadeFit *fit)
+{
+    sTextOnly = TRUE;
+    DrawSpec(p, sp, d, frame, 0, 0, fit);
+    sTextOnly = FALSE;
+}
+
+// ---------------------------------------------------------------------------------------------------- full screens
+// A style's own screen (the party...) drawn over the whole frame: Kai's sprites are drawn again over it (some where the
+// style puts them: its ICON ops), and Kai's pop-up windows (a menu of what to do, a question) put back over it as Kai
+// drew them, so everything the screen does stays in reach.
+static u16 sKaiFrame[DISPLAY_WIDTH * DISPLAY_HEIGHT];   // (the frame as Kai drew it, before the style's)
+
+// sprite S drawn over FRAME, moved by (dx, dy)
+static void RedrawSprite(u16 *frame, const struct Sprite *s, int dx, int dy)
+{
+    static const u8 sDims[3][4][2] = {
+        {{8, 8}, {16, 16}, {32, 32}, {64, 64}},
+        {{16, 8}, {32, 8}, {32, 16}, {64, 32}},
+        {{8, 16}, {8, 32}, {16, 32}, {32, 64}},
+    };
+    const u8 *tiles;
+    const u16 *pal;
+    int w, h, x0, y0, px, py;
+    if (!s->inUse || s->invisible || s->mpNoDraw || s->oam.affineMode != ST_OAM_AFFINE_OFF || s->oam.shape > 2
+     || s->oam.bpp != ST_OAM_4BPP || s->oam.objMode == ST_OAM_OBJ_WINDOW)
+        return;
+    w = sDims[s->oam.shape][s->oam.size][0];
+    h = sDims[s->oam.shape][s->oam.size][1];
+    x0 = (s->oam.x >= 256 ? s->oam.x - 512 : s->oam.x) + dx;
+    y0 = (s->oam.y >= 160 ? s->oam.y - 256 : s->oam.y) + dy;
+    tiles = (const u8 *)(OBJ_VRAM0) + s->oam.tileNum * TILE_SIZE_4BPP;
+    pal = (const u16 *)(OBJ_PLTT) + s->oam.paletteNum * 16;
+    for (py = 0; py < h; py++)
+    {
+        int sy = y0 + py, ty = s->oam.matrixNum & ST_OAM_VFLIP ? h - 1 - py : py;
+        if (sy < 0 || sy >= DISPLAY_HEIGHT)
+            continue;
+        for (px = 0; px < w; px++)
+        {
+            int sx = x0 + px, tx = s->oam.matrixNum & ST_OAM_HFLIP ? w - 1 - px : px;
+            u8 v;
+            if (sx < 0 || sx >= DISPLAY_WIDTH)
+                continue;
+            v = tiles[((ty / 8) * (w / 8) + tx / 8) * TILE_SIZE_4BPP + (ty % 8) * 4 + (tx % 8) / 2];
+            v = (tx & 1) ? (v >> 4) : (v & 0xF);
+            if (v)
+                frame[sy * DISPLAY_WIDTH + sx] = pal[v] | 0x8000;
+        }
+    }
+}
+
+// every sprite shown, in the order the GBA draws them (lower priority under), but those in SKIP (their ids + 1)
+static void RedrawSprites(u16 *frame, const u8 *skip, int nSkip)
+{
+    int pr, i, k;
+    for (pr = 3; pr >= 0; pr--)
+        for (i = MAX_SPRITES - 1; i >= 0; i--)
+        {
+            const struct Sprite *sp = &gSprites[i];
+            if (!sp->inUse || sp->invisible || sp->mpNoDraw || sp->oam.priority != pr)
+                continue;
+            for (k = 0; k < nSkip && skip[k] != i + 1; k++)
+                ;
+            if (k == nSkip)
+                RedrawSprite(frame, sp, 0, 0);
+        }
+}
+
+// Kai's window W put back over the frame as Kai drew it, with its frame (a pop-up over a style's screen)
+static void PasteKaiWindow(u16 *frame, u8 w)
+{
+    const struct WindowTemplate *t;
+    int x0, y0, x1, y1, x, y;
+    if (w >= WINDOWS_MAX || gWindows[w].tileData == NULL)
+        return;
+    t = &gWindows[w].window;
+    if (t->bg > 3 || t->width == 0)
+        return;
+    x0 = (t->tilemapLeft - 1) * 8, y0 = (t->tilemapTop - 1) * 8;
+    x1 = (t->tilemapLeft + t->width + 1) * 8, y1 = (t->tilemapTop + t->height + 1) * 8;
+    if (x0 < 0) x0 = 0;
+    if (y0 < 0) y0 = 0;
+    if (x1 > DISPLAY_WIDTH) x1 = DISPLAY_WIDTH;
+    if (y1 > DISPLAY_HEIGHT) y1 = DISPLAY_HEIGHT;
+    for (y = y0; y < y1; y++)
+        for (x = x0; x < x1; x++)
+            frame[y * DISPLAY_WIDTH + x] = sKaiFrame[y * DISPLAY_WIDTH + x];
+}
+
+// where a spec's ICON ops whose conditions hold put Kai's sprites: OUT[a] = (x, y) of the sprite's middle, -1 none
+static void IconPlaces(const struct UiSpec *sp, u32 flags, s16 out[4][2])
+{
+    u16 k;
+    for (k = 0; k < 4; k++)
+        out[k][0] = out[k][1] = -1;
+    for (k = 0; k < sp->nOps; k++)
+    {
+        const struct UiOp *op = &sp->ops[k];
+        if (op->kind != OP_ICON || op->a >= 4 || (flags & op->cond) != op->cond || (flags & op->unless))
+            continue;
+        out[op->a][0] = op->x, out[op->a][1] = op->y;
+    }
+}
+
+static const u8 *Filtered(const u8 *str, u8 *buf, int cap)
+{
+    const u8 *f = MP_TextOpts_Filter(str, WINDOWS_MAX);
+    int n;
+    for (n = 0; n < cap - 1 && f[n] != EOS; n++)
+        buf[n] = f[n];
+    buf[n] = EOS;
+    return buf;
+}
+
+static bool8 PartyScreenShown(struct MpPartyState *st)
+{
+    return MP_UiStyle_Active() != UISTYLE_KAI && MP_PartyMenu_GetState(st) && st->layout == PARTY_LAYOUT_SINGLE;
+}
+
+static void PartyScreen(struct UiPack *p, u16 *frame)
+{
+    struct MpPartyState st;
+    struct UiData d;
+    struct MpFadeFit fit;
+    const struct UiSpec *sp;
+    u8 skip[32], nSkip = 0, i, w;
+    s16 places[PARTY_SIZE][4][2];
+    bool8 popup;
+    static struct UiData sSlotData[PARTY_SIZE];
+    const struct UiSpec *slotSpec[PARTY_SIZE];
+    bool8 waiting;
+
+    if (!PartyScreenShown(&st) || (sp = FindSpec(p, "party")) == NULL)
+        return;
+    memcpy(sKaiFrame, frame, sizeof(sKaiFrame));
+    MP_FadeFit_FromPalette(&fit, BG_PLTT_ID(0));
+    // (a pop-up up: what to do, which move...: Kai's own message window comes back with it, sized for it)
+    for (w = 0, popup = FALSE; w < WINDOWS_MAX; w++)
+    {
+        bool8 own = w == 6 || w == st.msgWin;
+        for (i = 0; i < PARTY_SIZE; i++)
+            own |= w == st.window[i];
+        if (!own && gWindows[w].tileData != NULL && sFramed[w])
+            popup = TRUE;
+    }
+    // the screen: its ground, the message, CANCEL (CONFIRM too while choosing for a battle)
+    memset(&d, 0, sizeof(d));
+    if (st.msgWin < WINDOWS_MAX && !popup)
+    {
+        d.msg[0] = sCap[st.msgWin].text;
+        d.msgLen[0] = sCap[st.msgWin].len;
+        d.msgPrinted[0] = Printed(st.msgWin, &waiting);
+    }
+    if (st.slot == PARTY_SIZE + 1)
+        d.flags |= C_SEL0;
+    else if (st.slot == PARTY_SIZE)
+        d.flags |= C_SEL0 << 1;
+    if (st.chooseHalf)
+        d.flags |= C_ALT;
+    DrawSpec(p, sp, &d, frame, 0, 0, &fit);
+    // each slot
+    for (i = 0; i < PARTY_SIZE; i++)
+    {
+        static u8 sName[PARTY_SIZE][POKEMON_NAME_LENGTH + 12], sLv[PARTY_SIZE][6], sHp[PARTY_SIZE][6],
+                  sMax[PARTY_SIZE][6], sHp3[PARTY_SIZE][6], sMax3[PARTY_SIZE][6], sDesc[PARTY_SIZE][32];
+        struct Pokemon *mon = &gPlayerParty[i];
+        u16 species = GetMonData(mon, MON_DATA_SPECIES);
+        char name[16];
+        snprintf(name, sizeof(name), "party.%d", i);
+        places[i][0][0] = -1;
+        slotSpec[i] = NULL;
+        if ((sp = FindSpec(p, name)) == NULL)
+            continue;
+        memset(&d, 0, sizeof(d));
+        if (species == SPECIES_NONE)
+            d.flags |= P_EMPTY;
+        else
+        {
+            u8 nick[POKEMON_NAME_LENGTH + 12];
+            s32 hp = GetMonData(mon, MON_DATA_HP), maxHp = GetMonData(mon, MON_DATA_MAX_HP);
+            u8 level = GetMonData(mon, MON_DATA_LEVEL);
+            GetMonData(mon, MON_DATA_NICKNAME, nick);
+            nick[POKEMON_NAME_LENGTH] = EOS;
+            StringGet_Nickname(nick);
+            d.str[F_NAME] = Filtered(nick, sName[i], sizeof(sName[i]));
+            Digits(sLv[i], level, 0);
+            Digits(sHp[i], hp, 0);
+            Digits(sMax[i], maxHp, 0);
+            Digits(sHp3[i], hp, 3);
+            Digits(sMax3[i], maxHp, 3);
+            d.str[F_LEVEL] = sLv[i], d.str[F_HP] = sHp[i], d.str[F_MAXHP] = sMax[i];
+            d.str[F_HP3] = sHp3[i], d.str[F_MAXHP3] = sMax3[i];
+            d.frac[F_HPFRAC] = maxHp > 0 ? (s32)(((s64)hp << 16) / maxHp) : 0;
+            d.flags |= level >= 100 ? C_LV3 : level < 10 ? C_LV1 : 0;
+            if (GetMonData(mon, MON_DATA_IS_EGG))
+                d.flags |= P_EGG;
+            else
+            {
+                u8 g = GetMonGender(mon);
+                if (!((species == SPECIES_NIDORAN_F || species == SPECIES_NIDORAN_M)
+                   && StringCompare(nick, gSpeciesNames[species]) == 0))
+                    d.flags |= g == MON_MALE ? C_MALE : g == MON_FEMALE ? C_FEMALE : 0;
+                if (hp == 0)
+                    d.flags |= P_FAINT;
+            }
+            if (st.desc[i])
+            {
+                d.flags |= P_DESC;
+                d.str[F_TEXT0 + 1] = Filtered(st.desc[i], sDesc[i], sizeof(sDesc[i]));
+            }
+        }
+        if (st.statusSprite[i] < MAX_SPRITES && gSprites[st.statusSprite[i]].inUse
+         && !gSprites[st.statusSprite[i]].invisible)
+            d.flags |= C_STATUS;   // (its status shown: some styles put it in the level's place)
+        if (st.slot == i)
+            d.flags |= C_SEL0;
+        if (st.action == PARTY_ACTION_SWITCH && st.slot2 == i && st.slot != i)
+            d.flags |= P_SWITCH;
+        DrawSpec(p, sp, &d, frame, 0, 0, &fit);
+        IconPlaces(sp, d.flags, places[i]);
+        slotSpec[i] = sp;
+        sSlotData[i] = d;
+    }
+    // the party's long messages (WIN_MSG: "... is holding ..."), in the style's message box
+    if (sFramed[6] && (sp = FindSpec(p, "f.msg")) != NULL)
+    {
+        memset(&d, 0, sizeof(d));
+        d.msg[0] = sCap[6].text;
+        d.msgLen[0] = sCap[6].len;
+        d.msgPrinted[0] = Printed(6, &waiting);
+        d.msgHold[0] = waiting;
+        if (waiting)
+            d.flags |= C_WAIT;
+        DrawSpec(p, sp, &d, frame, 0, 0, &fit);
+    }
+    // the sprites: the POKé BALLS the style has its own of stay hidden; each slot's icon, item and status where the
+    // style puts them
+    for (i = 0; i < PARTY_SIZE && nSkip + 3 < (int)sizeof(skip); i++)
+    {
+        skip[nSkip++] = st.monSprite[i] + 1;
+        skip[nSkip++] = st.itemSprite[i] + 1;
+        skip[nSkip++] = st.statusSprite[i] + 1;
+    }
+    RedrawSprites(frame, skip, nSkip);
+    for (i = 0; i < PARTY_SIZE; i++)
+    {
+        static const s8 sItemDx = 4, sItemDy = 10;
+        struct Sprite *mon = st.monSprite[i] < MAX_SPRITES ? &gSprites[st.monSprite[i]] : NULL;
+        s16 mx, my;
+        if (mon == NULL || !mon->inUse || places[i][0][0] < 0)
+            continue;
+        mx = places[i][0][0] - mon->x, my = places[i][0][1] - mon->y;
+        RedrawSprite(frame, mon, mx, my);
+        if (st.itemSprite[i] < MAX_SPRITES)
+        {
+            struct Sprite *it = &gSprites[st.itemSprite[i]];
+            if (places[i][1][0] >= 0)
+                RedrawSprite(frame, it, places[i][1][0] - it->x, places[i][1][1] - it->y);
+            else
+                RedrawSprite(frame, it, places[i][0][0] + sItemDx - it->x, places[i][0][1] + sItemDy - it->y);
+        }
+        if (st.statusSprite[i] < MAX_SPRITES && places[i][2][0] >= 0)
+        {
+            struct Sprite *ss = &gSprites[st.statusSprite[i]];
+            RedrawSprite(frame, ss, places[i][2][0] - ss->x, places[i][2][1] - ss->y);
+        }
+    }
+    for (i = 0; i < PARTY_SIZE; i++)
+        if (slotSpec[i])
+            DrawSpecText(p, slotSpec[i], &sSlotData[i], frame, &fit);
+    // Kai's pop-ups (what to do, which move...) as Kai draws them
+    for (w = 0; w < WINDOWS_MAX; w++)
+    {
+        bool8 own = w == 6 || (w == st.msgWin && !popup);
+        for (i = 0; i < PARTY_SIZE; i++)
+            own |= w == st.window[i];
+        if (!own && gWindows[w].tileData != NULL && sFramed[w])
+            PasteKaiWindow(frame, w);
+    }
+}
+
 // ---------------------------------------------------------------------------------------------------- each frame
 s16 gMpUiHideBg0[4];
 static u8 sDrawing;   // what this frame draws: 1 the battle, 2 the field's message box, 4 START
@@ -1540,6 +1835,24 @@ void MP_UiStyle_PreFrame(void)
     {
         HideHealthboxes(style != UISTYLE_KAI);
         sHid = style != UISTYLE_KAI;
+    }
+    {
+        // (the party's POKé BALLS: a style draws the screen without them; Kai's own come back with KAI)
+        struct MpPartyState st;
+        if (MP_PartyMenu_GetState(&st))
+        {
+            bool8 hide = style != UISTYLE_KAI && st.layout == PARTY_LAYOUT_SINGLE;
+            u8 i;
+            for (i = 0; i < PARTY_SIZE; i++)
+                if (st.ballSprite[i] < MAX_SPRITES)
+                    gSprites[st.ballSprite[i]].mpNoDraw = hide;
+            if (st.cancelBall < MAX_SPRITES)
+                gSprites[st.cancelBall].mpNoDraw = hide;
+            if (st.confirmBall < MAX_SPRITES)
+                gSprites[st.confirmBall].mpNoDraw = hide;
+            if (hide)
+                sDrawing |= 16;
+        }
     }
     if (style == UISTYLE_KAI)
         return;
@@ -1591,4 +1904,6 @@ void MP_UiStyle_Composite(u16 *frame)
         FieldMessage(p, frame);
     if (sDrawing & 4)
         StartMenu(p, frame);
+    if (sDrawing & 16)
+        PartyScreen(p, frame);
 }

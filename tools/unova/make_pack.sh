@@ -67,4 +67,5 @@ python3 -I tools/unova/build_scripts.py unova/black_scripts.pak
 python3 -I tools/unova/build_gfx.py unova/black_gfx.pak
 python3 -I tools/unova/battle_bg.py unova/black_battle.pak
 python3 -I tools/unova/build_musical.py unova/black_musical.pak
+python3 -I tools/ui_styles/build_pack.py "black=$ROM" unova/ui_black.pak   # (OPTIONS > DISPLAY > UI STYLE's BLACK)
 ls -la unova/

@@ -84,6 +84,8 @@ class PTPack:
             g = st.special_glyph(d)
             f.add(0xA1 + d, 8, 0, 0, [[v if v in (1, 2) else 0 for v in r] for r in g])
         f.add(0x00, 8, 0, 0, [])
+        f.add(0xBA, 8, 0, 0, [[v if v in (1, 2) else 0 for v in r] for r in st.special_glyph(10)])       # (/)
+        f.add(0x34, 16, 0, 0, [[v if v in (1, 2) else 0 for v in r] for r in st.special_glyph(11, 16)])  # (Lv.)
         self.fdig = self.p.font('pt.digits', f)
 
     # ---------------------------------------------------------------------------------------------------- helpers
@@ -433,9 +435,95 @@ class PTPack:
             p.spec(sp)
         p.spec(map_spec('start', START_ICONS))
 
+    # ---------------------------------------------------------------------------------------------------- party
+    def party(self):
+        """pt.py party(): Platinum's party screen, its striped ground and six panels two by two (the lead's round,
+        the chosen in its light blue, an empty slot grey), each with its ball, Kai's icon, the name and gender, Lv.
+        and the HP in the special characters (or the status there, as Platinum shows it), the bar's fill; the
+        message box and CANCEL under them"""
+        st, p = self.st, self.p
+        d = os.path.join(R, 'res', 'graphics', 'party_menu')
+        pal = st.jasc(os.path.join(d, 'menu.pal'))
+        ts = st.gray_tiles(os.path.join(d, 'menu_tiles.png'))
+        _, _, bents = st.nscr(os.path.join(d, 'menu.NSCR'))
+        _, _, pents = st.nscr(os.path.join(d, 'menu_panels.NSCR'))
+        ground = Image.new('RGBA', (240, 160), pal[0] + (255,))
+        ground.alpha_composite(st.map_rows(ts, bents, 32, 0, 0, 30, 20, pal))
+        st.message_frame(ground, 2, 17, 20, 2)
+        btn = Image.open(os.path.join(d, 'button.png'))
+        bp, bpx = btn.getpalette(), btn.load()
+        b = Image.new('RGBA', (56, 32), (0, 0, 0, 0))
+        for y in range(32):
+            for x in range(56):
+                v = bpx[x, y]
+                if v:
+                    b.putpixel((x, y), tuple(bp[3 * v:3 * v + 3]) + (255,))
+        b = b.crop(b.getbbox())
+        ground.alpha_composite(b, (238 - b.width, 157 - b.height))
+        sp = U.Spec('party')
+        self.img(sp, 'pt.party.ground', ground)
+        fi, fs = st.FIELD_INK
+        sp.add(U.OP_MSG, x=16, y=136, a=0, h=16, n=1, w=152, e=self.fn + 1, font=self.fm, ink=fi, shadow=fs)
+        # (CANCEL chosen: the D-pad's red corners round the button, as the battle's)
+        bx0, by0 = 238 - b.width, 157 - b.height
+        self.img(sp, 'pt.party.cancel', self.corners_img(b.width, b.height), bx0 - 2, by0 - 2, cond=U.C_SEL0)
+        self.text(sp, 'CANCEL', 238 - b.width // 2, 157 - b.height // 2 - 8, self.fn, (248, 248, 248), (32, 56, 120),
+                  align=2)
+        p.spec(sp)
+        white, dark = pal[15], pal[14]
+        ball = Image.new('RGBA', (32, 32), (0, 0, 0, 0))
+        ball.alpha_composite(st.indexed(os.path.join(d, 'member_ball.png')).crop((0, 0, 32, 32)))
+        ball_id = p.image('pt.party.ball', ball)
+        ys = {y: i for i, y in enumerate(st.PANEL_ROWS)}
+        X = lambda x: x if x < 40 else x - 8  # noqa: E731
+
+        def panel(kind, prow):
+            full = st.map_rows(ts, pents, 32, 0, 6 * kind, 16, 6, pal, prow)
+            fp = full.load()
+            out = Image.new('RGBA', (120, 40), (0, 0, 0, 0))
+            q = out.load()
+            for oy, sy in enumerate(st.PANEL_ROWS):
+                for ox, sx in enumerate(st.PANEL_COLS):
+                    q[ox, oy] = fp[sx, sy]
+            return out
+        fills = []
+        for t, row in zip('gyr', (3, 4, 5)):
+            im = Image.new('RGBA', (48, 4), (0, 0, 0, 0))
+            lite, deep = pal[row * 16 + 9], pal[row * 16 + 10]
+            for yy, c in enumerate((deep, lite, lite, deep)):
+                im.paste(c + (255,), (0, yy, 48, yy + 1))
+            fills.append(p.image('pt.partybar.' + t, im))
+        for slot in range(6):
+            sp = U.Spec('party.%d' % slot)
+            px0, py0 = (slot % 2) * 120, 1 + (slot // 2) * 42
+            kind = 0 if slot == 0 else 1
+            self.img(sp, 'pt.panel.empty', panel(2, 1), px0, py0, cond=U.P_EMPTY)
+            self.img(sp, 'pt.panel.%d' % kind, panel(kind, 3), px0, py0, unless=U.P_EMPTY | U.C_SEL0 | U.P_SWITCH)
+            self.img(sp, 'pt.panel.%d.sel' % kind, panel(kind, 7), px0, py0, cond=U.C_SEL0, unless=U.P_EMPTY)
+            self.img(sp, 'pt.panel.%d.sel' % kind, panel(kind, 7), px0, py0, cond=U.P_SWITCH,
+                     unless=U.P_EMPTY | U.C_SEL0)
+            off, no = U.P_EMPTY, U.P_EMPTY | U.P_EGG
+            no_hp = no | U.P_DESC
+            sp.add(U.OP_BAR, x=px0 + X(64), y=py0 + ys[26], a=U.F_HPFRAC, b=fills[0], c=fills[1], d=fills[2],
+                   unless=no_hp)
+            sp.add(U.OP_IMG, x=px0, y=py0 + ys[14] - 14, a=ball_id, unless=off)
+            sp.add(U.OP_ICON, x=px0 + 26, y=py0 + ys[16] + 2, a=0, unless=off)
+            ny = py0 + ys[11] - 3
+            self.text(sp, '{%d}' % U.F_NAME, px0 + X(48), ny, self.fn, white, dark, unless=off)
+            self.text(sp, '♂', px0 + X(112), ny, self.fn, pal[3], pal[4], cond=U.C_MALE, unless=no)
+            self.text(sp, '♀', px0 + X(112), ny, self.fn, pal[5], pal[6], cond=U.C_FEMALE, unless=no)
+            ly = py0 + ys[35] - 1
+            self.text(sp, '{LV}{%d}' % U.F_LEVEL, px0 + 5, ly, self.fdig, white, dark, unless=no | U.C_STATUS)
+            sp.add(U.OP_ICON, x=px0 + 5 + 16, y=ly + 4, a=2, cond=U.C_STATUS, unless=off)
+            self.text(sp, '{%d}/{%d}' % (U.F_HP3, U.F_MAXHP), px0 + X(60), ly, self.fdig, white, dark, unless=no_hp)
+            self.text(sp, '{%d}' % (U.F_TEXT0 + 1), px0 + X(60), ly - 2, self.fn, white, dark, cond=U.P_DESC,
+                      unless=off)
+            p.spec(sp)
+
     def make(self):
         self.fonts()
         for kind in ('foe1', 'mine1', 'foe2', 'mine2', 'foe3', 'mine3'):
             self.p.spec(self.hud(kind))
         self.panels()
+        self.party()
         return self.p

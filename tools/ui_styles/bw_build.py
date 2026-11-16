@@ -515,8 +515,73 @@ class BWPack:
                 self.img(sp, 'bw.retarc.%d' % ry, arc.crop(ab), ab[0], ab[1], cond=U.C_SEL0 << tabs)
             p.spec(sp)
 
+    # ---------------------------------------------------------------------------------------------------- party
+    def party(self):
+        """bw.py party(): Black's party screen, its ground and six plates two by two (the chosen lit as Black's lead
+        plate, an empty slot's own), each with Kai's icon, the name and gender, the HP bar filled in its colour, Lv
+        and the HP (the status in the level's place, as Black shows it); the balloon with the message and the return
+        button for CANCEL"""
+        st, p = self.st, self.p
+        ground = Image.new('RGBA', (240, 160), (0, 0, 0, 255))
+        bg = st.screen(st.PARTY, 15, 20, 6).crop((0, 0, 256, 192))
+        bg = BW.carve(BW.carve(bg, 'x', 16, 0, 256), 'y', 32, 0, 192)
+        ground.alpha_composite(bg.convert('RGBA'), (0, 0))
+        ground.alpha_composite(st.balloon(168, 24), (0, 136))
+        T = 'a/0/8/3'
+        ret, _, _ = st.cell(T, 21, st.tiles(T, 20), st.pal(T, 19), 1)
+        ret = ret.crop(ret.getbbox())
+        ground.alpha_composite(ret, (240 - 6 - ret.width, 140))
+        sp = U.Spec('party')
+        self.img(sp, 'bw.party.ground', ground)
+        ink, sh = st.INK
+        sp.add(U.OP_MSG, x=10, y=140, a=0, h=16, n=1, w=154, e=self.fs + 1, font=self.fm, ink=ink, shadow=sh)
+        pi, ps = st.PLATE_INK
+        self.text(sp, 'CANCEL', 240 - 10 - ret.width, 141, self.fm, pi, ps, align=1)
+        arc = Image.new('RGBA', (240, 160), (0, 0, 0, 0))
+        rx = 240 - 6 - ret.width
+        st.arcs(arc, rx - 1, 139, rx + ret.width + 1, 141 + ret.height, out=4)
+        ab = arc.getbbox()
+        self.img(sp, 'bw.party.cancel', arc.crop(ab), ab[0], ab[1], cond=U.C_SEL0)
+        p.spec(sp)
+        pw, ph = 120, 44
+        empty_bar = st.party_hp(0.0)
+        P = st.pal('a/0/8/3', 0)
+        fills = []
+        for t, colour in zip('gyr', ((5, 6), (9, 10), (7, 8))):
+            im = Image.new('RGBA', empty_bar.size, (0, 0, 0, 0))
+            for i in range(48):
+                im.putpixel((16 + i, 3), BW.rgb(P[colour[0]]) + (255,))
+                im.putpixel((16 + i, 4), BW.rgb(P[colour[1]]) + (255,))
+            fills.append(p.image('bw.partybar.' + t, im))
+        bar_id = p.image('bw.partybar', empty_bar)
+        plates = {k: p.image('bw.plate.' + k, st.plate(k, pw, ph)) for k in ('lead', 'other', 'empty')}
+        mi, fi = st.MALE_INK, st.FEMALE_INK
+        for i in range(6):
+            sp = U.Spec('party.%d' % i)
+            x, y = (i % 2) * pw, (i // 2) * (ph + 1)
+            off, no = U.P_EMPTY, U.P_EMPTY | U.P_EGG
+            no_hp = no | U.P_DESC
+            sp.add(U.OP_IMG, x=x, y=y, a=plates['empty'], cond=U.P_EMPTY)
+            sp.add(U.OP_IMG, x=x, y=y, a=plates['other'], unless=U.P_EMPTY | U.C_SEL0 | U.P_SWITCH)
+            sp.add(U.OP_IMG, x=x, y=y, a=plates['lead'], cond=U.C_SEL0, unless=U.P_EMPTY)
+            sp.add(U.OP_IMG, x=x, y=y, a=plates['lead'], cond=U.P_SWITCH, unless=U.P_EMPTY | U.C_SEL0)
+            sp.add(U.OP_ICON, x=x + 20, y=y + 20, a=0, unless=off)
+            self.text(sp, '{%d}' % U.F_NAME, x + 38, y + 3, self.fm, pi, ps, unless=off)
+            self.text(sp, '♂', x + 104, y + 3, self.fm, mi[0], mi[1], cond=U.C_MALE, unless=no)
+            self.text(sp, '♀', x + 104, y + 3, self.fm, fi[0], fi[1], cond=U.C_FEMALE, unless=no)
+            sp.add(U.OP_IMG, x=x + 42, y=y + 17, a=bar_id, unless=no_hp)
+            sp.add(U.OP_BAR, x=x + 42, y=y + 17, a=U.F_HPFRAC, b=fills[0], c=fills[1], d=fills[2], unless=no_hp)
+            self.text(sp, 'Lv{%d}' % U.F_LEVEL, x + 8, y + 26, self.fs, pi, ps, unless=no | U.C_STATUS)
+            sp.add(U.OP_ICON, x=x + 8 + 16, y=y + 26 + 6, a=2, cond=U.C_STATUS, unless=off)
+            self.text(sp, '{%d}' % U.F_HP, x + 76, y + 26, self.fs, pi, ps, align=1, unless=no_hp)
+            self.text(sp, '/', x + 77, y + 26, self.fs, pi, ps, unless=no_hp)
+            self.text(sp, '{%d}' % U.F_MAXHP, x + 84, y + 26, self.fs, pi, ps, unless=no_hp)
+            self.text(sp, '{%d}' % (U.F_TEXT0 + 1), x + 42, y + 24, self.fm, pi, ps, cond=U.P_DESC, unless=off)
+            p.spec(sp)
+
     def make(self):
         self.fonts()
         self.huds()
         self.panels()
+        self.party()
         return self.p

@@ -21,8 +21,9 @@ def build(kind, src):
         import fr_build
         return fr_build.FRPack(src).make()
     if kind == 'platinum':
-        import pt_build
         pret, rom = src.split(':', 1) if ':' in src else (src, None)
+        os.environ['POKEPLATINUM'] = pret   # (pt.py reads it as it's imported)
+        import pt_build
         return pt_build.PTPack(pret, rom).make()
     if kind == 'black':
         import bw_build

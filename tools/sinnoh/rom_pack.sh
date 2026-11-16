@@ -1,7 +1,9 @@
 #!/bin/bash
 # SINNOH's pieces the decomp doesn't hold, from the user's Platinum ROM (docs/SINNOH_HANDOFF.md "The user's Platinum
 # ROM"): CANALAVE LIBRARY's TV (sinnoh/platinum_libtv.bin, tools/sinnoh/build_library_tv.py) and the BATTLE FRONTIER's
-# Scratch-Off Cards (sinnoh/platinum_scratch.bin, tools/sinnoh/build_scratch.py). Nothing of the ROM or
+# Scratch-Off Cards (sinnoh/platinum_scratch.bin, tools/sinnoh/build_scratch.py), and OPTIONS > DISPLAY > UI STYLE's
+# PLATINUM (sinnoh/ui_platinum.pak: tools/ui_styles/build_pack.py, from the ROM's fonts and battle backgrounds and
+# pret/pokeplatinum's interface art, tools/ui_styles/fetch_platinum.sh). Nothing of the ROM or
 # what's built from it is in the repository (sinnoh/ is ignored); the release builds it from the PLATINUM_ROM_URL secret
 # and ships it with SINNOH's packs. Without it the game holds the screen dark where the TV would be, and the cards' screen
 # says what it lacks.
@@ -46,3 +48,5 @@ fi
 mkdir -p "$REPO/sinnoh"
 python3 -I "$REPO/tools/sinnoh/build_library_tv.py" "$ROM" "$REPO/sinnoh/platinum_libtv.bin"
 python3 -I "$REPO/tools/sinnoh/build_scratch.py" "$ROM" "$REPO/sinnoh/platinum_scratch.bin"
+"$REPO/tools/ui_styles/fetch_platinum.sh" "$WORK/pokeplatinum_ui"
+python3 -I "$REPO/tools/ui_styles/build_pack.py" "platinum=$WORK/pokeplatinum_ui:$ROM" "$REPO/sinnoh/ui_platinum.pak"

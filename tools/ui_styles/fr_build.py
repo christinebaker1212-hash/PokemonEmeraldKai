@@ -237,9 +237,87 @@ class FRPack:
                 assert st.measure(t) <= 236, ('FireRed help too wide', t)
         p.spec(words_spec(p, 'start', HELP))
 
+    # ---------------------------------------------------------------------------------------------------- party
+    def party(self):
+        """fr.py party(): FireRed's party screen (its bg and slots, the chosen slot in its own colours), the words in
+        its small font where party_menu.h's sPartyBoxInfoRects put them, the HP bar's fill, the message, CANCEL"""
+        import os
+        from PIL import Image as I
+        st, p = self.st, self.p
+        a = st.a
+        bg = I.open(os.path.join(st.g, 'party_menu', 'bg.png'))
+        pal = F.png_pal(bg)
+        tiles = st._tiles(bg, pal, 48)
+        sel = list(pal)
+        for off, idx in zip((4, 5, 6, 1, 7, 8), (116, 117, 118, 97, 103, 104)):
+            sel[48 + off] = pal[idx]
+        sel_tiles = st._tiles(bg, sel, 48)
+
+        def slot(name, w, h, current):
+            d = open(os.path.join(st.g, 'party_menu', name), 'rb').read()
+            ts = sel_tiles if current else tiles
+            im = I.new('RGBA', (w * 8, h * 8), (0, 0, 0, 0))
+            for k, t in enumerate(d[:w * h]):
+                im.alpha_composite(ts[t], ((k % w) * 8, (k // w) * 8))
+            return im
+        ground = I.new('RGBA', (240, 160), (0, 0, 0, 255))
+        ground.paste(a._tilemap('party_menu/bg.png', 'party_menu/bg.bin', pal, 32, 20), (0, 0))
+        st.frame(ground, (0, 128, 184, 160))
+        ink = (pal[48 + 3][:3], pal[48 + 2][:3])
+        male, female = (pal[48 + 11][:3], pal[48 + 12][:3]), (pal[64 + 11][:3], pal[64 + 12][:3])
+        sp = U.Spec('party')
+        self.img(sp, 'fr.party.ground', ground)
+        sp.add(U.OP_MSG, x=8, y=137, a=0, h=16, n=1, w=168, e=self.fs + 1, font=self.fn, ink=F.STD[0],
+               shadow=F.STD[1])
+        self.text(sp, 'CANCEL', 216, 135, ink, 's', align=2)
+        p.spec(sp)
+        # the HP bar's fill colours: green as fr.py's, yellow and red from the battle bar's own tiles (healthbar.pal)
+        def bar_rows(base):
+            t = st.elements[base + 8]
+            return t.getpixel((2, 3))[:3], t.getpixel((2, 4))[:3]
+        tiers = [((90, 213, 131), (115, 255, 172))] + [bar_rows(b) for b in (47, 56)]
+        for i in range(6):
+            sp = U.Spec('party.%d' % i)
+            if i == 0:
+                x, y, rect = 8, 24, (24, 11, 32, 20, 64, 20, 38, 36, 53, 36, 24, 35)
+                icon, status, desc = (16, 40), (50, 52), (12, 34)
+                art = [('main', slot('slot_main.bin', 10, 7, False), slot('slot_main.bin', 10, 7, True))]
+            else:
+                x, y, rect = 96, 8 + (i - 1) * 24, (22, 3, 32, 12, 64, 12, 102, 12, 117, 12, 88, 10)
+                icon, status, desc = (104, 18 + 24 * (i - 1)), (136, 27 + 24 * (i - 1)), (77, 4)
+                art = [('wide', slot('slot_wide.bin', 18, 3, False), slot('slot_wide.bin', 18, 3, True))]
+                self.img(sp, 'fr.slot.empty', slot('slot_wide_empty.bin', 18, 3, False), x, y, cond=U.P_EMPTY)
+            for name, plain, chosen in art:
+                self.img(sp, 'fr.slot.%s' % name, plain, x, y, unless=U.P_EMPTY | U.C_SEL0 | U.P_SWITCH)
+                self.img(sp, 'fr.slot.%s.sel' % name, chosen, x, y, cond=U.C_SEL0, unless=U.P_EMPTY)
+                self.img(sp, 'fr.slot.%s.sel' % name, chosen, x, y, cond=U.P_SWITCH, unless=U.P_EMPTY | U.C_SEL0)
+            nx, ny, lx, ly, gx, gy, hx, hy, mx, my, bx, by = rect
+            off = U.P_EMPTY
+            sp.add(U.OP_ICON, x=icon[0], y=icon[1], a=0, unless=off)
+            sp.add(U.OP_ICON, x=status[0], y=status[1], a=2, unless=off)
+            self.text(sp, '{%d}' % U.F_NAME, x + nx, y + ny, ink, 's', unless=off)
+            no = U.P_EMPTY | U.P_EGG
+            # (Emerald's and FireRed's party: a status in the level's place)
+            self.text(sp, '{LV}{%d}' % U.F_LEVEL, x + lx, y + ly, ink, 's', unless=no | U.C_STATUS)
+            self.text(sp, '♂', x + gx, y + gy, male, 's', cond=U.C_MALE, unless=no)
+            self.text(sp, '♀', x + gx, y + gy, female, 's', cond=U.C_FEMALE, unless=no)
+            no_hp = no | U.P_DESC
+            self.text(sp, '{%d}/' % U.F_HP, x + hx + 20, y + hy, ink, 's', align=1, unless=no_hp)
+            self.text(sp, '{%d}' % U.F_MAXHP, x + mx + 20, y + my, ink, 's', align=1, unless=no_hp)
+            fills = []
+            for t, (deep, lite) in zip('gyr', tiers):
+                im = I.new('RGBA', (48, 3), (0, 0, 0, 0))
+                for k, c in enumerate((deep, lite, lite)):
+                    im.paste(c + (255,), (0, k, 48, k + 1))
+                fills.append(p.image('fr.partybar.%s' % t, im))
+            sp.add(U.OP_BAR, x=x + bx, y=y + by, a=U.F_HPFRAC, b=fills[0], c=fills[1], d=fills[2], unless=no_hp)
+            self.text(sp, '{%d}' % (U.F_TEXT0 + 1), x + desc[0], y + desc[1], ink, 's', cond=U.P_DESC, unless=off)
+            p.spec(sp)
+
     def make(self):
         self.fonts()
         for kind in ('foe', 'mine', 'foe2', 'mine2', 'foe3', 'mine3'):
             self.p.spec(self.hud(kind))
         self.panels()
+        self.party()
         return self.p

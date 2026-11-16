@@ -125,6 +125,9 @@ OP_BACKING = 7    # (a canvas spec) colour ink at alpha A behind the drawn pixel
 OP_IMGSEL = 8     # image A + (the field B's value, a list's row type...) at (x, y)
 OP_ROWMAP = 9     # (a canvas spec) the canvas's rows kept, string A (a byte a row), when it's placed
 OP_BLEND = 10     # image A over (x, y) blended as the DS's BLDALPHA: each pixel its colour plus EVB/16 of what's under
+OP_ICON = 11      # where Kai's sprite A (0 a party slot's POKéMON icon, 1 its held item, 2 its status) goes: its middle
+#                   at (x, y) (the game draws it there; nothing is drawn by the op)
+P_EMPTY, P_EGG, P_DESC, P_FAINT, P_SWITCH = 1 << 27, 1 << 28, 1 << 29, 1 << 30, 1 << 31   # (a party slot's spec)
 F_EXP = 64
 F_HPFRAC = 65
 F_ICON0 = 70           # a list row's icon (START's: the style's map.start of each entry)
@@ -348,7 +351,7 @@ def flow(f, b, maxw):
     return out
 
 
-def render(pack, sp, data, flags, dst=None, at=(0, 0)):
+def render(pack, sp, data, flags, dst=None, at=(0, 0), text_only=False):
     """SP drawn as the game draws it: DATA {field: bytes, a number or a fraction}, FLAGS its condition bits; onto DST
     at AT (a new picture when DST is None). Returns the picture"""
     if dst is None:
@@ -361,6 +364,8 @@ def render(pack, sp, data, flags, dst=None, at=(0, 0)):
     rowmap, place, backing = None, (0, 0), None
     for op in sp.ops:
         if (flags & op.cond) != op.cond or (flags & op.unless):
+            continue
+        if text_only and op.kind not in (OP_TEXT, OP_LONG):
             continue
         if op.kind == OP_LONG:
             f = pack.fonts[op.font]

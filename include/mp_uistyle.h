@@ -39,6 +39,18 @@ void MP_UiStyle_HudExp(u8 battler, s32 exp, s32 expMax);
 bool8 MP_UiStyle_DrawsHealthboxes(void);  // the game's healthbox sprites aren't drawn (CreateBattlerHealthboxSprites)
 void MP_UiStyle_SetChooser(u8 battler);   // the player's battler choosing an action or move now
 
+// the party screen (party_menu.c MP_PartyMenu_GetState): what UI STYLE draws its party from
+struct MpPartyState
+{
+    u8 layout, menuType, action, msgWin;
+    s8 slot, slot2;
+    bool8 chooseHalf;
+    u8 cancelBall, confirmBall;
+    u8 monSprite[6], itemSprite[6], ballSprite[6], statusSprite[6], window[6];
+    const u8 *desc[6];   // (a slot's description in place of its HP: ABLE, NOT ABLE...)
+};
+bool8 MP_PartyMenu_GetState(struct MpPartyState *st);
+
 // the renderer (gba_easy_draw.c): BG0's pixels a style draws in place of, this frame (y0 <= line < y1, x0 <= x < x1)
 extern s16 gMpUiHideBg0[4];
 void MP_UiStyle_PreFrame(void);          // VDraw, before the frame is drawn: what's hidden

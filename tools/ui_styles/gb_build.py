@@ -300,11 +300,59 @@ class GBPack:
                 self.text(sp, '{%d}' % (U.F_TEXT0 + 31), 8, 144)
             p.spec(sp)
 
+    # ---------------------------------------------------------------------------------------------------- party
+    def party(self):
+        """gbstyle.party(): RED / CRYSTAL's list, a row of name and :L and a row of HP: and its numbers each, ▶ on
+        the chosen; the message along the foot (Kai's icons drawn where the list puts them)"""
+        import gbstyle
+        st, p = self.st, self.p
+        sp = U.Spec('party')
+        ground = Image.new('RGBA', (240, 160), st.paper + (255,))
+        st.window(ground, (0, 136, 240, 160))
+        sp.add(U.OP_IMG, a=p.image('party.ground', ground))
+        sp.add(U.OP_MSG, x=8, y=144, a=0, h=16, n=1, w=224, font=self.font, ink=st.ink, shadow=st.mid)
+        p.spec(sp)
+        full = Image.new('RGBA', (240, 24), (0, 0, 0, 0))
+        empty = Image.new('RGBA', (240, 24), (0, 0, 0, 0))
+        st.hp_bar(empty, 48, 0, 0.0)
+        fills = []
+        keep = gbstyle.hp_colour
+        for tier, col in (('g', GREEN), ('y', YELLOW), ('r', RED)):
+            gbstyle.hp_colour = lambda f, g, y, r, col=col: col
+            full = Image.new('RGBA', (240, 24), (0, 0, 0, 0))
+            st.hp_bar(full, 48, 0, 1.0)
+            fills.append(p.image('party.fill.' + tier, diff(full, empty)))
+        gbstyle.hp_colour = keep
+        bar = p.image('party.bar', empty)
+        lv = p.image('lv.party', self.tile_img(0x6E))
+        for i in range(6):
+            y = 2 + 22 * i
+            sp = U.Spec('party.%d' % i)
+            sp.add(U.OP_ICON, x=22, y=y + 9, a=0, unless=U.P_EMPTY)
+            sp.add(U.OP_ICON, x=152, y=y + 6, a=2, unless=U.P_EMPTY)
+            self.text(sp, '▶', 0, y + 2, cond=U.C_SEL0)
+            self.text(sp, '▶', 0, y + 2, cond=U.P_SWITCH)
+            self.text(sp, '{%d}' % U.F_NAME, 40, y + 2, reg=1, unless=U.P_EMPTY)
+            if not self.red:
+                self.text(sp, '♂', 0, y + 2, MALE_INK, cond=U.C_MALE, rel=True, reg=1, unless=U.P_EMPTY | U.P_EGG)
+                self.text(sp, '♀', 0, y + 2, FEMALE_INK, cond=U.C_FEMALE, rel=True, reg=1, unless=U.P_EMPTY | U.P_EGG)
+            # (gbstyle.level: :L and the digits; three digits over the :L, as PrintLevel)
+            sp.add(U.OP_IMG, x=176, y=y + 2, a=lv, unless=U.C_LV3 | U.P_EMPTY | U.P_EGG)
+            self.text(sp, '{%d}' % U.F_LEVEL, 184, y + 2, unless=U.C_LV3 | U.P_EMPTY | U.P_EGG)
+            self.text(sp, '{%d}' % U.F_LEVEL, 176, y + 2, cond=U.C_LV3, unless=U.P_EMPTY | U.P_EGG)
+            no_hp = U.P_EMPTY | U.P_EGG | U.P_DESC
+            sp.add(U.OP_IMG, x=0, y=y + 11, a=bar, unless=no_hp)
+            sp.add(U.OP_BAR, x=0, y=y + 11, a=U.F_HPFRAC, b=fills[0], c=fills[1], d=fills[2], unless=no_hp)
+            self.text(sp, '{%d}/{%d}' % (U.F_HP3, U.F_MAXHP3), 232, y + 11, align=1, unless=no_hp)
+            self.text(sp, '{%d}' % (U.F_TEXT0 + 1), 48, y + 11, cond=U.P_DESC, unless=U.P_EMPTY)
+            p.spec(sp)
+
     def make(self):
         self.fonts()
         for kind in ('foe1', 'mine1', 'foe2', 'mine2', 'foe3', 'mine3'):
             self.p.spec(self.hud(kind))
         self.panels()
+        self.party()
         if not self.red:
             self.p.spec(words_spec(self.p, 'start', ACCOUNT))
         return self.p

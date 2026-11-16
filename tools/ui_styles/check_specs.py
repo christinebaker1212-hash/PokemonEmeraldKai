@@ -1,6 +1,8 @@
 """Draws each style's specs (uipack.py) with the mock-ups' own words and numbers over the same scenes and compares
 them with the approved mock-ups, pixel for pixel: what the game will draw is what was approved.
-usage: check_specs.py KAI_SHOTS STYLE...   (STYLE: red=PRET crystal=PRET firered=PRET platinum=ROM black=ROM)"""
+usage: [MOEMON_EXPORT=DIR] [CHECK_OUT=DIR] check_specs.py KAI_SHOTS STYLE...
+    (STYLE: red=PRET crystal=PRET firered=PRET platinum=PRET:ROM black=ROM; MOEMON_EXPORT adds the party screen)"""
+import os
 import sys
 
 from PIL import Image
@@ -116,12 +118,36 @@ def variants(pack, mock, kind):
             sp = specs.get('hud.%s.%d' % (sk, pos)) if pos is not None else None
             U.render(pack, sp or specs['hud.' + sk], d, f, got, (rects[0], rects[1]))
             out.append((sk, m['name'], compare(got, want)))
-            if compare(got, want) != 'same':
-                got.save('/tmp/claude-0/-home-user/a6424581-b487-50fe-8bae-5e1098371be0/scratchpad/var_%s_%s_%s.png'
-                         % (kind, sk, m['name']))
-                want.save('/tmp/claude-0/-home-user/a6424581-b487-50fe-8bae-5e1098371be0/scratchpad/varw_%s_%s_%s.png'
-                          % (kind, sk, m['name']))
+            if compare(got, want) != 'same' and os.environ.get('CHECK_OUT'):
+                got.save(os.path.join(os.environ['CHECK_OUT'], 'var_%s_%s_%s.png' % (kind, sk, m['name'])))
+                want.save(os.path.join(os.environ['CHECK_OUT'], 'varw_%s_%s_%s.png' % (kind, sk, m['name'])))
     return out
+
+
+def party_screen(pack, export):
+    """the party screen as the game draws it from the pack with the mock-ups' PARTY (each slot's spec, Kai's icons
+    where its ICON ops put them)"""
+    specs = {s.name: s for s in pack.specs}
+    im = Image.new('RGBA', (240, 160), (0, 0, 0, 255))
+    U.render(pack, specs['party'], {U.F_TEXT0: 'Choose a MOéMON.'}, 0, im)
+    for i in range(6):
+        sp = specs.get('party.%d' % i)
+        if sp is None:
+            continue
+        m = C.PARTY[i] if i < len(C.PARTY) else None
+        if m is None:
+            U.render(pack, sp, {}, U.P_EMPTY, im)
+            continue
+        d, f = hud_data(m)
+        d[U.F_HP], d[U.F_MAXHP] = str(m['hp']), str(m['maxhp'])
+        f |= U.C_SEL0 if i == 0 else 0
+        U.render(pack, sp, d, f, im)
+        for op in sp.ops:
+            if op.kind == U.OP_ICON and op.a == 0 and not (op.unless & f):
+                ic = C.creature(export, m['species'], 'icon')
+                C.paste(im, ic, op.x - 16, op.y - 16)
+        U.render(pack, sp, d, f, im, text_only=True)    # (the words over Kai's icons, as the game draws them)
+    return im
 
 
 def compare(a, b):
@@ -144,8 +170,9 @@ def main():
             pack, mock = b.make(), gb_build.GB(kind, src, kai, None)
             got = screens(pack, kai, ('MOéMON', 'database') if kind == 'crystal' else None)
         elif kind == 'platinum':
-            import pt_build
             pret, rom = src.split(':', 1)
+            os.environ['POKEPLATINUM'] = pret   # (pt.py reads it as it's imported)
+            import pt_build
             b = pt_build.PTPack(pret, rom)
             pack, mock = b.make(), pt_build.Platinum(rom, kai, None)
             got = screens(pack, kai, None, icons=[0, 1, 2, 3, 4, 5, 6])
@@ -157,6 +184,10 @@ def main():
             import fr_build
             pack, mock = fr_build.FRPack(src).make(), fr_build.FireRed(src, kai, None)
             got = screens(pack, kai, ('The MOéDEX keeps your record of', 'every MOéMON seen and caught.'))
+        export = os.environ.get('MOEMON_EXPORT')
+        if export and any(sp.name == 'party' for sp in pack.specs):
+            mock.export = export
+            got['party'] = party_screen(pack, export)
         for sk, name, res in variants(pack, mock, kind):
             print(kind, 'variant', sk, name, res)
         for name, im in got.items():
@@ -165,8 +196,8 @@ def main():
                 for x, y in Lo.TRIPLE_FOE_ICONS + Lo.TRIPLE_MINE_ICONS:
                     want.paste(im.crop((x - 1, y - 1, x + 13, y + 13)), (x - 1, y - 1))
             print(kind, name, compare(im, want))
-            im.save('/tmp/claude-0/-home-user/a6424581-b487-50fe-8bae-5e1098371be0/scratchpad/spec_%s_%s.png'
-                    % (kind, name))
+            if os.environ.get('CHECK_OUT'):   # (a folder for the drawn screens, to look at)
+                im.save(os.path.join(os.environ['CHECK_OUT'], 'spec_%s_%s.png' % (kind, name)))
 
 
 if __name__ == '__main__':

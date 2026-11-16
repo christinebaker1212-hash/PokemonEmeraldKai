@@ -46,6 +46,9 @@ cp music/*.kaisong "$P/music/" 2>/dev/null || true
 cp music/kaisong_gains.txt "$P/music/" 2>/dev/null || true   # (every file's gain: tools/kaisong/normalize.py)
 cp music/orre_gains.txt "$P/music/" 2>/dev/null || true      # (Colosseum's songs' gains in ORRE: the same script)
 cp docs/SONG_TABLE.md "$P/music/SONG_TABLE.md"
+# OPTIONS > DISPLAY > UI STYLE's RED, CRYSTAL and FIRERED (uistyle/: tools/ui_styles/build_pack.py, from the pret decomps)
+mkdir -p "$P/uistyle"
+cp uistyle/*.pak "$P/uistyle/"
 # Moemon Maker's published pack (the repository's MoemonMaker/: the user's edits and music) as MoemonMakerPack/, so a
 # fresh install has it without a download (src/platform/updater.c MakerPackWorker keeps it current between releases).
 # The editor's own working copy (MoemonMaker/ beside a game) is never shipped, so an update never touches it.
@@ -65,6 +68,10 @@ fi
 if [ -f sinnoh/platinum_libtv.bin ]; then   # (CANALAVE LIBRARY's TV, from the user's Platinum ROM: tools/sinnoh/rom_pack.sh)
     mkdir -p "$P/sinnoh"
     cp sinnoh/platinum_libtv.bin "$P/sinnoh/"
+fi
+if [ -f sinnoh/ui_platinum.pak ]; then   # (OPTIONS > DISPLAY > UI STYLE's PLATINUM, from the same ROM)
+    mkdir -p "$P/sinnoh"
+    cp sinnoh/ui_platinum.pak "$P/sinnoh/"
 fi
 if [ -f sinnoh/platinum_scratch.bin ]; then   # (the BATTLE FRONTIER's Scratch-Off Cards, from the same ROM)
     mkdir -p "$P/sinnoh"
@@ -88,6 +95,9 @@ if [ -f unova/black3d.pak ] && [ -f unova/black_text.pak ] && [ -f unova/black_s
     cp unova/black3d.pak unova/black_text.pak unova/black_scripts.pak unova/black_gfx.pak "$P/unova/"
     if [ -f unova/black_battle.pak ]; then   # (Black's battle backgrounds: tools/unova/battle_bg.py)
         cp unova/black_battle.pak "$P/unova/"
+    fi
+    if [ -f unova/ui_black.pak ]; then   # (OPTIONS > DISPLAY > UI STYLE's BLACK: tools/ui_styles/build_pack.py)
+        cp unova/ui_black.pak "$P/unova/"
     fi
     if [ -f unova/black_musical.pak ]; then   # (Black's MUSICAL props, shows and performers: tools/unova/build_musical.py)
         cp unova/black_musical.pak "$P/unova/"

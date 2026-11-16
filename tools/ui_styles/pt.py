@@ -21,7 +21,8 @@ import layout as Lo
 from base import Style
 from common import H, W, paste
 
-R = os.environ.get('POKEPLATINUM', '/tmp/claude-0/ppl_sparse')
+# pret/pokeplatinum's res/ (tools/ui_styles/fetch_platinum.sh DIR): POKEPLATINUM=DIR, set before this is imported
+R = os.environ.get('POKEPLATINUM') or os.path.expanduser('~/.cache/moemon/pokeplatinum_ui')
 
 
 def png_indices(path):
