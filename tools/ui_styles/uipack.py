@@ -104,6 +104,9 @@ C_LV1 = 1 << 22         # a level of one digit
 C_ALT = 1 << 23         # the move's info box shows something other than its PP and type (R's view, a gimmick)
 C_MOEWORD = 1 << 25     # the battle's POKéMON command reads MOéMON
 C_STDCMD = 1 << 26      # the battle's commands are FIGHT, BAG, POKéMON, RUN
+C_HELD0 = 1 << 14       # (b.moves) the move held to swap (SELECT), rows 0-3: C_HELD0 << i (C_SEL0's rows 4-7)
+C_CAUGHT = 1 << 27      # (a battle box's spec) a wild foe whose kind the POKéDEX has caught
+C_NOBG = 1 << 28        # (a battle box's spec) OPTIONS > DISPLAY > WHITE BG OFF: no paper behind the box
 C_ROWS0 = 1 << 24       # (a list's rows: drawn row i when i < the rows, the op's N; not a bit)
 
 TYPE_NAMES = ['NORMAL', 'FIGHTING', 'FLYING', 'POISON', 'GROUND', 'ROCK', 'BUG', 'GHOST', 'STEEL', '???', 'FIRE',
@@ -555,3 +558,15 @@ def _bar(dst, pack, op, frac, x, y):
         for cy in range(im.height):
             p[cx, cy] = q[cx, cy]
     _paste(dst, part, x, y)
+
+
+def grey(im):
+    """IM's colours as greys of the same lightness (a held mark beside the chosen one), its alpha kept"""
+    out = im.convert('RGBA').copy()
+    q = out.load()
+    for y in range(out.height):
+        for x in range(out.width):
+            r, g, b, a = q[x, y]
+            v = (r * 30 + g * 59 + b * 11) // 100
+            q[x, y] = (v, v, v, a)
+    return out

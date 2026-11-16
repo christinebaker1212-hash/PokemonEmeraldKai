@@ -26,6 +26,9 @@
 #include "palette.h"
 #include "constants/rgb.h"
 #include "pokemon.h"
+#include "pokedex.h"
+#include "graphics.h"
+const u8 *MP_CaughtBallGfx(void);   // battle_interface.c
 #include "sprite.h"
 #include "string_util.h"
 #include "text.h"
@@ -76,6 +79,8 @@ struct Card
     u8 level;
     u8 status;          // 0 none, 1 PSN, 2 PAR, 3 SLP, 4 FRZ, 5 BRN
     bool8 team;         // the team's card (tail on the left)
+    bool8 caught;       // a wild foe the player has caught before: the caught ball before its HP bar
+    u8 ballX;           // ... where (the card's x)
     s32 hp, maxHp;
     u8 pix[CARD_H][CARD_W];   // TC_* roles
 };
@@ -225,6 +230,12 @@ static void Render(struct Card *c)
         ConvertIntToDecimalStringN(lv + 2, c->level, STR_CONV_MODE_LEFT_ALIGN, 3);
         x = DrawText(c, lv, lx, ROW_LEVEL, right + 1, TC_TEXT);
     }
+    if (c->caught)
+    {
+        // (the caught ball before its HP bar, as the healthbox shows it: the game's own tile, drawn over the card)
+        c->ballX = x;
+        x += 8;
+    }
     DrawBar(c, x + 1, right);
     c->dirty = FALSE;
 }
@@ -293,6 +304,8 @@ void MP_TriCards_Update(u8 battler, struct Pokemon *mon, bool8 hpToo)
     c->level = GetMonData(mon, MON_DATA_LEVEL);
     c->status = StatusOf(GetMonData(mon, MON_DATA_STATUS));
     c->team = GetBattlerSide(battler) == B_SIDE_PLAYER;
+    c->caught = !c->team && !(gBattleTypeFlags & (BATTLE_TYPE_TRAINER | BATTLE_TYPE_WALLY_TUTORIAL))
+             && GetSetPokedexFlag(SpeciesToNationalPokedexNum(GetMonData(mon, MON_DATA_SPECIES)), FLAG_GET_CAUGHT);
     // the gender as on the original healthbox (a NIDORAN♀/♂ under its own name already shows it)
     switch (GetMonGender(mon))
     {
@@ -542,6 +555,20 @@ void MP_TriCards_Composite(u16 *frame)
                     break;
                 }
             }
+        }
+        if (c->caught)
+        {
+            // the caught ball: the healthbox's own tile in its own palette (TryAddPokeballIconToHealthbox), its rows
+            // 1-7 on the level's row and below, under the same fade as the card
+            const u8 *t = MP_CaughtBallGfx();
+            for (py = 0; py < 8; py++)
+                for (px = 0; px < 8; px++)
+                {
+                    int sx = x0 + c->ballX + px, sy = y0 + ROW_LEVEL - 1 + py;
+                    u8 v = (t[py * 4 + px / 2] >> ((px & 1) * 4)) & 0xF;
+                    if (v && sx >= 0 && sx < DISPLAY_WIDTH && sy >= 0 && sy < DISPLAY_HEIGHT)
+                        frame[sy * DISPLAY_WIDTH + sx] = MP_FadeFit_Apply(&fit, gBattleInterface_BallDisplayPal[v]) | 0x8000;
+                }
         }
     }
 }

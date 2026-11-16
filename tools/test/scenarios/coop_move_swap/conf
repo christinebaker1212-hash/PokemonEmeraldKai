@@ -1,0 +1,12 @@
+# co-op wild 2-on-2: ALICE (who joins) swaps two moves with SELECT in the link battle (GROWL in slot 1 and WATER GUN
+# in slot 4), then uses WATER GUN from slot 1 to the battle's end; BOB's game (the battle's master) makes the same swap,
+# and ALICE's MOEMON keeps the new order after the battle
+MODE=2
+WARP=0,16,12,11
+WARP_B=0,16,14,11
+FPS=60
+TMO=400
+ENV_A="MOEMON_DEBUG_PARTY=280:30"
+ENV_B="MOEMON_DEBUG_PARTY=283:30"
+EXPECT_A=("co-op: battle over, outcome 1" "knows: slot 0 = 55 39 45 45")
+EXPECT_B=("co-op: battle over, outcome 1" "swapped moves 0 and 3")

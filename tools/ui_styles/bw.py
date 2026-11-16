@@ -305,6 +305,10 @@ class Black(Style):
             lb = self._bmp(str(m['level']), 3, 2, 0, 5, self.fsub)
             o = 0x480 if side else 0x460
             put(o, lb[0:3]), put(o + 0x100, lb[3:6])
+        if m.get('caught'):
+            # (BTLV_GAUGE_DrawCaughtIcon: the parts' ball, tile 0x360, into the frame's tile 0x120, a foe's gauge in a
+            # wild battle)
+            ts[0x120 // 32] = list(parts[0x360 // 32])
         canvas = Image.new('RGBA', (160, 48), (0, 0, 0, 0))
 
         def at(img_x0_y0, cx, cy):

@@ -835,6 +835,10 @@ void MP_Battle_OnRelay(u8 from, const u8 *data, u16 len)
         if (len >= 4 && gMain.inBattle)
             MP_LifeBattle_OnPeerEmote(data[1], data[2], data[3]);
         break;
+    case MPR_BATTLE_MOVESWAP:
+        if (len >= 4 && gMain.inBattle)
+            MP_Battle_OnMoveSwap(data[1], data[2], data[3]);
+        break;
     case MPR_LINK_SYNC:
         if (len < 4)
             return;

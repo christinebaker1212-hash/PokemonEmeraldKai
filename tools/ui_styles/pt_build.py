@@ -10,6 +10,7 @@ from PIL import Image
 import dsfont
 import layout as Lo
 import uipack as U
+from uipack import grey
 from gb_build import diff, map_spec
 from pt import Art, Platinum, R
 
@@ -202,6 +203,11 @@ class PTPack:
                 for s, gc, gu in (('m', U.C_MALE, 0), ('f', U.C_FEMALE, 0), (None, 0, U.C_MALE | U.C_FEMALE)):
                     sp.add(U.OP_IMG, x=lx, y=wy, a=icons[s], cond=c2 | gc, unless=u2 | gu)
                 self.text(sp, '{%d}' % U.F_LEVEL, lx + 16, wy + 4, self.fdig, ink, sh, cond=c2, unless=u2)
+        if foe:
+            # (healthbox.c HealthBox_DrawCaughtIcon: the parts' caught ball in the bar's row at the box's x 8, a wild
+            # foe's; its top row, which the box loses, a row up)
+            ball = self.tile_img([r[:7] for r in st.part(59)[:7]], 15)
+            self.img(sp, 'pt.caught', ball, fl(8), ys.index(33) - 1, cond=U.C_CAUGHT)
         if k == 'mine':
             hy = ys.index(41) - 1
             gx = fr(S['gauge'])
@@ -234,7 +240,18 @@ class PTPack:
         sp.add(U.OP_BAR, a=U.F_HPFRAC, b=fills[0], c=fills[1], d=fills[2])
         ink = self.col(14)
         nx, ny = got['name']
-        self.text(sp, '{%d}' % U.F_NAME, nx, ny, self.fn, ink, self.col(2), reg=1)
+        self.text(sp, '{%d}' % U.F_NAME, nx, ny, self.fn, ink, self.col(2), reg=1, unless=U.C_CAUGHT if foe else 0)
+        if foe:
+            # (a wild foe's caught ball, the box's own part, before the name, which moves on past it: in KAI's small
+            # letters when it wouldn't leave the gender mark room)
+            ball = self.tile_img([r[:7] for r in st.part(59)[:7]], 15)
+            self.img(sp, 'pt.caught', ball, nx - 1, ny + 4, cond=U.C_CAUGHT)
+            cx = nx - 1 + ball.width + 2
+            sp.add(U.OP_LONG, a=U.F_NAME, font=self.fn, w=w - 3 - 8 - cx, cond=U.C_CAUGHT)
+            self.text(sp, '{%d}' % U.F_NAME, cx, ny, self.fn, ink, self.col(2), reg=1, cond=U.C_CAUGHT,
+                      unless=U.C_LONG)
+            self.text(sp, '{%d}' % U.F_NAME, cx, ny + 1, self.fsmall, ink, self.col(2), reg=1,
+                      cond=U.C_CAUGHT | U.C_LONG)
         for s, gc in (('m', U.C_MALE), ('f', U.C_FEMALE)):
             sp.add(U.OP_IMG, x=1, y=-1, a=p.image('pt.cardicon.' + s, self.icon_img(s, 6)), rel=True, reg=1, cond=gc)
         lx, ly, shadow = got['lv']
@@ -321,6 +338,9 @@ class PTPack:
             sp.add(U.OP_IMGSEL, x=bx, y=by, a=base, b=U.F_ITEM0 + 8 + i)
         for i, (bx, by) in enumerate(spots):
             self.img(sp, 'pt.corners.move', self.corners_img(bw, 22), bx - 2, by - 2, cond=U.C_SEL0 << i)
+            # (the move held to swap with SELECT: its corners grey)
+            self.img(sp, 'pt.corners.held', grey(self.corners_img(bw, 22)), bx - 2, by - 2, cond=U.C_HELD0 << i,
+                     unless=U.C_SEL0 << i)
         for i, (bx, by) in enumerate(spots):
             self.text(sp, '{%d}' % (U.F_ITEM0 + i), bx + bw // 2, by + 4, self.fn, (32, 32, 24), (144, 144, 128),
                       align=2)

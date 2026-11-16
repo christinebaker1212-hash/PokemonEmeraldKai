@@ -1,0 +1,24 @@
+pressuntil A field 5000
+mp moves 0 45 39 45 55
+waitfor online 6000
+waitlog 3000 co-op wild: joining
+pressuntil A action 6000
+wait 30
+press A 2
+wait 20
+press SELECT 2
+wait 10
+press DOWN 2
+wait 10
+press SELECT 2
+wait 10
+shot swapped
+press UP 2
+wait 5
+press LEFT 2
+wait 5
+pressuntillog A 20000 co-op: battle over
+wait 300
+mp moves 0
+wait 10
+quit

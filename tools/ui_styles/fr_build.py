@@ -138,6 +138,9 @@ class FRPack:
         self.text(sp, '♂', 0, ty, F.MALE, 's', rel=True, reg=1, cond=U.C_MALE)
         self.text(sp, '♀', 0, ty, F.FEMALE, 's', rel=True, reg=1, cond=U.C_FEMALE)
         self.text(sp, '{LV}{%d}' % U.F_LEVEL, right, ty, F.HBOX, 's', align=1)
+        if not mine:
+            # (TryAddPokeballIconToHealthbox: B_INTERFACE_GFX_BALL_CAUGHT two tiles before the HP label, a wild foe's)
+            self.img(sp, 'fr.caught', st.elements[70], x0 + end - 64 - 16, y0 + by, cond=U.C_CAUGHT)
         if kind == 'mine':
             # " 56/" at 60 and " 56" at 80, cut at the window's last row (row 30) as the game's are
             self.text(sp, '{%d}/' % U.F_HP3, 60, 19, F.HBOX, 's', h=11)
@@ -165,7 +168,14 @@ class FRPack:
             empty, fills = self.bar_imgs('%s.%d' % (sp.name, n), (w + 8, h + 8), bar)
             self.img(sp, '%s.bar%d' % (sp.name, n), empty, cond=cond, unless=unless)
             sp.add(U.OP_BAR, a=U.F_HPFRAC, b=fills[0], c=fills[1], d=fills[2], cond=cond, unless=unless)
-        self.text(sp, '{%d}' % U.F_NAME, tx, -2, F.HBOX, 's', reg=1)
+        if mine:
+            self.text(sp, '{%d}' % U.F_NAME, tx, -2, F.HBOX, 's', reg=1)
+        else:
+            # (a wild foe's caught ball before the name, which moves on past it)
+            ball = st.elements[70]
+            self.img(sp, 'fr.caught', ball, tx - 1, 0, cond=U.C_CAUGHT)
+            self.text(sp, '{%d}' % U.F_NAME, tx, -2, F.HBOX, 's', reg=1, unless=U.C_CAUGHT)
+            self.text(sp, '{%d}' % U.F_NAME, tx + 7, -2, F.HBOX, 's', reg=1, cond=U.C_CAUGHT)
         self.text(sp, '♂', 0, -2, F.MALE, 's', rel=True, reg=1, cond=U.C_MALE)
         self.text(sp, '♀', 0, -2, F.FEMALE, 's', rel=True, reg=1, cond=U.C_FEMALE)
         self.text(sp, '{LV}{%d}' % U.F_LEVEL, tx, 6, F.HBOX, 's')
@@ -198,6 +208,8 @@ class FRPack:
             x, y = 16 + (i % 2) * 72, 121 + (i // 2) * 16
             self.text(sp, '{%d}' % (U.F_ITEM0 + i), x, y, F.BATTLE, 's')
             self.text(sp, '▶', x - 8, y - 1, F.BATTLE, cond=U.C_SEL0 << i)
+            # (the move held to swap with SELECT: its arrow pale, as the BAG's held item's)
+            self.text(sp, '▶', x - 8, y - 1, (F.BATTLE[1], F.BATTLE[1]), cond=U.C_HELD0 << i, unless=U.C_SEL0 << i)
         self.text(sp, 'PP', 168, 122, F.BATTLE, 's', unless=U.C_ALT)
         self.text(sp, '{%d}/{%d}' % (U.F_PP, U.F_MAXPP), 230, 122, F.BATTLE, align=1, unless=U.C_ALT)
         self.text(sp, 'TYPE/{%d}' % U.F_TYPE, 168, 138, F.BATTLE, 's', unless=U.C_ALT)

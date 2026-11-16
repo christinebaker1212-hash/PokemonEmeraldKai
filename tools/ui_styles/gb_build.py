@@ -111,18 +111,26 @@ class GBPack:
         sp.add(U.OP_TEXT, x=x, y=y, a=self.p.string(s), b=alt, font=self.font, ink=ink or self.st.ink,
                shadow=self.st.mid, cond=cond, unless=unless, rel=rel, reg=reg, align=align, w=w)
 
-    def level(self, sp, x, y, reg=0):
+    def level(self, sp, x, y, reg=0, cond=0, unless=0):
         """PrintLevel: :L and the digits; three digits over the :L"""
         lv = self.p.image('lv', self.tile_img(0x6E))
-        sp.add(U.OP_IMG, x=x, y=y, a=lv, unless=U.C_LV3)
-        self.text(sp, '{%d}' % U.F_LEVEL, x + 8, y, unless=U.C_LV3, reg=reg)
-        self.text(sp, '{%d}' % U.F_LEVEL, x, y, cond=U.C_LV3, reg=reg)
+        sp.add(U.OP_IMG, x=x, y=y, a=lv, cond=cond, unless=unless | U.C_LV3)
+        self.text(sp, '{%d}' % U.F_LEVEL, x + 8, y, cond=cond, unless=unless | U.C_LV3, reg=reg)
+        self.text(sp, '{%d}' % U.F_LEVEL, x, y, cond=cond | U.C_LV3, unless=unless, reg=reg)
 
-    def gender(self, sp, x, y, rel=False, reg=0):
+    def ball(self, sp, x, y, cond=U.C_CAUGHT):
+        """the caught ball: CRYSTAL's own (DrawEnemyHUDBorder puts tile $5D, the expbar's last, at hlcoord 1, 1);
+        RED has none (the first games never marked a caught kind)"""
         if self.red:
             return
-        self.text(sp, '♂', x, y, MALE_INK, cond=U.C_MALE, rel=rel, reg=reg)
-        self.text(sp, '♀', x, y, FEMALE_INK, cond=U.C_FEMALE, rel=rel, reg=reg)
+        im = self.tile_img(0x5D)
+        sp.add(U.OP_IMG, x=x, y=y, a=self.p.image('ball', im), cond=cond)
+
+    def gender(self, sp, x, y, rel=False, reg=0, cond=0, unless=0):
+        if self.red:
+            return
+        self.text(sp, '♂', x, y, MALE_INK, cond=cond | U.C_MALE, unless=unless, rel=rel, reg=reg)
+        self.text(sp, '♀', x, y, FEMALE_INK, cond=cond | U.C_FEMALE, unless=unless, rel=rel, reg=reg)
 
     def hud(self, kind):
         st, red, p = self.st, self.red, self.p
@@ -180,7 +188,14 @@ class GBPack:
                 st.put(exp_full, 0x6A, k, 4, EXP_BLUE)
             frame.alpha_composite(exp_empty)
             exp = p.image('hud.mine1.exp', diff(exp_full, exp_empty))
-        sp.add(U.OP_IMG, a=p.image('hud.%s.frame' % kind, frame))
+        if kind == 'foe2' and not red:
+            # (the caught ball takes the bracket's top tile, sitting on its corner as CRYSTAL's sits over its side)
+            caught = frame.copy()
+            caught.paste((0, 0, 0, 0), (0, 8, 8, 16))
+            sp.add(U.OP_IMG, a=p.image('hud.%s.frame' % kind, frame), unless=U.C_CAUGHT)
+            sp.add(U.OP_IMG, a=p.image('hud.%s.framec' % kind, caught), cond=U.C_CAUGHT)
+        else:
+            sp.add(U.OP_IMG, a=p.image('hud.%s.frame' % kind, frame))
         sp.add(U.OP_BAR, a=U.F_HPFRAC, b=fills[0], c=fills[1], d=fills[2])
         if exp is not None:
             sp.add(U.OP_BAR, a=U.F_EXP, b=exp, c=exp, d=exp, e=1, cond=U.C_EXP)
@@ -193,6 +208,9 @@ class GBPack:
                 self.gender(sp, o[1], o[2], rel=o[3], reg=1)
             elif o[0] == 'hpnum':
                 self.text(sp, '{%d}/{%d}' % (U.F_HP3, U.F_MAXHP3), o[1], o[2])
+        if foe:
+            # (left of the level, where DrawEnemyHUDBorder puts it: hlcoord 1, 1)
+            self.ball(sp, 0, 8)
         # (the rows a full box keeps, and where it sits: KAI's box's side, a pixel in; on the Game Boy's white)
         worst = U.render(p, sp_canvas_only(sp), {U.F_NAME: 'MASQUERAIN', U.F_LEVEL: 100, U.F_HP3: '999',
                                                  U.F_MAXHP3: '999', U.F_HPFRAC: 1.0, U.F_EXP: 1.0},
@@ -201,7 +219,7 @@ class GBPack:
         x = 1 if foe else rw - 1 - cw
         y = (rh - len(keep)) // 2
         sp.add(U.OP_ROWMAP, x=x, y=y, a=p.string(bytes(keep)))
-        sp.add(U.OP_BACKING, a=255, b=1, ink=st.paper)
+        sp.add(U.OP_BACKING, a=255, b=1, ink=st.paper, unless=U.C_NOBG)
         return sp
 
     def card(self, kind, rect):
@@ -220,24 +238,44 @@ class GBPack:
             for k in range(1, 8):
                 st.put(border, 0x76, k, 0)
             st.put(border, 0x77, 8, 0)
-        sp.add(U.OP_IMG, y=20 - (5 if red else 7), a=p.image('hud.%s.border' % kind, border))
-        # (a level of one digit leaves the bar a tile more)
-        for digits, cond, unless in ((1, U.C_LV1, 0), (2, 0, U.C_LV1)):
-            col = 1 + digits + (0 if red else 1)
-            if red:
-                bar = (lambda c, f, colr, col=col: self.gb_bar(c, col, 1, f, 0x6C if foe else 0x6D, 'edge',
-                                                               8 - col - 1, colr))
-            else:
-                bar = (lambda c, f, colr, col=col: self.gb_bar(c, col, 1, f, 0x6B, True, 8 - col - 2, colr))
-            empty, fills = self.bar_specs('hud.%s.%d' % (kind, digits), (72, 20), bar)
-            sp.add(U.OP_IMG, a=p.image('hud.%s.bar%d' % (kind, digits), empty), cond=cond, unless=unless)
-            sp.add(U.OP_BAR, a=U.F_HPFRAC, b=fills[0], c=fills[1], d=fills[2], cond=cond, unless=unless)
-        # (nine tiles hold nine letters; a tenth sets them a pixel closer)
+        if foe and not red:
+            # (a caught kind's ball sits on the bracket's corner, as in CRYSTAL's own box: DrawEnemyHUDBorder)
+            pedestal = border.copy()
+            pedestal.paste((0, 0, 0, 0), (0, 0, 8, 8))
+            st.put(pedestal, 0x74, 0, 0)
+            pedestal.paste((0, 0, 0, 0), (0, 0, 8, 3))   # (the border starts in the level's row: the ball's over that)
+            sp.add(U.OP_IMG, y=20 - 7, a=p.image('hud.%s.border' % kind, border), unless=U.C_CAUGHT)
+            sp.add(U.OP_IMG, y=20 - 7, a=p.image('hud.%s.borderc' % kind, pedestal), cond=U.C_CAUGHT)
+        else:
+            sp.add(U.OP_IMG, y=20 - (5 if red else 7), a=p.image('hud.%s.border' % kind, border))
+        # (a level of one digit leaves the bar a tile more; a wild foe's caught ball goes first on the level's row,
+        # the level and the bar a tile on, CRYSTAL's bar then without its HP: to keep two tiles of gauge)
         self.text(sp, '{%d}' % U.F_NAME, 0, 0, w=72, alt=self.font7 + 1)
-        self.level(sp, 0, 8, reg=1)
-        self.gender(sp, 0, 8, rel=True, reg=1)
+        for caught in ((False, True) if foe and not red else (False,)):
+            k = 1 if caught else 0
+            cc = U.C_CAUGHT if caught else 0
+            cu = U.C_CAUGHT if foe and not red and not caught else 0
+            for digits, cond, unless in ((1, U.C_LV1, 0), (2, 0, U.C_LV1)):
+                col = 1 + digits + (0 if red else 1) + k
+                if red:
+                    bar = (lambda c, f, colr, col=col: self.gb_bar(c, col, 1, f, 0x6C if foe else 0x6D, 'edge',
+                                                                   8 - col - 1, colr))
+                elif caught:
+                    bar = (lambda c, f, colr, col=col: self.gb_bar(c, col, 1, f, 0x6B, False, 8 - col, colr))
+                else:
+                    bar = (lambda c, f, colr, col=col: self.gb_bar(c, col, 1, f, 0x6B, True, 8 - col - 2, colr))
+                tag = 'hud.%s.%d%s' % (kind, digits, 'c' if caught else '')
+                empty, fills = self.bar_specs(tag, (72, 20), bar)
+                sp.add(U.OP_IMG, a=p.image(tag.replace('.%d' % digits, '.bar%d' % digits), empty), cond=cond | cc,
+                       unless=unless | cu)
+                sp.add(U.OP_BAR, a=U.F_HPFRAC, b=fills[0], c=fills[1], d=fills[2], cond=cond | cc,
+                       unless=unless | cu)
+            if caught:
+                self.ball(sp, 0, 8)
+            self.level(sp, 8 * k, 8, reg=1, cond=cc, unless=cu)
+            self.gender(sp, 0, 8, rel=True, reg=1, cond=cc, unless=cu)
         sp.add(U.OP_ROWMAP, x=2 if foe else rw - 2 - 72, y=(rh - 20) // 2, a=p.string(bytes(range(20))))
-        sp.add(U.OP_BACKING, a=255, b=1, ink=st.paper)
+        sp.add(U.OP_BACKING, a=255, b=1, ink=st.paper, unless=U.C_NOBG)
         return sp
 
     # ---------------------------------------------------------------------------------------------------- panels
@@ -272,6 +310,8 @@ class GBPack:
         for i in range(4):
             self.text(sp, '{%d}' % (U.F_ITEM0 + i), 16, 120 + 8 * i)
             self.text(sp, '▶', 8, 120 + 8 * i, cond=U.C_SEL0 << i)
+            # (the move held to swap with SELECT: its arrow in the light ink, as the PACK's held item's)
+            self.text(sp, '▶', 8, 120 + 8 * i, st.mid, cond=U.C_HELD0 << i, unless=U.C_SEL0 << i)
         self.text(sp, 'TYPE/', 168, 120, unless=U.C_ALT)
         self.text(sp, '{%d}' % U.F_TYPE, 176, 128, unless=U.C_ALT)
         self.text(sp, '{%d}/{%d}' % (U.F_PP, U.F_MAXPP), 232, 140, align=1)

@@ -129,6 +129,7 @@ enum
     OPT_PHONE,        // Moemon Co-op: CO-OP > PHONE LINK (A: pairing and the phones, src/mp/mp_phone.c)
     OPT_THEME,        // Moemon Co-op: DISPLAY > THEME DEFAULT / DARK (every window's colors: mp_darktheme.c)
     OPT_UISTYLE,      // Moemon Kai: DISPLAY > UI STYLE KAI / RED / CRYSTAL / FIRERED / PLATINUM / BLACK (mp_uistyle.c)
+    OPT_WHITEBG,      // Moemon Kai: DISPLAY > WHITE BG ON / OFF, RED's and CRYSTAL's battle boxes on white or clear
     OPT_CLOSE,
 };
 #define SC_RULE(opt) ((opt) - OPT_SC_ON)
@@ -297,7 +298,9 @@ static const u8 sText_Back[] = _("BACK");
 static const u8 sText_SpriteScale[] = _("SPRITE SCALING");
 static const u8 sText_Shadows[] = _("SHADOWS");
 static const u8 sText_Theme[] = _("THEME");
+static const u8 sText_WhiteBg[] = _("WHITE BG");
 static const u8 sText_ThemeDefault[] = _("DEFAULT");
+static const u8 sText_ByStyle[] = _("UI STYLE'S");   // (FRAME and THEME while a UI STYLE draws its own windows)
 static const u8 sText_ThemeDark[] = _("DARK");
 static const u8 sText_UiStyle[] = _("UI STYLE");
 static const u8 sText_UiKai[] = _("KAI");
@@ -524,6 +527,8 @@ static void BuildRows(void)
         AddRow(OPT_SHADOWS, 0);
         AddRow(OPT_THEME, 0);
         AddRow(OPT_UISTYLE, 0);
+        if (gMpConfig.uiStyle == UISTYLE_RED || gMpConfig.uiStyle == UISTYLE_CRYSTAL)
+            AddRow(OPT_WHITEBG, 0);   // (the Game Boy styles' own)
         break;
     case TAB_CONTROLS:
         AddRow(OPT_PADSELECT, 0);
@@ -601,12 +606,15 @@ static u8 Choices(u8 row, const u8 **names, u8 *buf)
         return 3;
     case OPT_TYPEICONS: case OPT_FULLSCREEN: case OPT_VSYNC: case OPT_ANALOGRUN: case OPT_RUMBLE: case OPT_SPECPANEL:
     case OPT_FR_SHOW: case OPT_BIKEMUSIC: case OPT_SURFMUSIC: case OPT_CARDSCALE: case OPT_SHADOWS: case OPT_CARDTITLE: case OPT_BGMUTE:
+    case OPT_WHITEBG:
         names[0] = sText_Off, names[1] = sText_On;
         return 2;
     case OPT_ANNOUNCER:
         names[0] = sText_Off, names[1] = sText_English, names[2] = sText_Japanese;
         return 3;
     case OPT_THEME:
+        if (MP_UiStyle_Active() != UISTYLE_KAI)
+            break;   // (a UI STYLE draws its own windows: shown as the style's, below)
         names[MP_MENU_THEME_DEFAULT] = sText_ThemeDefault, names[MP_MENU_THEME_DARK] = sText_ThemeDark;
         return MP_MENU_THEME_COUNT;
     case OPT_UISTYLE:
@@ -704,11 +712,13 @@ static u8 Choices(u8 row, const u8 **names, u8 *buf)
     buf[0] = EOS;
     switch (opt)
     {
+    case OPT_THEME:
+        StringCopy(buf, sText_ByStyle);   // (only reached under a UI STYLE: THEME is KAI's alone)
+        break;
     case OPT_FRAME:
         if (MP_UiStyle_Active() != UISTYLE_KAI)
         {
             // (a UI STYLE draws its own windows: FRAME only for KAI's)
-            static const u8 sText_ByStyle[] = _("UI STYLE'S");
             StringCopy(buf, sText_ByStyle);
         }
         else
@@ -904,6 +914,7 @@ static u8 Current(u8 row)
     case OPT_SHADOWS:     return !gMpConfig.noShadows;
     case OPT_THEME:       return gMpConfig.menuTheme % MP_MENU_THEME_COUNT;
     case OPT_UISTYLE:     return gMpConfig.uiStyle % UISTYLE_COUNT;
+    case OPT_WHITEBG:     return !gMpConfig.uiNoWhiteBg;
     case OPT_BGMUTE:      return gMpConfig.muteInBackground != 0;
     case OPT_ANNOUNCER:   return gMpConfig.noAnnouncer ? 0 : gMpConfig.announcerJp ? 2 : 1;
     case OPT_BADGEFADE:   return MP_TCard_Fade();
@@ -1021,12 +1032,19 @@ static void Change(u8 row, int dir)
         }
         gMpConfig.uiStyle = v;
         MP_UiStyle_Changed();
+        OptionMenu_LoadThemePalettes();   // (THEME is KAI's alone: DARK comes and goes with it)
         break;
     }
     case OPT_THEME:
+        if (MP_UiStyle_Active() != UISTYLE_KAI)
+            break;   // (a UI STYLE draws its own windows)
         gMpConfig.menuTheme = Wrap(gMpConfig.menuTheme + (dir ? dir : 1), MP_MENU_THEME_COUNT);
         MPNet_Log("theme: %s", gMpConfig.menuTheme == MP_MENU_THEME_DARK ? "dark" : "default");
         OptionMenu_LoadThemePalettes();   // seen at once, on this screen too
+        break;
+    case OPT_WHITEBG:
+        gMpConfig.uiNoWhiteBg = !gMpConfig.uiNoWhiteBg;
+        MPNet_Log("ui white bg: %d", !gMpConfig.uiNoWhiteBg);
         break;
     case OPT_SHADOWS:
         gMpConfig.noShadows = !gMpConfig.noShadows;
@@ -1162,6 +1180,7 @@ static const u8 *RowLabel(u8 row, u8 *buf)
     case OPT_SHADOWS: return sText_Shadows;
     case OPT_THEME: return sText_Theme;
     case OPT_UISTYLE: return sText_UiStyle;
+    case OPT_WHITEBG: return sText_WhiteBg;
     case OPT_BGMUTE:  return sText_BgMute;
     case OPT_ANNOUNCER: return sText_Announcer;
     case OPT_BADGEFADE:   return sText_BadgeFade;
@@ -1367,7 +1386,10 @@ static bool8 HintText(u8 *buf)
         };
         snprintf(ascii, sizeof(ascii), "%s", sDesc[gMpConfig.uiStyle % UISTYLE_COUNT]);
     }
-    else if (opt == OPT_THEME)
+    else if (opt == OPT_WHITEBG)
+        snprintf(ascii, sizeof(ascii), "%s", gMpConfig.uiNoWhiteBg ? "THE BATTLE BOXES WITH NOTHING BEHIND THEM"
+                                                                   : "THE BATTLE BOXES ON THE GAME BOY'S WHITE");
+    else if (opt == OPT_THEME && MP_UiStyle_Active() == UISTYLE_KAI)
         snprintf(ascii, sizeof(ascii), "%s", gMpConfig.menuTheme == MP_MENU_THEME_DARK ? "EVERY WINDOW AND MESSAGE IN DARK COLORS"
                                                                                           : "THE GAME'S OWN LIGHT WINDOWS");
     else if (opt == OPT_SHADOWS)
@@ -1387,7 +1409,7 @@ static bool8 HintText(u8 *buf)
     else if (opt == OPT_BGMUTE)
         snprintf(ascii, sizeof(ascii), "%s", gMpConfig.muteInBackground ? "SILENT WHILE ANOTHER WINDOW IS IN FRONT"
                                                                         : "SOUND PLAYS EVEN WHEN NOT IN FOCUS");
-    else if (opt == OPT_FRAME && MP_UiStyle_Active() != UISTYLE_KAI)
+    else if ((opt == OPT_FRAME || opt == OPT_THEME) && MP_UiStyle_Active() != UISTYLE_KAI)
         snprintf(ascii, sizeof(ascii), "THE UI STYLE DRAWS ITS OWN WINDOWS");
     else if (opt == OPT_SURFMUSIC)
         snprintf(ascii, sizeof(ascii), "OFF: THE MAP'S SONG SURFING AND DIVING");
@@ -1924,10 +1946,10 @@ static void Task_OptionMenuProcessInput(u8 taskId)
     // the rows again whenever what they show changed (here or elsewhere)
     if (ShownKey() != sShownKey)
     {
-        if (sTab == TAB_COOP && !sFriendPage)
+        if ((sTab == TAB_COOP && !sFriendPage) || sTab == TAB_DISPLAY)
         {
             u8 count = sRowCount;
-            BuildRows();   // a friend came or went
+            BuildRows();   // a friend came or went (DISPLAY: WHITE BG comes and goes with RED / CRYSTAL)
             if (count != sRowCount)
                 SetScrollArrows();
         }

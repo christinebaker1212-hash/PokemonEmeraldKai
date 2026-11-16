@@ -1136,7 +1136,8 @@ static void HandleInputChooseMove(void)
     }
     else if (JOY_NEW(SELECT_BUTTON))
     {
-        if (gNumberOfMovesToChoose > 1 && !(gBattleTypeFlags & BATTLE_TYPE_LINK))
+        // Moemon Co-op: link battles too (co-op, online): the swap is sent to the others' games (MPR_BATTLE_MOVESWAP)
+        if (gNumberOfMovesToChoose > 1 && (!(gBattleTypeFlags & BATTLE_TYPE_LINK) || MP_Battle_IsActive()))
         {
             MoveSelectionCreateCursorAt(gMoveSelectionCursor[gActiveBattler], 29);
 
@@ -1150,6 +1151,60 @@ static void HandleInputChooseMove(void)
             gBattlerControllerFuncs[gActiveBattler] = HandleMoveSwitching;
         }
     }
+}
+
+// Moemon Co-op: a friend swapped two of their POKéMON's moves with SELECT in a link battle (mp_battle.c
+// MPR_BATTLE_MOVESWAP): the same swap here, as HandleMoveSwitching makes it, in the battle's copy and the party's
+void MP_Battle_OnMoveSwap(u8 battler, u8 a, u8 b)
+{
+    struct Pokemon *mon;
+    u8 bonus[MAX_MON_MOVES], i, t, all;
+    u16 move, pp;
+    if (battler >= gBattlersCount || battler >= MAX_BATTLERS_COUNT || a >= MAX_MON_MOVES || b >= MAX_MON_MOVES || a == b)
+        return;
+    move = gBattleMons[battler].moves[a], gBattleMons[battler].moves[a] = gBattleMons[battler].moves[b];
+    gBattleMons[battler].moves[b] = move;
+    pp = gBattleMons[battler].pp[a], gBattleMons[battler].pp[a] = gBattleMons[battler].pp[b], gBattleMons[battler].pp[b] = pp;
+    for (i = 0; i < MAX_MON_MOVES; i++)
+        bonus[i] = (gBattleMons[battler].ppBonuses >> (i * 2)) & 3;
+    t = bonus[a], bonus[a] = bonus[b], bonus[b] = t;
+    for (all = 0, i = 0; i < MAX_MON_MOVES; i++)
+        all |= bonus[i] << (i * 2);
+    gBattleMons[battler].ppBonuses = all;
+    if (gDisableStructs[battler].mimickedMoves & gBitTable[a])
+    {
+        gDisableStructs[battler].mimickedMoves &= ~gBitTable[a];
+        gDisableStructs[battler].mimickedMoves |= gBitTable[b];
+    }
+    if (gBattleMons[battler].status2 & STATUS2_TRANSFORMED)
+        return;   // (the party's POKéMON keeps its own moves)
+    mon = GetBattlerSide(battler) == B_SIDE_PLAYER ? &gPlayerParty[gBattlerPartyIndexes[battler]]
+                                                   : &gEnemyParty[gBattlerPartyIndexes[battler]];
+    {
+        u16 ma = GetMonData(mon, MON_DATA_MOVE1 + a), mb = GetMonData(mon, MON_DATA_MOVE1 + b);
+        u8 pa = GetMonData(mon, MON_DATA_PP1 + a), pb = GetMonData(mon, MON_DATA_PP1 + b);
+        u8 bon = GetMonData(mon, MON_DATA_PP_BONUSES);
+        for (i = 0; i < MAX_MON_MOVES; i++)
+            bonus[i] = (bon >> (i * 2)) & 3;
+        t = bonus[a], bonus[a] = bonus[b], bonus[b] = t;
+        for (all = 0, i = 0; i < MAX_MON_MOVES; i++)
+            all |= bonus[i] << (i * 2);
+        SetMonData(mon, MON_DATA_MOVE1 + a, &mb);
+        SetMonData(mon, MON_DATA_MOVE1 + b, &ma);
+        SetMonData(mon, MON_DATA_PP1 + a, &pb);
+        SetMonData(mon, MON_DATA_PP1 + b, &pa);
+        SetMonData(mon, MON_DATA_PP_BONUSES, &all);
+    }
+    MPNet_Log("battle: battler %u swapped moves %u and %u", battler, a, b);
+}
+
+// Moemon Kai: UI STYLE (mp_uistyle.c): whether BATTLER is choosing the move to swap with (SELECT), and which it's on
+bool8 MP_BattleMoveSwapping(u8 battler, u8 *to)
+{
+    if (battler >= MAX_BATTLERS_COUNT || gBattlerControllerFuncs[battler] != HandleMoveSwitching)
+        return FALSE;
+    *to = gMultiUsePlayerCursor;
+    return TRUE;
 }
 
 static u32 UNUSED HandleMoveInputUnused(void)
@@ -1292,6 +1347,12 @@ static void HandleMoveSwitching(void)
                 }
 
                 SetMonData(&gPlayerParty[gBattlerPartyIndexes[gActiveBattler]], MON_DATA_PP_BONUSES, &totalPPBonuses);
+            }
+            if (gBattleTypeFlags & BATTLE_TYPE_LINK)
+            {
+                // Moemon Co-op: the others' games swap the same two (the master's battle runs on its copy)
+                u8 msg[4] = {MPR_BATTLE_MOVESWAP, gActiveBattler, gMoveSelectionCursor[gActiveBattler], gMultiUsePlayerCursor};
+                MP_Battle_SendToPeers(msg, sizeof(msg));
             }
         }
 

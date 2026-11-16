@@ -11,6 +11,7 @@ import bw as BW
 import dsfont
 import layout as Lo
 import uipack as U
+from uipack import grey
 from bw import Black, _lines, _rebuild, rgb
 from gb_build import diff
 from pt_build import kai_font, kai_glyph
@@ -233,13 +234,21 @@ class BWPack:
         lvc = {1: (U.C_LV1, 0), 2: (0, U.C_LV1 | U.C_LV3), 3: (U.C_LV3, 0)}
         sp.add(U.OP_LONG, a=U.F_NAME, font=self.fs, w=48)
         gcs = {None: (0, U.C_MALE | U.C_FEMALE), 'm': (U.C_MALE, 0), 'f': (U.C_FEMALE, 0)}
-        for (long, nd, sx) in [(lg, n, g) for lg in (False, True) for n in (1, 2, 3) for g in (None, 'm', 'f')]:
+        # (a wild foe's caught ball, BTLV_GAUGE_DrawCaughtIcon's: left of the name, its own variants of the box)
+        ball = None
+        if foe:
+            plain = self.gauge(side, 0)
+            ball = diff(self.st.gauge(side, 0, dict(name='', sex=None, level=Blank(1), hp=Blank(0), maxhp=Blank(1),
+                                                    exp=0.0, caught=True), numbers=False, name=True), plain)
+        for (long, nd, sx, caught) in [(lg, n, g, c) for lg in (False, True) for n in (1, 2, 3)
+                                       for g in (None, 'm', 'f') for c in ((False, True) if foe else (False,))]:
             nxw = 2 if long else 8
             if True:
                 V = Y[sx]
                 fy, g0, g0u, full, e1, ny = V['fy'], V['g0'], V['g0'], V['full'], V['e1'], V['ny']
-                cond = lvc[nd][0] | (U.C_LONG if long else 0) | gcs[sx][0]
-                unless = lvc[nd][1] | (0 if long else U.C_LONG) | gcs[sx][1]
+                cond = lvc[nd][0] | (U.C_LONG if long else 0) | gcs[sx][0] | (U.C_CAUGHT if caught else 0)
+                unless = lvc[nd][1] | (0 if long else U.C_LONG) | gcs[sx][1] | (U.C_CAUGHT if foe and not caught
+                                                                                  else 0)
                 # (bw.py: where the frame stands, and what's carved, for a name this wide and a level this long)
                 keep = None
                 if foe:
@@ -257,6 +266,10 @@ class BWPack:
                         n = min(over, free - 6)
                         _, keep = carve_keep(g0, 'x', n, 6, free)
                         fx -= max(0, over - n)
+                if caught:
+                    # (the ball at the gauge's x 8; where that's off the screen the box moves in to show it)
+                    bx = fx + (moved(keep, 8) if keep else 8)
+                    fx += max(0, 1 - bx)
                 ox, oy = fx - x0, fy
 
                 def X(x):
@@ -264,7 +277,7 @@ class BWPack:
 
                 def cut(im):
                     return _rebuild(im, 'x', keep) if keep else im
-                tag = '%s.%d%s%s' % (name, nd, 'L' if long else '', sx or '')
+                tag = '%s.%d%s%s%s' % (name, nd, 'L' if long else '', sx or '', 'c' if caught else '')
                 frame = cut(g0)
                 self.img(sp, tag + '.frame', frame, ox, oy, cond=cond, unless=unless)
                 empty = cut(g0u)
@@ -276,6 +289,10 @@ class BWPack:
                     sp.add(U.OP_BAR, x=ox, y=oy, a=U.F_EXP, b=e, c=e, d=e, cond=cond | U.C_EXP, unless=unless)
                 if sx:
                     self.img(sp, tag + '.mark', diff(cut(V['mark']), empty), ox, oy, cond=cond, unless=unless)
+                if caught:
+                    bb = ball.getbbox()
+                    self.img(sp, name + '.ball', ball.crop(bb), X(bb[0]), oy + bb[1], cond=cond,
+                             unless=unless)
                 nx = (16 if foe else 8) + nxw
                 self.text(sp, '{%d}' % U.F_NAME, X(nx), oy + ny, self.fs, self.gink, self.gsh, cond=cond,
                           unless=unless)
@@ -319,7 +336,17 @@ class BWPack:
         # (bw.py: the name row from (1, by - 12), the level after the Lv icon on the bar's white rows)
         bar_h = 11
         by = h - bar_h + 1
-        self.text(sp, '{%d}' % U.F_NAME, 1, by - 12, self.fs, self.gink, self.gsh, reg=1)
+        if foe:
+            # (a wild foe's caught ball before the name, as Black's gauge has it; the name after it)
+            plain = st.gauge(1, 2, dict(blank, name=''), numbers=False, name=True)
+            ball = diff(st.gauge(1, 2, dict(blank, name='', caught=True), numbers=False, name=True), plain)
+            bb = ball.getbbox()
+            ball = ball.crop(bb)
+            self.img(sp, name + '.ball', ball, 1, by - 12 + 4, cond=U.C_CAUGHT)
+            self.text(sp, '{%d}' % U.F_NAME, 1 + ball.width + 2, by - 12, self.fs, self.gink, self.gsh, reg=1,
+                      cond=U.C_CAUGHT)
+        self.text(sp, '{%d}' % U.F_NAME, 1, by - 12, self.fs, self.gink, self.gsh, reg=1,
+                  unless=U.C_CAUGHT if foe else 0)
         mew_end = 1 + dsfont.width(st.fsub, 'MEW')
         for s, gc in (('m', U.C_MALE), ('f', U.C_FEMALE)):
             gpic = genders[s]
@@ -452,6 +479,9 @@ class BWPack:
             ring = rings[i]
             rb = ring.getbbox()
             self.img(sp, 'bw.marc.%d' % i, ring.crop(rb), x0 + rb[0], y0 + rb[1], cond=U.C_SEL0 << i)
+            # (the move held to swap with SELECT: its ring grey)
+            self.img(sp, 'bw.marc.held.%d' % i, grey(ring.crop(rb)), x0 + rb[0], y0 + rb[1], cond=U.C_HELD0 << i,
+                     unless=U.C_SEL0 << i)
         mx0, my0, mx1, my1 = Lo.MOVE_INFO
         self.img(sp, 'bw.ground.info', ground.crop((0, 0, mx1 - mx0, my1 - my0)), mx0, my0)
         info = [p.image('bw.info.%d' % t, self.type_button(k, mx1 - mx0, my1 - my0)) for t, k in enumerate(TYPES)]

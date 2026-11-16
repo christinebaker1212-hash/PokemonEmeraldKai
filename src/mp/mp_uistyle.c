@@ -30,6 +30,7 @@
 #include "bg.h"
 #include "mp_life.h"
 #include "palette.h"
+#include "pokedex.h"
 #include "pokemon.h"
 #include "sprite.h"
 #include "string_util.h"
@@ -149,6 +150,9 @@ enum { OP_IMG = 1, OP_TEXT, OP_BAR, OP_FILL, OP_MSG, OP_LONG, OP_BACKING, OP_IMG
 #define C_ALT (1u << 23)
 #define C_MOEWORD (1u << 25)   // the battle's POKéMON command reads MOéMON (OPTIONS > CREATURES)
 #define C_STDCMD (1u << 26)    // the battle's commands are FIGHT, BAG, POKéMON, RUN (a style's own lettering fits)
+#define C_HELD0 (1u << 14)     // b.moves: the move held to swap (SELECT), C_HELD0 << its row (C_SEL0's rows 4-7)
+#define C_CAUGHT (1u << 27)    // a battle box: a wild foe whose kind the POKéDEX has caught (the ball by its name)
+#define C_NOBG (1u << 28)      // a battle box: OPTIONS > DISPLAY > WHITE BG OFF (RED / CRYSTAL: no paper behind it)
 #define P_EMPTY (1u << 27)     // a party slot: nobody in it
 #define P_EGG (1u << 28)       // ... an EGG (its name only)
 #define P_DESC (1u << 29)      // ... its description in its HP's place (ABLE, NOT ABLE...)
@@ -1489,6 +1493,7 @@ struct Hud
     bool8 used;
     u8 name[POKEMON_NAME_LENGTH + 12];
     u8 level, gender, status;   // (gender 0 none, 1 male, 2 female; status 0 none, 1 PSN 2 PAR 3 SLP 4 FRZ 5 BRN)
+    bool8 caught;               // (a wild foe whose kind is caught: battle_interface.c TryAddPokeballIconToHealthbox)
     s32 hp, maxHp;
     s32 exp, expMax;
 };
@@ -1561,6 +1566,9 @@ void MP_UiStyle_HudUpdate(u8 battler, struct Pokemon *mon, bool8 hpToo)
     default:         h->gender = 0; break;
     }
     species = GetMonData(mon, MON_DATA_SPECIES);
+    h->caught = GetBattlerSide(battler) == B_SIDE_OPPONENT
+             && !(gBattleTypeFlags & (BATTLE_TYPE_TRAINER | BATTLE_TYPE_WALLY_TUTORIAL))
+             && GetSetPokedexFlag(SpeciesToNationalPokedexNum(species), FLAG_GET_CAUGHT);
     if ((species == SPECIES_NIDORAN_F || species == SPECIES_NIDORAN_M) && StringCompare(h->name, gSpeciesNames[species]) == 0)
         h->gender = 0;
     if (hpToo)
@@ -1665,7 +1673,9 @@ static void BattleHuds(struct UiPack *p, u16 *frame)
         d.flags = (h->level >= 100 ? C_LV3 : h->level < 10 ? C_LV1 : 0)
                 | (h->gender == 1 ? C_MALE : h->gender == 2 ? C_FEMALE : 0)
                 | (h->status ? (C_STATUS | (C_PSN << (h->status - 1))) : 0)
-                | (side == B_SIDE_PLAYER ? C_EXP : 0);   // (a style's box shows it where its game does)
+                | (side == B_SIDE_PLAYER ? C_EXP : 0)    // (a style's box shows it where its game does)
+                | (h->caught ? C_CAUGHT : 0)
+                | (gMpConfig.uiNoWhiteBg ? C_NOBG : 0);   // (RED's and CRYSTAL's boxes: OPTIONS > DISPLAY > WHITE BG)
         MP_FadeFit_FromPalette(&fit, OBJ_PLTT_ID(box->oam.paletteNum));
         DrawSpec(p, sp, &d, frame, x, y, &fit);
     }
@@ -1763,8 +1773,12 @@ static void BattlePanel(struct UiPack *p, u16 *frame)
     else if (vofs == DISPLAY_HEIGHT * 2)
     {
         struct ChooseMoveStruct *mi = (struct ChooseMoveStruct *)(&gBattleBufferA[sChooser][4]);
-        u8 cur = gMoveSelectionCursor[sChooser] & 3, i;
-        u16 move = mi->moves[cur];
+        u8 cur = gMoveSelectionCursor[sChooser] & 3, i, to, held = 0xFF;
+        u16 move;
+        // (SELECT's swap: the cursor on the move it would swap with, the held one marked: C_HELD0)
+        if (MP_BattleMoveSwapping(sChooser, &to))
+            held = cur, cur = to & 3;
+        move = mi->moves[cur];
         sp = FindSpec(p, "b.moves");
         for (i = 0; i < 4; i++)
         {
@@ -1780,6 +1794,8 @@ static void BattlePanel(struct UiPack *p, u16 *frame)
             d.val[F_TYPE] = gBattleMoves[move].type;
         }
         d.flags |= C_SEL0 << cur;
+        if (held != 0xFF && held != cur)
+            d.flags |= C_HELD0 << held;
         // (R's view of the move or START's gimmick line in the type's place)
         if (gMpUiMoveTypeAlt)
             d.flags |= C_ALT;
@@ -3080,6 +3096,10 @@ void MP_UiStyle_PreFrame(void)
     if (style != UISTYLE_KAI && (InField() || InBattle()) && GetPack(style) && FindSpec(GetPack(style), "win"))
     {
         // (Kai's pop-ups on BG0: the style draws its own there, PopUps; their frames not drawn under it)
+        // (a pop-up just closed: its window is gone but the screen shows its old tiles a frame or two more, until
+        // the cleared map reaches it; its place stays hidden that long, so KAI's never flashes up as the style's goes)
+        static s16 sPopRect[WINDOWS_MAX][4];
+        static u8 sPopTail[WINDOWS_MAX];
         u8 w, startWin = InField() ? GetStartMenuWindowId() : WINDOW_NONE;
         for (w = 0; w < WINDOWS_MAX && gMpUiHideCount < MP_UI_HIDE_RECTS; w++)
         {
@@ -3087,11 +3107,17 @@ void MP_UiStyle_PreFrame(void)
             s16 *r;
             int side;
             if (w == startWin || !PopUpShown(w) || t->bg != 0)
+            {
+                if (w != startWin && sPopTail[w] && --sPopTail[w])
+                    memcpy(gMpUiHideRects[gMpUiHideCount++], sPopRect[w], sizeof(sPopRect[w]));
                 continue;
+            }
             side = sFramed[w] == 1 ? 24 : 8;
             r = gMpUiHideRects[gMpUiHideCount++];
             r[0] = t->tilemapLeft * 8 - side, r[1] = t->tilemapTop * 8 - 8;
             r[2] = (t->tilemapLeft + t->width) * 8 + side, r[3] = (t->tilemapTop + t->height) * 8 + 8;
+            memcpy(sPopRect[w], r, sizeof(sPopRect[w]));
+            sPopTail[w] = 3;
         }
     }
     if (InBattle() && (style != UISTYLE_KAI || sHid))
@@ -3157,18 +3183,29 @@ void MP_UiStyle_PreFrame(void)
     {
         u8 actions[16], count, cursor;
         const u8 *names[16];
+        // (START just closed: its window is gone but the screen shows its old tiles a frame or two more, until the
+        // cleared map reaches it; KAI's START stays hidden there so it never flashes up as the style's goes)
+        static s16 sStartRect[4];
+        static u8 sStartTail, sMsgTail;
         if (MP_StartMenu_State(actions, &count, &cursor, names) && count)
         {
             // START's window with its frame (menu.c AddStartMenuWindow: from tile (21, 1), 8 wide)
             u8 h = count > 8 ? count * 2 : count * 2 + 2;
             gMpUiHideBg0[0] = 20 * 8, gMpUiHideBg0[1] = 0, gMpUiHideBg0[2] = DISPLAY_WIDTH, gMpUiHideBg0[3] = (h + 2) * 8;
+            memcpy(sStartRect, gMpUiHideBg0, sizeof(sStartRect));
+            sStartTail = 3;
             sDrawing |= 4;
         }
+        else if (sStartTail && --sStartTail)
+            memcpy(gMpUiHideBg0, sStartRect, sizeof(sStartRect));
         else if (FieldMessageShown())
         {
             gMpUiHideBg0[0] = 0, gMpUiHideBg0[1] = 112, gMpUiHideBg0[2] = DISPLAY_WIDTH, gMpUiHideBg0[3] = DISPLAY_HEIGHT;
+            sMsgTail = 3;
             sDrawing |= 2;
         }
+        else if (sMsgTail && --sMsgTail)   // (the message box just closed: the same, its old tiles kept hidden)
+            gMpUiHideBg0[0] = 0, gMpUiHideBg0[1] = 112, gMpUiHideBg0[2] = DISPLAY_WIDTH, gMpUiHideBg0[3] = DISPLAY_HEIGHT;
     }
 }
 

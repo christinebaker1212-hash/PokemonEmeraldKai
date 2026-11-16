@@ -278,6 +278,7 @@ struct MpConfig
     u8 announcerJp;           // ... its voices: 0 ENGLISH (Pokemon Stadium's), 1 JAPANESE (POKEMON STADIUM 2's)
     u8 stadiumStyle;          // OPTIONS > BATTLE > STADIUM SETTINGS > STYLE: STADIUM's screens (MP_STADIUM_STYLE_*)
     u8 uiStyle;               // OPTIONS > DISPLAY > UI STYLE: UISTYLE_* (mp_uistyle.h: KAI, RED, CRYSTAL, FIRERED...)
+    u8 uiNoWhiteBg;           // OPTIONS > DISPLAY > WHITE BG (RED / CRYSTAL): 1 OFF = the battle boxes without their white
     // The options the save itself holds (TEXT SPEED, FRAME...) and the TRAINER CARD's two, kept with the other settings
     // so another save file follows File 1's (save_slots.c; the user, 2026-11-11). gameOptSet: which ones the file has
     u8 gameOpt[16];           // MP_GAMEOPT_*
@@ -537,6 +538,7 @@ void MP_BattleWeather_Composite(u16 *frame);   // mp_battleweather.c: rain, hail
 void MP_BattleWeather_LinkState(u8 *state);       // battle_controllers.c: the master's, for the others' screens
 void MP_BattleWeather_OnLinkState(const u8 *state, u16 size);   // ... the others: the master's weather now
 void MP_BattleWeather_NewBattle(void);           // battle_controllers.c: a battle starts (every game)
+void MP_Battle_OnMoveSwap(u8 battler, u8 a, u8 b);   // battle_controller_player.c: a friend's SELECT move swap (MPR_BATTLE_MOVESWAP)
 void MP_Battle_SendToPeers(const u8 *buf, u16 len);   // mp_battle.c: to every other game in the battle link
 bool8 MP_QuickFadeActive(void);   // palette.c: a whole-screen fade, already 30% quicker, is running
 u16 MP_BattleWeather_FieldFlags(void);          // this game's field weather as a battle's (B_WEATHER_*)
@@ -1380,6 +1382,7 @@ enum {
     MPR_BATTLE_MONEMOTE,   // our Pokémon's battle emote, for the others' screens: u8 battler, icon, happy (mp_life_battle.c)
     MPR_FIGHT_FIRST = 25,  // the VS cabinet: 25 a seat, 26 a challenge, 27 its answer, 28 buttons, 29 the end, 30 addresses, 31 desync recovery (mp_fight.c)
     MPR_RHYTHM_FIRST = 32,     // the DANCE machine: 32 a pad, 33 an ask, 34 its answer, 35 the machine's own (mp_rhythm.c)
+    MPR_BATTLE_MOVESWAP = 36,  // a player swapped two moves (SELECT) in a link battle: u8 battler, a, b (battle_controller_player.c)
     MPR_COOP_BATTLING = 39,    // battling a trainer met on the field: u8 on, mapGroup, mapNum, localId, u16 trainer, u8 joinable (mp_coop.c)
     MPR_SPECTATE_FIRST = 40,   // battle spectating (mp_spectate.c)
     MPR_COOP_FIRST = 60,       // co-op double battles (mp_coop.c)

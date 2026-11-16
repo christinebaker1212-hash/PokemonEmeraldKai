@@ -15,6 +15,7 @@
 #include <string.h>
 #include "global.h"
 #include "mp.h"
+#include "mp_uistyle.h"
 #include "palette.h"
 #include "menu.h"
 #include "text_window.h"
@@ -27,7 +28,8 @@ _Static_assert(sizeof(sDarkFrames) / sizeof(sDarkFrames[0]) == WINDOW_FRAMES_COU
 
 bool8 MP_Theme_Dark(void)
 {
-    return gMpConfig.menuTheme == MP_MENU_THEME_DARK;
+    // (a UI STYLE other than KAI's draws its own windows in its own colors: THEME is KAI's alone)
+    return gMpConfig.menuTheme == MP_MENU_THEME_DARK && MP_UiStyle_Active() == UISTYLE_KAI;
 }
 
 // The palette to load in SRC's place (SRC itself unless DARK is on and it's one of the windows' palettes)

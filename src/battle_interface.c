@@ -1989,6 +1989,12 @@ static void UpdateNickInHealthbox(u8 healthboxSpriteId, struct Pokemon *mon)
     RemoveWindowOnHealthbox(windowId);
 }
 
+// Moemon Kai: the caught ball's own tile (4bpp, gBattleInterface_BallDisplayPal), for the Triple Battle cards (mp_tricards.c)
+const u8 *MP_CaughtBallGfx(void)
+{
+    return GetHealthboxElementGfxPtr(HEALTHBOX_GFX_STATUS_BALL_CAUGHT);
+}
+
 static void TryAddPokeballIconToHealthbox(u8 healthboxSpriteId, bool8 noStatus)
 {
     u8 battler, healthBarSpriteId;
