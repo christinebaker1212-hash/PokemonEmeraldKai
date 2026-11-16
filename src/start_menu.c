@@ -514,7 +514,8 @@ static void RemoveExtraStartMenuWindows(void)
 bool8 MP_StartMenu_State(u8 *actions, u8 *count, u8 *cursor, const u8 **names)
 {
     u8 i;
-    if (GetStartMenuWindowId() == WINDOW_NONE || sInitStartMenuData[0] < 5 || sNumStartMenuActions == 0
+    // (from its window's first frame, its actions built: a UI STYLE's START menu whole while Kai's prints its rows)
+    if (GetStartMenuWindowId() == WINDOW_NONE || sInitStartMenuData[0] < 3 || sNumStartMenuActions == 0
      || sNumStartMenuActions > ARRAY_COUNT(sCurrentStartMenuActions))
         return FALSE;
     for (i = 0; i < sNumStartMenuActions; i++)

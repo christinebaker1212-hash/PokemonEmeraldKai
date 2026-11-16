@@ -1357,6 +1357,15 @@ static void DrawScanline(uint16_t *pixels, uint16_t vcount)
     }
     if (REG_DISPCNT & DISPCNT_OBJ_ON)
         DrawSprites(&scanline, vcount, windowsEnabled);
+    // Moemon Kai: UI STYLE: where the style's box takes BG0's place, the sprites BG0 covered stay covered (Kai's box
+    // was opaque; a style's may be see-through, as BLACK's battle box is)
+    if ((REG_DISPCNT & DISPCNT_OBJ_ON) && (REG_DISPCNT & DISPCNT_BG0_ON) && gMpUiHideBg0[2] > gMpUiHideBg0[0]
+     && vcount >= gMpUiHideBg0[1] && vcount < gMpUiHideBg0[3])
+    {
+        for (int p = scanline.bgtoprio[0] + 1; p < 4; p++)   // (a sprite at BG0's own priority is in front of it)
+            for (int x = gMpUiHideBg0[0] < 0 ? 0 : gMpUiHideBg0[0]; x < gMpUiHideBg0[2] && x < DISPLAY_WIDTH; x++)
+                scanline.spriteLayers[p][x] = 0;
+    }
 
     memset(&gMpPixelObjPal[vcount * DISPLAY_WIDTH], 0, DISPLAY_WIDTH);
     //iterate trough every priority in order

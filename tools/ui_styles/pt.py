@@ -532,8 +532,14 @@ class Platinum(Style):
         return out
 
     def type_icon(self, kind):
+        """the type (or contest) icon, its colour 0 (the pill's corners and top and bottom rows) black and its
+        sides closed in black too, so the outline goes all the way round"""
         im = Image.open(os.path.join(R, 'res', 'graphics', 'battle', 'type_icons', kind.lower() + '.png'))
-        return im.convert('RGBA')
+        im = im.convert('RGBA')
+        for y in range(1, im.height - 1):
+            for x in (0, im.width - 1):
+                im.putpixel((x, y), (0, 0, 0, 255))
+        return im
 
     def move_panel(self, im):
         """the moves: Platinum's four buttons, each its type's colours, two by two where KAI has its four; beside
@@ -1032,12 +1038,23 @@ class Platinum(Style):
                     c = layer[sx, sy]
                     if c[3]:
                         im.putpixel((104 + ox, oy), c)
-        # the bag beside the label, on the pedestal
-        bag = self.indexed(os.path.join(d, 'bag_sprite_male.png')).crop((0, 64, 64, 128))
-        bag = bag.crop(bag.getbbox())
         Ly = {sy: i for i, sy in enumerate(rows)}
-        paste(im, bag, 72 - bag.width // 2, Ly[76] - bag.height)
         return im, Ly
+
+    def bag_pictures(self, Ly, female=False):
+        """the bag beside the label, on the pedestal, for each of KAI's eight pockets: bag_sprite_male's frame for
+        the pocket (bag/main.c sets the bag's animation to the pocket's type, POCKET_ITEMS ... POCKET_KEY_ITEMS, one
+        64 x 64 frame each; the player's own: bag_sprite_female for a girl), all cut to the frames' common box; ([(picture, x, y)] in KAI's pocket order)"""
+        d = os.path.join(R, 'res', 'graphics', 'bag')
+        sheet = self.indexed(os.path.join(d, 'bag_sprite_female.png' if female else 'bag_sprite_male.png'))
+        frames = [sheet.crop((0, 64 * k, 64, 64 * k + 64)) for k in range(8)]
+        boxes = [f.getbbox() for f in frames]
+        box = (min(b[0] for b in boxes), min(b[1] for b in boxes), max(b[2] for b in boxes), max(b[3] for b in boxes))
+        out = []
+        for k in self.POCKET_ORDER:
+            bag = frames[k].crop(box)
+            out.append((bag, 72 - bag.width // 2, Ly[76] - bag.height))
+        return out
 
     POCKET_ORDER = [0, 1, 2, 3, 4, 6, 7, 5]   # (KAI's eight on Platinum's icons: FAVORITES has MAIL's envelope)
 
@@ -1072,6 +1089,8 @@ class Platinum(Style):
         paste(im, ground, 0, 0)
         dark, lite = (16, 24, 32), (172, 189, 189)
         cur = POCKETS.index(BAG_POCKET)
+        bag, bx, by = self.bag_pictures(Ly)[cur]
+        paste(im, bag, bx, by)
         for i, (grey, red) in enumerate(self.pocket_icons()):
             paste(im, red if i == cur else grey, 4 + 12 * i, Ly[90] - 2)
         self.text(im, 52, Ly[106], BAG_POCKET, dark, lite, align='c')
@@ -1084,8 +1103,9 @@ class Platinum(Style):
             self.text(im, 116, y, n, dark, lite)
             self.text(im, 196, y, 'x', dark, lite)
             self.text(im, 226, y, str(q), dark, lite, align='r')
-        self.text(im, 226, ly0 + 16 * 4 + 2, 'START  SORT', (106, 139, 180), (164, 180, 205), align='r')
-        paste(im, self.list_arrow(False), 108, ly0 + 16 * 4)     # (CLOSE BAG below)
+        self.text(im, 22, 20, 'START', dark, lite, align='c')
+        self.text(im, 22, 34, 'SORT', dark, lite, align='c')
+        self.text(im, 116, ly0 + 16 * len(BAG_ITEMS), 'CLOSE BAG', dark, lite)
         # the description band
         ic = item_icon(self.export, 13)
         if ic:

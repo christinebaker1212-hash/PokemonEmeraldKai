@@ -7841,5 +7841,23 @@ docs/ui_styles/UI_STYLES.md ("Building it" for the game's side).
   box at the screen's foot is the style's message box. A message ending on its last \p keeps that page up (Msg).
 - KAI's button icons and extra symbols ({PLUS}, {LV_2}, PP, ID...) are the style's letters (KeypadWord, SymbolWord).
 - Fields past 160: F_CREATURES (1 when the game says POKéMON) for BLACK's re-spelt title.
-Tests: ui_style_battles, ui_style_screens; tools/ui_styles/check_specs.py.
+- 1.200.3 (the user's fix list, 2026-11-16):
+  - A pop-up is redrawn in the style's letters only when every line fits (PopUps lays them out first: inside the
+    window, clear of each other at the font's height) and nothing is drawn into it but words: a picture blitted into
+    it (window.c MP_UiStyle_WindowPicture; the text printer's own ▼ and button icons don't count: gMpUiTextBlit) or a
+    sprite shown over it (SpritesOver, the CO-OP menu's icons) keeps KAI's inside as KAI laid it out (KaiInside: the
+    window's pixels in its palette on the style's paper, its sprites drawn again) in the style's frame. So nothing a
+    style draws runs over a window, and the CO-OP menu keeps its icons and layout in every style.
+  - Words longer than a style's box page by themselves as KAI's own descriptions do (AutoPage: the first page 210
+    frames, each after 150): the BAG's description, the summary's Ability and move words.
+  - The BAG's picture is the pocket's and the player's: C_FEMALE set from the player's gender, each style's own per
+    pocket (FIRERED item_menu_icons.c's frames, the TM CASE disc, the BERRY POUCH; CRYSTAL pack.asm's PackGFX frames,
+    KRIS's pink pack; PLATINUM bag_sprite_male / female by pocket type; BLACK HILBERT's bag / HILDA's tote cells).
+  - OP_MSG ALIGN 2 / 3 centres each line (3 on the 8-pixel grid; CRYSTAL's long pocket name on two lines, OP_MSG 1);
+    the summary's POKé BALL lines snap to a list's N-pixel rows when N > 1 and its ball goes where ICON 4 says (BLACK).
+  - START is reported to a style from its window's first frame (start_menu.c MP_StartMenu_State, step 3), so the
+    style's START shows whole at once instead of KAI's rows printing first.
+  - The controller-only buttons (LT, RT, LS, RS, the west / north face buttons) are letters too, named for the pad in
+    hand (KeypadWord).
+Tests: ui_style_battles, ui_style_screens, ui_style_dpad; tools/ui_styles/check_specs.py.
 

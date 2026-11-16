@@ -733,6 +733,63 @@ class Black(Style):
                     q[x - X0, y - Y0] = p[x, y]
         return word
 
+    @staticmethod
+    def ring(mask, avoid=None):
+        """a cursor ring two pixels wide round MASK's shape (four-way steps out from it), inside MASK's own
+        rectangle's picture: the light pink against the button, the dark pink outside it"""
+        w, h = mask.size
+        m = mask.load()
+        out = Image.new('RGBA', (w, h), (0, 0, 0, 0))
+        q = out.load()
+        inner = set((x, y) for y in range(h) for x in range(w) if m[x, y])
+        d1 = set()
+        for (x, y) in inner:
+            for dx, dy in ((1, 0), (-1, 0), (0, 1), (0, -1)):
+                n = (x + dx, y + dy)
+                if 0 <= n[0] < w and 0 <= n[1] < h and n not in inner:
+                    d1.add(n)
+        d2 = set()
+        for (x, y) in d1:
+            for dx, dy in ((1, 0), (-1, 0), (0, 1), (0, -1), (1, 1), (-1, 1), (1, -1), (-1, -1)):
+                n = (x + dx, y + dy)
+                if 0 <= n[0] < w and 0 <= n[1] < h and n not in inner and n not in d1:
+                    d2.add(n)
+        a = avoid.load() if avoid is not None else None   # (never over a neighbouring button)
+        for (x, y) in d1:
+            if not (a and a[x, y]):
+                q[x, y] = (248, 104, 168, 255)
+        for (x, y) in d2:
+            if not (a and a[x, y]):
+                q[x, y] = (176, 24, 96, 255)
+        return out
+
+    def command_rings(self, w, h):
+        """the four commands' cursor rings in a W x H panel (battle_menu's places), each round its button's shape and
+        never over another button"""
+        bh, cols = 22, [(1, 74), (76, 43)]
+        place = {'FIGHT': (0, 0), 'BAG': (1, 0), 'MOéMON': (0, 1), 'RUN': (1, 1)}
+        masks, union = {}, Image.new('L', (w, h), 0)
+        for key, (c, rr) in place.items():
+            bx, bw_ = cols[c]
+            by = 0 if rr == 0 else h - bh
+            m = Image.new('L', (w, h), 0)
+            m.paste(self.command_button(bw_, bh).split()[3].point(lambda a: 255 if a else 0), (bx, by))
+            masks[key] = m
+            union.paste(255, (0, 0), m)
+        return {k: self.ring(m, union) for k, m in masks.items()}
+
+    def move_rings(self, w, h, bw_, bh_):
+        """the four move buttons' cursor rings in a W x H panel, two by two"""
+        shape = self.move_button('NORMAL', bw_, bh_).split()[3].point(lambda a: 255 if a else 0)
+        union = Image.new('L', (w, h), 0)
+        masks = []
+        for i in range(4):
+            m = Image.new('L', (w, h), 0)
+            m.paste(shape, ((i % 2) * bw_, (i // 2) * bh_))
+            masks.append(m)
+            union.paste(255, (0, 0), m)
+        return [self.ring(m, union) for m in masks]
+
     def battle_menu(self, im, r=Lo.BATTLE_MENU):
         """Black's command screen in KAI's room for it: its four commands on Black's white-edged mesh buttons (the
         touch screen's long button cut down, ends kept), FIGHT! / BAG over MOéMON / RUN as KAI orders them, on the
@@ -760,8 +817,8 @@ class Black(Style):
             out.alpha_composite(wd, (bx + (bw_ - wd.width) // 2, by + (bh - wd.height + 1) // 2))
             rects[key] = (bx, by, bx + bw_, by + bh)
         paste(im, out, x0, y0)
-        a, b, c, d = rects['FIGHT']
-        self.arcs(im, x0 + a, y0 + b, x0 + c, y0 + d, out=4)
+        # (the cursor on FIGHT!: a pink ring round the button's own shape)
+        im.alpha_composite(self.command_rings(w, h)['FIGHT'], (x0, y0))
 
     # the move buttons (btlv_input.c BTLV_INPUT_DrawWazaButtons): a type's palette (overlay 94's d_0220A5F0) into
     # the button's palette row; the type icons (a/0/8/3: 0x22 + type, cell 0x3B, palette 0x21 at the row
@@ -818,7 +875,7 @@ class Black(Style):
             paste(im, self.move_button(kind, bw_, bh_), bx, by)
             # (Black's small letters: the cut-down button's inside is ten rows, its main font's eleven)
             self.text(im, bx + bw_ // 2, by + 5, n, ink, sh, 's', 'c')
-        self.arcs(im, x0, y0, x0 + bw_, y0 + bh_, out=4)
+        im.alpha_composite(self.move_rings(x1 - x0, y1 - y0, bw_, bh_)[0], (x0, y0))
         # (the chosen move's own row from its button: the type's icon and its PP, on the same button)
         x0, y0, x1, y1 = Lo.MOVE_INFO
         n, pp, mx, kind = MOVES[0]
@@ -1050,7 +1107,8 @@ class Black(Style):
         ti, ts_ = self.TEAL
         lab = self.SUMMARY_TABS[k]
         self.text(bar, 236, 2, lab, ti, ts_, 's', 'r')
-        x0 = min(152, 236 - self.measure(lab, 's') - 42)
+        # (the dots in one place on every page: before the longest page name's room)
+        x0 = 236 - max(self.measure(t, 's') for t in self.SUMMARY_TABS) - 42
         for j in range(6):
             cx = x0 + j * 7
             for dy in range(3):
@@ -1125,12 +1183,17 @@ class Black(Style):
     # animations' first cells: each pocket's cell when not chosen and when chosen; Black has no POKé BALLS, BATTLE
     # ITEMS or FAVORITES pocket: those take the X menu's POKé BALL, the battle BAG's BATTLE ITEMS mark and the
     # registered item's check)
+    BAG_PIC_Y = 57       # (the pocket's picture centred here: the ITEMS bag, 82 tall, whole between the name and
+    BAG_MARKS_Y = 99     # the marks; the touch bar's << >> beside it, the marks under it, over the balloon's top)
     POCKET_CELLS = {'ITEMS': (4, 9), 'MEDICINE': (2, 7), 'TMs & HMs': (3, 8), 'BERRIES': (1, 6), 'KEY ITEMS': (0, 5)}
 
-    def pocket_icon(self, name, chosen):
+    def pocket_icon(self, name, chosen, female=False):
+        """the pocket's own picture as Black's BAG draws it (the player's: HILBERT's bag cells 0x0E on tiles 0x0F,
+        palette 0x10; HILDA's tote cells 0x0A on tiles 0x0B, palette 0x0C, in the same order)"""
         A = self.BAG
         if name in self.POCKET_CELLS:
-            im, _, _ = self.cell(A, 0x0E, self.tiles(A, 0x0F), self.pal(A, 0x10), self.POCKET_CELLS[name][chosen])
+            c, t, pl = (0x0A, 0x0B, 0x0C) if female else (0x0E, 0x0F, 0x10)
+            im, _, _ = self.cell(A, c, self.tiles(A, t), self.pal(A, pl), self.POCKET_CELLS[name][chosen])
         elif name == 'POKé BALLS':
             im, _, _ = self.cell(self.XMENU, 23, self.tiles(self.XMENU, 8), self.pal(self.XMENU, 1))
         elif name == 'BATTLE ITEMS':
@@ -1159,19 +1222,19 @@ class Black(Style):
         # marks under it between the touch bar's << and >>)
         self.text(im, 52, 4, BAG_POCKET, lab, lsh, 'n', 'c')
         ic = self.pocket_icon(BAG_POCKET, True)
-        paste(im, ic, 52 - ic.width // 2, 50 - ic.height // 2)
+        paste(im, ic, 52 - ic.width // 2, self.BAG_PIC_Y - ic.height // 2)
         T = 'a/0/8/3'
         for k, frame in ((0, 4), (1, 5)):
             ar, _, _ = self.cell(T, 21, self.tiles(T, 20), self.pal(T, 19), frame)
             ar = ar.crop(ar.getbbox())
-            paste(im, ar, 4 if k == 0 else 100 - ar.width, 84 - ar.height // 2)
+            paste(im, ar, 4 if k == 0 else 100 - ar.width, self.BAG_PIC_Y - ar.height // 2)
         cur = POCKETS.index(BAG_POCKET)
         for i in range(len(POCKETS)):
             x = 52 - (len(POCKETS) * 7) // 2 + i * 7
             for dy in range(4):
                 for dx in range(4):
                     if i == cur or dx in (0, 3) or dy in (0, 3):
-                        im.putpixel((x + dx, 82 + dy), lab + (255,))
+                        im.putpixel((x + dx, self.BAG_MARKS_Y + dy), lab + (255,))
         # (the list: each item on Black's row plate, its count at the right; the chosen row marked by the touch
         # bar's arrow)
         plate = self.screen(A, 0x21, 0x23, 0x22)

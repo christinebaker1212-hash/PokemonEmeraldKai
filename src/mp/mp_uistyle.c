@@ -14,6 +14,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include "global.h"
+#include "platform/gamepad.h"
 #include "main.h"
 #include "battle.h"
 #include "battle_controllers.h"
@@ -27,6 +28,7 @@
 #include "overworld.h"
 #include "gpu_regs.h"
 #include "bg.h"
+#include "mp_life.h"
 #include "palette.h"
 #include "pokemon.h"
 #include "sprite.h"
@@ -381,6 +383,24 @@ u8 MP_UiStyle_Active(void)
     return GetPack(s) ? s : UISTYLE_KAI;
 }
 
+// ---------------------------------------------------------------------------------------------------- the JOURNAL
+static u8 sJPage, sJPages = 1;
+
+// A on the summary's JOURNAL: the style's next page (TRUE: the style turned it)
+bool8 MP_UiStyle_JournalNext(void)
+{
+    if (MP_UiStyle_Active() == UISTYLE_KAI)
+        return FALSE;
+    if (sJPages > 1)
+        sJPage = (sJPage + 1) % sJPages;
+    return TRUE;
+}
+
+void MP_UiStyle_JournalReset(void)
+{
+    sJPage = 0;
+}
+
 // ---------------------------------------------------------------------------------------------------- the D-pad
 // A style that lays a menu out other than KAI does (RED's moves a list, PLATINUM's FIGHT above the other three, a
 // party in a list or two columns) moves its cursor as it's laid out: each entry's place on the style's own grid, the
@@ -502,6 +522,8 @@ struct Capture
     const u8 *base;   // the string the printer was given (it walks from here)
 };
 static struct Capture sCap[WINDOWS_MAX];
+u8 gMpUiTextBlit;
+static bool8 sPics[WINDOWS_MAX];   // (a picture drawn into the window: its inside stays Kai's)
 static u8 sFramed[WINDOWS_MAX];   // 1 its dialogue frame drawn, 2 the standard frame, 0 neither
 // (each window's words line by line as printed, where and in what colour: a pop-up drawn in a style's own font)
 #define RUNS 32
@@ -564,6 +586,7 @@ void MP_UiStyle_WindowFilled(u8 windowId)
     if (active)   // (the printer clearing its own page: its words go on)
         return;
     sRunCount[windowId] = 0;
+    sPics[windowId] = FALSE;
     sCap[windowId].len = 0;
     sCap[windowId].text[0] = EOS;
     sCap[windowId].base = NULL;
@@ -613,6 +636,12 @@ void MP_UiStyle_WindowRectFilled(u8 windowId, u16 x, u16 y, u16 w, u16 h)
     }
 }
 
+void MP_UiStyle_WindowPicture(u8 windowId)
+{
+    if (windowId < WINDOWS_MAX)
+        sPics[windowId] = TRUE;
+}
+
 void MP_UiStyle_WindowShown(u8 windowId, bool8 shown)
 {
     if (windowId < WINDOWS_MAX)
@@ -624,6 +653,7 @@ void MP_UiStyle_WindowGone(u8 windowId)
     if (windowId >= WINDOWS_MAX)
         return;
     sRunCount[windowId] = 0;
+    sPics[windowId] = FALSE;
     sShown[windowId] = FALSE;
     sFramed[windowId] = 0;
     sBox[windowId][0] = -1;
@@ -656,6 +686,7 @@ struct UiData
     u16 msgLen[WINDOWS_MAX];      // whether its printer waits at the end of a page, that page still shown)
     u16 msgPrinted[WINDOWS_MAX];
     bool8 msgHold[WINDOWS_MAX];
+    u16 msgFirst[WINDOWS_MAX];    // (a page a style turns itself: its first line + 1; 0: as the words are printed)
 };
 
 struct Surf
@@ -836,6 +867,12 @@ static const u8 *KeypadWord(u8 icon)
 {
     static const u8 sA[] = _("A"), sB[] = _("B"), sL[] = _("L"), sR[] = _("R"), sStart[] = _("START"),
                     sSelect[] = _("SELECT");
+    // (the controller-only buttons by the names the controller in hand prints on them, as mp_buttons.c draws them)
+    static const u8 sLt[3][3] = {_("ZL"), _("L2"), _("LT")}, sRt[3][3] = {_("ZR"), _("R2"), _("RT")},
+                    sLs[3][3] = {_("LS"), _("L3"), _("LS")}, sRs[3][3] = {_("RS"), _("R3"), _("RS")},
+                    sWest[3][7] = {_("Y"), _("SQUARE"), _("X")}, sNorth[3][9] = {_("X"), _("TRIANGLE"), _("Y")};
+    int fam = Gamepad_IconFamily();
+    int k = fam == GAMEPAD_ICONS_NINTENDO ? 0 : fam == GAMEPAD_ICONS_PLAYSTATION ? 1 : 2;
     switch (icon)
     {
     case CHAR_A_BUTTON: return sA;
@@ -844,6 +881,12 @@ static const u8 *KeypadWord(u8 icon)
     case CHAR_R_BUTTON: return sR;
     case CHAR_START_BUTTON: return sStart;
     case CHAR_SELECT_BUTTON: return sSelect;
+    case CHAR_MP_LT: return sLt[k];
+    case CHAR_MP_RT: return sRt[k];
+    case CHAR_MP_LS: return sLs[k];
+    case CHAR_MP_RS: return sRs[k];
+    case CHAR_MP_WEST: return fam == GAMEPAD_ICONS_KEYBOARD ? sSelect : sWest[k];
+    case CHAR_MP_NORTH: return fam == GAMEPAD_ICONS_KEYBOARD ? sStart : sNorth[k];
     }
     return NULL;
 }
@@ -1177,17 +1220,24 @@ static void Msg(struct Surf *s, struct UiPack *p, const struct UiOp *op, const s
     else
         rows = op->c ? op->c : op->n, step = op->b, y0 = op->d + oy;
     first = nl > rows ? lastLine + 1 - rows : 0;
+    if (d->msgFirst[op->a])
+        first = d->msgFirst[op->a] - 1, rows = op->n, step = op->h, y0 = y;
     if (first < 0)
         first = 0;
     for (i = first; i < nl && i < first + rows; i++)
     {
         int lx = x;
-        if (op->align == 1)
+        if (op->align)
         {
             int wd = 0;
             for (k = sLineStart[i]; k < sLineEnd[i]; k++)
                 wd += f->g[sFlow[k].c].adv;
-            lx -= wd;
+            if (op->align == 1)
+                lx -= wd;
+            else if (op->align == 2)   // (each line centred in W)
+                lx += (op->w - wd) / 2;
+            else if (op->align == 3)   // (... on the Game Boy's 8-pixel grid)
+                lx += ((op->w - wd) / 2 / 8) * 8;
         }
         for (k = sLineStart[i]; k < sLineEnd[i] && sFlow[k].src < shown; k++)
         {
@@ -2016,15 +2066,15 @@ static void PasteKaiWindow(u16 *frame, u8 w)
 }
 
 // where a spec's ICON ops whose conditions hold put Kai's sprites: OUT[a] = (x, y) of the sprite's middle, -1 none
-static void IconPlaces(const struct UiSpec *sp, u32 flags, s16 out[4][2])
+static void IconPlaces(const struct UiSpec *sp, u32 flags, s16 out[5][2])
 {
     u16 k;
-    for (k = 0; k < 4; k++)
+    for (k = 0; k < 5; k++)
         out[k][0] = out[k][1] = -1;
     for (k = 0; k < sp->nOps; k++)
     {
         const struct UiOp *op = &sp->ops[k];
-        if (op->kind != OP_ICON || op->a >= 4 || (flags & op->cond) != op->cond || (flags & op->unless))
+        if (op->kind != OP_ICON || op->a >= 5 || (flags & op->cond) != op->cond || (flags & op->unless))
             continue;
         out[op->a][0] = op->x, out[op->a][1] = op->y;
     }
@@ -2052,7 +2102,7 @@ static void PartyScreen(struct UiPack *p, u16 *frame)
     struct MpFadeFit fit;
     const struct UiSpec *sp;
     u8 skip[32], nSkip = 0, i, w;
-    s16 places[PARTY_SIZE][4][2];
+    s16 places[PARTY_SIZE][5][2];
     bool8 popup;
     static struct UiData sSlotData[PARTY_SIZE];
     const struct UiSpec *slotSpec[PARTY_SIZE];
@@ -2280,6 +2330,45 @@ static void OptionsScreen(struct UiPack *p, u16 *frame)
     }
 }
 
+// words the style's box can't hold whole (a description longer than its OP_MSG's N lines, and no narrower font for
+// it): a page of N lines at a time, turning by itself as Kai's own descriptions do (mp_itemdesc.c: the first page
+// 210 frames, each after it 150), from the first page again when the words change
+struct AutoPager
+{
+    u32 sum;
+    u16 timer;
+};
+
+static void AutoPage(struct UiPack *p, const struct UiSpec *sp, struct UiData *d, int win, struct AutoPager *ap)
+{
+    const struct UiOp *op = NULL;
+    const struct UiFont *f;
+    u32 sum = 0;
+    int k, nl, pages;
+    for (k = 0; k < sp->nOps && op == NULL; k++)
+        if (sp->ops[k].kind == OP_MSG && sp->ops[k].a == win && (d->flags & sp->ops[k].cond) == sp->ops[k].cond
+         && !(d->flags & sp->ops[k].unless))
+            op = &sp->ops[k];
+    if (op == NULL || d->msg[win] == NULL || op->n == 0 || op->font >= p->nFont)
+        return;
+    for (k = 0; k < d->msgLen[win]; k++)
+        sum = sum * 31 + d->msg[win][k];
+    if (sum != ap->sum)
+        ap->sum = sum, ap->timer = 0;
+    else if (ap->timer < 0xFFF0)
+        ap->timer++;
+    f = &p->font[op->font];
+    nl = FlowPage(f, d->msg[win], 0, d->msgLen[win], op->w);
+    if (nl <= op->n)
+        return;
+    if (op->e && op->e - 1 < p->nFont && !op->b && FlowPage(&p->font[op->e - 1], d->msg[win], 0, d->msgLen[win],
+                                                            op->w) <= op->n)
+        return;   // (Msg prints it whole in the narrower font)
+    pages = (nl + op->n - 1) / op->n;
+    k = ap->timer < 210 ? 0 : 1 + (ap->timer - 210) / 150;
+    d->msgFirst[win] = (k % pages) * op->n + 1;
+}
+
 // the BAG in a style: its spec "bag" (the screen: the pocket, the description, the item's icon where its ICON 1 says)
 // and its OP_LIST's rows, each drawn with "bag.row"; Kai's pop-ups (what to do, how many, SORT) put back over it
 static void BagScreen(struct UiPack *p, u16 *frame)
@@ -2291,7 +2380,7 @@ static void BagScreen(struct UiPack *p, u16 *frame)
     const struct UiSpec *sp, *rowSp;
     const struct UiOp *list = NULL;
     u8 skip[24], nSkip = 0, top, bottom;
-    s16 icon[4][2];
+    s16 icon[5][2];
     int vis, k, i;
 
     if (!MP_Bag_View(&v) || (sp = FindSpec(p, "bag")) == NULL || (rowSp = FindSpec(p, "bag.row")) == NULL)
@@ -2299,6 +2388,8 @@ static void BagScreen(struct UiPack *p, u16 *frame)
     memcpy(sKaiFrame, frame, sizeof(sKaiFrame));
     memset(&d, 0, sizeof(d));
     d.flags |= C_SEL0 << v.view;
+    if (gSaveBlock2Ptr->playerGender == FEMALE)   // (the style's BAG is the player's own where its game has two)
+        d.flags |= C_FEMALE;
     d.val[F_CUR] = v.view;
     for (k = 0; k < sp->nOps && list == NULL; k++)
         if (sp->ops[k].kind == OP_LIST && (d.flags & sp->ops[k].cond) == sp->ops[k].cond
@@ -2321,11 +2412,17 @@ static void BagScreen(struct UiPack *p, u16 *frame)
     {
         static u8 sName[24], sDesc[220];
         d.str[F_TITLE] = Filtered(v.pocketName, sName, sizeof(sName));
+        d.msg[1] = d.str[F_TITLE];   // (a style that breaks a long pocket name onto two lines: OP_MSG 1)
+        d.msgLen[1] = d.msgPrinted[1] = StringLength(d.msg[1]);
         if (v.desc)
         {
             d.msg[0] = Filtered(v.desc, sDesc, sizeof(sDesc));
             d.msgLen[0] = d.msgPrinted[0] = StringLength(d.msg[0]);
         }
+    }
+    {
+        static struct AutoPager sPager;
+        AutoPage(p, sp, &d, 0, &sPager);
     }
     DrawSpec(p, sp, &d, frame, 0, 0, &fit);
     for (i = 0; i < vis && sTop + i < v.rows; i++)
@@ -2397,7 +2494,7 @@ static void SummaryScreen(struct UiPack *p, u16 *frame)
     const struct UiOp *list = NULL;
     char name[24];
     u8 skip[40], nSkip = 0, i, k, wi;
-    s16 icon[4][2];
+    s16 icon[5][2];
     u32 status;
 
     if (!MP_Summary_View(&v))
@@ -2458,10 +2555,16 @@ static void SummaryScreen(struct UiPack *p, u16 *frame)
     {
         const u8 *desc = v.page == 3 ? w.contestDesc : w.moveDesc;
         d.flags |= SM_CHOOSING;
-        if (desc && w.move[v.moveCursor < 5 ? v.moveCursor : 0] != MOVE_NONE)
+        if (desc)
         {
-            d.msg[1] = desc;
-            d.msgLen[1] = d.msgPrinted[1] = StringLength(desc);
+            // (Kai's own line breaks out: the style breaks the words for its own box)
+            static u8 sDesc[160];
+            u16 n;
+            for (n = 0; desc[n] != EOS && n < sizeof(sDesc) - 1; n++)
+                sDesc[n] = desc[n] == CHAR_NEWLINE ? CHAR_SPACE : desc[n];
+            sDesc[n] = EOS;
+            d.msg[1] = sDesc;
+            d.msgLen[1] = d.msgPrinted[1] = n;
         }
     }
     d.msg[2] = Filtered(w.memo, sMemo, sizeof(sMemo));
@@ -2500,34 +2603,63 @@ static void SummaryScreen(struct UiPack *p, u16 *frame)
         if (v.statusSprite < MAX_SPRITES && gSprites[v.statusSprite].inUse && !gSprites[v.statusSprite].invisible)
             d.flags |= C_STATUS | (1u << (3 + StatusOf(status)));
     }
-    if (v.page == 5 && v.journalRows)
+    if (v.page == 5 && v.mon)
     {
-        // (the page's sentences as running text, a line each: for a style that wraps them its own way)
-        static u8 sJournal[400];
-        u16 n = 0;
-        for (i = 0; i < v.journalRows; i++)
+        // (every sentence of the JOURNAL, a line each, laid out in the style's own box and turned a page at a time
+        // by A: the style's pages, not Kai's, so none is cut short)
+        static u8 sJournal[LIFE_JOURNAL_LINES * (LIFE_JOURNAL_TEXT + 4)];
+        static u8 lines[LIFE_JOURNAL_LINES][LIFE_JOURNAL_TEXT];
+        static const u8 sNone[] = _("Spend time together in your party to get to know it."), sBullet[] = _("- ");
+        const struct UiOp *jop = NULL;
+        u16 n = 0, k;
+        u8 count = MP_Life_Journal(&v.mon->box, lines, LIFE_JOURNAL_LINES);
+        for (i = 0; i < count || (count == 0 && i == 0); i++)
         {
-            const u8 *t = v.journal[i];
+            const u8 *t = count ? lines[i] : sNone;
             if (i > 0 && n < sizeof(sJournal) - 1)
-                sJournal[n++] = v.journalEntry[i] != v.journalEntry[i - 1] ? CHAR_NEWLINE : CHAR_SPACE;
-            if (i > 0 && v.journalEntry[i] == v.journalEntry[i - 1])
-                while (*t == CHAR_SPACE)
-                    t++;   // (a sentence's next row: its indent under the bullet)
+                sJournal[n++] = CHAR_NEWLINE;
+            for (k = 0; count && sBullet[k] != EOS && n < sizeof(sJournal) - 1; k++)
+                sJournal[n++] = sBullet[k];
             while (*t != EOS && n < sizeof(sJournal) - 1)
                 sJournal[n++] = *t++;
         }
         sJournal[n] = EOS;
         d.msg[3] = sJournal;
         d.msgLen[3] = d.msgPrinted[3] = n;
+        for (k = 0; k < sp->nOps && jop == NULL; k++)
+            if (sp->ops[k].kind == OP_MSG && sp->ops[k].a == 3 && sp->ops[k].font < p->nFont)
+                jop = &sp->ops[k];
+        sJPages = 1;
+        if (jop && jop->n)
+        {
+            int nl = FlowPage(&p->font[jop->font], sJournal, 0, n, jop->w);
+            if (jop->e && jop->e - 1 < p->nFont && !jop->b && nl > jop->n
+             && FlowPage(&p->font[jop->e - 1], sJournal, 0, n, jop->w) <= jop->n)
+                nl = jop->n;   // (the narrower letters fit it on one page)
+            sJPages = (nl + jop->n - 1) / jop->n;
+            if (sJPages < 1)
+                sJPages = 1;
+            if (sJPage >= sJPages)
+                sJPage = 0;
+            if (sJPages > 1)
+                d.msgFirst[3] = sJPage * jop->n + 1;
+        }
+        if (sJPages > 1)
+        {
+            static u8 sPage[24];
+            u8 *e = Digits(sPage, sJPage + 1, 0);
+            *e++ = CHAR_SLASH;
+            Digits(e, sJPages, 0);
+            d.str[F_JPAGE] = sPage;
+            d.flags |= S_DOWN;
+        }
+        d.val[F_PROMPT] = sJPages > 1 ? 6 : 7;
     }
-    if (v.page == 5 && v.journalPages > 1)
     {
-        static u8 sPage[24];
-        u8 *e = Digits(sPage, v.journalPage + 1, 0);
-        *e++ = CHAR_SLASH;
-        Digits(e, v.journalPages, 0);
-        d.str[F_JPAGE] = sPage;
-        d.flags |= S_DOWN;
+        // (an Ability's or a move's words longer than the style's box: pages that turn by themselves)
+        static struct AutoPager sPager[2];
+        AutoPage(p, sp, &d, 0, &sPager[0]);
+        AutoPage(p, sp, &d, 1, &sPager[1]);
     }
     MP_FadeFit_FromPalette(&fit, BG_PLTT_ID(0));
     DrawSpec(p, sp, &d, frame, 0, 0, &fit);
@@ -2577,6 +2709,9 @@ static void SummaryScreen(struct UiPack *p, u16 *frame)
                 break;
             memset(&rd, 0, sizeof(rd));
             rd.str[F_NAME] = t;
+            // (a list's N over 1: the lines on the style's own rows, that many pixels apart)
+            if (list->n > 1)
+                y = ((y + list->n / 2) / list->n) * list->n;
             DrawSpec(p, rowSp, &rd, frame, list->x + x, list->y + (list->h ? y * list->h / 16 : y), &fit);
         }
     }
@@ -2623,7 +2758,14 @@ static void SummaryScreen(struct UiPack *p, u16 *frame)
     }
     // (the POKé BALL page's ball where the style's box puts the page's lines)
     if (v.ballIcon < MAX_SPRITES && list && gSprites[v.ballIcon].inUse && !gSprites[v.ballIcon].invisible)
-        RedrawSprite(frame, &gSprites[v.ballIcon], list->x - 88, list->y - 32);
+    {
+        // (where the page's ICON 4 says, its middle there; else Kai's place from the box's corner)
+        struct Sprite *b = &gSprites[v.ballIcon];
+        if (icon[4][0] >= 0)
+            RedrawSprite(frame, b, icon[4][0] - (b->x + b->x2), icon[4][1] - (b->y + b->y2));
+        else
+            RedrawSprite(frame, b, list->x - 88, list->y - 32);
+    }
 }
 
 // ---------------------------------------------------------------------------------------------------- pop-ups
@@ -2631,6 +2773,49 @@ static void SummaryScreen(struct UiPack *p, u16 *frame)
 // 24 x 24 picture of its 3 x 3 frame tiles, its fill) round the window, the window's words as printed, in the
 // style's font ("win.text": C_SEL0 the red ones, C_ALT the pale ones); a message box at the foot of the screen in
 // the style's message box. A window a screen drew itself is left alone (sHandled).
+// a sprite shown over the window's inside (an icon a screen sets on its menu, as the CO-OP menu's): the window then
+// keeps Kai's inside, the sprite with it
+static bool8 SpriteOver(const struct WindowTemplate *t, const struct Sprite *s);
+
+static bool8 SpritesOver(const struct WindowTemplate *t)
+{
+    int i;
+    for (i = 0; i < MAX_SPRITES; i++)
+        if (SpriteOver(t, &gSprites[i]))
+            return TRUE;
+    return FALSE;
+}
+
+// ... those sprites drawn again over the window's inside, back to front
+static void RedrawSpritesIn(u16 *frame, const struct WindowTemplate *t)
+{
+    int pr, i;
+    for (pr = 3; pr >= 0; pr--)
+        for (i = MAX_SPRITES - 1; i >= 0; i--)
+            if (gSprites[i].oam.priority == pr && SpriteOver(t, &gSprites[i]))
+                RedrawSprite(frame, &gSprites[i], 0, 0);
+}
+
+static bool8 SpriteOver(const struct WindowTemplate *t, const struct Sprite *s)
+{
+    static const u8 sDims[3][4][2] = {
+        {{8, 8}, {16, 16}, {32, 32}, {64, 64}},
+        {{16, 8}, {32, 8}, {32, 16}, {64, 32}},
+        {{8, 16}, {8, 32}, {16, 32}, {32, 64}},
+    };
+    int x0 = t->tilemapLeft * 8, y0 = t->tilemapTop * 8, x1 = x0 + t->width * 8, y1 = y0 + t->height * 8;
+    u32 prio = GetBgAttribute(t->bg, BG_ATTR_PRIORITY);
+    int sx, sy, w, h;
+    if (!s->inUse || s->invisible || s->mpNoDraw || s->oam.affineMode == ST_OAM_AFFINE_ERASE || s->oam.shape > 2
+     || s->oam.objMode == ST_OAM_OBJ_WINDOW || s->oam.priority > prio)
+        return FALSE;
+    w = sDims[s->oam.shape][s->oam.size][0];
+    h = sDims[s->oam.shape][s->oam.size][1];
+    sx = s->oam.x >= 256 ? s->oam.x - 512 : s->oam.x;
+    sy = s->oam.y >= 160 ? s->oam.y - 256 : s->oam.y;
+    return sx < x1 - 2 && sx + w > x0 + 2 && sy < y1 - 2 && sy + h > y0 + 2;
+}
+
 static bool8 PopUpShown(u8 w)
 {
     const struct WindowTemplate *t = &gWindows[w].window;
@@ -2643,6 +2828,27 @@ static bool8 AtFoot(u8 w)
 {
     const struct WindowTemplate *t = &gWindows[w].window;
     return sFramed[w] == 1 && t->tilemapTop >= 13 && t->width >= 26;
+}
+
+// window W's inside as Kai drew it (its pixels, in its palette as faded now) on the style's paper: its words and
+// pictures kept where they are, its own paper (colours 0 and 1) the style's
+static void KaiInside(u16 *frame, u8 w)
+{
+    const struct WindowTemplate *t = &gWindows[w].window;
+    const u8 *px = gWindows[w].tileData;
+    const u16 *pal = &gPlttBufferFaded[BG_PLTT_ID(t->paletteNum & 15)];
+    int x0 = t->tilemapLeft * 8, y0 = t->tilemapTop * 8, x, y;
+    if (px == NULL)
+        return;
+    for (y = 0; y < t->height * 8; y++)
+        for (x = 0; x < t->width * 8; x++)
+        {
+            int X = x0 + x, Y = y0 + y;
+            u8 v = px[((y / 8) * t->width + x / 8) * 32 + (y % 8) * 4 + (x % 8) / 2];
+            v = (x & 1) ? v >> 4 : v & 15;
+            if (v > 1 && X >= 0 && Y >= 0 && X < DISPLAY_WIDTH && Y < DISPLAY_HEIGHT)
+                frame[Y * DISPLAY_WIDTH + X] = pal[v] & 0x7FFF;
+        }
 }
 
 static void PopUpFrame(u16 *frame, const struct UiImg *im, int x0, int y0, int x1, int y1, u16 fill,
@@ -2684,7 +2890,9 @@ static void PopUps(struct UiPack *p, u16 *frame)
     u16 fill = 0x7FFF;
     struct MpFadeFit fit;
     u8 w, k;
-    int put[40][3], nPut, j;   // (the lines drawn in a window: their y, first and last x)
+    int put[40][3], nPut, j, cellH = 16;   // (the lines drawn in a window: their y, first and last x)
+    static u8 sLines[40][64], sFg[40];
+    bool8 fits;
     if (ws == NULL || wt == NULL)
         return;
     for (k = 0; k < ws->nOps; k++)
@@ -2697,6 +2905,8 @@ static void PopUps(struct UiPack *p, u16 *frame)
     for (k = 0; k < wt->nOps && f == NULL; k++)
         if (wt->ops[k].kind == OP_TEXT && wt->ops[k].font < p->nFont)
             f = &p->font[wt->ops[k].font];
+    if (f)
+        cellH = f->cellH;
     MP_FadeFit_FromPalette(&fit, BG_PLTT_ID(15));
     for (w = 0; w < WINDOWS_MAX; w++)
     {
@@ -2712,6 +2922,57 @@ static void PopUps(struct UiPack *p, u16 *frame)
             continue;
         }
         x0 = t->tilemapLeft * 8, y0 = t->tilemapTop * 8, ww = t->width * 8;
+        // (the lines laid out in the style's letters first: where each goes, Kai's place kept, a line set against
+        // the right edge kept there, one reaching a run Kai set after it on its line moved past it)
+        nPut = 0;
+        fits = !sPics[w] && !SpritesOver(t);
+        for (k = 0; k < sRunCount[w] && fits; k++)
+        {
+            struct Run *r = &sRuns[w][k];
+            const u8 *line = r->text;
+            int ln = 0;
+            // (each of its lines: YES / NO is one string, a new line between)
+            while (*line != EOS && ln < 8)
+            {
+                int n = 0, x = x0 + r->x, sw, ly = r->y + ln * r->lineH;
+                while (line[n] != EOS && line[n] != CHAR_NEWLINE && n < (int)sizeof(sLines[0]) - 1)
+                {
+                    sLines[nPut < (int)ARRAY_COUNT(put) ? nPut : 0][n] = line[n];
+                    n++;
+                }
+                if (nPut >= (int)ARRAY_COUNT(put))
+                {
+                    fits = FALSE;
+                    break;
+                }
+                sLines[nPut][n] = EOS;
+                sw = f ? Width(f, sLines[nPut], 255) : r->kaiW;
+                if (r->x > 0 && r->x + r->kaiW >= ww - 3 && ln == 0)
+                    x = x0 + ww - sw;
+                for (j = 0; j < nPut; j++)
+                    if (put[j][0] == ly && put[j][1] < x && put[j][2] >= x)
+                        x = put[j][2] + 1;
+                put[nPut][0] = ly, put[nPut][1] = x, put[nPut][2] = x + sw;
+                sFg[nPut] = r->fg;
+                nPut++;
+                line += n;
+                if (*line == CHAR_NEWLINE)
+                    line++;
+                ln++;
+            }
+        }
+        // (the style's letters only where every line stays inside the window, clear of the others: else the window
+        // keeps Kai's own words and pictures, as Kai laid them out, in the style's frame)
+        for (j = 0; j < nPut && fits; j++)
+        {
+            int i2;
+            if (put[j][1] < x0 || put[j][2] > x0 + ww || put[j][0] + cellH - 3 > t->height * 8 + 2)
+                fits = FALSE;
+            for (i2 = 0; i2 < j && fits; i2++)
+                if (put[i2][0] != put[j][0] && abs(put[i2][0] - put[j][0]) < cellH - 3
+                 && put[i2][1] < put[j][2] && put[j][1] < put[i2][2])
+                    fits = FALSE;
+        }
         if (sBox[w][0] >= 0)
         {
             // (a battle box: the frame round its inside; YES / NO's cursor, a tile left of the window, the style's)
@@ -2719,7 +2980,7 @@ static void PopUps(struct UiPack *p, u16 *frame)
             int cx, cy;
             PopUpFrame(frame, im, sBox[w][0] * 8, sBox[w][1] * 8, (sBox[w][2] + 1) * 8, (sBox[w][3] + 1) * 8,
                        fill, &fit);
-            for (cy = sBox[w][1]; map && cy <= sBox[w][3]; cy++)
+            for (cy = sBox[w][1]; map && fits && cy <= sBox[w][3]; cy++)
                 for (cx = sBox[w][0]; cx < t->tilemapLeft; cx++)
                     if ((map[cy * 32 + cx] & 0x3FF) == 1)
                     {
@@ -2732,56 +2993,25 @@ static void PopUps(struct UiPack *p, u16 *frame)
         }
         else
             PopUpFrame(frame, im, x0, y0, x0 + ww, y0 + t->height * 8, fill, &fit);
-        nPut = 0;
-        for (k = 0; k < sRunCount[w]; k++)
+        if (!fits)
         {
-            struct Run *r = &sRuns[w][k];
-            const u8 *line = r->text;
-            int ln = 0;
-            // (each of its lines: YES / NO is one string, a new line between)
-            while (*line != EOS && ln < 8)
-            {
-                static u8 sLine[64];
-                struct UiData d;
-                int n = 0, x = x0 + r->x, sw;
-                while (line[n] != EOS && line[n] != CHAR_NEWLINE && n < (int)sizeof(sLine) - 1)
-                {
-                    sLine[n] = line[n];
-                    n++;
-                }
-                sLine[n] = EOS;
-                sw = f ? Width(f, sLine, 255) : r->kaiW;
-                memset(&d, 0, sizeof(d));
-                d.str[F_NAME] = sLine;
-                if (r->fg == TEXT_COLOR_RED || r->fg == TEXT_COLOR_LIGHT_RED)
-                    d.flags |= C_SEL0;
-                else if (r->fg == TEXT_COLOR_LIGHT_GRAY || r->fg == TEXT_COLOR_GREEN || r->fg == TEXT_COLOR_LIGHT_GREEN)
-                    d.flags |= C_ALT;
-                // (a line Kai set against the window's right edge stays there; one too wide for the style's letters
-                // is moved in)
-                if (r->x > 0 && r->x + r->kaiW >= ww - 3 && ln == 0)
-                    x = x0 + ww - sw;
-                else if (x + sw > x0 + ww)
-                    x = x0 + ww - sw;
-                if (x < x0)
-                    x = x0;
-                // (a run Kai set after another on its line, which the style's wider letters reach: moved past it,
-                // as the level up's + after DEFENSE)
-                for (j = 0; j < nPut; j++)
-                    if (put[j][0] == r->y + ln * r->lineH && put[j][1] < x && put[j][2] >= x)
-                        x = put[j][2] + 1;
-                if (nPut < (int)ARRAY_COUNT(put))
-                {
-                    put[nPut][0] = r->y + ln * r->lineH, put[nPut][1] = x, put[nPut][2] = x + sw;
-                    nPut++;
-                }
-                DrawSpec(p, wt, &d, frame, x, y0 + r->y + ln * r->lineH, &fit);
-                line += n;
-                if (*line == CHAR_NEWLINE)
-                    line++;
-                ln++;
-            }
+            // (Kai's own inside, and the sprites Kai shows over it, as the CO-OP menu's icons)
+            KaiInside(frame, w);
+            RedrawSpritesIn(frame, t);
         }
+        if (fits)
+            for (j = 0; j < nPut; j++)
+            {
+                struct UiData d;
+                memset(&d, 0, sizeof(d));
+                d.str[F_NAME] = sLines[j];
+                if (sFg[j] == TEXT_COLOR_RED || sFg[j] == TEXT_COLOR_LIGHT_RED)
+                    d.flags |= C_SEL0;
+                else if (sFg[j] == TEXT_COLOR_LIGHT_GRAY || sFg[j] == TEXT_COLOR_GREEN
+                      || sFg[j] == TEXT_COLOR_LIGHT_GREEN)
+                    d.flags |= C_ALT;
+                DrawSpec(p, wt, &d, frame, put[j][1], y0 + put[j][0], &fit);
+            }
         sHandled |= 1u << w;
     }
 }
@@ -2794,13 +3024,24 @@ static u8 sDrawing;   // what this frame draws: 1 the battle, 2 the field's mess
                       // 16 the party, 32 OPTIONS, 64 the BAG, 128 the summary
 
 // the game's own healthbox sprites (its two halves and its bar) drawn or not
+// a healthbox's own sprite (its two halves, its bar): never another sprite that took its number while the battle
+// rebuilt its sprites (coming back from the BAG), which was then left undrawn
+static bool8 IsHealthboxSprite(u8 id)
+{
+    u16 tag;
+    if (id >= MAX_SPRITES || !gSprites[id].inUse || gSprites[id].template == NULL)
+        return FALSE;
+    tag = gSprites[id].template->tileTag;
+    return (tag >= TAG_HEALTHBOX_PLAYER1_TILE && tag <= TAG_HEALTHBAR_OPPONENT2_TILE) || tag == TAG_HEALTHBOX_SAFARI_TILE;
+}
+
 static void HideHealthboxes(bool8 hide)
 {
     u8 b;
     for (b = 0; b < MAX_BATTLERS_COUNT; b++)
     {
         u8 id = gHealthboxSpriteIds[b], other, bar;
-        if (id >= MAX_SPRITES || !gSprites[id].inUse)
+        if (!IsHealthboxSprite(id))
             continue;
         // (the SAFARI ZONE's own box, its balls, stays the game's)
         if ((gBattleTypeFlags & BATTLE_TYPE_SAFARI) && GetBattlerSide(b) == B_SIDE_PLAYER)
@@ -2808,9 +3049,9 @@ static void HideHealthboxes(bool8 hide)
         other = gSprites[id].oam.affineParam;
         bar = gSprites[id].data[5];
         gSprites[id].mpNoDraw = hide;
-        if (other < MAX_SPRITES && gSprites[other].inUse)
+        if (IsHealthboxSprite(other))
             gSprites[other].mpNoDraw = hide;
-        if (bar < MAX_SPRITES && gSprites[bar].inUse)
+        if (IsHealthboxSprite(bar))
             gSprites[bar].mpNoDraw = hide;
     }
 }

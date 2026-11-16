@@ -874,6 +874,7 @@ void TextPrinterDrawDownArrow(struct TextPrinter *textPrinter)
                 break;
             }
 
+            gMpUiTextBlit++;   // Moemon Kai: UI STYLE (the printer's own arrow: not a picture of the window's)
             BlitBitmapRectToWindow(
                 textPrinter->printerTemplate.windowId,
                 arrowTiles,
@@ -885,6 +886,7 @@ void TextPrinterDrawDownArrow(struct TextPrinter *textPrinter)
                 textPrinter->printerTemplate.currentY,
                 8,
                 16);
+            gMpUiTextBlit--;
             CopyWindowToVram(textPrinter->printerTemplate.windowId, COPYWIN_GFX);
 
             subStruct->downArrowDelay = 8;
@@ -981,7 +983,9 @@ void DrawDownArrow(u8 windowId, u16 x, u16 y, u8 bgColor, bool8 drawArrow, u8 *c
                 break;
             }
 
+            gMpUiTextBlit++;   // Moemon Kai: UI STYLE (the printer's own arrow: not a picture of the window's)
             BlitBitmapRectToWindow(windowId, arrowTiles, 0, sDownArrowYCoords[*yCoordIndex & 3], 8, 16, x, y - 2, 8, 16);
+            gMpUiTextBlit--;
             CopyWindowToVram(windowId, COPYWIN_GFX);
             *counter = 8;
             ++*yCoordIndex;
@@ -1679,6 +1683,7 @@ u8 DrawKeypadIcon(u8 windowId, u8 keypadIconId, u16 x, u16 y)
     u8 w = MP_ButtonIcon_Draw(windowId, keypadIconId, x, y);
     if (w || keypadIconId >= ARRAY_COUNT(sKeypadIcons))
         return w;
+    gMpUiTextBlit++;   // Moemon Kai: UI STYLE (a button in the words, as the style's letters)
     BlitBitmapRectToWindow(
         windowId,
         sKeypadIconTiles + (sKeypadIcons[keypadIconId].tileOffset * 0x20),
@@ -1690,6 +1695,7 @@ u8 DrawKeypadIcon(u8 windowId, u8 keypadIconId, u16 x, u16 y)
         y,
         sKeypadIcons[keypadIconId].width,
         sKeypadIcons[keypadIconId].height);
+    gMpUiTextBlit--;
     return sKeypadIcons[keypadIconId].width;
 }
 

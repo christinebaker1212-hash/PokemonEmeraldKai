@@ -371,7 +371,16 @@ class PTPack:
             path = os.path.join(R, 'res', 'graphics', 'battle', 'type_icons', kind.lower() + '.png')
         if not os.path.exists(path):
             return self.fairy_icon()
-        return Image.open(path).convert('RGBA')
+        return self.closed(Image.open(path).convert('RGBA'))
+
+    @staticmethod
+    def closed(im):
+        """a type icon's outline closed at its sides: the pill's colour 0 (black) round its top and bottom carried
+        down its left and right columns"""
+        for y in range(1, im.height - 1):
+            for x in (0, im.width - 1):
+                im.putpixel((x, y), (0, 0, 0, 255))
+        return im
 
     def fairy_icon(self):
         """(Platinum has no FAIRY icon: its PSYCHIC icon's shape in FAIRY's pink with KAI's letters)"""
@@ -397,7 +406,7 @@ class PTPack:
         if bb:
             letters_h = bb[3] - bb[1]
             im.alpha_composite(txt.crop(bb), ((im.width - (bb[2] - bb[0])) // 2, (im.height - letters_h) // 2))
-        return im
+        return self.closed(im)
 
     def start_menus(self):
         """Platinum's START on the right: the standard frame round an 11-tile window, each entry's icon (coloured on
@@ -595,17 +604,24 @@ class PTPack:
         dark, lite = (16, 24, 32), (172, 189, 189)
         sp = U.Spec('bag')
         self.img(sp, 'pt.bag.ground', ground)
+        for sex in (0, 1):
+            for i, (bag, bx, by) in enumerate(st.bag_pictures(Ly, sex)):
+                g = dict(cond=U.C_SEL0 << i | U.C_FEMALE) if sex else dict(cond=U.C_SEL0 << i, unless=U.C_FEMALE)
+                self.img(sp, 'pt.bag.pic%d.%d' % (sex, i), bag, bx, by, **g)
         for i, (grey, red) in enumerate(st.pocket_icons()):
             self.img(sp, 'pt.bag.pocket%d' % i, grey, 4 + 12 * i, Ly[90] - 2, unless=U.C_SEL0 << i)
             self.img(sp, 'pt.bag.pocket%d.on' % i, red, 4 + 12 * i, Ly[90] - 2, cond=U.C_SEL0 << i)
         self.text(sp, '{%d}' % U.F_TITLE, 52, Ly[106], self.fn, dark, lite, align=2)
-        self.text(sp, 'START  SORT', 226, 13 + 16 * 4 + 2, self.fn, (106, 139, 180), (164, 180, 205), align=1)
-        self.img(sp, 'pt.arrow.down', st.list_arrow(False), 108, 13 + 16 * 4, cond=U.S_DOWN)
-        self.img(sp, 'pt.arrow.up', st.list_arrow(True), 108, -4, cond=U.S_UP)
+        # START SORT on the sky under the BAG label, as KAI keeps it beside its bag (the list keeps KAI's five rows)
+        self.text(sp, 'START', 22, 20, self.fn, dark, lite, align=2)
+        self.text(sp, 'SORT', 22, 34, self.fn, dark, lite, align=2)
+        # the scroll cursor on the list panel's foot / head, under / over the middle of the rows
+        self.img(sp, 'pt.arrow.down', st.list_arrow(False), 158, 13 + 16 * 5 - 3, cond=U.S_DOWN)
+        self.img(sp, 'pt.arrow.up', st.list_arrow(True), 158, -4, cond=U.S_UP)
         sp.add(U.OP_ICON, x=22, y=138, a=1)
         sp.add(U.OP_MSG, x=40, y=112, a=0, h=16, n=3, w=196, b=12, c=4, d=110, font=self.fn, ink=(255, 255, 255),
                shadow=(0, 0, 0))
-        sp.add(U.OP_LIST, x=0, y=13, h=16, n=4)
+        sp.add(U.OP_LIST, x=0, y=13, h=16, n=5)
         p.spec(sp)
         row = U.Spec('bag.row')
         self.img(row, 'pt.bag.highlight', st.item_highlight(), 110, 0, cond=U.C_SEL0)
@@ -727,8 +743,10 @@ class PTPack:
             if fld is not None:
                 cx = X(wx) + ww // 2 if X(wx) else X(184) + 32
                 self.text(sp, '{%d}' % fld, cx, y, self.fn, *(BL if label == 'OT' else BK), align=2)
-        sp.add(U.OP_IMGSEL, x=X(200), y=Y(72), a=tfirst, b=U.F_TYPE1, unless=U.SM_EGG)
-        sp.add(U.OP_IMGSEL, x=X(200) + 34, y=Y(72), a=tfirst, b=U.F_TYPE2, cond=U.SM_TWOTYPES, unless=U.SM_EGG)
+        # (one type in the middle of the value's field; two side by side in it, both on the screen)
+        sp.add(U.OP_IMGSEL, x=X(200), y=Y(72), a=tfirst, b=U.F_TYPE1, unless=U.SM_EGG | U.SM_TWOTYPES)
+        sp.add(U.OP_IMGSEL, x=160, y=Y(72), a=tfirst, b=U.F_TYPE1, cond=U.SM_TWOTYPES, unless=U.SM_EGG)
+        sp.add(U.OP_IMGSEL, x=160 + 34, y=Y(72), a=tfirst, b=U.F_TYPE2, cond=U.SM_TWOTYPES, unless=U.SM_EGG)
         my = top + 90 + 1
         self.text(sp, '{%d} nature.' % U.F_NATURE, X(112), my, self.fn, *BK, cond=U.SM_MEMOPLAIN)
         self.text(sp, 'Lv{%d} {%d}' % (U.F_METLV, U.F_METPLACE), X(112) - 2, my + 16, self.fn, *BK,
@@ -784,6 +802,13 @@ class PTPack:
             g, Ly, Y, X = st.summary_ground(nscr, k, pick=pick)
             self.img(sp, 'pt.sum%d' % k, g, unless=U.SM_CHOOSING)
             g2, _, Y2, X2 = st.summary_ground(nscr + '_select_mode', k, choosing=True, pick=pick)
+            if contest:
+                # (the contest page's own cream bubble on the stripes, where Platinum's condition chart sits: the
+                # stripes carried over it, so the hearts sit on clean bands)
+                q = g2.load()
+                for yy in range(16, 52):
+                    for xx in range(50, 102):
+                        q[xx, yy] = q[30, yy]
             self.img(sp, 'pt.sum%dc' % k, g2, cond=U.SM_CHOOSING)
             common(sp, Ly, k)
             # (the normal page's left column; picked, the move's panel)

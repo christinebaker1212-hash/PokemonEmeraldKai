@@ -705,6 +705,13 @@ static u8 Choices(u8 row, const u8 **names, u8 *buf)
     switch (opt)
     {
     case OPT_FRAME:
+        if (MP_UiStyle_Active() != UISTYLE_KAI)
+        {
+            // (a UI STYLE draws its own windows: FRAME only for KAI's)
+            static const u8 sText_ByStyle[] = _("UI STYLE'S");
+            StringCopy(buf, sText_ByStyle);
+        }
+        else
         {
             u8 *p = StringCopy(buf, gText_FrameType);
             *p++ = CHAR_SPACE;
@@ -935,6 +942,8 @@ static void Change(u8 row, int dir)
         break;
     case OPT_BUTTONMODE:  gSaveBlock2Ptr->optionsButtonMode = Wrap(gSaveBlock2Ptr->optionsButtonMode + dir, 3); break;
     case OPT_FRAME:
+        if (MP_UiStyle_Active() != UISTYLE_KAI)
+            break;   // (a UI STYLE draws its own windows)
         gSaveBlock2Ptr->optionsWindowFrameType = Wrap(gSaveBlock2Ptr->optionsWindowFrameType + dir, WINDOW_FRAMES_COUNT);
         LoadBgTiles(1, GetWindowFrameTilesPal(gSaveBlock2Ptr->optionsWindowFrameType)->tiles, 0x120, 0x1A2);
         LoadPalette(GetWindowFrameTilesPal(gSaveBlock2Ptr->optionsWindowFrameType)->pal, BG_PLTT_ID(7), PLTT_SIZE_4BPP);
@@ -1378,6 +1387,8 @@ static bool8 HintText(u8 *buf)
     else if (opt == OPT_BGMUTE)
         snprintf(ascii, sizeof(ascii), "%s", gMpConfig.muteInBackground ? "SILENT WHILE ANOTHER WINDOW IS IN FRONT"
                                                                         : "SOUND PLAYS EVEN WHEN NOT IN FOCUS");
+    else if (opt == OPT_FRAME && MP_UiStyle_Active() != UISTYLE_KAI)
+        snprintf(ascii, sizeof(ascii), "THE UI STYLE DRAWS ITS OWN WINDOWS");
     else if (opt == OPT_SURFMUSIC)
         snprintf(ascii, sizeof(ascii), "OFF: THE MAP'S SONG SURFING AND DIVING");
     else if (opt == OPT_BADGEFADE)

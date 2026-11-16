@@ -399,13 +399,12 @@ class BWPack:
                          y0 + by + (bh - wd.height + 1) // 2, cond=cond, unless=unless)
             self.text(sp, '{%d}' % (U.F_ITEM0 + field), x0 + bx + bw_ // 2, y0 + by + 5, self.fm, ink, sh, align=2,
                       unless=U.C_STDCMD)
+        # (the chosen command: a pink ring round its button's own six-sided shape: bw.py command_rings)
+        rings = st.command_rings(w, h)
         for key, (c, rr, field) in place.items():
-            bx, bw_ = cols[c]
-            by = 0 if rr == 0 else h - bh
-            arc = Image.new('RGBA', (240, 160), (0, 0, 0, 0))
-            st.arcs(arc, x0 + bx, y0 + by, x0 + bx + bw_, y0 + by + bh, out=4)
-            ab = arc.getbbox()
-            self.img(sp, 'bw.arc.%s' % key, arc.crop(ab), ab[0], ab[1], cond=U.C_SEL0 << field)
+            ring = rings[key]
+            rb = ring.getbbox()
+            self.img(sp, 'bw.arc.%s' % key, ring.crop(rb), x0 + rb[0], y0 + rb[1], cond=U.C_SEL0 << field)
 
     def type_button(self, kind, w, h):
         st = self.st
@@ -447,12 +446,12 @@ class BWPack:
             bx, by = x0 + (i % 2) * 80, y0 + (i // 2) * 24
             sp.add(U.OP_IMGSEL, x=bx, y=by, a=base[0], b=U.F_ITEM0 + 8 + i)
             self.text(sp, '{%d}' % (U.F_ITEM0 + i), bx + bw_ // 2, by + 5, self.fs, ink, sh, align=2)
+        # (the chosen move: the pink ring round its oval: bw.py move_rings)
+        rings = st.move_rings(x1 - x0, y1 - y0, bw_, bh_)
         for i in range(4):
-            bx, by = x0 + (i % 2) * 80, y0 + (i // 2) * 24
-            arc = Image.new('RGBA', (240, 160), (0, 0, 0, 0))
-            st.arcs(arc, bx, by, bx + bw_, by + bh_, out=4)
-            ab = arc.getbbox()
-            self.img(sp, 'bw.marc.%d' % i, arc.crop(ab), ab[0], ab[1], cond=U.C_SEL0 << i)
+            ring = rings[i]
+            rb = ring.getbbox()
+            self.img(sp, 'bw.marc.%d' % i, ring.crop(rb), x0 + rb[0], y0 + rb[1], cond=U.C_SEL0 << i)
         mx0, my0, mx1, my1 = Lo.MOVE_INFO
         self.img(sp, 'bw.ground.info', ground.crop((0, 0, mx1 - mx0, my1 - my0)), mx0, my0)
         info = [p.image('bw.info.%d' % t, self.type_button(k, mx1 - mx0, my1 - my0)) for t, k in enumerate(TYPES)]
@@ -656,7 +655,7 @@ class BWPack:
         for k, frame in ((0, 4), (1, 5)):
             ar, _, _ = st.cell(T, 21, st.tiles(T, 20), st.pal(T, 19), frame)
             ar = ar.crop(ar.getbbox())
-            BW.paste(ground, ar, 4 if k == 0 else 100 - ar.width, 84 - ar.height // 2)
+            BW.paste(ground, ar, 4 if k == 0 else 100 - ar.width, st.BAG_PIC_Y - ar.height // 2)
         px = ground.load()
         n = len(POCKETS)
         for i in range(n):
@@ -664,24 +663,27 @@ class BWPack:
             for dy in range(4):
                 for dx in range(4):
                     if dx in (0, 3) or dy in (0, 3):
-                        px[x + dx, 82 + dy] = lab + (255,)
+                        px[x + dx, st.BAG_MARKS_Y + dy] = lab + (255,)
         st.text(ground, 232, 92, 'START: SORT', lab, lsh, 's', 'r')
         BW.paste(ground, st.balloon(240, 56), 0, 104)
         sp = U.Spec('bag')
         self.img(sp, 'bw.bag.ground', ground)
         self.text(sp, '{%d}' % U.F_TITLE, 52, 4, self.fm, lab, lsh, align=2)
-        first = None
-        for i, name in enumerate(POCKETS):
-            ic = st.pocket_icon(name, True)
-            c = Image.new('RGBA', (64, 48), (0, 0, 0, 0))
-            c.alpha_composite(ic, (32 - ic.width // 2, 24 - ic.height // 2))
-            k = p.image('bw.bag.pocket%d' % i, c)
-            first = k if first is None else first
-            assert k == first + i
-        sp.add(U.OP_IMGSEL, x=52 - 32, y=50 - 24, a=first, b=U.F_CUR)
+        # (the pocket's picture, whole: HILBERT's bag, or HILDA's tote for a girl)
+        for sex in (0, 1):
+            first = None
+            for i, name in enumerate(POCKETS):
+                ic = st.pocket_icon(name, True, female=bool(sex))
+                c = Image.new('RGBA', (64, 84), (0, 0, 0, 0))
+                c.alpha_composite(ic, (32 - ic.width // 2, 42 - ic.height // 2))
+                k = p.image('bw.bag.pocket%d.%d' % (sex, i), c)
+                first = k if first is None else first
+                assert k == first + i
+            g = dict(cond=U.C_FEMALE) if sex else dict(unless=U.C_FEMALE)
+            sp.add(U.OP_IMGSEL, x=52 - 32, y=st.BAG_PIC_Y - 42, a=first, b=U.F_CUR, **g)
         dot = Image.new('RGBA', (2, 2), lab + (255,))
         for i in range(n):
-            self.img(sp, 'bw.bag.mark', dot, 52 - (n * 7) // 2 + i * 7 + 1, 83, cond=U.C_SEL0 << i)
+            self.img(sp, 'bw.bag.mark', dot, 52 - (n * 7) // 2 + i * 7 + 1, st.BAG_MARKS_Y + 1, cond=U.C_SEL0 << i)
         self.img(sp, 'bw.bag.down', st.wedge(), 112, 95, cond=U.S_DOWN)
         self.img(sp, 'bw.bag.up', st.wedge(True), 112, 1, cond=U.S_UP)
         sp.add(U.OP_ICON, x=22, y=132, a=1)
@@ -985,7 +987,10 @@ class BWPack:
             sp = U.Spec('sum.%d' % k)
             header(sp, k, g)
             if k == 4:
-                sp.add(U.OP_LIST, x=8, y=19, h=0, n=1)
+                # (the lines on the lined page's own rows, 16 apart, from the margin the other pages' words keep;
+                # the ball at the right, between its first two rows)
+                sp.add(U.OP_LIST, x=16, y=19, h=0, n=16)
+                sp.add(U.OP_ICON, x=214, y=39, a=4)
             else:
                 sp.add(U.OP_MSG, x=8, y=20, a=3, h=16, n=8, w=224, e=self.fs + 1, font=self.fm, ink=ink, shadow=sh)
                 self.text(sp, '{%d}' % U.F_JPAGE, 232, 148, self.fs, ink, sh, align=1, cond=U.S_DOWN)

@@ -576,7 +576,8 @@ class FireRed(Style):
         paste(im, a._tilemap('item_menu/bg.png', 'item_menu/bg.bin', png_pal(bg), 32, 20), 0, 0)
         bagpic = a._sheet('interface/bag_male.png', png_pal(Image.open(os.path.join(self.g, 'interface',
                                                                                        'bag_male.png'))))
-        paste(im, bagpic.crop((0, 0, 64, 64)), 40 - 32, 68 - 32)
+        # (the BAG open on the ITEMS side for KAI's MEDICINE: item_menu_icons.c sAnims_Bag's frame 2)
+        paste(im, bagpic.crop((0, 128, 64, 192)), 40 - 32, 68 - 32)
         # the pocket's name on the band, KAI's eight pockets as the band's arrows and a row of pips
         self.text(im, 44, 9, BAG_POCKET, *WHITE, align='c')
         self.arrow(im, 8 - 8, 72 - 8, left=True)       # (item_menu.c sPocketSwitchArrowPairTemplate)
@@ -597,7 +598,7 @@ class FireRed(Style):
         self.text(im, kx + 2, 89, 'SORT', font='s')
         ic = item_icon(self.export, BAG_ITEMS[0][2])
         if ic:
-            paste(im, ic, 6, 120)
+            paste(im, ic, 24 - 16, 140 - 16)     # (item_menu_icons.c: the icon's sprite at 24, 140)
         for i, ln in enumerate(wrap_px(' '.join(BAG_DESC), 196, lambda t: self.measure(t))[:3]):
             self.text(im, 40, 115 + 14 * i, ln, *WHITE)
 

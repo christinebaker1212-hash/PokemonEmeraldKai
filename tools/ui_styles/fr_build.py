@@ -377,7 +377,6 @@ class FRPack:
         ground.paste(a._tilemap('item_menu/bg.png', 'item_menu/bg.bin', F.png_pal(bg), 32, 20), (0, 0))
         bagpic = a._sheet('interface/bag_male.png', F.png_pal(Image.open(os.path.join(st.g, 'interface',
                                                                                          'bag_male.png'))))
-        F.paste(ground, bagpic.crop((0, 0, 64, 64)), 40 - 32, 68 - 32)
         st.arrow(ground, 8 - 8, 72 - 8, left=True)
         st.arrow(ground, 72 - 8, 72 - 8, left=False)
         kx = st.key(ground, 160, 91, 'START')
@@ -385,6 +384,32 @@ class FRPack:
         sp = U.Spec('bag')
         self.img(sp, 'fr.bag.ground', ground)
         self.text(sp, '{%d}' % U.F_TITLE, 44, 9, F.WHITE, align=2)
+        # the picture for the pocket: the BAG open where item_menu_icons.c sAnims_Bag opens it (frame 1 the POKé
+        # BALLS', 2 the ITEMS', 3 the KEY ITEMS'), the TM CASE's disc (tm_case/disc.png, NORMAL's colours) for TMs &
+        # HMs, the BERRY POUCH (berry_pouch.png) for BERRIES; KAI's other pockets the ITEMS side
+        disc = Image.open(os.path.join(st.g, 'tm_case', 'disc.png')).convert('L')
+        dpal = F.jasc(os.path.join(st.g, 'tm_case', 'disc_types_1.pal'))
+        discpic = Image.new('RGBA', (32, 32), (0, 0, 0, 0))
+        dp, dq = disc.load(), discpic.load()
+        for yy in range(32):
+            for xx in range(32):
+                v = dp[xx, yy] // 17
+                if v:
+                    dq[xx, yy] = dpal[v][:3] + (255,)
+        pouch = Image.open(os.path.join(st.g, 'berry_pouch', 'berry_pouch.png'))
+        pouch = a._sheet('berry_pouch/berry_pouch.png', F.png_pal(pouch)).crop((0, 0, 64, 64))
+        # (the BAG is the player's own: item_menu_icons.c gSpriteSheet_BagMale / BagFemale by gSaveBlock2 gender)
+        frames = [2, 2, 1, None, None, 2, 3, 2]
+        for sex, png in ((0, 'bag_male.png'), (1, 'bag_female.png')):
+            sheet = a._sheet('interface/' + png, F.png_pal(Image.open(os.path.join(st.g, 'interface', png))))
+            for i, fr_ in enumerate(frames):
+                if fr_ is not None:
+                    g = dict(cond=U.C_SEL0 << i | U.C_FEMALE) if sex else dict(cond=U.C_SEL0 << i,
+                                                                               unless=U.C_FEMALE)
+                    self.img(sp, 'fr.bag.pic%d.%d' % (sex, fr_), sheet.crop((0, fr_ * 64, 64, fr_ * 64 + 64)),
+                             40 - 32, 68 - 32, **g)
+        self.img(sp, 'fr.bag.disc', discpic, 40 - 16, 68 - 16, cond=U.C_SEL0 << 3)
+        self.img(sp, 'fr.bag.pouch', pouch, 40 - 32, 68 - 32, cond=U.C_SEL0 << 4)
         for i in range(8):
             x = 8 + i * 9
             pip = Image.new('RGBA', (6, 6), (98, 98, 98, 255))
@@ -397,7 +422,7 @@ class FRPack:
         st.arrow(chev, 0, 0, left=True)
         self.img(sp, 'fr.o.up', chev.transpose(Image.ROTATE_270), 152, 0, cond=U.S_UP)
         self.img(sp, 'fr.o.down', chev.transpose(Image.ROTATE_90), 136, 92, cond=U.S_DOWN)
-        sp.add(U.OP_ICON, x=22, y=136, a=1)
+        sp.add(U.OP_ICON, x=24, y=140, a=1)     # (item_menu_icons.c: the item's icon at 24, 140)
         sp.add(U.OP_MSG, x=40, y=115, a=0, h=14, n=3, w=196, font=self.fn, ink=F.WHITE[0], shadow=F.WHITE[1])
         sp.add(U.OP_LIST, x=0, y=10, h=16, n=5)
         p.spec(sp)
@@ -591,22 +616,25 @@ class FRPack:
         sp = U.Spec('sum.1')
         self.img(sp, 'fr.sum.skills', ground(1, overlay=['page_skills.bin']))
         common(sp, 1)
-        self.text(sp, '{%d}/{%d}' % (U.F_HP, U.F_MAXHP), 236, 21, ink, align=1, unless=U.SM_IV | U.SM_EV)
+        # (each number in the middle of its pale box: HP's x 165-237, the stats' 201-237, the boxes 11 rows tall
+        # from y 21 / 39, 13 apart; the digits' 10 rows with their shadow one row in)
+        self.text(sp, '{%d}/{%d}' % (U.F_HP, U.F_MAXHP), 201, 19, ink, align=2, unless=U.SM_IV | U.SM_EV)
         sp.add(U.OP_IMGSEL, x=212, y=24, a=stars[0], b=U.F_IV0, cond=U.SM_IV)
-        self.text(sp, '{%d}' % U.F_EV0, 236, 21, ink, align=1, cond=U.SM_EV)
+        self.text(sp, '{%d}' % U.F_EV0, 201, 19, ink, align=2, cond=U.SM_EV)
         for i in range(5):
-            y = 40 + 13 * i
-            self.text(sp, '{%d}' % (U.F_STAT0 + i), 236, y, red, align=1, cond=U.C_SEL0 << i,
+            y = 38 + 13 * i
+            self.text(sp, '{%d}' % (U.F_STAT0 + i), 219, y, red, align=2, cond=U.C_SEL0 << i,
                       unless=U.SM_IV | U.SM_EV)
-            self.text(sp, '{%d}' % (U.F_STAT0 + i), 236, y, blue, align=1, cond=U.C_SEL0 << (5 + i),
+            self.text(sp, '{%d}' % (U.F_STAT0 + i), 219, y, blue, align=2, cond=U.C_SEL0 << (5 + i),
                       unless=U.SM_IV | U.SM_EV)
-            self.text(sp, '{%d}' % (U.F_STAT0 + i), 236, y, ink, align=1,
+            self.text(sp, '{%d}' % (U.F_STAT0 + i), 219, y, ink, align=2,
                       unless=U.SM_IV | U.SM_EV | (U.C_SEL0 << i) | (U.C_SEL0 << (5 + i)))
-            sp.add(U.OP_IMGSEL, x=210, y=y + 3, a=stars[0], b=U.F_IV0 + 1 + i, cond=U.SM_IV)
-            self.text(sp, '{%d}' % (U.F_EV0 + 1 + i), 236, y, ink, align=1, cond=U.SM_EV)
-        self.text(sp, '{%d}' % U.F_EXPPTS, 236, 105, ink, align=1)
-        self.text(sp, 'NEXT LV.', 170, 119, ink, 's')
-        self.text(sp, '{%d}' % U.F_NEXTLV, 236, 117, ink, align=1)
+            sp.add(U.OP_IMGSEL, x=210, y=y + 5, a=stars[0], b=U.F_IV0 + 1 + i, cond=U.SM_IV)
+            self.text(sp, '{%d}' % (U.F_EV0 + 1 + i), 219, y, ink, align=2, cond=U.SM_EV)
+        # (EXP. POINTS on its band above the line at y 116, NEXT LV. under it: the label on the number's line)
+        self.text(sp, '{%d}' % U.F_EXPPTS, 233, 103, ink, align=1)
+        self.text(sp, 'NEXT LV.', 170, 117, ink, 's')
+        self.text(sp, '{%d}' % U.F_NEXTLV, 233, 117, ink, align=1)
         self.text(sp, '{%d}' % U.F_ABILITY, 72, 130, ink, w=78, b=self.fs + 1)
         sp.add(U.OP_MSG, x=8, y=144, a=0, h=14, n=1, w=228, e=self.fs + 1, font=self.fn, ink=ink[0], shadow=ink[1])
         clear = Image.new('RGBA', (240, 160), (0, 0, 0, 0))
@@ -624,20 +652,46 @@ class FRPack:
             F.paste(info, mv.crop((120, 0, 240, 160)), 120, 0)
             if contest:
                 # (APPEAL and JAM where POWER and ACCURACY are: their pills' words written again)
+                # (the label pills drawn afresh as FireRed's are made: the word's letters, a dark outline round
+                # them and the dark bar through their middle; the old words' pills covered first)
                 pill = self.fr_icon(0xC0, 40)
+                pp = pill.load()
+                dark = next(pp[xx, yy] for yy in range(12) for xx in range(40) if pp[xx, yy][3]
+                            and sum(pp[xx, yy][:3]) < 200)
+                light = next(pp[xx, yy] for yy in range(12) for xx in range(40) if pp[xx, yy][3]
+                             and sum(pp[xx, yy][:3]) >= 450)
+                under = info.crop((6, 58, 46, 58 + 26))
                 for word, y in (('APPEAL', 58), ('JAM', 72)):
-                    pl = pill.copy()
+                    # (what was under the old pill: the panel's own colour beside it)
+                    bg = info.getpixel((5, y + 6))
+                    info.paste(bg, (6, y, 46, y + 12))
+                    letters = Image.new('RGBA', (40, 12), (0, 0, 0, 0))
+                    st.text(letters, (40 - st.measure(word, 's')) // 2, -1, word, light[:3], None, font='s')
+                    lp = letters.load()
+                    pl = Image.new('RGBA', (40, 12), (0, 0, 0, 0))
                     px = pl.load()
-                    from collections import Counter
-                    cols = Counter(px[xx, yy] for yy in range(12) for xx in range(40) if px[xx, yy][3])
-                    body = cols.most_common(1)[0][0]
-                    for yy in range(1, 11):
-                        for xx in range(2, 38):
-                            if px[xx, yy][3] and px[xx, yy] != body and px[xx - 1, yy][3] and px[xx + 1, yy][3] \
-                                    and px[xx, yy - 1][3] and px[xx, yy + 1][3]:
-                                px[xx, yy] = body
-                    st.text(pl, (40 - st.measure(word, 's')) // 2, -2, word, (255, 255, 255), (98, 98, 98), font='s')
+                    for yy in range(4, 9):
+                        for xx in range(0 if 5 <= yy <= 7 else 1, 40 if 5 <= yy <= 7 else 39):
+                            px[xx, yy] = dark
+                    for yy in range(12):
+                        for xx in range(40):
+                            if lp[xx, yy][3]:
+                                for dy in (-1, 0, 1):
+                                    for dx in (-1, 0, 1):
+                                        if 0 <= xx + dx < 40 and 0 <= yy + dy < 12 and not lp[xx + dx, yy + dy][3]:
+                                            px[xx + dx, yy + dy] = dark
+                    for yy in range(12):
+                        for xx in range(40):
+                            if lp[xx, yy][3]:
+                                px[xx, yy] = light
                     F.paste(info, pl, 6, y)
+                    # (the value's white box made long enough for eight hearts: its own rows carried on to x 114)
+                    ip = info.load()
+                    for yy in range(y, y + 11):
+                        ends = [xx for xx in range(46, 90) if ip[xx, yy][:3] == (246, 255, 255)]
+                        if ends:
+                            for xx in range(ends[-1] + 1, ends[-1] + 1 + (114 - 82)):
+                                ip[xx, yy] = ip[ends[-1], yy]
             self.img(sp, 'fr.sum.moves%di' % k, info, cond=U.SM_CHOOSING)
             common(sp, k, pic=False)
             sp.add(U.OP_ICON, x=60, y=64, a=0, unless=U.SM_CHOOSING)
@@ -708,7 +762,8 @@ class FRPack:
                 sp.add(U.OP_LIST, x=12, y=24, h=0, n=1)
             else:
                 common(sp, k, pic=False, row=(12, 24, F.STD, F.MALE, F.FEMALE))
-                sp.add(U.OP_LIST, x=10, y=40, h=14, n=7)
+                sp.add(U.OP_MSG, x=12, y=40, a=3, h=14, n=7, w=216, e=self.fs + 1, font=self.fn, ink=F.STD[0],
+                       shadow=F.STD[1])
                 self.text(sp, '{%d}' % U.F_JPAGE, 228, 139, F.STD, 's', align=1, cond=U.S_DOWN)
             p.spec(sp)
             row = U.Spec('sum.%d.row' % k)

@@ -15,7 +15,7 @@ from common import (BAG_DESC, BAG_ITEMS, BAG_POCKET, OPTION_ROWS, OPTION_TABS, S
 CODES = {**{chr(65 + i): 0x80 + i for i in range(26)}, **{chr(97 + i): 0xA0 + i for i in range(26)},
          **{str(i): 0xF6 + i for i in range(10)}, '(': 0x9A, ')': 0x9B, ':': 0x9C, ';': 0x9D, '[': 0x9E, ']': 0x9F,
          'é': 0xBA, "'": 0xE0, '-': 0xE3, '?': 0xE6, '!': 0xE7, '.': 0xE8, '▶': 0xED, '▼': 0xEE, '♂': 0xEF,
-         '¥': 0xF0, '×': 0xF1, '/': 0xF3, ',': 0xF4, '♀': 0xF5, '&': 0xE7,
+         '¥': 0xF0, '×': 0xF1, '/': 0xF3, ',': 0xF4, '♀': 0xF5,
          '’': 0xE0, '‘': 0xE0}   # (the game's ' is its ’)
 
 
@@ -89,11 +89,14 @@ class GB(Style):
     # letters KAI's words use that the Game Boy fonts don't have, drawn in their thin strokes
     SYNTH = {'+': ('........', '........', '...#....', '...#....', '.#####..', '...#....', '...#....', '........'),
              '=': ('........', '........', '........', '.######.', '........', '.######.', '........', '........'),
-             '%': ('........', '.##...#.', '.##..#..', '....#...', '...#....', '..#..##.', '.#...##.', '........')}
+             '%': ('........', '.##...#.', '.##..#..', '....#...', '...#....', '..#..##.', '.#...##.', '........'),
+             '&': ('..##....', '.#..#...', '.#..#...', '..##....', '.#..#.#.', '.#...#..', '..###.#.', '........')}
 
     def glyph(self, ch):
         if ch == '◀':
             return self.font[0xED - 0x80].transpose(Image.FLIP_LEFT_RIGHT)
+        if ch == '&' and self.kind == 'crystal':
+            return self.font[0xE9 - 0x80]   # (Crystal's own &: charmap.asm $E9)
         if ch in self.SYNTH:
             t = Image.new('L', (8, 8), 255)
             for y, row in enumerate(self.SYNTH[ch]):
@@ -544,9 +547,13 @@ class GB(Style):
                                     ('MET/', 'INSIDE OF TRUCK')]):
             self.at(im, 1, 10 + 3 * k, a)
             self.at(im, 2, 11 + 3 * k, v)
-        for k, (a, v) in enumerate([('TYPE1/', s['type']), ('IDNo/', s['idno']), ('OT/', s['ot'])]):
-            self.at(im, 20, 10 + 3 * k, a)
-            self.at(im, 21 if k == 0 else 22, 11 + 3 * k, v)
+        # (TYPE1/, then TYPE2/ for a second type (TORCHIC has none), IDNo/, OT/: two rows each, as RED's)
+        for k, row in enumerate([('TYPE1/', s['type']), None, ('IDNo/', s['idno']), ('OT/', s['ot'])]):
+            if row is None:
+                continue
+            a, v = row
+            self.at(im, 20, 10 + 2 * k, a)
+            self.at(im, 21 if k == 0 else 22, 11 + 2 * k, v)
         self.line_box(im, 29, 10, 19, 19)
 
     def stats_crystal(self, im):
@@ -626,11 +633,11 @@ class GB(Style):
         for col in range(20):
             GB.tile(self, im, menu[0x28 + col], col * 8, 0, self.paper, (16, 16, 24))
         self.at(im, 20, 0, 'START:SORT', self.paper)
-        pic = self.gbc_picture(self.pack_png, blue, (0, 0, 40, 24))
+        pic = self.gbc_picture(self.pack_png, blue, (0, 24, 40, 48))     # (PackGFX frame 1: the ITEM pocket's)
         paste(im, pic, 3 * 8 - 4 + 4, 3 * 8)
         self.fill(im, (0, 7 * 8, 10 * 8, 8 * 8), self.paper)
         self.at(im, (10 - len(BAG_POCKET)) // 2, 7, BAG_POCKET)
-        self.fill(im, (10 * 8, 8, W, 11 * 8), self.paper)
+        self.fill(im, (10 * 8, 8, W, 12 * 8), self.paper)
         for i, (n, q, _it) in enumerate(BAG_ITEMS):
             self.at(im, 12, 2 + 2 * i, n)
             self.at(im, 26, 3 + 2 * i, '×%2d' % q)

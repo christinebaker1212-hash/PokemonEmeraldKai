@@ -404,20 +404,36 @@ class GBPack:
             col_name, col_qty, col_cur = 6, 24, 5
         else:
             import os
-            ground = Image.new('RGBA', (240, 160), (120, 152, 248, 255))
-            ground.paste((16, 16, 24, 255), (0, 0, 240, 8))
+            # (CHRIS's PACK on blue, KRIS's on pink: cgb_layouts.asm _CGB_PackPals by wPlayerGender, gfx/pack/pack.pal
+            # and pack_f.pal; the picture for the pocket as pack.asm DrawPackGFX picks it: PackGFX's frame 1 the
+            # ITEM pocket's, 3 the BALL pocket's, 0 the KEY ITEM pocket's, 2 the TM/HM pocket's)
             menu = st._tiles(os.path.join(st.pret, 'gfx', 'pack', 'pack_menu.png'))
-            for col in range(20):
-                GB.tile(st, ground, menu[0x28 + col], col * 8, 0, st.paper, (16, 16, 24))
-            st.at(ground, 20, 0, 'START:SORT', st.paper)
-            blue = [(248, 248, 248), (120, 152, 248), (24, 56, 200), (16, 16, 24)]
-            pic = st.gbc_picture(st.pack_png, blue, (0, 0, 40, 24))
-            ground.alpha_composite(pic, (24, 24))
-            st.fill(ground, (0, 56, 80, 64), st.paper)
-            st.fill(ground, (80, 8, 240, 88), st.paper)
-            st.window(ground, (0, 96, 240, 160))
-            sp.add(U.OP_IMG, a=p.image('crystal.bag.ground', ground))
-            self.text(sp, '{%d}' % U.F_TITLE, 40, 56, align=3)
+            frames = [1, 1, 3, 2, 1, 1, 0, 1]     # (KAI's ITEMS, MEDICINE, POKé BALLS, TMs & HMs, BERRIES, ...)
+            for sex, png, cols in ((0, 'pack.png', [(248, 248, 248), (120, 152, 248), (24, 56, 200), (16, 16, 24)]),
+                                   (1, 'pack_f.png', [(248, 248, 248), (240, 136, 224), (208, 64, 192),
+                                                      (16, 16, 24)])):
+                ground = Image.new('RGBA', (240, 160), cols[1] + (255,))
+                ground.paste((16, 16, 24, 255), (0, 0, 240, 8))
+                for col in range(20):
+                    GB.tile(st, ground, menu[0x28 + col], col * 8, 0, st.paper, (16, 16, 24))
+                st.at(ground, 20, 0, 'START:SORT', st.paper)
+                st.fill(ground, (0, 56, 80, 64), st.paper)
+                st.fill(ground, (80, 8, 240, 96), st.paper)   # (to the box: the fifth row's count on row 11)
+                st.window(ground, (0, 96, 240, 160))
+                g = dict(cond=U.C_FEMALE) if sex else dict(unless=U.C_FEMALE)
+                sp.add(U.OP_IMG, a=p.image('crystal.bag.ground%d' % sex, ground), **g)
+                for i, k in enumerate(frames):
+                    pic = st.gbc_picture(os.path.join(st.pret, 'gfx', 'pack', png), cols, (0, 24 * k, 40, 24 * k + 24))
+                    c = dict(g)
+                    c['cond'] = c.get('cond', 0) | (U.C_SEL0 << i)
+                    sp.add(U.OP_IMG, x=24, y=24, a=p.image('crystal.bag.pack%d.%d' % (sex, k), pic), **c)
+            # (the pocket's name on its strip under the PACK; one too long for its ten columns on two lines)
+            sp.add(U.OP_LONG, a=U.F_TITLE, font=self.font, w=80)
+            self.text(sp, '{%d}' % U.F_TITLE, 40, 56, align=3, unless=U.C_LONG)
+            strip = Image.new('RGBA', (80, 8), st.paper + (255,))
+            sp.add(U.OP_IMG, x=0, y=64, a=p.image('crystal.bag.strip', strip), cond=U.C_LONG)
+            sp.add(U.OP_MSG, x=0, y=56, a=1, h=8, n=2, w=80, align=3, font=self.font, ink=st.ink, shadow=st.mid,
+                   cond=U.C_LONG)
             self.text(sp, '▼', 232, 80, cond=U.S_DOWN)
             sp.add(U.OP_MSG, x=8, y=104, a=0, h=16, n=3, w=224, b=8, c=6, d=104, font=self.font, ink=st.ink,
                    shadow=st.mid)
@@ -594,12 +610,17 @@ class GBPack:
                                            ('MET/', U.F_METPLACE)]):
                 st.at(g, 1, 10 + 3 * j, lab)
                 at(sp, 2, 11 + 3 * j, '{%d}' % fld)
-            for j, (lab, fld) in enumerate([('TYPE1/', None), ('IDNo/', U.F_IDNO), ('OT/', U.F_OT)]):
-                st.at(g, 20, 10 + 3 * j, lab)
+            # (as RED's status screen: TYPE1/, TYPE2/ when there's a second, IDNo/, OT/, two rows each)
+            for j, (lab, fld) in enumerate([('TYPE1/', None), (None, None), ('IDNo/', U.F_IDNO), ('OT/', U.F_OT)]):
+                if lab is None:
+                    at(sp, 20, 10 + 2 * j, 'TYPE2/', cond=U.SM_TWOTYPES)
+                    sp.add(U.OP_IMGSEL, x=21 * 8, y=(11 + 2 * j) * 8, a=types, b=U.F_TYPE2, cond=U.SM_TWOTYPES)
+                    continue
+                st.at(g, 20, 10 + 2 * j, lab)
                 if fld is None:
                     sp.add(U.OP_IMGSEL, x=21 * 8, y=11 * 8, a=types, b=U.F_TYPE1)
                 else:
-                    at(sp, 22, 11 + 3 * j, '{%d}' % fld)
+                    at(sp, 22, 11 + 2 * j, '{%d}' % fld)
             st.line_box(g, 29, 10, 19, 19)
         else:
             for row in range(8, 20):
@@ -611,6 +632,7 @@ class GBPack:
             status(sp, 1, 13)
             st.at(g, 0, 15, 'TYPE/')
             sp.add(U.OP_IMGSEL, x=8, y=16 * 8, a=types, b=U.F_TYPE1)
+            sp.add(U.OP_IMGSEL, x=8, y=17 * 8, a=types, b=U.F_TYPE2, cond=U.SM_TWOTYPES)   # (the second under it)
             for j, (lab, fld) in enumerate([('ABILITY/', U.F_ABILITY), ('NATURE/', U.F_NATURE),
                                            ('MET/', U.F_METPLACE)]):
                 st.at(g, 10, 9 + 3 * j, lab)

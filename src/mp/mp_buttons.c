@@ -13,6 +13,7 @@
 #include "constants/characters.h"
 #include "platform/gamepad.h"
 #include "mp_buttons_data.h"
+#include "mp_uistyle.h"
 
 #define ICON_CELL_H 12   // the GBA icons' height (what the text engine is told)
 extern u8 gMpIconFont;   // the font of the text being printed (text.c)
@@ -285,5 +286,7 @@ static void DrawIconAt(u8 windowId, int icon, u16 x, u16 y, bool8 plain, int ove
             *b |= (i & 1) ? v << 4 : v;
         }
     }
+    gMpUiTextBlit++;   // (a button in the words: the UI STYLE writes it as letters)
     BlitBitmapRectToWindow(windowId, sBuf, 0, 0, 16, 16, x, y, w, h);
+    gMpUiTextBlit--;
 }

@@ -3602,6 +3602,7 @@ static void MpJournal_ShowPage(void)
         CopyWindowToVram(sMpJournal->titleWindow, COPYWIN_FULL);
     }
     sMpJournal->page = 0;
+    MP_UiStyle_JournalReset();
     MpJournal_Build();
     MpJournal_Draw();
     MPNet_Log("journal: shown, %u rows, %u pages", sMpJournal->rowCount, sMpJournal->pages);
@@ -3624,6 +3625,7 @@ static void MpJournal_PrintPage(void)
     if (sMpJournal && sMonSummaryScreen->currPageIndex == PSS_PAGE_JOURNAL)
     {
         sMpJournal->page = 0;
+        MP_UiStyle_JournalReset();
         MpJournal_Build();
         MpJournal_Draw();
     }
@@ -3649,6 +3651,11 @@ static bool8 MpJournal_HandleInput(u8 taskId)
 {
     if (sMpJournal == NULL || !JOY_NEW(A_BUTTON))
         return FALSE;
+    if (MP_UiStyle_JournalNext())
+    {
+        PlaySE(SE_SELECT);   // (a UI STYLE lays the JOURNAL out in its own pages)
+        return TRUE;
+    }
     if (sMpJournal->pages <= 1)
         return TRUE;
     sMpJournal->page = (sMpJournal->page + 1) % sMpJournal->pages;
@@ -5801,8 +5808,12 @@ void MP_Summary_Words(struct MpSummaryWords *w)
     // the move picked (choosing one): its power, accuracy and words, or its appeal and jam
     if (sMonSummaryScreen->firstMoveIndex <= MAX_MON_MOVES)
     {
-        u16 move = w->move[sMonSummaryScreen->firstMoveIndex];
-        if (move != MOVE_NONE)
+        // (the fifth row is the move to learn, or CANCEL: nothing picked)
+        u16 move = sMonSummaryScreen->firstMoveIndex < MAX_MON_MOVES || sMonSummaryScreen->mode == SUMMARY_MODE_SELECT_MOVE
+                 ? w->move[sMonSummaryScreen->firstMoveIndex] : MOVE_NONE;
+        StringCopy(w->power, gText_ThreeDashes);
+        StringCopy(w->accuracy, gText_ThreeDashes);
+        if (move != MOVE_NONE && move < MOVES_COUNT)
         {
             base = IS_MAKER_MOVE(move) && Maker_MoveBase(move) ? Maker_MoveBase(move) : move;
             if (gBattleMoves[move].power < 2)

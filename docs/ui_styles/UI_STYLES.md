@@ -121,5 +121,9 @@ tools/ui_styles/build_pack.py makes from the same mock-up code (uipack.py: the f
   its page NSCRs with the rows each page needs (pt.py summary_ground's pick: the move rows' light stripe whole and ten of
   the dark one's rows, PP in its special digits); BLACK on its INFO (screen 63), STATS (73) and lined (64) pages of
   a/0/7/8, the contest icons spelt from its type icons' own letters (bw_build.py contest_icon).
+- 1.200.3: a pop-up whose words wouldn't fit the style's letters, or that holds a picture or has sprites over it (the
+  CO-OP menu), keeps KAI's own inside in the style's frame; long descriptions page by themselves; the BAG's picture
+  follows the pocket and the player's gender (C_FEMALE) in each style that has one; BLACK's cursor is a ring traced
+  round the button's own shape (bw.py command_rings / move_rings). COOP_NOTES "UI STYLE (1.200.0)" has the details.
 - Tests: scenarios ui_style_battles, ui_style_screens (the summary's pages and OPTIONS in every style; shots looked at
-  by hand), check_specs.py for every style after any spec change.
+  by hand), ui_style_dpad, check_specs.py for every style after any spec change.

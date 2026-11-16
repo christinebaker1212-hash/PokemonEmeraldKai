@@ -28,11 +28,15 @@ void MP_UiStyle_Changed(void);           // OPTIONS changed it (its pack loaded 
 // the game's text printers (text.c AddTextPrinter, window.c FillWindowPixelBuffer): what each window prints
 void MP_UiStyle_TextPrinted(u8 windowId, const u8 *str);
 void MP_UiStyle_WindowFilled(u8 windowId);
+void MP_UiStyle_WindowPicture(u8 windowId);   // (a picture blitted into the window)
+extern u8 gMpUiTextBlit;   // (non-zero: the text printer's own blit, a ▼ or a button: not a picture)
 void MP_UiStyle_WindowGone(u8 windowId);  // (window.c RemoveWindow)
 void MP_UiStyle_TextRun(u8 windowId, const u8 *str, u8 x, u8 y, u8 fontId, u8 fg, u8 letterSpacing, u8 lineSpacing);   // (text.c)
 void MP_UiStyle_WindowRectFilled(u8 windowId, u16 x, u16 y, u16 w, u16 h);   // (window.c FillWindowPixelRect)
 void MP_UiStyle_WindowShown(u8 windowId, bool8 shown);   // (window.c Put / ClearWindowTilemap)
 void MP_UiStyle_Framed(u8 windowId, u8 kind);   // menu.c: its frame drawn (1 dialogue, 2 standard) or cleared (0)
+bool8 MP_UiStyle_JournalNext(void);   // the summary's JOURNAL: A turns the style's own pages
+void MP_UiStyle_JournalReset(void);
 enum { MP_UINAV_COMMAND, MP_UINAV_MOVES, MP_UINAV_PARTY };
 // a menu the style lays out other than KAI: its D-pad (NavOwn TRUE), the entry the D-pad in KEYS goes to from CUR
 // among the USABLE ones (a bit each), round the far end in WRAP
