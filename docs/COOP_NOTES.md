@@ -7938,6 +7938,15 @@ docs/ui_styles/UI_STYLES.md ("Building it" for the game's side).
   DAY 10-17 27,31,27, NITE 18-3 15,14,24). RED's and CRYSTAL's boxes don't bob on the player's turn (BattleHuds drops
   the healthbox's y2). Every style's drawing in battle shows only inside the intro's opening window (WIN0 / WIN1 while
   WINOUT hides BG0: ClipToBattleWindow), so the message box opens with the screen as Kai's does.
+- 1.201.2 / 1.201.3 (the user, 2026-11-17): a pop-up the style's letters widen grows only as far as its lines need
+  (the save's box went across the screen over its YES / NO). MENU POKéMON frames are centred across their 16 pixels
+  at build time (gb_build.py center_icon) and drawn without Kai's icon's bob. RED / CRYSTAL's SWITCH is theirs
+  (party_menu.c Task_GbSwitch, as pokered SwitchPartyMon / pokecrystal _SwitchPartyMons): the first row cleared
+  (MP_UiStyle_PartyBlank) with the swap sound, the second cleared at once, then, that sound done, the sound again as
+  both are drawn swapped; the sounds are Red's SFX_SWAP (a bank-1 sound, rendered from its own header) and Crystal's
+  SFX_SWITCH_POKEMON (tools/moemon_legacy/sfx_render.py, MP_LegacySfx_PlaySwap). A held item is Crystal's own 8 x 8
+  tile (gfx/stats/item.png / mail.png, kept in tools/ui_styles/data/; spec "helditem") in place of the icon's
+  bottom-left quarter as Crystal lays it, in RED too; with KAI's icons, where Kai's item sprite goes.
 Tests: ui_style_battles, ui_style_screens, ui_style_dpad, ui_style_party_battles, coop_move_swap;
 tools/ui_styles/check_specs.py.
 

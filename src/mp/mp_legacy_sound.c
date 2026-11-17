@@ -99,3 +99,13 @@ void MP_LegacySfx_Mix(float *buffer, s32 count)
     (void)count;
 #endif
 }
+
+// UI STYLE: RED's / CRYSTAL's party SWITCH sound (SFX_SWAP / SFX_SWITCH_POKEMON)
+void MP_LegacySfx_PlaySwap(bool8 crystal)
+{
+#ifdef HAVE_LEGACY_SFX
+    MP_LegacySfx_Play(crystal ? LEGACY_SFX_GSC_SWITCH_POKEMON : LEGACY_SFX_RED_SWAP, 0);
+#else
+    (void)crystal;
+#endif
+}

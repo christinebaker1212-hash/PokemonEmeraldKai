@@ -3257,6 +3257,40 @@ static void CursorCb_Switch(u8 taskId)
 #define tSlot1SlideDir data[10]
 #define tSlot2SlideDir data[11]
 
+// Moemon Kai: RED's / CRYSTAL's SWITCH (UI STYLE, the user 2026-11-17), as pokered SwitchPartyMon and pokecrystal
+// _SwitchPartyMons do it: the first one's row cleared and the swap sound played, the second's row cleared at once,
+// then, that sound done, the sound again as both are drawn swapped. No slide
+static u8 sGbSwitchStep;
+
+static void Task_GbSwitch(u8 taskId)
+{
+    bool8 crystal = MP_UiStyle_Active() == UISTYLE_CRYSTAL;
+    switch (sGbSwitchStep)
+    {
+    case 0:
+        MP_UiStyle_PartyBlank(1 << gPartyMenu.slotId);
+        MP_LegacySfx_PlaySwap(crystal);
+        sGbSwitchStep++;
+        break;
+    case 1:
+        MP_UiStyle_PartyBlank((1 << gPartyMenu.slotId) | (1 << gPartyMenu.slotId2));
+        sGbSwitchStep++;
+        break;
+    default:
+        if (MP_LegacySfx_Playing())
+            break;
+        MP_LegacySfx_PlaySwap(crystal);
+        SwitchPartyMon();
+        DisplayPartyPokemonData(gPartyMenu.slotId);
+        DisplayPartyPokemonData(gPartyMenu.slotId2);
+        MP_UiStyle_PartyBlank(0);
+        sGbSwitchStep = 0;
+        MPNet_Log("party: switched %d and %d (the Game Boy's way)", gPartyMenu.slotId, gPartyMenu.slotId2);
+        FinishTwoMonAction(taskId);
+        break;
+    }
+}
+
 static void SwitchSelectedMons(u8 taskId)
 {
     s16 *data = gTasks[taskId].data;
@@ -3265,6 +3299,11 @@ static void SwitchSelectedMons(u8 taskId)
     if (gPartyMenu.slotId2 == gPartyMenu.slotId)
     {
         FinishTwoMonAction(taskId);
+    }
+    else if (MP_UiStyle_GbSwitch())
+    {
+        sGbSwitchStep = 0;
+        gTasks[taskId].func = Task_GbSwitch;
     }
     else
     {

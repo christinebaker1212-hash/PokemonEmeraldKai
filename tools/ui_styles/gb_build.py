@@ -1,6 +1,8 @@
 """RED and CRYSTAL as the game draws them (uipack.py): gbstyle.py's pieces made into a pack's fonts, pictures and
 specs. Every spec puts things where gbstyle.py's mock-ups put them (approved 2026-11-16); check_specs.py draws both
 and compares them."""
+import os
+
 from PIL import Image
 
 import layout as Lo
@@ -804,6 +806,20 @@ class GBPack:
                 k = p.image('gbicon.%d.%d' % (i, f), center_icon(im))
                 base = k if base is None else base
                 assert k == base + 2 * i + f
+        # a held item: Crystal's own little tile (gfx/stats/item.png, mail.png), in place of the icon's bottom-left
+        # quarter as Crystal lays it (SPRITE_ANIM_OAMSET_PARTY_MON_WITH_ITEM); RED's too (the user, 2026-11-17)
+        held = U.Spec('helditem')
+        for n in ('item', 'mail'):
+            src = Image.open(os.path.join(os.path.dirname(os.path.abspath(__file__)), 'data',
+                                          'crystal_%s.png' % n)).convert('L')   # (pokecrystal gfx/stats)
+            im = Image.new('RGBA', (8, 8), (0, 0, 0, 0))
+            for y in range(8):
+                for x in range(8):
+                    v = gb_icons._shade(src.getpixel((x, y)))
+                    if v < 3:
+                        im.putpixel((x, y), cols[v] + (255,))
+            held.add(U.OP_IMG, a=p.image('gbheld.' + n, im))
+        p.spec(held)
         default = names.index('ICON_MON' if self.red else 'ICON_MONSTER')
         sp = U.Spec('icons')
         sp.add(U.OP_ICONSET, a=p.string(table + bytes([default])), b=base, c=len(frames), d=0)

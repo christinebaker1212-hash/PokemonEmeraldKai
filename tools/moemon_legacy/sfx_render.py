@@ -1032,8 +1032,10 @@ class RedEngine:
         self.w(0x24, 0x77)
 
     # Audio2_PlaySound .playSfx / .playSoundCommon (not a cry, nothing playing)
-    def play_sfx(self, sound_id):
-        hdr = self.headers2 + 3 * sound_id
+    def play_sfx(self, sound_id, hdr=None):
+        # (HDR: a sound of another bank's header table, its engine the same code: SFX_SWAP is only in bank 1)
+        if hdr is None:
+            hdr = self.headers2 + 3 * sound_id
         count = ((self.a.rd(hdr) & 0xC0) >> 6) + 1
         for i in reversed(range(count)):
             e = self.a.rd(hdr + 3 * i) & 0xF
@@ -1828,10 +1830,13 @@ SOUNDS = [
     ("GSC_BALL_BOUNCE",      "Gsc_BallBounce",    "gsc", "SFX_BALL_BOUNCE"),
     ("GSC_BALL_WOBBLE",      "Gsc_BallWobble",    "gsc", "SFX_BALL_WOBBLE"),
     ("GSC_CAUGHT_MON",       "Gsc_CaughtMon",     "gsc", "SFX_CAUGHT_MON"),
+    # (UI STYLE: RED's and CRYSTAL's party SWITCH, the user 2026-11-17; RED's is a bank-1 sound: the field engine's)
+    ("RED_SWAP",             "Red_Swap",          "red", "SFX_SWAP"),
+    ("GSC_SWITCH_POKEMON",   "Gsc_SwitchPokemon", "gsc", "SFX_SWITCH_POKEMON"),
 ]
 
 
-RED_SFX_FILES = ["ball_toss.asm", "tink_1.asm", "tink_2.asm", "tink_3.asm", "ball_poof.asm", "caught_mon.asm"]
+RED_SFX_FILES = ["ball_toss.asm", "tink_1.asm", "tink_2.asm", "tink_3.asm", "ball_poof.asm", "caught_mon.asm", "swap_1.asm"]
 
 
 def git_commit(path):
@@ -1884,9 +1889,12 @@ class RedData:
         apu = APU(record_freqs=True)
         eng = RedEngine(self.asm, apu, self.h2, self.pitches, self.asm.labels["Audio2_WavePointers"])
 
+        lab = self.ids[const][1]
+        hdr = None if self.asm.labels[lab] >= self.h2 else self.asm.labels[lab]   # (a bank-1 sound: its own header)
+
         def start(e):
             e.stop_all_audio()
-            e.play_sfx(sid)
+            e.play_sfx(sid, hdr)
         res = run_sound(eng, apu, start)
         return apu, res, bank2_label
 

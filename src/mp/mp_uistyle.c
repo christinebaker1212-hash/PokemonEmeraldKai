@@ -43,6 +43,8 @@
 #include "data.h"
 #include "mp.h"
 #include "mp_uistyle.h"
+#include "item.h"
+#include "mail.h"
 
 const char *Updater_ExeFile(const char *name);
 bool8 MP_StartMenu_State(u8 *actions, u8 *count, u8 *cursor, const u8 **names);
@@ -2188,6 +2190,33 @@ static bool8 PartyScreenShown(struct MpPartyState *st)
     return MP_UiStyle_Active() != UISTYLE_KAI && MP_PartyMenu_GetState(st) && PartyLayoutStyled(st->layout);
 }
 
+static u8 sPartyBlank;   // party slots shown blank (RED's / CRYSTAL's SWITCH clears each row in turn)
+
+void MP_UiStyle_PartyBlank(u8 mask)
+{
+    sPartyBlank = mask;
+}
+
+// RED / CRYSTAL: the party's SWITCH as theirs, row by row with their sound, not Emerald's slide (the user, 2026-11-17)
+bool8 MP_UiStyle_GbSwitch(void)
+{
+    u8 style = MP_UiStyle_Active();
+    return style == UISTYLE_RED || style == UISTYLE_CRYSTAL;
+}
+
+// A held item as Crystal shows it (spec "helditem": item, mail), its 8 x 8 tile with its top-left at X, Y
+static void DrawHeldTile(struct UiPack *p, struct Surf *s, u16 item, int x, int y)
+{
+    const struct UiSpec *sp = FindSpec(p, "helditem");
+    u16 k, n = 0, want = ItemIsMail(item) ? 1 : 0;
+    for (k = 0; sp && k < sp->nOps; k++)
+        if (sp->ops[k].kind == OP_IMG && n++ == want && sp->ops[k].a < p->nImg)
+        {
+            DrawImg(s, &p->img[sp->ops[k].a], x, y);
+            return;
+        }
+}
+
 static void PartyScreen(struct UiPack *p, u16 *frame)
 {
     struct MpPartyState st;
@@ -2240,7 +2269,7 @@ static void PartyScreen(struct UiPack *p, u16 *frame)
         snprintf(name, sizeof(name), "party.%d", i);
         places[i][0][0] = -1;
         slotSpec[i] = NULL;
-        if ((sp = FindSpec(p, name)) == NULL)
+        if ((sp = FindSpec(p, name)) == NULL || (sPartyBlank & (1 << i)))
             continue;
         memset(&d, 0, sizeof(d));
         if (species == SPECIES_NONE)
@@ -2318,19 +2347,53 @@ static void PartyScreen(struct UiPack *p, u16 *frame)
         static const s8 sItemDx = 4, sItemDy = 10;
         struct Sprite *mon = st.monSprite[i] < MAX_SPRITES ? &gSprites[st.monSprite[i]] : NULL;
         s16 mx, my;
+        u16 held;
+        bool8 styled;
         if (mon == NULL || !mon->inUse || places[i][0][0] < 0)
             continue;
         mx = places[i][0][0] - mon->x, my = places[i][0][1] - mon->y;
+        styled = FALSE;
+        held = FindSpec(p, "helditem") != NULL ? GetMonData(&gPlayerParty[i], MON_DATA_HELD_ITEM) : ITEM_NONE;
         {
             // (OPTIONS > DISPLAY > MENU POKéMON: the style's own icon, its two frames as Kai's icon turns its own)
             struct Surf is = {frame, NULL, DISPLAY_WIDTH, DISPLAY_HEIGHT, &fit};
             u8 fr = mon->anims ? mon->anims[mon->animNum][mon->animCmdIndex].frame.imageValue : 0;
-            if (!StyleMonIcon(p, &is, GetMonData(&gPlayerParty[i], MON_DATA_SPECIES),
-                              GetMonData(&gPlayerParty[i], MON_DATA_IS_EGG), fr, places[i][0][0],
-                              places[i][0][1]))   // (its own two frames carry its movement: not Kai's bob as well)
+            int qx = places[i][0][0] - 8, qy = places[i][0][1], r, c;
+            u16 under[8][8];
+            for (r = 0; r < 8; r++)
+                for (c = 0; c < 8; c++)
+                    under[r][c] = (qx + c >= 0 && qx + c < DISPLAY_WIDTH && qy + r >= 0 && qy + r < DISPLAY_HEIGHT)
+                                ? frame[(qy + r) * DISPLAY_WIDTH + qx + c] : 0;
+            if (StyleMonIcon(p, &is, GetMonData(&gPlayerParty[i], MON_DATA_SPECIES),
+                             GetMonData(&gPlayerParty[i], MON_DATA_IS_EGG), fr, places[i][0][0],
+                             places[i][0][1]))   // (its own two frames carry its movement: not Kai's bob as well)
+            {
+                if (held != ITEM_NONE)
+                {
+                    // (Crystal's: the item's tile in place of the icon's bottom-left quarter)
+                    for (r = 0; r < 8; r++)
+                        for (c = 0; c < 8; c++)
+                            if (qx + c >= 0 && qx + c < DISPLAY_WIDTH && qy + r >= 0 && qy + r < DISPLAY_HEIGHT)
+                                frame[(qy + r) * DISPLAY_WIDTH + qx + c] = under[r][c];
+                    DrawHeldTile(p, &is, held, qx, qy);
+                }
+                styled = TRUE;   // (the item drawn: not Kai's item sprite)
+            }
+            else
                 RedrawSprite(frame, mon, mx, my);
         }
-        if (st.itemSprite[i] < MAX_SPRITES)
+        if (styled)
+            ;
+        else if (held != ITEM_NONE)
+        {
+            // (Kai's icons: Crystal's item tile where Kai's item sprite goes)
+            struct Surf is = {frame, NULL, DISPLAY_WIDTH, DISPLAY_HEIGHT, &fit};
+            if (places[i][1][0] >= 0)
+                DrawHeldTile(p, &is, held, places[i][1][0] - 4, places[i][1][1] - 4);
+            else
+                DrawHeldTile(p, &is, held, places[i][0][0] + sItemDx - 4, places[i][0][1] + sItemDy - 4);
+        }
+        else if (st.itemSprite[i] < MAX_SPRITES)
         {
             struct Sprite *it = &gSprites[st.itemSprite[i]];
             if (places[i][1][0] >= 0)

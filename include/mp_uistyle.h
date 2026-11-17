@@ -145,4 +145,8 @@ bool8 MP_BattleChoosingMove(u8 battler);           // battle_controller_player.c
 
 bool8 MP_BattlePic_SceneTint(u16 *tint);   // CRYSTAL's battles, WHITE BG ON: the time of day's light (mp_battlepic.c)
 
+bool8 MP_UiStyle_GbSwitch(void);          // RED / CRYSTAL: the party's SWITCH as theirs (party_menu.c)
+void MP_UiStyle_PartyBlank(u8 mask);      // party slots shown blank (bits), the SWITCH's rows cleared
+void MP_LegacySfx_PlaySwap(bool8 crystal);
+
 #endif // GUARD_MP_UISTYLE_H
