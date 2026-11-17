@@ -8031,3 +8031,6 @@ tools/ui_styles/check_specs.py.
   8 px a frame to their sides (each slot's side from the style's layout), swap, and come back
   (MP_UiStyle_PartySlide / PartySlideSteps). Icons go with them, off the left edge too (NO_PLACE marks "none").
   RED / CRYSTAL keep Task_GbSwitch; KAI keeps its slide. Test ui_style_party_switch.
+- (1.202.2) RED / CRYSTAL pop-ups never wrap a run Kai set against the window's right edge (a tile's margin or less,
+  past the first third: the CO-OP hub's "A OPEN   B CLOSE", MpUi_HelpInto 4 px in). It keeps its margin and moves left
+  (PopUps rightSet). Wrapping it grew the box up under the hub panel and hid the help's first line.

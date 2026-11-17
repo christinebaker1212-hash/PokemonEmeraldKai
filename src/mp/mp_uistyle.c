@@ -3206,7 +3206,7 @@ static void PopUps(struct UiPack *p, u16 *frame)
     int put[40][3], nPut, j, cellH = 16;   // (the lines drawn in a window: their y, first and last x)
     int sWraps[40][2], nWraps, hh;   // (the wrapped pieces: the y of the line they came from, their height)
     static u8 sLines[40][64], sFg[40];
-    bool8 fits, wrap;
+    bool8 fits, wrap, rightSet;
     if (ws == NULL || wt == NULL)
         return;
     for (k = 0; k < ws->nOps; k++)
@@ -3285,7 +3285,10 @@ static void PopUps(struct UiPack *p, u16 *frame)
                 }
                 sLines[nPut][n] = EOS;
                 sw = f ? Width(f, sLines[nPut], 255) : r->kaiW;
-                if (wrap && sw > DISPLAY_WIDTH - 20 - r->x)
+                // (a run Kai set against the window's right edge, a tile's margin or less, past its first third: the
+                // CO-OP hub's "A OPEN   B CLOSE"; it keeps its margin and moves left, never wrapped)
+                rightSet = r->x >= ww / 3 && r->x + r->kaiW >= ww - 8 && r->x + r->kaiW <= ww && ln == 0 && piece == 0;
+                if (wrap && !rightSet && sw > DISPLAY_WIDTH - 20 - r->x)
                 {
                     // (the longest start that fits, cut at a space; the rest a line of its own under it)
                     int cut = n, room = DISPLAY_WIDTH - 20 - r->x;
@@ -3319,6 +3322,8 @@ static void PopUps(struct UiPack *p, u16 *frame)
                     sWraps[nWraps][0] = base, sWraps[nWraps][1] = r->lineH, nWraps++;
                 if (r->x > 0 && r->x + r->kaiW >= ww - 3 && ln == 0 && piece == 0)
                     x = x0 + ww - sw;
+                else if (rightSet)
+                    x = x0 + r->x + r->kaiW - sw;
                 for (j = 0; j < nPut; j++)
                     if (put[j][0] == ly && put[j][1] < x && put[j][2] >= x)
                         x = put[j][2] + 1;
