@@ -687,6 +687,9 @@ void MP_UiStyle_WindowGone(u8 windowId)
 }
 
 // how much of window W's words is printed, and whether its printer waits for A
+static bool8 sHolding[WINDOWS_MAX];   // (RED / CRYSTAL: a printer waiting at a line past the box's two: MP_UiStyle_HoldLine)
+static bool8 AtFoot(u8 w);
+
 static u16 Printed(u8 w, bool8 *waiting)
 {
     bool8 active;
@@ -694,6 +697,8 @@ static u16 Printed(u8 w, bool8 *waiting)
     const u8 *cur = MP_TextPrinter_Cur(w, &active, &state);
     struct Capture *c = &sCap[w];
     *waiting = active && (state == RENDER_STATE_WAIT || state == RENDER_STATE_CLEAR || state == RENDER_STATE_SCROLL_START);
+    if (w < WINDOWS_MAX && active && sHolding[w])
+        *waiting = TRUE;   // (RED / CRYSTAL holding a line past the box's two: the ▼ shows)
     if (!active || c->base == NULL || cur < c->base || cur > c->base + c->len)
         return c->len;
     return cur - c->base;
@@ -2043,6 +2048,90 @@ static bool8 FieldMessageShown(void)
     return TRUE;
 }
 
+// RED / CRYSTAL: a message page whose lines in the style's letters are more than the box's two. The printer waits
+// (text.c RenderText) at the first letter of each line past the second, the style's ▼ showing, until A; Msg then shows
+// the last two lines printed, so the earlier one scrolls up as on the Game Boy (pokered / pokecrystal `cont`). The box
+// keeps one layout whatever the length (the user, 2026-11-17: "The second image is inconsistent with the first")
+static u8 sHoldLine[WINDOWS_MAX], sAckLine[WINDOWS_MAX];
+static u32 sAckPage[WINDOWS_MAX];
+
+static int SkipCtrl(const u8 *t, int i, int len)
+{
+    if (t[i] == EXT_CTRL_CODE_BEGIN && i + 1 < len)
+        return i + 1 + CtrlArgs(t[i + 1]);
+    if (t[i] == PLACEHOLDER_BEGIN || t[i] == CHAR_DYNAMIC || t[i] == CHAR_KEYPAD_ICON || t[i] == CHAR_EXTRA_SYMBOL)
+        return i + 1;
+    return i;
+}
+
+bool8 MP_UiStyle_HoldLine(u8 w, const u8 *cur)
+{
+    u8 style = MP_UiStyle_Active();
+    struct UiPack *p;
+    const struct UiSpec *sp;
+    const struct UiOp *op = NULL;
+    const struct Capture *c;
+    const u8 *t;
+    int idx, from = 0, to, i, nl, line = -1;
+    u32 sum = 0;
+    if (w >= WINDOWS_MAX)
+        return FALSE;
+    sHolding[w] = FALSE;
+    if ((style != UISTYLE_RED && style != UISTYLE_CRYSTAL) || gMain.inBattle || gTextFlags.autoScroll || !AtFoot(w)
+     || (p = GetPack(style)) == NULL || (sp = FindSpec(p, "f.msg")) == NULL)
+        return FALSE;
+    for (i = 0; i < sp->nOps && op == NULL; i++)
+        if (sp->ops[i].kind == OP_MSG && sp->ops[i].a == 0)
+            op = &sp->ops[i];
+    c = &sCap[w];
+    if (op == NULL || op->n == 0 || op->font >= p->nFont || c->base == NULL || cur < c->base || cur >= c->base + c->len)
+        return FALSE;
+    t = c->text;
+    idx = cur - c->base;
+    for (i = 0; i < idx; i++)
+    {
+        int j = SkipCtrl(t, i, c->len);
+        if (j != i)
+        {
+            i = j;
+            continue;
+        }
+        if (t[i] == CHAR_PROMPT_CLEAR)
+            from = i + 1;
+    }
+    for (to = from; to < c->len && t[to] != CHAR_PROMPT_CLEAR; to++)
+        to = SkipCtrl(t, to, c->len);
+    if (to > c->len)
+        to = c->len;
+    nl = FlowPage(&p->font[op->font], t, from, to, op->w);
+    if (nl <= op->n)
+        return FALSE;
+    for (i = op->n; i < nl && line < 0; i++)
+        if (sLineEnd[i] > sLineStart[i] && sFlow[sLineStart[i]].src == idx)
+            line = i;
+    if (line < 0)
+        return FALSE;
+    for (i = from; i < to; i++)
+        sum = sum * 31 + t[i];
+    sum = sum * 31 + from;
+    if (sAckPage[w] != sum)
+        sAckPage[w] = sum, sAckLine[w] = 0;
+    if (sAckLine[w] >= line)
+        return FALSE;
+    sHoldLine[w] = line;
+    sHolding[w] = TRUE;
+    return TRUE;
+}
+
+void MP_UiStyle_HoldDone(u8 w)
+{
+    if (w >= WINDOWS_MAX)
+        return;
+    sAckLine[w] = sHoldLine[w];
+    sHolding[w] = FALSE;
+    MPNet_Log("ui style: message line %d scrolled up (A)", sHoldLine[w]);
+}
+
 // window W's words in the style's message box (the field's, or a screen's at the foot of the screen)
 static void MessageBox(struct UiPack *p, u16 *frame, u8 w)
 {
@@ -2481,7 +2570,21 @@ static void PartyScreen(struct UiPack *p, u16 *frame)
             // (OPTIONS > DISPLAY > MENU POKéMON: the style's own icon, its two frames as Kai's icon turns its own)
             struct Surf is = {frame, NULL, DISPLAY_WIDTH, DISPLAY_HEIGHT, &fit};
             u8 fr = mon->anims ? mon->anims[mon->animNum][mon->animCmdIndex].frame.imageValue : 0;
-            int qx = places[i][0][0] - 8, qy = places[i][0][1], r, c;
+            int qx = places[i][0][0] - 8, qy, r, c, bob = 0, iy = places[i][0][1];
+            if (MP_UiStyle_Active() == UISTYLE_RED && st.slot != i)
+                fr = 0;   // (pokered AnimatePartyMon: only the POKéMON under the cursor moves)
+            else if (MP_UiStyle_Active() == UISTYLE_CRYSTAL && st.slot == i && (gMain.vblankCounter1 & 16))
+            {
+                // (pokecrystal SpriteAnimFunc_PartyMonSwitch: the one under the cursor rises every other 16 frames,
+                // 2 pixels with green HP, 1 with yellow, none with red: GetHPPal on the 48-pixel bar)
+                s32 hp = GetMonData(&gPlayerParty[i], MON_DATA_HP), max = GetMonData(&gPlayerParty[i], MON_DATA_MAX_HP);
+                s32 px = max > 0 ? hp * 48 / max : 0;
+                if (hp > 0 && px == 0)
+                    px = 1;
+                bob = px >= 24 ? 2 : px >= 10 ? 1 : 0;
+            }
+            iy -= bob;
+            qy = iy;
             u16 under[8][8];
             for (r = 0; r < 8; r++)
                 for (c = 0; c < 8; c++)
@@ -2489,7 +2592,7 @@ static void PartyScreen(struct UiPack *p, u16 *frame)
                                 ? frame[(qy + r) * DISPLAY_WIDTH + qx + c] : 0;
             if (StyleMonIcon(p, &is, GetMonData(&gPlayerParty[i], MON_DATA_SPECIES),
                              GetMonData(&gPlayerParty[i], MON_DATA_IS_EGG), fr, places[i][0][0],
-                             places[i][0][1]))   // (its own two frames carry its movement: not Kai's bob as well)
+                             iy))   // (its own two frames carry its movement: not Kai's bob as well)
             {
                 if (held != ITEM_NONE)
                 {

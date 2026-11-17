@@ -4918,6 +4918,30 @@ void MP_TestCommand(const char *cmd, const char *arg)
         else
             printf("[test] u3dci %d: %d\n", seq, U3D_CiStart(seq, SPECIES_NONE, 0, 0));
     }
+    else if (strcmp(cmd, "fieldsay") == 0)   // fieldsay TEXT ("|" a new line): TEXT in the field's message box
+    {
+        void MP_AsciiToGame(u8 *dst, const char *src, int maxLen);
+        static u8 sSay[300];
+        char a[300];
+        const char *q = arg;
+        int n = 0;
+        while (*q && n < (int)sizeof(sSay) - 2)
+        {
+            int k = 0;
+            while (q[k] && q[k] != '|' && k < (int)sizeof(a) - 1)
+                a[k] = q[k], k++;
+            a[k] = 0;
+            MP_AsciiToGame(sSay + n, a, (int)sizeof(sSay) - 2 - n);
+            while (sSay[n] != EOS)
+                n++;
+            q += k;
+            if (*q == '|')
+                sSay[n++] = CHAR_NEWLINE, q++;
+        }
+        sSay[n] = EOS;
+        ShowFieldMessage(sSay);
+        printf("[test] fieldsay\n");
+    }
     else if (strcmp(cmd, "u3dsay") == 0)   // u3dsay BANK MSG: one of Black's lines in the field's message box
     {
         static u8 sLine[512];

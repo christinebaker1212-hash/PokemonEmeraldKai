@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
-"""OPTIONS > DISPLAY > MENU POKéMON (RED / CRYSTAL): every party icon stands still (the user, 2026-11-17): each icon's
-first frame centred across its 16 pixels on the bottom row like every other, its second laid where it best covers the
-first. Checks every frame of ORIGINAL (RED, CRYSTAL) and EXTENDED (CRYSTAL) and draws them all, both frames over each
+"""OPTIONS > DISPLAY > MENU POKéMON (RED / CRYSTAL): every party icon aligned the same way (the user, 2026-11-17): each
+icon's first frame centred across its 16 pixels on the bottom row like every other, its second kept where the game
+draws it against the first (Red's hops and shakes, Crystal's poses: pret's own). Checks every frame of ORIGINAL (RED, CRYSTAL) and EXTENDED (CRYSTAL) and draws them all, both frames over each
 other and side by side, into OUTDIR/icons_<style>.png.
 
     python3 tools/ui_styles/check_icons.py POKERED POKECRYSTAL [OUTDIR]

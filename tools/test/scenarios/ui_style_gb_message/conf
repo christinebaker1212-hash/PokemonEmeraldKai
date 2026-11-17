@@ -1,0 +1,6 @@
+# UI STYLE RED / CRYSTAL: a message whose words need a third line in the style's letters keeps the box's two lines at
+# their spacing; the printer waits with the style's arrow at the third (text.c, MP_UiStyle_HoldLine) and A scrolls it up
+MODE=1
+TMO=120
+EXPECT_A=("ui style: RED" "ui style: message line 2 scrolled up (A)")
+UNEXPECT_A=("[crash]")

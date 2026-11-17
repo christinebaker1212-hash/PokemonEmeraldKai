@@ -1017,6 +1017,18 @@ static u16 RenderText(struct TextPrinter *textPrinter)
             return RENDER_UPDATE;
         }
 
+        // Moemon Kai: UI STYLE RED / CRYSTAL: a line past the message box's two waits, with the style's ▼, until A
+        // scrolls it up (pokered's / pokecrystal's `cont`), so a long message keeps the box's own layout
+        if (MP_UiStyle_HoldLine(textPrinter->printerTemplate.windowId, textPrinter->printerTemplate.currentChar))
+        {
+            if (JOY_NEW(A_BUTTON | B_BUTTON) || MP_Qol_SkipActive())
+            {
+                PlaySE(SE_SELECT);
+                MP_UiStyle_HoldDone(textPrinter->printerTemplate.windowId);
+            }
+            return RENDER_UPDATE;
+        }
+
         if (!(gBattleTypeFlags & BATTLE_TYPE_RECORDED) && gTextFlags.autoScroll)
             textPrinter->delayCounter = 3;
         else

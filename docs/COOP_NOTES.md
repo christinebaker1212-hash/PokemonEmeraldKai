@@ -8034,3 +8034,14 @@ tools/ui_styles/check_specs.py.
 - (1.202.2) RED / CRYSTAL pop-ups never wrap a run Kai set against the window's right edge (a tile's margin or less,
   past the first third: the CO-OP hub's "A OPEN   B CLOSE", MpUi_HelpInto 4 px in). It keeps its margin and moves left
   (PopUps rightSet). Wrapping it grew the box up under the hub panel and hid the help's first line.
+- (1.202.3) RED / CRYSTAL field messages: a page whose lines in the style's letters are more than the box's two keeps the
+  box's layout. The f.msg / b.msg / bag OP_MSGs lost their close-up (B / C / D, gb_build.py). text.c RenderText asks
+  MP_UiStyle_HoldLine before each letter: at the first letter of a line past the second, the printer waits, the ▼
+  shows (Printed's waiting), and A scrolls the line up (MP_UiStyle_HoldDone; Msg shows the last two printed: pokered's
+  `cont`). Field box only (AtFoot), never in battle (co-op battles mustn't wait on one player) nor with autoScroll.
+  `mp fieldsay TEXT` (| a new line); test ui_style_gb_message.
+- (1.202.3) MENU POKéMON as pret: gb_build.py anchor_icon moves both frames by the first frame's anchoring, so the second
+  sits where the game draws it (Red's BALL / HELIX shake 1 px, MONSTER hops; Crystal's poses). RED animates only the
+  cursor's POKéMON (pokered AnimatePartyMon). CRYSTAL raises the cursor's 2 / 1 / 0 px (green / yellow / red HP, GetHPPal
+  on 48 px) every other 16 frames (pokecrystal SpriteAnimFunc_PartyMonSwitch): mp_uistyle.c PartyScreen. Check
+  tools/ui_styles/check_icons.py POKERED POKECRYSTAL.

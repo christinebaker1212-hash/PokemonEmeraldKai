@@ -301,14 +301,14 @@ class GBPack:
         # the battle's message: the whole panel, two lines (hlcoord 1, 14 / 1, 16)
         sp = U.Spec('b.msg')
         sp.add(U.OP_IMG, x=0, y=112, a=self.window_img('w.240x48', (0, 112, 240, 160)))
-        sp.add(U.OP_MSG, x=8, y=128, a=0, h=16, n=2, w=216, b=8, c=4, d=120, font=self.font, ink=st.ink,
+        sp.add(U.OP_MSG, x=8, y=128, a=0, h=16, n=2, w=216, font=self.font, ink=st.ink,
                shadow=st.mid)
         p.spec(sp)
         # the command: the prompt's box, the menu's box, ▶ on the chosen one
         sp = U.Spec('b.cmd')
         sp.add(U.OP_IMG, x=0, y=112, a=self.window_img('w.120x48', Lo.BATTLE_MSG))
         sp.add(U.OP_IMG, x=120, y=112, a=self.window_img('w.120x48', Lo.BATTLE_MENU))
-        sp.add(U.OP_MSG, x=8, y=128, a=1, h=16, n=2, w=104, b=8, c=4, d=120, font=self.font, ink=st.ink,
+        sp.add(U.OP_MSG, x=8, y=128, a=1, h=16, n=2, w=104, font=self.font, ink=st.ink,
                shadow=st.mid)
         for i in range(4):
             x, y = 136 + (i % 2) * 56, 128 + (i // 2) * 16
@@ -332,7 +332,7 @@ class GBPack:
         # the field's message box: two lines, ▼ waiting
         sp = U.Spec('f.msg')
         sp.add(U.OP_IMG, x=0, y=112, a=self.window_img('w.240x48', Lo.FIELD_MSG))
-        sp.add(U.OP_MSG, x=8, y=128, a=0, h=16, n=2, w=216, b=8, c=4, d=120, font=self.font, ink=st.ink,
+        sp.add(U.OP_MSG, x=8, y=128, a=0, h=16, n=2, w=216, font=self.font, ink=st.ink,
                shadow=st.mid)
         arrow = Image.new('RGBA', (8, 8), (0, 0, 0, 0))
         GB.text(st, arrow, 0, 0, '▼')
@@ -450,7 +450,7 @@ class GBPack:
             sp.add(U.OP_IMG, a=p.image('red.bag.frame', frame))
             self.text(sp, '◀{%d}▶' % U.F_TITLE, 148, 8, align=3)
             self.text(sp, '▼', 224, 72, cond=U.S_DOWN)
-            sp.add(U.OP_MSG, x=8, y=96, a=0, h=16, n=4, w=224, b=8, c=7, d=96, font=self.font, ink=st.ink,
+            sp.add(U.OP_MSG, x=8, y=96, a=0, h=16, n=4, w=224, font=self.font, ink=st.ink,
                    shadow=st.mid)
             sp.add(U.OP_LIST, x=0, y=16, h=16, n=4)
             col_name, col_qty, col_cur = 6, 24, 5
@@ -487,7 +487,7 @@ class GBPack:
             sp.add(U.OP_MSG, x=0, y=56, a=1, h=8, n=2, w=80, align=3, font=self.font, ink=st.ink, shadow=st.mid,
                    cond=U.C_LONG)
             self.text(sp, '▼', 232, 80, cond=U.S_DOWN)
-            sp.add(U.OP_MSG, x=8, y=104, a=0, h=16, n=3, w=224, b=8, c=6, d=104, font=self.font, ink=st.ink,
+            sp.add(U.OP_MSG, x=8, y=104, a=0, h=16, n=3, w=224, font=self.font, ink=st.ink,
                    shadow=st.mid)
             sp.add(U.OP_LIST, x=0, y=16, h=16, n=5)
             col_name, col_qty, col_cur = 12, 26, 11
@@ -789,7 +789,7 @@ class GBPack:
                 at(sp, 1, 2, '{%d}' % U.F_NAME)
                 # (a blank row between lines as the games' own text has them; a page that needs more rows than that
                 # gives them all, eight pixels apart)
-                sp.add(U.OP_MSG, x=8, y=32, a=3, h=16, n=7, b=8, c=15, d=32, w=224, font=self.font, ink=ink,
+                sp.add(U.OP_MSG, x=8, y=32, a=3, h=16, n=7, w=224, font=self.font, ink=ink,
                        shadow=mid)
                 at(sp, 28, 18, '{%d}' % U.F_JPAGE, align=1, cond=U.S_DOWN)
             done(sp, g, k)
@@ -877,31 +877,18 @@ def _shift(im, dx, dy):
 
 
 def anchor_icon(a, b):
-    """a party icon's two frames, standing still (the user, 2026-11-17, asked for the third time: no positional
-    movement on any frame, every icon aligned the same way): the first frame centred across its 16 pixels and standing
-    on the bottom row, like every other icon; the second laid where it best covers the first (a frame that is the first
-    moved - Red's MONSTER hopping up, Crystal's fox stepping left - lands exactly on it; another pose lines up with it).
-    The animation is what the frames draw differently, never where they are."""
+    """a party icon's two frames, both moved by the same amount: the first frame centred across its 16 pixels and
+    standing on the bottom row, like every other icon, and the second kept where the game draws it against the first.
+    So the frames move exactly as pret draws them (the user, 2026-11-17: "some Pokemon in Red and Crystal SHOULD bounce
+    1px up"): Red's MONSTER hops, the BALL and the HELIX shake a pixel (pokered AnimatePartyMon), Crystal's poses stand
+    where Crystal puts them. Each frame centred by itself made icons drift; lining the second up on the first took the
+    games' own hops away."""
     box = a.getchannel('A').getbbox()
     if not box:
         return a, b
     dx = (a.width - (box[2] - box[0])) // 2 - box[0]
     dy = a.height - box[3]
-    a2 = _shift(a, dx, dy)
-    if not b.getchannel('A').getbbox():
-        return a2, b
-    pa = [[a2.getpixel((x, y))[3] > 0 for x in range(a.width)] for y in range(a.height)]
-    best, at = None, (dx, dy)
-    for oy in range(-6, 7):
-        for ox in range(-6, 7):
-            c = _shift(b, ox, oy)
-            pc = [[c.getpixel((x, y))[3] > 0 for x in range(a.width)] for y in range(a.height)]
-            same = sum(1 for y in range(a.height) for x in range(a.width) if pa[y][x] and pc[y][x])
-            miss = sum(1 for y in range(a.height) for x in range(a.width) if pa[y][x] != pc[y][x])
-            score = (same - miss, -abs(ox - dx) - abs(oy - dy))
-            if best is None or score > best:
-                best, at = score, (ox, oy)
-    return a2, _shift(b, *at)
+    return _shift(a, dx, dy), _shift(b, dx, dy)
 
 
 def words_spec(p, menu, lines):
