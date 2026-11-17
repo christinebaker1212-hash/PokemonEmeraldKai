@@ -6711,13 +6711,6 @@ static void Cmd_drawlvlupbox(void)
             // Close level up box
             PlaySE(SE_SELECT);
             HandleBattleWindow(18, 7, 29, 19, WINDOW_BG1 | WINDOW_CLEAR);
-            // Moemon Kai: UI STYLE: the box's words go with its frame (the style stops drawing the box now, and the
-            // game's own box showed for the frames until state 9 cleared it)
-            if (MP_UiStyle_Active() != UISTYLE_KAI)
-            {
-                ClearWindowTilemap(B_WIN_LEVEL_UP_BOX);
-                CopyWindowToVram(B_WIN_LEVEL_UP_BOX, COPYWIN_MAP);
-            }
             gBattleScripting.drawlvlupboxState++;
         }
         break;
@@ -11441,6 +11434,22 @@ void HandleBattleWindow(u8 xStart, u8 yStart, u8 xEnd, u8 yEnd, u8 flags)
             else
                 CopyToBgTilemapBufferRect_ChangePalette(0, &var, destX, destY, 1, 1, 0x11);
         }
+    }
+    // Moemon Kai: a box closed leaves the screen now, with the windows inside it (YES / NO's words stayed up as the
+    // screen faded to the party, the box with them, in every UI STYLE: the clear only reached the tilemap's buffer)
+    if (flags & WINDOW_CLEAR)
+    {
+        u8 bg = (flags & WINDOW_BG1) ? 1 : 0, w;
+        for (w = 0; w < WINDOWS_MAX; w++)
+        {
+            const struct WindowTemplate *t = &gWindows[w].window;
+            if (gWindows[w].tileData == NULL || t->bg != bg || t->width == 0
+             || t->tilemapLeft <= xStart || t->tilemapLeft + t->width - 1 >= xEnd
+             || t->tilemapTop <= yStart || t->tilemapTop + t->height - 1 >= yEnd)
+                continue;
+            ClearWindowTilemap(w);
+        }
+        CopyBgTilemapBufferToVram(bg);
     }
 }
 
