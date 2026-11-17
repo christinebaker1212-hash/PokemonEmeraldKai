@@ -141,15 +141,27 @@ void MP_ExpCurve_NoteTrainer(u8 partyMax)
     Refresh();
 }
 
+// The ceiling never passes the level the region's badges allow (LEVEL SCALING's own BADGE CAPS: 18 with none ... 65
+// with eight): an area's tables reach far higher than the story there (KANTO's water is Lv34-36 from ROUTE 4 on,
+// CERULEAN CAVE Lv54-62 beside CERULEAN), and a frontier raised by them gave a player who could SURF there, or who
+// stepped into the cave, the whole +100% at Lv30 by NUGGET BRIDGE while friends there were cut to a tenth (the EXP
+// audit, 2026-11-17)
+static u8 Top(void)
+{
+    return MP_LevelScale_BadgeCap(MP_Region_ScaleBadges());
+}
+
 u8 MP_ExpCurve_Ceiling(void)
 {
-    u8 r = MP_Region_Current(), c, f;
+    u8 r = MP_Region_Current(), c, f, top;
     Refresh();
     c = sAreaWild > sAreaTrainers ? sAreaWild : sAreaTrainers;
     if (r < REGION_COUNT && gRegionState.expFrontier[r] > c)
         c = gRegionState.expFrontier[r];
     f = BadgeFloor();
-    return c > f ? c : f;
+    c = c > f ? c : f;
+    top = Top();
+    return c < top ? c : top;
 }
 
 // A POKeMON at LEVEL with CEILING: its EXP in percent (100: the game's own)
@@ -208,9 +220,9 @@ u16 MP_ExpCurve_CatchUp(void)
 void MP_ExpCurve_Debug(void)
 {
     u8 i, c = MP_ExpCurve_Ceiling(), r = MP_Region_Current();
-    printf("[test] expcurve: active %d region %d badges %d wild %d trainers %d frontier %d floor %d ceiling %d base %d catchup %d\n",
+    printf("[test] expcurve: active %d region %d badges %d wild %d trainers %d frontier %d floor %d top %d ceiling %d base %d catchup %d\n",
            MP_ExpCurve_Active(), r, MP_Region_ScaleBadges(), sAreaWild, sAreaTrainers,
-           r < REGION_COUNT ? gRegionState.expFrontier[r] : 0, BadgeFloor(), c, MP_BaseScaling(), MP_ExpCurve_CatchUp());
+           r < REGION_COUNT ? gRegionState.expFrontier[r] : 0, BadgeFloor(), Top(), c, MP_BaseScaling(), MP_ExpCurve_CatchUp());
     for (i = 0; i < PARTY_SIZE; i++)
         if (GetMonData(&gPlayerParty[i], MON_DATA_SPECIES) && !GetMonData(&gPlayerParty[i], MON_DATA_IS_EGG))
             printf("[test] expcurve: slot %d Lv%d -> %d%%\n", i, GetMonData(&gPlayerParty[i], MON_DATA_LEVEL),

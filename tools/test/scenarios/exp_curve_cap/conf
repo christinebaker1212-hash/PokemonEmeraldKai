@@ -1,0 +1,9 @@
+# The EXP CURVE's ceiling stops at the badges' cap (the EXP audit, 2026-11-17): on KANTO's ROUTE 24 by NUGGET BRIDGE,
+# whose water is Lv34-36, a Lv30 team that can SURF there with no KANTO badges gets a ceiling of 18 (LEVEL SCALING's
+# cap with no badges), not 36: before, such a player got +30-100% there while friends who couldn't SURF were cut to 10%
+MODE=1
+WARP=37,100,10,20
+TMO=150
+ENV_A="MOEMON_DEBUG_PARTY=9:30,280:30 MOEMON_LEVEL_SCALING=1"
+EXPECT_A=("expfrontier: region 2 = 36" "top 18 ceiling 18" "expcurve: slot 0 Lv30 -> 11%")
+UNEXPECT_A=("[crash]" "TIMEOUT" "ceiling 36")

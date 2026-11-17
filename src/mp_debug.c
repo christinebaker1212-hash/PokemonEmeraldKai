@@ -4761,6 +4761,13 @@ void MP_TestCommand(const char *cmd, const char *arg)
     }
     else if (strcmp(cmd, "expcurve") == 0)   // expcurve: the EXP CURVE here (mp_expcurve.c): area, frontier, each POKeMON's %
         MP_ExpCurve_Debug();
+    else if (strcmp(cmd, "expfrontier") == 0)   // expfrontier N: the region's EXP CURVE frontier (as a high area would leave it)
+    {
+        u8 r = MP_Region_Current();
+        if (r < REGION_COUNT)
+            gRegionState.expFrontier[r] = (u8)atoi(arg);
+        printf("[test] expfrontier: region %d = %d\n", r, r < REGION_COUNT ? gRegionState.expFrontier[r] : 0);
+    }
     else if (strcmp(cmd, "entree") == 0)   // entree: the ENTRALINK's ENTREE menu (src/unova/u3d_entralink.c)
     {
         void Unova_Entree_Open(void);

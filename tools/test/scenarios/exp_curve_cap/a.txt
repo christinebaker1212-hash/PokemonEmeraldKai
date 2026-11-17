@@ -1,0 +1,8 @@
+pressuntil A field 5000
+mp setlevel 0 30
+mp setlevel 1 30
+mp expfrontier 36
+wait 30
+mp expcurve
+wait 10
+quit

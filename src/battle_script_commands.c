@@ -3394,10 +3394,11 @@ static u16 sMpCoopExp[3], sMpCoopShareExp[3];
 static u8 sMpCatchExpPercent;
 
 // Moemon Kai (the user, 2026-11-06): once an Elite Four is beaten, with LEVEL SCALING on, every POKéMON that fought
-// gets the whole EXP instead of a share of it
+// gets the whole EXP instead of a share of it: the Elite Four of the region the player is in (HOENN's beaten gave a
+// host the whole EXP in KANTO while friends there shared theirs: the EXP audit, 2026-11-17)
 static bool8 MpExpUnsplit(void)
 {
-    return MP_LevelScaling() && MP_Region_AnyCleared();
+    return MP_LevelScaling() && MP_Region_ClearedHere();
 }
 
 static u8 MpHoldEffectOf(u8 slot)
