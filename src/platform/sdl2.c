@@ -1027,6 +1027,10 @@ void VDraw(void)
     MP_AstralFx_Composite(image);   // ... the ASTRAL BALL's silver sparkles
     MP_Compass_Composite(image);    // ... arrows toward friends off screen
     {
+        void MP_GbTrans_Composite(u16 *frame);
+        MP_GbTrans_Composite(image);     // Moemon Kai: GB OPTIONS > TRANSITIONS, Red's / Crystal's (mp_gb_trans.c)
+    }
+    {
         void MP_DexHud_Composite(u16 *frame);
         MP_DexHud_Composite(image);      // Moemon Kai: the POKéDEX list's header (src/mp/mp_dexplus.c)
     }

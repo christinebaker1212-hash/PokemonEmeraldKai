@@ -1041,11 +1041,19 @@ void BattleTransition_Start(u8 transitionId)
 #define tTransitionId   data[1]
 #define tTransitionDone data[15]
 
+// Moemon Kai: MOEMON_ANIMLEN set: "transition length: ID FRAMES" (the GB OPTIONS' transitions fit in KAI's: measured so)
+char *getenv(const char *name);
+static u32 sMpTransStart;
+static u8 sMpTransId;
+
 bool8 IsBattleTransitionDone(void)
 {
     u8 taskId = FindTaskIdByFunc(Task_BattleTransition);
     if (gTasks[taskId].tTransitionDone)
     {
+        if (getenv("MOEMON_ANIMLEN"))
+            MPNet_Log("transition length: %u %u", sMpTransId, (unsigned)(gMain.vblankCounter1 - sMpTransStart));
+        MP_GbTrans_End();   // Moemon Kai: GB OPTIONS > TRANSITIONS (mp_gb_trans.c)
         DestroyTask(taskId);
         #ifdef PORTABLE
         SetHBlankCallback(NULL); //prevents use after free crash in HBlankCB_Phase2_Mugshots
@@ -1062,6 +1070,9 @@ bool8 IsBattleTransitionDone(void)
 static void LaunchBattleTransitionTask(u8 transitionId)
 {
     u8 taskId = CreateTask(Task_BattleTransition, 2);
+    sMpTransStart = gMain.vblankCounter1;
+    sMpTransId = transitionId;
+    MP_GbTrans_Begin(transitionId);   // Moemon Kai: GB OPTIONS > TRANSITIONS: Red's / Crystal's drawn over it (mp_gb_trans.c)
     gTasks[taskId].tTransitionId = transitionId;
     sTransitionData = AllocZeroed(sizeof(*sTransitionData));
 }

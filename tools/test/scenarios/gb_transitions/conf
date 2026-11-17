@@ -1,0 +1,9 @@
+# GB OPTIONS > TRANSITIONS: with UI STYLE RED a wild battle's transition is Red's (a weaker wild one outside a dungeon:
+# the double circle) and with CRYSTAL a trainer's is Crystal's (its POKe BALL in palette 7, then the speckle for a
+# stronger foe), each drawn over KAI's own and fitted to its time, which stays the same (MOEMON_ANIMLEN); TRANSITIONS
+# KAI (bit 8) draws none
+MODE=1
+TMO=120
+ENV_A="MOEMON_DEBUG_PARTY=280:15 MOEMON_ANIMLEN=1"
+EXPECT_A=("gb transition: timeline 0 (110 frames) fitted to KAI's 8 (88 frames)" "transition length: 8 88" "gb transition: timeline 15 (106 frames) fitted to KAI's 11 (137 frames)" "transition length: 11 137" "transition length: 3 158")
+UNEXPECT_A=("fitted to KAI's 3 (158 frames)")

@@ -8166,3 +8166,22 @@ KAI's own (sKaiThrowFrames: 234 / 293 / 352 / 411 frames for 0-3 shakes, 703 cau
 SPEED). A longer timeline is spread over that time, a shorter one rests on its last frame, so a friend who sees
 KAI's throw never waits. Measured with MOEMON_ANIMLEN (battle_anim.c: "anim length: KIND ID FRAMES" for every
 animation); `mp forceshakes N` rigs a throw. Scenario gb_ball_throws.
+
+### GB OPTIONS stage 3: TRANSITIONS
+
+With RED or CRYSTAL showing and TRANSITIONS on its game (MP_GB_KAI_TRANS, bit 8, unset: the default), a battle starts
+with Red's or Crystal's own transition. tools/moemon_legacy/trans_bake.py runs both games' routines (pokered
+engine/battle/battle_transitions.asm, pokecrystal engine/battle/battle_transition.asm) on the Game Boy's 20x18 tile map
+and writes every frame into src/mp/mp_gb_trans_data.h: which cell each cell shows (Red's SHRINK and SPLIT move rows and
+columns), the black tile, Crystal's Poke Ball square, rBGP (the flashes, the fade to black), Crystal's palette 7 (a
+trainer battle sets every tile to it: trainer_battle.pal) and its wave (SCX per line). Red's eight are picked by its
+three bits (a trainer; the foe 3 or more levels above the lead; a dungeon, MAP_TYPE_UNDERGROUND here), Crystal's four by
+a cave and stronger, each with its Poke Ball before a trainer's (16 timelines, GB_TRANS_*). A trainer's level comes from
+its data (MP_Region_TrainerData, every region's), since its party isn't made yet.
+
+KAI's own transition runs underneath, unchanged (the battle starts when it ends, on the same frame as for a friend
+without the option), and mp_gb_trans.c draws the Game Boy's over the finished picture (sdl2.c VDraw, after the other
+overlays): the field as it was on the first frame, a Game Boy cell 12 x 8.9 of our pixels. Fitted to KAI's time per
+transition (sKaiTransFrames, measured with MOEMON_ANIMLEN: "transition length: ID FRAMES"): a longer timeline spread
+over it, a shorter one resting on its last frame (black). `mp gbtrans N` forces timeline N (255: the battle's own),
+`mp transition N` starts KAI's N on the field. Scenario gb_transitions.

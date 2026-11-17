@@ -1,0 +1,12 @@
+pressuntil A field 5000
+mp uistyle red
+mp gboptions red 8
+mp transition 3
+waitlog 600 transition length: 3
+mp gboptions red 0
+mp transition 8
+waitlog 600 transition length: 8
+mp uistyle crystal
+mp trainer 1
+waitlog 600 transition length: 11
+quit

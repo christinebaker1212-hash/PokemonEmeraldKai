@@ -135,6 +135,7 @@ enum
     OPT_GB_SCENERY,   // its BATTLE SCENERY: the battle intro's grass / water / cave strips
     OPT_GB_CAUGHT,    // its CAUGHT MARK (RED)
     OPT_GB_BALLS,     // its BALL THROWS: RED's / CRYSTAL's own, or KAI's (mp_legacy_anim.c)
+    OPT_GB_TRANS,     // its TRANSITIONS (mp_gb_trans.c)
     OPT_GB_BACK,
     OPT_MENUMONS,     // Moemon Kai: DISPLAY > MENU POKeMON ORIGINAL (/ EXTENDED) / KAI: RED's and CRYSTAL's party icons
     OPT_CLOSE,
@@ -313,6 +314,7 @@ static const u8 sText_GbOptions[] = _("GB OPTIONS");
 static const u8 sText_GbScenery[] = _("BATTLE SCENERY");
 static const u8 sText_GbCaught[] = _("CAUGHT MARK");
 static const u8 sText_GbBalls[] = _("BALL THROWS");
+static const u8 sText_GbTrans[] = _("TRANSITIONS");
 static const u8 sText_MenuMonsOriginal[] = _("ORIGINAL");
 static const u8 sText_MenuMonsExtended[] = _("EXTENDED");
 static const u8 sText_MenuMonsKai[] = _("KAI");
@@ -468,6 +470,7 @@ static void BuildRows(void)
     if (sGbPage)
     {
         AddRow(OPT_GB_BALLS, 0);
+        AddRow(OPT_GB_TRANS, 0);
         AddRow(OPT_GB_SCENERY, 0);
         if (gMpConfig.uiStyle == UISTYLE_RED)
             AddRow(OPT_GB_CAUGHT, 0);   // (CRYSTAL always shows it, as Crystal did)
@@ -647,7 +650,7 @@ static u8 Choices(u8 row, const u8 **names, u8 *buf)
     case OPT_WHITEBG: case OPT_GB_SCENERY: case OPT_GB_CAUGHT:
         names[0] = sText_Off, names[1] = sText_On;
         return 2;
-    case OPT_GB_BALLS:   // (KAI's, or the style's own game's)
+    case OPT_GB_BALLS: case OPT_GB_TRANS:   // (KAI's, or the style's own game's)
         names[0] = sText_UiKai, names[1] = gMpConfig.uiStyle == UISTYLE_CRYSTAL ? sText_UiCrystal : sText_UiRed;
         return 2;
     case OPT_ANNOUNCER:
@@ -971,6 +974,7 @@ static u8 Current(u8 row)
     case OPT_GB_SCENERY:  return (GbOptions() & MP_GB_SCENERY) != 0;
     case OPT_GB_CAUGHT:   return (GbOptions() & MP_GB_CAUGHT) != 0;
     case OPT_GB_BALLS:    return !(GbOptions() & MP_GB_KAI_BALLS);
+    case OPT_GB_TRANS:    return !(GbOptions() & MP_GB_KAI_TRANS);
     case OPT_MENUMONS:
         if (MenuMonsExtended())
             return gMpConfig.uiMenuMons % MP_MENU_MONS_COUNT;
@@ -1113,8 +1117,9 @@ static void Change(u8 row, int dir)
     case OPT_GB_SCENERY:
     case OPT_GB_CAUGHT:
     case OPT_GB_BALLS:
+    case OPT_GB_TRANS:
         GbOptions() ^= sRows[row].opt == OPT_GB_SCENERY ? MP_GB_SCENERY : sRows[row].opt == OPT_GB_CAUGHT ? MP_GB_CAUGHT
-                     : MP_GB_KAI_BALLS;
+                     : sRows[row].opt == OPT_GB_BALLS ? MP_GB_KAI_BALLS : MP_GB_KAI_TRANS;
         MPNet_Log("gb options: %s %x", gMpConfig.uiStyle == UISTYLE_RED ? "red" : "crystal", GbOptions());
         break;
     case OPT_WHITEBG:
@@ -1265,6 +1270,7 @@ static const u8 *RowLabel(u8 row, u8 *buf)
     case OPT_GB_SCENERY: return sText_GbScenery;
     case OPT_GB_CAUGHT: return sText_GbCaught;
     case OPT_GB_BALLS: return sText_GbBalls;
+    case OPT_GB_TRANS: return sText_GbTrans;
     case OPT_GB_BACK:  return sText_Back;
     case OPT_BGMUTE:  return sText_BgMute;
     case OPT_ANNOUNCER: return sText_Announcer;
@@ -1477,6 +1483,10 @@ static bool8 HintText(u8 *buf)
     else if (opt == OPT_GB_SCENERY)
         snprintf(ascii, sizeof(ascii), "%s", (GbOptions() & MP_GB_SCENERY) ? "GRASS, WATER OR CAVE SLIDES IN AS BATTLES OPEN"
                                                                             : "BATTLES OPEN WITH NO GRASS, WATER OR CAVE");
+    else if (opt == OPT_GB_TRANS)
+        snprintf(ascii, sizeof(ascii), "%s", (GbOptions() & MP_GB_KAI_TRANS) ? "BATTLES START AS KAI STARTS THEM"
+                                             : gMpConfig.uiStyle == UISTYLE_CRYSTAL ? "BATTLES START AS THEY DO IN CRYSTAL"
+                                                                                     : "BATTLES START AS THEY DO IN RED");
     else if (opt == OPT_GB_BALLS)
         snprintf(ascii, sizeof(ascii), "%s", (GbOptions() & MP_GB_KAI_BALLS) ? "EVERY BALL THROWN AS KAI THROWS IT"
                                              : gMpConfig.uiStyle == UISTYLE_CRYSTAL ? "EVERY BALL THROWN AS CRYSTAL THROWS IT"

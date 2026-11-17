@@ -93,6 +93,13 @@ bool8 MP_DebugQuickStartEnabled(void)
 // animall FIRST LAST ATK TGT [TURN]: every move animation from FIRST to LAST in a row, ATK attacking TGT (in a battle,
 // at the action menu); with MOEMON_ANIMCHECK the log lists every sprite animation started (tools/test/check_anims.py)
 #include "task.h"
+// mp transition: waits for the transition as Task_BattleStart does (IsBattleTransitionDone ends it and logs its length)
+static void Task_MpDebugTransitionWait(u8 taskId)
+{
+    bool8 IsBattleTransitionDone(void);
+    if (IsBattleTransitionDone())
+        DestroyTask(taskId);
+}
 u8 gMpForceShakes = 0xFF;   // mp forceshakes (battle_script_commands.c Cmd_handleballthrow)
 
 // The walker's own view of a tile: one shut only by an ORRE door that opens when the player walks up to it is open
@@ -4319,6 +4326,22 @@ void MP_TestCommand(const char *cmd, const char *arg)
         sscanf(arg, "%15s %x", which, &v);
         gMpConfig.gbOptions[strcmp(which, "crystal") == 0] = (u16)v;
         printf("[test] gboptions %s %x\n", which, v);
+    }
+    else if (strcmp(cmd, "transition") == 0)
+    {
+        // transition N - a battle transition on the field, as a battle would start it (tests: its length, its look)
+        void BattleTransition_StartOnField(u8 transitionId);
+        BattleTransition_StartOnField((u8)atoi(arg));
+        CreateTask(Task_MpDebugTransitionWait, 1);
+        printf("[test] transition %d\n", atoi(arg));
+    }
+    else if (strcmp(cmd, "gbtrans") == 0)
+    {
+        // gbtrans N - GB OPTIONS > TRANSITIONS: the next transitions draw Red's / Crystal's timeline N (mp_gb_trans.c's
+        // GB_TRANS_*: 0-7 Red's, 8-15 Crystal's), 255 back to the battle's own choice
+        extern u8 gMpGbTransForce;
+        gMpGbTransForce = (u8)atoi(arg);
+        printf("[test] gbtrans %d\n", gMpGbTransForce);
     }
     else if (strcmp(cmd, "forceshakes") == 0)
     {

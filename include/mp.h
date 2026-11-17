@@ -545,11 +545,14 @@ enum {
     MP_GB_CAUGHT   = 1 << 1,   // RED: the caught ball on a wild foe's box (Red had none; CRYSTAL always shows it)
     // (the stages after the first: a bit set takes KAI's way, so 0, the default, is the Game Boy's for old settings too)
     MP_GB_KAI_BALLS = 1 << 2,  // BALL THROWS: KAI's throws (unset: Red's / Crystal's own for every ball: mp_legacy_anim.c)
+    MP_GB_KAI_TRANS = 1 << 3,  // TRANSITIONS: KAI's (unset: Red's / Crystal's over KAI's, fitted to its time: mp_gb_trans.c)
 };
 #define MP_GB_DEFAULTS_RED     0
 #define MP_GB_DEFAULTS_CRYSTAL MP_GB_CAUGHT
 bool8 MP_Gb_On(u16 bit);   // (mp_uistyle.c: the style showing is RED or CRYSTAL and its GB OPTIONS have BIT)
 bool8 MP_Gb_Off(u16 bit);  // (... RED or CRYSTAL without it)
+void MP_GbTrans_Begin(u8 transitionId);   // (mp_gb_trans.c: GB OPTIONS > TRANSITIONS over KAI's)
+void MP_GbTrans_End(void);
 #define MP_BATTLE_WEATHER_STATE 5                 // B_COMM_MP_WEATHER: the battle's weather, the field's, settled
 void MP_BattleWeather_LinkState(u8 *state);       // battle_controllers.c: the master's, for the others' screens
 void MP_BattleWeather_OnLinkState(const u8 *state, u16 size);   // ... the others: the master's weather now
