@@ -66,6 +66,7 @@ enum
     OPT_UNOVASPRITES,   // Moemon Kai: UNOVA PEOPLE: MIXED / GEN 5 (event_object_movement.c UnovaObjectInfo)
     OPT_BIKEMUSIC,
     OPT_SURFMUSIC,
+    OPT_INSTANTTEXT,  // Moemon Kai: GAME > INSTANT TEXT (words read before at once: mp_qol.c MP_Qol_FieldTextSpeed)
     OPT_LEVELSCALE,
     OPT_MOVESPLIT,
     OPT_GENERATION,
@@ -215,6 +216,7 @@ static const u8 sText_NewFriends[] = _("NEW FRIENDS");
 static const u8 sText_Autosave[] = _("AUTOSAVE");
 static const u8 sText_FlagRange[] = _("FLAG RANGE");
 static const u8 sText_BikeMusic[] = _("BIKE MUSIC");
+static const u8 sText_InstantText[] = _("INSTANT TEXT");
 static const u8 sText_BadgeFade[] = _("BADGE FADING");
 static const u8 sText_CardTitle[] = _("CARD TITLE");
 static const u8 sText_FadePlatinum[] = _("PLATINUM");
@@ -489,6 +491,7 @@ static void BuildRows(void)
     {
     case TAB_GAME:   // reading, sound, the card games
         AddRow(OPT_TEXTSPEED, 0);
+        AddRow(OPT_INSTANTTEXT, 0);
         AddRow(OPT_FRAME, 0);
         AddRow(OPT_NAMECASE, 0);
         AddRow(OPT_CREATURES, 0);
@@ -619,7 +622,7 @@ static u8 Choices(u8 row, const u8 **names, u8 *buf)
         names[0] = gText_ButtonTypeNormal, names[1] = gText_ButtonTypeLR, names[2] = gText_ButtonTypeLEqualsA;
         return 3;
     case OPT_TYPEICONS: case OPT_FULLSCREEN: case OPT_VSYNC: case OPT_ANALOGRUN: case OPT_RUMBLE: case OPT_SPECPANEL:
-    case OPT_FR_SHOW: case OPT_BIKEMUSIC: case OPT_SURFMUSIC: case OPT_CARDSCALE: case OPT_SHADOWS: case OPT_CARDTITLE: case OPT_BGMUTE:
+    case OPT_FR_SHOW: case OPT_BIKEMUSIC: case OPT_SURFMUSIC: case OPT_INSTANTTEXT: case OPT_CARDSCALE: case OPT_SHADOWS: case OPT_CARDTITLE: case OPT_BGMUTE:
     case OPT_WHITEBG:
         names[0] = sText_Off, names[1] = sText_On;
         return 2;
@@ -921,6 +924,7 @@ static u8 Current(u8 row)
     case OPT_ST_STYLE:    return gMpConfig.stadiumStyle % MP_STADIUM_STYLE_COUNT;
     case OPT_TITLE:       return 0;
     case OPT_SURFMUSIC:   return gMpConfig.surfMusic != 0;
+    case OPT_INSTANTTEXT: return gMpConfig.instantText != 0;
     case OPT_LEVELSCALE:  return 0;   // (the page has the settings)
     case OPT_SC_ON: case OPT_SC_WILD: case OPT_SC_TRAINERS: case OPT_SC_BOSS: case OPT_SC_CAPS: case OPT_SC_PAST8: case OPT_SC_EXP:
         return MP_LevelScaleRule(SC_RULE(sRows[row].opt));
@@ -1102,6 +1106,10 @@ static void Change(u8 row, int dir)
         MPNet_Log("unova sprites: %d", gMpConfig.unovaSprites);
         break;
     case OPT_SURFMUSIC:   gMpConfig.surfMusic = !gMpConfig.surfMusic; break;
+    case OPT_INSTANTTEXT:
+        gMpConfig.instantText = !gMpConfig.instantText;
+        MPNet_Log("instant text: %d", gMpConfig.instantText);
+        break;
     case OPT_LEVELSCALE:  break;   // A opens its page
     case OPT_SC_ON: case OPT_SC_WILD: case OPT_SC_TRAINERS: case OPT_SC_BOSS: case OPT_SC_CAPS: case OPT_SC_PAST8: case OPT_SC_EXP:
         if (!ScaleLocked())
@@ -1230,6 +1238,7 @@ static const u8 *RowLabel(u8 row, u8 *buf)
     case OPT_SC_EXP:      return sText_ScExp;
     case OPT_SC_BACK:     return sText_Back;
     case OPT_SURFMUSIC:   return sText_SurfMusic;
+    case OPT_INSTANTTEXT: return sText_InstantText;
     case OPT_LEVELSCALE:  return sText_LevelScale;
     case OPT_MOVESPLIT:   return sText_MoveSplit;
     case OPT_GENERATION:  return sText_Generation;
@@ -1453,6 +1462,8 @@ static bool8 HintText(u8 *buf)
                                                                         : "SOUND PLAYS EVEN WHEN NOT IN FOCUS");
     else if ((opt == OPT_FRAME || opt == OPT_THEME) && MP_UiStyle_Active() != UISTYLE_KAI)
         snprintf(ascii, sizeof(ascii), "THE UI STYLE DRAWS ITS OWN WINDOWS");
+    else if (opt == OPT_INSTANTTEXT)
+        snprintf(ascii, sizeof(ascii), "%s", gMpConfig.instantText ? "WORDS READ BEFORE APPEAR AT ONCE" : "WORDS READ BEFORE AT THE TEXT SPEED");
     else if (opt == OPT_SURFMUSIC)
         snprintf(ascii, sizeof(ascii), "OFF: THE MAP'S SONG SURFING AND DIVING");
     else if (opt == OPT_BADGEFADE)

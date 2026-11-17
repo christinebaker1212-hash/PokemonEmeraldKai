@@ -8124,3 +8124,10 @@ be hit by moves that hit them all.
 - Nothing was found that hides a center outright: sweeps of SWIFT, SURF, EARTHQUAKE, THUNDERBOLT, PSYCHIC, PSYBEAM, ICE
   BEAM, SLUDGE BOMB, SHADOW BALL, CRUNCH, GIGA DRAIN, FLAMETHROWER, BUBBLEBEAM and others, at a flank and at the
   center, from both sides, show only the game's hit blinks. `mp foebmove MOVE` gives every foe only MOVE (tests).
+
+## OPTIONS > GAME > INSTANT TEXT (after 1.203.2)
+
+The user (2026-11-17): an option to turn on and off the instant text for words read before. INSTANT TEXT (the row
+under TEXT SPEED; ON by default, as it always was) is gMpConfig.instantText, "instant_text" in the settings file and in
+a new game's canonical list (save_slots.c). OFF: mp_qol.c MP_Qol_FieldTextSpeed prints a line read before at the TEXT
+SPEED like the first time; signs and the skip button stay instant either way. `mp instanttext 0 / 1` (tests).

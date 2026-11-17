@@ -255,6 +255,7 @@ struct MpConfig
     struct MpSpecFriend specFriends[MP_SPEC_FRIENDS];   // CO-OP > SPECTATE: each friend's screen, by name
     u8 bikeMusic;             // OPTIONS > GAME > BIKE MUSIC: the cycling song on a bike (1) or the map's own (0)
     u8 surfMusic;             // OPTIONS > GAME > SURF MUSIC: the surfing / underwater songs (1) or the map's (0)
+    u8 instantText;           // OPTIONS > GAME > INSTANT TEXT: words read before print at once (1) or at TEXT SPEED (0)
     u8 moenavCalls;           // OPTIONS > CO-OP > MOENAV CALLS: 0 all, 1 only trainers asking for a battle
     u8 finderStyle;           // OPTIONS > CO-OP > FRIEND FINDER: MP_FINDER_* (mp_compass.c)
     u8 streamer;              // OPTIONS > CO-OP > STREAMER MODE: MP_STREAMER_* (mp_streamer.c)

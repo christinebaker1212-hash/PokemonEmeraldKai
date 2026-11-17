@@ -531,6 +531,7 @@ static void LoadConfig(void)
     gMpConfig.scaleFollowersPct = 100;
     gMpConfig.scaleGardenPct = 50;
     gMpConfig.surfMusic = TRUE;
+    gMpConfig.instantText = TRUE;
     memset(gMpConfig.phrases, 0xFF, sizeof(gMpConfig.phrases));
     gMpConfig.quickStock[0] = 0;   // Hello!
     gMpConfig.quickStock[1] = 4;   // Follow me!
@@ -611,6 +612,7 @@ static void LoadConfig(void)
         else if (strcmp(key, "spectate_panel") == 0) gMpConfig.spectatePanel = atoi(val) != 0;
         else if (strcmp(key, "bike_music") == 0) gMpConfig.bikeMusic = atoi(val) != 0;
         else if (strcmp(key, "surf_music") == 0) gMpConfig.surfMusic = atoi(val) != 0;
+        else if (strcmp(key, "instant_text") == 0) gMpConfig.instantText = atoi(val) != 0;
         else if (strcmp(key, "card_art") == 0)   // (1.28's "printed" never had the pictures: it's the new default)
             gMpConfig.cardArt = strcmp(val, "gameboy") == 0     ? MP_CARD_ART_GAME_BOY
                               : strcmp(val, "full_card") == 0 ? MP_CARD_ART_FULL_CARD
@@ -776,6 +778,8 @@ void MP_SaveConfig(void)
         "spectate_panel = %d\nspectate_size = %d\n"
         "; OPTIONS > GAME: the cycling song on a bike, the surfing / underwater songs (1) or the map's own (0)\n"
         "bike_music = %d\nsurf_music = %d\n"
+        "; OPTIONS > GAME > INSTANT TEXT: words read before print at once (1) or at the text speed (0)\n"
+        "instant_text = %d\n"
         "; OPTIONS > CO-OP > MOENAV CALLS: all, or battles (only trainers asking for a battle; story calls always come)\n"
         "moenav_calls = %s\n"
         "; OPTIONS > CO-OP > FRIEND FINDER: both, arrows (at the edge of the screen) or radar (in the corner);\n"
@@ -829,6 +833,7 @@ void MP_SaveConfig(void)
         gMpConfig.lastRoom, gMpConfig.lastRoomKey, gMpConfig.lastHostName, gMpConfig.lastRoomAddr, gMpConfig.lastJoinCode, gMpConfig.welcome, gMpConfig.trainerPadding, gMpConfig.levelScaling, gMpConfig.moveSplit, gMpConfig.generation, gMpConfig.gimmicks,
         gMpConfig.scale[0], gMpConfig.scale[1], gMpConfig.scale[2], gMpConfig.scale[3], gMpConfig.scale[4], gMpConfig.scale[5], gMpConfig.animSpeed,
         gMpConfig.spectatePanel, gMpConfig.spectateScale, gMpConfig.bikeMusic, gMpConfig.surfMusic,
+        gMpConfig.instantText,
         gMpConfig.moenavCalls ? "battles" : "all",
         gMpConfig.finderStyle == MP_FINDER_ARROWS ? "arrows" : gMpConfig.finderStyle == MP_FINDER_RADAR ? "radar" : "both",
         gMpConfig.finderOn,

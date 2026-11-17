@@ -4310,6 +4310,12 @@ void MP_TestCommand(const char *cmd, const char *arg)
         void MP_MatchCall_DebugSelect(int n);
         MP_MatchCall_DebugSelect(arg[0] ? atoi(arg) : 5);
     }
+    else if (strcmp(cmd, "instanttext") == 0)
+    {
+        // instanttext 0 / 1 - OPTIONS > GAME > INSTANT TEXT
+        gMpConfig.instantText = atoi(arg) != 0;
+        printf("[test] instanttext %d\n", gMpConfig.instantText);
+    }
     else if (strcmp(cmd, "ridemusic") == 0)
     {
         // ridemusic BIKE SURF - OPTIONS > GAME > BIKE MUSIC / SURF MUSIC (1 on, 0 off)

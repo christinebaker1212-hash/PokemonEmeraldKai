@@ -281,7 +281,8 @@ u8 MP_Qol_FieldTextSpeed(u8 normalSpeed)
     u32 h;
     SeenLoad();
     h = Fnv1a(gStringVar4, StringLength(gStringVar4), 0x811C9DC5u);
-    if (sSignActive || SeenHas(h) || MP_Qol_SkipActive())
+    // (OPTIONS > GAME > INSTANT TEXT: words read before at once, or at the text speed as the first time)
+    if (sSignActive || (gMpConfig.instantText && SeenHas(h)) || MP_Qol_SkipActive())
     {
         SeenAdd(h);
         return 0;
