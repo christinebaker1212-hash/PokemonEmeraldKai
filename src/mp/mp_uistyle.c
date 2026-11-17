@@ -542,6 +542,10 @@ static u8 sRunCount[WINDOWS_MAX];
 static bool8 sShown[WINDOWS_MAX];
 static s8 sBox[WINDOWS_MAX][4];   // a battle box round a window (HandleBattleWindow): its inside in tiles, x0 < 0 none
 static u32 sHandled;   // the windows a screen drew itself this frame
+// (a battle box closed: its tiles leave the screen a frame or two after HandleBattleWindow clears them (the copy waits
+// for the DMA), so the style keeps drawing it till then, else Kai's box showed for a frame as the level up's closed)
+static u8 sLinger[WINDOWS_MAX];
+static bool8 sLingerHide[WINDOWS_MAX];
 
 
 void MP_UiStyle_Framed(u8 windowId, u8 kind)
@@ -564,6 +568,12 @@ void MP_UiStyle_BattleBox(u8 x0, u8 y0, u8 x1, u8 y1, bool8 bg1, bool8 clear)
         if (t->tilemapLeft <= x0 || t->tilemapLeft + t->width - 1 >= x1 || t->tilemapTop <= y0
          || t->tilemapTop + t->height - 1 >= y1)
             continue;
+        if (clear && sFramed[w] == 2 && sBox[w][0] >= 0)
+        {
+            sLinger[w] = 3, sLingerHide[w] = FALSE;
+            continue;
+        }
+        sLinger[w] = 0;
         sFramed[w] = clear ? 0 : 2;
         sBox[w][0] = clear ? -1 : x0 + 1;
         sBox[w][1] = y0 + 1, sBox[w][2] = x1 - 1, sBox[w][3] = y1 - 1;
@@ -653,8 +663,12 @@ void MP_UiStyle_WindowPicture(u8 windowId)
 
 void MP_UiStyle_WindowShown(u8 windowId, bool8 shown)
 {
-    if (windowId < WINDOWS_MAX)
-        sShown[windowId] = shown;
+    if (windowId >= WINDOWS_MAX)
+        return;
+    if (!shown && sLinger[windowId])
+        sLingerHide[windowId] = TRUE;
+    else
+        sShown[windowId] = shown, sLinger[windowId] = shown ? 0 : sLinger[windowId];
 }
 
 void MP_UiStyle_WindowGone(u8 windowId)
@@ -666,6 +680,7 @@ void MP_UiStyle_WindowGone(u8 windowId)
     sShown[windowId] = FALSE;
     sFramed[windowId] = 0;
     sBox[windowId][0] = -1;
+    sLinger[windowId] = 0;
     sCap[windowId].len = 0;
     sCap[windowId].text[0] = EOS;
     sCap[windowId].base = NULL;
@@ -3471,6 +3486,16 @@ void MP_UiStyle_Composite(u16 *frame)
     u8 style = MP_UiStyle_Active();
     bool8 clip;
     sHandled = 0;
+    {
+        u8 w;
+        for (w = 0; w < WINDOWS_MAX; w++)
+            if (sLinger[w] && --sLinger[w] == 0)
+            {
+                sFramed[w] = 0, sBox[w][0] = -1;
+                if (sLingerHide[w])
+                    sShown[w] = FALSE;
+            }
+    }
     if (style == UISTYLE_KAI)
         return;
     // (the field or the battle as last seen in full light: a style whose BAG opens over it, as RED's ITEM box does)

@@ -6711,6 +6711,13 @@ static void Cmd_drawlvlupbox(void)
             // Close level up box
             PlaySE(SE_SELECT);
             HandleBattleWindow(18, 7, 29, 19, WINDOW_BG1 | WINDOW_CLEAR);
+            // Moemon Kai: UI STYLE: the box's words go with its frame (the style stops drawing the box now, and the
+            // game's own box showed for the frames until state 9 cleared it)
+            if (MP_UiStyle_Active() != UISTYLE_KAI)
+            {
+                ClearWindowTilemap(B_WIN_LEVEL_UP_BOX);
+                CopyWindowToVram(B_WIN_LEVEL_UP_BOX, COPYWIN_MAP);
+            }
             gBattleScripting.drawlvlupboxState++;
         }
         break;
