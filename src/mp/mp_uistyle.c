@@ -2327,7 +2327,7 @@ static void PartyScreen(struct UiPack *p, u16 *frame)
             u8 fr = mon->anims ? mon->anims[mon->animNum][mon->animCmdIndex].frame.imageValue : 0;
             if (!StyleMonIcon(p, &is, GetMonData(&gPlayerParty[i], MON_DATA_SPECIES),
                               GetMonData(&gPlayerParty[i], MON_DATA_IS_EGG), fr, places[i][0][0],
-                              places[i][0][1] + mon->y2))
+                              places[i][0][1]))   // (its own two frames carry its movement: not Kai's bob as well)
                 RedrawSprite(frame, mon, mx, my);
         }
         if (st.itemSprite[i] < MAX_SPRITES)
@@ -3100,7 +3100,7 @@ static void PopUps(struct UiPack *p, u16 *frame)
             {
                 need = (need + 7) & ~7;
                 if (right + need <= DISPLAY_WIDTH - 8 && x0 + ww / 2 < DISPLAY_WIDTH / 2)
-                    ww = x0 <= 8 ? DISPLAY_WIDTH - 2 * x0 : ww + need;   // (one from the left edge: across, as theirs)
+                    ww += need;   // (only as wide as its lines need: the save's box once went across over its YES / NO, the user 2026-11-17)
                 else if (x0 - need >= 8)
                 {
                     for (j = 0; j < nPut; j++)
