@@ -8002,3 +8002,32 @@ tools/ui_styles/check_specs.py.
   every game (MP_Coop_OtherWildOut reads the foes' party HP off the master, gBattleMons only on it); the ball's click
   then stops only SE1 / SE3 and starts the ducked jingle (battle_anim_throw.c), never m4aMPlayAllStop. Tests
   coop_catch, tri_catch (log "catch jingle: the song back up ... playing 1" on every game).
+
+## The EXP audit, field moves' badges, card flow fixes, the styles' party SWITCH (1.202.1)
+
+- The EXP CURVE's ceiling (max of the area, the region's frontier and the badge floor) is capped by Top() =
+  MP_LevelScale_BadgeCap(MP_Region_ScaleBadges()): water or a frontier past the badges can't raise it. The host's
+  ~2000 EXP at Lv30 by NUGGET BRIDGE came from KANTO's water (Lv34-36) counted because SURF was owned (a MoeGatcha
+  prize) and the frontier was never lowered. Debug: `mp expfrontier N`; the log prints "top T ceiling C".
+  Test exp_curve_cap.
+- Whole (unsplit) EXP only where LEVEL SCALING is on and this region's LEAGUE is beaten (battle_script_commands.c
+  MpExpUnsplit: MP_Region_ClearedHere).
+- Field moves' badges: MP_Region_FieldMoveBadge's tables are in FIELD_MOVE order (0 CUT, 1 FLASH, 2 ROCK SMASH, 3
+  STRENGTH, 4 SURF, 5 FLY, 6 DIVE, 7 WATERFALL, 8 WHIRLPOOL): KANTO {1,0,5,3,4,2,7,6,7}, JOHTO {1,0,0,2,3,4,7,7,6}.
+  Before, SURF asked for FLASH's badge. qz_specials.c's ROCK SMASH is index 2. `mp fmbadge [REGION BADGE]`; test
+  region_fieldmove_badges.
+- MoeGatcha prizes (OT ID GACHA_OT_ID: MP_OtIsGacha) don't count as traded for the traded EXP bonus, solo or co-op.
+- Mail trades carry the sender's region (one byte after the deposit, read only when present); a POKéMON arriving
+  from another region starts there at Lv5 like any other (mp_region.c MP_Region_ArriveFrom).
+- The party screen's long messages (WIN_MSG: "... HP was restored ...") are drawn after the slots in every style, so
+  they sit over the party (mp_uistyle.c PartyScreen); `mp partymsg` shows one.
+- Card duels (shared tcg_flow.c, so the board and the phone both): TcgFlow_NeedsDeck lists the Trainers that take from
+  the deck (BILL, POKEDEX, both POKE BALLs, ENERGY SEARCH, COMPUTER SEARCH, POKEMON TRADER, MOON STONE, THE BOSS'S
+  WAY, MASTER BALL). With an empty deck the flow refuses them ("Your deck is empty.") and TrainerHasUse says no.
+  POKEMON BREEDER's Basic follows the evolving rules (not new this turn, not on the first turn). Found by TcgCoreTest
+  (android/coretest), which passes now at five seeds. The card test scripts link android/app/src/main/cpp/aw_file_sync.c
+  (the collections save through AwFile).
+- FIRERED / PLATINUM / BLACK party SWITCH: party_menu.c Task_StyleSwitch slides the style's own boxes. The slots go out
+  8 px a frame to their sides (each slot's side from the style's layout), swap, and come back
+  (MP_UiStyle_PartySlide / PartySlideSteps). Icons go with them, off the left edge too (NO_PLACE marks "none").
+  RED / CRYSTAL keep Task_GbSwitch; KAI keeps its slide. Test ui_style_party_switch.
