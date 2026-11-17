@@ -807,6 +807,22 @@ class GBPack:
         default = names.index('ICON_MON' if self.red else 'ICON_MONSTER')
         sp = U.Spec('icons')
         sp.add(U.OP_ICONSET, a=p.string(table + bytes([default])), b=base, c=len(frames), d=0)
+        # EXTENDED (CRYSTAL): Crystal Clear's own icon for each of the 251 and the EGG, in its own colours
+        # (cc_icons.py, data/crystal_clear_icons.png); every later POKéMON takes one as gb_icons does ORIGINAL's
+        cc = None if self.red else __import__('cc_icons').frames()
+        if cc:
+            ext = None
+            for i, pair in enumerate(cc):
+                for f, im in enumerate(pair):
+                    k = p.image('ccicon.%d.%d' % (i, f), im)
+                    ext = k if ext is None else ext
+                    assert k == ext + 2 * i + f
+            species = gb_icons._pokeapi()
+            own = ['CC%d' % n for n in range(1, 252)]
+            mapping = gb_icons._map(own, species, 'CC1')
+            egg = len(cc) - 1
+            ctable = bytes([egg] + [int(mapping[n][2:]) - 1 for n in range(1, gb_icons.NATIONAL_MAX + 1)])
+            sp.add(U.OP_ICONSET, a=p.string(ctable + bytes([0])), b=ext, c=len(cc), d=1)
         p.spec(sp)
 
     def make(self):

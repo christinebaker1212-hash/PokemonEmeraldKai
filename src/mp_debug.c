@@ -3408,6 +3408,13 @@ void MP_TestCommand(const char *cmd, const char *arg)
         gMpConfig.uiStyle = MP_UiStyle_FromKey(arg);
         printf("[test] uistyle %s (active %s)\n", arg, MP_UiStyle_Name(MP_UiStyle_Active()));
     }
+    else if (strcmp(cmd, "menumons") == 0)
+    {
+        // menumons original|extended|kai - OPTIONS > DISPLAY > MENU POKeMON (RED / CRYSTAL)
+        gMpConfig.uiMenuMons = strcmp(arg, "kai") == 0 ? MP_MENU_MONS_KAI : strcmp(arg, "extended") == 0 ? MP_MENU_MONS_EXTENDED
+                             : MP_MENU_MONS_ORIGINAL;
+        printf("[test] menumons %d\n", gMpConfig.uiMenuMons);
+    }
     else if (strcmp(cmd, "theme") == 0)
     {
         // theme dark|default - OPTIONS > DISPLAY > THEME (palettes already loaded keep theirs until reloaded)

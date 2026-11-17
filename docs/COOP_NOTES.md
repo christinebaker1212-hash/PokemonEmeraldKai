@@ -7921,9 +7921,15 @@ docs/ui_styles/UI_STYLES.md ("Building it" for the game's side).
   icon (nearest stage) or the icon the game gave most to its POKéMON of the same body shape and first type, then
   shape, then type (data/species_shapes.csv from PokeAPI). Packs carry spec "icons" (OP_ICONSET: a byte a national
   number, 0 the EGG, the last any other; pictures B + 2 * icon + frame; set 0 ORIGINAL, 1 EXTENDED), drawn by
-  mp_uistyle.c StyleMonIcon where the party spec places Kai's icon, its frame Kai's icon's own. EXTENDED (Crystal
-  Clear's icons) shows only once a pack has set 1 (MP_UiStyle_HasIconSet): Crystal Clear keeps them in a form not
-  found by reading the ROM alone.
+  mp_uistyle.c StyleMonIcon where the party spec places Kai's icon, its frame Kai's icon's own. EXTENDED (CRYSTAL:
+  set 1, shown in OPTIONS once a pack has it, MP_UiStyle_HasIconSet) is Crystal Clear 2.5.11's own icon for each of
+  the 251 and its EGG in their own colours, taken from the game as it runs because reading the ROM alone doesn't
+  find them: tools/ui_styles/cc_icons.py plays a new game in PyBoy (the inputs in BOOT) to the bedroom, writes six
+  POKéMON at a time into the party (wPartyCount $DCD7 as pret's Crystal), opens START > POKéMON and reads each
+  slot's four sprites for 90 frames (pixels from VRAM, colours from the screen), two frames each, into
+  tools/ui_styles/data/crystal_clear_icons.png (committed; the ROM never is; UNOWN's letter follows the starter's
+  random DVs). gb_build.py adds them with every later POKéMON mapped as ORIGINAL's are. `mp menumons
+  original|extended|kai`.
 - 1.201.0 (the user, 2026-11-16): WHITE BG ON makes RED's and CRYSTAL's whole battle background plain (every region's
   scene and Kai's: mp_battlepic.c PlainBackground, through the full-colour picture hook, MP_BattlePic_AfterKaiBg after
   Kai's BG3 loads, battle_bg.c), and the boxes have no paper of their own any more (C_NOBG always). CRYSTAL lays its
