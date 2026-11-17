@@ -11230,6 +11230,11 @@ static void Cmd_handleballthrow(void)
             odds = SAFE_DIV(1048560, odds);
 
             for (shakes = 0; shakes < BALL_3_SHAKES_SUCCESS && Random() < odds; shakes++);
+            {
+                extern u8 gMpForceShakes;   // Moemon Kai: mp forceshakes N (tests: 0-3 shakes, 4 caught)
+                if (gMpForceShakes <= BALL_3_SHAKES_SUCCESS)
+                    shakes = gMpForceShakes;
+            }
 
             if (gLastUsedItem == ITEM_MASTER_BALL)
                 shakes = BALL_3_SHAKES_SUCCESS; // why calculate the shakes before that check?

@@ -784,7 +784,7 @@ void MP_SaveConfig(void)
         "bike_music = %d\nsurf_music = %d\n"
         "; OPTIONS > GAME > INSTANT TEXT: words read before print at once (1) or at the text speed (0)\n"
         "instant_text = %d\n"
-        "; OPTIONS > DISPLAY > GB OPTIONS: RED's and CRYSTAL's (hex: 1 battle intro scenery, 2 RED's caught ball)\n"
+        "; OPTIONS > DISPLAY > GB OPTIONS: RED's and CRYSTAL's (hex: 1 battle intro scenery, 2 RED's caught ball, 4 KAI's ball throws)\n"
         "gb_options_red = %x\ngb_options_crystal = %x\n"
         "; OPTIONS > CO-OP > MOENAV CALLS: all, or battles (only trainers asking for a battle; story calls always come)\n"
         "moenav_calls = %s\n"

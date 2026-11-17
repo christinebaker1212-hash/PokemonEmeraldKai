@@ -543,6 +543,8 @@ enum { MP_MENU_MONS_ORIGINAL, MP_MENU_MONS_EXTENDED, MP_MENU_MONS_KAI, MP_MENU_M
 enum {
     MP_GB_SCENERY  = 1 << 0,   // the battle intro's grass / water / cave strips (Emerald's; OFF in both, as the GB had none)
     MP_GB_CAUGHT   = 1 << 1,   // RED: the caught ball on a wild foe's box (Red had none; CRYSTAL always shows it)
+    // (the stages after the first: a bit set takes KAI's way, so 0, the default, is the Game Boy's for old settings too)
+    MP_GB_KAI_BALLS = 1 << 2,  // BALL THROWS: KAI's throws (unset: Red's / Crystal's own for every ball: mp_legacy_anim.c)
 };
 #define MP_GB_DEFAULTS_RED     0
 #define MP_GB_DEFAULTS_CRYSTAL MP_GB_CAUGHT

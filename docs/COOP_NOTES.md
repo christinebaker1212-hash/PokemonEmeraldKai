@@ -8152,3 +8152,17 @@ stages:
 Settings: gMpConfig.gbOptions[2] (RED, CRYSTAL), MP_GB_* bits (include/mp.h), "gb_options_red" / "gb_options_crystal"
 (hex) in the settings file and the canonical list; MP_Gb_On / MP_Gb_Off (mp_uistyle.c). `mp gboptions red|crystal HEX`.
 The GB fonts got a ">" (gbstyle.py SYNTH): the option pages' titles read "DISPLAY > ..." (it was "?").
+
+### GB OPTIONS stage 2: BALL THROWS (after 1.203.3)
+
+With RED or CRYSTAL showing and BALL THROWS on its game (MP_GB_KAI_BALLS unset, the default), every ball is thrown the
+Game Boy way: AnimTask_MpIsLegacyBall sends the throw to mp_legacy_anim.c (the GENESIS / EPOCH BALLS' engine: Red's
+timeline in RED, Crystal's in CRYSTAL). Colours: RED in the Game Boy's greys (sRedGrays; the GENESIS BALL keeps its own
+reds). CRYSTAL in Crystal's own BallColors palette for its balls (sGscBallColors, battle_anims.pal's six). Any other ball
+gets a palette of that kind from its sprite (BallPaletteFromSprite: the colour its first frame shows most, with a
+lighter or darker one of the same hue; mostly grey balls such as LUXURY take GRAY). Art comes through
+mp_ballstyle.c MP_BallStyle_ItemArt, because ItemIdToBallId only knows Hoenn's balls. Timing: the throw is fitted to
+KAI's own (sKaiThrowFrames: 234 / 293 / 352 / 411 frames for 0-3 shakes, 703 caught, the same for every ball and ANIM
+SPEED). A longer timeline is spread over that time, a shorter one rests on its last frame, so a friend who sees
+KAI's throw never waits. Measured with MOEMON_ANIMLEN (battle_anim.c: "anim length: KIND ID FRAMES" for every
+animation); `mp forceshakes N` rigs a throw. Scenario gb_ball_throws.

@@ -93,6 +93,7 @@ bool8 MP_DebugQuickStartEnabled(void)
 // animall FIRST LAST ATK TGT [TURN]: every move animation from FIRST to LAST in a row, ATK attacking TGT (in a battle,
 // at the action menu); with MOEMON_ANIMCHECK the log lists every sprite animation started (tools/test/check_anims.py)
 #include "task.h"
+u8 gMpForceShakes = 0xFF;   // mp forceshakes (battle_script_commands.c Cmd_handleballthrow)
 
 // The walker's own view of a tile: one shut only by an ORRE door that opens when the player walks up to it is open
 // (src/orre/orre_vm.c TouchDoors)
@@ -4318,6 +4319,13 @@ void MP_TestCommand(const char *cmd, const char *arg)
         sscanf(arg, "%15s %x", which, &v);
         gMpConfig.gbOptions[strcmp(which, "crystal") == 0] = (u16)v;
         printf("[test] gboptions %s %x\n", which, v);
+    }
+    else if (strcmp(cmd, "forceshakes") == 0)
+    {
+        // forceshakes N - every ball thrown shakes N times (0-3), 4 catches, 255 back to chance
+        extern u8 gMpForceShakes;
+        gMpForceShakes = (u8)atoi(arg);
+        printf("[test] forceshakes %d\n", gMpForceShakes);
     }
     else if (strcmp(cmd, "instanttext") == 0)
     {

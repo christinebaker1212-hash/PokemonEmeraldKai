@@ -519,6 +519,26 @@ static bool8 SpecialHasArt(u8 special)
     return special >= 1 && special <= MP_SPECIAL_COUNT && sSpecialGfx[special - 1][0] != NULL;
 }
 
+// A ball item's own art, the sheet and palette its throw is drawn with (LZ): a special ball's, else its Hoenn ball's.
+// FALSE for a special ball without art of its own (the DREAM BALL...)
+u8 ItemIdToBallId(u16 ballItem);   // (battle_anim_throw.c)
+bool8 MP_BallStyle_ItemArt(u16 item, const u32 **gfx, const u32 **pal)
+{
+    u8 special = MP_SpecialBall_FromItem(item), ballId;
+    if (special != MP_SPECIAL_NONE)
+    {
+        if (!SpecialHasArt(special))
+            return FALSE;
+        *gfx = sSpecialGfx[special - 1][0];
+        *pal = sSpecialGfx[special - 1][1];
+        return TRUE;
+    }
+    ballId = ItemIdToBallId(item);
+    *gfx = gBallSpriteSheets[ballId].data;
+    *pal = gBallSpritePalettes[ballId].data;
+    return TRUE;
+}
+
 static void SpecialBallSprite(u8 spriteId, u8 special)
 {
     u16 tag = TAG_MP_BALL_HGSS + special, start = GetSpriteTileStartByTag(tag);

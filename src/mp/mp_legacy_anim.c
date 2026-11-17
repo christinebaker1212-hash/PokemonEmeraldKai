@@ -29,6 +29,15 @@
 #include "constants/battle_anim.h"
 #include "constants/items.h"
 #include "constants/rgb.h"
+#include "pokeball.h"
+#include "decompress.h"
+#include "mp_uistyle.h"
+#include <string.h>
+
+// GB OPTIONS: the special animation's frames outside the throw's own task (its script's commands before and after it,
+// less the frame the task's last step shares with them), taken from KAI's time so the whole throw takes exactly
+// KAI's (measured with MOEMON_ANIMLEN: every outcome, RED and CRYSTAL)
+#define LEGACY_THROW_OUTSIDE (-1)
 
 struct LegacyAnimSprite { s16 x, y; u8 tile, flags; };    // flags: bit 0 X flip, 1 Y flip, 4-7 palette
 struct LegacyAnimFrame { u16 first, count; };
@@ -44,6 +53,28 @@ enum { TL_RED_MISS, TL_RED_1, TL_RED_2, TL_RED_3, TL_RED_CAUGHT,
 // Red's sprites: the GENESIS BALL's own colors for the Game Boy's four shades (the throw, the
 // shakes, the send-out smoke)
 static const u16 sRedShades[4] = {RGB(31, 31, 31), RGB(31, 24, 24), RGB(31, 16, 16), RGB(4, 4, 4)};
+// GB OPTIONS > BALL THROWS (RED): any other ball thrown Red's way, in the Game Boy's own four shades
+static const u16 sRedGrays[4] = {RGB(31, 31, 31), RGB(21, 21, 21), RGB(10, 10, 10), RGB(0, 0, 0)};
+// Crystal's battle animation palettes (pokecrystal gfx/battle_anims/battle_anims.pal: PAL_BATTLE_OB_GRAY ... BROWN)
+// and which one each of its balls is thrown in (data/battle_anims/ball_colors.asm BallColors; others GRAY)
+enum { GSC_GRAY, GSC_YELLOW, GSC_RED, GSC_GREEN, GSC_BLUE, GSC_BROWN };
+static const u16 sGscObPals[6][4] = {
+    {RGB(31, 31, 31), RGB(25, 25, 25), RGB(13, 13, 13), RGB(0, 0, 0)},
+    {RGB(31, 31, 31), RGB(31, 31, 7), RGB(31, 16, 1), RGB(0, 0, 0)},
+    {RGB(31, 31, 31), RGB(31, 19, 24), RGB(30, 10, 6), RGB(0, 0, 0)},
+    {RGB(31, 31, 31), RGB(12, 25, 1), RGB(5, 14, 0), RGB(0, 0, 0)},
+    {RGB(31, 31, 31), RGB(8, 12, 31), RGB(1, 4, 31), RGB(0, 0, 0)},
+    {RGB(31, 31, 31), RGB(24, 18, 7), RGB(20, 15, 3), RGB(0, 0, 0)},
+};
+static const struct { u16 item; u8 pal; } sGscBallColors[] = {
+    {ITEM_MASTER_BALL, GSC_GREEN}, {ITEM_ULTRA_BALL, GSC_YELLOW}, {ITEM_GREAT_BALL, GSC_BLUE}, {ITEM_POKE_BALL, GSC_RED},
+    {ITEM_HEAVY_BALL, GSC_GRAY}, {ITEM_LEVEL_BALL, GSC_BROWN}, {ITEM_LURE_BALL, GSC_BLUE}, {ITEM_FAST_BALL, GSC_BLUE},
+    {ITEM_FRIEND_BALL, GSC_YELLOW}, {ITEM_MOON_BALL, GSC_GRAY}, {ITEM_LOVE_BALL, GSC_RED},
+};
+// GB OPTIONS > BALL THROWS: how long KAI's own throw takes for each outcome (0-3 shakes, caught; frames of the
+// special animation, the same for every ball and ANIM SPEED: measured with MOEMON_ANIMLEN), which the Game Boy's
+// is fitted to, so a friend seeing KAI's throw is never waited for or kept waiting
+static const u16 sKaiThrowFrames[BALL_3_SHAKES_SUCCESS + 1] = {234, 293, 352, 411, 703};
 // Once the catch is done, Red on the Super Game Boy (pokered SetPal_Battle / BlkPacket_Battle) colors the screen by area,
 // sprites too: the HP bars' palettes (PAL_GREENBAR / YELLOWBAR / REDBAR) and each Pokémon's own
 // palette over its picture. So the caught ball, resting in the foe's picture, takes its colors.
@@ -68,6 +99,10 @@ static struct {
     u16 targetPal[4];     // the target's and the thrower's Moemon as a Game Boy palette (MonGbPalette)
     u16 attackerPal[4];
     u16 barPal[2][4];     // Red: the thrower's / target's HP bar palettes
+    const u16 *redShades; // Red's throw: the GENESIS BALL's own shades, or the Game Boy's (GB OPTIONS)
+    u16 gscBall[4];       // Crystal's throw: the ball's palette (its own in Crystal, else from its sprite)
+    u16 fit;              // GB OPTIONS: the frames KAI's throw takes, which this one is fitted to (0: its own pace)
+    u16 elapsed;
 } sAnim;
 
 static void MapPoint(s32 gx, s32 gy, s32 *x, s32 *y);
@@ -217,9 +252,82 @@ static const u16 *RedAreaPalette(s32 gx, s32 gy)
 // The script's hooks
 
 // Special_BallThrow: 1 for a GENESIS / EPOCH BALL that isn't blocked (they play their own throw)
+// GB OPTIONS > BALL THROWS: RED / CRYSTAL showing, every ball thrown its game's way
+static bool8 GbThrow(void)
+{
+    return (MP_UiStyle_Active() == UISTYLE_RED || MP_UiStyle_Active() == UISTYLE_CRYSTAL) && !MP_Gb_On(MP_GB_KAI_BALLS);
+}
+
+// A ball Crystal didn't have, thrown Crystal's way: a palette of Crystal's kind (white, a light and a dark of the
+// ball's own colour, black) from the ball's sprite: its most colourful colour, and a lighter or darker one of the
+// same hue; a ball of greys (LUXURY, PREMIER...) takes Crystal's GRAY
+static void BallPaletteFromSprite(u16 item, u16 *out)
+{
+    static u8 sSheet[0x2000];   // (a ball's sheet: its frames, 4bpp)
+    bool8 MP_BallStyle_ItemArt(u16 item, const u32 **gfx, const u32 **pal);
+    const u32 *gfx, *lzPal;
+    u16 pal[16];
+    u32 count[16] = {0}, i, n, best = 0, partner = 0, bestCount = 0, grey = 0;
+    memcpy(out, sGscObPals[GSC_GRAY], sizeof(sGscObPals[GSC_GRAY]));
+    if (!MP_BallStyle_ItemArt(item, &gfx, &lzPal) || (*gfx >> 8) > sizeof(sSheet))
+        return;   // (an LZ header holds its size above its first byte)
+    LZ77UnCompWram(lzPal, pal);
+    LZ77UnCompWram(gfx, sSheet);
+    n = 16 * 16 / 2;   // (the first frame: the ball as it's thrown)
+    for (i = 0; i < n; i++)
+        count[sSheet[i] & 15]++, count[sSheet[i] >> 4]++;
+    // the colour the ball shows most of, of those that are a colour (not black, white or grey)
+    for (i = 1; i < 16; i++)
+    {
+        s32 r, g, b, mx, mn;
+        Split555(pal[i], &r, &g, &b);
+        mx = max(r, max(g, b));
+        mn = min(r, min(g, b));
+        if (mx - mn >= 6 && Luma(pal[i]) > 5000 && count[i] > bestCount)
+            bestCount = count[i], best = i;
+        else if (mx - mn < 6 && Luma(pal[i]) > 5000)
+            grey += count[i];   // (the ball's grey body, its outline aside)
+    }
+    // a ball mostly grey, a little colour on it (LUXURY's stripe), is thrown in Crystal's GRAY
+    if (best == 0 || bestCount * 3 < grey)
+        return;
+    for (i = 1; i < 16; i++)
+        if (i != best && count[i] && SimilarHue(pal[i], pal[best]) && abs(Luma(pal[i]) - Luma(pal[best])) > 3000
+         && (partner == 0 || count[i] > count[partner]))
+            partner = i;
+    if (partner == 0)
+    {
+        s32 r2, g2, b2;
+        Split555(pal[best], &r2, &g2, &b2);
+        out[1] = RGB((r2 + 31) / 2, (g2 + 31) / 2, (b2 + 31) / 2);   // (no partner: it halfway to white)
+        out[2] = pal[best];
+    }
+    else if (Luma(pal[partner]) > Luma(pal[best]))
+        out[1] = pal[partner], out[2] = pal[best];
+    else
+        out[1] = pal[best], out[2] = pal[partner];
+}
+
+static void GscBallPalette(u16 item, u16 *out)
+{
+    u32 i;
+    if (MP_LegacyBall_Kind(item) == MP_SPECIAL_EPOCH)
+    {
+        memcpy(out, sGscObPals[GSC_RED], sizeof(sGscObPals[GSC_RED]));   // (the EPOCH BALL's own, as it always was)
+        return;
+    }
+    for (i = 0; i < ARRAY_COUNT(sGscBallColors); i++)
+        if (sGscBallColors[i].item == item)
+        {
+            memcpy(out, sGscObPals[sGscBallColors[i].pal], sizeof(sGscObPals[0]));
+            return;
+        }
+    BallPaletteFromSprite(item, out);
+}
+
 void AnimTask_MpIsLegacyBall(u8 taskId)
 {
-    gBattleAnimArgs[ARG_RET_ID] = MP_LegacyBall_Kind(gLastUsedItem)
+    gBattleAnimArgs[ARG_RET_ID] = (MP_LegacyBall_Kind(gLastUsedItem) || GbThrow())
         && gBattleSpritesDataPtr->animationData->ballThrowCaseId != BALL_TRAINER_BLOCK;
     DestroyAnimVisualTask(taskId);
 }
@@ -261,7 +369,20 @@ static void Task_LegacyBallThrow(u8 taskId)
         return;
     sAnim.lastTick = gMain.vblankCounter1;
 
-    if (gTasks[taskId].tState == 0)
+    if (sAnim.fit)
+    {
+        // GB OPTIONS: fitted to KAI's throw. A longer timeline is spread over that time (a frame or two skipped
+        // now and then), a shorter one rests on its last frame; the throw ends when KAI's would
+        u16 want = tl->length > sAnim.fit ? (u32)sAnim.elapsed * tl->length / sAnim.fit : sAnim.elapsed;
+        if (want > tl->length - 1)
+            want = tl->length - 1;
+        while (tl->events[sAnim.nextEvent].frame <= want)
+            RunEvent(&tl->events[sAnim.nextEvent++]);
+        sAnim.frame = want;
+        if (++sAnim.elapsed < sAnim.fit)
+            return;
+    }
+    else if (gTasks[taskId].tState == 0)
     {
         while (tl->events[sAnim.nextEvent].frame == sAnim.frame)
             RunEvent(&tl->events[sAnim.nextEvent++]);
@@ -272,8 +393,8 @@ static void Task_LegacyBallThrow(u8 taskId)
         }
         gTasks[taskId].tState = 1;   // the last frame stays up while its sounds finish
     }
-    // WaitForSoundToFinish / WaitSFX
-    if (MP_LegacySfx_Playing())
+    // WaitForSoundToFinish / WaitSFX (fitted: the sounds may run on, the throw has had KAI's time)
+    if (!sAnim.fit && MP_LegacySfx_Playing())
         return;
     sAnim.active = FALSE;
     if (gBattleSpritesDataPtr->animationData->ballThrowCaseId == BALL_3_SHAKES_SUCCESS)
@@ -312,6 +433,19 @@ void AnimTask_MpLegacyBallThrow(u8 taskId)
 {
     u8 caseId = gBattleSpritesDataPtr->animationData->ballThrowCaseId;
     sAnim.game = MP_LegacyBall_Kind(gLastUsedItem);
+    sAnim.fit = 0;
+    sAnim.elapsed = 0;
+    if (sAnim.game == MP_SPECIAL_NONE)
+    {
+        // GB OPTIONS > BALL THROWS: another ball, thrown the way the style's own game throws, fitted to KAI's time
+        sAnim.game = MP_UiStyle_Active() == UISTYLE_RED ? MP_SPECIAL_GENESIS : MP_SPECIAL_EPOCH;
+        if (caseId <= BALL_3_SHAKES_SUCCESS)
+            sAnim.fit = sKaiThrowFrames[caseId] - LEGACY_THROW_OUTSIDE;
+        sAnim.redShades = sRedGrays;
+    }
+    else
+        sAnim.redShades = sRedShades;
+    GscBallPalette(gLastUsedItem, sAnim.gscBall);
     if (sAnim.game == MP_SPECIAL_GENESIS)
         sAnim.timeline = caseId == BALL_MP_MISS ? TL_RED_MISS
                        : caseId == BALL_3_SHAKES_SUCCESS ? TL_RED_CAUGHT
@@ -347,8 +481,8 @@ void AnimTask_MpLegacyBallThrow(u8 taskId)
         sAnim.offY = GetBattlerSpriteCoord(sAnim.target, BATTLER_COORD_Y) + 24 - ry - 2 - 2;   // and 2 px higher (owner's call)
     }
     gBattleSpritesDataPtr->animationData->wildMonInvisible = gSprites[gBattlerSpriteIds[gBattleAnimTarget]].invisible;
-    MPNet_Log("legacy anim: %s timeline %d (case %d), b%d -> b%d", sAnim.game == MP_SPECIAL_GENESIS ? "GENESIS" : "EPOCH",
-              sAnim.timeline, caseId, sAnim.attacker, sAnim.target);
+    MPNet_Log("legacy anim: %s timeline %d (case %d), b%d -> b%d%s", sAnim.game == MP_SPECIAL_GENESIS ? "GENESIS" : "EPOCH",
+              sAnim.timeline, caseId, sAnim.attacker, sAnim.target, sAnim.fit ? " (GB OPTIONS, fitted)" : "");
     gTasks[taskId].func = Task_LegacyBallThrow;
     gTasks[taskId].data[0] = 0;
     Task_LegacyBallThrow(taskId);
@@ -477,13 +611,15 @@ static void DrawSprites(u16 *frame, u16 index)
         const struct LegacyAnimSprite *s = &tl->sprites[f->first + i];
         if (sAnim.game == MP_SPECIAL_GENESIS)
             DrawTile(frame, sRedAnimTiles[s->tile], s->x + offX[i], s->y + offY[i], s->flags,
-                     (!sAnim.active && sAnim.kept) ? RedAreaPalette(s->x + 4, s->y + 4) : sRedShades);
+                     (!sAnim.active && sAnim.kept) ? RedAreaPalette(s->x + 4, s->y + 4) : sAnim.redShades);
         else if (!sAnim.active && sAnim.kept)
             // Crystal: the caught ball stays with anim_keepsprites, and BattleAnim_ClearOAM moves
             // every kept sprite to PAL_BATTLE_OB_ENEMY, the caught Pokémon's own palette
             DrawTile(frame, sGscAnimTiles[s->tile], s->x + offX[i], s->y + offY[i], s->flags, sAnim.targetPal);
         else
-            DrawTile(frame, sGscAnimTiles[s->tile], s->x + offX[i], s->y + offY[i], s->flags, gscColors[(s->flags >> 4) & 1]);
+            // (palette 1 is the ball's: its own colour, as BallColors gives it)
+            DrawTile(frame, sGscAnimTiles[s->tile], s->x + offX[i], s->y + offY[i], s->flags,
+                     ((s->flags >> 4) & 1) ? sAnim.gscBall : gscColors[0]);
     }
 }
 

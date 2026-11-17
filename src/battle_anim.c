@@ -28,6 +28,9 @@
 
 extern const u16 gMovesWithQuietBGM[];
 extern const u8 *const gBattleAnims_Moves[];
+extern const u8 *const gBattleAnims_General[];
+extern const u8 *const gBattleAnims_Special[];
+extern const u8 *const gBattleAnims_StatusConditions[];
 
 static void Cmd_loadspritegfx(void);
 static void Cmd_unloadspritegfx(void);
@@ -211,6 +214,30 @@ void DoMoveAnim(u16 move)
 }
 
 // Moemon Co-op: BATTLE ANIMS > MODERN (mp_modernanim.c): told when an animation starts and when its blows land
+// Moemon Kai: MOEMON_ANIMLEN set: "anim length: KIND ID FRAMES" for every animation (the GB OPTIONS fit their own
+// animations to Kai's lengths: tools measure them this way)
+char *getenv(const char *name);
+void MPNet_Log(const char *fmt, ...);
+static s8 sMpAnimLenOn = -1;
+static u32 sMpAnimLenStart;
+static u16 sMpAnimLenId;
+static char sMpAnimLenKind;
+static void MpAnimLenBegin(const u8 *const table[], u16 id)
+{
+    if (sMpAnimLenOn < 0)
+        sMpAnimLenOn = getenv("MOEMON_ANIMLEN") != NULL;
+    if (!sMpAnimLenOn)
+        return;
+    sMpAnimLenStart = gMain.vblankCounter1;
+    sMpAnimLenId = id;
+    sMpAnimLenKind = table == gBattleAnims_Moves ? 'm' : table == gBattleAnims_General ? 'g'
+                   : table == gBattleAnims_Special ? 's' : table == gBattleAnims_StatusConditions ? 'c' : '?';
+}
+static void MpAnimLenEnd(void)
+{
+    if (sMpAnimLenOn > 0)
+        MPNet_Log("anim length: %c %u %u", sMpAnimLenKind, sMpAnimLenId, (unsigned)(gMain.vblankCounter1 - sMpAnimLenStart));
+}
 void MP_ModernAnim_Begin(const u8 *const table[], u16 id);
 void MP_ModernAnim_OnSprite(const struct SpriteTemplate *template);
 void MP_ModernAnim_OnTask(TaskFunc func);
@@ -272,6 +299,7 @@ void LaunchBattleAnimation(const u8 *const animsTable[], u16 tableId, bool8 isMo
     sMonAnimTaskIdArray[1] = TASK_NONE;
     sBattleAnimScriptPtr = animsTable[tableId];
     gAnimScriptActive = TRUE;
+    MpAnimLenBegin(animsTable, tableId);   // Moemon Kai: MOEMON_ANIMLEN logs every animation's length (tests)
     MP_ModernAnim_Begin(animsTable, tableId);   // Moemon Co-op: BATTLE ANIMS > MODERN draws over it
     {
         const u8 *MP_MakerAnim_Begin(const u8 *const table[], u16 id);
@@ -624,6 +652,7 @@ static void Cmd_end(void)
             UpdateOamPriorityInAllHealthboxes(1);
         }
         gAnimScriptActive = FALSE;
+        MpAnimLenEnd();
     }
 }
 
