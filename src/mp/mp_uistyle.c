@@ -580,6 +580,10 @@ void MP_UiStyle_BattleBox(u8 x0, u8 y0, u8 x1, u8 y1, bool8 bg1, bool8 clear)
     }
 }
 
+static u8 sHoldLine[WINDOWS_MAX], sAckLine[WINDOWS_MAX];   // (MP_UiStyle_HoldLine)
+static u32 sAckPage[WINDOWS_MAX];
+static bool8 sHolding[WINDOWS_MAX];
+
 void MP_UiStyle_TextPrinted(u8 windowId, const u8 *str)
 {
     struct Capture *c;
@@ -587,6 +591,9 @@ void MP_UiStyle_TextPrinted(u8 windowId, const u8 *str)
     if (windowId >= WINDOWS_MAX || str == NULL)
         return;
     c = &sCap[windowId];
+    // (RED / CRYSTAL: a message printed again waits at its lines past the box's two again, as the first time:
+    // MP_UiStyle_HoldLine; what was read is never carried to the next printing of the same words)
+    sAckPage[windowId] = 0, sAckLine[windowId] = 0, sHolding[windowId] = FALSE;
     while (n < CAP_LEN - 1 && str[n] != EOS)
         n++;
     memcpy(c->text, str, n);
@@ -687,7 +694,6 @@ void MP_UiStyle_WindowGone(u8 windowId)
 }
 
 // how much of window W's words is printed, and whether its printer waits for A
-static bool8 sHolding[WINDOWS_MAX];   // (RED / CRYSTAL: a printer waiting at a line past the box's two: MP_UiStyle_HoldLine)
 static bool8 AtFoot(u8 w);
 
 static u16 Printed(u8 w, bool8 *waiting)
@@ -1103,6 +1109,10 @@ static u16 sLineStart[FLOW_LINES], sLineEnd[FLOW_LINES];
 static int FlowPage(const struct UiFont *f, const u8 *t, int from, int to, int maxW)
 {
     int n = 0, nl = 0, i, k, lineFirst = 0, w = 0, lastSpace = -1;
+    // (RED / CRYSTAL: once a line of Kai's runs past the box in the style's letters, the words it pushes over go on
+    // at the start of Kai's next line, not on a line of their own, so the page fills the box as the Game Boy's text
+    // does; Kai's own breaks stay where nothing ran over: the user, 2026-11-17)
+    bool8 join = MP_UiStyle_Active() == UISTYLE_RED || MP_UiStyle_Active() == UISTYLE_CRYSTAL, wrapped = FALSE;
     sLineStart[0] = 0;
     for (i = from; i < to && n < FLOW_MAX; i++)
     {
@@ -1120,8 +1130,18 @@ static int FlowPage(const struct UiFont *f, const u8 *t, int from, int to, int m
         }
         if (c == CHAR_PROMPT_CLEAR)
             break;
+        if (c == CHAR_NEWLINE && join && wrapped && maxW && n > lineFirst)
+        {
+            // (the line before ran over: Kai's break becomes a space between words)
+            sFlow[n].src = i, sFlow[n].c = CHAR_SPACE;
+            lastSpace = n;
+            w += f->g[CHAR_SPACE].adv;
+            n++;
+            continue;
+        }
         if (c == CHAR_NEWLINE || c == CHAR_PROMPT_SCROLL)
         {
+            wrapped = FALSE;
             if (nl < FLOW_LINES - 1)
             {
                 sLineEnd[nl++] = n;
@@ -1140,6 +1160,7 @@ static int FlowPage(const struct UiFont *f, const u8 *t, int from, int to, int m
             sLineEnd[nl++] = lastSpace;
             sLineStart[nl] = lastSpace + 1;
             lineFirst = lastSpace + 1;
+            wrapped = TRUE;
             for (w = 0, k = lineFirst; k < n; k++)
                 w += f->g[sFlow[k].c].adv;
             lastSpace = -1;
@@ -2061,8 +2082,6 @@ static bool8 FieldMessageShown(void)
 // (text.c RenderText) at the first letter of each line past the second, the style's ▼ showing, until A; Msg then shows
 // the last two lines printed, so the earlier one scrolls up as on the Game Boy (pokered / pokecrystal `cont`). The box
 // keeps one layout whatever the length (the user, 2026-11-17: "The second image is inconsistent with the first")
-static u8 sHoldLine[WINDOWS_MAX], sAckLine[WINDOWS_MAX];
-static u32 sAckPage[WINDOWS_MAX];
 
 static int SkipCtrl(const u8 *t, int i, int len)
 {

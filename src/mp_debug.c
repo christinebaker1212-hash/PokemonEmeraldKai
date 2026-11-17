@@ -4918,7 +4918,7 @@ void MP_TestCommand(const char *cmd, const char *arg)
         else
             printf("[test] u3dci %d: %d\n", seq, U3D_CiStart(seq, SPECIES_NONE, 0, 0));
     }
-    else if (strcmp(cmd, "fieldsay") == 0)   // fieldsay TEXT ("|" a new line): TEXT in the field's message box
+    else if (strcmp(cmd, "fieldsay") == 0)   // fieldsay TEXT ("|" a new line, "^" a new page): TEXT in the field's message box
     {
         void MP_AsciiToGame(u8 *dst, const char *src, int maxLen);
         static u8 sSay[300];
@@ -4928,7 +4928,7 @@ void MP_TestCommand(const char *cmd, const char *arg)
         while (*q && n < (int)sizeof(sSay) - 2)
         {
             int k = 0;
-            while (q[k] && q[k] != '|' && k < (int)sizeof(a) - 1)
+            while (q[k] && q[k] != '|' && q[k] != '^' && k < (int)sizeof(a) - 1)
                 a[k] = q[k], k++;
             a[k] = 0;
             MP_AsciiToGame(sSay + n, a, (int)sizeof(sSay) - 2 - n);
@@ -4937,6 +4937,8 @@ void MP_TestCommand(const char *cmd, const char *arg)
             q += k;
             if (*q == '|')
                 sSay[n++] = CHAR_NEWLINE, q++;
+            else if (*q == '^')
+                sSay[n++] = CHAR_PROMPT_CLEAR, q++;   // ("^" a new page)
         }
         sSay[n] = EOS;
         ShowFieldMessage(sSay);

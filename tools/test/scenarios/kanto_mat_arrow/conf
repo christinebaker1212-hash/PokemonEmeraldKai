@@ -1,0 +1,6 @@
+# KANTO's one-tile exit mats: the warp tiles either side never leave (IsWideMatEdge) and show no exit arrow either; the
+# mat itself does (field_player_avatar.c HideShowWarpArrow). CERULEAN's POKéMON CENTER: edge, mat, edge (shots)
+MODE=1
+TMO=120
+EXPECT_A=("warp: 38,14 6,6")
+UNEXPECT_A=("[crash]")

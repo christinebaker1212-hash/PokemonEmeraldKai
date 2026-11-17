@@ -907,6 +907,18 @@ void TextPrinterClearDownArrow(struct TextPrinter *textPrinter)
     CopyWindowToVram(textPrinter->printerTemplate.windowId, COPYWIN_GFX);
 }
 
+// Moemon Kai: a text wait takes an A / B press only if no other wait took it on this frame. A printer that prints at
+// once (words read before: mp_qol.c MP_Qol_FieldTextSpeed) runs every state in one frame, so one press passed every
+// wait after it (a page's arrow, RED / CRYSTAL's line waits): lines went by unseen, pages fell differently
+static bool8 TextPressTaken(void)
+{
+    static u32 sFrame = 0xFFFFFFFF;
+    if (!JOY_NEW(A_BUTTON | B_BUTTON) || sFrame == gMain.vblankCounter1)
+        return FALSE;
+    sFrame = gMain.vblankCounter1;
+    return TRUE;
+}
+
 bool8 TextPrinterWaitAutoMode(struct TextPrinter *textPrinter)
 {
     struct TextPrinterSubStruct *subStruct = (struct TextPrinterSubStruct *)(&textPrinter->subStructFields);
@@ -932,7 +944,7 @@ bool16 TextPrinterWaitWithDownArrow(struct TextPrinter *textPrinter)
     else
     {
         TextPrinterDrawDownArrow(textPrinter);
-        if (JOY_NEW(A_BUTTON | B_BUTTON) || MP_Qol_SkipActive())   // Moemon Co-op QoL: START skips seen scripts
+        if (TextPressTaken() || MP_Qol_SkipActive())   // Moemon Co-op QoL: START skips seen scripts
         {
             result = TRUE;
             PlaySE(SE_SELECT);
@@ -950,7 +962,7 @@ bool16 TextPrinterWait(struct TextPrinter *textPrinter)
     }
     else
     {
-        if (JOY_NEW(A_BUTTON | B_BUTTON) || MP_Qol_SkipActive())
+        if (TextPressTaken() || MP_Qol_SkipActive())
         {
             result = TRUE;
             PlaySE(SE_SELECT);
@@ -1021,7 +1033,7 @@ static u16 RenderText(struct TextPrinter *textPrinter)
         // scrolls it up (pokered's / pokecrystal's `cont`), so a long message keeps the box's own layout
         if (MP_UiStyle_HoldLine(textPrinter->printerTemplate.windowId, textPrinter->printerTemplate.currentChar))
         {
-            if (JOY_NEW(A_BUTTON | B_BUTTON) || MP_Qol_SkipActive())
+            if (TextPressTaken() || MP_Qol_SkipActive())
             {
                 PlaySE(SE_SELECT);
                 MP_UiStyle_HoldDone(textPrinter->printerTemplate.windowId);

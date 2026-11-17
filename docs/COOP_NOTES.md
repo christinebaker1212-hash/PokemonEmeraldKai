@@ -8082,3 +8082,18 @@ each game's foes are the other side). It changes looks only. **Black's Triple Ba
 - Tests: foe_shift_triple, foe_shift_double (Lv100 foes, the chosen at 1 HP, SURF from all three). Checked by hand
   frame by frame: Triple left / middle / right / two at once and both Double sides in KAI, each style (RED, CRYSTAL,
   FIRERED, PLATINUM, BLACK), and the layout kept after the BAG.
+
+## RED / CRYSTAL text read again, the box filled; KANTO / JOHTO mat arrows (1.203.1)
+
+- A text wait (a page's arrow, RED / CRYSTAL's line waits) takes an A / B press only if no other wait took it on that
+  frame (text.c TextPressTaken). Words read before print at once (mp_qol.c MP_Qol_FieldTextSpeed), and an instant
+  printer runs every state in one frame, so one press passed every wait after it: lines went by unseen and the second
+  reading looked different from the first. The style's waits also start fresh at each printing
+  (MP_UiStyle_TextPrinted).
+- RED / CRYSTAL fill the box (the user, 2026-11-17: "re-wrap so the dialogue uses the whole message box when
+  available, while sticking close to the original text style"). In mp_uistyle.c FlowPage, once a line of Kai's runs
+  past the box in the style's letters, its pushed-over words go on at the start of Kai's next line (Kai's break
+  becomes a space). Kai's own breaks stay where nothing ran over, and a page still longer than the box waits for A at
+  each line past the two. No timed scrolling and no joining of lines that fit (the user turned both down).
+- KANTO / JOHTO mats: field_player_avatar.c HideShowWarpArrow shows no arrow on the warp tiles beside a one-tile mat
+  (MP_ArrowWarpIsMatEdge, the check that already stopped them leaving). Test kanto_mat_arrow.

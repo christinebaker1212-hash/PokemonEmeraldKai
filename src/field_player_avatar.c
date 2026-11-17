@@ -1625,6 +1625,8 @@ void SetPlayerAvatarWatering(u8 direction)
     StartSpriteAnim(&gSprites[gPlayerAvatar.spriteId], GetFaceDirectionAnimNum(direction));
 }
 
+bool8 MP_ArrowWarpIsMatEdge(s16 x, s16 y);   // Moemon Kai: field_control_avatar.c
+
 static void HideShowWarpArrow(struct ObjectEvent *objectEvent)
 {
     s16 x;
@@ -1635,7 +1637,10 @@ static void HideShowWarpArrow(struct ObjectEvent *objectEvent)
     for (x = 0, direction = DIR_SOUTH; x < 4; x++, direction++)
     {
         if (sArrowWarpMetatileBehaviorChecks2[x](metatileBehavior) && direction == objectEvent->movementDirection
-         && !MetatileBehavior_IsSinnohStairs(metatileBehavior))   // (Moemon Kai: SINNOH's stairs show no arrow, as Platinum's)
+         && !MetatileBehavior_IsSinnohStairs(metatileBehavior)   // (Moemon Kai: SINNOH's stairs show no arrow, as Platinum's)
+         // (Moemon Kai: the tiles beside a KANTO / JOHTO one-tile exit mat are warps that never leave
+         // (field_control_avatar.c IsWideMatEdge): no arrow on them either, only on the mat itself)
+         && !MP_ArrowWarpIsMatEdge(objectEvent->currentCoords.x - MAP_OFFSET, objectEvent->currentCoords.y - MAP_OFFSET))
         {
             // Show warp arrow if applicable
             x = objectEvent->currentCoords.x;
