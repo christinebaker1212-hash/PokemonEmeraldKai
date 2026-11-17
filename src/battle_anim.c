@@ -300,6 +300,11 @@ void LaunchBattleAnimation(const u8 *const animsTable[], u16 tableId, bool8 isMo
     sBattleAnimScriptPtr = animsTable[tableId];
     gAnimScriptActive = TRUE;
     MpAnimLenBegin(animsTable, tableId);   // Moemon Kai: MOEMON_ANIMLEN logs every animation's length (tests)
+    if (animsTable == gBattleAnims_Moves && !IsContest())
+    {
+        void MP_GbMoves_Begin(u16 move, u8 attacker, u8 target);
+        MP_GbMoves_Begin(ownId, gBattleAnimAttacker, gBattleAnimTarget);   // Moemon Kai: GB OPTIONS > MOVES (mp_gb_moves.c)
+    }
     MP_ModernAnim_Begin(animsTable, tableId);   // Moemon Co-op: BATTLE ANIMS > MODERN draws over it
     {
         const u8 *MP_MakerAnim_Begin(const u8 *const table[], u16 id);
@@ -379,10 +384,13 @@ static void ClearSpriteIndex(u16 index)
     }
 }
 
+u32 gMpAnimSteps;   // Moemon Kai: the animation script's steps (GB OPTIONS > MOVES fits to them: mp_gb_moves.c)
+
 static void WaitAnimFrameCount(void)
 {
     if (!gAnimScriptActive)
         return;   // Moemon Co-op: an extra step after the end (battle_main.c MpBattleTurbo) does nothing
+    gMpAnimSteps++;
     if (sAnimFramesToWait <= 0)
     {
         gAnimScriptCallback = RunAnimScriptCommand;
@@ -398,6 +406,7 @@ static void RunAnimScriptCommand(void)
 {
     if (!gAnimScriptActive)
         return;   // Moemon Co-op: see WaitAnimFrameCount
+    gMpAnimSteps++;
     do
     {
         sScriptCmdTable[sBattleAnimScriptPtr[0]]();
@@ -653,6 +662,10 @@ static void Cmd_end(void)
         }
         gAnimScriptActive = FALSE;
         MpAnimLenEnd();
+        {
+            void MP_GbMoves_End(void);
+            MP_GbMoves_End();   // Moemon Kai: GB OPTIONS > MOVES: KAI's ended, so does the Game Boy's
+        }
     }
 }
 

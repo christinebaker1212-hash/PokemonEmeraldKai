@@ -629,6 +629,36 @@ void PlaySE(u16 songNum)
     m4aSongNumStart(songNum);
 }
 
+// Moemon Kai: GB OPTIONS > MOVES plays the Game Boy's sounds over KAI's animation: KAI's own play at no volume (so an
+// animation waiting for them takes its usual time: mp_gb_moves.c)
+bool8 MP_GbMoves_MuteKai(void);
+static bool8 sMpSeSilent;
+static void MpGbMovesSilence(void)
+{
+    if (MP_GbMoves_MuteKai())
+    {
+        m4aMPlayVolumeControl(&gMPlayInfo_SE1, TRACKS_ALL, 0);
+        m4aMPlayVolumeControl(&gMPlayInfo_SE2, TRACKS_ALL, 0);
+        sMpSeSilent = TRUE;
+    }
+    else if (sMpSeSilent)
+    {
+        m4aMPlayVolumeControl(&gMPlayInfo_SE1, TRACKS_ALL, 256);
+        m4aMPlayVolumeControl(&gMPlayInfo_SE2, TRACKS_ALL, 256);
+        sMpSeSilent = FALSE;
+    }
+}
+
+void MP_GbMoves_UnmuteKai(void)
+{
+    if (sMpSeSilent)
+    {
+        m4aMPlayVolumeControl(&gMPlayInfo_SE1, TRACKS_ALL, 256);
+        m4aMPlayVolumeControl(&gMPlayInfo_SE2, TRACKS_ALL, 256);
+        sMpSeSilent = FALSE;
+    }
+}
+
 void PlaySE12WithPanning(u16 songNum, s8 pan)
 {
     m4aSongNumStart(songNum);
@@ -636,6 +666,7 @@ void PlaySE12WithPanning(u16 songNum, s8 pan)
     m4aMPlayImmInit(&gMPlayInfo_SE2);
     m4aMPlayPanpotControl(&gMPlayInfo_SE1, TRACKS_ALL, pan);
     m4aMPlayPanpotControl(&gMPlayInfo_SE2, TRACKS_ALL, pan);
+    MpGbMovesSilence();
 }
 
 void PlaySE1WithPanning(u16 songNum, s8 pan)
@@ -643,6 +674,7 @@ void PlaySE1WithPanning(u16 songNum, s8 pan)
     m4aSongNumStart(songNum);
     m4aMPlayImmInit(&gMPlayInfo_SE1);
     m4aMPlayPanpotControl(&gMPlayInfo_SE1, TRACKS_ALL, pan);
+    MpGbMovesSilence();
 }
 
 void PlaySE2WithPanning(u16 songNum, s8 pan)
@@ -650,6 +682,7 @@ void PlaySE2WithPanning(u16 songNum, s8 pan)
     m4aSongNumStart(songNum);
     m4aMPlayImmInit(&gMPlayInfo_SE2);
     m4aMPlayPanpotControl(&gMPlayInfo_SE2, TRACKS_ALL, pan);
+    MpGbMovesSilence();
 }
 
 void SE12PanpotControl(s8 pan)

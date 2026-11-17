@@ -41,6 +41,7 @@ $(C_BUILDDIR)/mp/mp_patchnotes.o: c_dep += $(DATA_SRC_SUBDIR)/mp_patchnotes.h
 
 # Moemon Co-op: the PMD Collab sheets go in with .incbin (scaninc doesn't see it)
 $(C_BUILDDIR)/mp/mp_pmd_data.o: graphics/moemon/pmd/pmd.bin
+$(C_BUILDDIR)/mp/mp_gb_moves_data.o: graphics/moemon/legacy/gbmoves.bin
 # Moemon Co-op: the BADGE CASE's badges, the same way
 $(C_BUILDDIR)/mp/mp_badge_data.o: graphics/moemon/badges/badges.bin
 $(C_BUILDDIR)/mp/mp_pass_data.o: graphics/moemon/cards/passes.bin

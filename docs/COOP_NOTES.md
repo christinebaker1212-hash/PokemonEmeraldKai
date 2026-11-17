@@ -8208,3 +8208,55 @@ an 8x8 cell (ReduceCell). The frame's top bit is kept on every pixel (screenshot
 COLOR but not its filters: display.c gMpGbDisplayColor (-1 as chosen, 0 DEFAULT, 1 the GBA profile for GBA), and the
 COLOR row reads "GB OPTIONS". MOEMON_GBPAL_TRACE=1 logs CRYSTAL's palettes and merges every 120 frames. Scenario
 gb_colors (its check.py: DMG / POCKET / COLOR shots hold only their colours, KAI untouched, CRYSTAL's cells).
+
+CRYSTAL's COLORS under the time of day's light (WHITE BG ON: mp_uistyle.c TintBattleScene runs after palette RAM is
+drawn): mp_gbpal.c Allow takes each palette RAM colour as that light leaves it too, and GB OPTIONS > MOVES' own
+Crystal colours (MP_GbPal_AllowColor), so ReduceCell leaves them alone; without it every 8x8 cell where a POKeMON met
+the background was cut to four colours of its own (blocks round the pictures). MOEMON_GBPAL_TRACE=1 logs the cells it
+reduces.
+
+### GB OPTIONS stage 5: MOVES
+
+GB OPTIONS > MOVES (MP_GB_KAI_MOVES, bit 0x80, unset by default): every move animated and heard as Red or Crystal show
+it. tools/moemon_legacy/move_bake.py builds both games from their pret disassemblies (`make blue_debug` in pokered:
+Blue's animations and sounds are Red's; `make crystal` in pokecrystal; rgbds 1.0.4, no ROM) and runs them in PyBoy,
+the image patched in memory only:
+- Red: the title screen jumps to the debug build's DebugMenu, A picks FIGHT (TestBattle). JoypadLowSensitivity (the
+  battle menu polls it) first calls a routine in bank 0's free space ($3FBA): with a WRAM flag at 1 it plays
+  MoveAnimation (wAnimationID, hWhoseTurn, wAnimationType 0: no after-hit shake / blink, KAI has its own) through
+  Bankswitch, at 3 PlaySound, then sets the flag to 2.
+- Crystal: the title screen jumps to $3FB5, which selects WRAM bank 1 and FarCalls StartBattle (a hook on
+  _TitleScreen writes a CYNDAQUIL into the party and a wild CHIKORITA); JoyTextDelay calls the routine: 1 plays
+  PlayBattleAnim (wFXAnimID, hBattleTurn), 3 PlaySFX.
+From the battle menu's saved state every move (Red 1-165, Crystal 1-251) is played from each side and every frame
+recorded: the sprites (tiles collected once), BGP / OBP0 / OBP1 and Crystal's CGB palettes (wBGPals2 / wOBPals2), SCX
+/ SCY on every line and the window's place (Red draws the battle on the window: its moves are the shakes), and each
+picture as it was, gone, or a map of 8x8 cells (each one of the picture's own 49 tiles moved, or a tile of the move's
+own such as SUBSTITUTE's doll or MINIMIZE's dot), and the sounds started (Red PlaySound with wFrequencyModifier /
+wTempoModifier, Crystal PlayStereoSFX; cries left out: KAI's animation still plays the POKeMON's own). Each sound
+is then played alone in the emulator (Red: music stopped with id $FF; Crystal: its music channels switched off) and
+its audio kept. tools/moemon_legacy/move_pack.py packs it all into graphics/moemon/legacy/gbmoves.bin (layout at the
+top of the tool; frames that repeat are one byte; sounds 4-bit IMA ADPCM at 21024 Hz; Crystal's palettes as BGPs for
+the background, palette 7, and each picture, palettes 0 / 1), built in by src/mp/mp_gb_moves_data.c's .incbin.
+
+src/mp/mp_gb_moves.c: battle_anim.c LaunchBattleAnimation tells it a move's animation starts (MP_GbMoves_Begin) and
+when any ends (MP_GbMoves_End). KAI's animation runs on unseen; its sound effects play at no volume (sound.c
+MpGbMovesSilence, so one waiting for its sounds takes its usual time). The Game Boy's timeline is fitted to KAI's
+script's steps (gMpAnimSteps, counted in battle_anim.c's step functions, so ANIM SPEED and turbo change nothing)
+against the steps KAI's takes for that move and side (src/mp/mp_gb_moves_kailen.h, from `mp animall` with
+MOEMON_ANIM_FRAMES): a longer timeline spread over them, a shorter one at its own pace and resting on its last frame.
+The picture: the frame before the move (sStill) with the backdrop drawn once without sprites (sdl2.c renders the
+first frame twice: sPlate, then sRaw; a battler's pixels are where they differ and no overlay has drawn since), the
+two battlers erased, moved or cut cell by cell (64/7 pixels a cell) as the timeline says, each in its picture's BGP,
+the rest in BGP's, each line shifted, and the Game Boy's sprites over it. Sprites that touch are one object (a
+flame, a bolt, a ball built of 8x8 tiles: DrawSprites joins them each frame): its centre is mapped and its tiles keep
+their 8-pixel spacing, as the GENESIS / EPOCH BALLS' throws do; mapping each tile alone cut them apart (Thunderbolt,
+Ember, every move's graphics). A point is mapped from the picture it's nearer (MapPoint: its place from the user's
+picture near the user, from the target's near the target, by that picture's size over the Game Boy's, and blended
+between as far along as it is on the Game Boy), so what sits on a POKeMON sits on it here. Each picture's centre is
+its sprite's as the move starts (KAI's shakes don't move the boxes; a UI STYLE's layout counts). Doubles and Triples
+aim at KAI's own target. A sprite behind the background (OAM bit 7) hides behind what's drawn over the backdrop (the
+POKeMON, the boxes), as the Game Boy's colours 1-3. Sprite colours: Red's in GB OPTIONS > COLORS' shades (MP_GbPal_ObjShade), Crystal's in its
+own CGB palettes. Moves past the game's own: MP_GbMoves_StandIn (by the name's words: PUNCH, KICK, FANG, BEAM...,
+else by type and power, status moves by type; Moemon Maker moves by their base). Sounds: mp_legacy_sound.c's move
+voice (one at a time, as the Game Boy's channels). MOEMON_GBMOVES_TRACE=1 logs each frame. Scenario gb_moves.

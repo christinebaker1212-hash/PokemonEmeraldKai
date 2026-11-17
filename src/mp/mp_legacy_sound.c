@@ -64,9 +64,77 @@ void MP_LegacySfx_StopAll(void)
         sVoices[i].id = -1;
 }
 
+// GB OPTIONS > MOVES (mp_gb_moves.c): a move's sound from the pack (u32 samples, then 4-bit IMA ADPCM at 21024 Hz, each
+// sample played twice at the port's 42048). One at a time: a sound starting takes the Game Boy's sound channels from
+// the one playing, as the games' own did.
+static struct {
+    const u8 *data;
+    u32 count, pos;
+    s32 pred, index;
+    s16 cur;
+    u8 half;
+} sMoveVoice;
+
+void MP_LegacySfx_PlayMove(const u8 *sound)
+{
+    sMoveVoice.count = sound[0] | (sound[1] << 8) | (sound[2] << 16) | ((u32)sound[3] << 24);
+    sMoveVoice.data = sound + 4;
+    sMoveVoice.pos = 0;
+    sMoveVoice.pred = 0;
+    sMoveVoice.index = 0;
+    sMoveVoice.half = 0;
+}
+
+static s16 MoveVoiceNext(void)
+{
+    static const s16 sSteps[89] = {
+        7, 8, 9, 10, 11, 12, 13, 14, 16, 17, 19, 21, 23, 25, 28, 31, 34, 37, 41, 45, 50, 55, 60, 66, 73, 80, 88, 97, 107,
+        118, 130, 143, 157, 173, 190, 209, 230, 253, 279, 307, 337, 371, 408, 449, 494, 544, 598, 658, 724, 796, 876,
+        963, 1060, 1166, 1282, 1411, 1552, 1707, 1878, 2066, 2272, 2499, 2749, 3024, 3327, 3660, 4026, 4428, 4871, 5358,
+        5894, 6484, 7132, 7845, 8630, 9493, 10442, 11487, 12635, 13899, 15289, 16818, 18500, 20350, 22385, 24623, 27086,
+        29794, 32767};
+    static const s8 sIndex[8] = {-1, -1, -1, -1, 2, 4, 6, 8};
+    u8 code;
+    s32 step, delta;
+    if (sMoveVoice.half)
+    {
+        sMoveVoice.half = 0;
+        return sMoveVoice.cur;
+    }
+    code = (sMoveVoice.data[sMoveVoice.pos >> 1] >> ((sMoveVoice.pos & 1) * 4)) & 15;
+    step = sSteps[sMoveVoice.index];
+    delta = step >> 3;
+    if (code & 4) delta += step;
+    if (code & 2) delta += step >> 1;
+    if (code & 1) delta += step >> 2;
+    sMoveVoice.pred += (code & 8) ? -delta : delta;
+    if (sMoveVoice.pred > 32767) sMoveVoice.pred = 32767;
+    if (sMoveVoice.pred < -32768) sMoveVoice.pred = -32768;
+    sMoveVoice.index += sIndex[code & 7];
+    if (sMoveVoice.index < 0) sMoveVoice.index = 0;
+    if (sMoveVoice.index > 88) sMoveVoice.index = 88;
+    sMoveVoice.pos++;
+    sMoveVoice.half = 1;
+    sMoveVoice.cur = sMoveVoice.pred;
+    return sMoveVoice.cur;
+}
+
 // buffer: interleaved stereo floats, `count` floats (2 per sample frame)
 void MP_LegacySfx_Mix(float *buffer, s32 count)
 {
+    if (sMoveVoice.data != NULL)
+    {
+        s32 n;
+        for (n = 0; n + 1 < count && (sMoveVoice.pos < sMoveVoice.count || sMoveVoice.half); n += 2)
+        {
+            float v = MoveVoiceNext() / 32768.0f * 0.9f;
+            buffer[n] += v;
+            buffer[n + 1] += v;
+        }
+        if (sMoveVoice.pos >= sMoveVoice.count && !sMoveVoice.half)
+            sMoveVoice.data = NULL;
+    }
+    {
 #ifdef HAVE_LEGACY_SFX
     u8 i;
     bool8 stereo = gSaveBlock2Ptr != NULL && gSaveBlock2Ptr->optionsSound;
@@ -98,6 +166,7 @@ void MP_LegacySfx_Mix(float *buffer, s32 count)
     (void)buffer;
     (void)count;
 #endif
+    }
 }
 
 // UI STYLE: RED's / CRYSTAL's party SWITCH sound (SFX_SWAP / SFX_SWITCH_POKEMON)

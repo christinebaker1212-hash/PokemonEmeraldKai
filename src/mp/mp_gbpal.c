@@ -348,7 +348,7 @@ static void KeepEight(u16 (*four)[4], const u16 *used, u32 first, u32 last, cons
             memcpy(four[i], four[rep[i]], sizeof(four[i]));
 }
 
-static void Allow(u16 c)
+static void AllowOne(u16 c)
 {
     c &= 0x7FFF;
     if (!(sAllowed[c >> 3] & (1 << (c & 7))))
@@ -357,6 +357,49 @@ static void Allow(u16 c)
         if (sAllowedCount < ARRAY_COUNT(sAllowedList))
             sAllowedList[sAllowedCount++] = c;
     }
+}
+
+// CRYSTAL's light of the time of day over a battle (WHITE BG ON: mp_uistyle.c TintBattleScene, after palette RAM is
+// drawn): each colour palette RAM gives is allowed as that light leaves it too, or every 8x8 cell where a POKeMON meets
+// the background would be cut to four colours of its own (blocks)
+static bool8 sTintOn;
+static s32 sTintR, sTintG, sTintB;
+static void Allow(u16 c)
+{
+    AllowOne(c);
+    if (sTintOn)
+        AllowOne(((c & 31) * sTintR / 31) | ((((c >> 5) & 31) * sTintG / 31) << 5)
+                 | ((((c >> 10) & 31) * sTintB / 31) << 10));
+}
+
+static void TintNow(void)
+{
+    bool8 MP_BattlePic_SceneTint(u16 *tint);
+    u16 t;
+    sTintOn = gMain.inBattle && MP_BattlePic_SceneTint(&t);
+    if (sTintOn)
+        sTintR = t & 31, sTintG = (t >> 5) & 31, sTintB = (t >> 10) & 31;
+}
+
+// GB OPTIONS > MOVES (mp_gb_moves.c): a colour it draws over the frame, as a sprite's of the Game Boy's own (CRYSTAL's
+// palettes: its sprites have their own palettes, not the background cell's)
+void MP_GbPal_AllowColor(u16 c)
+{
+    if (sKind == KIND_CRYSTAL)
+        AllowOne(c);
+}
+
+// GB OPTIONS > MOVES (mp_gb_moves.c): a Game Boy sprite's shade (OBP 0 / 1, 2 the background's) in the colours shown
+u16 MP_GbPal_ObjShade(u8 shade, u8 obp)
+{
+    static const u16 sGrey[4] = {RGB(31, 31, 31), RGB(21, 21, 21), RGB(10, 10, 10), RGB(0, 0, 0)};
+    Choose();
+    shade &= 3;
+    if (sKind == KIND_MONO)
+        return sMono[sMonoIdx][shade];
+    if (sKind == KIND_RED_GBC)
+        return obp == 0 ? sRedGbcObj[shade] : sRedGbcBg[shade];
+    return sGrey[shade];
 }
 
 // sdl2.c VDraw, before DrawFrame: palette RAM in the Game Boy's colours
@@ -380,6 +423,7 @@ void MP_GbPal_PreDraw(void)
         for (i = 0; i < sAllowedCount; i++)
             sAllowed[sAllowedList[i] >> 3] = 0;
         sAllowedCount = 0;
+        TintNow();
         UsedPalettes(used);
     }
     for (p = 0; p < NUM_PALS; p++)
@@ -486,6 +530,14 @@ static void ReduceCell(u16 *frame, s32 x0, s32 y0)
         }
     if (n <= 4)
         return;
+    if (sGbPalTrace)
+    {
+        char buf[200];
+        s32 o = 0;
+        for (k = 0; k < n && o < 180; k++)
+            o += snprintf(buf + o, sizeof(buf) - o, " %04x", col[k]);
+        MPNet_Log("gbpal cell %d,%d:%s", x0, y0, buf);
+    }
     // sort by brightness
     for (i = 1; i < n; i++)
         for (j = i; j > 0 && Lum(col[j]) < Lum(col[j - 1]); j--)

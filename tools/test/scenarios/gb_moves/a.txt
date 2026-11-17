@@ -1,0 +1,18 @@
+pressuntil A field 5000
+mp uistyle red
+mp wild 290:5
+pressuntil A action 4000
+wait 10
+mp animall 94 94 0 1 0
+waitlog 3000 animall done
+mp animall 299 299 1 0 0
+waitlog 3000 animall done
+mp gboptions red 80
+mp animall 85 85 0 1 0
+waitlog 3000 animall done
+mp uistyle crystal
+mp animall 94 94 0 1 0
+waitlog 3000 animall done
+mp animall 403 403 1 0 0
+waitlog 3000 animall done
+quit

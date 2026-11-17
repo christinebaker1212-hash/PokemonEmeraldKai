@@ -990,7 +990,24 @@ void VDraw(void)
         void MP_GbPal_PreDraw(void);
         MP_GbPal_PreDraw();     // Moemon Kai: GB OPTIONS > COLORS: palette RAM in the Game Boy's (mp_gbpal.c) ...
     }
-    DrawFrame(image);
+    {
+        bool8 MP_GbMoves_WantPlate(void);
+        void MP_GbMoves_TakePlate(const u16 *frame);
+        void MP_GbMoves_TakeRaw(const u16 *frame);
+        if (MP_GbMoves_WantPlate())   // Moemon Kai: GB OPTIONS > MOVES: the battle's backdrop without its sprites
+        {
+            u16 dispcnt = REG_DISPCNT;
+            REG_DISPCNT &= ~DISPCNT_OBJ_ON;
+            DrawFrame(image);
+            REG_DISPCNT = dispcnt;
+            MP_GbMoves_TakePlate(image);
+            memset(image, 0, sizeof(sFrameImage));
+            DrawFrame(image);
+            MP_GbMoves_TakeRaw(image);   // (... and with them)
+        }
+        else
+            DrawFrame(image);
+    }
     {
         void MP_GbPal_PostDraw(void);
         MP_GbPal_PostDraw();    // ... and back as the game left it
@@ -1055,7 +1072,9 @@ void VDraw(void)
         MP_Credits_Composite(image);     // Moemon Kai: the credits' "Skip the credits?" bar (credits.c)
     }
     {
+        void MP_GbMoves_Composite(u16 *frame);
         void MP_GbPal_Composite(u16 *frame);
+        MP_GbMoves_Composite(image);     // Moemon Kai: GB OPTIONS > MOVES, Red's / Crystal's (mp_gb_moves.c)
         MP_GbPal_Composite(image);       // Moemon Kai: GB OPTIONS > COLORS: what palette RAM didn't draw (mp_gbpal.c)
     }
     {

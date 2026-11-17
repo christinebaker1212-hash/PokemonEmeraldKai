@@ -1,0 +1,8 @@
+# GB OPTIONS > MOVES: with UI STYLE RED a move plays Red's own animation over KAI's (PSYCHIC from the player's side,
+# BLAZE KICK from the foe's as Red's nearest, MEGA KICK), with CRYSTAL Crystal's (AIR SLASH as SLASH); MOVES KAI
+# plays none (mp_gb_moves.c); KAI's own animation still runs to its end each time
+MODE=1
+TMO=150
+ENV_A="MOEMON_DEBUG_PARTY=280:30 MOEMON_ANIMLEN=1"
+EXPECT_A=("gb moves: red move 94 (as 94), side 0" "gb moves: red move 299 (as 25), side 1" "gb moves: crystal move 94 (as 94), side 0" "gb moves: crystal move 403 (as 163), side 1" "anim length: m 85")
+UNEXPECT_A=("gb moves: red move 85")

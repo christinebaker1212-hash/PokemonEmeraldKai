@@ -193,7 +193,10 @@ packs from tools/ui_styles/build_pack.py (PLATINUM / BLACK from the ROMs, by the
 mock-ups docs/ui_styles/mockups/ (tools/ui_styles/mockups.py, its checker must pass); check_specs.py compares packs
 with the mock-ups pixel for pixel; tests ui_style_battles, ui_style_screens.
 GB OPTIONS (the user, 2026-11-17: OPTIONS > DISPLAY > GB OPTIONS with RED / CRYSTAL, each player's own, anything that
-changes timing fitted to Kai's, real GBC colour rules; built in stages: COOP_NOTES "GB OPTIONS (RED / CRYSTAL)").
+changes timing fitted to Kai's, real GBC colour rules; built in stages: COOP_NOTES "GB OPTIONS (RED / CRYSTAL)"; all
+five built 2026-11-17: balls, TRANSITIONS src/mp/mp_gb_trans.c, COLORS mp_gbpal.c, MOVES mp_gb_moves.c with
+graphics/moemon/legacy/gbmoves.bin from tools/moemon_legacy/move_bake.py + move_pack.py (sprites that touch move as one
+object, as the GENESIS / EPOCH throws; scenarios gb_*)).
 **No release until every GB OPTIONS stage is done** (the user, 2026-11-17): push the work to the default branch without
 raising MOEMON_VERSION; one release at the end.
 
