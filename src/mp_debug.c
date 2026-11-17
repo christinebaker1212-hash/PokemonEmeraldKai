@@ -3923,6 +3923,16 @@ void MP_TestCommand(const char *cmd, const char *arg)
         void CB2_PartyMenuFromStartMenu(void);
         SetMainCallback2(CB2_PartyMenuFromStartMenu);
     }
+    else if (strcmp(cmd, "partymsg") == 0)
+    {
+        // partymsg - on the open party screen, its long message as an item's use leaves it ("...'s HP was restored...")
+        u8 DisplayPartyMenuMessage(const u8 *str, bool8 keepOpen);
+        extern const u8 gText_PkmnHPRestoredByVar2[];
+        GetMonNickname(&gPlayerParty[0], gStringVar1);
+        ConvertIntToDecimalStringN(gStringVar2, 13, STR_CONV_MODE_LEFT_ALIGN, 3);
+        StringExpandPlaceholders(gStringVar4, gText_PkmnHPRestoredByVar2);
+        DisplayPartyMenuMessage(gStringVar4, TRUE);
+    }
     else if (strcmp(cmd, "options") == 0)
     {
         // options - the OPTIONS screen (back to the field)

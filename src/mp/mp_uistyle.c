@@ -2390,18 +2390,6 @@ static void PartyScreen(struct UiPack *p, u16 *frame)
         slotSpec[i] = sp;
         sSlotData[i] = d;
     }
-    // the party's long messages (WIN_MSG: "... is holding ..."), in the style's message box
-    if (sFramed[6] && (sp = FindSpec(p, "f.msg")) != NULL)
-    {
-        memset(&d, 0, sizeof(d));
-        d.msg[0] = sCap[6].text;
-        d.msgLen[0] = sCap[6].len;
-        d.msgPrinted[0] = Printed(6, &waiting);
-        d.msgHold[0] = waiting;
-        if (waiting)
-            d.flags |= C_WAIT;
-        DrawSpec(p, sp, &d, frame, 0, 0, &fit);
-    }
     // the sprites: the POKé BALLS the style has its own of stay hidden; each slot's icon, item and status where the
     // style puts them
     for (i = 0; i < PARTY_SIZE && nSkip + 3 < (int)sizeof(skip); i++)
@@ -2479,6 +2467,20 @@ static void PartyScreen(struct UiPack *p, u16 *frame)
     for (i = 0; i < PARTY_SIZE; i++)
         if (slotSpec[i])
             DrawSpecText(p, slotSpec[i], &sSlotData[i], frame, &fit);
+    // the party's long messages (WIN_MSG: "... is holding ...", "...'s HP was restored ..."), in the style's message
+    // box over everything else on the screen: drawn before the icons and the slots' words, the last row showed over
+    // it (the user, 2026-11-17)
+    if (sFramed[6] && (sp = FindSpec(p, "f.msg")) != NULL)
+    {
+        memset(&d, 0, sizeof(d));
+        d.msg[0] = sCap[6].text;
+        d.msgLen[0] = sCap[6].len;
+        d.msgPrinted[0] = Printed(6, &waiting);
+        d.msgHold[0] = waiting;
+        if (waiting)
+            d.flags |= C_WAIT;
+        DrawSpec(p, sp, &d, frame, 0, 0, &fit);
+    }
     // (its own windows drawn; Kai's pop-ups (what to do, which move...) in the style: PopUps)
     sHandled |= 1u << 6;
     if (st.msgWin < WINDOWS_MAX && !popup)
