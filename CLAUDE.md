@@ -194,6 +194,8 @@ mock-ups docs/ui_styles/mockups/ (tools/ui_styles/mockups.py, its checker must p
 with the mock-ups pixel for pixel; tests ui_style_battles, ui_style_screens.
 GB OPTIONS (the user, 2026-11-17: OPTIONS > DISPLAY > GB OPTIONS with RED / CRYSTAL, each player's own, anything that
 changes timing fitted to Kai's, real GBC colour rules; built in stages: COOP_NOTES "GB OPTIONS (RED / CRYSTAL)").
+**No release until every GB OPTIONS stage is done** (the user, 2026-11-17): push the work to the default branch without
+raising MOEMON_VERSION; one release at the end.
 
 **The GBA's limits are not this game's** (the user, 2026-11-13: "this isn't a GBA game, this is a PC port"): any time
 something would go over a GBA limit (tiles, palettes, colours, sprites, VRAM, OAM, screen size...), ask the user how
