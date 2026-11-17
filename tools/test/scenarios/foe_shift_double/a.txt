@@ -1,0 +1,18 @@
+pressuntil A field 5000
+wait 30
+mp uistyle kai
+mp godmode 1
+mp dexcatch 261 265
+mp teach 0 57
+mp teach 1 57
+mp teach 2 57
+mp double 288:100 286:100
+pressuntil A action 4000
+wait 30
+shot before
+mp battlerhp 1 1
+mash A 9 20
+pressuntillog A 4000 foe shift: 1 on
+wait 40
+shot end
+quit

@@ -1716,6 +1716,14 @@ static void BattleHuds(struct UiPack *p, u16 *frame)
             kind = side == B_SIDE_OPPONENT ? "hud.foe3" : "hud.mine3";
             x = (side == B_SIDE_OPPONENT ? sTripleFoe[sFoeRow[pos]][0] : sTripleMine[sTeamRow[pos]][0]) + box->x2;
             y = (side == B_SIDE_OPPONENT ? sTripleFoe[sFoeRow[pos]][1] : sTripleMine[sTeamRow[pos]][1]) + bob;
+            if (side == B_SIDE_OPPONENT)
+            {
+                // (the boxes close the gap upward as foes leave the field: mp_foeshift.c)
+                s32 row = MP_FoeShift_Row(b), r0 = row >> 8, f = row & 255;
+                if (r0 >= 2)
+                    r0 = 2, f = 0;
+                y = sTripleFoe[r0][1] + (f ? ((sTripleFoe[r0 + 1][1] - sTripleFoe[r0][1]) * f) / 256 : 0) + bob;
+            }
         }
         else if (IsDoubleBattle())
         {
@@ -1732,7 +1740,8 @@ static void BattleHuds(struct UiPack *p, u16 *frame)
             y = sSingleRect[side][1] + box->y + bob - sSingleHome[side][1];
         }
         // (a style's box for this spot on the screen when it has one: Black's gauges stand differently per spot)
-        snprintf(name, sizeof(name), "%s.%d", kind, pos);
+        // (a foe whose box has risen into another's place: that place's box, once it's there: mp_foeshift.c)
+        snprintf(name, sizeof(name), "%s.%d", kind, side == B_SIDE_OPPONENT ? MP_FoeShift_ShownPos(b) : pos);
         if ((sp = FindSpec(p, name)) == NULL && (sp = FindSpec(p, kind)) == NULL)
             continue;
         memset(&d, 0, sizeof(d));

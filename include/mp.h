@@ -1551,6 +1551,14 @@ void MP_TriCards_Composite(u16 *frame);
 extern bool8 gMpBattleSceneHidden;
 #define MP_OBJ_LAYER_SHOWN() ((REG_DISPCNT & (DISPCNT_OBJ_ON | DISPCNT_FORCED_BLANK)) == DISPCNT_OBJ_ON && !gMpBattleSceneHidden)
 bool8 MP_TriCards_Place(u8 battler, s16 *left, s16 *right, s16 *top);
+// the foes close ranks as their number shrinks (src/mp/mp_foeshift.c)
+void MP_FoeShift_Reset(void);
+void MP_FoeShift_Update(void);
+s16 MP_FoeShift_Dx(u8 battler);
+s16 MP_FoeShift_Dy(u8 battler);
+s32 MP_FoeShift_Row(u8 battler);
+bool8 MP_FoeShift_BoxPos(u8 battler, s16 *x, s16 *y);
+u8 MP_FoeShift_ShownPos(u8 battler);
 // mp_typeicons.c: type icons by the healthboxes (OPTIONS > TYPE ICONS)
 bool8 MP_TypeIcons_On(void);
 void MP_TypeIcons_Composite(u16 *frame);

@@ -624,6 +624,7 @@ const u8 *const gStatusConditionStringsTable[][2] =
 
 void CB2_InitBattle(void)
 {
+    MP_FoeShift_Reset();   // Moemon Kai: before the boxes are made (src/mp/mp_foeshift.c)
     MoveSaveBlocks_ResetHeap();
     AllocateBattleResources();
     AllocateBattleSpritesData();
@@ -2176,6 +2177,7 @@ static void MpBattleTurbo(void)
 
 void BattleMainCB2(void)
 {
+    MP_FoeShift_Update();   // Moemon Kai: the foes close ranks as their number shrinks (src/mp/mp_foeshift.c)
     AnimateSprites();
     MpBattleTurbo();
     BuildOamBuffer();
@@ -3532,6 +3534,7 @@ static void BattleStartClearSetData(void)
     gBattleScripting.animTargetsHit = 0;
     gLeveledUpInBattle = 0;
     gAbsentBattlerFlags = 0;
+    MP_FoeShift_Reset();   // Moemon Kai: every foe in its own spot (src/mp/mp_foeshift.c)
     gBattleStruct->runTries = 0;
     gBattleStruct->safariGoNearCounter = 0;
     gBattleStruct->safariPkblThrowCounter = 0;

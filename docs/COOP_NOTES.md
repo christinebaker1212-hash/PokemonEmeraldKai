@@ -8049,3 +8049,36 @@ tools/ui_styles/check_specs.py.
 - (1.202.4) The pop-up wrapping above (and 1.202.2's right-set rule that went with it) is gone: PopUps lays words out in
   Kai's window as before 1.202.0 (the user: the CO-OP menu's help box back to its old size). RED / CRYSTAL's long
   messages are the field box's hold and scroll (1.202.3).
+
+## The foes close ranks (1.203.0)
+
+The user's design (2026-11-17): in a Double or Triple Battle, when a foe leaves the field for good, the foes left take
+the places that many POKéMON would have had from the start, and their HP boxes close the gap upward (a box only ever
+rises). Both move together in one smooth 20-frame move. Only the foes' side, wild and trainer battles alike (PvP too:
+each game's foes are the other side). It changes looks only. **Black's Triple Battle rules are never considered**
+(CLAUDE.md): reach and adjacency stay Kai's.
+
+- "Leaves the field for good" is gAbsentBattlerFlags: fainted with nobody to send in, caught (co-op wild), an empty
+  co-op wild slot. Link battles copy the flag to every game, so every player's screen shifts alike (tests coop_catch,
+  tri_catch, tri_one_mon, tri_padded log the same "foe shift" lines on each game).
+- src/mp/mp_foeshift.c:
+  - Targets: the k foes on the field, in screen order left to right (Triple OPP_RIGHT, CENTER, OPP_LEFT; Double
+    OPP_RIGHT, OPP_LEFT), take sBattlerCoords' spots for a battle of k (3 Triple, 2 Double, 1 Single's
+    OPP_LEFT 176,40), read through battle_anim_mons.c MP_BattlerSlotCoord. Their boxes, in box order top to bottom
+    (Triple OPP_RIGHT, CENTER, OPP_LEFT; Double OPP_LEFT (44,19), OPP_RIGHT (32,44)), take rows 0..k-1.
+  - Timing: the move starts once every foe on the field shows its box and no move animation plays. A sprite being
+    sent out or faint-waiting for a replacement is never pushed. The move pauses while an animation plays. Two
+    fainting together go straight to the layout for those left. A foe coming back (absent cleared) moves them back.
+  - Where it reaches: GetBattlerSpriteCoord / GetBattlerSpriteFinal_Y add MP_FoeShift_Dx / Dy. Every move animation,
+    POKé BALL, shadow, weather and a sprite rebuilt after the BAG / party uses the new spot. The battler sprites and
+    KAI's Double Battle healthboxes are moved here by the change each frame; the box's other half, bar, caught ball and
+    type icons follow the box. InitBattlerHealthboxCoords puts a rebuilt box where its row is
+    (MP_FoeShift_BoxPos).
+  - The Triple cards: mp_tricards.c CardPlace (also the type icons' MP_TriCards_Place) at MP_FoeShift_Row.
+  - Every UI STYLE: mp_uistyle.c BattleHuds. Triple rows come from MP_FoeShift_Row, between sTripleFoe's anchors. A
+    Double box follows the healthbox sprite. Its spec is the spot it has risen into once it arrives
+    (MP_FoeShift_ShownPos: BLACK's hud.foe2.1 / .3).
+  - Reset at CB2_InitBattle (before the boxes are made) and BattleStartClearSetData.
+- Tests: foe_shift_triple, foe_shift_double (Lv100 foes, the chosen at 1 HP, SURF from all three). Checked by hand
+  frame by frame: Triple left / middle / right / two at once and both Double sides in KAI, each style (RED, CRYSTAL,
+  FIRERED, PLATINUM, BLACK), and the layout kept after the BAG.

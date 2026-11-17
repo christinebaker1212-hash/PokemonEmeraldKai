@@ -60,7 +60,17 @@ static const struct UCoords8 sBattlerCoords[][MAX_BATTLERS_COUNT] =
         [B_POSITION_OPPONENT_CENTER] = { 178, 30 },
     },
 };
+s16 MP_FoeShift_Dx(u8 battler);   // Moemon Kai: src/mp/mp_foeshift.c
+s16 MP_FoeShift_Dy(u8 battler);
 #define BATTLER_COORDS_ROW() (IS_TRIPLE_BATTLE() ? 2 : IS_DOUBLE_BATTLE() ? 1 : 0)
+
+// Moemon Kai: a position's spot in a battle of ROW (0 single, 1 double, 2 triple): where the foes go as their number
+// shrinks (src/mp/mp_foeshift.c, which offsets the foes' spots in GetBattlerSpriteCoord below)
+void MP_BattlerSlotCoord(u8 row, u8 position, s16 *x, s16 *y)
+{
+    *x = sBattlerCoords[row][position].x;
+    *y = sBattlerCoords[row][position].y;
+}
 
 // One entry for each of the four Castform forms.
 const struct MonCoords gCastformFrontSpriteCoords[NUM_CASTFORM_FORMS] =
@@ -136,10 +146,10 @@ u8 GetBattlerSpriteCoord(u8 battler, u8 coordType)
     {
     case BATTLER_COORD_X:
     case BATTLER_COORD_X_2:
-        retVal = sBattlerCoords[BATTLER_COORDS_ROW()][GetBattlerPosition(battler)].x;
+        retVal = sBattlerCoords[BATTLER_COORDS_ROW()][GetBattlerPosition(battler)].x + MP_FoeShift_Dx(battler);
         break;
     case BATTLER_COORD_Y:
-        retVal = sBattlerCoords[BATTLER_COORDS_ROW()][GetBattlerPosition(battler)].y;
+        retVal = sBattlerCoords[BATTLER_COORDS_ROW()][GetBattlerPosition(battler)].y + MP_FoeShift_Dy(battler);
         break;
     case BATTLER_COORD_Y_PIC_OFFSET:
     case BATTLER_COORD_Y_PIC_OFFSET_DEFAULT:
@@ -292,7 +302,7 @@ u8 GetBattlerSpriteFinal_Y(u8 battler, u16 species, bool8 a3)
         offset = GetBattlerYDelta(battler, species);
         offset -= GetBattlerElevation(battler, species);
     }
-    y = offset + sBattlerCoords[BATTLER_COORDS_ROW()][GetBattlerPosition(battler)].y;
+    y = offset + sBattlerCoords[BATTLER_COORDS_ROW()][GetBattlerPosition(battler)].y + MP_FoeShift_Dy(battler);
     if (a3)
     {
         if (GetBattlerSide(battler) == B_SIDE_PLAYER)

@@ -1,0 +1,8 @@
+# The foes close ranks (mp_foeshift.c): a foe that faints with nobody to take its place leaves the field; the ones left
+# slide to the spots of a battle of that many and their boxes close the gap upward. Lv100 foes, the chosen one at 1 HP,
+# SURF from all three of the player's (godmode)
+MODE=1
+TMO=200
+ENV_A="MOEMON_DEBUG_PARTY=280:100,283:100,277:100,25:100"
+EXPECT_A=("foe shift: 2 on the field (mask a)")
+UNEXPECT_A=("[crash]")

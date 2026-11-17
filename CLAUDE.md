@@ -350,6 +350,8 @@ spots you (MPR_COOP_BATTLING: JOIN BATTLE / BATTLE ALONE; tests coop_spot_*).
 Link battles: only the master's engine runs, so anything the others' screens show from battle state must reach them
 (battle weather: B_COMM_MP_WEATHER blocks; Pokemon emotes: MPR_BATTLE_MONEMOTE; tests coop_fieldweather*, coop_life_emote).
 Whole-screen fades (28+ of the 32 palettes, 0<->16) are 30% quicker (palette.c sQuickFade).
+Also the foes closing ranks (1.203.0: a foe that leaves a Double / Triple Battle for good, the others slide to the spots of a battle of
+that many and their boxes rise into the gap, every UI STYLE: src/mp/mp_foeshift.c; COOP_NOTES "The foes close ranks"; tests foe_shift_*).
 Also two trainers at once and players grouped on one trainer (COOP_NOTES "Two trainers at once"; tests coop_two_*, coop_held_spot,
 coop_wait_merge); a third player joining makes it a Triple Battle against both (test coop_two_join3). Also Pokemon Stadium hues for nicknamed Moemon (mp_hue.c: the Stadium page's math, Kai's skin slots kept;
 tools/moemon_hues, tests hue_*). Also the SPECTATE panel (friends' screens beside yours, each friend below / above / left / right /
@@ -587,6 +589,8 @@ Gotchas worth knowing before touching battles:
 - Network link (mp_battle.c): queued blocks move into gBlockRecvBuffer in NetLink_GetBlockReceivedStatus, never in
   ResetBlockReceivedFlag; the receive task stops after a B_COMM_TO_CONTROLLER message; link tasks never run twice a frame.
   Test link changes at lag with tools/mp_server/lagproxy.py / `WORST=1 tools/test/regress.sh`.
+- **Black's Triple Battle rules are never accounted for or considered** (the user, 2026-11-17): reach, adjacency and
+  shifting in a Triple Battle stay Kai's own; anything Black does there is never a reason to change them.
 - Triple Battles: battlers 4/5 exist. Anything doing `battler ^ BIT_FLANK` or assuming positions 0-3 (screen rebuild,
   shadows, Cmd_monbg) breaks for them, often by touching sprite 0 = battler 0's healthbox. Use BATTLE_PARTNER.
   Battle animations put a Pokémon and its partner on BG1 / BG2 by position: use MP_BG2_POSITION (battle_anim.h), which

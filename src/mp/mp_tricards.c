@@ -389,7 +389,9 @@ static bool8 CardPlace(u8 battler, s16 *x, s16 *y, u16 *opacity)
     if (GetBattlerSide(battler) == B_SIDE_OPPONENT)
     {
         *x = FOE_X;
-        *y = FOE_Y + sFoeRow[pos] * CARD_STEP;
+        // (the cards close the gap upward as foes leave the field: mp_foeshift.c)
+        *y = FOE_Y + (MP_FoeShift_Row(battler) * CARD_STEP) / 256;
+        (void)sFoeRow;
         *opacity = 159;
     }
     else

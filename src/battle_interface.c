@@ -1119,6 +1119,7 @@ void InitBattlerHealthboxCoords(u8 battler)
             x = 32, y = 44;
             break;
         }
+        MP_FoeShift_BoxPos(battler, &x, &y);   // Moemon Kai: a foe's box where the foes' boxes have risen to (mp_foeshift.c)
     }
 
     UpdateSpritePos(gHealthboxSpriteIds[battler], x, y);
