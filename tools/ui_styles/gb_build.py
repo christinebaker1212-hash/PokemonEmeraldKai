@@ -797,13 +797,16 @@ class GBPack:
         cols = [st.ink, st.mid, light]
         base = None
         for i, pair in enumerate(frames):
+            ims = []
             for f, rows in enumerate(pair):
                 im = Image.new('RGBA', (16, 16), (0, 0, 0, 0))
                 for y, r in enumerate(rows):
                     for x, v in enumerate(r):
                         if v < 3:
                             im.putpixel((x, y), cols[v] + (255,))
-                k = p.image('gbicon.%d.%d' % (i, f), center_icon(im))
+                ims.append(im)
+            for f, im in enumerate(anchor_icon(*ims)):
+                k = p.image('gbicon.%d.%d' % (i, f), im)
                 base = k if base is None else base
                 assert k == base + 2 * i + f
         # a held item: Crystal's own little tile (gfx/stats/item.png, mail.png), in place of the icon's bottom-left
@@ -829,8 +832,8 @@ class GBPack:
         if cc:
             ext = None
             for i, pair in enumerate(cc):
-                for f, im in enumerate(pair):
-                    k = p.image('ccicon.%d.%d' % (i, f), center_icon(im))
+                for f, im in enumerate(anchor_icon(*pair)):
+                    k = p.image('ccicon.%d.%d' % (i, f), im)
                     ext = k if ext is None else ext
                     assert k == ext + 2 * i + f
             species = gb_icons._pokeapi()
@@ -857,19 +860,38 @@ class GBPack:
         return self.p
 
 
-def center_icon(im):
-    """a party icon's frame with what it shows centred across its 16 pixels: the games' two frames sit a pixel apart
-    sideways now and then (Crystal's fox steps left), which read as the icons drifting (the user, 2026-11-17); the
-    hop up and down stays"""
-    box = im.getchannel('A').getbbox()
-    if not box:
-        return im
-    dx = (im.width - (box[2] - box[0])) // 2 - box[0]
-    if dx == 0:
-        return im
+def _shift(im, dx, dy):
     out = Image.new('RGBA', im.size, (0, 0, 0, 0))
-    out.paste(im, (dx, 0))
+    out.paste(im, (dx, dy))
     return out
+
+
+def anchor_icon(a, b):
+    """a party icon's two frames, standing still (the user, 2026-11-17, asked for the third time: no positional
+    movement on any frame, every icon aligned the same way): the first frame centred across its 16 pixels and standing
+    on the bottom row, like every other icon; the second laid where it best covers the first (a frame that is the first
+    moved - Red's MONSTER hopping up, Crystal's fox stepping left - lands exactly on it; another pose lines up with it).
+    The animation is what the frames draw differently, never where they are."""
+    box = a.getchannel('A').getbbox()
+    if not box:
+        return a, b
+    dx = (a.width - (box[2] - box[0])) // 2 - box[0]
+    dy = a.height - box[3]
+    a2 = _shift(a, dx, dy)
+    if not b.getchannel('A').getbbox():
+        return a2, b
+    pa = [[a2.getpixel((x, y))[3] > 0 for x in range(a.width)] for y in range(a.height)]
+    best, at = None, (dx, dy)
+    for oy in range(-6, 7):
+        for ox in range(-6, 7):
+            c = _shift(b, ox, oy)
+            pc = [[c.getpixel((x, y))[3] > 0 for x in range(a.width)] for y in range(a.height)]
+            same = sum(1 for y in range(a.height) for x in range(a.width) if pa[y][x] and pc[y][x])
+            miss = sum(1 for y in range(a.height) for x in range(a.width) if pa[y][x] != pc[y][x])
+            score = (same - miss, -abs(ox - dx) - abs(oy - dy))
+            if best is None or score > best:
+                best, at = score, (ox, oy)
+    return a2, _shift(b, *at)
 
 
 def words_spec(p, menu, lines):

@@ -2129,7 +2129,10 @@ static bool8 StyleMonIcon(struct UiPack *p, struct Surf *s, u16 species, bool8 e
         id = op->b + 2 * id + (frameNo & 1);
         if (id >= p->nImg)
             return FALSE;
-        DrawImg(s, &p->img[id], x - p->img[id].w / 2, y - p->img[id].h / 2);
+        // (the frame's own 16 x 16 square centred on (x, y): the pack keeps only its drawn pixels and where they sit
+        // in that square (dx, dy), so centring by those pixels' own size moved every frame whose drawing was a
+        // different size - the icons' drift, the user 2026-11-17)
+        DrawImg(s, &p->img[id], x - 8, y - 8);
         return TRUE;
     }
 }
