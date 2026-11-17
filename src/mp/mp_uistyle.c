@@ -1625,6 +1625,53 @@ static const s16 sDoubleHome[4][2] = {{159, 76}, {44, 19}, {171, 101}, {32, 44}}
 static const s16 sTripleFoe[3][2] = {{1, 1}, {1, 22}, {1, 43}};
 static const s16 sTripleMine[3][2] = {{164, 48}, {164, 69}, {164, 90}};
 
+// RED's and CRYSTAL's battle boxes with WHITE BG ON (the user, 2026-11-17): a white border a pixel wide round
+// everything the box draws, its frame, bars and every letter, so it reads over the POKéMON as on the white: the box
+// drawn on its own first (bit 15 marks what a spec draws, Put), then the ring, then the box
+static u16 sOutlineBuf[DISPLAY_WIDTH * DISPLAY_HEIGHT];
+
+static void DrawSpecOutlined(struct UiPack *p, const struct UiSpec *sp, struct UiData *d, u16 *frame, int ax, int ay,
+                             const struct MpFadeFit *fit)
+{
+    u16 white = fit && fit->on ? MP_FadeFit_Apply(fit, 0x7FFF) : 0x7FFF;
+    int x, y, x0 = DISPLAY_WIDTH, y0 = DISPLAY_HEIGHT, x1 = -1, y1 = -1;
+    memset(sOutlineBuf, 0, sizeof(sOutlineBuf));
+    DrawSpec(p, sp, d, sOutlineBuf, ax, ay, fit);
+    for (y = 0; y < DISPLAY_HEIGHT; y++)
+        for (x = 0; x < DISPLAY_WIDTH; x++)
+            if (sOutlineBuf[y * DISPLAY_WIDTH + x] & 0x8000)
+            {
+                if (x < x0) x0 = x;
+                if (x > x1) x1 = x;
+                if (y < y0) y0 = y;
+                if (y > y1) y1 = y;
+            }
+    if (x1 < 0)
+        return;
+    for (y = y0 - 1; y <= y1 + 1; y++)
+        for (x = x0 - 1; x <= x1 + 1; x++)
+        {
+            int dx, dy, near = 0;
+            if (x < 0 || y < 0 || x >= DISPLAY_WIDTH || y >= DISPLAY_HEIGHT)
+                continue;
+            if (sOutlineBuf[y * DISPLAY_WIDTH + x] & 0x8000)
+            {
+                frame[y * DISPLAY_WIDTH + x] = sOutlineBuf[y * DISPLAY_WIDTH + x];
+                continue;
+            }
+            for (dy = -1; dy <= 1 && !near; dy++)
+                for (dx = -1; dx <= 1 && !near; dx++)
+                {
+                    int nx = x + dx, ny = y + dy;
+                    if (nx >= 0 && ny >= 0 && nx < DISPLAY_WIDTH && ny < DISPLAY_HEIGHT
+                     && (sOutlineBuf[ny * DISPLAY_WIDTH + nx] & 0x8000))
+                        near = 1;
+                }
+            if (near)
+                frame[y * DISPLAY_WIDTH + x] = white | 0x8000;
+        }
+}
+
 static void BattleHuds(struct UiPack *p, u16 *frame)
 {
     u8 b;
@@ -1701,7 +1748,10 @@ static void BattleHuds(struct UiPack *p, u16 *frame)
                 | C_NOBG;   // (RED's and CRYSTAL's boxes stand on the background itself: WHITE BG ON makes the whole
                             // background plain, mp_battlepic.c, so no paper of their own, the user 2026-11-16)
         MP_FadeFit_FromPalette(&fit, OBJ_PLTT_ID(box->oam.paletteNum));
-        DrawSpec(p, sp, &d, frame, x, y, &fit);
+        if ((MP_UiStyle_Active() == UISTYLE_RED || MP_UiStyle_Active() == UISTYLE_CRYSTAL) && !gMpConfig.uiNoWhiteBg)
+            DrawSpecOutlined(p, sp, &d, frame, x, y, &fit);
+        else
+            DrawSpec(p, sp, &d, frame, x, y, &fit);
     }
 }
 
