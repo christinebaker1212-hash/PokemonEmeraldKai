@@ -41,6 +41,7 @@ void MP_BigSprite_NoteScale(struct Sprite *sprite, u16 first, u16 end);  // ... 
 // the renderer: an OAM entry's scale (Q8; 0: none) and the point it shrinks around (the bottom middle of its sprite)
 u16 MP_BigSprite_OamScale(u16 oamIndex, s16 *ax, s16 *ay);
 int MP_BigSprite_OamClipY(u16 oamIndex);                         // the renderer: the line it stops at (a big number: none)
+bool8 MP_BigSprite_OamClipped(u16 oamIndex, int vcount);           // the renderer: nothing of it on this line
 
 #define MP_BIG_OAM_SHAPE 3   // OAM shape 3 is "prohibited" on the GBA: a big sprite's entry, tileNum = its index
 

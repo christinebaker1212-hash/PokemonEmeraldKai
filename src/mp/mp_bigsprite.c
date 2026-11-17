@@ -53,7 +53,7 @@ void MP_BigSprite_NoteClip(struct Sprite *sprite, u16 first, u16 end)
         sPendingAnyClip = TRUE;
     }
     for (i = first; i < end && i < OAM_ENTRY_COUNT; i++)
-        sPendingClip[i] = sprite->mpClipY;
+        sPendingClip[i] = sprite->mpClipOn == MP_CLIP_ABOVE ? -1 - sprite->mpClipY : sprite->mpClipY;   // (negative: from the top)
 }
 
 // Any sprite's OAM entries can be drawn smaller (sprite->mpScale), around the bottom middle of all of them
@@ -144,6 +144,15 @@ u16 MP_BigSprite_OamScale(u16 oamIndex, s16 *ax, s16 *ay)
 int MP_BigSprite_OamClipY(u16 oamIndex)
 {
     return sLiveAnyClip && oamIndex < OAM_ENTRY_COUNT ? sLiveClip[oamIndex] : NO_CLIP;
+}
+
+// TRUE: this OAM entry draws nothing on screen line vcount (mpClipOn: from the line down, or MP_CLIP_ABOVE: above it)
+bool8 MP_BigSprite_OamClipped(u16 oamIndex, int vcount)
+{
+    int c = MP_BigSprite_OamClipY(oamIndex);
+    if (c == NO_CLIP)
+        return FALSE;
+    return c >= 0 ? vcount >= c : vcount < -1 - c;
 }
 
 bool8 MP_BigSprite_AddOam(struct Sprite *sprite, u16 *oamIndex)

@@ -711,9 +711,9 @@ void AnimTask_SwitchOutBallEffect(u8 taskId)
         bool8 player = GetBattlerSide(gBattleAnimAttacker) == B_SIDE_PLAYER;
         s16 x = GetBattlerSpriteCoord(gBattleAnimAttacker, BATTLER_COORD_X);
         s16 y = GetBattlerSpriteCoord(gBattleAnimAttacker, BATTLER_COORD_Y);
-        // toward its trainer: bottom left for ours, top right for theirs
+        // back to the left (the way home, whichever side: the user, 2026-11-17), down for ours and up for theirs
         PlaySE(SE_BALL_OPEN);
-        if (MP_BallFx_StartRecall(mon, player ? x - 56 : x + 56, player ? y + 24 : y - 24, player ? 0 : MPFX_FRONT, &mpFx))
+        if (MP_BallFx_StartRecall(mon, x - 56, player ? y + 24 : y - 24, player ? 0 : MPFX_FRONT, &mpFx))
         {
             gTasks[taskId].data[1] = mon;
             gTasks[taskId].func = Task_MpWaitRecallFx;

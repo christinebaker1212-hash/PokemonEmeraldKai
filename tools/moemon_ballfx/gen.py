@@ -636,6 +636,53 @@ def bits():
     return [('beam', beam), ('shadow', shadow), ('line', line), ('spiral', spiral)] + dust
 
 
+def card():
+    """CARD FLIP's card: its back (the energy color, a POKé BALL emblem, a white border) and its face (a white
+    frame the Moemon shows through), 40 x 56 like a trading card"""
+    w, h = 40, 56
+    back = Img(w, h)
+    face = Img(w, h)
+    for y in range(h):
+        for x in range(w):
+            # rounded corners
+            cx = min(x, w - 1 - x)
+            cy = min(y, h - 1 - y)
+            if cx + cy < 2:
+                continue
+            edge = cx == 0 or cy == 0 or cx + cy == 2
+            if edge:
+                back.p[y][x] = K
+                face.p[y][x] = K
+            elif cx < 3 or cy < 3:
+                back.p[y][x] = W
+                face.p[y][x] = W if cx > 1 and cy > 1 else LG
+            elif cx < 4 or cy < 4:
+                back.p[y][x] = ED
+                face.p[y][x] = E
+            else:
+                # the back: energy with a soft diagonal sheen; the face: a pale picture window (light, a white sheen)
+                back.p[y][x] = EL if (x + y) % 14 < 2 else E
+                face.p[y][x] = W if (x + y) % 18 < 1 or (cx == 4 or cy == 4) else EL
+    # the back's POKé BALL emblem
+    bx, by = w / 2, h / 2
+    for y in range(h):
+        for x in range(w):
+            d = math.hypot(x + 0.5 - bx, y + 0.5 - by)
+            if d <= 9:
+                if d > 8:
+                    back.p[y][x] = ED
+                elif abs(y + 0.5 - by) < 1.2:
+                    back.p[y][x] = ED
+                elif d < 3.2:
+                    back.p[y][x] = ED if d > 2.2 else W
+                else:
+                    back.p[y][x] = W if y < by else EL
+    # the face's corner glints
+    for (x, y) in ((5, 5), (w - 6, h - 6)):
+        face.set(x, y, Y); face.set(x - 1, y, Y); face.set(x + 1, y, Y); face.set(x, y - 1, Y); face.set(x, y + 1, Y)
+    return [('back', back), ('face', face)]
+
+
 def recall():
     # for the new recalls: Snore's Z, Ice Beam's ice chunk breaking, a spirit orb (Will-O-Wisp's)
     return frames_of('z.png', 16, 16, 2, 'z') + frames_of('ice_chunk.png', 32, 32, 4, 'chunk') \
@@ -650,7 +697,7 @@ SETS = [
     ('HEARTS', hearts), ('NOTES', notes), ('SNOW', snow), ('FEATHERS', feathers), ('LEAVES', leaves),
     ('STARS', stars), ('RAINBOW', rainbow), ('FIRE', fire), ('WATER', water), ('SAKURA', sakura),
     ('COINS', coins), ('BALLOONS', balloons), ('BUTTERFLIES', butterflies), ('GEMS', gems), ('AURA', aura),
-    ('BITS', bits), ('RECALL', recall),
+    ('BITS', bits), ('RECALL', recall), ('CARD', card),
 ]
 
 def main():

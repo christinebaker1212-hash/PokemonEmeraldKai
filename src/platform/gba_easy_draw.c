@@ -1010,7 +1010,7 @@ static void DrawSprites(struct scanlineData* scanline, uint16_t vcount, bool win
             continue;
         }
 
-        if ((int)vcount >= MP_BigSprite_OamClipY(i))   // Moemon PC: clipped above this line (in water, in the ground)
+        if (MP_BigSprite_OamClipped(i, (int)vcount))   // Moemon PC: clipped at a line (in water, in the ground; or above it)
             continue;
         sFxSprite = gMpFxLayer != NULL && gMpOamFx[i];   // Moemon Co-op: a battle animation's effect sprite
         sUiSprite = gMpUiLayer != NULL && gMpOamUi[i];   // Moemon Kai: the battle's UI (MODERN keeps off it)

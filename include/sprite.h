@@ -195,6 +195,7 @@ struct SpriteTemplate
 // then later dereferenced after being freed. Usually this won't
 // be visible in-game, but this is (part of) what causes the item
 // icon palette to flicker when changing items in the bag.
+#define MP_CLIP_ABOVE 2
 struct Sprite
 {
     /*0x00*/ struct OamData oam;
@@ -251,7 +252,8 @@ struct Sprite
 
     // Moemon PC: a picture of any size drawn in this sprite's place (mp_bigsprite.h); NULL = an ordinary sprite
     struct MpBigSprite *mpBig;
-    bool8 mpClipOn;         // Moemon PC: nothing of it drawn from screen line mpClipY down (in water, in the ground)
+    bool8 mpClipOn;         // Moemon PC: nothing of it drawn from screen line mpClipY down (in water, in the ground);
+                            // MP_CLIP_ABOVE: nothing above it instead (drawn in from the feet up)
     s16 mpClipY;
     u16 mpScale;            // Moemon Co-op: drawn this much smaller (Q8: 128 = half; 0 = as it is), smoothly (mp_spritescale.h)
     bool8 mpShadow;         // Moemon Kai: a shadow: its pixels darken what's under them instead (mp_shadow.c, gba_easy_draw.c)
