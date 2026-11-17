@@ -99,9 +99,9 @@ static u16 QzHasBadgeForFieldMove_(void)
     u8 hm;
     switch (move)
     {
-    case MOVE_CUT:        hm = 0; break;
+    case MOVE_CUT:        hm = 0; break;   // (the field move order, FIELD_MOVE_*: mp_region.c MP_Region_FieldMoveBadge)
     case MOVE_STRENGTH:   hm = 3; break;
-    case MOVE_ROCK_SMASH: hm = 5; break;
+    case MOVE_ROCK_SMASH: hm = 2; break;
     case MOVE_WHIRLPOOL:  hm = 8; break;   // (JOHTO's GLACIERBADGE: MP_Region_FieldMoveBadge)
     default:              return TRUE;
     }

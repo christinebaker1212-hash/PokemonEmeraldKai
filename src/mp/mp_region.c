@@ -1105,15 +1105,19 @@ u16 MP_Region_BadgeFlag(u8 region, u8 badge)
     return sBadgeFlags[region] + badge;
 }
 
-// The badge a field move needs in the region the player is in (HM order: CUT, FLY, SURF, STRENGTH, FLASH, ROCK SMASH,
-// WATERFALL, DIVE, then 8 WHIRLPOOL): HOENN's are Emerald's; KANTO's FireRed's (CASCADE, THUNDER, SOUL, RAINBOW,
-// BOULDER, MARSH, VOLCANO; DIVE: EARTH); JOHTO's Crystal's (HIVE, STORM, FOG, PLAIN, ZEPHYR; ROCK SMASH, a TM there:
-// ZEPHYR; WATERFALL and DIVE: RISING; WHIRLPOOL: GLACIER); SINNOH's Platinum's
+// The badge a field move needs in the region the player is in, by Emerald's field move order (party_menu.c
+// FIELD_MOVE_*: CUT, FLASH, ROCK SMASH, STRENGTH, SURF, FLY, DIVE, WATERFALL, then 8 WHIRLPOOL), as every caller asks
+// (the SURF / WATERFALL / DIVE prompts, the party menu, field_move_scripts.inc, qz_specials.c, the EXP CURVE): HOENN's
+// are Emerald's; KANTO's FireRed's (CUT CASCADE, FLASH BOULDER, ROCK SMASH MARSH, STRENGTH RAINBOW, SURF SOUL, FLY
+// THUNDER, DIVE EARTH, WATERFALL VOLCANO); JOHTO's Crystal's (CUT HIVE, FLASH ZEPHYR, ROCK SMASH (a TM there) ZEPHYR,
+// STRENGTH PLAIN, SURF FOG, FLY STORM, DIVE and WATERFALL RISING, WHIRLPOOL GLACIER); SINNOH's Platinum's.
+// (KANTO's and JOHTO's were in HM order until the EXP audit, 2026-11-17: SURF asked for the BOULDER / ZEPHYR BADGE,
+// FLY for MARSH / FOG...)
 u16 MP_Region_FieldMoveBadge(u8 hm)
 {
     static const u8 sSinnoh[9] = {1, 0, 0, 5, 3, 2, 3, 7, 7};
-    static const u8 sKanto[9] = {1, 2, 4, 3, 0, 5, 6, 7, 7};
-    static const u8 sJohto[9] = {1, 4, 3, 2, 0, 0, 7, 7, 6};
+    static const u8 sKanto[9] = {1, 0, 5, 3, 4, 2, 7, 6, 7};
+    static const u8 sJohto[9] = {1, 0, 0, 2, 3, 4, 7, 7, 6};
     u8 region = MP_Region_OfGroup(gSaveBlock1Ptr->location.mapGroup);
     if (hm >= 9)
         return 0;
@@ -1433,6 +1437,33 @@ bool8 MP_Region_FitBoxMon(struct BoxPokemon *b, u8 region)
         return FALSE;
     SetBoxMonData(b, MON_DATA_EXP, &newExp);
     return TRUE;
+}
+
+// A POKéMON that came by trade from a friend in region FROM (a trade by mail: mp_phone_trade.c): its level is FROM's,
+// so here, where it hasn't been, it starts at Lv5 as the player's own do on arriving (until this region's LEAGUE), its
+// level kept for FROM (the user, 2026-11-17: "should start at Lv5 like all others"). Trades in a room need none: the
+// room is in one region and the friend's game already gave it that region's level.
+void MP_Region_ArriveFrom(struct Pokemon *mon, u8 from)
+{
+    u8 here = MP_Region_Current();
+    struct RegionLevel *e;
+    struct BoxPokemon *b = &mon->box;
+    if (from >= REGION_COUNT || here >= REGION_COUNT || from == here
+     || !GetBoxMonData(b, MON_DATA_SANITY_HAS_SPECIES) || GetBoxMonData(b, MON_DATA_IS_EGG))
+        return;
+    e = FindLevels(GetBoxMonData(b, MON_DATA_PERSONALITY), GetBoxMonData(b, MON_DATA_OT_ID));
+    if (e == NULL)
+    {
+        if (sLevelCount >= MAX_REGION_LEVELS)
+            return;
+        e = &sLevels[sLevelCount++];
+        memset(e, 0, sizeof(*e));
+        e->pers = GetBoxMonData(b, MON_DATA_PERSONALITY);
+        e->otid = GetBoxMonData(b, MON_DATA_OT_ID);
+    }
+    e->cur = from;   // (FitBoxMon keeps what it has now as FROM's level, then gives it this region's)
+    MPNet_Log("region levels: a trade from region %d into %d", from, here);
+    MP_Region_FitMon(mon, here);
 }
 
 void MP_Region_FitMon(struct Pokemon *mon, u8 region)

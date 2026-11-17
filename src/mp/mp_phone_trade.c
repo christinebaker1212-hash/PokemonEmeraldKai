@@ -20,6 +20,7 @@
 #include "global.h"
 #include "orre_shadow.h"   // Moemon Kai: Shadow Pokémon
 #include "mp.h"
+#include "mp_region.h"
 #include "mp_life.h"
 #include "main.h"
 #include "event_data.h"
@@ -83,7 +84,8 @@ struct TradeRec
     u8 cancel;                    // (the phone asked to call it off)
     u8 why;                       // (TS_OFF: 0 called off, 1 turned down / they called it off, 2 ran out, 3 ours gone)
     u8 theirsIn;                  // (we offered: their deposit is in, ours goes as soon as the game is free)
-    u8 pad[2];
+    u8 theirRegion;               // (the region their game was in + 1, 0 not known: an older deposit)
+    u8 pad[1];
     u32 created, expires, changed;
     u32 myPid, myOt;
     u16 want;                     // (role 0: the species we asked for, 0 any)
@@ -267,10 +269,11 @@ static void Ask(struct TradeRec *r, u8 op, const u8 *data, u16 n)
     sAskedAt = sTick;
 }
 
-// Our deposit, sealed with the pair key: [version][our Trainer ID][our name][BoxPokemon][Garden record]
+// Our deposit, sealed with the pair key: [version][our Trainer ID][our name][BoxPokemon][Garden record][our region]
+// (the region byte last: an older game reads up to the record and takes no notice of it)
 static void SendDeposit(struct TradeRec *r)
 {
-    static u8 plain[1 + 4 + PLAYER_NAME_LENGTH + 1 + sizeof(struct BoxPokemon) + 2 + REC_MAX];
+    static u8 plain[1 + 4 + PLAYER_NAME_LENGTH + 1 + sizeof(struct BoxPokemon) + 2 + REC_MAX + 1];
     static u8 sealed[sizeof(plain) + PHONE_SEAL_EXTRA];
     u8 pk[PHONE_KEY_SIZE];
     u32 at = 0, id = GetPlayerIDAsU32();
@@ -286,10 +289,11 @@ static void SendDeposit(struct TradeRec *r)
     at += sizeof(struct BoxPokemon);
     if (MP_Life_FindKey(MP_Life_BoxKey(&r->mine)))
         rec = MP_Life_PackRecord(MP_Life_BoxKey(&r->mine), plain + at + 2, REC_MAX);
-    if (at + 2 + rec + PHONE_SEAL_EXTRA > ESC_DATA_MAX)
+    if (at + 2 + rec + 1 + PHONE_SEAL_EXTRA > ESC_DATA_MAX)
         rec = 0;   // (too big to travel: its Garden story stays here)
     plain[at++] = rec & 0xFF, plain[at++] = rec >> 8;
     at += rec;
+    plain[at++] = MP_Region_Current() + 1;
     PhoneProto_Seal(pk, 0, plain, at, sealed);
     Ask(r, ESC_PUT, sealed, (u16)(at + PHONE_SEAL_EXTRA));
 }
@@ -318,6 +322,8 @@ static bool8 OpenDeposit(struct TradeRec *r, const u8 *data, u16 len)
     at += 2;
     r->recLen = rec <= REC_MAX && at + rec <= (u32)n ? rec : 0;
     memcpy(r->rec, plain + at, r->recLen);
+    at += r->recLen;
+    r->theirRegion = at < (u32)n && plain[at] >= 1 && plain[at] <= REGION_COUNT ? plain[at] : 0;
     {
         u16 species = GetBoxMonData(&r->theirs, MON_DATA_SPECIES);
         if (species == SPECIES_NONE || species >= NUM_SPECIES || GetBoxMonData(&r->theirs, MON_DATA_SANITY_IS_BAD_EGG))
@@ -412,6 +418,11 @@ static void Receive(struct TradeRec *r)
         if (!GetMonData(&mon, MON_DATA_IS_EGG))
             SetMonData(&mon, MON_DATA_FRIENDSHIP, &friendship);   // (as the game's trades do)
         MP_StripHeldHm(&mon);
+        if (r->theirRegion)
+        {
+            void MP_Region_ArriveFrom(struct Pokemon *mon, u8 from);
+            MP_Region_ArriveFrom(&mon, r->theirRegion - 1);   // (from another region: Lv5 here, as the player's own)
+        }
         PutIn(&mon);
         if (!GetMonData(&mon, MON_DATA_IS_EGG))
         {

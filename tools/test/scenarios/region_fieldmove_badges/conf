@@ -1,0 +1,8 @@
+# Field moves' badges by the field move order in every region (the EXP audit, 2026-11-17: KANTO's and JOHTO's tables
+# were in HM order, so KANTO's SURF asked for the BOULDER BADGE and FLY for MARSH). In CERULEAN with only the BOULDER
+# BADGE: FLASH (1) yes, SURF (4) and FLY (5) no; then the SOUL BADGE (KANTO's 5th) lets SURF be used
+MODE=1
+WARP=37,60,10,10
+TMO=120
+EXPECT_A=("fmbadge: 1 flag" "fmbadge: 1 flag 0x2100 has 1" "fmbadge: 4 flag 0x2104 has 0" "fmbadge: 5 flag 0x2102 has 0" "fmbadge: 4 flag 0x2104 has 1")
+UNEXPECT_A=("[crash]" "TIMEOUT")

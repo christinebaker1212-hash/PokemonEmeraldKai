@@ -1271,6 +1271,7 @@ void MP_BattleTentWon(void);
 // (battle_util.c IsMonDisobedient); they keep the traded EXP boost. MoeGatcha prizes
 // (their own OT) still obey by badges.
 bool8 MP_OtActsAsOwn(u32 otId);          // a Battle Tent prize (three wins in a row): 3 tickets
+bool8 MP_OtIsGacha(u32 otId);            // a MoeGatcha prize's OT: not traded (no traded EXP boost)
 s32 MP_Gatcha_FreeWaiting(void);   // every 128 steps: the follower's extra friendship
 bool8 MP_Follower_IsFollowing(struct Pokemon *mon);
 bool8 MP_Follower_HasGraphics(struct Pokemon *mon);

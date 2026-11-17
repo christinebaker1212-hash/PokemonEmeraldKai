@@ -3846,8 +3846,10 @@ static void Cmd_getexp(void)
 
                     // Moemon Co-op: the partner's Pokémon are theirs, not traded (traded Moemon keep
                     // their boost, though they obey like the player's own: battle_util.c)
+                    // (a MoeGatcha prize is the player's own, not traded: no boost, the EXP audit 2026-11-17)
                     if (gMpCoopBattle ? MP_Coop_IsTradedMon(gBattleStruct->expGetterMonId)
-                                      : IsTradedMon(&gPlayerParty[gBattleStruct->expGetterMonId]))
+                                      : IsTradedMon(&gPlayerParty[gBattleStruct->expGetterMonId])
+                                        && !MP_OtIsGacha(GetMonData(&gPlayerParty[gBattleStruct->expGetterMonId], MON_DATA_OT_ID)))
                     {
                         // check if the Pokémon doesn't belong to the player
                         if (gBattleTypeFlags & BATTLE_TYPE_INGAME_PARTNER && gBattleStruct->expGetterMonId >= 3)

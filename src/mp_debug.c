@@ -3877,6 +3877,16 @@ void MP_TestCommand(const char *cmd, const char *arg)
         if (!region)
             MP_HmRescue_GiveAll();   // (the HMs a player with them has had: no HM rescue in tests that skip the story)
     }
+    else if (strcmp(cmd, "fmbadge") == 0)
+    {
+        // fmbadge [REGION BADGE] - (with arguments: that one badge set first) each field move's badge here, in the
+        // field move order (0 CUT, 1 FLASH, 2 ROCK SMASH, 3 STRENGTH, 4 SURF, 5 FLY, 6 DIVE, 7 WATERFALL, 8 WHIRLPOOL)
+        int region = -1, badge = -1, hm;
+        if (sscanf(arg, "%d %d", &region, &badge) == 2 && region >= 0 && region < REGION_COUNT && badge >= 0 && badge < 8)
+            FlagSet(MP_Region_BadgeFlag(region, badge));
+        for (hm = 0; hm < 9; hm++)
+            printf("[test] fmbadge: %d flag 0x%x has %d\n", hm, MP_Region_FieldMoveBadge(hm), MP_Region_HasFieldMoveBadge(hm));
+    }
     else if (strcmp(cmd, "hud") == 0)
     {
         // hud 0|1: a battle's boxes and text layer hidden / shown (pictures of the scene alone: UI style mock-ups)

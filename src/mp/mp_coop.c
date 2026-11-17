@@ -2234,7 +2234,8 @@ void MP_Coop_NoteOwnCatch(u8 target)
 bool8 MP_Coop_IsTradedMon(u8 partyIndex)
 {
     u8 owner = SeatOfSlot(partyIndex);   // the seat = its link player
-    return GetMonData(&gPlayerParty[partyIndex], MON_DATA_OT_ID) != gLinkPlayers[owner].trainerId;
+    u32 ot = GetMonData(&gPlayerParty[partyIndex], MON_DATA_OT_ID);
+    return ot != gLinkPlayers[owner].trainerId && !MP_OtIsGacha(ot);   // (a MoeGatcha prize isn't traded)
 }
 
 // The other game's controller animated this experience gain; apply the same

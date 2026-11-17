@@ -1,0 +1,7 @@
+pressuntil A field 5000
+wait 10
+mp fmbadge 2 0
+wait 10
+mp fmbadge 2 4
+wait 10
+quit
