@@ -1587,7 +1587,8 @@ void MP_UiStyle_HudUpdate(u8 battler, struct Pokemon *mon, bool8 hpToo)
     }
     species = GetMonData(mon, MON_DATA_SPECIES);
     h->caught = GetBattlerSide(battler) == B_SIDE_OPPONENT
-             && !(gBattleTypeFlags & (BATTLE_TYPE_TRAINER | BATTLE_TYPE_WALLY_TUTORIAL))
+             && !(gBattleTypeFlags & BATTLE_TYPE_WALLY_TUTORIAL)
+             && (!(gBattleTypeFlags & BATTLE_TYPE_TRAINER) || (gMpCoopBattle && gMpCoopWild))   // (co-op wild: a link "trainer" battle)
              && GetSetPokedexFlag(SpeciesToNationalPokedexNum(species), FLAG_GET_CAUGHT);
     if ((species == SPECIES_NIDORAN_F || species == SPECIES_NIDORAN_M) && StringCompare(h->name, gSpeciesNames[species]) == 0)
         h->gender = 0;

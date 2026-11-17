@@ -304,7 +304,8 @@ void MP_TriCards_Update(u8 battler, struct Pokemon *mon, bool8 hpToo)
     c->level = GetMonData(mon, MON_DATA_LEVEL);
     c->status = StatusOf(GetMonData(mon, MON_DATA_STATUS));
     c->team = GetBattlerSide(battler) == B_SIDE_PLAYER;
-    c->caught = !c->team && !(gBattleTypeFlags & (BATTLE_TYPE_TRAINER | BATTLE_TYPE_WALLY_TUTORIAL))
+    c->caught = !c->team && !(gBattleTypeFlags & BATTLE_TYPE_WALLY_TUTORIAL)
+             && (!(gBattleTypeFlags & BATTLE_TYPE_TRAINER) || (gMpCoopBattle && gMpCoopWild))   // (co-op wild: a link "trainer" battle)
              && GetSetPokedexFlag(SpeciesToNationalPokedexNum(GetMonData(mon, MON_DATA_SPECIES)), FLAG_GET_CAUGHT);
     // the gender as on the original healthbox (a NIDORAN♀/♂ under its own name already shows it)
     switch (GetMonGender(mon))
