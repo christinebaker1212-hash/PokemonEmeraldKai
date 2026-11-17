@@ -3211,8 +3211,11 @@ bool8 MP_Coop_OtherWildOut(u8 caughtBattler)
     u8 b;
     if (!gMpCoopWild)
         return FALSE;
+    // (the foes' party HP: only the master's engine keeps gBattleMons, the others' games are told every HP change; with
+    // gBattleMons the others' games took every catch for the last and stopped the battle's song at the ball's click)
     for (b = 1; b < gBattlersCount; b += 2)
-        if (b != caughtBattler && !(gAbsentBattlerFlags & gBitTable[b]) && gBattleMons[b].hp != 0)
+        if (b != caughtBattler && !(gAbsentBattlerFlags & gBitTable[b])
+         && (sCoop.isMaster ? gBattleMons[b].hp : GetMonData(&gEnemyParty[gBattlerPartyIndexes[b]], MON_DATA_HP)) != 0)
             return TRUE;
     return FALSE;
 }

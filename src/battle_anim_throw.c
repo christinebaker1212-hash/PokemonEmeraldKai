@@ -1391,8 +1391,23 @@ static void SpriteCB_Ball_Capture_Step(struct Sprite *sprite)
     {
         gDoingBattleAnim = FALSE;
         UpdateOamPriorityInAllHealthboxes(1);
-        m4aMPlayAllStop();
-        PlaySE(MUS_RG_CAUGHT_INTRO);
+        {
+            // Moemon Kai: a battle that goes on after the catch keeps its song (it goes quieter under the jingle and
+            // comes back: mp_catchjingle.c); stopping every player here left it silent in co-op Doubles / Triples
+            bool8 MP_CatchJingle_GoesOn(u8 target);
+            void MP_CatchJingle_Start(bool8 ownJingle);
+            if (MP_CatchJingle_GoesOn(*battler))
+            {
+                m4aMPlayStop(&gMPlayInfo_SE1);
+                m4aMPlayStop(&gMPlayInfo_SE3);
+                MP_CatchJingle_Start(FALSE);   // (the song down, the jingle over it, the song back up after)
+            }
+            else
+            {
+                m4aMPlayAllStop();
+                PlaySE(MUS_RG_CAUGHT_INTRO);
+            }
+        }
     }
     else if (sprite->sTimer == 315)
     {

@@ -2612,7 +2612,8 @@ void BufferStringBattle(u16 stringID)
     {
         // Moemon Kai: a battle that goes on after the catch (a co-op wild battle with the other still out, ORRE's
         // snag in a trainer battle): its song goes quieter under the catch's jingle and comes back where it got to
-        bool8 goesOn = (gMpCoopWild && MP_Coop_OtherWildOut(gBattlerTarget)) || (gBattleTypeFlags & BATTLE_TYPE_TRAINER);
+        bool8 MP_CatchJingle_GoesOn(u8 target);
+        bool8 goesOn = MP_CatchJingle_GoesOn(gBattlerTarget);
         bool8 legacy = MP_LegacyBall_String(stringID) != NULL;
         // Moemon Co-op: a GENESIS / EPOCH BALL catch says it like Red / Crystal
         if (legacy)
