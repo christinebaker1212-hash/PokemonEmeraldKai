@@ -164,3 +164,8 @@ PIECES += [('BW_BALL%d' % i, 'bw:waza:%s' % k, 'MORE_MBALL') for i, k in enumera
     ('58:0', '54:0', '52:1', '46:0', '62:0', '66:0', '70:0', '74:0', '78:0', '80:1', '84:1', '86:0', '94:0', '100:1',
      '104:1', '106:0', '110:0', '120:1', '126:0', '134:0'))]
 PIECES += seq('BW_MASTER', 'bw', 'waza', 48, (1, 2, 3, 4, 5, 6, 7), 'MORE_MBALL')
+# white flame shapes (colored as they're drawn): SACRED FIRE's rainbow, spirit fires
+P(('BW_WHITEFLAME', 'bw:waza:213:3', 'FIRE_FLAME1'))
+P(('PL_WISP', 'pl:waza:146:0', 'MORE_WISP1'))
+P(('BW_WISP', 'bw:waza:573:0', 'MORE_WISP2'))
+P(('PL_FLARE', 'pl:waza:88:0', 'AURA_FLARE0'))

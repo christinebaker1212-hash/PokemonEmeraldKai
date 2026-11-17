@@ -9230,6 +9230,10 @@ enum {
     FXD_BW_MASTER4,
     FXD_BW_MASTER5,
     FXD_BW_MASTER6,
+    FXD_BW_WHITEFLAME,
+    FXD_PL_WISP,
+    FXD_BW_WISP,
+    FXD_PL_FLARE,
     FXD_END,
 };
 #define FXD_COUNT (FXD_END - FXD_FIRST)
@@ -9521,6 +9525,10 @@ static const u16 sDsFallback[FXD_COUNT] = {
     FXA_MORE_MBALL,
     FXA_MORE_MBALL,
     FXA_MORE_MBALL,
+    FXA_FIRE_FLAME1,
+    FXA_MORE_WISP1,
+    FXA_MORE_WISP2,
+    FXA_AURA_FLARE0,
 };
 static const struct { u8 pack; u8 index; } sDsWhere[FXD_COUNT] = {
     {0, 0}, {0, 1}, {0, 2}, {0, 3}, {0, 4}, {0, 5}, {1, 0}, {1, 1}, {1, 2}, {1, 3},
@@ -9551,5 +9559,6 @@ static const struct { u8 pack; u8 index; } sDsWhere[FXD_COUNT] = {
     {0, 95}, {0, 96}, {0, 97}, {0, 98}, {0, 99}, {0, 100}, {0, 101}, {0, 102}, {0, 103}, {0, 104},
     {1, 155}, {1, 156}, {1, 157}, {1, 158}, {1, 159}, {1, 160}, {1, 161}, {1, 162}, {1, 163}, {1, 164},
     {1, 165}, {1, 166}, {1, 167}, {1, 168}, {1, 169}, {1, 170}, {1, 171}, {1, 172}, {1, 173}, {1, 174},
-    {1, 175}, {1, 176}, {1, 177}, {1, 178}, {1, 179}, {1, 180}, {1, 181},
+    {1, 175}, {1, 176}, {1, 177}, {1, 178}, {1, 179}, {1, 180}, {1, 181}, {1, 182}, {0, 105}, {1, 183},
+    {0, 106},
 };
