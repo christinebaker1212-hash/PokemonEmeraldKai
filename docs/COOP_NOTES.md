@@ -837,6 +837,32 @@ PC, not 1-3: BG palette 1 in battle is the OPTIONS window frame (LoadBattleMenuW
 stay up during other battlers' moves (doubles/triples) flashed white with every backdrop flash (Double-Edge,
 Take Down...). The backdrop itself is 2-4.
 
+## Ball effects: the editor's lists, 90 more pieces, Platinum's and Black's art (1.202.0)
+
+The editor (src/mp/mp_ballfx_editor.c, the user's mock-ups from tools/moemon_ballfx/mockups.py): each row opens a list
+of every piece of its kind (MODE_LIST: earned and locked, ★ favourites ("fxfav:<c|f|p|r>:<index>"), NEW until seen
+("fxseen"), filters ALL / OWNED / ★), the color row a grid of all 41 (BG palettes 5-14), PRESETS a list with chips for
+MY PRESET 1-6 (TEXT_PAL 10-14); the preview's recall leaves to the left as battles' do.
+
+90 more pieces (include/mp.h after MPFX_FORM_RIBBON's line: 35 forms MPFX_FORM_BOULDER..RIBBON, 20 particle sets
+MPFX_PART_BALLS..SEALS, 35 recalls MPFX_RECALL_ROCKTOMB..BLACKOUT), each earned by a KANTO / JOHTO / SINNOH
+achievement (mp_ballunlock_ach.h). Their code is src/mp/mp_ballfx_more.inc.c (MoreEntranceFrame / MoreRecallFrame /
+MoreParticles, included by mp_ballfx.c); a piece's length is BodyLen -> MoreLen (forms 26, recalls 28 frames; the
+battle waits on MP_BallFx_BodyRunning). Helpers there: Size (a part sized by its longest side, ArtSize), SkyY (art
+from above stops over the HP boxes: Head - 16, never off the top), Fling, Puff, SettleAt. SOMERSAULT, CARD FLIP and
+the jumps were redone (Ease); every recall heads left (DASH / DIVE dir -1, battle_anim_throw.c's target x - 56 for
+both sides) but those that go up or down.
+
+Art from the DS games' move animations: Platinum's waza_particle / ball_particle / particledata / pl_etc_particle
+NARCs and Black's a/0/0/6, a/2/1/6, a/1/1/5, decoded from their SPA / SPT particle files (tools/moemon_ballfx/
+ds_particles.py: A3I5, A5I3, 4 / 16 / 256 colours, 4x4 and direct), the pieces picked in ds_pieces.py (~290, keys like
+"pl:waza:52:1"), packed by build_ds_pack.py ("MFXD", v1: w, h, offset each; RGB555 then 0-16 alpha) into
+sinnoh/ballfx_platinum.pak and unova/ballfx_black.pak: ROM-made, never committed, built by the release
+(tools/sinnoh/rom_pack.sh, tools/unova/make_pack.sh) and shipped. FXD_* ids start at FXA_COUNT; DsArt() loads the
+packs (Updater_ExeFile), without them each piece falls back to an FXA stand-in (sDsFallback). MOEMON_FX_NO_DS=1
+forces the stand-ins. FxPart.tint multiplies (TINT_ENERGY: the energy color), so one flame comes in many colours.
+Checked in Single, Double and Triple battles (scratchpad scripts burst.sh / battle.sh: `mp triple`, `mp double`).
+
 ## HGSS POKé BALLS (1.26: battle and summary balls)
 The thrown / sent-out / summary ball sprites are the HEARTGOLD / SOULSILVER sheet (docs/user_images/35.png, ripped by
 Sunday-Doneko, credited in dist_extras/README.txt; tools/moemon_balls/hgss_balls.py writes graphics/balls/<ball>.png).
@@ -7950,3 +7976,29 @@ docs/ui_styles/UI_STYLES.md ("Building it" for the game's side).
 Tests: ui_style_battles, ui_style_screens, ui_style_dpad, ui_style_party_battles, coop_move_swap;
 tools/ui_styles/check_specs.py.
 
+
+## UI STYLE fixes (1.202.0)
+
+- Statuses on the battle boxes in every style (Single, Double, Triple): RED / CRYSTAL print PSN / PAR / SLP / FRZ /
+  BRN in the level's place (gb_build.py level_or_status; the Triple card's bar takes the two-digit length); FIRERED's
+  badge from healthbox_elements 21-35, colour 12 from sStatusIconColors, ending where the HP label began, which gives
+  way to B_INTERFACE_GFX_HP_BAR_LEFT_BORDER, the caught ball hidden (fr_build.py status_imgs); PLATINUM's from
+  healthbox_parts 41-55 after the caught ball's tile (x 16 a foe's box, 32 the player's single, 24 a double's;
+  pt_build.py); BLACK's from the app icons a/0/8/3 (characters 12, palette 11, cells 14: cell = the status's anim)
+  at sGaugeStatusIconOffsets (-30, 8) / (-38, 8) (bw.py status_icon, OverlayTables.status). On the Triple cards the
+  badge takes the level's place. Test: `mp status SLOT VALUE` before `mp wild` / `mp double` / `mp triple`.
+- RED / CRYSTAL with WHITE BG: each battle box is drawn into sOutlineBuf (Put marks drawn pixels with bit 15), then
+  ringed with a 1 px white (faded with the box) and laid on the frame (mp_uistyle.c DrawSpecOutlined).
+- RED / CRYSTAL pop-ups wrap a line too long for the screen at a space (PopUps: `wrap`, sWraps), the lines under it
+  move down and the window grows (hh), never Kai's letters in the style's frame; struct Run keeps 160 letters.
+  `mp popup W H TEXT` (| a new line) / `mp popupclose` make a plain framed window for tests.
+- The caught ball in co-op wild Double / Triple battles: they're link battles flagged BATTLE_TYPE_TRAINER, so
+  battle_interface.c TryAddPokeballIconToHealthbox, mp_tricards.c and the styles' h->caught also accept
+  gMpCoopBattle && gMpCoopWild.
+- Battle boxes closed by HandleBattleWindow(WINDOW_CLEAR) take the windows inside them away and copy the tilemap at
+  once (YES / NO stayed up through the fade to the party); the style keeps drawing a closed box for 3 frames
+  (sLinger) while the clear reaches the screen, so the level up's box never shows Kai's for a frame.
+- A catch in a battle that goes on (co-op Double / Triple with another foe out): MP_CatchJingle_GoesOn decides it on
+  every game (MP_Coop_OtherWildOut reads the foes' party HP off the master, gBattleMons only on it); the ball's click
+  then stops only SE1 / SE3 and starts the ducked jingle (battle_anim_throw.c), never m4aMPlayAllStop. Tests
+  coop_catch, tri_catch (log "catch jingle: the song back up ... playing 1" on every game).
