@@ -142,6 +142,22 @@ class PTPack:
         return empty, fills
 
     # ---------------------------------------------------------------------------------------------------- the boxes
+    def status_imgs(self):
+        """Platinum's status badges (healthbox_parts HEALTHBOX_PART_STATUS_*_0..2: PAR 41, FRZ 44, SLP 47, PSN 50,
+        BRN 53), by the status's bit"""
+        if getattr(self, '_status', None):
+            return self._status
+        st = self.st
+        self._status = {}
+        for bit, base in ((U.C_PAR, 41), (U.C_FRZ, 44), (U.C_SLP, 47), (U.C_PSN, 50), (U.C_BRN, 53)):
+            rows = [st.part(base)[y] + st.part(base + 1)[y] + st.part(base + 2)[y] for y in range(8)]
+            self._status[bit] = self.p.image('pt.status.%d' % bit, self.tile_img(rows, None, 24))
+        return self._status
+
+    def status(self, sp, x, y, cond=0, unless=0):
+        for bit, im in self.status_imgs().items():
+            sp.add(U.OP_IMG, x=x, y=y, a=im, cond=cond | bit, unless=unless)
+
     def hud(self, kind):
         st, p = self.st, self.p
         rect = {'foe1': Lo.SINGLE_FOE, 'mine1': Lo.SINGLE_MINE, 'foe2': Lo.DOUBLE_FOES[0],
@@ -208,6 +224,11 @@ class PTPack:
             # foe's; its top row, which the box loses, a row up)
             ball = self.tile_img([r[:7] for r in st.part(59)[:7]], 15)
             self.img(sp, 'pt.caught', ball, fl(8), ys.index(33) - 1, cond=U.C_CAUGHT)
+        # (HealthBox_DrawStatusIcon: the badge's three tiles just after the caught ball's in the box's VRAM,
+        # sStatusIconVRAMTransfer: a foe's at x 16, the player's single box's at 32, a double's at 24; the ball's row)
+        sx = {'foe': 16, 'mine': 32, 'mine2': 24}[k]
+        sy = ys.index(32) if 32 in ys else ys.index(33) - 1
+        self.status(sp, fl(sx), sy)
         if k == 'mine':
             hy = ys.index(41) - 1
             gx = fr(S['gauge'])
@@ -255,7 +276,9 @@ class PTPack:
         for s, gc in (('m', U.C_MALE), ('f', U.C_FEMALE)):
             sp.add(U.OP_IMG, x=1, y=-1, a=p.image('pt.cardicon.' + s, self.icon_img(s, 6)), rel=True, reg=1, cond=gc)
         lx, ly, shadow = got['lv']
-        self.text(sp, '{%d}' % U.F_LEVEL, lx, ly, self.fdig, ink, self.col(shadow))
+        self.text(sp, '{%d}' % U.F_LEVEL, lx, ly, self.fdig, ink, self.col(shadow), unless=U.C_STATUS)
+        # (a status: the badge over the Lv mark and the level, as the box puts it before its bar)
+        self.status(sp, lx - 16, ly)
         return sp
 
     # ---------------------------------------------------------------------------------------------------- panels

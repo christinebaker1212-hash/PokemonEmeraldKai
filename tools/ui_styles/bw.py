@@ -280,6 +280,16 @@ class Black(Style):
             x += adv
         return [[px[ty * 8 + j // 8][tx * 8 + j % 8] for j in range(64)] for ty in range(ht) for tx in range(wt)]
 
+    STATUS_CELLS = {'par': 1, 'frz': 2, 'slp': 3, 'psn': 4, 'brn': 5}   # (sGaugeStatusAnimTable's cells)
+
+    def status_icon(self, which):
+        """BTLV_GAUGE_SetStatusIcon's badge (app icons a/0/8/3: characters 12, palette 11, cells 14): its picture
+        and its top left about the actor's point"""
+        A = 'a/0/8/3'
+        im, x0, y0 = self.cell(A, 14, self.tiles(A, 12), self.pal(A, 11), self.STATUS_CELLS[which])
+        bb = im.getbbox()
+        return im.crop(bb), x0 + bb[0], y0 + bb[1]
+
     def gauge(self, side, layout, m, numbers=True, exp=True, name=True):
         """one of Black's battle gauges as btlv_gauge.c builds it, on a canvas whose (64, 16) is the frame's point:
         SIDE 1 the foe's, 0 the player's; LAYOUT 0 single / double frames, 2 triple; M the POKéMON (common.py)"""
@@ -1335,4 +1345,5 @@ class OverlayTables:
         def pts(a, n):
             return [struct.unpack_from('<hh', img.d, a - img.ram + 4 * i) for i in range(n)]
         self.bar = pts(0x0220AAD0, 2)          # sGaugeBarOffsets: the player's (8, 7), the foe's (0, 7)
+        self.status = pts(0x0220AAC0, 2)       # sGaugeStatusIconOffsets: the player's (-30, 8), the foe's (-38, 8)
         self.single = pts(0x0220AAD8, 6)       # sGaugeDefaultPositions

@@ -225,7 +225,7 @@ class BWPack:
 
             def ycarve(im, ycut=ycut):
                 return _rebuild(im, 'y', ycut) if ycut else im
-            Y[sx] = dict(fy=((y1 - y0) - (bb[3] - bb[1])) // 2 - bb[1], g0=ycarve(G0),
+            Y[sx] = dict(ycut=ycut, fy=((y1 - y0) - (bb[3] - bb[1])) // 2 - bb[1], g0=ycarve(G0),
                          full=[ycarve(f) for f in FULL], e1=ycarve(E1) if E1 is not None else None,
                          mark=ycarve(GEN[sx]) if sx else None, ny=moved(ycut, 5) if ycut else 5)
         digits_w = {1: dsfont.width(st.fsub, '0'), 2: max(dsfont.width(st.fsub, '%d' % (10 * a + 8)) for a in
@@ -299,6 +299,16 @@ class BWPack:
                 lx = 96 if foe else 88
                 self.text(sp, '{%d}' % U.F_LEVEL, X(lx), oy + ny, self.fs, self.gink, self.gsh, cond=cond,
                           unless=unless)
+                # (a status: BTLV_GAUGE_SetStatusIcon's badge at sGaugeStatusIconOffsets from the frame's point,
+                # (64, 16) on the gauge's canvas)
+                so = st.gauge_parts()['ov'].status[side]
+                for which, bit in (('psn', U.C_PSN), ('par', U.C_PAR), ('slp', U.C_SLP), ('frz', U.C_FRZ),
+                                   ('brn', U.C_BRN)):
+                    icon, ix, iy = st.status_icon(which)
+                    cx, cy = 64 + so[0] + ix, 16 + so[1] + iy
+                    yc = V['ycut']
+                    self.img(sp, '%s.status.%s' % (name.split('.')[1], which), icon, X(cx),
+                             oy + (moved(yc, cy) if yc else cy), cond=cond | bit, unless=unless)
                 if kind == 'mine1':
                     d1, d2, d3 = self.dig
                     self.text(sp, '{%d}' % U.F_HP3, X(56), oy + 18, self.fdig, d1, d2, d3, cond=cond, unless=unless)
@@ -358,7 +368,12 @@ class BWPack:
         lv = g.crop(lv_box)
         lv = lv.crop(lv.getbbox())
         ly = by + 3
-        self.text(sp, '{%d}' % U.F_LEVEL, 1 + lv.width + 1, ly - 3, self.fs, self.gink, self.gsh, h=h - (ly - 3))
+        self.text(sp, '{%d}' % U.F_LEVEL, 1 + lv.width + 1, ly - 3, self.fs, self.gink, self.gsh, h=h - (ly - 3),
+                  unless=U.C_STATUS)
+        # (a status: Black's badge in the Lv mark's and the level's place, before the bar)
+        for which, bit in (('psn', U.C_PSN), ('par', U.C_PAR), ('slp', U.C_SLP), ('frz', U.C_FRZ), ('brn', U.C_BRN)):
+            icon, _, _ = st.status_icon(which)
+            self.img(sp, '%s.status.%s' % (name, which), icon, 1, ly, cond=bit)
         return sp
 
     # ---------------------------------------------------------------------------------------------------- panels

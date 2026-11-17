@@ -1,5 +1,7 @@
 """FIRERED as the game draws it (uipack.py): fr.py's pieces made into a pack's fonts, pictures and specs. Every spec
 puts things where fr.py's mock-ups put them (approved 2026-11-16); check_specs.py draws both and compares them."""
+import os
+
 from PIL import Image
 
 import layout as Lo
@@ -87,6 +89,28 @@ class FRPack:
         st.elements = green
         return empty, fills
 
+    def status_imgs(self):
+        """FireRed's status badges (healthbox_elements: three tiles each from B_INTERFACE_GFX_STATUS_*_BATTLER0, their
+        body colour 12 filled with sStatusIconColors as UpdateStatusIconInHealthbox does), by the status's bit"""
+        if getattr(self, '_status', None):
+            return self._status
+        el = Image.open(os.path.join(self.st.g, 'battle_interface', 'healthbox_elements.png'))
+        self._status = {}
+        for bit, base, c in ((U.C_PSN, 21, (24, 12, 24)), (U.C_PAR, 24, (23, 23, 3)), (U.C_SLP, 27, (20, 20, 17)),
+                             (U.C_FRZ, 30, (17, 22, 28)), (U.C_BRN, 33, (28, 14, 10))):
+            pal = list(self.st.barpal)
+            pal[12] = tuple((v << 3) | (v >> 2) for v in c)
+            tiles = self.st._tiles(el, pal)
+            im = Image.new('RGBA', (24, 8), (0, 0, 0, 0))
+            for k in range(3):
+                im.alpha_composite(tiles[base + k], (k * 8, 0))
+            self._status[bit] = self.p.image('fr.status.%d' % bit, im)
+        return self._status
+
+    def status(self, sp, x, y, cond=0, unless=0):
+        for bit, im in self.status_imgs().items():
+            sp.add(U.OP_IMG, x=x, y=y, a=im, cond=cond | bit, unless=unless)
+
     # ---------------------------------------------------------------------------------------------------- the HUDs
     def hud(self, kind):
         """fr.py hud(): the box's art, its words, its bars, each a part the game fills"""
@@ -132,6 +156,15 @@ class FRPack:
             exp = p.image(name + '.exp', diff(e1, e0))
         self.img(sp, name + '.frame', frame)
         sp.add(U.OP_BAR, a=U.F_HPFRAC, b=fills[0], c=fills[1], d=fills[2])
+        # (a status: UpdateStatusIconInHealthbox's badge, three tiles that end where the HP label began, the label
+        # given up for the bar's left edge, B_INTERFACE_GFX_HP_BAR_LEFT_BORDER, the box's own ground behind)
+        hx, hy = x0 + end - 64, y0 + by
+        patch = art.crop((hx, hy, hx + 16, hy + 8)) if hx + 16 <= art.width and hy + 8 <= art.height else None
+        if patch is not None:
+            patch = patch.copy()
+            patch.alpha_composite(st.elements[65], (8, 0))
+            self.img(sp, name + '.nolabel', patch, hx, hy, cond=U.C_STATUS)
+        self.status(sp, hx - 16, hy)
         if exp is not None:
             sp.add(U.OP_BAR, a=U.F_EXP, b=exp, c=exp, d=exp, cond=U.C_EXP)
         self.text(sp, '{%d}' % U.F_NAME, nx, ty, F.HBOX, 's', reg=1)
@@ -140,7 +173,8 @@ class FRPack:
         self.text(sp, '{LV}{%d}' % U.F_LEVEL, right, ty, F.HBOX, 's', align=1)
         if not mine:
             # (TryAddPokeballIconToHealthbox: B_INTERFACE_GFX_BALL_CAUGHT two tiles before the HP label, a wild foe's)
-            self.img(sp, 'fr.caught', st.elements[70], x0 + end - 64 - 16, y0 + by, cond=U.C_CAUGHT)
+            self.img(sp, 'fr.caught', st.elements[70], x0 + end - 64 - 16, y0 + by, cond=U.C_CAUGHT,
+                     unless=U.C_STATUS)   # (TryAddPokeballIconToHealthbox(noStatus FALSE): a status takes its place)
         if kind == 'mine':
             # " 56/" at 60 and " 56" at 80, cut at the window's last row (row 30) as the game's are
             self.text(sp, '{%d}/' % U.F_HP3, 60, 19, F.HBOX, 's', h=11)
@@ -158,8 +192,10 @@ class FRPack:
         lvw = st.measure('{LV}', 's')
         digit = st.measure('0', 's')
         assert all(st.measure(str(d), 's') == digit for d in range(10)), 'FireRed small digits not all one width'
-        for n, cond, unless in ((1, U.C_LV1, 0), (2, 0, U.C_LV1 | U.C_LV3), (3, U.C_LV3, 0)):
-            lx = tx + lvw + n * digit
+        # (a status: the badge in the level's place, the bar after it as after a three-digit level)
+        for n, cond, unless in ((1, U.C_LV1, U.C_STATUS), (2, 0, U.C_LV1 | U.C_LV3 | U.C_STATUS),
+                                (3, U.C_LV3, U.C_STATUS), (4, U.C_STATUS, 0)):
+            lx = tx + lvw + n * digit if n < 4 else tx + 24
             bx = max(lx + 1, tx + 19)
             cut = end - (bx + 16)
 
@@ -178,7 +214,8 @@ class FRPack:
             self.text(sp, '{%d}' % U.F_NAME, tx + 7, -2, F.HBOX, 's', reg=1, cond=U.C_CAUGHT)
         self.text(sp, '♂', 0, -2, F.MALE, 's', rel=True, reg=1, cond=U.C_MALE)
         self.text(sp, '♀', 0, -2, F.FEMALE, 's', rel=True, reg=1, cond=U.C_FEMALE)
-        self.text(sp, '{LV}{%d}' % U.F_LEVEL, tx, 6, F.HBOX, 's')
+        self.text(sp, '{LV}{%d}' % U.F_LEVEL, tx, 6, F.HBOX, 's', unless=U.C_STATUS)
+        self.status(sp, tx, 9)
         return sp
 
     # ---------------------------------------------------------------------------------------------------- panels

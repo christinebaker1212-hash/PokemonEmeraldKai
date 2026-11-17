@@ -15,6 +15,7 @@ EXP_BLUE = (32, 136, 248)
 
 # Crystal's MENU ACCOUNT words for each START entry, by start_menu.c's MENU_ACTION_* (its own where it has one: POKéDEX,
 # PARTY, PACK, POKéGEAR, status, SAVE, OPTION, EXIT; KAI's extras in the same voice, ten letters a line at most)
+STATUS_WORDS = (('PSN', U.C_PSN), ('PAR', U.C_PAR), ('SLP', U.C_SLP), ('FRZ', U.C_FRZ), ('BRN', U.C_BRN))
 ACCOUNT = [('MOéMON', 'database'), ('Party', 'status'), ('Contains', 'items'), ('Trainer\'s', 'key device'),
            ('Your own', 'status'), ('Save your', 'progress'), ('Change', 'settings'), ('Close this', 'menu'),
            ('Quit and', 'go home'), ('Your own', 'status'), ('Save and', 'rest'), ('Quit and', 'go home'),
@@ -120,6 +121,13 @@ class GBPack:
         self.text(sp, '{%d}' % U.F_LEVEL, x + 8, y, cond=cond, unless=unless | U.C_LV3, reg=reg)
         self.text(sp, '{%d}' % U.F_LEVEL, x, y, cond=cond | U.C_LV3, unless=unless, reg=reg)
 
+    def level_or_status(self, sp, x, y, reg=0, cond=0, unless=0):
+        """a battle box's level, or its status in the level's place (PrintStatusAilment: RED's and CRYSTAL's
+        boxes print PSN / PAR / SLP / FRZ / BRN where :L and the digits go)"""
+        self.level(sp, x, y, reg=reg, cond=cond, unless=unless | U.C_STATUS)
+        for word, bit in STATUS_WORDS:
+            self.text(sp, word, x, y, cond=cond | bit, unless=unless, reg=reg)
+
     def ball(self, sp, x, y, cond=U.C_CAUGHT):
         """the caught ball: CRYSTAL's own (DrawEnemyHUDBorder puts tile $5D, the expbar's last, at hlcoord 1, 1);
         RED has none (the first games never marked a caught kind)"""
@@ -205,7 +213,7 @@ class GBPack:
             if o[0] == 'name':
                 self.text(sp, '{%d}' % U.F_NAME, o[1], o[2], reg=1)
             elif o[0] == 'level':
-                self.level(sp, o[1], o[2])
+                self.level_or_status(sp, o[1], o[2])
             elif o[0] == 'gender':
                 self.gender(sp, o[1], o[2], rel=o[3], reg=1)
             elif o[0] == 'hpnum':
@@ -257,7 +265,9 @@ class GBPack:
             k = 1 if caught else 0
             cc = U.C_CAUGHT if caught else 0
             cu = U.C_CAUGHT if foe and not red and not caught else 0
-            for digits, cond, unless in ((1, U.C_LV1, 0), (2, 0, U.C_LV1)):
+            # (a status takes the level's three tiles, as two digits and :L do: the two-digit bar)
+            for digits, cond, unless, sfx in ((1, U.C_LV1, U.C_STATUS, ''), (2, 0, U.C_LV1, ''),
+                                              (2, U.C_LV1 | U.C_STATUS, 0, 's')):
                 col = 1 + digits + (0 if red else 1) + k
                 if red:
                     bar = (lambda c, f, colr, col=col: self.gb_bar(c, col, 1, f, 0x6C if foe else 0x6D, 'edge',
@@ -266,7 +276,7 @@ class GBPack:
                     bar = (lambda c, f, colr, col=col: self.gb_bar(c, col, 1, f, 0x6B, False, 8 - col, colr))
                 else:
                     bar = (lambda c, f, colr, col=col: self.gb_bar(c, col, 1, f, 0x6B, True, 8 - col - 2, colr))
-                tag = 'hud.%s.%d%s' % (kind, digits, 'c' if caught else '')
+                tag = 'hud.%s.%d%s%s' % (kind, digits, 'c' if caught else '', sfx)
                 empty, fills = self.bar_specs(tag, (72, 20), bar)
                 sp.add(U.OP_IMG, a=p.image(tag.replace('.%d' % digits, '.bar%d' % digits), empty), cond=cond | cc,
                        unless=unless | cu)
@@ -274,7 +284,7 @@ class GBPack:
                        unless=unless | cu)
             if caught:
                 self.ball(sp, 0, 8)
-            self.level(sp, 8 * k, 8, reg=1, cond=cc, unless=cu)
+            self.level_or_status(sp, 8 * k, 8, reg=1, cond=cc, unless=cu)
             self.gender(sp, 0, 8, rel=True, reg=1, cond=cc, unless=cu)
         sp.add(U.OP_ROWMAP, x=2 if foe else rw - 2 - 72, y=(rh - 20) // 2, a=p.string(bytes(range(20))))
         sp.add(U.OP_BACKING, a=255, b=1, ink=st.paper, unless=U.C_NOBG)
