@@ -87,6 +87,7 @@ int TcgFlow_SlotMatches(const struct TcgDuel *g, unsigned me, const struct TcgAc
                         unsigned slot, int filter);
 /* Can it be used now (the rules' side: whose turn it is is the caller's), and why not */
 int TcgFlow_HandPlayable(const struct TcgDuel *g, unsigned me, const struct TcgCard *c, char *reason, size_t size);
+int TcgFlow_NeedsDeck(unsigned id);  /* a Trainer that takes from the deck (none with an empty one) */
 int TcgFlow_TrainerHasUse(const struct TcgDuel *g, unsigned me, unsigned id); /* would it do anything now? */
 int TcgFlow_AttackReady(const struct TcgDuel *g, unsigned me, unsigned attack, char *reason, size_t size);
 int TcgFlow_CanRetreat(const struct TcgDuel *g, unsigned me, char *reason, size_t size);

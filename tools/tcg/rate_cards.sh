@@ -6,8 +6,8 @@ set -euo pipefail
 cd "$(dirname "$0")/../.."
 OUT=$(mktemp -d /tmp/moemon-tcg-cards.XXXXXX)
 trap 'rm -rf "$OUT"' EXIT
-gcc -std=c99 -O2 -Wall -Wextra -DTCG_TEST -DMOEMON_DEV_BUILD=0 -iquote include \
-    tools/tcg/rate_cards.c src/tcg/tcg_scale.c src/tcg/tcg_decks.c src/tcg/tcg_ai.c src/tcg/tcg_collection.c \
+gcc -std=c99 -D_DEFAULT_SOURCE -O2 -Wall -Wextra -DTCG_TEST -DMOEMON_DEV_BUILD=0 -iquote include \
+    tools/tcg/rate_cards.c src/tcg/tcg_scale.c src/tcg/tcg_decks.c src/tcg/tcg_ai.c src/tcg/tcg_collection.c android/app/src/main/cpp/aw_file_sync.c \
     src/tcg/tcg_catalog.c src/tcg/tcg_duel.c src/tcg/tcg_effects.c src/tcg/tcg_trainers.c src/tcg/tcg_powers.c \
     src/tcg/tcg_ratings.c -lm -o "$OUT/rate"
 "$OUT/rate" "${1:-80}" "${2:-400}"

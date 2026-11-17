@@ -317,7 +317,8 @@ int TcgFlow_SlotMatches(const struct TcgDuel *g, unsigned me, const struct TcgAc
     {
         const struct TcgCard *stage2 = a->selectionCount ? Tcg_Card(CardOf(g, me, a->selections[0])) : NULL;
         unsigned i;
-        if (!c || c->kind != TCG_POKEMON || c->stage || !stage2)
+        /* (as evolving: not on its first turn in play, nor on the player's first turn) */
+        if (!c || c->kind != TCG_POKEMON || c->stage || !stage2 || p->turnsTaken < 2 || f->enteredTurn == g->turn)
             return 0;
         for (i = 1; i <= TCG_CARD_COUNT; i++)
             if (gTcgCards[i].kind == TCG_POKEMON && gTcgCards[i].stage == 1 &&
@@ -464,6 +465,26 @@ static int InDiscard(const struct TcgDuel *g, unsigned me, int kind, int basicOn
     }
     return 0;
 }
+/* Trainers that take from the deck and can't be played with an empty one (the rules say "Your deck is empty.") */
+int TcgFlow_NeedsDeck(unsigned id)
+{
+    switch (id)
+    {
+    case TCG_CARD_BILL:
+    case TCG_CARD_POKEDEX:
+    case TCG_CARD_POKE_BALL:
+    case TCG_CARD_POKEBALL:
+    case TCG_CARD_ENERGY_SEARCH:
+    case TCG_CARD_COMPUTER_SEARCH:
+    case TCG_CARD_POKEMON_TRADER:
+    case TCG_CARD_MOON_STONE:
+    case TCG_CARD_THE_BOSSS_WAY:
+    case TCG_CARD_MASTER_BALL:
+        return 1;
+    }
+    return 0;
+}
+
 int TcgFlow_TrainerHasUse(const struct TcgDuel *g, unsigned me, unsigned id)
 {
     const struct TcgPlayer *p = &g->players[me];
@@ -471,6 +492,8 @@ int TcgFlow_TrainerHasUse(const struct TcgDuel *g, unsigned me, unsigned id)
     unsigned s, them = me ^ 1;
     for (s = 1; s < TCG_FIELD_SIZE; s++)
         bench += !p->field[s].stackSize;
+    if (TcgFlow_NeedsDeck(id) && !p->deckSize)
+        return 0;
     switch (id)
     {
     case TCG_CARD_POTION:
@@ -498,11 +521,6 @@ int TcgFlow_TrainerHasUse(const struct TcgDuel *g, unsigned me, unsigned id)
         return bench > 0;
     case TCG_CARD_REVIVE:
         return bench > 0 && InDiscard(g, me, TCG_POKEMON, 1);
-    case TCG_CARD_BILL:
-    case TCG_CARD_POKEDEX:
-    case TCG_CARD_POKE_BALL:
-    case TCG_CARD_ENERGY_SEARCH:
-        return p->deckSize > 0;
     case TCG_CARD_COMPUTER_SEARCH:
         return p->deckSize > 0 && p->handSize >= 3;
     case TCG_CARD_ITEM_FINDER:
@@ -891,6 +909,8 @@ unsigned TcgFlow_Begin(struct TcgFlow *f, const struct TcgDuel *g, unsigned me, 
             return AskSlot(f, g, f->me, c->stage ? TCG_F_EVOLVE_TARGET : TCG_F_BASIC_SLOT,
                            c->stage ? "Evolve which Pokemon?" : "Put it in which space?");
         }
+        if (TcgFlow_NeedsDeck(c->id) && !p->deckSize)
+            return Fail(f, "Your deck is empty.");
         f->action.type = TCG_PLAY_TRAINER;
         f->steps = TcgFlow_TrainerSteps(c->id, &f->nsteps);
         return Next(f, g);

@@ -7,7 +7,7 @@ OUT=${OUT:-/tmp/ygo-tests}
 mkdir -p "$OUT"
 tools/ygo/edo/build_core.sh "$OUT"
 SRC="src/ygo/ygo_catalog.c src/ygo/ygo_fusions.c src/ygo/ygo_edo.c src/ygo/ygo_edo_data.c src/ygo/ygo_edo_pak.c
-     src/ygo/ygo_edo_codes.c src/ygo/ygo_ai.c src/ygo/ygo_collection.c src/ygo/ygo_net.c tools/ygo/stb_zlib.c"
+     src/ygo/ygo_edo_codes.c src/ygo/ygo_ai.c src/ygo/ygo_collection.c android/app/src/main/cpp/aw_file_sync.c src/ygo/ygo_net.c tools/ygo/stb_zlib.c"
 for t in collection edo edo_cards net; do
     gcc -std=gnu99 -O1 -g -Wall -Wextra -Wno-unused-parameter -Wno-sign-compare -fsanitize=address,undefined \
         -fno-sanitize-recover=undefined -iquote include -iquote src/ygo tools/ygo/test_$t.c $SRC \
