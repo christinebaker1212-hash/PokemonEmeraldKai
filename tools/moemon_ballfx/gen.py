@@ -38,7 +38,7 @@ def rgb(r, g, b):
             return i
     if c not in EXTRA:
         EXTRA.append(c)
-        assert FIRST_EXTRA + len(EXTRA) <= 256, 'too many effect colors'
+        assert FIRST_EXTRA + len(EXTRA) <= 65535, 'too many effect colors'
     return FIRST_EXTRA + EXTRA.index(c)
 
 
@@ -683,6 +683,212 @@ def card():
     return [('back', back), ('face', face)]
 
 
+def more():
+    """The KANTO / JOHTO / SINNOH pieces' art: the game's own move animations (graphics/battle_anims/sprites, in their
+    colors or the energy color) and pieces drawn here"""
+    out = []
+    out += frames_of('rocks.png', 32, 32, 6, 'rock')                      # ROCK SHELL, ROCK TOMB
+    out += frames_of('flat_rock.png', 16, 16, 5, 'pebble')
+    out += frames_of('electric_orbs.png', 8, 8, 4, 'eorb')                # SPARK CAGE, VOLT SWITCH, SHOCK ORBS
+    out += frames_of('spark_1.png', 16, 16, 4, 'spark')
+    out += [('doll', imp('substitute.png', 0, 0, 64, 64)), ('dollback', imp('substitute_back.png', 0, 0, 64, 64))]   # DECOY
+    out += frames_of('opening_eye.png', 32, 32, 4, 'eye')                 # MIND'S EYE
+    out += [('dirt', imp('flying_dirt.png', 0, 0, 32, 32)), ('mound', imp('dirt_mound.png', 0, 0, 32, 32))]
+    out += [('bird', imp('bird.png', 0, 0, 64, 64, 'energy'))]             # THREE BIRDS, FLY AWAY (tinted)
+    out += frames_of('orbs.png', 16, 16, 3, 'orb')
+    out += frames_of('gold_ring.png', 16, 16, 2, 'gring')
+    out += frames_of('bell.png', 32, 32, 3, 'bell')                       # BELL CHIME / TOLL
+    out += frames_of('sprout.png', 32, 32, 7, 'sprout')                   # ODD TREE, SEED FLARE
+    out += [('milk', imp('milk_bottle.png', 0, 0, 32, 32))]               # MOOMOO MILK
+    out += [('moon', imp('moon.png', 0, 0, 64, 64))]                      # MOONLIGHT
+    out += [('blacksmoke', imp('black_smoke.png', 0, 0, 32, 16))]          # NIGHTMARE, DARK VOID
+    out += frames_of('seed.png', 16, 16, 3, 'seed')
+    out += frames_of('vine.png', 32, 32, 5, 'vine')                       # VINE WRAP / PULL
+    out += frames_of('blue_flames.png', 32, 32, 2, 'bflame')              # SPIRIT FLAMES, WILL-O-WISP
+    out += frames_of('wisp_fire.png', 32, 32, 4, 'wisp')
+    out += frames_of('noise_line.png', 32, 32, 4, 'noise', 'gray')        # TUNE IN, STATIC
+    out += frames_of('bent_spoon.png', 16, 32, 6, 'spoon')                # KINESIS
+    out += [('egg', imp('cracked_egg.png', 0, 0, 32, 32))] + frames_of('breaking_egg.png', 32, 32, 3, 'eggbreak')
+    out += frames_of('metal_sound_waves.png', 32, 32, 2, 'wave', 'energy')  # SOUND WAVES, TUNE IN
+    out += [('cone', imp('spotlight.png', 0, 0, 64, 64, 'energy')), ('angel', imp('angel.png', 0, 0, 32, 32))]
+    out += frames_of('hit.png', 32, 32, 5, 'hit')                         # BATTLE SPARKS
+    out += frames_of('roots.png', 32, 32, 4, 'root')
+    out += [('spirit', imp('ghostly_spirit.png', 0, 0, 32, 32))]
+    out += frames_of('gust.png', 32, 32, 2, 'gust', 'gray')
+    out += [('whirl', imp('whirlwind.png', 0, 0, 64, 64, 'energy'))]      # AEROBLAST, SILVER WIND
+    out += frames_of('blue_shards.png', 16, 16, 7, 'shard')               # MIRROR SHARDS, ICE SCULPT
+    out += frames_of('eclipsing_orb.png', 32, 32, 4, 'crescent')          # LUNAR DANCE
+    out += [('tendril', imp('tendrils.png', 0, 0, 64, 64))]
+    out += [('halo', imp('circle_of_light.png', 0, 0, 64, 64, 'energy')), ('thinring', imp('thin_ring.png', 0, 0, 64, 64, 'energy'))]
+    out += [('sun', imp('sunlight.png', 0, 0, 32, 32))]
+    out += [('mball', imp('pokeball.png', 0, 0, 16, 16))]                 # BALL BOUNCE
+    out += [('bag', imp('item_bag.png', 0, 0, 32, 32))]
+    out += [('cube', imp('ice_cube_0.png', 0, 0, 64, 64))]                # ICE SCULPT, SNOW GLOBE
+    out += frames_of('hail.png', 16, 16, 1, 'hail')
+
+    # APRICORNS (and APRICORN's fruit): a round fruit with a cap, in Kurt's seven colors
+    for name, col in (('red', R), ('blu', B), ('ylw', Y), ('grn', GR), ('pnk', P), ('wht', W), ('blk', DG)):
+        a = Img(16, 16)
+        a.disc(8, 9.5, 5.6, col)
+        src = [row[:] for row in a.p]
+        for y in range(16):
+            for x in range(16):
+                if src[y][x] == col and (x - 5.5) ** 2 + (y - 7.5) ** 2 > 22:
+                    a.p[y][x] = shade(col, 0.35)
+        a.disc(6, 7, 1.2, W if col != W else LG)
+        a.poly([(7, 4.5), (9, 4.5), (8.6, 2), (7.4, 2)], BR)
+        a.poly([(8.6, 3), (12, 1.5), (11, 4)], GR)
+        a.outline(shade(col, 0.6) if col not in (W,) else G)
+        out.append(('apri' + name, a))
+    # BERRIES: round, with a leafy top
+    for name, col in (('oran', B), ('cheri', R), ('pecha', P), ('sitrus', Y), ('rawst', GR)):
+        a = Img(16, 16)
+        a.ellipse(8, 10, 5, 4.6, col)
+        a.ellipse(10, 11.5, 2.4, 2, shade(col, 0.3))
+        a.set(6, 8, W); a.set(5, 9, W)
+        a.poly([(5, 5.5), (8, 6.5), (11, 5.5), (8, 3.5)], GR)
+        a.outline(shade(col, 0.6))
+        out.append(('berry' + name, a))
+    # UNOWN-like glyphs (8 x 8): a circle with marks, an eye, a hook, a cross, a fork
+    glyphs = [
+        ["..###...", ".#...#..", "#..#..#.", "#.###.#.", "#..#..#.", ".#...#..", "..###...", "........"],
+        ["........", ".#####..", "#.....#.", "#..#..#.", "#.....#.", ".#####..", "........", "........"],
+        ["..#.....", "..#.....", "..#.###.", "..##...#", "..#....#", "..#...#.", "...###..", "........"],
+        ["...#....", "...#....", "#######.", "...#....", "..#.#...", ".#...#..", "#.....#.", "........"],
+        ["#.....#.", ".#...#..", "..#.#...", "...#....", "...#....", "..###...", "...#....", "........"],
+    ]
+    for i, g in enumerate(glyphs):
+        a = Img(8, 8)
+        for y, row in enumerate(g):
+            for x, ch in enumerate(row):
+                if ch == '#':
+                    a.p[y][x] = K
+        a.outline(LG)
+        out.append(('glyph%d' % i, a))
+    # a bug net: a hoop with mesh and a handle
+    net = Img(32, 32)
+    net.ellipse(13, 12, 10, 10, LG)
+    for y in range(32):
+        for x in range(32):
+            if net.p[y][x] == LG and ((x + y) % 3 == 0 or (x - y) % 3 == 0):
+                net.p[y][x] = W
+    net.ring(13, 12, 10.5, BR, 1.6)
+    net.line(20, 20, 30, 30, BR); net.line(21, 20, 31, 30, shade(BR, 0.4))
+    out.append(('net', net))
+    # a ghost sheet: a white sheet with a draped bottom (32 x 40)
+    sheet = Img(32, 40)
+    sheet.ellipse(16, 12, 10, 11, W)
+    sheet.poly([(6, 12), (26, 12), (30, 36), (25, 33), (20, 37), (16, 33), (12, 37), (7, 33), (2, 36)], W)
+    for y in range(40):
+        for x in range(32):
+            if sheet.p[y][x] == W and x > 18 and (x - 18) * 0.1 + y * 0.03 > 1.0:
+                sheet.p[y][x] = LG
+    sheet.outline(G)
+    out.append(('sheet', sheet))
+    # a flat sheet lying on the ground
+    flat = Img(32, 8)
+    flat.ellipse(16, 4, 14, 3, W)
+    flat.ellipse(19, 5, 9, 2, LG)
+    flat.outline(G)
+    out.append(('sheetflat', flat))
+    # PLATE RING's plates: little tiles in the sixteen plates' colors
+    for i, col in enumerate((R, B, Y, GR, C, O, V, BR, P, K, LG, GD, W, E, G, DG)):
+        a = Img(8, 8)
+        a.poly([(1, 1), (7, 1), (7, 7), (1, 7)], col)
+        a.set(2, 2, W if col != W else LG); a.set(3, 2, W if col != W else LG)
+        a.outline(shade(col, 0.6) if col < 16 else ED)
+        out.append(('plate%d' % i, a))
+    # a paper lantern (16 x 16): warm glow inside a red frame
+    lan = Img(16, 16)
+    lan.ellipse(8, 9, 5, 6, O)
+    lan.ellipse(8, 9, 3, 4.5, Y)
+    lan.set(8, 8, W)
+    for y in (5, 9, 13):
+        for x in range(4, 13):
+            if lan.p[y][x]:
+                lan.p[y][x] = R
+    lan.poly([(6, 2), (10, 2), (10, 3.5), (6, 3.5)], DG)
+    lan.poly([(6, 14.5), (10, 14.5), (10, 16), (6, 16)], DG)
+    out.append(('lantern', lan))
+    # a dandelion seed (8 x 8): a fluffy tuft on a stem
+    dan = Img(8, 8)
+    for a_ in range(0, 360, 30):
+        dan.set(4 + 2.4 * math.cos(math.radians(a_)), 2.6 + 2 * math.sin(math.radians(a_)), W)
+    dan.set(4, 3, LG); dan.line(4, 4, 4, 7, LG)
+    out.append(('seedfluff', dan))
+    # a green cross (healing)
+    cr = Img(8, 8)
+    cr.poly([(3, 0.5), (5, 0.5), (5, 7.5), (3, 7.5)], GR); cr.poly([(0.5, 3), (7.5, 3), (7.5, 5), (0.5, 5)], GR)
+    cr.set(3, 1, W); cr.set(1, 3, W)
+    cr.outline(shade(GR, 0.55))
+    out.append(('cross', cr))
+    # a dragon scale glint (8 x 8)
+    sc = Img(8, 8)
+    sc.poly([(4, 0.5), (7.5, 4), (4, 7.5), (0.5, 4)], EL); sc.poly([(4, 2), (6, 4), (4, 6), (2, 4)], E); sc.set(3, 2, W)
+    out.append(('scale', sc))
+    # dig spheres (8 x 8) in five colors
+    for name, col in (('r', R), ('b', B), ('g', GR), ('p', P), ('y', Y)):
+        a = Img(8, 8)
+        a.disc(4, 4, 3.4, col); a.disc(5, 5, 1.6, shade(col, 0.3)); a.set(3, 2, W); a.set(2, 3, shade(col, 0.5, (31, 31, 31)))
+        out.append(('sphere' + name, a))
+    # streamers (16 x 8): a curling ribbon of paper, in six colors
+    for i, col in enumerate((R, B, Y, GR, P, C)):
+        a = Img(16, 8)
+        for x in range(16):
+            y = 4 + 2.6 * math.sin(x * 0.75)
+            a.set(x, y, col); a.set(x, y + 1, shade(col, 0.35))
+        out.append(('streamer%d' % i, a))
+    # a signal arc (16 x 16): quarter rings like a phone's bars
+    sig = Img(16, 16)
+    for r_ in (4, 8, 12):
+        sig.ring(2, 14, r_, E, 1.5)
+    for y in range(16):
+        for x in range(16):
+            if x < 2 or y > 14:
+                sig.p[y][x] = 0
+    out.append(('signal', sig))
+    # a snow globe (48 x 48): a glass dome on a wooden base
+    glb = Img(48, 48)
+    glb.disc(24, 21, 19, rgb(26, 30, 31))
+    glb.ring(24, 21, 19, W, 1.2)
+    glb.ring(24, 21, 17.5, rgb(20, 26, 31), 0.8)
+    glb.poly([(9, 36), (39, 36), (42, 46), (6, 46)], BR)
+    glb.poly([(9, 36), (39, 36), (40, 39), (8, 39)], shade(BR, 0.4, (31, 31, 31)))
+    glb.ellipse(15, 12, 2.2, 4, W)
+    for y in range(48):
+        for x in range(48):
+            if glb.p[y][x] == rgb(26, 30, 31):
+                glb.p[y][x] = 0 if (x + y) % 2 else rgb(26, 30, 31)   # see-through glass: every other pixel
+    out.append(('globe', glb))
+    # a bubble egg shell half (32 x 16) for EGG ROLL's closing shell
+    sh = Img(32, 16)
+    sh.ellipse(16, 16, 13, 14, rgb(31, 30, 24))
+    for x in range(3, 30):
+        sh.set(x, 3 + 2 * ((x // 3) % 2), 0)
+    sh.outline(shade(rgb(31, 30, 24), 0.4))
+    out.append(('shell', sh))
+    # BARRIER's wall of light (24 x 40): a see-through pane with bright edges and a sheen, in the energy color
+    pane = Img(24, 40)
+    for y in range(40):
+        for x in range(24):
+            edge = x in (0, 23) or y in (0, 39)
+            if edge:
+                pane.p[y][x] = W
+            elif x in (1, 22) or y in (1, 38):
+                pane.p[y][x] = EL
+            elif (x + y) % 2 == 0:
+                pane.p[y][x] = EL if abs((x - y * 0.4) - 4) < 2 else E
+    out.append(('pane', pane))
+    # a wing (32 x 16), white with grey tips: FLY AWAY's
+    wg = Img(32, 16)
+    wg.poly([(2, 14), (12, 4), (24, 1), (31, 2), (26, 6), (30, 8), (22, 10), (26, 13), (14, 13)], W)
+    for x in range(14, 31, 4):
+        wg.line(x, 4, x - 4, 12, LG)
+    wg.outline(G)
+    out.append(('wing', wg))
+    return out
+
+
 def recall():
     # for the new recalls: Snore's Z, Ice Beam's ice chunk breaking, a spirit orb (Will-O-Wisp's)
     return frames_of('z.png', 16, 16, 2, 'z') + frames_of('ice_chunk.png', 32, 32, 4, 'chunk') \
@@ -697,7 +903,7 @@ SETS = [
     ('HEARTS', hearts), ('NOTES', notes), ('SNOW', snow), ('FEATHERS', feathers), ('LEAVES', leaves),
     ('STARS', stars), ('RAINBOW', rainbow), ('FIRE', fire), ('WATER', water), ('SAKURA', sakura),
     ('COINS', coins), ('BALLOONS', balloons), ('BUTTERFLIES', butterflies), ('GEMS', gems), ('AURA', aura),
-    ('BITS', bits), ('RECALL', recall), ('CARD', card),
+    ('BITS', bits), ('RECALL', recall), ('CARD', card), ('MORE', more),
 ]
 
 def main():
@@ -726,7 +932,9 @@ def main():
     lines.append('};')
     lines.append('')
     lines.append('enum {\n' + ''.join('    %s,\n' % e for e in enums) + '    FXA_COUNT,\n};\n')
-    lines.append('static const u8 sFxPixels[] = {')
+    wide = len(full) > 256
+    lines.append('typedef %s FxPixel;   // a palette index (u16 once there are more than 256 colors)' % ('u16' if wide else 'u8'))
+    lines.append('static const FxPixel sFxPixels[] = {')
     for k in range(0, len(pixels), 32):
         lines.append('    ' + ','.join(str(v) for v in pixels[k:k + 32]) + ',')
     lines.append('};')
@@ -734,6 +942,33 @@ def main():
     lines.append('struct FxArt { u8 w, h; u32 offset; };')
     lines.append('static const struct FxArt sFxArt[FXA_COUNT] = {')
     lines += table
+    lines.append('};')
+    # the pieces from Platinum's and Black's move animations (ds_pieces.py): their names after the game's own art, the
+    # pack each is in (0 sinnoh/ballfx_platinum.pak, 1 unova/ballfx_black.pak) and its place there, and the stand-in
+    # drawn when the pack isn't there. Nothing of the ROMs is here: the packs are built from them at release time.
+    sys.path.insert(0, HERE)
+    import ds_pieces
+    fxset = set(enums)
+    lines.append('// Pieces from Platinum\'s and Black\'s move animations (tools/moemon_ballfx/ds_pieces.py): art ids from FXA_COUNT')
+    lines.append('enum {\n    FXD_FIRST = FXA_COUNT,')
+    seen = {}
+    for i, (name, key, fb) in enumerate(ds_pieces.PIECES):
+        assert 'FXA_' + fb in fxset, (name, fb)
+        lines.append('    FXD_%s%s,' % (name, ' = FXD_FIRST' if i == 0 else ''))
+    lines.append('    FXD_END,\n};')
+    lines.append('#define FXD_COUNT (FXD_END - FXD_FIRST)')
+    lines.append('static const u16 sDsFallback[FXD_COUNT] = {')
+    lines += ['    FXA_%s,' % fb for name, key, fb in ds_pieces.PIECES]
+    lines.append('};')
+    counters = {'pl': 0, 'bw': 0}
+    where = []
+    for name, key, fb in ds_pieces.PIECES:
+        g = key.split(':')[0]
+        where.append('{%d, %d}' % (0 if g == 'pl' else 1, counters[g]))
+        counters[g] += 1
+    lines.append('static const struct { u8 pack; u8 index; } sDsWhere[FXD_COUNT] = {')
+    for k in range(0, len(where), 10):
+        lines.append('    ' + ', '.join(where[k:k + 10]) + ',')
     lines.append('};')
     with open(OUT, 'w') as f:
         f.write('\n'.join(lines) + '\n')

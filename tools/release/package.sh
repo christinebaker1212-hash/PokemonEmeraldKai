@@ -73,6 +73,10 @@ if [ -f sinnoh/ui_platinum.pak ]; then   # (OPTIONS > DISPLAY > UI STYLE's PLATI
     mkdir -p "$P/sinnoh"
     cp sinnoh/ui_platinum.pak "$P/sinnoh/"
 fi
+if [ -f sinnoh/ballfx_platinum.pak ]; then   # (the ball effects' pieces from Platinum's move animations, the same ROM)
+    mkdir -p "$P/sinnoh"
+    cp sinnoh/ballfx_platinum.pak "$P/sinnoh/"
+fi
 if [ -f sinnoh/platinum_scratch.bin ]; then   # (the BATTLE FRONTIER's Scratch-Off Cards, from the same ROM)
     mkdir -p "$P/sinnoh"
     cp sinnoh/platinum_scratch.bin "$P/sinnoh/"
@@ -98,6 +102,9 @@ if [ -f unova/black3d.pak ] && [ -f unova/black_text.pak ] && [ -f unova/black_s
     fi
     if [ -f unova/ui_black.pak ]; then   # (OPTIONS > DISPLAY > UI STYLE's BLACK: tools/ui_styles/build_pack.py)
         cp unova/ui_black.pak "$P/unova/"
+    fi
+    if [ -f unova/ballfx_black.pak ]; then   # (the ball effects' pieces from Black's move animations: tools/moemon_ballfx)
+        cp unova/ballfx_black.pak "$P/unova/"
     fi
     if [ -f unova/black_musical.pak ]; then   # (Black's MUSICAL props, shows and performers: tools/unova/build_musical.py)
         cp unova/black_musical.pak "$P/unova/"

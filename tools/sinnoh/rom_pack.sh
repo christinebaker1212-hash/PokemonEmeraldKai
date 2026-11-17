@@ -50,3 +50,4 @@ python3 -I "$REPO/tools/sinnoh/build_library_tv.py" "$ROM" "$REPO/sinnoh/platinu
 python3 -I "$REPO/tools/sinnoh/build_scratch.py" "$ROM" "$REPO/sinnoh/platinum_scratch.bin"
 "$REPO/tools/ui_styles/fetch_platinum.sh" "$WORK/pokeplatinum_ui"
 python3 -I "$REPO/tools/ui_styles/build_pack.py" "platinum=$WORK/pokeplatinum_ui:$ROM" "$REPO/sinnoh/ui_platinum.pak"
+python3 -I "$REPO/tools/moemon_ballfx/build_ds_pack.py" platinum "$ROM" "$REPO/sinnoh/ballfx_platinum.pak"   # (the ball effects' pieces from Platinum's move animations and ball seals)

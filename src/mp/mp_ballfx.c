@@ -17,6 +17,8 @@
 // Graphics: tools/moemon_ballfx/gen.py -> mp_ballfx_gfx.h: indexed pixels with one
 // shared palette (the game's own battle animation art keeps its colors), drawn by
 // the effects layer; the "energy" pixels take the chosen energy color.
+#include <stdio.h>
+#include <stdlib.h>
 #include <string.h>
 #include "global.h"
 #include "mp.h"
@@ -38,6 +40,8 @@
 #include "constants/songs.h"
 
 #include "mp_ballfx_gfx.h"
+
+const char *Updater_ExeFile(const char *name);
 
 #define TAG_FX_PAL        0x5F00
 #define TAG_FX_SET(s)     (0x5F10 + (s))
@@ -456,6 +460,7 @@ enum { BLEND_NORMAL, BLEND_ADD, BLEND_GLOW };   // GLOW: adds light on dark pixe
 #define PF_PINGPONG   0x100  // its frames play forward, then back (wings)
 
 #define MAX_PARTS 1024
+#define TINT_ENERGY 0xFFFF
 #define ART_NONE  0xFFFF
 
 struct FxPart
@@ -477,6 +482,8 @@ struct FxPart
     u8 trailEvery;
     u16 trailArt;
     u16 solid;       // nonzero: every pixel this color (a piece of the Moemon itself)
+    u16 tint;        // nonzero: its colors multiplied by this (RGB555; TINT_ENERGY: the energy color) - the DS pieces
+                     // are mostly white shapes the DS colored as it drew them
     u8 underSprite;
     u8 stickSprite;
     u16 scale;       // 256 = 1
@@ -2404,6 +2411,7 @@ static void SandIn(struct FxBody *b, s16 x, s16 y, u16 c)
     p->life = 12 - d;
 }
 
+static void ArtSize(u16 id, u16 *w, u16 *h);
 #include "mp_ballfx_more.inc.c"   // the KANTO / JOHTO / SINNOH achievements' pieces
 
 static void EntranceFrame(struct FxBody *b)
@@ -4953,10 +4961,89 @@ static bool8 MonPixel(u8 spriteId, s16 sx, s16 sy, u16 *color)
 // The effects palette with the game's screen fade applied (once a frame, in MP_BallFx_Composite)
 static u16 sPalNow[FX_PAL_COUNT];
 
+// The pieces from Platinum's and Black's move animations: sinnoh/ballfx_platinum.pak and unova/ballfx_black.pak, built
+// from the user's ROMs at release time (tools/moemon_ballfx/build_ds_pack.py). Without them each piece's stand-in from
+// the game's own art is drawn (sDsFallback); MOEMON_FX_NO_DS=1 shows the stand-ins.
+static u8 *sDsPack[2];
+static u16 sDsCount[2];
+static bool8 sDsTried;
+
+static void DsLoad(void)
+{
+    static const char *const sFiles[2] = {"sinnoh/ballfx_platinum.pak", "unova/ballfx_black.pak"};
+    u8 i;
+    sDsTried = TRUE;
+    if (getenv("MOEMON_FX_NO_DS"))
+        return;
+    for (i = 0; i < 2; i++)
+    {
+        FILE *f = fopen(Updater_ExeFile(sFiles[i]), "rb");
+        long size;
+        if (f == NULL)
+            continue;
+        fseek(f, 0, SEEK_END);
+        size = ftell(f);
+        fseek(f, 0, SEEK_SET);
+        sDsPack[i] = size > 8 ? malloc(size) : NULL;
+        if (sDsPack[i] && (fread(sDsPack[i], 1, size, f) != (size_t)size || memcmp(sDsPack[i], "MFXD", 4) != 0))
+        {
+            free(sDsPack[i]);
+            sDsPack[i] = NULL;
+        }
+        fclose(f);
+        if (sDsPack[i])
+            sDsCount[i] = sDsPack[i][6] | (sDsPack[i][7] << 8);
+        MPNet_Log("ball fx: %s %s", sFiles[i], sDsPack[i] ? "loaded" : "isn't usable");
+    }
+}
+
+// A DS piece's picture: its size, colors and alphas (0-16); FALSE without its pack
+static bool8 DsArt(u16 id, u16 *w, u16 *h, const u16 **col, const u8 **alpha)
+{
+    u8 pack, index;
+    const u8 *e;
+    u32 off;
+    if (!sDsTried)
+        DsLoad();
+    if (id < FXD_FIRST || id >= FXD_END)
+        return FALSE;
+    pack = sDsWhere[id - FXD_FIRST].pack;
+    index = sDsWhere[id - FXD_FIRST].index;
+    if (sDsPack[pack] == NULL || index >= sDsCount[pack])
+        return FALSE;
+    e = sDsPack[pack] + 8 + 8 * index;
+    *w = e[0] | (e[1] << 8);
+    *h = e[2] | (e[3] << 8);
+    off = e[4] | (e[5] << 8) | (e[6] << 16) | ((u32)e[7] << 24);
+    *col = (const u16 *)(sDsPack[pack] + off);
+    *alpha = sDsPack[pack] + off + 2 * *w * *h;
+    return TRUE;
+}
+
+// Its size (a DS piece's, or its stand-in's)
+static void ArtSize(u16 id, u16 *w, u16 *h)
+{
+    const u16 *c;
+    const u8 *a;
+    if (id >= FXD_FIRST && !DsArt(id, w, h, &c, &a))
+        id = id < FXD_END ? sDsFallback[id - FXD_FIRST] : 0;
+    if (id < FXA_COUNT)
+        *w = sFxArt[id].w, *h = sFxArt[id].h;
+}
+
+static inline u16 Mul555(u16 c, u16 t)
+{
+    return ((c & 0x1F) * (t & 0x1F) / 31) | ((((c >> 5) & 0x1F) * ((t >> 5) & 0x1F) / 31) << 5)
+         | ((((c >> 10) & 0x1F) * ((t >> 10) & 0x1F) / 31) << 10);
+}
+
 static void DrawPart(u16 *frame, const struct FxPart *p, s16 cx0, s16 cy0, s16 cx1, s16 cy1)
 {
+    const u16 *dsCol = NULL;
+    const u8 *dsAlpha = NULL;
+    u16 aw = 0, ah = 0, id, tint;
     const struct FxArt *art;
-    const u8 *px;
+    const FxPixel *px;
     u16 energyNow[3];
     u8 alpha = p->alpha;
     s32 sx, sy, cosv, sinv, halfW, halfH, x0, y0, x1, y1, x, y;
@@ -4979,10 +5066,23 @@ static void DrawPart(u16 *frame, const struct FxPart *p, s16 cx0, s16 cy0, s16 c
         else
             fr = f % p->nFrames;
     }
-    if (p->art + fr >= FXA_COUNT)
-        return;
-    art = &sFxArt[p->art + fr];
-    px = sFxPixels + art->offset;
+    id = p->art + fr;
+    if (id >= FXD_FIRST)
+    {
+        if (id >= FXD_END)
+            return;
+        if (!DsArt(id, &aw, &ah, &dsCol, &dsAlpha))
+            id = sDsFallback[id - FXD_FIRST];   // (its stand-in)
+    }
+    if (dsCol == NULL)
+    {
+        if (id >= FXA_COUNT)
+            return;
+        art = &sFxArt[id];
+        px = sFxPixels + art->offset;
+        aw = art->w;
+        ah = art->h;
+    }
 
     // fades
     if (p->fadeIn && p->age < p->fadeIn)
@@ -4996,6 +5096,7 @@ static void DrawPart(u16 *frame, const struct FxPart *p, s16 cx0, s16 cy0, s16 c
     energyNow[0] = Faded(energy);
     energyNow[1] = Faded(MixRgb(energy, RGB_WHITE, 8));
     energyNow[2] = Faded(MixRgb(energy, RGB_BLACK, 8));
+    tint = p->tint == TINT_ENERGY ? energy : p->tint;
 
     sx = p->scale * p->stretchX / 256;
     sy = p->scale * p->stretchY / 256;
@@ -5004,8 +5105,8 @@ static void DrawPart(u16 *frame, const struct FxPart *p, s16 cx0, s16 cy0, s16 c
     cosv = gSineTable[(p->rot + 64) & 0xFF];
     sinv = gSineTable[p->rot & 0xFF];
     // bounding box (rotated)
-    halfW = (art->w * sx / 256) / 2 + 1;
-    halfH = (art->h * sy / 256) / 2 + 1;
+    halfW = (aw * sx / 256) / 2 + 1;
+    halfH = (ah * sy / 256) / 2 + 1;
     if (p->rot)
     {
         s32 m = halfW > halfH ? halfW : halfH;
@@ -5023,8 +5124,9 @@ static void DrawPart(u16 *frame, const struct FxPart *p, s16 cx0, s16 cy0, s16 c
         {
             // back to the art's pixel (nearest)
             s32 dx = (x - px0) * 256 + 128, dy = (y - py0) * 256 + 128, ux, uy;
-            u8 v;
+            u16 v;
             u16 *dst, c;
+            u8 pa;
             if (p->rot)
             {
                 s32 rx = (dx * cosv + dy * sinv) >> 8;
@@ -5032,40 +5134,57 @@ static void DrawPart(u16 *frame, const struct FxPart *p, s16 cx0, s16 cy0, s16 c
                 dx = rx;
                 dy = ry;
             }
-            ux = dx / sx + art->w / 2;
-            uy = dy / sy + art->h / 2;
+            ux = dx / sx + aw / 2;
+            uy = dy / sy + ah / 2;
             if (dx < 0 && dx % sx)
                 ux--;
             if (dy < 0 && dy % sy)
                 uy--;
-            if (ux < 0 || uy < 0 || ux >= art->w || uy >= art->h)
+            if (ux < 0 || uy < 0 || ux >= aw || uy >= ah)
                 continue;
             if (p->flags & PF_FLIPX)
-                ux = art->w - 1 - ux;
-            v = px[uy * art->w + ux];
-            if (v == 0 || v >= FX_PAL_COUNT)
-                continue;
+                ux = aw - 1 - ux;
+            pa = alpha;
+            if (dsCol)
+            {
+                u8 a = dsAlpha[uy * aw + ux];
+                if (a == 0)
+                    continue;
+                pa = alpha * a / 16;
+                if (pa == 0)
+                    continue;
+                c = dsCol[uy * aw + ux];
+                if (tint)
+                    c = Mul555(c, tint);
+                c = Faded(c);
+            }
+            else
+            {
+                v = px[uy * aw + ux];
+                if (v == 0 || v >= FX_PAL_COUNT)
+                    continue;
+                if (p->solid)
+                    c = Faded(p->solid & 0x7FFF);
+                else if (v >= 16 && v <= 18)
+                    c = energyNow[v - 16];
+                else
+                    c = tint ? Faded(Mul555(sFxPalette[v], tint)) : sPalNow[v];
+            }
             if ((p->flags & PF_UNDER) && MonPixel(p->underSprite, x, y, NULL))
                 continue;   // the Moemon stands in front of it
-            if (p->solid)
-                c = Faded(p->solid & 0x7FFF);
-            else if (v >= 16 && v <= 18)
-                c = energyNow[v - 16];
-            else
-                c = sPalNow[v];
             dst = &frame[y * DISPLAY_WIDTH + x];
             if (p->blend == BLEND_ADD)
-                *dst = Add555(*dst, c, alpha) | 0x8000;
+                *dst = Add555(*dst, c, pa) | 0x8000;
             else if (p->blend == BLEND_GLOW)
             {
                 u16 d = *dst;
                 u8 lum = ((d & 0x1F) + ((d >> 5) & 0x1F) + ((d >> 10) & 0x1F)) / 6;   // 0-15
-                *dst = Mix555(Add555(d, c, alpha), Mix555(d, c, alpha), lum + 1) | 0x8000;
+                *dst = Mix555(Add555(d, c, pa), Mix555(d, c, pa), lum + 1) | 0x8000;
             }
-            else if (alpha >= 16)
+            else if (pa >= 16)
                 *dst = c | 0x8000;
             else
-                *dst = Mix555(*dst, c, alpha) | 0x8000;
+                *dst = Mix555(*dst, c, pa) | 0x8000;
         }
     }
 }
