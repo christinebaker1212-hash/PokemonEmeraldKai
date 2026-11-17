@@ -510,12 +510,12 @@ static bool winCheckHorizontalBounds(u16 left, u16 right, u16 xpos)
 
 // Moemon Co-op: BATTLE ANIMS > MODERN (mp_modernanim.c): which OAM entries are a battle animation's effect sprites, and
 // where their pixels go
-extern u8 gMpOamFx[256];
+extern u8 gMpOamFxLive[256];   // (sprite.c: as LoadOam copied the OAM)
 extern u16 *gMpFxLayer;
 static bool sFxSprite;
 // Moemon Kai: MODERN never draws over the battle's UI: the pixels that come from BG0 (the text box and menus) or the
 // battle interface's sprites (gMpOamUi: HP boxes, HP bars, the party's ball bars) are marked in gMpUiLayer
-extern u8 gMpOamUi[256];
+extern u8 gMpOamUiLive[256];
 u8 *gMpUiLayer;
 static bool sUiSprite;
 static u8 sUiPix[4][DISPLAY_WIDTH];
@@ -1012,8 +1012,8 @@ static void DrawSprites(struct scanlineData* scanline, uint16_t vcount, bool win
 
         if (MP_BigSprite_OamClipped(i, (int)vcount))   // Moemon PC: clipped at a line (in water, in the ground; or above it)
             continue;
-        sFxSprite = gMpFxLayer != NULL && gMpOamFx[i];   // Moemon Co-op: a battle animation's effect sprite
-        sUiSprite = gMpUiLayer != NULL && gMpOamUi[i];   // Moemon Kai: the battle's UI (MODERN keeps off it)
+        sFxSprite = gMpFxLayer != NULL && gMpOamFxLive[i];   // Moemon Co-op: a battle animation's effect sprite
+        sUiSprite = gMpUiLayer != NULL && gMpOamUiLive[i];   // Moemon Kai: the battle's UI (MODERN keeps off it)
         sShadowSprite = gMpOamShadowLive[i];   // Moemon Kai: a shadow (mp_shadow.c; as LoadOam copied the OAM)
         sFadeSprite = gMpOamFadeLive[i];       // Moemon Kai: see-through (a SINNOH person fading away)
         if (oam->shape == MP_BIG_OAM_SHAPE)   // Moemon PC: a picture of any size (mp_bigsprite.h)

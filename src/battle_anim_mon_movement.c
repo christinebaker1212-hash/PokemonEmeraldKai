@@ -177,6 +177,12 @@ void AnimTask_ShakeMon2(u8 taskId)
         case ANIM_OPPONENT_LEFT:
             battler = GetBattlerAtPosition(B_POSITION_OPPONENT_LEFT);
             break;
+        case ANIM_PLAYER_CENTER:   // (Moemon Co-op: a Triple's centers)
+            battler = GetBattlerAtPosition(B_POSITION_PLAYER_CENTER);
+            break;
+        case ANIM_OPPONENT_CENTER:
+            battler = GetBattlerAtPosition(B_POSITION_OPPONENT_CENTER);
+            break;
         case ANIM_OPPONENT_RIGHT:
         default:
             battler = GetBattlerAtPosition(B_POSITION_OPPONENT_RIGHT);

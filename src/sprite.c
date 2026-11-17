@@ -556,6 +556,7 @@ u16 gMpOamUnderLive[256];   // ... as the OAM drawn now has them (LoadOam)
 bool8 MP_ModernAnim_IsFxSprite(const struct Sprite *sprite);
 bool8 MP_ModernAnim_IsUiSprite(const struct Sprite *sprite);
 u8 gMpOamUi[256];   // Moemon Kai: per OAM entry: the battle's UI (MODERN keeps off it: gba_easy_draw.c gMpUiLayer)
+u8 gMpOamFxLive[256], gMpOamUiLive[256];   // ... both as the OAM drawn now has them (LoadOam)
 
 void AddSpritesToOamBuffer(void)
 {
@@ -563,11 +564,8 @@ void AddSpritesToOamBuffer(void)
     u16 oamIndex = 0;   // Moemon PC: up to 256 entries (an 8-bit index never reached the slot machine's limit)
 
     MP_BigSprite_BeginOam();
-    if (gMpFxLayer != NULL)
-    {
-        memset(gMpOamFx, 0, sizeof(gMpOamFx));
-        memset(gMpOamUi, 0, sizeof(gMpOamUi));
-    }
+    memset(gMpOamFx, 0, sizeof(gMpOamFx));   // (always: a list left from the last animation marked whatever came
+    memset(gMpOamUi, 0, sizeof(gMpOamUi));   //  to stand in its entries)
     u16 spriteFirst[MAX_SPRITES], spriteEnd[MAX_SPRITES];
     bool8 anyUnder = FALSE;
 
@@ -784,6 +782,11 @@ void LoadOam(void)
         memcpy(gMpOamShadowLive, gMpOamShadow, sizeof(gMpOamShadowLive));
         memcpy(gMpOamFadeLive, gMpOamFade, sizeof(gMpOamFadeLive));
         memcpy(gMpOamUnderLive, gMpOamUnder, sizeof(gMpOamUnderLive));
+        // Moemon Co-op: and which are a battle animation's effects / the battle's UI (BATTLE ANIMS > MODERN): the list
+        // is built a frame before the OAM it describes is drawn, so marked as it was built, a sprite created or gone
+        // shifted the entries and a POKeMON drawn in an effect's entry glowed with it
+        memcpy(gMpOamFxLive, gMpOamFx, sizeof(gMpOamFxLive));
+        memcpy(gMpOamUiLive, gMpOamUi, sizeof(gMpOamUiLive));
     }
 }
 

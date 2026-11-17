@@ -214,6 +214,13 @@ void DoMoveAnim(u16 move)
 void MP_ModernAnim_Begin(const u8 *const table[], u16 id);
 void MP_ModernAnim_OnSprite(const struct SpriteTemplate *template);
 void MP_ModernAnim_OnTask(TaskFunc func);
+static void MpRunAnimTask(TaskFunc taskFunc, u8 taskPriority, u8 taskId, u8 numArgs);
+void AnimTask_ShakeMon(u8 taskId);
+void AnimTask_ShakeMon2(u8 taskId);
+void AnimTask_ShakeMonInPlace(u8 taskId);
+void AnimTask_ShakeAndSinkMon(u8 taskId);
+void AnimTask_BlendMonInAndOut(u8 taskId);
+void AnimTask_SetGrayscaleOrOriginalPal(u8 taskId);
 void MP_ModernAnim_OnSound(s8 pan);
 
 void LaunchBattleAnimation(const u8 *const animsTable[], u16 tableId, bool8 isMoveAnim)
@@ -477,8 +484,61 @@ static void Cmd_createvisualtask(void)
 
     MP_ModernAnim_OnTask(taskFunc);   // Moemon Co-op: the target shaken is a hit (BATTLE ANIMS > MODERN)
     taskId = CreateTask(taskFunc, taskPriority);
+    MpRunAnimTask(taskFunc, taskPriority, taskId, numArgs);
+}
+
+// Moemon Co-op: a Triple Battle's sides are three, and the scripts name two of each: a shake or flash of the
+// target's (the user's) partner runs again for the third ally, one of every Pokemon by position again for the
+// centers (SELF-DESTRUCT's shakes, PERISH SONG's grey), so a spread move's center is shaken as the others are
+static bool8 MpAnimTaskTakesBattler(TaskFunc func)
+{
+    return func == AnimTask_ShakeMon || func == AnimTask_ShakeMon2 || func == AnimTask_ShakeMonInPlace
+        || func == AnimTask_ShakeAndSinkMon || func == AnimTask_BlendMonInAndOut
+        || func == AnimTask_SetGrayscaleOrOriginalPal;
+}
+
+static void MpRunAnimTask(TaskFunc taskFunc, u8 taskPriority, u8 taskId, u8 numArgs)
+{
+    s16 args[ANIM_ARGS_COUNT];
+    s16 again = -1;
+    u8 i;
+
+    for (i = 0; i < ANIM_ARGS_COUNT; i++)
+        args[i] = gBattleAnimArgs[i];
     taskFunc(taskId);
     gAnimVisualTaskCount++;
+    if (IsContest() || !IS_TRIPLE_BATTLE() || numArgs == 0 || !MpAnimTaskTakesBattler(taskFunc))
+        return;
+    switch (args[0])
+    {
+    case ANIM_ATK_PARTNER:
+        if (MP_AnimThirdAlly(gBattleAnimAttacker) < MAX_BATTLERS_COUNT)
+            again = ANIM_ATK_PARTNER;
+        break;
+    case ANIM_DEF_PARTNER:
+        if (MP_AnimThirdAlly(gBattleAnimTarget) < MAX_BATTLERS_COUNT)
+            again = ANIM_DEF_PARTNER;
+        break;
+    case ANIM_PLAYER_RIGHT:
+        if (taskFunc == AnimTask_ShakeMon2 || taskFunc == AnimTask_SetGrayscaleOrOriginalPal)
+            again = ANIM_PLAYER_CENTER;
+        break;
+    case ANIM_OPPONENT_RIGHT:
+        if (taskFunc == AnimTask_ShakeMon2 || taskFunc == AnimTask_SetGrayscaleOrOriginalPal)
+            again = ANIM_OPPONENT_CENTER;
+        break;
+    }
+    if (again < 0)
+        return;
+    for (i = 0; i < ANIM_ARGS_COUNT; i++)
+        gBattleAnimArgs[i] = args[i];
+    gBattleAnimArgs[0] = again;
+    gMpAnimThirdPass = again == ANIM_ATK_PARTNER || again == ANIM_DEF_PARTNER;
+    MP_ModernAnim_OnTask(taskFunc);
+    i = CreateTask(taskFunc, taskPriority);
+    taskFunc(i);
+    gAnimVisualTaskCount++;
+    gMpAnimThirdPass = FALSE;
 }
 
 static void Cmd_delay(void)

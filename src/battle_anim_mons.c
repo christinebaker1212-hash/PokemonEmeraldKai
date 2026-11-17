@@ -422,18 +422,42 @@ u8 GetAnimBattlerSpriteId(u8 animBattler)
     }
     else if (animBattler == ANIM_ATK_PARTNER)
     {
-        if (!IsBattlerSpriteVisible(BATTLE_PARTNER(gBattleAnimAttacker)))
+        u8 partner = MP_AnimPartner(gBattleAnimAttacker);   // (Moemon Co-op: a Triple's third ally on its own pass)
+        if (partner >= MAX_BATTLERS_COUNT || !IsBattlerSpriteVisible(partner))
             return SPRITE_NONE;
         else
-            return gBattlerSpriteIds[BATTLE_PARTNER(gBattleAnimAttacker)];
+            return gBattlerSpriteIds[partner];
     }
     else
     {
-        if (IsBattlerSpriteVisible(BATTLE_PARTNER(gBattleAnimTarget)))
-            return gBattlerSpriteIds[BATTLE_PARTNER(gBattleAnimTarget)];
+        u8 partner = MP_AnimPartner(gBattleAnimTarget);
+        if (partner < MAX_BATTLERS_COUNT && IsBattlerSpriteVisible(partner))
+            return gBattlerSpriteIds[partner];
         else
             return SPRITE_NONE;
     }
+}
+
+// Moemon Co-op: in a Triple Battle a battler has two allies, and the scripts name only one (ANIM_ATK_PARTNER /
+// ANIM_DEF_PARTNER: BATTLE_PARTNER). The other, MAX_BATTLERS_COUNT outside a Triple: a spread move hits it too, so
+// battle_anim.c runs a partner's shake or flash again for it, with gMpAnimThirdPass set (MP_AnimPartner gives it then)
+u8 gMpAnimThirdPass;
+
+u8 MP_AnimThirdAlly(u8 battler)
+{
+    u8 b, partner;
+    if (IsContest() || !IS_TRIPLE_BATTLE() || battler >= MAX_BATTLERS_COUNT)
+        return MAX_BATTLERS_COUNT;
+    partner = BATTLE_PARTNER(battler);
+    for (b = 0; b < gBattlersCount; b++)
+        if (b != battler && b != partner && GetBattlerSide(b) == GetBattlerSide(battler))
+            return b;
+    return MAX_BATTLERS_COUNT;
+}
+
+u8 MP_AnimPartner(u8 battler)
+{
+    return gMpAnimThirdPass ? MP_AnimThirdAlly(battler) : BATTLE_PARTNER(battler);
 }
 
 void StoreSpriteCallbackInData6(struct Sprite *sprite, void (*callback)(struct Sprite *))
@@ -1455,19 +1479,25 @@ u32 GetBattlePalettesMask(bool8 battleBackground, bool8 attacker, bool8 target, 
     }
     if (attackerPartner)
     {
+        u8 third = MP_AnimThirdAlly(gBattleAnimAttacker);   // (Moemon Co-op: a Triple's side is three)
         if (IsBattlerSpriteVisible(BATTLE_PARTNER(gBattleAnimAttacker)))
         {
             shift = BATTLE_PARTNER(gBattleAnimAttacker) + 16;
             selectedPalettes |= 1 << shift;
         }
+        if (third < MAX_BATTLERS_COUNT && IsBattlerSpriteVisible(third))
+            selectedPalettes |= 1 << (third + 16);
     }
     if (targetPartner)
     {
+        u8 third = MP_AnimThirdAlly(gBattleAnimTarget);
         if (IsBattlerSpriteVisible(BATTLE_PARTNER(gBattleAnimTarget)))
         {
             shift = BATTLE_PARTNER(gBattleAnimTarget) + 16;
             selectedPalettes |= 1 << shift;
         }
+        if (third < MAX_BATTLERS_COUNT && IsBattlerSpriteVisible(third))
+            selectedPalettes |= 1 << (third + 16);
     }
     if (anim1)
     {

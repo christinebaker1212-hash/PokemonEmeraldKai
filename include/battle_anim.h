@@ -183,6 +183,9 @@ u8 GetBattlerSpriteCoord(u8 battler, u8 coordType);
 bool8 IsBattlerSpritePresent(u8 battler);
 void ClearBattleAnimBg(u32 bgId);
 u8 GetAnimBattlerSpriteId(u8 animBattler);
+extern u8 gMpAnimThirdPass;         // Moemon Co-op: a Triple's third ally (battle_anim_mons.c)
+u8 MP_AnimThirdAlly(u8 battler);
+u8 MP_AnimPartner(u8 battler);
 bool8 IsDoubleBattle(void);
 u8 GetBattleBgPaletteNum(void);
 // Moemon Co-op: the positions whose Pokemon a battle animation moves to BG2 (the others to BG1). A Triple's center

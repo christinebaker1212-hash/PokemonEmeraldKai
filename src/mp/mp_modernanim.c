@@ -614,15 +614,27 @@ bool8 MP_ModernAnim_On(void)
     return sEnv == 2 ? gMpConfig.battleAnims != 0 : sEnv;
 }
 
-static u8 BattlerFor(u8 which)
+// The battler a task's argument names (MAX_BATTLERS_COUNT: none on the field)
+static u8 BattlerFor(s16 which)
 {
+    u8 b;
     switch (which)
     {
-    case ANIM_ATTACKER:    return gBattleAnimAttacker;
-    case ANIM_ATK_PARTNER: return IsContest() ? gBattleAnimAttacker : BATTLE_PARTNER(gBattleAnimAttacker);
-    case ANIM_DEF_PARTNER: return IsContest() ? gBattleAnimTarget : BATTLE_PARTNER(gBattleAnimTarget);
-    default:               return gBattleAnimTarget;
+    case ANIM_ATTACKER:
+    case ANIM_ATTACKER_FORCE:  return gBattleAnimAttacker;
+    case ANIM_TARGET:          return gBattleAnimTarget;
+    case ANIM_ATK_PARTNER:     b = IsContest() ? gBattleAnimAttacker : MP_AnimPartner(gBattleAnimAttacker); break;
+    case ANIM_DEF_PARTNER:     b = IsContest() ? gBattleAnimTarget : MP_AnimPartner(gBattleAnimTarget); break;
+    // (SELF-DESTRUCT and EXPLOSION shake every one by its place; battle_anim.c adds a Triple's centers)
+    case ANIM_PLAYER_LEFT:     b = GetBattlerAtPosition(B_POSITION_PLAYER_LEFT); break;
+    case ANIM_PLAYER_RIGHT:    b = GetBattlerAtPosition(B_POSITION_PLAYER_RIGHT); break;
+    case ANIM_OPPONENT_LEFT:   b = GetBattlerAtPosition(B_POSITION_OPPONENT_LEFT); break;
+    case ANIM_OPPONENT_RIGHT:  b = GetBattlerAtPosition(B_POSITION_OPPONENT_RIGHT); break;
+    case ANIM_PLAYER_CENTER:   b = GetBattlerAtPosition(B_POSITION_PLAYER_CENTER); break;
+    case ANIM_OPPONENT_CENTER: b = GetBattlerAtPosition(B_POSITION_OPPONENT_CENTER); break;
+    default:                   return MAX_BATTLERS_COUNT;   // (not a battler: no burst on someone the move missed)
     }
+    return b < MAX_BATTLERS_COUNT && IsBattlerSpriteVisible(b) ? b : MAX_BATTLERS_COUNT;
 }
 
 // MOEMON_MODERN_AUDIT: one line per animation (docs/MODERN_ANIMS.md, tools/moemon_modernanim)
@@ -1644,10 +1656,15 @@ void MP_ModernAnim_OnTask(TaskFunc func)
 {
     if (sM.kind == KIND_NONE)
         return;
-    if ((func == AnimTask_ShakeMon || func == AnimTask_ShakeMon2 || func == AnimTask_ShakeMonInPlace
-      || func == AnimTask_ShakeAndSinkMon)
-     && gBattleAnimArgs[0] != ANIM_ATTACKER && gBattleAnimArgs[0] != ANIM_ATK_PARTNER)
-        BurstOn(HIT_SHAKE, BattlerFor(gBattleAnimArgs[0]), 0, 0);
+    if (func == AnimTask_ShakeMon || func == AnimTask_ShakeMon2 || func == AnimTask_ShakeMonInPlace
+     || func == AnimTask_ShakeAndSinkMon)
+    {
+        // (the user shaking itself, or its side's own, is no blow landing)
+        u8 b = BattlerFor(gBattleAnimArgs[0]);
+        if (b < MAX_BATTLERS_COUNT && b != sM.attacker && gBattleAnimArgs[0] != ANIM_ATTACKER
+         && gBattleAnimArgs[0] != ANIM_ATK_PARTNER && gBattleAnimArgs[0] != ANIM_ATTACKER_FORCE)
+            BurstOn(HIT_SHAKE, b, 0, 0);
+    }
     else if (func == AnimTask_ShakeTargetBasedOnMovePowerOrDmg || func == AnimTask_ShakeTargetInPattern)
         BurstOn(HIT_SHAKE, sM.target, 0, 0);
     else if (func == AnimTask_HorizontalShake && !sM.quaked)

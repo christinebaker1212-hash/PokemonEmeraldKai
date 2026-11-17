@@ -309,6 +309,9 @@
 #define ANIM_OPPONENT_LEFT    (MAX_BATTLERS_COUNT + 2)
 #define ANIM_OPPONENT_RIGHT   (MAX_BATTLERS_COUNT + 3)
 #define ANIM_ATTACKER_FORCE   (MAX_BATTLERS_COUNT + 4)
+// Moemon Co-op: a Triple Battle's centers (battle_anim.c runs an ..._RIGHT command again for them: scripts never name them)
+#define ANIM_PLAYER_CENTER    (MAX_BATTLERS_COUNT + 5)
+#define ANIM_OPPONENT_CENTER  (MAX_BATTLERS_COUNT + 6)
 
 // stereo panning constants [0-255]
 //

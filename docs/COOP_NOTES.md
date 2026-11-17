@@ -8097,3 +8097,30 @@ each game's foes are the other side). It changes looks only. **Black's Triple Ba
   each line past the two. No timed scrolling and no joining of lines that fit (the user turned both down).
 - KANTO / JOHTO mats: field_player_avatar.c HideShowWarpArrow shows no arrow on the warp tiles beside a one-tile mat
   (MP_ArrowWarpIsMatEdge, the check that already stopped them leaving). Test kanto_mat_arrow.
+
+## MODERN's glows on the right Pokémon; a Triple's third and center Pokémon in animations (1.203.2)
+
+The user (2026-11-17): MODERN's glows played on Pokémon the move had nothing to do with (THUNDERBOLT in Doubles and
+Triples; the foe's confusion in a Single Battle lit up the player's own), and a Triple's middle Pokémon wasn't seen to
+be hit by moves that hit them all.
+- The glows: sprite.c AddSpritesToOamBuffer marks which OAM entries are an animation's effect (gMpOamFx) and the
+  battle UI (gMpOamUi) as it builds the list, but the frame drawn after it is the OAM LoadOam copied the frame before.
+  So whenever a sprite came or went (THUNDERBOLT makes dozens) the marks were a frame ahead and fell on whatever
+  stood in those entries, a POKéMON too, which then glowed and left a trail. LoadOam now copies them as
+  gMpOamFxLive / gMpOamUiLive with the OAM (as the shadows' and fades' were in 1.63.11), and the renderer reads those;
+  the marks are cleared every frame, not only while MODERN draws (old marks from the last animation were read at
+  the next one's start). Checked against the old build: the foe's confusion no longer touches the player's POKéMON,
+  THUNDERBOLT no longer lights three others in a Triple.
+- MODERN's bursts follow the battler a shake names (mp_modernanim.c BattlerFor: the partner a Triple's pass means,
+  the places SELF-DESTRUCT names; nothing for an argument that isn't a battler, where it used to fall on the target).
+- A Triple's third ally (Classic and MODERN alike; the frame count is unchanged, tests anim_classic / anim_modern):
+  the scripts name only the target's (the user's) partner, so a spread move shook and flashed two of the three.
+  battle_anim.c MpRunAnimTask runs AnimTask_ShakeMon / ShakeMon2 / ShakeMonInPlace / ShakeAndSinkMon /
+  BlendMonInAndOut on ANIM_DEF_PARTNER / ANIM_ATK_PARTNER again for the third with gMpAnimThirdPass set
+  (battle_anim_mons.c MP_AnimPartner gives it then; MP_AnimThirdAlly), and ShakeMon2 / SetGrayscaleOrOriginalPal on
+  ANIM_PLAYER_RIGHT / ANIM_OPPONENT_RIGHT again for the centers (ANIM_PLAYER_CENTER / ANIM_OPPONENT_CENTER:
+  SELF-DESTRUCT's and EXPLOSION's shakes, PERISH SONG's grey). GetBattlePalettesMask's partner sides take the third
+  ally (F_PAL_DEF_SIDE / ATK_SIDE flashes). monbg still moves two (there are two BGs); the third stays a sprite.
+- Nothing was found that hides a center outright: sweeps of SWIFT, SURF, EARTHQUAKE, THUNDERBOLT, PSYCHIC, PSYBEAM, ICE
+  BEAM, SLUDGE BOMB, SHADOW BALL, CRUNCH, GIGA DRAIN, FLAMETHROWER, BUBBLEBEAM and others, at a flank and at the
+  center, from both sides, show only the game's hit blinks. `mp foebmove MOVE` gives every foe only MOVE (tests).

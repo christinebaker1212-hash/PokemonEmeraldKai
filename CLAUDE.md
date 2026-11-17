@@ -595,6 +595,9 @@ Gotchas worth knowing before touching battles:
   shadows, Cmd_monbg) breaks for them, often by touching sprite 0 = battler 0's healthbox. Use BATTLE_PARTNER.
   Battle animations put a Pokémon and its partner on BG1 / BG2 by position: use MP_BG2_POSITION (battle_anim.h), which
   sends the centers opposite their partners (they used to share BG2 with 0 / 1 and one vanished; test tri_anim_center).
+  The animation scripts name two of a side (ANIM_*_PARTNER, ANIM_PLAYER_ / OPPONENT_LEFT / RIGHT): battle_anim.c
+  MpRunAnimTask runs a partner's or a _RIGHT one's shake / flash again for a Triple's third ally / center, and
+  palette masks take the third ally (battle_anim_mons.c MP_AnimThirdAlly / MP_AnimPartner; COOP_NOTES 1.203.2).
 - Bump MP_PROTOCOL_VERSION (src/mp/mp_net.h) on any protocol change; tools/test rebuilds the server from it.
 - Sprite palettes 16-63 have no bit in a palette mask (`1 << (16 + n)`): fade one sprite's palette by slot with
   MP_BlendSpritePalette / MP_BeginSpritePaletteFade. Ball and co-op palettes live there (see COOP_NOTES, graphics).

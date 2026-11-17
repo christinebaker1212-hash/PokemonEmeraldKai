@@ -969,6 +969,14 @@ void AnimTask_SetGrayscaleOrOriginalPal(u8 taskId)
         position = B_POSITION_OPPONENT_RIGHT;
         calcSpriteId = TRUE;
         break;
+    case ANIM_PLAYER_CENTER:   // (Moemon Co-op: a Triple's centers)
+        position = B_POSITION_PLAYER_CENTER;
+        calcSpriteId = TRUE;
+        break;
+    case ANIM_OPPONENT_CENTER:
+        position = B_POSITION_OPPONENT_CENTER;
+        calcSpriteId = TRUE;
+        break;
     default:
         spriteId = SPRITE_NONE;
         break;

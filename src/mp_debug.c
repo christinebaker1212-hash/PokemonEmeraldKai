@@ -3669,6 +3669,20 @@ void MP_TestCommand(const char *cmd, const char *arg)
                 }
         printf("[test] bmove: %d\n", move);
     }
+    else if (strcmp(cmd, "foebmove") == 0)
+    {
+        // mp foebmove MOVE: in a battle, every foe battler knows only MOVE (tests of what the foes' moves look like)
+        int move = atoi(arg), b, i;
+        if (gMain.inBattle && move > 0 && move < MOVES_COUNT)
+            for (b = 0; b < gBattlersCount; b++)
+                if (GetBattlerSide(b) == B_SIDE_OPPONENT)
+                    for (i = 0; i < MAX_MON_MOVES; i++)
+                    {
+                        gBattleMons[b].moves[i] = i == 0 ? move : MOVE_NONE;
+                        gBattleMons[b].pp[i] = i == 0 ? gBattleMoves[move].pp : 0;
+                    }
+        printf("[test] foebmove: %d\n", move);
+    }
     else if (strcmp(cmd, "setmove") == 0)
     {
         // mp setmove SLOT INDEX MOVE: sets one of a party Pokémon's four moves (INDEX 0-3)
