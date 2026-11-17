@@ -801,7 +801,7 @@ class GBPack:
                     for x, v in enumerate(r):
                         if v < 3:
                             im.putpixel((x, y), cols[v] + (255,))
-                k = p.image('gbicon.%d.%d' % (i, f), im)
+                k = p.image('gbicon.%d.%d' % (i, f), center_icon(im))
                 base = k if base is None else base
                 assert k == base + 2 * i + f
         default = names.index('ICON_MON' if self.red else 'ICON_MONSTER')
@@ -814,7 +814,7 @@ class GBPack:
             ext = None
             for i, pair in enumerate(cc):
                 for f, im in enumerate(pair):
-                    k = p.image('ccicon.%d.%d' % (i, f), im)
+                    k = p.image('ccicon.%d.%d' % (i, f), center_icon(im))
                     ext = k if ext is None else ext
                     assert k == ext + 2 * i + f
             species = gb_icons._pokeapi()
@@ -839,6 +839,21 @@ class GBPack:
         if not self.red:
             self.p.spec(words_spec(self.p, 'start', ACCOUNT))
         return self.p
+
+
+def center_icon(im):
+    """a party icon's frame with what it shows centred across its 16 pixels: the games' two frames sit a pixel apart
+    sideways now and then (Crystal's fox steps left), which read as the icons drifting (the user, 2026-11-17); the
+    hop up and down stays"""
+    box = im.getchannel('A').getbbox()
+    if not box:
+        return im
+    dx = (im.width - (box[2] - box[0])) // 2 - box[0]
+    if dx == 0:
+        return im
+    out = Image.new('RGBA', im.size, (0, 0, 0, 0))
+    out.paste(im, (dx, 0))
+    return out
 
 
 def words_spec(p, menu, lines):
