@@ -131,6 +131,10 @@ enum
     OPT_THEME,        // Moemon Co-op: DISPLAY > THEME DEFAULT / DARK (every window's colors: mp_darktheme.c)
     OPT_UISTYLE,      // Moemon Kai: DISPLAY > UI STYLE KAI / RED / CRYSTAL / FIRERED / PLATINUM / BLACK (mp_uistyle.c)
     OPT_WHITEBG,      // Moemon Kai: DISPLAY > WHITE BG ON / OFF, RED's and CRYSTAL's battle boxes on white or clear
+    OPT_GB,           // Moemon Kai: DISPLAY > GB OPTIONS (RED / CRYSTAL; A: its page, MP_GB_*)
+    OPT_GB_SCENERY,   // its BATTLE SCENERY: the battle intro's grass / water / cave strips
+    OPT_GB_CAUGHT,    // its CAUGHT MARK (RED)
+    OPT_GB_BACK,
     OPT_MENUMONS,     // Moemon Kai: DISPLAY > MENU POKeMON ORIGINAL (/ EXTENDED) / KAI: RED's and CRYSTAL's party icons
     OPT_CLOSE,
 };
@@ -147,6 +151,7 @@ static EWRAM_DATA bool8 sScalePage = 0;    // GAME > LEVEL SCALING's page
 static EWRAM_DATA bool8 sFightPage = 0;    // CONTROLS > FIGHT BUTTONS' page
 static EWRAM_DATA bool8 sSpritePage = 0;   // DISPLAY > SPRITE SCALING's page
 static EWRAM_DATA bool8 sStadiumPage = 0;  // BATTLE > STADIUM SETTINGS' page
+static EWRAM_DATA bool8 sGbPage = 0;       // DISPLAY > GB OPTIONS' page (RED / CRYSTAL)
 static EWRAM_DATA u8 sFightQuiet = 0;      // frames of no input after a fight button was chosen
 static EWRAM_DATA u8 sCoopCursor = 0;      // where the CO-OP tab's cursor was before a friend's page
 static EWRAM_DATA u8 sArrowTask = 0;
@@ -303,6 +308,9 @@ static const u8 sText_Shadows[] = _("SHADOWS");
 static const u8 sText_Theme[] = _("THEME");
 static const u8 sText_WhiteBg[] = _("WHITE BG");
 static const u8 sText_MenuMons[] = _("MENU POKéMON");
+static const u8 sText_GbOptions[] = _("GB OPTIONS");
+static const u8 sText_GbScenery[] = _("BATTLE SCENERY");
+static const u8 sText_GbCaught[] = _("CAUGHT MARK");
 static const u8 sText_MenuMonsOriginal[] = _("ORIGINAL");
 static const u8 sText_MenuMonsExtended[] = _("EXTENDED");
 static const u8 sText_MenuMonsKai[] = _("KAI");
@@ -455,6 +463,16 @@ static void BuildRows(void)
             AddRow(i, 0);
         return;
     }
+    if (sGbPage)
+    {
+        AddRow(OPT_GB_SCENERY, 0);
+        if (gMpConfig.uiStyle == UISTYLE_RED)
+            AddRow(OPT_GB_CAUGHT, 0);   // (CRYSTAL always shows it, as Crystal did)
+        AddRow(OPT_WHITEBG, 0);
+        AddRow(OPT_MENUMONS, 0);
+        AddRow(OPT_GB_BACK, 0);
+        return;
+    }
     if (sStadiumPage)
     {
         AddRow(OPT_ST_STYLE, 0);
@@ -536,10 +554,7 @@ static void BuildRows(void)
         AddRow(OPT_THEME, 0);
         AddRow(OPT_UISTYLE, 0);
         if (gMpConfig.uiStyle == UISTYLE_RED || gMpConfig.uiStyle == UISTYLE_CRYSTAL)
-        {
-            AddRow(OPT_WHITEBG, 0);   // (the Game Boy styles' own)
-            AddRow(OPT_MENUMONS, 0);
-        }
+            AddRow(OPT_GB, 0);   // (the Game Boy styles' own: WHITE BG, MENU POKeMON... on its page)
         break;
     case TAB_CONTROLS:
         AddRow(OPT_PADSELECT, 0);
@@ -570,6 +585,9 @@ static void BuildRows(void)
 // Values
 
 // MENU POKéMON's EXTENDED: CRYSTAL's, once its pack has Crystal Clear's icons
+// GB OPTIONS: the style chosen's own (RED's or CRYSTAL's: gMpConfig.gbOptions)
+#define GbOptions() (gMpConfig.gbOptions[gMpConfig.uiStyle == UISTYLE_CRYSTAL ? 1 : 0])
+
 static bool8 MenuMonsExtended(void)
 {
     return gMpConfig.uiStyle == UISTYLE_CRYSTAL && MP_UiStyle_HasIconSet(UISTYLE_CRYSTAL, 1);
@@ -623,7 +641,7 @@ static u8 Choices(u8 row, const u8 **names, u8 *buf)
         return 3;
     case OPT_TYPEICONS: case OPT_FULLSCREEN: case OPT_VSYNC: case OPT_ANALOGRUN: case OPT_RUMBLE: case OPT_SPECPANEL:
     case OPT_FR_SHOW: case OPT_BIKEMUSIC: case OPT_SURFMUSIC: case OPT_INSTANTTEXT: case OPT_CARDSCALE: case OPT_SHADOWS: case OPT_CARDTITLE: case OPT_BGMUTE:
-    case OPT_WHITEBG:
+    case OPT_WHITEBG: case OPT_GB_SCENERY: case OPT_GB_CAUGHT:
         names[0] = sText_Off, names[1] = sText_On;
         return 2;
     case OPT_ANNOUNCER:
@@ -943,6 +961,9 @@ static u8 Current(u8 row)
     case OPT_THEME:       return gMpConfig.menuTheme % MP_MENU_THEME_COUNT;
     case OPT_UISTYLE:     return gMpConfig.uiStyle % UISTYLE_COUNT;
     case OPT_WHITEBG:     return !gMpConfig.uiNoWhiteBg;
+    case OPT_GB:          return 0;
+    case OPT_GB_SCENERY:  return (GbOptions() & MP_GB_SCENERY) != 0;
+    case OPT_GB_CAUGHT:   return (GbOptions() & MP_GB_CAUGHT) != 0;
     case OPT_MENUMONS:
         if (MenuMonsExtended())
             return gMpConfig.uiMenuMons % MP_MENU_MONS_COUNT;
@@ -1080,6 +1101,12 @@ static void Change(u8 row, int dir)
         else
             gMpConfig.uiMenuMons = gMpConfig.uiMenuMons == MP_MENU_MONS_KAI ? MP_MENU_MONS_ORIGINAL : MP_MENU_MONS_KAI;
         MPNet_Log("menu pokemon: %d", gMpConfig.uiMenuMons);
+        break;
+    case OPT_GB:          break;   // A opens its page
+    case OPT_GB_SCENERY:
+    case OPT_GB_CAUGHT:
+        GbOptions() ^= sRows[row].opt == OPT_GB_SCENERY ? MP_GB_SCENERY : MP_GB_CAUGHT;
+        MPNet_Log("gb options: %s %x", gMpConfig.uiStyle == UISTYLE_RED ? "red" : "crystal", GbOptions());
         break;
     case OPT_WHITEBG:
         gMpConfig.uiNoWhiteBg = !gMpConfig.uiNoWhiteBg;
@@ -1225,6 +1252,10 @@ static const u8 *RowLabel(u8 row, u8 *buf)
     case OPT_UISTYLE: return sText_UiStyle;
     case OPT_WHITEBG: return sText_WhiteBg;
     case OPT_MENUMONS: return sText_MenuMons;
+    case OPT_GB:       return sText_GbOptions;
+    case OPT_GB_SCENERY: return sText_GbScenery;
+    case OPT_GB_CAUGHT: return sText_GbCaught;
+    case OPT_GB_BACK:  return sText_Back;
     case OPT_BGMUTE:  return sText_BgMute;
     case OPT_ANNOUNCER: return sText_Announcer;
     case OPT_BADGEFADE:   return sText_BadgeFade;
@@ -1431,6 +1462,14 @@ static bool8 HintText(u8 *buf)
         };
         snprintf(ascii, sizeof(ascii), "%s", sDesc[gMpConfig.uiStyle % UISTYLE_COUNT]);
     }
+    else if (opt == OPT_GB)
+        snprintf(ascii, sizeof(ascii), "A: %s'S OWN WAYS, AS ON THE GAME BOY", gMpConfig.uiStyle == UISTYLE_RED ? "RED" : "CRYSTAL");
+    else if (opt == OPT_GB_SCENERY)
+        snprintf(ascii, sizeof(ascii), "%s", (GbOptions() & MP_GB_SCENERY) ? "GRASS, WATER OR CAVE SLIDES IN AS BATTLES OPEN"
+                                                                            : "BATTLES OPEN WITH NO GRASS, WATER OR CAVE");
+    else if (opt == OPT_GB_CAUGHT)
+        snprintf(ascii, sizeof(ascii), "%s", (GbOptions() & MP_GB_CAUGHT) ? "A BALL BY A WILD POKEMON YOU HAVE CAUGHT"
+                                                                           : "NO CAUGHT MARK, AS IN RED");
     else if (opt == OPT_MENUMONS)
         snprintf(ascii, sizeof(ascii), "%s", gMpConfig.uiMenuMons == MP_MENU_MONS_KAI ? "THE PARTY'S POKEMON AS KAI DRAWS THEM"
                                              : gMpConfig.uiMenuMons == MP_MENU_MONS_EXTENDED ? "THE PARTY'S POKEMON AS CRYSTAL CLEAR DRAWS THEM"
@@ -1559,6 +1598,8 @@ static bool8 PageTitle(u8 *buf)
         tab = sTabNames[TAB_CONTROLS], page = sText_FightKeys;
     else if (sStadiumPage)
         tab = sTabNames[TAB_BATTLE], page = sText_StadiumSettings;
+    else if (sGbPage)
+        tab = sTabNames[TAB_DISPLAY], page = sText_GbOptions;
     else if (sSpritePage)
         tab = sTabNames[TAB_DISPLAY], page = sText_SpriteScale;
     else if (sScalePage)
@@ -1633,7 +1674,7 @@ static void HighlightRow(void)
 static u32 ShownKey(void)
 {
     u32 key = 5381 + sRowCount * 7 + sTab * 131 + sFriendPage * 977 + sScalePage * 31 + Gamepad_IsSelecting()
-            + sFightPage * 53 + sSpritePage * 61 + sStadiumPage * 67 + Fight_BindListening() * 3001;
+            + sFightPage * 53 + sSpritePage * 61 + sStadiumPage * 67 + sGbPage * 71 + Fight_BindListening() * 3001;
     u8 i, j;
     for (i = 0; i < sRowCount; i++)
     {
@@ -1781,6 +1822,7 @@ void CB2_InitOptionMenu(void)
         sFightPage = FALSE;
         sSpritePage = FALSE;
         sStadiumPage = FALSE;
+        sGbPage = FALSE;
         GoTo(sOpenPhone ? TAB_COOP : TAB_GAME, 0, 0);   // (back from PHONE LINK: on its tab)
         if (sOpenPhone)
         {
@@ -1844,7 +1886,7 @@ static void Task_OptionMenuProcessInput(u8 taskId)
         GoTo(TAB_COOP, 0, 0);   // that friend left
         return;
     }
-    else if (!sFriendPage && !sScalePage && !sFightPage && !sSpritePage && !sStadiumPage && JOY_NEW(L_BUTTON | R_BUTTON))
+    else if (!sFriendPage && !sScalePage && !sFightPage && !sSpritePage && !sStadiumPage && !sGbPage && JOY_NEW(L_BUTTON | R_BUTTON))
     {
         PlaySE(SE_SELECT);
         GoTo(Wrap(sTab + (JOY_NEW(R_BUTTON) ? 1 : -1), TAB_COUNT), 0, 0);
@@ -1885,6 +1927,26 @@ static void Task_OptionMenuProcessInput(u8 taskId)
         GoTo(TAB_DISPLAY, 0, 0);
         for (i = 0; i < sRowCount; i++)   // back on its row
             if (sRows[i].opt == OPT_SPRITESCALE)
+                sSel = i;
+        RedrawAll();
+        return;
+    }
+    else if (JOY_NEW(A_BUTTON) && opt == OPT_GB)
+    {
+        PlaySE(SE_SELECT);
+        sGbPage = TRUE;
+        MPNet_Log("gb options page");
+        GoTo(TAB_DISPLAY, 0, 0);
+        return;
+    }
+    else if (sGbPage && (JOY_NEW(B_BUTTON | START_BUTTON) || (JOY_NEW(A_BUTTON) && opt == OPT_GB_BACK)))
+    {
+        u8 i;
+        PlaySE(SE_SELECT);
+        sGbPage = FALSE;
+        GoTo(TAB_DISPLAY, 0, 0);
+        for (i = 0; i < sRowCount; i++)   // back on its row
+            if (sRows[i].opt == OPT_GB)
                 sSel = i;
         RedrawAll();
         return;

@@ -532,6 +532,8 @@ static void LoadConfig(void)
     gMpConfig.scaleGardenPct = 50;
     gMpConfig.surfMusic = TRUE;
     gMpConfig.instantText = TRUE;
+    gMpConfig.gbOptions[0] = MP_GB_DEFAULTS_RED;
+    gMpConfig.gbOptions[1] = MP_GB_DEFAULTS_CRYSTAL;
     memset(gMpConfig.phrases, 0xFF, sizeof(gMpConfig.phrases));
     gMpConfig.quickStock[0] = 0;   // Hello!
     gMpConfig.quickStock[1] = 4;   // Follow me!
@@ -622,6 +624,8 @@ static void LoadConfig(void)
         else if (strcmp(key, "shadows") == 0) gMpConfig.noShadows = atoi(val) == 0;
         else if (strcmp(key, "ui_style") == 0) gMpConfig.uiStyle = MP_UiStyle_FromKey(val);
         else if (strcmp(key, "ui_white_bg") == 0) gMpConfig.uiNoWhiteBg = atoi(val) == 0;
+        else if (strcmp(key, "gb_options_red") == 0) gMpConfig.gbOptions[0] = (u16)strtoul(val, NULL, 16);
+        else if (strcmp(key, "gb_options_crystal") == 0) gMpConfig.gbOptions[1] = (u16)strtoul(val, NULL, 16);
         else if (strcmp(key, "ui_menu_mons") == 0)
             gMpConfig.uiMenuMons = strcmp(val, "kai") == 0 ? MP_MENU_MONS_KAI : strcmp(val, "extended") == 0 ? MP_MENU_MONS_EXTENDED
                                                                                                      : MP_MENU_MONS_ORIGINAL;
@@ -780,6 +784,8 @@ void MP_SaveConfig(void)
         "bike_music = %d\nsurf_music = %d\n"
         "; OPTIONS > GAME > INSTANT TEXT: words read before print at once (1) or at the text speed (0)\n"
         "instant_text = %d\n"
+        "; OPTIONS > DISPLAY > GB OPTIONS: RED's and CRYSTAL's (hex: 1 battle intro scenery, 2 RED's caught ball)\n"
+        "gb_options_red = %x\ngb_options_crystal = %x\n"
         "; OPTIONS > CO-OP > MOENAV CALLS: all, or battles (only trainers asking for a battle; story calls always come)\n"
         "moenav_calls = %s\n"
         "; OPTIONS > CO-OP > FRIEND FINDER: both, arrows (at the edge of the screen) or radar (in the corner);\n"
@@ -833,7 +839,7 @@ void MP_SaveConfig(void)
         gMpConfig.lastRoom, gMpConfig.lastRoomKey, gMpConfig.lastHostName, gMpConfig.lastRoomAddr, gMpConfig.lastJoinCode, gMpConfig.welcome, gMpConfig.trainerPadding, gMpConfig.levelScaling, gMpConfig.moveSplit, gMpConfig.generation, gMpConfig.gimmicks,
         gMpConfig.scale[0], gMpConfig.scale[1], gMpConfig.scale[2], gMpConfig.scale[3], gMpConfig.scale[4], gMpConfig.scale[5], gMpConfig.animSpeed,
         gMpConfig.spectatePanel, gMpConfig.spectateScale, gMpConfig.bikeMusic, gMpConfig.surfMusic,
-        gMpConfig.instantText,
+        gMpConfig.instantText, gMpConfig.gbOptions[0], gMpConfig.gbOptions[1],
         gMpConfig.moenavCalls ? "battles" : "all",
         gMpConfig.finderStyle == MP_FINDER_ARROWS ? "arrows" : gMpConfig.finderStyle == MP_FINDER_RADAR ? "radar" : "both",
         gMpConfig.finderOn,

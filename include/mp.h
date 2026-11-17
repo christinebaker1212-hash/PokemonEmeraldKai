@@ -281,6 +281,7 @@ struct MpConfig
     u8 uiStyle;               // OPTIONS > DISPLAY > UI STYLE: UISTYLE_* (mp_uistyle.h: KAI, RED, CRYSTAL, FIRERED...)
     u8 uiNoWhiteBg;           // OPTIONS > DISPLAY > WHITE BG (RED / CRYSTAL): 1 OFF = the battle boxes without their white
     u8 uiMenuMons;            // OPTIONS > DISPLAY > MENU POKeMON (RED / CRYSTAL): MP_MENU_MONS_* (the party's icons)
+    u16 gbOptions[2];         // OPTIONS > DISPLAY > GB OPTIONS: RED's [0] and CRYSTAL's [1] MP_GB_* (mp_uistyle.c MP_Gb_On)
     // The options the save itself holds (TEXT SPEED, FRAME...) and the TRAINER CARD's two, kept with the other settings
     // so another save file follows File 1's (save_slots.c; the user, 2026-11-11). gameOptSet: which ones the file has
     u8 gameOpt[16];           // MP_GAMEOPT_*
@@ -537,6 +538,16 @@ void MP_ItemDesc_Update(void);
 void MP_BattleWeather_TurnStart(void);        // battle_main.c: a turn begins (the field's weather showed until then)
 void MP_BattleWeather_Composite(u16 *frame);   // mp_battleweather.c: rain, hail, sandstorm and sunlight in battle
 enum { MP_MENU_MONS_ORIGINAL, MP_MENU_MONS_EXTENDED, MP_MENU_MONS_KAI, MP_MENU_MONS_COUNT };   // (gMpConfig.uiMenuMons)
+// OPTIONS > DISPLAY > GB OPTIONS (RED / CRYSTAL; the user, 2026-11-17): the Game Boy games' own ways, each player's own
+// (whatever changes timing keeps Kai's, so co-op never waits or desyncs). Each style keeps its own (gMpConfig.gbOptions)
+enum {
+    MP_GB_SCENERY  = 1 << 0,   // the battle intro's grass / water / cave strips (Emerald's; OFF in both, as the GB had none)
+    MP_GB_CAUGHT   = 1 << 1,   // RED: the caught ball on a wild foe's box (Red had none; CRYSTAL always shows it)
+};
+#define MP_GB_DEFAULTS_RED     0
+#define MP_GB_DEFAULTS_CRYSTAL MP_GB_CAUGHT
+bool8 MP_Gb_On(u16 bit);   // (mp_uistyle.c: the style showing is RED or CRYSTAL and its GB OPTIONS have BIT)
+bool8 MP_Gb_Off(u16 bit);  // (... RED or CRYSTAL without it)
 #define MP_BATTLE_WEATHER_STATE 5                 // B_COMM_MP_WEATHER: the battle's weather, the field's, settled
 void MP_BattleWeather_LinkState(u8 *state);       // battle_controllers.c: the master's, for the others' screens
 void MP_BattleWeather_OnLinkState(const u8 *state, u16 size);   // ... the others: the master's weather now

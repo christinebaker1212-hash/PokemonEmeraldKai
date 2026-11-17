@@ -1613,6 +1613,7 @@ void MP_UiStyle_HudUpdate(u8 battler, struct Pokemon *mon, bool8 hpToo)
     }
     species = GetMonData(mon, MON_DATA_SPECIES);
     h->caught = GetBattlerSide(battler) == B_SIDE_OPPONENT
+             && (MP_UiStyle_Active() != UISTYLE_RED || MP_Gb_On(MP_GB_CAUGHT))   // (RED's GB OPTIONS > CAUGHT MARK)
              && !(gBattleTypeFlags & BATTLE_TYPE_WALLY_TUTORIAL)
              && (!(gBattleTypeFlags & BATTLE_TYPE_TRAINER) || (gMpCoopBattle && gMpCoopWild))   // (co-op wild: a link "trainer" battle)
              && GetSetPokedexFlag(SpeciesToNationalPokedexNum(species), FLAG_GET_CAUGHT);
@@ -3790,4 +3791,22 @@ void MP_UiStyle_Composite(u16 *frame)
         PopUps(p, frame);
     if (clip)
         ClipToBattleWindow(frame, sBefore);
+}
+
+// OPTIONS > DISPLAY > GB OPTIONS (include/mp.h MP_GB_*): the style showing is RED or CRYSTAL and its own options have BIT
+bool8 MP_Gb_On(u16 bit)
+{
+    u8 style = MP_UiStyle_Active();
+    if (style == UISTYLE_RED)
+        return (gMpConfig.gbOptions[0] & bit) != 0;
+    if (style == UISTYLE_CRYSTAL)
+        return (gMpConfig.gbOptions[1] & bit) != 0;
+    return FALSE;
+}
+
+// ... and the style showing is RED or CRYSTAL without BIT (an Emerald piece the Game Boy games didn't have, left out)
+bool8 MP_Gb_Off(u16 bit)
+{
+    u8 style = MP_UiStyle_Active();
+    return (style == UISTYLE_RED || style == UISTYLE_CRYSTAL) && !MP_Gb_On(bit);
 }

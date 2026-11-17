@@ -8131,3 +8131,24 @@ The user (2026-11-17): an option to turn on and off the instant text for words r
 under TEXT SPEED; ON by default, as it always was) is gMpConfig.instantText, "instant_text" in the settings file and in
 a new game's canonical list (save_slots.c). OFF: mp_qol.c MP_Qol_FieldTextSpeed prints a line read before at the TEXT
 SPEED like the first time; signs and the skip button stay instant either way. `mp instanttext 0 / 1` (tests).
+
+## GB OPTIONS (RED / CRYSTAL), stage 1 (1.203.3)
+
+The user (2026-11-17) asked for OPTIONS > DISPLAY > GB OPTIONS: RED's and CRYSTAL's own ways, as toggles. Each player's
+own (whatever changes timing is fitted to Kai's, so co-op never waits or desyncs). Colours follow real GBC rules (4 colours
+a palette). The page is a DISPLAY row shown with UI STYLE RED or CRYSTAL. WHITE BG and MENU POKéMON moved onto it. The plan, in
+stages:
+1. (this) the page; BATTLE SCENERY: Emerald's grass / water / cave strips sliding in as a battle opens, OFF by
+   default (battle_bg.c DrawBattleEntryBackground leaves BG1 empty; the real link VS frame and the multi battle
+   intro stay); RED's CAUGHT MARK, OFF by default (Red had none): Red's own party POKé BALL (gfx/battle/balls.png's
+   first tile, gb_build.py red_ball) where CRYSTAL's sits, in Single, Double and Triple boxes (mp_uistyle.c h->caught).
+2. every ball thrown as Red / Crystal throw them (mp_legacy_anim.c, the GENESIS / EPOCH BALLS' engine), other balls
+   coloured from their sprite;
+3. Red's / Crystal's pre-battle transitions, fitted to Kai's length;
+4. colours: battle sprites and the overworld quantized to the hardware (RED: DMG / POCKET / LIGHT / COLOR / GBA;
+   CRYSTAL: GBC rules), over DISPLAY > COLOR but not the filters;
+5. move animations and sounds from both games (anim_bake.py / sfx_render.py for every Gen 1 / Gen 2 move, the nearest
+   for later ones), fitted to Kai's frame count.
+Settings: gMpConfig.gbOptions[2] (RED, CRYSTAL), MP_GB_* bits (include/mp.h), "gb_options_red" / "gb_options_crystal"
+(hex) in the settings file and the canonical list; MP_Gb_On / MP_Gb_Off (mp_uistyle.c). `mp gboptions red|crystal HEX`.
+The GB fonts got a ">" (gbstyle.py SYNTH): the option pages' titles read "DISPLAY > ..." (it was "?").

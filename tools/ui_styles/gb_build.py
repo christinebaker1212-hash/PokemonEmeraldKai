@@ -129,12 +129,36 @@ class GBPack:
             self.text(sp, word, x, y, cond=cond | bit, unless=unless, reg=reg)
 
     def ball(self, sp, x, y, cond=U.C_CAUGHT):
-        """the caught ball: CRYSTAL's own (DrawEnemyHUDBorder puts tile $5D, the expbar's last, at hlcoord 1, 1);
-        RED has none (the first games never marked a caught kind)"""
+        """the caught ball: CRYSTAL's own (DrawEnemyHUDBorder puts tile $5D, the expbar's last, at hlcoord 1, 1).
+        RED had none (the first games never marked a caught kind): with GB OPTIONS > CAUGHT MARK on (the user,
+        2026-11-17) it takes Red's own POKé BALL, the party's ball from its battles (gfx/battle/balls.png's first),
+        in the same place"""
         if self.red:
-            return
-        im = self.tile_img(0x5D)
+            im = self.red_ball()
+        else:
+            im = self.tile_img(0x5D)
         sp.add(U.OP_IMG, x=x, y=y, a=self.p.image('ball', im), cond=cond)
+
+    def red_ball(self):
+        """Red's party POKé BALL tile in the style's ink, its grey and a lighter grey; white inside its outline"""
+        t = Image.open(os.path.join(self.st.pret, 'gfx', 'battle', 'balls.png')).convert('L').crop((0, 0, 8, 8))
+        st = self.st
+        light = tuple((a + b) // 2 for a, b in zip(st.mid, st.paper))
+        c = Image.new('RGBA', (8, 8), (0, 0, 0, 0))
+        for y in range(8):
+            row = [t.getpixel((x, y)) for x in range(8)]
+            inner = [x for x in range(8) if row[x] < 220]
+            for x in range(8):
+                v = row[x]
+                if v < 64:
+                    c.putpixel((x, y), st.ink + (255,))
+                elif v < 128:
+                    c.putpixel((x, y), st.mid + (255,))
+                elif v < 220:
+                    c.putpixel((x, y), light + (255,))
+                elif inner and inner[0] < x < inner[-1]:
+                    c.putpixel((x, y), st.paper + (255,))
+        return c
 
     def gender(self, sp, x, y, rel=False, reg=0, cond=0, unless=0):
         if self.red:
@@ -198,7 +222,7 @@ class GBPack:
                 st.put(exp_full, 0x6A, k, 4, EXP_BLUE)
             frame.alpha_composite(exp_empty)
             exp = p.image('hud.mine1.exp', diff(exp_full, exp_empty))
-        if kind == 'foe2' and not red:
+        if kind == 'foe2':
             # (the caught ball takes the bracket's top tile, sitting on its corner as CRYSTAL's sits over its side)
             caught = frame.copy()
             caught.paste((0, 0, 0, 0), (0, 8, 8, 16))
@@ -261,10 +285,10 @@ class GBPack:
         # (a level of one digit leaves the bar a tile more; a wild foe's caught ball goes first on the level's row,
         # the level and the bar a tile on, CRYSTAL's bar then without its HP: to keep two tiles of gauge)
         self.text(sp, '{%d}' % U.F_NAME, 0, 0, w=72, alt=self.font7 + 1)
-        for caught in ((False, True) if foe and not red else (False,)):
+        for caught in ((False, True) if foe else (False,)):
             k = 1 if caught else 0
             cc = U.C_CAUGHT if caught else 0
-            cu = U.C_CAUGHT if foe and not red and not caught else 0
+            cu = U.C_CAUGHT if foe and not caught else 0
             # (a status takes the level's three tiles, as two digits and :L do: the two-digit bar)
             for digits, cond, unless, sfx in ((1, U.C_LV1, U.C_STATUS, ''), (2, 0, U.C_LV1, ''),
                                               (2, U.C_LV1 | U.C_STATUS, 0, 's')):

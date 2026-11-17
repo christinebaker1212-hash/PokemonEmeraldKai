@@ -1139,6 +1139,18 @@ void InitLinkBattleVsScreen(u8 taskId)
 
 void DrawBattleEntryBackground(void)
 {
+    // Moemon Kai: RED / CRYSTAL with GB OPTIONS > BATTLE SCENERY off: no grass, water or cave strips sliding in as the
+    // battle opens (the Game Boy games had none). BG1 left empty; the VS frame of a real link battle and the multi
+    // battle intro, where both teams slide in, aren't scenery and stay
+    if (MP_Gb_Off(MP_GB_SCENERY)
+     && !((gBattleTypeFlags & BATTLE_TYPE_LINK) && !gMpCoopBattle)
+     && !((gBattleTypeFlags & (BATTLE_TYPE_FRONTIER | BATTLE_TYPE_LINK | BATTLE_TYPE_RECORDED_LINK | BATTLE_TYPE_EREADER_TRAINER))
+          && !gMpCoopBattle && (gBattleTypeFlags & BATTLE_TYPE_INGAME_PARTNER) && !MP_PartnerShowsBack()))
+    {
+        CpuFill32(0, (void *)BG_CHAR_ADDR(1), 0x20);           // (tile 0 clear)
+        CpuFill16(0, (void *)BG_SCREEN_ADDR(28), 0x1000);      // (every cell tile 0)
+        return;
+    }
     if (!(MP_BG_TYPE_FLAGS & (BATTLE_TYPE_LINK | BATTLE_TYPE_FRONTIER | BATTLE_TYPE_EREADER_TRAINER | BATTLE_TYPE_RECORDED_LINK)) && (U3D_BattleBg(U3D_BBG_ENTRY) || S3D_BattleBg(S3D_BBG_ENTRY)))
         return;   // Moemon Kai: UNOVA's (u3d_battlebg.c)
     // Moemon Co-op: co-op battles (link under the hood) look like normal ones: no VS frame

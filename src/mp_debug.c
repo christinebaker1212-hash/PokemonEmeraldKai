@@ -4310,6 +4310,15 @@ void MP_TestCommand(const char *cmd, const char *arg)
         void MP_MatchCall_DebugSelect(int n);
         MP_MatchCall_DebugSelect(arg[0] ? atoi(arg) : 5);
     }
+    else if (strcmp(cmd, "gboptions") == 0)
+    {
+        // gboptions red|crystal HEX - OPTIONS > DISPLAY > GB OPTIONS (MP_GB_*)
+        char which[16] = "";
+        unsigned v = 0;
+        sscanf(arg, "%15s %x", which, &v);
+        gMpConfig.gbOptions[strcmp(which, "crystal") == 0] = (u16)v;
+        printf("[test] gboptions %s %x\n", which, v);
+    }
     else if (strcmp(cmd, "instanttext") == 0)
     {
         // instanttext 0 / 1 - OPTIONS > GAME > INSTANT TEXT

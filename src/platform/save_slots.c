@@ -456,7 +456,7 @@ static void MergeSet(const char *base, const char *own, const char *out)
 static const char *const sCanonicalCoop =
     "; Moemon Emerald Kai Co-op settings (a new game's own; the game writes this file itself)\n"
     "text_speed = fast\nwindow_frame = 1\nname_case = uncorrected\ncreatures = moemon\nbutton_mode = normal\n"
-    "sound = stereo\nmute_in_background = 1\nbike_music = 1\nsurf_music = 1\ninstant_text = 1\nbadge_fade = platinum\ncard_title = 1\n"
+    "sound = stereo\nmute_in_background = 1\nbike_music = 1\nsurf_music = 1\ninstant_text = 1\ngb_options_red = 0\ngb_options_crystal = 2\nbadge_fade = platinum\ncard_title = 1\n"
     "card_scaling = 1\ncard_art = printed_art\ncard_back = printed\nbattle_scene = 1\nbattle_style = shift\n"
     "battle_anims = modern\nstadium_announcer = 1\nstadium_announcer_jp = 0\nstadium_style = original\ntype_icons = 0\nlevel_scaling = 1\n"
     "level_scaling_rules = 2 2 0 1 0 1\ngeneration = 4\nmove_split = 1\ngimmicks = 168\nfollower_sprites = pmd\n"
