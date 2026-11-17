@@ -7989,8 +7989,9 @@ tools/ui_styles/check_specs.py.
   badge takes the level's place. Test: `mp status SLOT VALUE` before `mp wild` / `mp double` / `mp triple`.
 - RED / CRYSTAL with WHITE BG: each battle box is drawn into sOutlineBuf (Put marks drawn pixels with bit 15), then
   ringed with a 1 px white (faded with the box) and laid on the frame (mp_uistyle.c DrawSpecOutlined).
-- RED / CRYSTAL pop-ups wrap a line too long for the screen at a space (PopUps: `wrap`, sWraps), the lines under it
-  move down and the window grows (hh), never Kai's letters in the style's frame; struct Run keeps 160 letters.
+- (Reverted in 1.202.4: a misreading of the user's request, which was about the field message box.) RED / CRYSTAL
+  pop-ups once wrapped long lines and grew; they keep Kai's window again (Kai's letters in the style's frame where the
+  style's don't fit). struct Run keeps 160 letters.
   `mp popup W H TEXT` (| a new line) / `mp popupclose` make a plain framed window for tests.
 - The caught ball in co-op wild Double / Triple battles: they're link battles flagged BATTLE_TYPE_TRAINER, so
   battle_interface.c TryAddPokeballIconToHealthbox, mp_tricards.c and the styles' h->caught also accept
@@ -8045,3 +8046,6 @@ tools/ui_styles/check_specs.py.
   cursor's POKéMON (pokered AnimatePartyMon). CRYSTAL raises the cursor's 2 / 1 / 0 px (green / yellow / red HP, GetHPPal
   on 48 px) every other 16 frames (pokecrystal SpriteAnimFunc_PartyMonSwitch): mp_uistyle.c PartyScreen. Check
   tools/ui_styles/check_icons.py POKERED POKECRYSTAL.
+- (1.202.4) The pop-up wrapping above (and 1.202.2's right-set rule that went with it) is gone: PopUps lays words out in
+  Kai's window as before 1.202.0 (the user: the CO-OP menu's help box back to its old size). RED / CRYSTAL's long
+  messages are the field box's hold and scroll (1.202.3).
