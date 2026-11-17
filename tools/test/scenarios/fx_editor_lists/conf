@@ -1,0 +1,4 @@
+# The ball effect editor's lists: A opens every piece of a kind, L / R go round the kinds, SELECT a favourite, START ALL / FAV / NEW, the color grid, the presets list
+MODE=1
+ENV_A="MOEMON_DEBUG_PARTY=283:15"
+EXPECT_A=()

@@ -1,0 +1,86 @@
+pressuntil A field 5000
+mp ballfx 13 2 23 8 0 0
+mp fxunlock all
+mp fxedit 0
+wait 40
+press DOWN 2
+wait 8
+shot rows
+press A 2
+wait 20
+shot list
+press DOWN 2
+wait 10
+press DOWN 2
+wait 30
+shot list_moved
+press SELECT 2
+wait 8
+press UP 2
+wait 8
+press SELECT 2
+wait 8
+shot list_fav
+press START 2
+wait 10
+shot filter_fav
+press START 2
+wait 10
+shot filter_new
+press START 2
+wait 10
+press R 2
+wait 10
+shot colors
+press RIGHT 2
+wait 6
+press DOWN 2
+wait 10
+shot colors_moved
+press R 2
+wait 10
+shot parts
+press R 2
+wait 10
+press R 2
+wait 10
+shot sounds
+press B 2
+wait 10
+shot back_rows
+press UP 2
+wait 6
+press UP 2
+wait 6
+press UP 2
+wait 6
+press UP 2
+wait 6
+press UP 2
+wait 6
+press A 2
+wait 20
+shot presets
+press DOWN 2
+wait 10
+press DOWN 2
+wait 10
+press DOWN 2
+wait 10
+press DOWN 2
+wait 10
+press DOWN 2
+wait 10
+press DOWN 2
+wait 10
+press DOWN 2
+wait 20
+shot presets_scrolled
+press B 2
+wait 10
+press DOWN 2
+wait 6
+press R 2
+wait 20
+shot rows_favjump
+quit

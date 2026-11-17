@@ -44,17 +44,37 @@ enum { ROW_PRESET, ROW_FORM, ROW_COLOR, ROW_PART, ROW_RECALL, ROW_SOUND, ROW_SAV
 
 enum { ASK_NONE, ASK_SAVE, ASK_REPLACE, ASK_PARTY };
 
+// A on a row opens every piece of its kind at once (MODE_LIST: a list, the colors as a grid; MODE_PRESETS)
+enum { MODE_ROWS, MODE_LIST, MODE_PRESETS };
+#define KIND_SOUND MPFX_PIECE_KINDS   // the five kinds in the list: MPFX_PIECE_* and the sound
+#define LIST_KINDS (MPFX_PIECE_KINDS + 1)
+enum { FILTER_ALL, FILTER_FAV, FILTER_NEW, FILTER_COUNT };
+#define LIST_ROWS     9    // rows a list shows at once
+#define LIST_Y        27   // the first row
+#define LIST_H        13
+#define GRID_COLS     8
+#define PRESET_ROWS   5
+#define PRESET_H      25
+#define MAX_LIST      256
+
 #define WIN_PANEL 0
 #define WIN_INFO  1
 #define TEXT_PAL  15
 #define PANEL_X   112   // the panel covers x 112-239
 
-// Text palette: 1 white, 2 shadow, 3 grey, 4 panel, 5 selected band, 6 gold, 7 dim label, 8 edge
+// Text palette: 1 white, 2 shadow, 3 grey, 4 panel, 5 selected band, 6 gold, 7 dim label, 8 edge, 9 NEW,
+// 10-14 the presets' color chips (set as the list is drawn)
 static const u16 sTextPal[16] = {
     0, RGB(31, 31, 31), RGB(2, 3, 7), RGB(20, 21, 25), RGB(4, 6, 12), RGB(10, 14, 26), RGB(31, 25, 6),
-    RGB(15, 17, 23), RGB(16, 20, 30), 0, 0, 0, 0, 0, 0, 0,
+    RGB(15, 17, 23), RGB(16, 20, 30), RGB(31, 12, 10), 0, 0, 0, 0, 0, 0,
 };
-enum { TC_WHITE = 1, TC_SHADOW, TC_GREY, TC_PANEL, TC_BAND, TC_GOLD, TC_DIM, TC_EDGE };
+enum { TC_WHITE = 1, TC_SHADOW, TC_GREY, TC_PANEL, TC_BAND, TC_GOLD, TC_DIM, TC_EDGE, TC_NEW, TC_CHIP0 };
+// ENERGY COLOR's grid: each swatch in its own 2 x 2 tiles, whose palette is the text palette with seven colors
+// in 9-15 (BG palettes 5-14: 70 colors)
+#define SWATCH_PAL0    5
+#define SWATCH_PALS    10
+#define SWATCH_PER_PAL 7
+#define TC_SWATCH0     9
 
 static const struct BgTemplate sBgs[] = {
     {.bg = 0, .charBaseIndex = 0, .mapBaseIndex = 31, .screenSize = 0, .paletteMode = 0, .priority = 0, .baseTile = 0},
@@ -90,6 +110,13 @@ struct Editor
     u16 timer;
     s16 monX, monY, ballX, ballY;
     bool8 defaultForm, defaultRecall;
+    // the list
+    u8 mode;
+    u8 filter;
+    u16 cursor, top, shown;
+    struct MpBallFx before;    // B in the list puts this back
+    u8 items[MAX_LIST];        // the pieces shown (indexes), or presets: 0-5 MY PRESET, 6+ the ready-made ones
+    bool8 owned[MAX_LIST];
 };
 
 static EWRAM_DATA struct Editor *sEd = NULL;
@@ -268,6 +295,8 @@ static u8 PartyMonCount(void)
     return n;
 }
 
+static void DrawListInfo(void);
+
 static void DrawInfo(void)
 {
     const char *text;
@@ -295,6 +324,11 @@ static void DrawInfo(void)
         PrintWrapped(WIN_INFO, sEd->note, 4, 3, 104);
         PutWindowTilemap(WIN_INFO);
         CopyWindowToVram(WIN_INFO, COPYWIN_FULL);
+        return;
+    }
+    if (sEd->mode != MODE_ROWS)
+    {
+        DrawListInfo();
         return;
     }
     switch (sEd->row)
@@ -381,27 +415,489 @@ static void RowValue(u8 row, char *out, u32 size)
     }
 }
 
-static void DrawPanel(void)
+// ---------------------------------------------------------------------------
+// The five kinds a list goes round (L / R): MATERIALIZATION, ENERGY COLOR, ENTRANCE PARTICLES, RECALL EFFECT, SOUND
+// ACCENT. Favourites and the pieces already looked at (no longer NEW) are kept with the save, 32 to a key
+// ("fxfav:f:0", "fxseen:r:1").
+
+static const u8 sRowKind[ROW_COUNT] = {
+    [ROW_PRESET] = 0xFF, [ROW_FORM] = MPFX_PIECE_FORM, [ROW_COLOR] = MPFX_PIECE_COLOR, [ROW_PART] = MPFX_PIECE_PART,
+    [ROW_RECALL] = MPFX_PIECE_RECALL, [ROW_SOUND] = KIND_SOUND, [ROW_SAVEAS] = 0xFF, [ROW_PARTY] = 0xFF,
+};
+static const char sKindLetter[LIST_KINDS] = {'c', 'f', 'p', 'r', 's'};
+
+static u16 KindCount(u8 kind)
+{
+    return kind == KIND_SOUND ? MPFX_SOUND_COUNT : MP_BallUnlock_Count(kind);
+}
+
+static bool8 KindHas(u8 kind, u16 i)
+{
+    return kind == KIND_SOUND ? i < MPFX_SOUND_COUNT : MP_BallUnlock_Has(kind, i);
+}
+
+static u8 *KindField(struct MpBallFx *fx, u8 kind)
+{
+    switch (kind)
+    {
+    case MPFX_PIECE_COLOR:  return &fx->color;
+    case MPFX_PIECE_FORM:   return &fx->form;
+    case MPFX_PIECE_PART:   return &fx->part;
+    case MPFX_PIECE_RECALL: return &fx->recall;
+    default:                return &fx->sound;
+    }
+}
+
+static const char *KindTitle(u8 kind)
+{
+    static const char *const sTitles[LIST_KINDS] = {"ENERGY COLOR", "MATERIALIZATION", "ENTRANCE PARTICLES",
+                                                     "RECALL EFFECT", "SOUND ACCENT"};
+    return sTitles[kind];
+}
+
+static const char *KindPieceName(u8 kind, u16 i, char *buf, u32 size)
+{
+    switch (kind)
+    {
+    case MPFX_PIECE_COLOR:  MP_GameToAscii(buf, MP_BallStyle_ColorName(i), size - 1); return buf;
+    case MPFX_PIECE_FORM:   return MP_BallFx_FormName(i);
+    case MPFX_PIECE_PART:   return MP_BallFx_PartName(i);
+    case MPFX_PIECE_RECALL: return MP_BallFx_RecallName(i);
+    default:                return MP_BallFx_SoundName(i);
+    }
+}
+
+// The order a kind's dots and L / R go in: as the rows are
+static const u8 sKindOrder[LIST_KINDS] = {MPFX_PIECE_FORM, MPFX_PIECE_COLOR, MPFX_PIECE_PART, MPFX_PIECE_RECALL, KIND_SOUND};
+
+static u8 KindTab(u8 kind)
+{
+    u8 i;
+    for (i = 0; i < LIST_KINDS; i++)
+        if (sKindOrder[i] == kind)
+            return i;
+    return 0;
+}
+
+static u8 RowOfKind(u8 kind)
+{
+    u8 r;
+    for (r = 0; r < ROW_COUNT; r++)
+        if (sRowKind[r] == kind)
+            return r;
+    return ROW_FORM;
+}
+
+static bool8 FlagBit(const char *what, u8 kind, u16 i)
+{
+    char key[24];
+    snprintf(key, sizeof(key), "%s:%c:%d", what, sKindLetter[kind], i / 32);
+    return ((u32)MP_SaveData_Get(key) >> (i % 32)) & 1;
+}
+
+static void SetFlagBit(const char *what, u8 kind, u16 i, bool8 on)
+{
+    char key[24];
+    u32 v;
+    snprintf(key, sizeof(key), "%s:%c:%d", what, sKindLetter[kind], i / 32);
+    v = (u32)MP_SaveData_Get(key);
+    v = on ? (v | (1u << (i % 32))) : (v & ~(1u << (i % 32)));
+    MP_SaveData_Set(key, (s32)v);
+}
+
+static bool8 IsFavorite(u8 kind, u16 i)
+{
+    return FlagBit("fxfav", kind, i);
+}
+
+// NEW: earned (not one of everyone's first pieces) and not yet looked at in a list
+static bool8 IsNew(u8 kind, u16 i)
+{
+    return kind != KIND_SOUND && i >= MP_BallUnlock_First(kind) && KindHas(kind, i) && !FlagBit("fxseen", kind, i);
+}
+
+static u16 KindOwnedCount(u8 kind)
+{
+    u16 i, n = 0, count = KindCount(kind);
+    for (i = 0; i < count; i++)
+        n += KindHas(kind, i);
+    return n;
+}
+
+// From cur, the next (dir 1) or previous (-1) favourite this save has; cur when there's none
+static u16 NextFavorite(u8 kind, u16 cur, s8 dir)
+{
+    u16 count = KindCount(kind), i, v = cur;
+    for (i = 0; i < count; i++)
+    {
+        v = (v + count + dir) % count;
+        if (IsFavorite(kind, v) && KindHas(kind, v))
+            return v;
+    }
+    return cur;
+}
+
+// Little pictures drawn into the panel ('#' = a pixel)
+static const char *const sStar[] = {"...#...", "..###..", "#######", ".#####.", "..###..", ".##.##.", "##...##"};
+static const char *const sLock[] = {"..###..", ".#...#.", ".#...#.", "#######", "###.###", "###.###", "#######"};
+static const char *const sArrowL[] = {"..#", ".##", "###", ".##", "..#"};
+static const char *const sArrowR[] = {"#..", "##.", "###", "##.", "#.."};
+
+static void Glyph(const char *const *pic, u8 rows, u8 x, u8 y, u8 color)
+{
+    u8 r, c;
+    for (r = 0; r < rows; r++)
+        for (c = 0; pic[r][c]; c++)
+            if (pic[r][c] == '#')
+                FillWindowPixelRect(WIN_PANEL, PIXEL_FILL(color), x + c, y + r, 1, 1);
+}
+#define GLYPH(pic, x, y, color) Glyph(pic, ARRAY_COUNT(pic), x, y, color)
+
+static u16 TextWidth(const char *ascii)
+{
+    u8 game[96];
+    MP_AsciiToGame(game, ascii, sizeof(game) - 1);
+    return GetStringWidth(FONT_SMALL, game, 0);
+}
+
+static u8 ListKind(void)
+{
+    return sRowKind[sEd->row];
+}
+
+// The pieces the list shows under its filter (presets: MY PRESET 1-6, then the ready-made ones)
+static void BuildList(void)
+{
+    u16 i, count;
+    u8 kind = ListKind();
+    sEd->shown = 0;
+    if (sEd->mode == MODE_PRESETS)
+    {
+        count = MPFX_USER_PRESETS + MP_BallFx_PresetCount();
+        for (i = 0; i < count && i < MAX_LIST; i++)
+        {
+            sEd->items[sEd->shown] = i;
+            sEd->owned[sEd->shown] = i < MPFX_USER_PRESETS || MP_BallFx_PresetUnlocked(i - MPFX_USER_PRESETS);
+            sEd->shown++;
+        }
+        return;
+    }
+    count = KindCount(kind);
+    for (i = 0; i < count && i < MAX_LIST; i++)
+    {
+        bool8 has = KindHas(kind, i);
+        if (sEd->filter == FILTER_FAV && !(has && IsFavorite(kind, i)))
+            continue;
+        if (sEd->filter == FILTER_NEW && !IsNew(kind, i))
+            continue;
+        sEd->items[sEd->shown] = i;
+        sEd->owned[sEd->shown] = has;
+        sEd->shown++;
+    }
+}
+
+static bool8 IsGrid(void)
+{
+    return sEd->mode == MODE_LIST && ListKind() == MPFX_PIECE_COLOR;
+}
+
+static void ListScroll(void)
+{
+    u16 vis = sEd->mode == MODE_PRESETS ? PRESET_ROWS : IsGrid() ? 7 * 8 : LIST_ROWS;
+    u16 step = IsGrid() ? 8 : 1, cur = sEd->cursor - sEd->cursor % step;
+    if (cur < sEd->top)
+        sEd->top = cur;
+    if (sEd->cursor >= sEd->top + vis)
+        sEd->top = cur + step - vis;
+    if (sEd->shown <= vis)
+        sEd->top = 0;
+    else if (sEd->top > (sEd->shown + step - 1) / step * step - vis)
+        sEd->top = (sEd->shown + step - 1) / step * step - vis;
+}
+
+// Puts the cursor on the piece the mix has now (or on the nearest one shown)
+static void ListCursorToCurrent(void)
+{
+    u16 i, want;
+    sEd->cursor = 0;
+    if (sEd->mode == MODE_PRESETS)
+    {
+        s8 user = MP_BallFx_WhichUserPreset(&sEd->fx), built = MP_BallFx_WhichPreset(&sEd->fx);
+        want = user >= 0 ? (u16)user : built >= 0 ? MPFX_USER_PRESETS + built : 0;
+    }
+    else
+    {
+        want = *KindField(&sEd->fx, ListKind());
+    }
+    for (i = 0; i < sEd->shown; i++)
+        if (sEd->items[i] >= want)
+        {
+            sEd->cursor = i;
+            break;
+        }
+    ListScroll();
+}
+
+static void ScrollBar(u8 y0, u16 height, u16 vis)
+{
+    u16 h, y;
+    if (sEd->shown <= vis)
+        return;
+    FillWindowPixelRect(WIN_PANEL, PIXEL_FILL(TC_BAND), 122, y0, 3, height);
+    h = height * vis / sEd->shown;
+    if (h < 6)
+        h = 6;
+    y = y0 + (height - h) * sEd->top / (sEd->shown - vis);
+    FillWindowPixelRect(WIN_PANEL, PIXEL_FILL(TC_GREY), 122, y, 3, h);
+}
+
+static void ListHeader(u8 kind)
+{
+    u8 t;
+    const char *title = KindTitle(kind);
+    Print("{L}", 4, 0, TC_WHITE, FONT_SMALL);
+    Print(title, 65 - TextWidth(title) / 2, 0, TC_GOLD, FONT_SMALL);
+    Print("{R}", 116, 0, TC_WHITE, FONT_SMALL);
+    for (t = 0; t < LIST_KINDS; t++)
+        FillWindowPixelRect(WIN_PANEL, PIXEL_FILL(t == KindTab(kind) ? TC_GOLD : TC_DIM), 50 + t * 6, 22, 3, 2);
+    FillWindowPixelRect(WIN_PANEL, PIXEL_FILL(TC_EDGE), 2, 25, 124, 1);
+}
+
+static void ListFooter(void)
+{
+    Print("{A}PICK {SELECT}", 6, 146, TC_GREY, FONT_SMALL);
+    GLYPH(sStar, 6 + TextWidth("{A}PICK {SELECT}") + 1, 149, TC_GOLD);
+    Print("{START}", 6 + TextWidth("{A}PICK {SELECT}") + 11, 146, TC_GREY, FONT_SMALL);
+}
+
+static const char *const sFilterNames[FILTER_COUNT] = {"SHOW ALL", "SHOW FAV", "SHOW NEW"};
+
+static void DrawList(void)
+{
+    u8 kind = ListKind(), r;
+    char line[48], buf[24];
+    u16 have = 0, i;
+
+    ListHeader(kind);
+    for (i = 0; i < sEd->shown; i++)
+        have += sEd->owned[i];
+    snprintf(line, sizeof(line), "%d OF %d", have, sEd->shown);
+    Print(line, 6, 12, TC_GREY, FONT_SMALL);
+    Print(sFilterNames[sEd->filter], 124 - TextWidth(sFilterNames[sEd->filter]), 12, TC_GOLD, FONT_SMALL);
+    if (sEd->shown == 0)
+    {
+        Print(sEd->filter == FILTER_FAV ? "No favorites yet:" : "Nothing new.", 8, LIST_Y + 2, TC_DIM, FONT_SMALL);
+        if (sEd->filter == FILTER_FAV)
+        {
+            Print("{SELECT} on a piece marks it", 8, LIST_Y + 15, TC_DIM, FONT_SMALL);
+            Print("as one.", 8, LIST_Y + 28, TC_DIM, FONT_SMALL);
+        }
+    }
+    for (r = 0; r < LIST_ROWS && sEd->top + r < sEd->shown; r++)
+    {
+        u16 at = sEd->top + r, piece = sEd->items[at];
+        u8 y = LIST_Y + r * LIST_H;
+        if (at == sEd->cursor)
+            FillWindowPixelRect(WIN_PANEL, PIXEL_FILL(TC_BAND), 2, y, 118, LIST_H);
+        if (sEd->owned[at])
+        {
+            if (IsFavorite(kind, piece))
+                GLYPH(sStar, 5, y + 3, TC_GOLD);
+            Print(KindPieceName(kind, piece, buf, sizeof(buf)), 14, y - 1, TC_WHITE, FONT_SMALL);
+            if (IsNew(kind, piece))
+                Print("NEW", 119 - TextWidth("NEW"), y - 1, TC_NEW, FONT_SMALL);
+        }
+        else
+        {
+            GLYPH(sLock, 5, y + 3, TC_DIM);
+            Print("- - - - -", 14, y - 1, TC_DIM, FONT_SMALL);
+        }
+    }
+    ScrollBar(LIST_Y, LIST_ROWS * LIST_H, LIST_ROWS);
+    ListFooter();
+}
+
+// ENERGY COLOR: every color at once, as swatches (a 16 x 16 cell each, 8 to a row, from y 32)
+#define GRID_Y    32
+#define GRID_ROWS 7
+static void DrawColorGrid(void)
+{
+    u16 i, have = 0;
+    char line[24], name[24];
+    ListHeader(MPFX_PIECE_COLOR);
+    if (sEd->shown)
+    {
+        u16 c = sEd->items[sEd->cursor];
+        Print(sEd->owned[sEd->cursor] ? KindPieceName(MPFX_PIECE_COLOR, c, name, sizeof(name)) : "- - - - -", 6, 12,
+              sEd->owned[sEd->cursor] ? TC_WHITE : TC_DIM, FONT_SMALL);
+    }
+    else
+    {
+        Print(sEd->filter == FILTER_FAV ? "No favorites yet." : "Nothing new.", 6, 12, TC_DIM, FONT_SMALL);
+    }
+    for (i = 0; i < sEd->shown; i++)
+        have += sEd->owned[i];
+    if (sEd->filter == FILTER_ALL)
+        snprintf(line, sizeof(line), "%d OF %d", have, sEd->shown);
+    else
+        snprintf(line, sizeof(line), "%s", sFilterNames[sEd->filter]);
+    Print(line, 124 - TextWidth(line), 12, sEd->filter == FILTER_ALL ? TC_GREY : TC_GOLD, FONT_SMALL);
+    for (i = sEd->top; i < sEd->shown && i < sEd->top + GRID_COLS * GRID_ROWS; i++)
+    {
+        u8 x = ((i - sEd->top) % GRID_COLS) * 16, y = GRID_Y + ((i - sEd->top) / GRID_COLS) * 16;
+        u16 c = sEd->items[i];
+        if (sEd->owned[i])
+        {
+            FillWindowPixelRect(WIN_PANEL, PIXEL_FILL(TC_SHADOW), x + 3, y + 3, 10, 10);
+            FillWindowPixelRect(WIN_PANEL, PIXEL_FILL(TC_SWATCH0 + c % SWATCH_PER_PAL), x + 4, y + 4, 8, 8);
+            if (IsFavorite(MPFX_PIECE_COLOR, c))
+                GLYPH(sStar, x + 5, y + 5, TC_WHITE);
+        }
+        else
+        {
+            FillWindowPixelRect(WIN_PANEL, PIXEL_FILL(TC_BAND), x + 3, y + 3, 10, 10);
+            GLYPH(sLock, x + 5, y + 5, TC_DIM);
+        }
+        if (i == sEd->cursor)
+        {
+            FillWindowPixelRect(WIN_PANEL, PIXEL_FILL(TC_GOLD), x + 1, y + 1, 14, 1);
+            FillWindowPixelRect(WIN_PANEL, PIXEL_FILL(TC_GOLD), x + 1, y + 14, 14, 1);
+            FillWindowPixelRect(WIN_PANEL, PIXEL_FILL(TC_GOLD), x + 1, y + 1, 1, 14);
+            FillWindowPixelRect(WIN_PANEL, PIXEL_FILL(TC_GOLD), x + 14, y + 1, 1, 14);
+        }
+    }
+    {
+        u16 vis = GRID_COLS * GRID_ROWS;
+        if (sEd->shown > vis)
+        {
+            u16 rows = (sEd->shown + GRID_COLS - 1) / GRID_COLS;
+            u16 h = GRID_ROWS * 16 * GRID_ROWS / rows;
+            u16 y = GRID_Y + (GRID_ROWS * 16 - h) * (sEd->top / GRID_COLS) / (rows - GRID_ROWS);
+            FillWindowPixelRect(WIN_PANEL, PIXEL_FILL(TC_BAND), 125, GRID_Y, 2, GRID_ROWS * 16);
+            FillWindowPixelRect(WIN_PANEL, PIXEL_FILL(TC_GREY), 125, y, 2, h);
+        }
+    }
+    ListFooter();
+}
+
+// The grid's swatches take their colors' palettes (after PutWindowTilemap)
+static void ColorGridTilemap(void)
+{
+    u16 *map = GetBgTilemapBuffer(0);
+    u16 i;
+    for (i = sEd->top; i < sEd->shown && i < sEd->top + GRID_COLS * GRID_ROWS; i++)
+    {
+        u8 tx = PANEL_X / 8 + ((i - sEd->top) % GRID_COLS) * 2, ty = GRID_Y / 8 + ((i - sEd->top) / GRID_COLS) * 2, d;
+        u16 pal = SWATCH_PAL0 + sEd->items[i] / SWATCH_PER_PAL;
+        if (pal >= SWATCH_PAL0 + SWATCH_PALS)
+            continue;
+        for (d = 0; d < 4; d++)
+        {
+            u16 *e = &map[(ty + d / 2) * 32 + tx + d % 2];
+            *e = (*e & 0x0FFF) | (pal << 12);
+        }
+    }
+}
+
+static void LoadSwatchPalettes(void)
+{
+    u16 pal[16];
+    u8 p, k;
+    for (p = 0; p < SWATCH_PALS; p++)
+    {
+        memcpy(pal, sTextPal, sizeof(pal));
+        for (k = 0; k < SWATCH_PER_PAL; k++)
+        {
+            u16 c = p * SWATCH_PER_PAL + k;
+            pal[TC_SWATCH0 + k] = c < MP_BALL_COLORS ? MP_BallFx_EnergyRgb(c) : 0;
+        }
+        LoadPalette(pal, BG_PLTT_ID(SWATCH_PAL0 + p), sizeof(pal));
+    }
+}
+
+// PRESET: every preset with what's in it
+static void DrawPresets(void)
+{
+    u8 r;
+    struct MpBallFx fx;
+    char name[24];
+    Print("PRESETS", 6, 1, TC_GOLD, FONT_NORMAL);
+    FillWindowPixelRect(WIN_PANEL, PIXEL_FILL(TC_EDGE), 2, 15, 124, 1);
+    for (r = 0; r < PRESET_ROWS && sEd->top + r < sEd->shown; r++)
+    {
+        u16 at = sEd->top + r, p = sEd->items[at];
+        u8 y = 17 + r * PRESET_H;
+        bool8 filled;
+        bool8 on = at == sEd->cursor;
+        if (on)
+            FillWindowPixelRect(WIN_PANEL, PIXEL_FILL(TC_BAND), 2, y, 118, PRESET_H);
+        if (p < MPFX_USER_PRESETS)
+        {
+            filled = MP_BallFx_GetUserPreset(p, &fx);
+            snprintf(name, sizeof(name), "MY PRESET %d", p + 1);
+        }
+        else
+        {
+            filled = TRUE;
+            MP_BallFx_Preset(p - MPFX_USER_PRESETS, &fx);
+            snprintf(name, sizeof(name), "%s", MP_BallFx_PresetName(p - MPFX_USER_PRESETS));
+        }
+        if (!sEd->owned[at])
+        {
+            GLYPH(sLock, 5, y + 3, TC_DIM);
+            Print(name, 14, y - 1, TC_DIM, FONT_SMALL);
+            Print("- - - - -", 14, y + 10, TC_DIM, FONT_SMALL);
+            continue;
+        }
+        if (filled)
+        {
+            u16 chip = MP_BallFx_EnergyRgb(fx.color);
+            LoadPalette(&chip, BG_PLTT_ID(TEXT_PAL) + TC_CHIP0 + r, sizeof(chip));
+            FillWindowPixelRect(WIN_PANEL, PIXEL_FILL(TC_SHADOW), 5, y + 3, 6, 6);
+            FillWindowPixelRect(WIN_PANEL, PIXEL_FILL(TC_CHIP0 + r), 6, y + 4, 4, 4);
+        }
+        Print(name, 14, y - 1, on ? TC_GOLD : TC_WHITE, FONT_SMALL);
+        Print(filled ? MP_BallFx_FormName(fx.form) : "- empty -", 14, y + 10, filled ? TC_GREY : TC_DIM, FONT_SMALL);
+    }
+    ScrollBar(17, PRESET_ROWS * PRESET_H, PRESET_ROWS);
+    Print("{A}USE", 6, 146, TC_GREY, FONT_SMALL);
+    if (sEd->shown && sEd->items[sEd->cursor] < MPFX_USER_PRESETS)
+        Print("{START}SAVE HERE", 6 + TextWidth("{A}USE") + 5, 146, TC_GREY, FONT_SMALL);
+}
+
+static void DrawRows(void)
 {
     u8 row;
     char line[48], value[32];
 
-    FillWindowPixelBuffer(WIN_PANEL, PIXEL_FILL(TC_PANEL));
-    FillWindowPixelRect(WIN_PANEL, PIXEL_FILL(TC_EDGE), 0, 0, 1, 160);
     Print("BALL EFFECTS", 6, 1, TC_GOLD, FONT_NORMAL);
     for (row = 0; row < ROW_COUNT; row++)
     {
         bool8 on = (row == sEd->row) && !sEd->asking;
+        u8 kind = sRowKind[row];
         RowValue(row, value, sizeof(value));
         if (row < ROW_SETTINGS)
         {
-            // label, and the value under it
-            u8 y = 17 + row * 17;
+            // label (with how many of its kind this save has), and the value under it
+            u8 y = 17 + row * 17, x;
             if (on)
                 FillWindowPixelRect(WIN_PANEL, PIXEL_FILL(TC_BAND), 2, y - 1, 124, 17);
             Print(RowLabel(row), 6, y - 2, on ? TC_GREY : TC_DIM, FONT_SMALL);
-            snprintf(line, sizeof(line), on ? "< %s >" : "%s", value);
-            Print(line, on ? 6 : 12, y + 6, TC_WHITE, FONT_SMALL);
+            if (kind != 0xFF)
+            {
+                snprintf(line, sizeof(line), "%d/%d", KindOwnedCount(kind), KindCount(kind));
+                Print(line, 124 - TextWidth(line), y - 2, on ? TC_GREY : TC_DIM, FONT_SMALL);
+            }
+            Print(value, 12, y + 6, TC_WHITE, FONT_SMALL);
+            x = 12 + TextWidth(value);
+            if (on)
+            {
+                GLYPH(sArrowL, 6, y + 10, TC_WHITE);
+                GLYPH(sArrowR, x + 2, y + 10, TC_WHITE);
+                x += 6;
+            }
+            if (kind != 0xFF && IsFavorite(kind, *KindField(&sEd->fx, kind)))
+                GLYPH(sStar, x + 3, y + 9, TC_GOLD);
         }
         else
         {
@@ -417,9 +913,24 @@ static void DrawPanel(void)
             }
         }
     }
-    snprintf(line, sizeof(line), "{SELECT} %s  {START} SAVE", sEd->front ? "BACK" : "FRONT");
-    Print(line, 6, 146, TC_GREY, FONT_SMALL);
+    Print(sEd->row < ROW_SETTINGS ? "{A}LIST {L}{R}FAVORITE" : "{SELECT}FRONT {START}SAVE", 6, 146, TC_GREY, FONT_SMALL);
+}
+
+static void DrawPanel(void)
+{
+    FillWindowPixelBuffer(WIN_PANEL, PIXEL_FILL(TC_PANEL));
+    FillWindowPixelRect(WIN_PANEL, PIXEL_FILL(TC_EDGE), 0, 0, 1, 160);
+    if (sEd->mode == MODE_PRESETS)
+        DrawPresets();
+    else if (IsGrid())
+        DrawColorGrid();
+    else if (sEd->mode == MODE_LIST)
+        DrawList();
+    else
+        DrawRows();
     PutWindowTilemap(WIN_PANEL);
+    if (IsGrid())
+        ColorGridTilemap();
     CopyWindowToVram(WIN_PANEL, COPYWIN_FULL);
     DrawInfo();
 }
@@ -672,6 +1183,224 @@ static void ChangeValue(s8 d)
     StartPreview();
 }
 
+// ---------------------------------------------------------------------------
+// The list: what's under the cursor plays in the preview; A keeps it, B puts back what was there
+
+static void DrawListInfo(void)
+{
+    char buf[112];
+    const char *text;
+    u16 piece;
+    if (sEd->shown == 0)
+    {
+        text = sEd->filter == FILTER_FAV ? "{START} shows them all again." : "Nothing new to see: {START} shows them all.";
+    }
+    else if (sEd->mode == MODE_PRESETS)
+    {
+        piece = sEd->items[sEd->cursor];
+        if (!sEd->owned[sEd->cursor])
+            text = "Not yet yours: earn its parts first.";
+        else if (piece < MPFX_USER_PRESETS)
+        {
+            struct MpBallFx saved;
+            text = MP_BallFx_GetUserPreset(piece, &saved) ? "Your own mix. {START} keeps the one you had here instead."
+                                                          : "Empty. {START} keeps the mix you had here.";
+        }
+        else
+            text = piece == MPFX_USER_PRESETS ? "Everything the way the game does it." : "A ready-made mix.";
+    }
+    else
+    {
+        u8 kind = ListKind();
+        piece = sEd->items[sEd->cursor];
+        if (!sEd->owned[sEd->cursor])
+        {
+            char how[80];
+            MP_BallUnlock_HowTo(kind, piece, how, sizeof(how));
+            snprintf(buf, sizeof(buf), "Not yet earned. %s", how);
+            text = buf;
+        }
+        else switch (kind)
+        {
+        case MPFX_PIECE_FORM:   text = sFormInfo[piece]; break;
+        case MPFX_PIECE_PART:   text = sPartInfo[piece]; break;
+        case MPFX_PIECE_RECALL: text = sRecallInfo[piece]; break;
+        case KIND_SOUND:        text = sSoundInfo[piece]; break;
+        default:                text = "The color of its energy: beams, glows, motes, pixels and ink."; break;
+        }
+    }
+    PrintWrapped(WIN_INFO, text, 4, 3, 104);
+    PutWindowTilemap(WIN_INFO);
+    CopyWindowToVram(WIN_INFO, COPYWIN_FULL);
+}
+
+// The mix with what's under the cursor in it, playing in the preview (a piece not yet earned isn't shown)
+static void ListHover(void)
+{
+    u16 piece;
+    if (sEd->shown == 0 || !sEd->owned[sEd->cursor])
+        return;
+    piece = sEd->items[sEd->cursor];
+    if (sEd->mode == MODE_PRESETS)
+    {
+        struct MpBallFx fx;
+        if (piece < MPFX_USER_PRESETS)
+        {
+            if (!MP_BallFx_GetUserPreset(piece, &fx))
+                fx = sEd->before;
+        }
+        else
+            MP_BallFx_Preset(piece - MPFX_USER_PRESETS, &fx);
+        if (memcmp(&fx, &sEd->fx, sizeof(fx)) == 0)
+            return;
+        sEd->fx = fx;
+    }
+    else
+    {
+        u8 kind = ListKind();
+        if (IsNew(kind, piece))
+            SetFlagBit("fxseen", kind, piece, TRUE);   // looked at: no longer NEW (the list keeps showing it till it's left)
+        if (*KindField(&sEd->fx, kind) == piece)
+            return;
+        *KindField(&sEd->fx, kind) = piece;
+    }
+    StartPreview();
+}
+
+static void OpenList(void)
+{
+    sEd->before = sEd->fx;
+    sEd->mode = sEd->row == ROW_PRESET ? MODE_PRESETS : MODE_LIST;
+    if (sEd->mode == MODE_PRESETS)
+        sEd->filter = FILTER_ALL;
+    sEd->top = 0;
+    BuildList();
+    ListCursorToCurrent();
+    PlaySE(SE_SELECT);
+    DrawPanel();
+}
+
+static void CloseList(bool8 keep)
+{
+    if (!keep)
+    {
+        if (memcmp(&sEd->fx, &sEd->before, sizeof(sEd->fx)) != 0)
+        {
+            sEd->fx = sEd->before;
+            StartPreview();
+        }
+    }
+    sEd->mode = MODE_ROWS;
+    PlaySE(SE_SELECT);
+    DrawPanel();
+}
+
+static void ListMove(s16 d)
+{
+    s16 c = sEd->cursor;
+    if (sEd->shown == 0)
+        return;
+    if (d == 1 || d == -1 || IsGrid())
+        c = (c + sEd->shown * 8 + d) % sEd->shown;   // round and round
+    else
+    {
+        c += d;   // a page: stops at the ends
+        if (c < 0)
+            c = 0;
+        if (c >= sEd->shown)
+            c = sEd->shown - 1;
+    }
+    if (c == sEd->cursor)
+        return;
+    sEd->cursor = c;
+    ListScroll();
+    PlaySE(SE_SELECT);
+    ListHover();
+    DrawPanel();
+}
+
+// L / R: the kind before / after (the mix as it is now is kept: B still puts back what was there before the list)
+static void ListKindStep(s8 d)
+{
+    u8 tab = (KindTab(ListKind()) + LIST_KINDS + d) % LIST_KINDS;
+    sEd->row = RowOfKind(sKindOrder[tab]);
+    sEd->top = 0;
+    BuildList();
+    ListCursorToCurrent();
+    PlaySE(SE_SELECT);
+    DrawPanel();
+}
+
+static void Task_List(void)
+{
+    if (JOY_REPEAT(DPAD_UP))
+        ListMove(IsGrid() ? -GRID_COLS : -1);
+    else if (JOY_REPEAT(DPAD_DOWN))
+        ListMove(IsGrid() ? GRID_COLS : 1);
+    else if (JOY_REPEAT(DPAD_LEFT))
+        ListMove(IsGrid() ? -1 : -(sEd->mode == MODE_PRESETS ? PRESET_ROWS : LIST_ROWS));
+    else if (JOY_REPEAT(DPAD_RIGHT))
+        ListMove(IsGrid() ? 1 : (sEd->mode == MODE_PRESETS ? PRESET_ROWS : LIST_ROWS));
+    else if (JOY_NEW(L_BUTTON) && sEd->mode == MODE_LIST)
+        ListKindStep(-1);
+    else if (JOY_NEW(R_BUTTON) && sEd->mode == MODE_LIST)
+        ListKindStep(1);
+    else if (JOY_NEW(A_BUTTON))
+    {
+        if (sEd->shown && !sEd->owned[sEd->cursor])
+        {
+            PlaySE(SE_FAILURE);
+            return;
+        }
+        CloseList(TRUE);
+    }
+    else if (JOY_NEW(B_BUTTON))
+        CloseList(FALSE);
+    else if (JOY_NEW(SELECT_BUTTON) && sEd->mode == MODE_LIST && sEd->shown)
+    {
+        u8 kind = ListKind();
+        u16 piece = sEd->items[sEd->cursor];
+        if (!sEd->owned[sEd->cursor])
+        {
+            PlaySE(SE_FAILURE);
+            return;
+        }
+        SetFlagBit("fxfav", kind, piece, !IsFavorite(kind, piece));
+        PlaySE(SE_SELECT);
+        DrawPanel();
+    }
+    else if (JOY_NEW(START_BUTTON) && sEd->mode == MODE_LIST)
+    {
+        // ALL / FAV / NEW: the cursor stays on the same piece where it can
+        u16 piece = sEd->shown ? sEd->items[sEd->cursor] : 0, i;
+        sEd->filter = (sEd->filter + 1) % FILTER_COUNT;
+        BuildList();
+        sEd->cursor = 0;
+        for (i = 0; i < sEd->shown; i++)
+            if (sEd->items[i] >= piece)
+            {
+                sEd->cursor = i;
+                break;
+            }
+        sEd->top = 0;
+        ListScroll();
+        PlaySE(SE_SELECT);
+        ListHover();
+        DrawPanel();
+    }
+    else if (JOY_NEW(START_BUTTON) && sEd->mode == MODE_PRESETS && sEd->shown && sEd->items[sEd->cursor] < MPFX_USER_PRESETS)
+    {
+        // keeps the mix from before the list in this slot
+        u8 slot = sEd->items[sEd->cursor];
+        sEd->slot = slot;
+        sEd->fx = sEd->before;
+        MP_BallFx_SaveUserPreset(slot, &sEd->fx);
+        PlaySE(SE_SAVE);
+        StartPreview();
+        DrawPanel();
+    }
+}
+
 static void SavePreset(void)
 {
     MP_BallFx_SaveUserPreset(sEd->slot, &sEd->fx);
@@ -766,10 +1495,15 @@ static void Task_Editor(u8 taskId)
         }
         return;
     }
-    if (sEd->note[0] && (gMain.newKeys & (A_BUTTON | B_BUTTON | DPAD_ANY | START_BUTTON | SELECT_BUTTON)))
+    if (sEd->note[0] && (gMain.newKeys & (A_BUTTON | B_BUTTON | DPAD_ANY | START_BUTTON | SELECT_BUTTON | L_BUTTON | R_BUTTON)))
     {
         sEd->note[0] = 0;   // any key clears the "saved" line (and still does its own thing)
         DrawInfo();
+    }
+    if (sEd->mode != MODE_ROWS)
+    {
+        Task_List();
+        return;
     }
     if (JOY_NEW(DPAD_UP))
     {
@@ -809,9 +1543,23 @@ static void Task_Editor(u8 taskId)
         DrawPanel();
     }
     else if (JOY_NEW(A_BUTTON))
+        OpenList();
+    else if ((JOY_NEW(L_BUTTON) || JOY_NEW(R_BUTTON)) && sRowKind[sEd->row] != 0xFF)
     {
-        PlaySE(SE_SELECT);
-        StartPreview();
+        // the favourite before / after this one
+        u8 kind = sRowKind[sEd->row], *field = KindField(&sEd->fx, kind);
+        u16 next = NextFavorite(kind, *field, JOY_NEW(L_BUTTON) ? -1 : 1);
+        if (next == *field)
+        {
+            PlaySE(SE_FAILURE);
+        }
+        else
+        {
+            *field = next;
+            PlaySE(SE_SELECT);
+            DrawPanel();
+            StartPreview();
+        }
     }
     else if (JOY_NEW(SELECT_BUTTON))
     {
@@ -889,6 +1637,7 @@ static void CB2_InitEditor(void)
     LoadCompressedPalette(gBattleEnvironmentPalette_TallGrass, BG_PLTT_ID(2), 3 * PLTT_SIZE_4BPP);
     LoadPalette(sTextPal, BG_PLTT_ID(TEXT_PAL), sizeof(sTextPal));
     LoadPalette(sTextPal, BG_PLTT_ID(0), PLTT_SIZEOF(1));
+    LoadSwatchPalettes();
 
     DrawPanel();
     CopyBgTilemapBufferToVram(0);
