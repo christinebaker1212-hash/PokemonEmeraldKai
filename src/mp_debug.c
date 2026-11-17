@@ -5079,6 +5079,45 @@ void MP_TestCommand(const char *cmd, const char *arg)
         void MP_Gatcha_Open(void);
         MP_Gatcha_Open();
     }
+    else if (strcmp(cmd, "popup") == 0 || strcmp(cmd, "popupclose") == 0)
+    {
+        // popup W H TEXT ("|" a new line) - a standard framed window at the top left with TEXT in Kai's letters
+        // (UI STYLE's pop-ups: how a style lays out words wider than Kai's); popupclose - takes it away
+        static u8 sWin = WINDOW_NONE;
+        static u8 sTexts[4][160], sNext;
+        u8 *sText = sTexts[sNext++ & 3];
+        if (sWin != WINDOW_NONE)
+        {
+            ClearStdWindowAndFrame(sWin, TRUE);
+            RemoveWindow(sWin);
+            sWin = WINDOW_NONE;
+        }
+        if (cmd[5] == 0)
+        {
+            int ww = 10, hh = 4, n = 0;
+            const char *t = arg;
+            struct WindowTemplate tpl = {0, 1, 1, 10, 4, 15, 0x200};
+            sscanf(arg, "%d %d", &ww, &hh);
+            while (*t && *t != ' ') t++;
+            while (*t == ' ') t++;
+            while (*t && *t != ' ') t++;
+            while (*t == ' ') t++;
+            for (; *t && n < 159; t++)
+                sText[n++] = *t == '|' ? CHAR_NEWLINE : *t == ' ' ? CHAR_SPACE
+                           : (*t >= 'A' && *t <= 'Z') ? CHAR_A + (*t - 'A') : (*t >= 'a' && *t <= 'z') ? CHAR_a + (*t - 'a')
+                           : (*t >= '0' && *t <= '9') ? CHAR_0 + (*t - '0') : *t == '!' ? CHAR_EXCL_MARK
+                           : *t == '?' ? CHAR_QUESTION_MARK : *t == '.' ? CHAR_PERIOD : CHAR_SPACE;
+            sText[n] = EOS;
+            tpl.width = ww, tpl.height = hh;
+            sWin = AddWindow(&tpl);
+            DrawStdWindowFrame(sWin, FALSE);
+            FillWindowPixelBuffer(sWin, PIXEL_FILL(1));
+            AddTextPrinterParameterized(sWin, FONT_NORMAL, sText, 0, 1, 0, NULL);
+            PutWindowTilemap(sWin);
+            CopyWindowToVram(sWin, COPYWIN_FULL);
+            printf("[test] popup %dx%d\n", ww, hh);
+        }
+    }
     else if (strcmp(cmd, "startmenu") == 0)
     {
         // startmenu - the START menu's rows now (POKEDEX / POKEMON by name, others by action number) and the NATIONAL DEX

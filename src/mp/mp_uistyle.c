@@ -536,7 +536,7 @@ static bool8 sPics[WINDOWS_MAX];   // (a picture drawn into the window: its insi
 static u8 sFramed[WINDOWS_MAX];   // 1 its dialogue frame drawn, 2 the standard frame, 0 neither
 // (each window's words line by line as printed, where and in what colour: a pop-up drawn in a style's own font)
 #define RUNS 32
-struct Run { u8 x, y, fg, lineH; u16 kaiW; u8 text[64]; };   // (LINEH: its new lines' spacing)
+struct Run { u8 x, y, fg, lineH; u16 kaiW; u8 text[160]; };   // (a long text's lines a style may wrap: the whole run)   // (LINEH: its new lines' spacing)
 static struct Run sRuns[WINDOWS_MAX][RUNS];
 static u8 sRunCount[WINDOWS_MAX];
 static bool8 sShown[WINDOWS_MAX];
@@ -3132,8 +3132,9 @@ static void PopUps(struct UiPack *p, u16 *frame)
     u8 w, k, oi;
     int drawn[8][4], nDrawn = 0;   // (the pop-ups drawn so far this frame)
     int put[40][3], nPut, j, cellH = 16;   // (the lines drawn in a window: their y, first and last x)
+    int sWraps[40][2], nWraps, hh;   // (the wrapped pieces: the y of the line they came from, their height)
     static u8 sLines[40][64], sFg[40];
-    bool8 fits;
+    bool8 fits, wrap;
     if (ws == NULL || wt == NULL)
         return;
     for (k = 0; k < ws->nOps; k++)
@@ -3181,19 +3182,25 @@ static void PopUps(struct UiPack *p, u16 *frame)
             continue;
         }
         x0 = t->tilemapLeft * 8, y0 = t->tilemapTop * 8, ww = t->width * 8;
+        // (RED's and CRYSTAL's letters are wider than Kai's: a line too long for the screen goes on to a next line
+        // at a space, the lines under it move down and the window grows to hold them, so a long text is laid out as
+        // a short one is, never in Kai's own letters inside the style's frame: the user, 2026-11-17)
+        wrap = (MP_UiStyle_Active() == UISTYLE_RED || MP_UiStyle_Active() == UISTYLE_CRYSTAL) && f && sBox[w][0] < 0;
         // (the lines laid out in the style's letters first: where each goes, Kai's place kept, a line set against
         // the right edge kept there, one reaching a run Kai set after it on its line moved past it)
         nPut = 0;
         fits = !sPics[w] && !SpritesOver(t);
+        nWraps = 0;
         for (k = 0; k < sRunCount[w] && fits; k++)
         {
             struct Run *r = &sRuns[w][k];
             const u8 *line = r->text;
-            int ln = 0;
+            int ln = 0, piece = 0;
             // (each of its lines: YES / NO is one string, a new line between)
             while (*line != EOS && ln < 8)
             {
-                int n = 0, x = x0 + r->x, sw, ly = r->y + ln * r->lineH;
+                int n = 0, x = x0 + r->x, sw, base = r->y + ln * r->lineH, ly, i3;
+                bool8 more = FALSE;
                 while (line[n] != EOS && line[n] != CHAR_NEWLINE && n < (int)sizeof(sLines[0]) - 1)
                 {
                     sLines[nPut < (int)ARRAY_COUNT(put) ? nPut : 0][n] = line[n];
@@ -3206,7 +3213,39 @@ static void PopUps(struct UiPack *p, u16 *frame)
                 }
                 sLines[nPut][n] = EOS;
                 sw = f ? Width(f, sLines[nPut], 255) : r->kaiW;
-                if (r->x > 0 && r->x + r->kaiW >= ww - 3 && ln == 0)
+                if (wrap && sw > DISPLAY_WIDTH - 20 - r->x)
+                {
+                    // (the longest start that fits, cut at a space; the rest a line of its own under it)
+                    int cut = n, room = DISPLAY_WIDTH - 20 - r->x;
+                    while (cut > 0)
+                    {
+                        while (cut > 0 && line[cut] != CHAR_SPACE)
+                            cut--;
+                        if (cut == 0)
+                            break;
+                        sLines[nPut][cut] = EOS;
+                        if (Width(f, sLines[nPut], 255) <= room)
+                            break;
+                        cut--;
+                    }
+                    if (cut > 0)
+                    {
+                        sLines[nPut][cut] = EOS;
+                        sw = Width(f, sLines[nPut], 255);
+                        n = cut + 1;   // (the space eaten: the next piece starts at the word after it)
+                        more = TRUE;
+                    }
+                    else
+                        sLines[nPut][n] = EOS;
+                }
+                // (its y: Kai's, under every wrapped piece of a line above it, and its own piece's place)
+                ly = base + piece * r->lineH;
+                for (i3 = 0; i3 < nWraps; i3++)
+                    if (sWraps[i3][0] < base)
+                        ly += sWraps[i3][1];
+                if (piece > 0 && nWraps < (int)ARRAY_COUNT(sWraps))
+                    sWraps[nWraps][0] = base, sWraps[nWraps][1] = r->lineH, nWraps++;
+                if (r->x > 0 && r->x + r->kaiW >= ww - 3 && ln == 0 && piece == 0)
                     x = x0 + ww - sw;
                 for (j = 0; j < nPut; j++)
                     if (put[j][0] == ly && put[j][1] < x && put[j][2] >= x)
@@ -3215,11 +3254,25 @@ static void PopUps(struct UiPack *p, u16 *frame)
                 sFg[nPut] = r->fg;
                 nPut++;
                 line += n;
+                if (more)
+                {
+                    piece++;   // (the same line's next piece, under this one)
+                    continue;
+                }
+                piece = 0;
                 if (*line == CHAR_NEWLINE)
                     line++;
                 ln++;
             }
         }
+        // (the window as tall as its lines now need: Kai's height, or more for the pieces wrapped)
+        hh = t->height * 8;
+        if (fits && nWraps > 0)
+            for (j = 0; j < nPut; j++)
+                if (put[j][0] + cellH + 1 > hh)
+                    hh = (put[j][0] + cellH + 1 + 7) & ~7;
+        if (hh > t->height * 8 && y0 + hh > DISPLAY_HEIGHT)
+            y0 = DISPLAY_HEIGHT - hh < 0 ? 0 : DISPLAY_HEIGHT - hh;   // (grown past the screen's foot: up, whole)
         // (lines the style's letters make wider than Kai's window: the window grows to hold them, toward the
         // screen's middle, a window against the right edge leftward, as the Game Boy games' menus open)
         if (fits && nPut > 0 && sBox[w][0] < 0)
@@ -3246,7 +3299,7 @@ static void PopUps(struct UiPack *p, u16 *frame)
         for (j = 0; j < nPut && fits; j++)
         {
             int i2;
-            if (put[j][1] < x0 || put[j][2] > x0 + ww || put[j][0] + cellH - 3 > t->height * 8 + 2)
+            if (put[j][1] < x0 || put[j][2] > x0 + ww || put[j][0] + cellH - 3 > hh + 2)
                 fits = FALSE;
             for (i2 = 0; i2 < j && fits; i2++)
                 if (put[i2][0] != put[j][0] && abs(put[i2][0] - put[j][0]) < cellH - 3
@@ -3258,14 +3311,14 @@ static void PopUps(struct UiPack *p, u16 *frame)
         {
             int d;
             for (d = 0; d < nDrawn; d++)
-                if (x0 < drawn[d][2] && drawn[d][0] < x0 + ww && y0 < drawn[d][3] && drawn[d][1] < y0 + t->height * 8
-                 && y0 < drawn[d][1] && drawn[d][1] - 16 - t->height * 8 >= 8)
-                    y0 = drawn[d][1] - 16 - t->height * 8;
+                if (x0 < drawn[d][2] && drawn[d][0] < x0 + ww && y0 < drawn[d][3] && drawn[d][1] < y0 + hh
+                 && y0 < drawn[d][1] && drawn[d][1] - 16 - hh >= 8)
+                    y0 = drawn[d][1] - 16 - hh;
         }
         if (sBox[w][0] < 0 && nDrawn < (int)ARRAY_COUNT(drawn))
         {
             drawn[nDrawn][0] = x0, drawn[nDrawn][1] = y0, drawn[nDrawn][2] = x0 + ww;
-            drawn[nDrawn][3] = y0 + t->height * 8, nDrawn++;
+            drawn[nDrawn][3] = y0 + hh, nDrawn++;
         }
         if (sBox[w][0] >= 0)
         {
@@ -3286,7 +3339,7 @@ static void PopUps(struct UiPack *p, u16 *frame)
                     }
         }
         else
-            PopUpFrame(frame, im, x0, y0, x0 + ww, y0 + t->height * 8, fill, &fit);
+            PopUpFrame(frame, im, x0, y0, x0 + ww, y0 + hh, fill, &fit);
         if (!fits)
         {
             // (Kai's own inside, and the sprites Kai shows over it, as the CO-OP menu's icons)
