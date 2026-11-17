@@ -986,7 +986,15 @@ void VDraw(void)
     memset(image, 0, sizeof(sFrameImage));
     MP_World_PrepareLights();   // Moemon Co-op: friends' lights in dark caves (window 0)
     MP_UiStyle_PreFrame();      // Moemon Kai: UI STYLE: the game's boxes it draws in place of (mp_uistyle.c)
+    {
+        void MP_GbPal_PreDraw(void);
+        MP_GbPal_PreDraw();     // Moemon Kai: GB OPTIONS > COLORS: palette RAM in the Game Boy's (mp_gbpal.c) ...
+    }
     DrawFrame(image);
+    {
+        void MP_GbPal_PostDraw(void);
+        MP_GbPal_PostDraw();    // ... and back as the game left it
+    }
     MP_Candy_Composite(image);      // Moemon Co-op: the CANDY JAR's picture under everything drawn
     MP_BagUI_Composite(image);      // ... and the BAG's
     MP_AstralFx_Prism(image);       // ... the ASTRAL BALL's prismatic sheen (its own pixels, before any tint)
@@ -1045,6 +1053,10 @@ void VDraw(void)
         void MP_BoxGrid_Composite(u16 *frame);
         MP_BoxGrid_Composite(image);     // Moemon Kai: the PC boxes' 3x3 grid (mp_boxgrid.c)
         MP_Credits_Composite(image);     // Moemon Kai: the credits' "Skip the credits?" bar (credits.c)
+    }
+    {
+        void MP_GbPal_Composite(u16 *frame);
+        MP_GbPal_Composite(image);       // Moemon Kai: GB OPTIONS > COLORS: what palette RAM didn't draw (mp_gbpal.c)
     }
     {
         void MP_FxClip_Frame(const u16 *frame);

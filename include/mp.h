@@ -545,12 +545,16 @@ enum {
     MP_GB_CAUGHT   = 1 << 1,   // RED: the caught ball on a wild foe's box (Red had none; CRYSTAL always shows it)
     // (the stages after the first: a bit set takes KAI's way, so 0, the default, is the Game Boy's for old settings too)
     MP_GB_KAI_BALLS = 1 << 2,  // BALL THROWS: KAI's throws (unset: Red's / Crystal's own for every ball: mp_legacy_anim.c)
+    MP_GB_PAL_SHIFT = 4,       // COLORS, 3 bits (mp_gbpal.c: RED 0 DMG 1 POCKET 2 LIGHT 3 COLOR 4 GBA 5 KAI; CRYSTAL 0 COLOR 1 GBA 2 KAI)
+    MP_GB_PAL_MASK = 7,
     MP_GB_KAI_TRANS = 1 << 3,  // TRANSITIONS: KAI's (unset: Red's / Crystal's over KAI's, fitted to its time: mp_gb_trans.c)
 };
 #define MP_GB_DEFAULTS_RED     0
 #define MP_GB_DEFAULTS_CRYSTAL MP_GB_CAUGHT
 bool8 MP_Gb_On(u16 bit);   // (mp_uistyle.c: the style showing is RED or CRYSTAL and its GB OPTIONS have BIT)
 bool8 MP_Gb_Off(u16 bit);  // (... RED or CRYSTAL without it)
+u8 MP_GbPal_Setting(void);  // GB OPTIONS > COLORS as set for the style showing (mp_gbpal.c; MP_GB_PAL_SHIFT)
+bool8 MP_GbPal_Active(void);  // ... and it draws the picture now (RED / CRYSTAL showing, not KAI)
 void MP_GbTrans_Begin(u8 transitionId);   // (mp_gb_trans.c: GB OPTIONS > TRANSITIONS over KAI's)
 void MP_GbTrans_End(void);
 #define MP_BATTLE_WEATHER_STATE 5                 // B_COMM_MP_WEATHER: the battle's weather, the field's, settled

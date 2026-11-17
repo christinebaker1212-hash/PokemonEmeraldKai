@@ -28,6 +28,10 @@
 #include "tcg/integration.h"
 #include "platform/fight.h"
 
+// Moemon Kai: GB OPTIONS > COLORS (mp_gbpal.c) over DISPLAY > COLOR (not its filters): -1 as chosen, 0 DEFAULT, 1 the
+// GBA's screen
+int gMpGbDisplayColor = -1;
+
 #ifdef PLATFORM_SDL2
 
 #ifdef _WIN32
@@ -491,13 +495,18 @@ static void BuildColorLut(int color)
 }
 
 // The frame in its COLOR (ARGB8888 into sColorTex); FALSE: shown as it is
+static int ShownColor(void)
+{
+    return gMpGbDisplayColor >= 0 ? (gMpGbDisplayColor ? DISPLAY_COLOR_GBA : DISPLAY_COLOR_DEFAULT) : sCfg.color;
+}
+
 static int UploadColored(const void *pixels)
 {
     const Uint16 *src = pixels;
-    int i;
-    if (sCfg.color <= DISPLAY_COLOR_DEFAULT || sCfg.color >= DISPLAY_COLOR_COUNT || sColorTex == NULL || pixels == NULL)
+    int i, color = ShownColor();
+    if (color <= DISPLAY_COLOR_DEFAULT || color >= DISPLAY_COLOR_COUNT || sColorTex == NULL || pixels == NULL)
         return 0;
-    BuildColorLut(sCfg.color);
+    BuildColorLut(color);
     for (i = 0; i < GBA_W * GBA_H; i++)
         sColorPixels[i] = sColorLut[src[i] & 0x7FFF];
     SDL_UpdateTexture(sColorTex, NULL, sColorPixels, GBA_W * 4);
@@ -1378,7 +1387,7 @@ static void RenderToBackbuffer(void)
     // Moemon Kai: the card screens are the game picture while they're open (src/tcg/tcg_ui.c)
     gameTex = sGameTex ? Tcg_Canvas(sRenderer, sGameTex) : NULL;
     if (gameTex == NULL)   // (the game's picture: in its COLOR when one is chosen)
-        gameTex = sCfg.color != DISPLAY_COLOR_DEFAULT && sColorTex && sColorLutFor == sCfg.color ? sColorTex : sGameTex;
+        gameTex = ShownColor() != DISPLAY_COLOR_DEFAULT && sColorTex && sColorLutFor == ShownColor() ? sColorTex : sGameTex;
     SDL_SetRenderTarget(sRenderer, NULL);
     if (sPanelCount > 0)
         SDL_SetRenderDrawColor(sRenderer, 17, 19, 26, 255);   // beside the game: the panel's slate, darker

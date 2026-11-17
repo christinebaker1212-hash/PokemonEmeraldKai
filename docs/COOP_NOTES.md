@@ -8185,3 +8185,26 @@ overlays): the field as it was on the first frame, a Game Boy cell 12 x 8.9 of o
 transition (sKaiTransFrames, measured with MOEMON_ANIMLEN: "transition length: ID FRAMES"): a longer timeline spread
 over it, a shorter one resting on its last frame (black). `mp gbtrans N` forces timeline N (255: the battle's own),
 `mp transition N` starts KAI's N on the field. Scenario gb_transitions.
+
+### GB OPTIONS stage 4: COLORS
+
+GB OPTIONS > COLORS (bits 4-6 of the style's gbOptions, MP_GB_PAL_SHIFT): RED 0 DMG (the default: the first Game
+Boy's four greens), 1 POCKET (its greys), 2 LIGHT (its backlight), 3 COLOR (Red on a Game Boy Color: its boot ROM's
+palettes for Red, the background red and sprites green; a battle's POKeMON in the background's, since Red draws them
+on the background), 4 GBA (COLOR on a GBA's screen), 5 KAI; CRYSTAL 0 COLOR (the default), 1 GBA, 2 KAI.
+src/mp/mp_gbpal.c, from sdl2.c VDraw: MP_GbPal_PreDraw puts every 16-colour palette in palette RAM (16 BG + 64 OBJ)
+into four shades just before DrawFrame and MP_GbPal_PostDraw puts RAM back. Shades come from the palette as loaded
+(gPlttBufferUnfaded), so a fade steps through the shades as a Game Boy's BGP did (Faded); brightness counts a strong
+colour darker (GbLum: an HP bar's fill or a fire's orange in the dark shades, as Game Boy art drew them). CRYSTAL:
+each palette's four colours by k-means over its colours, weighted by the pixels the background shows of each
+(UsedPalettes scans the text BGs' visible tiles; colour 0 is see-through and not counted), each drawn in the palette's
+own colour nearest its group's middle; at most eight background and eight sprite palettes on screen (KeepEight merges
+the one whose tiles would change least, weighted by how much of the screen it covers); a battle's POKeMON 1-251 in
+Crystal's own colours for it, normal or shiny (src/mp/mp_gbpal_data.h from tools/moemon_legacy/gbpal_species.py,
+pret/pokecrystal's front.png middle entries and shiny.pal). MP_GbPal_Composite then handles what palette RAM didn't
+draw (full-colour pictures, UI STYLE's windows, overlays): mono and RED's COLOR by a 32K-colour table (a colour within
+a step of a mode colour, as the renderer's blends leave them, snaps to it, the rest by GbLum), CRYSTAL four colours to
+an 8x8 cell (ReduceCell). The frame's top bit is kept on every pixel (screenshots read it as alpha). Over DISPLAY >
+COLOR but not its filters: display.c gMpGbDisplayColor (-1 as chosen, 0 DEFAULT, 1 the GBA profile for GBA), and the
+COLOR row reads "GB OPTIONS". MOEMON_GBPAL_TRACE=1 logs CRYSTAL's palettes and merges every 120 frames. Scenario
+gb_colors (its check.py: DMG / POCKET / COLOR shots hold only their colours, KAI untouched, CRYSTAL's cells).

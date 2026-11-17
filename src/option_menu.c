@@ -136,6 +136,7 @@ enum
     OPT_GB_CAUGHT,    // its CAUGHT MARK (RED)
     OPT_GB_BALLS,     // its BALL THROWS: RED's / CRYSTAL's own, or KAI's (mp_legacy_anim.c)
     OPT_GB_TRANS,     // its TRANSITIONS (mp_gb_trans.c)
+    OPT_GB_COLORS,    // its COLORS: the Game Boy's (mp_gbpal.c)
     OPT_GB_BACK,
     OPT_MENUMONS,     // Moemon Kai: DISPLAY > MENU POKeMON ORIGINAL (/ EXTENDED) / KAI: RED's and CRYSTAL's party icons
     OPT_CLOSE,
@@ -315,6 +316,7 @@ static const u8 sText_GbScenery[] = _("BATTLE SCENERY");
 static const u8 sText_GbCaught[] = _("CAUGHT MARK");
 static const u8 sText_GbBalls[] = _("BALL THROWS");
 static const u8 sText_GbTrans[] = _("TRANSITIONS");
+static const u8 sText_GbColors[] = _("COLORS");
 static const u8 sText_MenuMonsOriginal[] = _("ORIGINAL");
 static const u8 sText_MenuMonsExtended[] = _("EXTENDED");
 static const u8 sText_MenuMonsKai[] = _("KAI");
@@ -471,6 +473,7 @@ static void BuildRows(void)
     {
         AddRow(OPT_GB_BALLS, 0);
         AddRow(OPT_GB_TRANS, 0);
+        AddRow(OPT_GB_COLORS, 0);
         AddRow(OPT_GB_SCENERY, 0);
         if (gMpConfig.uiStyle == UISTYLE_RED)
             AddRow(OPT_GB_CAUGHT, 0);   // (CRYSTAL always shows it, as Crystal did)
@@ -887,9 +890,22 @@ static u8 Choices(u8 row, const u8 **names, u8 *buf)
             MP_AsciiToGame(buf, names[Display_GetFilter() % DISPLAY_FILTER_COUNT], 16);
         }
         break;
+    case OPT_GB_COLORS:
+        {
+            static const char *const red[6] = {"DMG", "POCKET", "LIGHT", "COLOR", "GBA", "KAI"};
+            static const char *const crystal[3] = {"COLOR", "GBA", "KAI"};
+            u8 v = MP_GbPal_Setting();
+            MP_AsciiToGame(buf, gMpConfig.uiStyle == UISTYLE_CRYSTAL ? crystal[min(v, 2)] : red[min(v, 5)], 16);
+        }
+        break;
     case OPT_COLOR:
         {
             static const char *const names[DISPLAY_COLOR_COUNT] = {"DEFAULT", "GBA CORRECTED", "GBA SP", "GBA SP 101", "NDS"};
+            if (MP_GbPal_Active())   // (GB OPTIONS > COLORS over it)
+            {
+                MP_AsciiToGame(buf, "GB OPTIONS", 16);
+                break;
+            }
             MP_AsciiToGame(buf, names[Display_GetColor() % DISPLAY_COLOR_COUNT], 16);
         }
         break;
@@ -932,6 +948,7 @@ static u8 Current(u8 row)
     case OPT_SCALING:     return Display_GetScaleMode();
     case OPT_FILTER:      return 0;   // (one value shown: 1.63.14, eight of them)
     case OPT_COLOR:       return 0;   // (one value shown)
+    case OPT_GB_COLORS:   return 0;
     case OPT_VSYNC:       return Display_GetVSync() != 0;
     case OPT_FRAMERATE:   return Display_GetFrameCap();
     case OPT_CARDART:     return gMpConfig.cardArt % MP_CARD_ART_COUNT;
@@ -1031,6 +1048,13 @@ static void Change(u8 row, int dir)
     case OPT_SCALING:     Display_SetScaleMode(Wrap(Display_GetScaleMode() + dir, DISPLAY_SCALE_COUNT)); break;
     case OPT_FILTER:      Display_SetFilter(Wrap(Display_GetFilter() + dir, DISPLAY_FILTER_COUNT)); break;
     case OPT_COLOR:       Display_SetColor(Wrap(Display_GetColor() + dir, DISPLAY_COLOR_COUNT)); break;
+    case OPT_GB_COLORS:
+        {
+            u8 n = gMpConfig.uiStyle == UISTYLE_CRYSTAL ? 3 : 6, v = Wrap(min(MP_GbPal_Setting(), n - 1) + dir, n);
+            GbOptions() = (GbOptions() & ~(MP_GB_PAL_MASK << MP_GB_PAL_SHIFT)) | (v << MP_GB_PAL_SHIFT);
+            MPNet_Log("gb options: %s %x", gMpConfig.uiStyle == UISTYLE_RED ? "red" : "crystal", GbOptions());
+        }
+        break;
     case OPT_VSYNC:       Display_SetVSync(!Display_GetVSync()); break;
     case OPT_FRAMERATE:   Display_SetFrameCap(Wrap(Display_GetFrameCap() + dir, DISPLAY_FPS_COUNT)); break;
     case OPT_CARDART:     gMpConfig.cardArt = Wrap(gMpConfig.cardArt % MP_CARD_ART_COUNT + dir, MP_CARD_ART_COUNT); break;
@@ -1271,6 +1295,7 @@ static const u8 *RowLabel(u8 row, u8 *buf)
     case OPT_GB_CAUGHT: return sText_GbCaught;
     case OPT_GB_BALLS: return sText_GbBalls;
     case OPT_GB_TRANS: return sText_GbTrans;
+    case OPT_GB_COLORS: return sText_GbColors;
     case OPT_GB_BACK:  return sText_Back;
     case OPT_BGMUTE:  return sText_BgMute;
     case OPT_ANNOUNCER: return sText_Announcer;
@@ -1408,6 +1433,18 @@ static bool8 HintText(u8 *buf)
         snprintf(ascii, sizeof(ascii), "%s", !Display_GetVSync()
                  ? "TURN VSYNC ON IF THE PICTURE TEARS" : hints[Display_GetFrameCap()]);
     }
+    else if (opt == OPT_GB_COLORS)
+    {
+        static const char *const red[6] = {"AS THE FIRST GAME BOY'S GREEN SCREEN", "AS THE GAME BOY POCKET'S GREY SCREEN",
+            "AS THE GAME BOY LIGHT'S LIT SCREEN", "AS RED ON A GAME BOY COLOR", "AS RED ON A GAME BOY ADVANCE",
+            "KAI'S OWN COLORS"};
+        static const char *const crystal[3] = {"FOUR COLORS A TILE, AS THE GAME BOY COLOR",
+            "AS CRYSTAL ON A GAME BOY ADVANCE", "KAI'S OWN COLORS"};
+        u8 v = MP_GbPal_Setting();
+        snprintf(ascii, sizeof(ascii), "%s", gMpConfig.uiStyle == UISTYLE_CRYSTAL ? crystal[min(v, 2)] : red[min(v, 5)]);
+    }
+    else if (opt == OPT_COLOR && MP_GbPal_Active())
+        snprintf(ascii, sizeof(ascii), "%s", "GB OPTIONS > COLORS CHOOSES THEM");
     else if (opt == OPT_COLOR)
     {
         static const char *const hints[DISPLAY_COLOR_COUNT] = {

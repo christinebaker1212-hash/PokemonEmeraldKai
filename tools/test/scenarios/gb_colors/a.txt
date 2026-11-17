@@ -1,0 +1,25 @@
+pressuntil A field 5000
+mp uistyle red
+mp gboptions red 0
+wait 30
+shot dmg_field
+mp gboptions red 10
+wait 10
+shot pocket_field
+mp gboptions red 30
+wait 10
+shot color_field
+mp gboptions red 50
+wait 10
+shot kai_field
+mp uistyle crystal
+mp gboptions crystal 2
+wait 10
+shot crystal_field
+mp uistyle red
+mp gboptions red 0
+mp wild 4:10
+pressuntil A action 4000
+wait 20
+shot dmg_battle
+quit
