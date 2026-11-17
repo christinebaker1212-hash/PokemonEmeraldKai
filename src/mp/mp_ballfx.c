@@ -145,7 +145,7 @@ s8 MP_BallFx_WhichPreset(const struct MpBallFx *fx)
 bool8 MP_BallFx_GetUserPreset(u8 slot, struct MpBallFx *out)
 {
     char key[16];
-    s32 v;
+    s32 v, hi;
     if (slot >= MPFX_USER_PRESETS)
         return FALSE;
     snprintf(key, sizeof(key), "fxpreset%d", slot + 1);
@@ -153,7 +153,12 @@ bool8 MP_BallFx_GetUserPreset(u8 slot, struct MpBallFx *out)
     if (!(v & USER_PRESET_USED))
         return FALSE;
     if (v & USER_PRESET_V2)
-        MP_BallFx_Unpack(v & 0xFFFFFF, (v >> 24) & 0x7, out);
+    {
+        // (the bits past 24 and the sound's fourth bit in "fxpresethiN", since 1.202.0)
+        snprintf(key, sizeof(key), "fxpresethi%d", slot + 1);
+        hi = MP_SaveData_Get(key);
+        MP_BallFx_Unpack((v & 0xFFFFFF) | ((u32)(hi & 0x3F) << 24), ((v >> 24) & 0x7) | ((hi >> 6) & 1) << 3, out);
+    }
     else
         MP_BallFx_Unpack(v & 0xFFFF, (v >> 16) & 0x7, out);
     return TRUE;
@@ -162,10 +167,14 @@ bool8 MP_BallFx_GetUserPreset(u8 slot, struct MpBallFx *out)
 void MP_BallFx_SaveUserPreset(u8 slot, const struct MpBallFx *fx)
 {
     char key[16];
+    u32 packed;
     if (slot >= MPFX_USER_PRESETS)
         return;
+    packed = MP_BallFx_Pack(fx);
     snprintf(key, sizeof(key), "fxpreset%d", slot + 1);
-    MP_SaveData_Set(key, USER_PRESET_USED | USER_PRESET_V2 | ((fx->sound & 0x7) << 24) | MP_BallFx_Pack(fx));
+    MP_SaveData_Set(key, USER_PRESET_USED | USER_PRESET_V2 | ((fx->sound & 0x7) << 24) | (packed & 0xFFFFFF));
+    snprintf(key, sizeof(key), "fxpresethi%d", slot + 1);
+    MP_SaveData_Set(key, (packed >> 24) | ((fx->sound >> 3) & 1) << 6);
 }
 
 s8 MP_BallFx_WhichUserPreset(const struct MpBallFx *fx)
@@ -191,11 +200,14 @@ void MP_BallFx_EffectName(const struct MpBallFx *fx, char *out, u32 size)
 
 // MON_DATA_MP_BALLFX (substruct 0's spare u16): form 0-3, particles 4-7, energy color 8-11, recall 12-14;
 // MON_DATA_MP_BALLFX_EXT (8 bits): form bit 4, particles bit 4, color bits 4-5, recall bits 3-5 (all 0 in
-// Moemon from before there were more); the sound in the spare flag bits
+// Moemon from before there were more); MON_DATA_MP_BALLFX_EXT2 (11 bits, since 1.202.0): form bits 5-6, particles
+// bits 5-6, recall bits 6-7 (5 bits spare); the sound (4 bits) in the spare flag bits.
+// Packed (MP_BallFx_Pack): BALLFX | EXT << 16 | EXT2's six bits << 24: the 24-bit packing of before kept as it was
 void MP_BallFx_OfBoxMon(const struct BoxPokemon *boxMon, struct MpBallFx *out)
 {
     u32 v = GetBoxMonData((struct BoxPokemon *)boxMon, MON_DATA_MP_BALLFX, NULL)
-          | (GetBoxMonData((struct BoxPokemon *)boxMon, MON_DATA_MP_BALLFX_EXT, NULL) << 16);
+          | (GetBoxMonData((struct BoxPokemon *)boxMon, MON_DATA_MP_BALLFX_EXT, NULL) << 16)
+          | ((GetBoxMonData((struct BoxPokemon *)boxMon, MON_DATA_MP_BALLFX_EXT2, NULL) & 0x3F) << 24);
     MP_BallFx_Unpack(v, GetBoxMonData((struct BoxPokemon *)boxMon, MON_DATA_MP_BALLFX_SOUND, NULL), out);
 }
 
@@ -208,21 +220,22 @@ u32 MP_BallFx_Pack(const struct MpBallFx *fx)
 {
     u32 base = (fx->form & 0xF) | ((fx->part & 0xF) << 4) | ((fx->color & 0xF) << 8) | ((fx->recall & 0x7) << 12);
     u32 ext = ((fx->form >> 4) & 1) | (((fx->part >> 4) & 1) << 1) | (((fx->color >> 4) & 3) << 2) | (((fx->recall >> 3) & 7) << 4);
-    return base | (ext << 16);
+    u32 ext2 = ((fx->form >> 5) & 3) | (((fx->part >> 5) & 3) << 2) | (((fx->recall >> 6) & 3) << 4);
+    return base | (ext << 16) | (ext2 << 24);
 }
 
 void MP_BallFx_Unpack(u32 v, u8 sound, struct MpBallFx *out)
 {
-    u32 ext = (v >> 16) & 0xFF;
-    u8 form = (v & 0xF) | ((ext & 1) << 4);
-    u8 part = ((v >> 4) & 0xF) | (((ext >> 1) & 1) << 4);
+    u32 ext = (v >> 16) & 0xFF, ext2 = (v >> 24) & 0x3F;
+    u8 form = (v & 0xF) | ((ext & 1) << 4) | ((ext2 & 3) << 5);
+    u8 part = ((v >> 4) & 0xF) | (((ext >> 1) & 1) << 4) | (((ext2 >> 2) & 3) << 5);
     u8 color = ((v >> 8) & 0xF) | (((ext >> 2) & 3) << 4);
-    u8 recall = ((v >> 12) & 0x7) | (((ext >> 4) & 7) << 3);
+    u8 recall = ((v >> 12) & 0x7) | (((ext >> 4) & 7) << 3) | (((ext2 >> 4) & 3) << 6);
     out->form = form < MPFX_FORM_COUNT ? form : 0;
     out->part = part < MPFX_PART_COUNT ? part : 0;
     out->color = color < MP_BALL_COLORS ? color : 0;
     out->recall = recall < MPFX_RECALL_COUNT ? recall : 0;
-    out->sound = sound & 0x7;
+    out->sound = (sound & 0xF) < MPFX_SOUND_COUNT ? sound & 0xF : 0;
 }
 
 void MP_BallFx_SetBoxMon(struct BoxPokemon *boxMon, const struct MpBallFx *fx)
@@ -230,9 +243,11 @@ void MP_BallFx_SetBoxMon(struct BoxPokemon *boxMon, const struct MpBallFx *fx)
     u32 packed = MP_BallFx_Pack(fx);
     u16 v = packed & 0xFFFF;
     u8 ext = packed >> 16;
-    u8 s = fx->sound & 0x7;
+    u16 ext2 = (GetBoxMonData(boxMon, MON_DATA_MP_BALLFX_EXT2, NULL) & ~0x3F) | ((packed >> 24) & 0x3F);
+    u8 s = fx->sound & 0xF;
     SetBoxMonData(boxMon, MON_DATA_MP_BALLFX, &v);
     SetBoxMonData(boxMon, MON_DATA_MP_BALLFX_EXT, &ext);
+    SetBoxMonData(boxMon, MON_DATA_MP_BALLFX_EXT2, &ext2);
     SetBoxMonData(boxMon, MON_DATA_MP_BALLFX_SOUND, &s);
 }
 

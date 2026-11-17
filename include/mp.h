@@ -162,7 +162,7 @@ struct MpState
     u16 seq;
     u16 followerDex;   // national dex number of the follower Pokémon (0 = none)
     u8 followerFlags;  // bit 0: female, bits 1-3: its ball effect's sound accent, bits 4-5: sent-out count, bit 6: its recall is playing, bit 7: shiny
-    u32 followerFx;    // its ball effect (MP_BallFx_Pack: 24 bits)
+    u32 followerFx;    // its ball effect (MP_BallFx_Pack: 30 bits)
     s16 followerHue;   // its Stadium hue in degrees (mp_hue.c; 0 = its own colors)
     u8 badges;         // how many gym badges (catch-up bonus)
     u8 light;          // the dark map's flash level around them (0 bright, 1 FLASH, 7 dim; mp_world.c)
@@ -1596,7 +1596,7 @@ struct Pokemon;
 void MP_BallFx_OfBoxMon(const struct BoxPokemon *boxMon, struct MpBallFx *out);
 void MP_BallFx_OfMon(struct Pokemon *mon, struct MpBallFx *out);
 void MP_BallFx_SetBoxMon(struct BoxPokemon *boxMon, const struct MpBallFx *fx);
-u32 MP_BallFx_Pack(const struct MpBallFx *fx);                 // 24 bits: MON_DATA_MP_BALLFX | MON_DATA_MP_BALLFX_EXT << 16
+u32 MP_BallFx_Pack(const struct MpBallFx *fx);                 // 30 bits: MON_DATA_MP_BALLFX | _EXT << 16 | _EXT2 & 0x3F << 24
 void MP_BallFx_Unpack(u32 v, u8 sound, struct MpBallFx *out);
 bool8 MP_BallFx_IsDefaultEntrance(const struct MpBallFx *fx);
 u16 MP_BallFx_EnergyRgb(u8 color);

@@ -4062,7 +4062,10 @@ u32 GetBoxMonData3(struct BoxPokemon *boxMon, s32 field, u8 *data)
         retVal = substruct0->heldItem;
         break;
     case MON_DATA_EXP:
-        retVal = substruct0->experience;
+        retVal = substruct0->experience & MP_EXP_MASK;   // Moemon Co-op: the top bits are MON_DATA_MP_BALLFX_EXT2's
+        break;
+    case MON_DATA_MP_BALLFX_EXT2:
+        retVal = substruct0->experience >> MP_EXP_BITS;
         break;
     case MON_DATA_PP_BONUSES:
         retVal = substruct0->ppBonuses;
@@ -4470,8 +4473,20 @@ void SetBoxMonData(struct BoxPokemon *boxMon, s32 field, const void *dataArg)
         SET16(substruct0->heldItem);
         break;
     case MON_DATA_EXP:
-        SET32(substruct0->experience);
+    {
+        // Moemon Co-op: EXP in its 21 bits (no POKeMON can have more), the top ones kept: MON_DATA_MP_BALLFX_EXT2
+        u32 v = data[0] + (data[1] << 8) + (data[2] << 16) + ((u32)data[3] << 24);
+        if (v > MP_EXP_MASK)
+            v = MP_EXP_MASK;
+        substruct0->experience = (substruct0->experience & ~MP_EXP_MASK) | v;
         break;
+    }
+    case MON_DATA_MP_BALLFX_EXT2:
+    {
+        u32 v = (data[0] + (data[1] << 8)) & 0x7FF;
+        substruct0->experience = (substruct0->experience & MP_EXP_MASK) | (v << MP_EXP_BITS);
+        break;
+    }
     case MON_DATA_PP_BONUSES:
         SET8(substruct0->ppBonuses);
         break;

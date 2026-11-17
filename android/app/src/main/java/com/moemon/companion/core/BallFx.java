@@ -25,11 +25,11 @@ public final class BallFx {
 
     public static BallFx unpack(long v, int sound) {
         BallFx f = new BallFx();
-        int ext = (int) ((v >> 16) & 0xFF);
-        f.form = (int) (v & 0xF) | ((ext & 1) << 4);
-        f.part = (int) ((v >> 4) & 0xF) | (((ext >> 1) & 1) << 4);
+        int ext = (int) ((v >> 16) & 0xFF), ext2 = (int) ((v >> 24) & 0x3F);   // (ext2: since 1.202.0)
+        f.form = (int) (v & 0xF) | ((ext & 1) << 4) | ((ext2 & 3) << 5);
+        f.part = (int) ((v >> 4) & 0xF) | (((ext >> 1) & 1) << 4) | (((ext2 >> 2) & 3) << 5);
         f.color = (int) ((v >> 8) & 0xF) | (((ext >> 2) & 3) << 4);
-        f.recall = (int) ((v >> 12) & 0x7) | (((ext >> 4) & 7) << 3);
+        f.recall = (int) ((v >> 12) & 0x7) | (((ext >> 4) & 7) << 3) | (((ext2 >> 4) & 3) << 6);
         f.sound = sound & 7;
         return f;
     }
@@ -37,7 +37,8 @@ public final class BallFx {
     public long pack() {
         long base = (form & 0xF) | ((part & 0xF) << 4) | ((color & 0xF) << 8) | ((recall & 0x7) << 12);
         long ext = ((form >> 4) & 1) | (((part >> 4) & 1) << 1) | (((color >> 4) & 3) << 2) | (((recall >> 3) & 7) << 4);
-        return base | (ext << 16);
+        long ext2 = ((form >> 5) & 3) | (((part >> 5) & 3) << 2) | (((recall >> 6) & 3) << 4);
+        return base | (ext << 16) | (ext2 << 24);
     }
 
     public int get(int kind) {

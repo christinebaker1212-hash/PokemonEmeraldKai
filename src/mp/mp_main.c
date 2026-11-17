@@ -979,6 +979,7 @@ static void PackState(const struct MpState *s, u8 *p)
     p[34] = s->lifeEmote; p[35] = s->lifeEmoteSeq;
     p[36] = (u8)s->lifePx; p[37] = (u8)s->lifePy; p[38] = s->lifeFace;
     p[39] = s->top3;
+    p[40] = s->followerFx >> 24;   // (the effect's bits past 24, since protocol 85)
 }
 
 static void UnpackState(const u8 *p, struct MpState *s)
@@ -989,7 +990,7 @@ static void UnpackState(const u8 *p, struct MpState *s)
     s->flags = p[10]; s->topLevel = p[11]; s->partyCount = p[12]; s->emote = p[13];
     s->seq = GetU16(p + 14);
     s->followerDex = GetU16(p + 16); s->followerFlags = p[18]; s->badges = p[19];
-    s->followerFx = GetU16(p + 20) | ((u32)p[23] << 16);
+    s->followerFx = GetU16(p + 20) | ((u32)p[23] << 16) | ((u32)(p[40] & 0x3F) << 24);
     s->light = p[22] & 0x7F;
     s->cardDuel = p[22] >> 7;
     s->followerHue = (s16)GetU16(p + 24);

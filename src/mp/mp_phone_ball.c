@@ -82,7 +82,7 @@ static bool8 FxAllowed(const struct MpBallFx *fx, const struct MpBallFx *had)
 static bool8 ParseFx(const char *json, struct MpBallFx *out)
 {
     long long pack, snd = 0;
-    if (!JsonNum(json, "fx", &pack) || pack < 0 || pack > 0xFFFFFF)
+    if (!JsonNum(json, "fx", &pack) || pack < 0 || pack > 0x3FFFFFFF)
         return FALSE;
     JsonNum(json, "fxs", &snd);
     if (snd < 0 || snd >= MPFX_SOUND_COUNT)

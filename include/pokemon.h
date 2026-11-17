@@ -99,7 +99,12 @@ enum {
     MON_DATA_MP_BALLFX_EXT,    // Moemon Co-op: 8 more bits for the effect (the markings byte's spare top 4 bits and
                                // the 4 unused ribbon bits; mp_ballfx.c)
     MON_DATA_FORM,             // Moemon Kai: the stored form (the language byte's spare top 4 bits; mp_forms.c)
+    MON_DATA_MP_BALLFX_EXT2,   // Moemon Co-op: 11 more bits for the effect: EXP's top bits, never used (the most EXP
+                               // there is, 1,640,000, needs 21: MON_DATA_EXP reads and keeps only those; mp_ballfx.c)
 };
+
+#define MP_EXP_BITS 21
+#define MP_EXP_MASK ((1u << MP_EXP_BITS) - 1)
 
 struct PokemonSubstruct0
 {
