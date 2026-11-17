@@ -1,0 +1,29 @@
+pressuntil A field 5000
+wait 60
+mp uistyle firered
+press START 2
+wait 30
+press DOWN 2
+wait 10
+press A 2
+wait 90
+shot party
+press A 2
+wait 30
+press DOWN 2
+wait 8
+shot actions
+press A 2
+wait 20
+press DOWN 2
+wait 8
+press DOWN 2
+wait 8
+shot choose2
+press A 2
+wait 12
+shot sliding
+wait 130
+shot after
+mp partyids
+quit

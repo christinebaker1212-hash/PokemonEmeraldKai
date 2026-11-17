@@ -3291,6 +3291,40 @@ static void Task_GbSwitch(u8 taskId)
     }
 }
 
+// Moemon Kai: FIRERED / PLATINUM / BLACK's SWITCH (UI STYLE, the user 2026-11-17: "no animations for swapping
+// party pokemon position in FireRed and beyond like in Kai"): Kai's slide on the style's own boxes, both slots out to
+// their sides 8 pixels a frame, swapped, then back in (mp_uistyle.c PartyScreen draws them moved)
+#define tStyleStep  data[0]
+#define tStyleOut   data[1]
+#define tStyleSteps data[2]
+
+static void Task_StyleSwitch(u8 taskId)
+{
+    s16 *data = gTasks[taskId].data;
+    if (tStyleOut)
+    {
+        tStyleStep++;
+        if (tStyleStep >= tStyleSteps)
+        {
+            SwitchPartyMon();
+            DisplayPartyPokemonData(gPartyMenu.slotId);
+            DisplayPartyPokemonData(gPartyMenu.slotId2);
+            tStyleOut = FALSE;
+        }
+    }
+    else if (--tStyleStep <= 0)
+    {
+        tStyleStep = 0;
+        MP_UiStyle_PartySlide(gPartyMenu.slotId, 0);
+        MP_UiStyle_PartySlide(gPartyMenu.slotId2, 0);
+        MPNet_Log("party: switched %d and %d (slid as the style's boxes)", gPartyMenu.slotId, gPartyMenu.slotId2);
+        FinishTwoMonAction(taskId);
+        return;
+    }
+    MP_UiStyle_PartySlide(gPartyMenu.slotId, tStyleStep);
+    MP_UiStyle_PartySlide(gPartyMenu.slotId2, tStyleStep);
+}
+
 static void SwitchSelectedMons(u8 taskId)
 {
     s16 *data = gTasks[taskId].data;
@@ -3304,6 +3338,17 @@ static void SwitchSelectedMons(u8 taskId)
     {
         sGbSwitchStep = 0;
         gTasks[taskId].func = Task_GbSwitch;
+    }
+    else if (MP_UiStyle_PartyStyled())
+    {
+        u8 a = MP_UiStyle_PartySlideSteps(gPartyMenu.slotId), b = MP_UiStyle_PartySlideSteps(gPartyMenu.slotId2);
+        tStyleStep = 0;
+        tStyleOut = TRUE;
+        tStyleSteps = a > b ? a : b;
+        if (tStyleSteps == 0)
+            tStyleSteps = 1;
+        gPartyMenu.action = PARTY_ACTION_SWITCHING;
+        gTasks[taskId].func = Task_StyleSwitch;
     }
     else
     {

@@ -147,6 +147,8 @@ bool8 MP_BattlePic_SceneTint(u16 *tint);   // CRYSTAL's battles, WHITE BG ON: th
 
 bool8 MP_UiStyle_GbSwitch(void);          // RED / CRYSTAL: the party's SWITCH as theirs (party_menu.c)
 void MP_UiStyle_PartyBlank(u8 mask);      // party slots shown blank (bits), the SWITCH's rows cleared
+void MP_UiStyle_PartySlide(u8 slot, u8 step);   // FIRERED / PLATINUM / BLACK: the SWITCH's slide, STEP 8 px out
+u8 MP_UiStyle_PartySlideSteps(u8 slot);         // (the steps until the slot has left the screen)
 void MP_LegacySfx_PlaySwap(bool8 crystal);
 
 #endif // GUARD_MP_UISTYLE_H

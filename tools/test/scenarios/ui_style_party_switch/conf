@@ -1,0 +1,7 @@
+# UI STYLE: FIRERED's (and PLATINUM's / BLACK's) party SWITCH slides the style's own boxes out to their sides and back,
+# as Kai's does (party_menu.c Task_StyleSwitch, mp_uistyle.c MP_UiStyle_PartySlide); the slots end swapped
+MODE=1
+TMO=180
+ENV_A="MOEMON_DEBUG_PARTY=280:24,283:22,277:20,25:18"
+EXPECT_A=("ui style: FIRERED" "party: switched 0 and 2 (slid as the style's boxes)" "partyids: 277:")
+UNEXPECT_A=("[crash]")

@@ -2266,6 +2266,65 @@ void MP_UiStyle_PartyBlank(u8 mask)
     sPartyBlank = mask;
 }
 
+// FIRERED / PLATINUM / BLACK: the party's SWITCH as Kai's, the two slots sliding out to their own sides and back
+// (the user, 2026-11-17): STEP 8-pixel steps out (0: in place); each slot's side from where the style puts it
+static u8 sPartySlide[PARTY_SIZE];
+
+static void SlotSpan(struct UiPack *p, const struct UiSpec *sp, int *lo, int *hi)
+{
+    u16 k;
+    *lo = DISPLAY_WIDTH, *hi = 0;
+    for (k = 0; k < sp->nOps; k++)
+    {
+        const struct UiOp *op = &sp->ops[k];
+        int w = op->kind == OP_IMG && op->a < p->nImg ? p->img[op->a].w : op->kind == OP_FILL ? op->w : 0;
+        if (w <= 0)
+            continue;
+        if (op->x < *lo)
+            *lo = op->x;
+        if (op->x + w > *hi)
+            *hi = op->x + w;
+    }
+    if (*hi < *lo)
+        *lo = *hi = 0;
+}
+
+static const struct UiSpec *PartySlotSpec(struct UiPack *p, u8 slot)
+{
+    char name[16];
+    snprintf(name, sizeof(name), "party.%d", slot);
+    return p ? FindSpec(p, name) : NULL;
+}
+
+// (pixels the slot moves at STEP: left-hand slots to the left, the rest to the right)
+static int SlideDx(struct UiPack *p, u8 slot, u8 step)
+{
+    const struct UiSpec *sp = PartySlotSpec(p, slot);
+    int lo, hi;
+    if (!step || sp == NULL)
+        return 0;
+    SlotSpan(p, sp, &lo, &hi);
+    return (lo + hi) / 2 < DISPLAY_WIDTH / 2 ? -8 * step : 8 * step;
+}
+
+void MP_UiStyle_PartySlide(u8 slot, u8 step)
+{
+    if (slot < PARTY_SIZE)
+        sPartySlide[slot] = step;
+}
+
+// the steps until SLOT has left the screen
+u8 MP_UiStyle_PartySlideSteps(u8 slot)
+{
+    struct UiPack *p = GetPack(MP_UiStyle_Active());
+    const struct UiSpec *sp = PartySlotSpec(p, slot);
+    int lo, hi;
+    if (sp == NULL)
+        return 0;
+    SlotSpan(p, sp, &lo, &hi);
+    return (lo + hi) / 2 < DISPLAY_WIDTH / 2 ? (hi + 7) / 8 + 1 : (DISPLAY_WIDTH - lo + 7) / 8 + 1;
+}
+
 // RED / CRYSTAL: the party's SWITCH as theirs, row by row with their sound, not Emerald's slide (the user, 2026-11-17)
 bool8 MP_UiStyle_GbSwitch(void)
 {
@@ -2286,6 +2345,8 @@ static void DrawHeldTile(struct UiPack *p, struct Surf *s, u16 item, int x, int 
         }
 }
 
+#define NO_PLACE (-32768)   // (an icon the slot doesn't place: its places can be off the left edge while sliding)
+
 static void PartyScreen(struct UiPack *p, u16 *frame)
 {
     struct MpPartyState st;
@@ -2297,6 +2358,8 @@ static void PartyScreen(struct UiPack *p, u16 *frame)
     bool8 popup;
     static struct UiData sSlotData[PARTY_SIZE];
     const struct UiSpec *slotSpec[PARTY_SIZE];
+    int slideDx[PARTY_SIZE] = {0};
+    u16 k;
     bool8 waiting;
 
     if (!PartyScreenShown(&st) || (sp = FindSpec(p, "party")) == NULL)
@@ -2336,7 +2399,7 @@ static void PartyScreen(struct UiPack *p, u16 *frame)
         u16 species = GetMonData(mon, MON_DATA_SPECIES);
         char name[16];
         snprintf(name, sizeof(name), "party.%d", i);
-        places[i][0][0] = -1;
+        places[i][0][0] = NO_PLACE;
         slotSpec[i] = NULL;
         if ((sp = FindSpec(p, name)) == NULL || (sPartyBlank & (1 << i)))
             continue;
@@ -2385,8 +2448,11 @@ static void PartyScreen(struct UiPack *p, u16 *frame)
             d.flags |= C_SEL0;
         if (st.action == PARTY_ACTION_SWITCH && st.slot2 == i && st.slot != i)
             d.flags |= P_SWITCH;
-        DrawSpec(p, sp, &d, frame, 0, 0, &fit);
+        slideDx[i] = SlideDx(p, i, sPartySlide[i]);
+        DrawSpec(p, sp, &d, frame, slideDx[i], 0, &fit);
         IconPlaces(sp, d.flags, places[i]);
+        for (k = 0; k < 5; k++)
+            places[i][k][0] = places[i][k][0] < 0 ? NO_PLACE : places[i][k][0] + slideDx[i];   // (may go off the left edge)
         slotSpec[i] = sp;
         sSlotData[i] = d;
     }
@@ -2406,7 +2472,7 @@ static void PartyScreen(struct UiPack *p, u16 *frame)
         s16 mx, my;
         u16 held;
         bool8 styled;
-        if (mon == NULL || !mon->inUse || places[i][0][0] < 0)
+        if (mon == NULL || !mon->inUse || places[i][0][0] == NO_PLACE)
             continue;
         mx = places[i][0][0] - mon->x, my = places[i][0][1] - mon->y;
         styled = FALSE;
@@ -2445,7 +2511,7 @@ static void PartyScreen(struct UiPack *p, u16 *frame)
         {
             // (Kai's icons: Crystal's item tile where Kai's item sprite goes)
             struct Surf is = {frame, NULL, DISPLAY_WIDTH, DISPLAY_HEIGHT, &fit};
-            if (places[i][1][0] >= 0)
+            if (places[i][1][0] != NO_PLACE)
                 DrawHeldTile(p, &is, held, places[i][1][0] - 4, places[i][1][1] - 4);
             else
                 DrawHeldTile(p, &is, held, places[i][0][0] + sItemDx - 4, places[i][0][1] + sItemDy - 4);
@@ -2453,12 +2519,12 @@ static void PartyScreen(struct UiPack *p, u16 *frame)
         else if (st.itemSprite[i] < MAX_SPRITES)
         {
             struct Sprite *it = &gSprites[st.itemSprite[i]];
-            if (places[i][1][0] >= 0)
+            if (places[i][1][0] != NO_PLACE)
                 RedrawSprite(frame, it, places[i][1][0] - it->x, places[i][1][1] - it->y);
             else
                 RedrawSprite(frame, it, places[i][0][0] + sItemDx - it->x, places[i][0][1] + sItemDy - it->y);
         }
-        if (st.statusSprite[i] < MAX_SPRITES && places[i][2][0] >= 0)
+        if (st.statusSprite[i] < MAX_SPRITES && places[i][2][0] != NO_PLACE)
         {
             struct Sprite *ss = &gSprites[st.statusSprite[i]];
             RedrawSprite(frame, ss, places[i][2][0] - ss->x, places[i][2][1] - ss->y);
@@ -2466,7 +2532,11 @@ static void PartyScreen(struct UiPack *p, u16 *frame)
     }
     for (i = 0; i < PARTY_SIZE; i++)
         if (slotSpec[i])
-            DrawSpecText(p, slotSpec[i], &sSlotData[i], frame, &fit);
+        {
+            sTextOnly = TRUE;
+            DrawSpec(p, slotSpec[i], &sSlotData[i], frame, slideDx[i], 0, &fit);
+            sTextOnly = FALSE;
+        }
     // the party's long messages (WIN_MSG: "... is holding ...", "...'s HP was restored ..."), in the style's message
     // box over everything else on the screen: drawn before the icons and the slots' words, the last row showed over
     // it (the user, 2026-11-17)
