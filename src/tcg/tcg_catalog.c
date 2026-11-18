@@ -4430,7 +4430,7 @@ const struct TcgCard gTcgCards[TCG_CARD_COUNT + 1] = {
 {.name="",.description="",.effect="NONE",.animation="ATK_ANIM_NONE",.cost={0},.damage=0,.category=TCG_DAMAGE_NORMAL},
 }
 },
-[709] = {.id=709, .name="Steelix", .kind=TCG_POKEMON, .type=8, .rarity=2, .set=15, .set2=255, .dark=0, .holo=1, .flags=0, .origin=15,
+[709] = {.id=709, .name="Steelix", .kind=TCG_POKEMON, .type=8, .rarity=2, .set=15, .set2=255, .dark=0, .holo=1, .flags=TCG_CF_READY, .origin=15,
 .hp=110, .stage=1, .species=208, .level=64, .retreat=4, .weakness=0, .resistance=1, .evolvesFrom="Onix", .description="Its body has been compressed deep under the ground. As a result, it is even harder than a diamond.", .attacks={
 {.name="Tackle",.description="",.effect="NONE",.animation="ATK_ANIM_HIT",.cost={0,0,0,0,0,0,2,0,0},.damage=20,.category=TCG_DAMAGE_NORMAL},
 {.name="Tail Crush",.description="Flip a coin. If heads, this attack does 30 damage plus 20 more damage; if tails, this attack does 30 damage.",.effect="neo1-15:a1",.animation="ATK_ANIM_HIT",.cost={0,0,0,0,0,0,2,0,1},.damage=30,.category=TCG_DAMAGE_PLUS},
@@ -4458,7 +4458,7 @@ const struct TcgCard gTcgCards[TCG_CARD_COUNT + 1] = {
 {.name="",.description="",.effect="NONE",.animation="ATK_ANIM_NONE",.cost={0},.damage=0,.category=TCG_DAMAGE_NORMAL},
 }
 },
-[713] = {.id=713, .name="Metal Energy", .kind=TCG_ENERGY, .type=6, .rarity=2, .set=15, .set2=255, .dark=0, .holo=1, .flags=TCG_CF_SPECIAL, .origin=15,
+[713] = {.id=713, .name="Metal Energy", .kind=TCG_ENERGY, .type=8, .rarity=2, .set=15, .set2=255, .dark=0, .holo=1, .flags=TCG_CF_SPECIAL|TCG_CF_READY, .origin=15,
 .effect="neo1-19:t",.description="Damage done to the Pokemon Metal Energy is attached to is reduced by 10 (after applying Weakness and Resistance). If the Pokemon Metal Energy is attached to isn't Metal, whenever it damages a Pokemon, reduce that damage by 10 (before applying Weakness and Resistance). Metal Energy provides Metal Energy. (Doesn't count as a basic Energy card.)"
 },
 [714] = {.id=714, .name="Cleffa", .kind=TCG_POKEMON, .type=6, .rarity=2, .set=15, .set2=255, .dark=0, .holo=0, .flags=TCG_CF_BABY, .origin=15,
@@ -4965,10 +4965,10 @@ const struct TcgCard gTcgCards[TCG_CARD_COUNT + 1] = {
 [797] = {.id=797, .name="Super Rod", .kind=TCG_TRAINER, .type=6, .rarity=0, .set=15, .set2=255, .dark=0, .holo=0, .flags=0, .origin=15,
 .effect="neo1-103:t",.description="Flip a coin. If heads, put an Evolution card from your discard pile, if any, into your hand. If tails, put a Basic Pokemon card from your discard pile, if any, into your hand."
 },
-[798] = {.id=798, .name="Darkness Energy", .kind=TCG_ENERGY, .type=6, .rarity=2, .set=15, .set2=255, .dark=0, .holo=0, .flags=TCG_CF_SPECIAL, .origin=15,
+[798] = {.id=798, .name="Darkness Energy", .kind=TCG_ENERGY, .type=7, .rarity=2, .set=15, .set2=255, .dark=0, .holo=0, .flags=TCG_CF_SPECIAL|TCG_CF_READY, .origin=15,
 .effect="neo1-104:t",.description="If the Pokemon Darkness Energy is attached to damages the Defending Pokemon (after applying Weakness and Resistance), the attack does 10 more damage to the Defending Pokemon. At the end of every turn, put 1 damage counter on the Pokemon Darkness Energy is attached to, unless it's Darkness or has Dark in its name. Darkness Energy provides Darkness Energy. (Doesn't count as a basic Energy card.)"
 },
-[799] = {.id=799, .name="Recycle Energy", .kind=TCG_ENERGY, .type=6, .rarity=2, .set=15, .set2=255, .dark=0, .holo=0, .flags=TCG_CF_SPECIAL, .origin=15,
+[799] = {.id=799, .name="Recycle Energy", .kind=TCG_ENERGY, .type=6, .rarity=2, .set=15, .set2=255, .dark=0, .holo=0, .flags=TCG_CF_SPECIAL|TCG_CF_READY, .origin=15,
 .effect="neo1-105:t",.description="Recycle Energy provides Colorless Energy. (Doesn't count as a basic Energy card.) If this card is put into your discard pile from play, return it to your hand."
 },
 [800] = {.id=800, .name="Espeon", .kind=TCG_POKEMON, .type=5, .rarity=2, .set=16, .set2=255, .dark=0, .holo=1, .flags=TCG_CF_READY, .origin=16,
@@ -4992,7 +4992,7 @@ const struct TcgCard gTcgCards[TCG_CARD_COUNT + 1] = {
 {.name="",.description="",.effect="NONE",.animation="ATK_ANIM_NONE",.cost={0},.damage=0,.category=TCG_DAMAGE_NORMAL},
 }
 },
-[803] = {.id=803, .name="Houndoom", .kind=TCG_POKEMON, .type=7, .rarity=2, .set=16, .set2=255, .dark=0, .holo=1, .flags=0, .origin=16,
+[803] = {.id=803, .name="Houndoom", .kind=TCG_POKEMON, .type=7, .rarity=2, .set=16, .set2=255, .dark=0, .holo=1, .flags=TCG_CF_READY, .origin=16,
 .hp=70, .stage=1, .species=229, .level=37, .retreat=1, .weakness=255, .resistance=5, .evolvesFrom="Houndour", .description="Upon hearing its eerie howls, other Pokemon get the shivers and head straight back to their nests.", .attacks={
 {.name="Crunch",.description="Until the end of your next turn, if an attack damages the Defending Pokemon (after applying Weakness and Resistance), that attack does 20 more damage to the Defending Pokemon.",.effect="neo2-4:a0",.animation="ATK_ANIM_HIT",.cost={0,0,0,0,0,0,2,1,0},.damage=30,.category=TCG_DAMAGE_NORMAL},
 {.name="Flamethrower",.description="Discard 1 Fire Energy card attached to Houndoom or this attack does nothing.",.effect="neo2-4:a1",.animation="ATK_ANIM_HIT",.cost={2,0,0,0,0,0,1,0,0},.damage=50,.category=TCG_DAMAGE_NORMAL},
@@ -5055,7 +5055,7 @@ const struct TcgCard gTcgCards[TCG_CARD_COUNT + 1] = {
 {.name="",.description="",.effect="NONE",.animation="ATK_ANIM_NONE",.cost={0},.damage=0,.category=TCG_DAMAGE_NORMAL},
 }
 },
-[812] = {.id=812, .name="Umbreon", .kind=TCG_POKEMON, .type=7, .rarity=2, .set=16, .set2=255, .dark=0, .holo=1, .flags=0, .origin=16,
+[812] = {.id=812, .name="Umbreon", .kind=TCG_POKEMON, .type=7, .rarity=2, .set=16, .set2=255, .dark=0, .holo=1, .flags=TCG_CF_READY, .origin=16,
 .hp=80, .stage=1, .species=197, .level=40, .retreat=1, .weakness=255, .resistance=5, .evolvesFrom="Eevee", .description="When darkness falls, the rings on the body begin to glow, striking fear in the hearts of anyone nearby.", .attacks={
 {.name="Bite",.description="",.effect="NONE",.animation="ATK_ANIM_HIT",.cost={0,0,0,0,0,0,2,0,0},.damage=20,.category=TCG_DAMAGE_NORMAL},
 {.name="Feint Attack",.description="",.effect="NONE",.animation="ATK_ANIM_HIT",.cost={0,0,0,0,0,0,1,2,0},.damage=0,.category=TCG_DAMAGE_NORMAL},
@@ -5125,7 +5125,7 @@ const struct TcgCard gTcgCards[TCG_CARD_COUNT + 1] = {
 {.name="",.description="",.effect="NONE",.animation="ATK_ANIM_NONE",.cost={0},.damage=0,.category=TCG_DAMAGE_NORMAL},
 }
 },
-[822] = {.id=822, .name="Houndoom", .kind=TCG_POKEMON, .type=7, .rarity=2, .set=16, .set2=255, .dark=0, .holo=0, .flags=0, .origin=16,
+[822] = {.id=822, .name="Houndoom", .kind=TCG_POKEMON, .type=7, .rarity=2, .set=16, .set2=255, .dark=0, .holo=0, .flags=TCG_CF_READY, .origin=16,
 .hp=70, .stage=1, .species=229, .level=37, .retreat=1, .weakness=255, .resistance=5, .evolvesFrom="Houndour", .description="Upon hearing its eerie howls, other Pokemon get the shivers and head straight back to their nests.", .attacks={
 {.name="Crunch",.description="Until the end of your next turn, if an attack damages the Defending Pokemon (after applying Weakness and Resistance), that attack does 20 more damage to the Defending Pokemon.",.effect="neo2-23:a0",.animation="ATK_ANIM_HIT",.cost={0,0,0,0,0,0,2,1,0},.damage=30,.category=TCG_DAMAGE_NORMAL},
 {.name="Flamethrower",.description="Discard 1 Fire Energy card attached to Houndoom or this attack does nothing.",.effect="neo2-23:a1",.animation="ATK_ANIM_HIT",.cost={2,0,0,0,0,0,1,0,0},.damage=50,.category=TCG_DAMAGE_NORMAL},
@@ -5634,7 +5634,7 @@ const struct TcgCard gTcgCards[TCG_CARD_COUNT + 1] = {
 {.name="",.description="",.effect="NONE",.animation="ATK_ANIM_NONE",.cost={0},.damage=0,.category=TCG_DAMAGE_NORMAL},
 }
 },
-[897] = {.id=897, .name="Skarmory", .kind=TCG_POKEMON, .type=8, .rarity=2, .set=17, .set2=255, .dark=0, .holo=0, .flags=0, .origin=17,
+[897] = {.id=897, .name="Skarmory", .kind=TCG_POKEMON, .type=8, .rarity=2, .set=17, .set2=255, .dark=0, .holo=0, .flags=TCG_CF_READY, .origin=17,
 .hp=60, .stage=0, .species=227, .level=29, .retreat=2, .weakness=0, .resistance=1, .evolvesFrom="", .description="After nesting in bramble bushes, the wings of its chicks grow hard from scratches by thorns.", .attacks={
 {.name="Fury Attack",.description="Flip 2 coins. This attack does 10 damage times the number of heads.",.effect="neo3-23:a0",.animation="ATK_ANIM_HIT",.cost={0,0,0,0,0,0,1,0,0},.damage=10,.category=TCG_DAMAGE_X},
 {.name="Agility",.description="Flip a coin. If heads, during your opponent's next turn, prevent all effects of attacks, including damage, done to Skarmory.",.effect="neo3-23:a1",.animation="ATK_ANIM_HIT",.cost={0,0,0,0,0,0,2,0,1},.damage=20,.category=TCG_DAMAGE_NORMAL},
@@ -6212,7 +6212,7 @@ const struct TcgCard gTcgCards[TCG_CARD_COUNT + 1] = {
 {.name="",.description="",.effect="NONE",.animation="ATK_ANIM_NONE",.cost={0},.damage=0,.category=TCG_DAMAGE_NORMAL},
 }
 },
-[983] = {.id=983, .name="Houndour", .kind=TCG_POKEMON, .type=7, .rarity=1, .set=18, .set2=255, .dark=0, .holo=0, .flags=0, .origin=18,
+[983] = {.id=983, .name="Houndour", .kind=TCG_POKEMON, .type=7, .rarity=1, .set=18, .set2=255, .dark=0, .holo=0, .flags=TCG_CF_READY, .origin=18,
 .hp=40, .stage=0, .species=228, .level=16, .retreat=1, .weakness=255, .resistance=5, .evolvesFrom="", .description="When night falls, the air fills with the eerie cries of this Pokemon as it stakes out its territory.", .attacks={
 {.name="Corner",.description="The Defending Pokemon can't retreat during your opponent's next turn.",.effect="neo4-43:a0",.animation="ATK_ANIM_HIT",.cost={0,0,0,0,0,0,0,1,0},.damage=0,.category=TCG_RESIDUAL},
 {.name="Lunge",.description="Flip a coin. If tails, this attack does nothing.",.effect="neo4-43:a1",.animation="ATK_ANIM_HIT",.cost={0,0,0,0,0,0,2,0,0},.damage=30,.category=TCG_DAMAGE_NORMAL},
@@ -6835,7 +6835,7 @@ const struct TcgCard gTcgCards[TCG_CARD_COUNT + 1] = {
 {.name="",.description="",.effect="NONE",.animation="ATK_ANIM_NONE",.cost={0},.damage=0,.category=TCG_DAMAGE_NORMAL},
 }
 },
-[1080] = {.id=1080, .name="Skarmory", .kind=TCG_POKEMON, .type=8, .rarity=2, .set=19, .set2=255, .dark=0, .holo=1, .flags=0, .origin=19,
+[1080] = {.id=1080, .name="Skarmory", .kind=TCG_POKEMON, .type=8, .rarity=2, .set=19, .set2=255, .dark=0, .holo=1, .flags=TCG_CF_READY, .origin=19,
 .hp=60, .stage=0, .species=227, .level=0, .retreat=2, .weakness=0, .resistance=1, .evolvesFrom="", .description="", .attacks={
 {.name="Steel Beak",.description="Flip a coin. If heads, this attack does 20 damage plus 10 more damage.",.effect="ecard1-27:a0",.animation="ATK_ANIM_HIT",.cost={0,0,0,0,0,0,1,0,1},.damage=20,.category=TCG_DAMAGE_PLUS},
 {.name="Air Cutter",.description="Flip a coin. If tails, this attack does nothing.",.effect="ecard1-27:a1",.animation="ATK_ANIM_HIT",.cost={0,0,0,0,0,0,3,0,0},.damage=50,.category=TCG_DAMAGE_NORMAL},
@@ -7087,7 +7087,7 @@ const struct TcgCard gTcgCards[TCG_CARD_COUNT + 1] = {
 {.name="",.description="",.effect="NONE",.animation="ATK_ANIM_NONE",.cost={0},.damage=0,.category=TCG_DAMAGE_NORMAL},
 }
 },
-[1116] = {.id=1116, .name="Skarmory", .kind=TCG_POKEMON, .type=8, .rarity=2, .set=19, .set2=255, .dark=0, .holo=0, .flags=0, .origin=19,
+[1116] = {.id=1116, .name="Skarmory", .kind=TCG_POKEMON, .type=8, .rarity=2, .set=19, .set2=255, .dark=0, .holo=0, .flags=TCG_CF_READY, .origin=19,
 .hp=60, .stage=0, .species=227, .level=0, .retreat=2, .weakness=0, .resistance=1, .evolvesFrom="", .description="", .attacks={
 {.name="Steel Beak",.description="Flip a coin. If heads, this attack does 20 damage plus 10 more damage.",.effect="ecard1-63:a0",.animation="ATK_ANIM_HIT",.cost={0,0,0,0,0,0,1,0,1},.damage=20,.category=TCG_DAMAGE_PLUS},
 {.name="Air Cutter",.description="Flip a coin. If tails, this attack does nothing.",.effect="ecard1-63:a1",.animation="ATK_ANIM_HIT",.cost={0,0,0,0,0,0,3,0,0},.damage=50,.category=TCG_DAMAGE_NORMAL},
@@ -7668,10 +7668,10 @@ const struct TcgCard gTcgCards[TCG_CARD_COUNT + 1] = {
 [1210] = {.id=1210, .name="Switch", .kind=TCG_TRAINER, .type=6, .rarity=0, .set=19, .set2=255, .dark=0, .holo=0, .flags=0, .origin=19,
 .effect="ecard1-157:t",.description="Switch your Active Pokemon with 1 of your Benched Pokemon."
 },
-[1211] = {.id=1211, .name="Darkness Energy", .kind=TCG_ENERGY, .type=6, .rarity=2, .set=19, .set2=255, .dark=0, .holo=0, .flags=TCG_CF_SPECIAL, .origin=19,
+[1211] = {.id=1211, .name="Darkness Energy", .kind=TCG_ENERGY, .type=7, .rarity=2, .set=19, .set2=255, .dark=0, .holo=0, .flags=TCG_CF_SPECIAL|TCG_CF_READY, .origin=19,
 .effect="ecard1-158:t",.description="If the Pokemon Darkness Energy is attached to does damage with an attack (after applying Weakness and Resistance), the attack does 10 more damage. At the end of every turn, put 1 damage counter on the Pokemon Darkness Energy is attached to, unless it's Darkness or has Dark in its name. Darkness Energy provides Darkness Energy. (Doesn't count as a basic Energy card.)"
 },
-[1212] = {.id=1212, .name="Metal Energy", .kind=TCG_ENERGY, .type=6, .rarity=2, .set=19, .set2=255, .dark=0, .holo=0, .flags=TCG_CF_SPECIAL, .origin=19,
+[1212] = {.id=1212, .name="Metal Energy", .kind=TCG_ENERGY, .type=8, .rarity=2, .set=19, .set2=255, .dark=0, .holo=0, .flags=TCG_CF_SPECIAL|TCG_CF_READY, .origin=19,
 .effect="ecard1-159:t",.description="Damage done by attacks to the Pokemon Metal Energy is attached to is reduced by 10 (after applying Weakness and Resistance). If the Pokemon Metal Energy is attached to isn't Metal, whenever it damages a Pokemon by an attack, reduce that damage by 10 (after applying Weakness and Resistance). Metal Energy provides Metal Energy. (Doesn't count as a basic Energy card.)"
 },
 [1213] = {.id=1213, .name="Ampharos", .kind=TCG_POKEMON, .type=2, .rarity=2, .set=20, .set2=255, .dark=0, .holo=0, .flags=0, .origin=20,
@@ -7912,7 +7912,7 @@ const struct TcgCard gTcgCards[TCG_CARD_COUNT + 1] = {
 {.name="",.description="",.effect="NONE",.animation="ATK_ANIM_NONE",.cost={0},.damage=0,.category=TCG_DAMAGE_NORMAL},
 }
 },
-[1247] = {.id=1247, .name="Steelix", .kind=TCG_POKEMON, .type=8, .rarity=2, .set=20, .set2=255, .dark=0, .holo=0, .flags=0, .origin=20,
+[1247] = {.id=1247, .name="Steelix", .kind=TCG_POKEMON, .type=8, .rarity=2, .set=20, .set2=255, .dark=0, .holo=0, .flags=TCG_CF_READY, .origin=20,
 .hp=100, .stage=1, .species=208, .level=0, .retreat=4, .weakness=0, .resistance=1, .evolvesFrom="Onix", .description="", .attacks={
 {.name="Earth Rift",.description="This attack does 10 damage to each of your opponent's Benched Pokemon. (Don't apply Weakness or Resistance for Benched Pokemon.) Then, flip a coin. If tails, this attack can't be used during your next turn.",.effect="ecard2-35:a0",.animation="ATK_ANIM_HIT",.cost={0,0,0,0,0,0,2,0,0},.damage=10,.category=TCG_DAMAGE_NORMAL},
 {.name="Iron Smash",.description="Flip 2 coins. If both are heads, this attack does 50 damage plus 20 more damage. If both are tails, this attack does nothing. If 1 is heads and 1 is tails, this attack just does 50 damage.",.effect="ecard2-35:a1",.animation="ATK_ANIM_HIT",.cost={0,0,0,0,0,0,2,0,2},.damage=50,.category=TCG_DAMAGE_PLUS},
@@ -8565,16 +8565,16 @@ const struct TcgCard gTcgCards[TCG_CARD_COUNT + 1] = {
 [1353] = {.id=1353, .name="Weakness Guard", .kind=TCG_TRAINER, .type=6, .rarity=1, .set=20, .set2=255, .dark=0, .holo=0, .flags=0, .origin=20,
 .effect="ecard2-141:t",.description="Attach this card to 1 of your Pokemon. Discard it at the end of your opponent's next turn. As long as this card is attached, this Pokemon has no Weakness."
 },
-[1354] = {.id=1354, .name="Darkness Energy", .kind=TCG_ENERGY, .type=6, .rarity=2, .set=20, .set2=255, .dark=0, .holo=0, .flags=TCG_CF_SPECIAL, .origin=20,
+[1354] = {.id=1354, .name="Darkness Energy", .kind=TCG_ENERGY, .type=7, .rarity=2, .set=20, .set2=255, .dark=0, .holo=0, .flags=TCG_CF_SPECIAL|TCG_CF_READY, .origin=20,
 .effect="ecard2-142:t",.description="If the Pokemon Darkness Energy is attached to damages the Defending Pokemon (after applying Weakness and Resistance), the attack does 10 more damage to the Defending Pokemon. At the end of every turn, put 1 damage counter on the Pokemon Darkness Energy is attached to, unless it's Darkness or has Dark in its name. Darkness Energy provides Darkness Energy. (Doesn't count as a basic Energy card.)"
 },
-[1355] = {.id=1355, .name="Metal Energy", .kind=TCG_ENERGY, .type=6, .rarity=2, .set=20, .set2=255, .dark=0, .holo=0, .flags=TCG_CF_SPECIAL, .origin=20,
+[1355] = {.id=1355, .name="Metal Energy", .kind=TCG_ENERGY, .type=8, .rarity=2, .set=20, .set2=255, .dark=0, .holo=0, .flags=TCG_CF_SPECIAL|TCG_CF_READY, .origin=20,
 .effect="ecard2-143:t",.description="Damage done to the Pokemon Metal Energy is attached to is reduced by 10 (after applying Weakness and Resistance). If the Pokemon Metal Energy is attached to isn't Metal, whenever it damages a Pokemon, reduce that damage by 10 (before applying Weakness and Resistance). Metal Energy provides Metal Energy. (Doesn't count as a basic Energy card.)"
 },
-[1356] = {.id=1356, .name="Rainbow Energy", .kind=TCG_ENERGY, .type=6, .rarity=2, .set=20, .set2=255, .dark=0, .holo=0, .flags=TCG_CF_SPECIAL, .origin=20,
+[1356] = {.id=1356, .name="Rainbow Energy", .kind=TCG_ENERGY, .type=6, .rarity=2, .set=20, .set2=255, .dark=0, .holo=0, .flags=TCG_CF_SPECIAL|TCG_CF_READY, .origin=20,
 .effect="ecard2-144:t",.description="Attach Rainbow Energy to 1 of your Pokemon. While in play, Rainbow Energy provides every type of Energy but provides only 1 Energy at a time. (Doesn't count as a basic Energy card when not in play.) When you attach this card from your hand to 1 of your Pokemon, put 1 damage counter on that Pokemon."
 },
-[1357] = {.id=1357, .name="Boost Energy", .kind=TCG_ENERGY, .type=6, .rarity=1, .set=20, .set2=255, .dark=0, .holo=0, .flags=TCG_CF_SPECIAL, .origin=20,
+[1357] = {.id=1357, .name="Boost Energy", .kind=TCG_ENERGY, .type=6, .rarity=1, .set=20, .set2=255, .dark=0, .holo=0, .flags=TCG_CF_SPECIAL|TCG_CF_READY, .origin=20,
 .effect="ecard2-145:t",.description="Boost Energy can be attached only to an Evolved Pokemon. Discard Boost Energy at the end of the turn it was attached. Boost Energy provides ColorlessColorlessColorless Energy. The Pokemon Boost Energy is attached to can't retreat. When the Pokemon Boost Energy is attached to is no longer an Evolved Pokemon, discard Boost Energy."
 },
 [1358] = {.id=1358, .name="Crystal Energy", .kind=TCG_ENERGY, .type=6, .rarity=1, .set=20, .set2=255, .dark=0, .holo=0, .flags=TCG_CF_SPECIAL, .origin=20,
@@ -8758,7 +8758,7 @@ const struct TcgCard gTcgCards[TCG_CARD_COUNT + 1] = {
 {.name="",.description="",.effect="NONE",.animation="ATK_ANIM_NONE",.cost={0},.damage=0,.category=TCG_DAMAGE_NORMAL},
 }
 },
-[1385] = {.id=1385, .name="Steelix", .kind=TCG_POKEMON, .type=8, .rarity=2, .set=20, .set2=255, .dark=0, .holo=1, .flags=0, .origin=20,
+[1385] = {.id=1385, .name="Steelix", .kind=TCG_POKEMON, .type=8, .rarity=2, .set=20, .set2=255, .dark=0, .holo=1, .flags=TCG_CF_READY, .origin=20,
 .hp=100, .stage=1, .species=208, .level=0, .retreat=4, .weakness=0, .resistance=1, .evolvesFrom="Onix", .description="", .attacks={
 {.name="Earth Rift",.description="This attack does 10 damage to each of your opponent's Benched Pokemon. (Don't apply Weakness or Resistance for Benched Pokemon.) Then, flip a coin. If tails, this attack can't be used during your next turn.",.effect="ecard2-H23:a0",.animation="ATK_ANIM_HIT",.cost={0,0,0,0,0,0,2,0,0},.damage=10,.category=TCG_DAMAGE_NORMAL},
 {.name="Iron Smash",.description="Flip 2 coins. If both are heads, this attack does 50 damage plus 20 more damage. If both are tails, this attack does nothing. If 1 is heads and 1 is tails, this attack just does 50 damage.",.effect="ecard2-H23:a1",.animation="ATK_ANIM_HIT",.cost={0,0,0,0,0,0,2,0,2},.damage=50,.category=TCG_DAMAGE_PLUS},
@@ -10579,7 +10579,7 @@ const struct TcgCard gTcgCards[TCG_CARD_COUNT + 1] = {
 {.name="Rage",.description="Does 50 damage plus 10 more damage for each damage counter on Typhlosion.",.effect="np-34:a1",.animation="ATK_ANIM_HIT",.cost={1,0,0,0,0,0,2,0,0},.damage=50,.category=TCG_DAMAGE_PLUS},
 }
 },
-[1664] = {.id=1664, .name="Pikachu Delta", .kind=TCG_POKEMON, .type=8, .rarity=3, .set=4, .set2=255, .dark=0, .holo=0, .flags=0, .origin=23,
+[1664] = {.id=1664, .name="Pikachu Delta", .kind=TCG_POKEMON, .type=8, .rarity=3, .set=4, .set2=255, .dark=0, .holo=0, .flags=TCG_CF_READY, .origin=23,
 .hp=40, .stage=0, .species=25, .level=0, .retreat=1, .weakness=4, .resistance=255, .evolvesFrom="", .description="", .attacks={
 {.name="Thunder Wave",.description="Flip a coin. If heads, the Defending Pokemon is now Paralyzed.",.effect="np-35:a0",.animation="ATK_ANIM_HIT",.cost={0,0,0,0,0,0,1,0,0},.damage=0,.category=TCG_RESIDUAL},
 {.name="Iron Tail",.description="Flip a coin until you get tails. This attack does 20 damage times the number of heads.",.effect="np-35:a1",.animation="ATK_ANIM_HIT",.cost={0,0,0,0,0,0,1,0,1},.damage=20,.category=TCG_DAMAGE_X},

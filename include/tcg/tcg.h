@@ -101,6 +101,28 @@ enum
  * cards that play (TCG_CF_READY, the Game Boy games' all) unless gTcgAllCards is set. */
 const struct TcgCard *Tcg_CardAny(unsigned id);
 extern int gTcgAllCards;
+/* What an Energy card's rules are (the same card in two sets has one rule) and how much Energy it provides */
+enum
+{
+    TCG_ER_BASIC,
+    TCG_ER_DOUBLE_COLORLESS,
+    TCG_ER_POTION,
+    TCG_ER_FULL_HEAL,
+    TCG_ER_RAINBOW,
+    TCG_ER_RECYCLE,
+    TCG_ER_DARKNESS,
+    TCG_ER_METAL,      /* a non-Metal Pokemon's damage less 10 before Weakness and Resistance */
+    TCG_ER_METAL_LATE, /* (Expedition's: after) */
+    TCG_ER_MIRACLE,
+    TCG_ER_CRYSTAL,
+    TCG_ER_BOOST,
+    TCG_ER_WARP,
+    TCG_ER_BOUNCE,
+    TCG_ER_CYCLONE,
+    TCG_ER_RETRO
+};
+unsigned Tcg_EnergyRule(unsigned id);
+unsigned Tcg_EnergyProvides(unsigned id);
 /* Each GB2 booster's cards (0 ends a list) */
 extern const uint16_t gTcgGb2PackCards[TCG_GB2_PACKS][TCG_GB2_PACK_MAX];
 /* Can that booster (pack type 0-10) hold this card? */

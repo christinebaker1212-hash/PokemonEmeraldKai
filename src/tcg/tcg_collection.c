@@ -15,6 +15,37 @@ const struct TcgCard *Tcg_Card(unsigned id)
                ? &gTcgCards[id]
                : NULL;
 }
+unsigned Tcg_EnergyRule(unsigned id)
+{
+    switch (id)
+    {
+    case TCG_CARD_DOUBLE_COLORLESS_ENERGY: return TCG_ER_DOUBLE_COLORLESS;
+    case TCG_CARD_POTION_ENERGY: return TCG_ER_POTION;
+    case TCG_CARD_FULLHEAL_ENERGY: return TCG_ER_FULL_HEAL;
+    case TCG_CARD_RAINBOW_ENERGY: case TCG_CARD_ECARD2_144: return TCG_ER_RAINBOW;
+    case TCG_CARD_RECYCLE_ENERGY: case TCG_CARD_NEO1_105: return TCG_ER_RECYCLE;
+    case TCG_CARD_NEO1_104: case TCG_CARD_ECARD1_158: case TCG_CARD_ECARD2_142: return TCG_ER_DARKNESS;
+    case TCG_CARD_NEO1_19: case TCG_CARD_ECARD2_143: return TCG_ER_METAL;
+    case TCG_CARD_ECARD1_159: return TCG_ER_METAL_LATE;
+    case TCG_CARD_NEO4_16: return TCG_ER_MIRACLE;
+    case TCG_CARD_ECARD2_146: return TCG_ER_CRYSTAL;
+    case TCG_CARD_ECARD2_145: return TCG_ER_BOOST;
+    case TCG_CARD_ECARD2_147: return TCG_ER_WARP;
+    case TCG_CARD_ECARD3_142: return TCG_ER_BOUNCE;
+    case TCG_CARD_ECARD3_143: return TCG_ER_CYCLONE;
+    case TCG_CARD_ECARD3_144: return TCG_ER_RETRO;
+    }
+    return TCG_ER_BASIC;
+}
+unsigned Tcg_EnergyProvides(unsigned id)
+{
+    switch (Tcg_EnergyRule(id))
+    {
+    case TCG_ER_DOUBLE_COLORLESS: case TCG_ER_BOUNCE: case TCG_ER_MIRACLE: return 2;
+    case TCG_ER_BOOST: return 3;
+    }
+    return 1;
+}
 uint32_t Tcg_Random(uint32_t *state)
 {
     uint32_t x = *state ? *state : 0x6d2b79f5u;

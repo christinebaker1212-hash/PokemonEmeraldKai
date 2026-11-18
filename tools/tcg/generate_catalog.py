@@ -64,7 +64,9 @@ for c in reg:
  if c.get('ability') and c['ability']['kind']=='BODY':flags.append('TCG_CF_BODY')
  if REG.ready(c):flags.append('TCG_CF_READY')
  flagx='|'.join(flags) or '0'
- out.append(f'[{n}] = {{.id={n}, .name={q(c["name"])}, .kind={kind}, .type={rtype(c["type"])}, .rarity={rarity}, .set={cardset}, .set2=255, .dark={1 if "DARK" in c["flags"] else 0}, .holo={1 if holo else 0}, .flags={flagx}, .origin={c["origin"]},')
+ # (Darkness / Metal Energy provide their own type)
+ ctype=c['name'].split()[0] if c['kind']=='energy' and c['name'] in ('Darkness Energy','Metal Energy') else c['type']
+ out.append(f'[{n}] = {{.id={n}, .name={q(c["name"])}, .kind={kind}, .type={rtype(ctype)}, .rarity={rarity}, .set={cardset}, .set2=255, .dark={1 if "DARK" in c["flags"] else 0}, .holo={1 if holo else 0}, .flags={flagx}, .origin={c["origin"]},')
  if c['kind']=='pokemon':
   out.append(f'.hp={c["hp"]}, .stage={c["stage"]}, .species={c["species"]}, .level={c["level"]}, .retreat={c["retreat"]}, .weakness={rtype(c["weakness"])}, .resistance={rtype(c["resistance"])}, .evolvesFrom={q(c["evolvesFrom"])}, .description={q(c["flavor"])}, .attacks={{')
   attacks=[]

@@ -183,7 +183,7 @@ unsigned TcgDuel_Energy(const struct TcgDuel *g, unsigned player, unsigned slot,
         /* (Charizard's Energy Burn: all of it is Fire Energy this turn) */
         unsigned kind = f->burn ? TCG_FIRE : c->type;
         if (c->kind == TCG_ENERGY && (type == TCG_NONE || type == kind))
-            n += c->id == TCG_CARD_DOUBLE_COLORLESS_ENERGY ? 2 : 1;
+            n += Tcg_EnergyProvides(c->id);
     }
     return n;
 }
@@ -239,7 +239,7 @@ static int EnergyPaid(const struct TcgDuel *g, unsigned player, unsigned attack)
     const struct TcgFieldCard *f = &g->players[player].field[from];
     /* (Rainbow Energy: any one type each) */
     for (i = 0; i < f->attachedSize; i++)
-        rainbow += g->players[player].cards[f->attached[i]] == TCG_CARD_RAINBOW_ENERGY;
+        rainbow += Tcg_EnergyRule(g->players[player].cards[f->attached[i]]) == TCG_ER_RAINBOW;
     if (!c || attack >= TCG_ATTACKS || c->kind != TCG_POKEMON)
         return 0;
     a = &c->attacks[attack];
@@ -374,6 +374,23 @@ static unsigned AttachedTrainerCount(const struct TcgDuel *g, unsigned player, u
     return count;
 }
 
+/* How many Energy cards attached to that Pokemon have this rule (Tcg_EnergyRule) */
+unsigned TcgDuel_AttachedRule(const struct TcgDuel *g, unsigned who, unsigned slot, unsigned rule)
+{
+    const struct TcgPlayer *p = &g->players[who];
+    const struct TcgFieldCard *f = &p->field[slot];
+    unsigned i, n = 0;
+    for (i = 0; i < f->attachedSize; i++)
+    {
+        const struct TcgCard *c = Tcg_Card(p->cards[f->attached[i]]);
+        n += c && c->kind == TCG_ENERGY && Tcg_EnergyRule(c->id) == rule;
+    }
+    return n;
+}
+static int DarkPokemon(const struct TcgCard *c)
+{
+    return c->type == TCG_DARKNESS || c->dark || strstr(c->name, "Dark") != NULL;
+}
 static void EndTurn(struct TcgDuel *g)
 {
     unsigned who, s;
@@ -428,6 +445,18 @@ static void EndTurn(struct TcgDuel *g)
         if (f->defender)
             f->defender--;
     }
+    /* Darkness Energy: at the end of every turn, a damage counter on a Pokemon that isn't Darkness or Dark */
+    for (who = 0; who < 2; who++)
+        for (s = 0; s < TCG_FIELD_SIZE; s++)
+        {
+            const struct TcgCard *c = TcgDuel_Field(g, who, s);
+            unsigned n = c ? TcgDuel_AttachedRule(g, who, s, TCG_ER_DARKNESS) : 0;
+            if (n && c->kind == TCG_POKEMON && !DarkPokemon(c))
+            {
+                g->players[who].field[s].damage += 10 * n;
+                TcgDuel_Event(g, TCG_EV_DAMAGE, who, s, 10 * n, 0, 0);
+            }
+        }
     for (who = 0; who < 2; who++)
     {
         struct TcgPlayer *q = &g->players[who];
@@ -632,6 +661,9 @@ static int Apply(struct TcgDuel *g, const struct TcgAction *a)
             if (f->charged == 2)
                 total *= f->charge3 ? 3 : 2;
             total += g->bonus + TcgPower_AttackBonus(g, total); /* (Frenzy, Dark Wave, Prehistoric Dream) */
+            /* Metal Energy on a Pokemon that isn't Metal: its damage 10 less each (before Weakness, Resistance) */
+            if (type != TCG_METAL)
+                total -= 10 * (int)TcgDuel_AttachedRule(g, g->current, 0, TCG_ER_METAL);
             /* (noWeakRes 1: neither, 2: no Resistance, 3: no Weakness) */
             if ((!g->noWeakRes || g->noWeakRes == 2) && TcgDuel_Weakness(g, g->current ^ 1, 0) == type)
             {
@@ -644,6 +676,15 @@ static int Apply(struct TcgDuel *g, const struct TcgAction *a)
                 flags |= TCG_DMG_RESIST;
             }
             total += 10 * (int)AttachedTrainerCount(g, g->current, 0, TCG_CARD_PLUSPOWER);
+            /* Darkness Energy: 10 more each, if it does damage; Expedition's Metal Energy on a non-Metal attacker 10
+             * less each, and any Metal Energy on the Defending Pokemon 10 less each (after Weakness, Resistance) */
+            if (total > 0)
+                total += 10 * (int)TcgDuel_AttachedRule(g, g->current, 0, TCG_ER_DARKNESS);
+            if (type != TCG_METAL)
+                total -= 10 * (int)TcgDuel_AttachedRule(g, g->current, 0, TCG_ER_METAL_LATE);
+            if (!g->swift)
+                total -= 10 * (int)(TcgDuel_AttachedRule(g, g->current ^ 1, 0, TCG_ER_METAL) +
+                                    TcgDuel_AttachedRule(g, g->current ^ 1, 0, TCG_ER_METAL_LATE));
             if (foe->vulnUntil >= g->turn)
                 total += foe->vulnBonus; /* (the regional sets: "that attack does 20 more damage") */
             if (!g->swift)
@@ -787,7 +828,8 @@ static int Apply(struct TcgDuel *g, const struct TcgAction *a)
         if (p->retreated)
             return Error(g, "You can only retreat once each turn.");
         if (c->kind == TCG_TRAINER || f->condition == TCG_ASLEEP || f->condition == TCG_PARALYZED || f->noRetreat ||
-            p->confusionRetreatFailed || (f->lockTurn == g->turn && f->lockAttack == TCG_LOCK_ALL))
+            p->confusionRetreatFailed || (f->lockTurn == g->turn && f->lockAttack == TCG_LOCK_ALL) ||
+            TcgDuel_AttachedRule(g, g->current, 0, TCG_ER_BOOST))
             return Error(g, "This Pokemon cannot retreat.");
         {
             const char *why = TcgPower_RetreatBlock(g, g->current);
@@ -804,7 +846,7 @@ static int Apply(struct TcgDuel *g, const struct TcgAction *a)
             c = Tcg_Card(p->cards[f->attached[j]]);
             if (c->kind != TCG_ENERGY)
                 return TCG_INVALID;
-            n += c->id == TCG_CARD_DOUBLE_COLORLESS_ENERGY ? 2 : 1;
+            n += Tcg_EnergyProvides(c->id);
             p->discard[p->discardSize++] = TcgPile_Remove(f->attached, &f->attachedSize, j);
         }
         c = TcgDuel_Field(g, g->current, 0);
@@ -916,6 +958,11 @@ static int Apply(struct TcgDuel *g, const struct TcgAction *a)
     case TCG_ATTACH:
         if (c->kind != TCG_ENERGY || !f->stackSize || p->energyPlayed)
             return Error(g, "Only one Energy card may be attached from your hand each turn.");
+        if (Tcg_EnergyRule(c->id) == TCG_ER_BOOST && f->stackSize < 2)
+            return Error(g, "Boost Energy can be attached only to an Evolved Pokemon.");
+        /* (Boost Energy: discarded at the end of the turn) */
+        if (Tcg_EnergyRule(c->id) == TCG_ER_BOOST)
+            p->attachmentExpires[p->hand[a->hand]] = g->turn;
         f->attached[f->attachedSize++] = TcgPile_Remove(p->hand, &p->handSize, a->hand);
         p->energyPlayed = 1;
         TcgDuel_Event(g, TCG_EV_ATTACH, g->current, s, 0, c->id, 0);
@@ -931,7 +978,7 @@ static int Apply(struct TcgDuel *g, const struct TcgAction *a)
             f->poison = 0;
             TcgDuel_Event(g, TCG_EV_STATUS, g->current, s, TCG_HEALTHY, 0, 0);
         }
-        else if (c->id == TCG_CARD_RAINBOW_ENERGY)
+        else if (Tcg_EnergyRule(c->id) == TCG_ER_RAINBOW)
         {
             f->damage += 10;
             TcgDuel_Event(g, TCG_EV_DAMAGE, g->current, s, 10, 0, 0);
@@ -1002,7 +1049,7 @@ int TcgDuel_Apply(struct TcgDuel *g, const struct TcgAction *action)
                     uint8_t card = g->players[who].field[s].attached[i];
                     struct TcgPlayer *q = &next.players[who];
                     unsigned k;
-                    if (g->players[who].cards[card] != TCG_CARD_RECYCLE_ENERGY)
+                    if (Tcg_EnergyRule(g->players[who].cards[card]) != TCG_ER_RECYCLE)
                         continue;
                     for (k = 0; k < q->discardSize; k++)
                         if (q->discard[k] == card)

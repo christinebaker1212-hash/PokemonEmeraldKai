@@ -557,7 +557,7 @@ static int EnergyHelps(const struct TcgDuel *g, unsigned who, unsigned slot, con
 {
     const struct TcgPlayer *p = &g->players[who];
     const struct TcgCard *c = TcgDuel_Field(g, who, slot);
-    unsigned i, add = energy->id == TCG_CARD_DOUBLE_COLORLESS_ENERGY ? 2 : 1;
+    unsigned i, add = Tcg_EnergyProvides(energy->id);
     if (!c || c->kind != TCG_POKEMON)
         return 0;
     if (HelpsCard(g, who, slot, c, energy->type, add))
@@ -610,7 +610,7 @@ static int Ready(const struct TcgDuel *g, unsigned who, unsigned slot, unsigned 
     {
         const struct TcgCard *e = Tcg_Card(p->cards[p->hand[i]]);
         if (e->kind == TCG_ENERGY &&
-            !Unmet(g, who, slot, &c->attacks[attack], e->type, e->id == TCG_CARD_DOUBLE_COLORLESS_ENERGY ? 2 : 1))
+            !Unmet(g, who, slot, &c->attacks[attack], e->type, Tcg_EnergyProvides(e->id)))
             return 1;
     }
     return 0;
@@ -815,7 +815,7 @@ static int RetreatEnergy(const struct TcgDuel *g, struct TcgAction *a)
         for (i = 0; i < f->attachedSize && paid < cost; i++)
         {
             const struct TcgCard *e = Tcg_Card(p->cards[f->attached[i]]);
-            int dce = e->id == TCG_CARD_DOUBLE_COLORLESS_ENERGY, needed = NeedMost(c, e->type) > 0 && e->type != TCG_COLORLESS;
+            int dce = Tcg_EnergyProvides(e->id) > 1, needed = NeedMost(c, e->type) > 0 && e->type != TCG_COLORLESS;
             if (used[i] || e->kind != TCG_ENERGY)
                 continue;
             /* pass 0: Energy its attacks don't ask for by type; 1: any single Energy; 2: a Double Colorless */
@@ -1131,7 +1131,15 @@ static int Act(const struct TcgDuel *g, struct TcgAction *a)
                 int score;
                 if (!c || c->kind != TCG_POKEMON || !EnergyHelps(g, g->current, s, energy))
                     continue;
+                if (Tcg_EnergyRule(energy->id) == TCG_ER_BOOST && g->players[g->current].field[s].stackSize < 2)
+                    continue;
                 score = s == 0 ? 40 : 0;
+                /* (Darkness Energy hurts a Pokemon that isn't Dark; Metal Energy weakens one that isn't Metal) */
+                if (Tcg_EnergyRule(energy->id) == TCG_ER_DARKNESS && c->type != TCG_DARKNESS && !c->dark)
+                    score -= 30;
+                if ((Tcg_EnergyRule(energy->id) == TCG_ER_METAL || Tcg_EnergyRule(energy->id) == TCG_ER_METAL_LATE) &&
+                    c->type != TCG_METAL)
+                    score -= 20;
                 for (attack = 0; attack < TCG_ATTACKS; attack++)
                 {
                     const struct TcgAttack *move = &c->attacks[attack];

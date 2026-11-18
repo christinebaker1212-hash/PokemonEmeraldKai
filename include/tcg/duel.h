@@ -317,6 +317,7 @@ int TcgDuel_CanAttack(const struct TcgDuel *g, unsigned player, unsigned attack)
 /* Is the effect on this Pokemon tied to its opponent's Active (effectBy) still in force? */
 int TcgDuel_BoundEffect(const struct TcgDuel *g, unsigned player, unsigned slot);
 /* Leer / Tail Wag / Bone Attack: the Active Pokemon can't attack now. */
+unsigned TcgDuel_AttachedRule(const struct TcgDuel *g, unsigned who, unsigned slot, unsigned rule);
 int TcgDuel_NoAttack(const struct TcgDuel *g, unsigned player);
 int TcgDuel_EffectSupported(const char *name);
 int TcgDuel_EffectTouchesDefender(const struct TcgAttack *attack);

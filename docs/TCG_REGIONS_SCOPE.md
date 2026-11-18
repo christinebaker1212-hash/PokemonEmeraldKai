@@ -7,26 +7,23 @@ plays (tools/tcg/regions/effects.py); only finished cards appear in the game.
 |---|---|---|
 | gym1 | 126 | 39 |
 | gym2 | 126 | 21 |
-| neo1 | 105 | 30 |
-| neo2 | 75 | 20 |
-| neo3 | 66 | 11 |
-| neo4 | 113 | 27 |
-| ecard1 | 159 | 82 |
-| ecard2 | 182 | 42 |
+| neo1 | 105 | 34 |
+| neo2 | 75 | 23 |
+| neo3 | 66 | 12 |
+| neo4 | 113 | 28 |
+| ecard1 | 159 | 86 |
+| ecard2 | 182 | 48 |
 | ecard3 | 182 | 35 |
 | basep | 53 | 10 |
-| np | 40 | 15 |
-| **all** | 1227 | 332 |
+| np | 40 | 16 |
+| **all** | 1227 | 352 |
 
 ## Rules the engine doesn't play yet (cards needing each)
 
 - STADIUM: 33
-- DARK_ENERGY: 32
-- METAL_ENERGY: 28
 - BABY: 19
 - SUPPORTER: 18
 - TM: 16
-- SPECIAL: 15
 - TOOL: 13
 - SHINING: 10
 - CRYSTAL: 9
@@ -34,7 +31,7 @@ plays (tools/tcg/regions/effects.py); only finished cards appear in the game.
 - RSM: 3
 - GAME_CORNER: 2
 
-## Wordings to translate (866; the most cards first)
+## Wordings to translate (859; the most cards first)
 
 - 6 x BODY: Zapdos (ecard2-44): You can't attach Lightning Energy cards from your hand to Zapdos.
 - 6 x TRAINER: Darkness Cube 01 (ecard2-119): Attach this card to 1 of your Darkness Pokemon in play. That Pokemon may use this card's attack instead of its own. At the end of your turn, discard Darkness Cube 01.
@@ -67,14 +64,12 @@ plays (tools/tcg/regions/effects.py); only finished cards appear in the game.
 - 2 x attack: Sabrina's Abra (gym2-93): This attack can't be used unless Sabrina's Abra and the Defending Pokemon have the same number of Energy cards attached to them.
 - 2 x attack: Sabrina's Abra (gym2-94): Look at your opponent's hand.
 - 2 x attack: Jumpluff (neo1-7): If this attack damages the Defending Pokemon (after applying Weakness and Resistance), remove 1 damage counter from Jumpluff, if it has any.
-- 2 x ENERGY: Metal Energy (neo1-19): Damage done to the Pokemon Metal Energy is attached to is reduced by 10 (after applying Weakness and Resistance). If the Pokemon Metal Energy is attached to isn't Metal, whenever it damages a Pokemon, reduce that dam
 - 2 x attack: Xatu (neo1-52): Look at the top 3 cards of either player's deck and rearrange them as you like.
 - 2 x attack: Chikorita (neo1-54): If the Defending Pokemon attacks Chikorita during your opponent's next turn, any damage done to Chikorita is reduced by 10 (before applying Weakness and Resistance). (Benching or evolving either Pokemon ends this effect
 - 2 x attack: Cyndaquil (neo1-56): Flip a coin. If heads, the Defending Pokemon can't attack Cyndaquil during your opponent's next turn. (Benching or evolving either Pokemon ends this effect.)
 - 2 x TRAINER: Gold Berry (neo1-93): Attach Gold Berry to 1 of your Pokemon that doesn't have a Pokemon Tool attached to it. At any time between turns, if there are at least 4 damage counters on the Pokemon Gold Berry is attached to, you may remove 4 of t
 - 2 x TRAINER: Super Scoop Up (neo1-98): Flip a coin. If heads, return 1 of your Pokemon and all cards attached to it to your hand.
 - 2 x TRAINER: Moo-Moo Milk (neo1-101): Choose 1 of your Pokemon. Flip 2 coins. Remove 2 damage counters times the number of heads from that Pokemon. If the Pokemon has fewer damage counters than that, remove all of them.
-- 2 x ENERGY: Darkness Energy (neo1-104): If the Pokemon Darkness Energy is attached to damages the Defending Pokemon (after applying Weakness and Resistance), the attack does 10 more damage to the Defending Pokemon. At the end of every turn, put 1 damag
 - 2 x POWER: Forretress (neo2-2): During your opponent's turn, whenever 1 of your opponent's Benched Pokemon becomes his or her Active Pokemon, Forretress does 10 damage to it. (Don't apply Weakness and Resistance.) This power stops working if Forretres
 - 2 x attack: Magnemite (neo2-7): During your next turn, treat any tails flipped when using Magnemite's Electric Bolt attack as if they were heads. (Benching or evolving either Pokemon ends this effect.)
 - 2 x POWER: Politoed (neo2-8): Whenever Politoed's attack damages the Defending Pokemon (after applying Weakness and Resistance), if there are more than 3 Poliwags, Poliwhirls, Poliwraths, and/or Politoeds in play (including your opponent's), that atta
@@ -446,7 +441,6 @@ plays (tools/tcg/regions/effects.py); only finished cards appear in the game.
 - 1 x TRAINER: Double Gust (neo1-100): If you have any Benched Pokemon, your opponent chooses 1 of them and switches it with your Active Pokemon. Then, if your opponent has any Benched Pokemon, choose 1 of them and switch it with his or her Active Pokemon
 - 1 x TRAINER: Pokemon March (neo1-102): Your opponent may search his or her deck for 1 Basic Pokemon card and put it onto his or her Bench. Then, you may search your deck for 1 Basic Pokemon card and put it onto your Bench. Then, each player shuffles his
 - 1 x TRAINER: Super Rod (neo1-103): Flip a coin. If heads, put an Evolution card from your discard pile, if any, into your hand. If tails, put a Basic Pokemon card from your discard pile, if any, into your hand.
-- 1 x ENERGY: Recycle Energy (neo1-105): Recycle Energy provides Colorless Energy. (Doesn't count as a basic Energy card.) If this card is put into your discard pile from play, return it to your hand.
 - 1 x attack: Beedrill (neo2-18): Flip a coin. If heads, the Defending Pokemon is now Poisoned. Your opponent now puts 3 damage counters on it instead of 1 after each player's turn (even if it was already Poisoned).
 - 1 x attack: Butterfree (neo2-19): Flip a coin. If heads, the Defending Pokemon is now either Asleep, Confused, Paralyzed, or Poisoned (your choice).
 - 1 x attack: Butterfree (neo2-19): Does 10 damage times the number of Energy attached to the Defending Pokemon. After doing damage, remove a number of damage counters from Butterfree equal to the amount of damage done to the Defending Pokemon (after app
@@ -681,8 +675,6 @@ plays (tools/tcg/regions/effects.py); only finished cards appear in the game.
 - 1 x TRAINER: Full Heal (ecard1-154): Remove all Special Conditions from your Active Pokemon.
 - 1 x TRAINER: Potion (ecard1-156): Remove 2 damage counters from 1 of your Pokemon (1 if that Pokemon has only 1).
 - 1 x TRAINER: Switch (ecard1-157): Switch your Active Pokemon with 1 of your Benched Pokemon.
-- 1 x ENERGY: Darkness Energy (ecard1-158): If the Pokemon Darkness Energy is attached to does damage with an attack (after applying Weakness and Resistance), the attack does 10 more damage. At the end of every turn, put 1 damage counter on the Pokemon D
-- 1 x ENERGY: Metal Energy (ecard1-159): Damage done by attacks to the Pokemon Metal Energy is attached to is reduced by 10 (after applying Weakness and Resistance). If the Pokemon Metal Energy is attached to isn't Metal, whenever it damages a Pokemon by
 - 1 x attack: Elekid (ecard2-9): Flip a coin. If heads, choose an Energy card attached to the Defending Pokemon. Your opponent moves that card to 1 of his or her other Pokemon. (If your opponent has no Benched Pokemon, this attack does nothing.)
 - 1 x attack: Exeggutor (ecard2-13): Flip a number of coins equal to the amount of Energy attached to all of of your Benched Pokemon. This attack does 30 damage plus 10 more damage for each heads.
 - 1 x attack: Jynx (ecard2-18): This attack does 10 damage plus 10 more damage for each damage counter on the Defending Pokemon.
@@ -749,8 +741,6 @@ plays (tools/tcg/regions/effects.py); only finished cards appear in the game.
 - 1 x TRAINER: Undersea Ruins (ecard2-138): This card stays in play when you play it. Discard this card if another Stadium card comes into play. Once during each player's turn (before attacking), that player may flip a coin. If heads, that player chooses 
 - 1 x TRAINER: Power Plant (ecard2-139): This card stays in play when you play it. Discard this card if another Stadium card comes into play. Once during each of his or her turns, a player may discard a basic Energy card from his or her hand. If that play
 - 1 x TRAINER: Weakness Guard (ecard2-141): Attach this card to 1 of your Pokemon. Discard it at the end of your opponent's next turn. As long as this card is attached, this Pokemon has no Weakness.
-- 1 x ENERGY: Rainbow Energy (ecard2-144): Attach Rainbow Energy to 1 of your Pokemon. While in play, Rainbow Energy provides every type of Energy but provides only 1 Energy at a time. (Doesn't count as a basic Energy card when not in play.) When you att
-- 1 x ENERGY: Boost Energy (ecard2-145): Boost Energy can be attached only to an Evolved Pokemon. Discard Boost Energy at the end of the turn it was attached. Boost Energy provides ColorlessColorlessColorless Energy. The Pokemon Boost Energy is attached 
 - 1 x ENERGY: Crystal Energy (ecard2-146): Crystal Energy provides 1 Energy of all types (colors) of basic Energy cards attached to the Pokemon Crystal Energy is attached to. If there are no basic Energy cards attached to the Pokemon Crystal Energy is at
 - 1 x ENERGY: Warp Energy (ecard2-147): Warp Energy provides 1 Colorless Energy. When you attach Warp Energy from your hand to your Active Pokemon, switch your Active Pokemon with 1 of your Benched Pokemon.
 - 1 x attack: Kingdra (ecard2-148): Kingdra does 10 damage to itself. (Don't apply Weakness or Resistance when Kingdra damages itself with this attack.)

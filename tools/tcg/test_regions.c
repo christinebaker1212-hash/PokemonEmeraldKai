@@ -15,6 +15,9 @@ static void Deck(uint16_t *cards, unsigned id)
         cards[i] = i % 3 == 0 ? TCG_CARD_LIGHTNING_ENERGY : i % 3 == 1 ? TCG_CARD_PSYCHIC_ENERGY : TCG_CARD_GRASS_ENERGY;
     for (i = 42; i < 50; i++)
         cards[i] = TCG_CARD_FIGHTING_ENERGY;
+    /* (the only Darkness / Metal Energy: special) */
+    for (i = 0; i < 8; i++)
+        cards[i] = i < 4 ? TCG_CARD_NEO1_104 : TCG_CARD_NEO1_19;
     for (i = 50; i < 52; i++)
         cards[i] = TCG_CARD_MACHOP;
     cards[54] = TCG_CARD_DOUBLE_COLORLESS_ENERGY;
@@ -54,7 +57,7 @@ static void Stage(struct TcgDuel *g, unsigned id, unsigned attack, uint32_t seed
 {
     static const unsigned energy[TCG_TYPES] = {TCG_CARD_FIRE_ENERGY, TCG_CARD_GRASS_ENERGY, TCG_CARD_LIGHTNING_ENERGY,
                                                TCG_CARD_WATER_ENERGY, TCG_CARD_FIGHTING_ENERGY, TCG_CARD_PSYCHIC_ENERGY,
-                                               TCG_CARD_WATER_ENERGY, TCG_CARD_WATER_ENERGY, TCG_CARD_WATER_ENERGY};
+                                               TCG_CARD_WATER_ENERGY, TCG_CARD_NEO1_104, TCG_CARD_NEO1_19};
     uint16_t a[60], b[60];
     unsigned t, who;
     Deck(a, id);
@@ -113,7 +116,7 @@ static int TypeDeck(uint16_t out[60], unsigned type, unsigned skip)
     static const unsigned energy[TCG_TYPES] = {TCG_CARD_FIRE_ENERGY, TCG_CARD_GRASS_ENERGY, TCG_CARD_LIGHTNING_ENERGY,
                                                TCG_CARD_WATER_ENERGY, TCG_CARD_FIGHTING_ENERGY, TCG_CARD_PSYCHIC_ENERGY,
                                                TCG_CARD_WATER_ENERGY, TCG_CARD_WATER_ENERGY, TCG_CARD_WATER_ENERGY};
-    unsigned id, n = 0, basics = 0, seen = 0;
+    unsigned id, n = 0, basics = 0, seen = 0, k;
     for (id = TCG_CARD_GB_COUNT + 1; id <= TCG_CARD_COUNT && n < 32; id++)
     {
         const struct TcgCard *c = Tcg_Card(id), *from;
@@ -143,9 +146,66 @@ static int TypeDeck(uint16_t out[60], unsigned type, unsigned skip)
     }
     if (!basics)
         return 0;
+    /* (Darkness / Metal: four of the special Energy, the rest Colorless-paying basic Energy) */
+    if (type == TCG_DARKNESS || type == TCG_METAL)
+        for (k = 0; k < 4 && n < 60; k++, n++)
+            out[n] = (uint16_t)(type == TCG_DARKNESS ? (k % 2 ? TCG_CARD_NEO1_104 : TCG_CARD_ECARD1_158)
+                                                     : (k % 2 ? TCG_CARD_NEO1_19 : TCG_CARD_ECARD2_143));
     while (n < 60)
         out[n++] = (uint16_t)energy[type < 6 ? type : 3];
     return 1;
+}
+/* Darkness Energy (10 more, a counter at the end of the turn on a Pokemon that isn't Dark), Metal Energy (10 less to
+ * it), Boost Energy (only on an Evolved Pokemon, then no retreat) */
+static int LowKick(unsigned mine, unsigned theirs, unsigned *dealt, unsigned *took)
+{
+    struct TcgDuel g;
+    struct TcgAction a;
+    Stage(&g, TCG_CARD_MACHOP, 0, 7);
+    g.players[1].field[0].poison = 0;
+    if (mine)
+        Attach(&g, 0, 0, mine, 1);
+    if (theirs)
+        Attach(&g, 1, 0, theirs, 1);
+    memset(&a, 0, sizeof(a));
+    a.type = TCG_ATTACK;
+    if (TcgDuel_Apply(&g, &a) != TCG_OK)
+        return printf("FAIL Low Kick: %s\n", g.error), 1;
+    *dealt = g.players[1].field[0].damage;
+    *took = g.players[0].field[0].damage;
+    return 0;
+}
+static int SpecialEnergy(void)
+{
+    struct TcgDuel g;
+    struct TcgAction a;
+    unsigned dealt, took;
+    if (LowKick(0, 0, &dealt, &took) || dealt != 20 || took != 20)
+        return printf("FAIL plain Low Kick: %u / %u\n", dealt, took), 1;
+    if (LowKick(TCG_CARD_NEO1_104, 0, &dealt, &took) || dealt != 30 || took != 30)
+        return printf("FAIL Darkness Energy: dealt %u (30), took %u (30)\n", dealt, took), 1;
+    if (LowKick(0, TCG_CARD_NEO1_19, &dealt, &took) || dealt != 10)
+        return printf("FAIL Metal Energy on the Defending Pokemon: %u (10)\n", dealt), 1;
+    if (LowKick(TCG_CARD_NEO1_19, 0, &dealt, &took) || dealt != 10)
+        return printf("FAIL Metal Energy on a Fighting attacker: %u (10)\n", dealt), 1;
+    /* Boost Energy: not on a Basic Pokemon */
+    Stage(&g, TCG_CARD_MACHOP, 0, 3);
+    {
+        struct TcgPlayer *p = &g.players[0];
+        int c = Take(&g, 0, TCG_CARD_GRASS_ENERGY);
+        uint16_t keep = p->cards[c];
+        p->cards[c] = TCG_CARD_ECARD2_145;
+        p->hand[p->handSize++] = (uint8_t)c;
+        memset(&a, 0, sizeof(a));
+        a.type = TCG_ATTACH;
+        a.hand = (uint8_t)(p->handSize - 1);
+        a.slot = 0;
+        if (TcgDuel_Apply(&g, &a) == TCG_OK)
+            return printf("FAIL Boost Energy went on a Basic Pokemon\n"), 1;
+        p->cards[c] = keep;
+    }
+    printf("PASS special Energy: Darkness Energy's 10 more and its damage counter, Metal Energy both ways, Boost Energy\n");
+    return 0;
 }
 int main(void)
 {
@@ -219,13 +279,18 @@ int main(void)
     }
     printf("PASS %u finished regional cards: %u attacks used %u times, then %u AI actions after them\n", ready, used, ok,
            steps);
+    if (SpecialEnergy())
+        return 1;
     /* Decks of them, each type against the others, to the end */
     {
-        unsigned t, u, games = 0, finished = 0, actions = 0, skip;
+        static const unsigned types[] = {TCG_FIRE, TCG_GRASS, TCG_LIGHTNING, TCG_WATER, TCG_FIGHTING, TCG_PSYCHIC,
+                                         TCG_DARKNESS, TCG_METAL};
+        unsigned ti, ui, t, u, games = 0, finished = 0, actions = 0, skip;
         for (skip = 0; skip < 3; skip++)
-            for (t = 0; t < 6; t++)
-                for (u = 0; u < 6; u++)
+            for (ti = 0; ti < 8; ti++)
+                for (ui = 0; ui < 8; ui++)
                 {
+                    t = types[ti], u = types[ui];
                     uint16_t a[60], b[60];
                     unsigned k;
                     if (t == u || !TypeDeck(a, t, skip) || !TypeDeck(b, u, skip * 2))

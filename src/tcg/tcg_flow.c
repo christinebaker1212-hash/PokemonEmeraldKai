@@ -392,7 +392,7 @@ int TcgFlow_AttackSteps(const struct TcgDuel *g, unsigned me, const struct TcgAc
 }
 
 /* ---------------------------------------------------------------------------------------------------- filters */
-unsigned TcgFlow_EnergyValue(unsigned id) { return id == TCG_CARD_DOUBLE_COLORLESS_ENERGY ? 2 : 1; }
+unsigned TcgFlow_EnergyValue(unsigned id) { return Tcg_EnergyProvides(id); }
 
 int TcgFlow_HasEnergy(const struct TcgDuel *g, unsigned who, unsigned slot)
 {
@@ -556,6 +556,13 @@ int TcgFlow_HandPlayable(const struct TcgDuel *g, unsigned me, const struct TcgC
     }
     if (c->kind == TCG_ENERGY && p->energyPlayed)
         return snprintf(reason, size, "You already attached Energy this turn."), 0;
+    if (c->kind == TCG_ENERGY && Tcg_EnergyRule(c->id) == TCG_ER_BOOST)
+    {
+        for (s = 0; s < TCG_FIELD_SIZE; s++)
+            if (p->field[s].stackSize >= 2)
+                return 1;
+        return snprintf(reason, size, "Boost Energy goes only on an Evolved Pokemon."), 0;
+    }
     if (c->kind == TCG_POKEMON && !c->stage)
     {
         for (s = 1; s < TCG_FIELD_SIZE; s++)
@@ -742,6 +749,8 @@ int TcgFlow_CanRetreat(const struct TcgDuel *g, unsigned me, char *reason, size_
         return snprintf(reason, size, "%s can't retreat this turn.", c->name), 0;
     if (TcgPower_RetreatBlock(g, me))
         return snprintf(reason, size, "%s", TcgPower_RetreatBlock(g, me)), 0;
+    if (TcgDuel_AttachedRule(g, me, 0, TCG_ER_BOOST))
+        return snprintf(reason, size, "Boost Energy: %s can't retreat.", c->name), 0;
     if (TcgDuel_Energy(g, me, 0, TCG_NONE) < cost)
         return snprintf(reason, size, "Retreating costs %u Energy.", cost), 0;
     return 1;
@@ -1086,7 +1095,8 @@ unsigned TcgFlow_Begin(struct TcgFlow *f, const struct TcgDuel *g, unsigned me, 
         if (c->kind == TCG_ENERGY)
         {
             f->action.type = TCG_ATTACH;
-            return AskSlot(f, g, f->me, TCG_F_ANY_POKEMON, "Attach it to which Pokemon?");
+            return AskSlot(f, g, f->me, Tcg_EnergyRule(c->id) == TCG_ER_BOOST ? TCG_F_EVOLVED : TCG_F_ANY_POKEMON,
+                           "Attach it to which Pokemon?");
         }
         if (c->kind == TCG_POKEMON)
         {
