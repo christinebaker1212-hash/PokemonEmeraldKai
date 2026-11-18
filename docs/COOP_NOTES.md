@@ -8366,3 +8366,17 @@ advance in m4aSoundVSync each frame, so it never waits on the audio device), so 
 the screen has faded for the POKéDEX page (Cmd_displaydexinfo), at the nickname question (Cmd_trygivecaughtmonnick) and
 whenever the battle has an outcome (MP_LegacyAnim_Composite): the dex page, naming screen and fade-out are drawn while
 BattleMainCB2 still runs.
+
+## The POKéMON card game in every region (the regional sets, 2026-11-18)
+Everything is in docs/TCG_REGIONS.md (the plan, the user's four decisions, where each part lives). In short: the nine
+regional sets (Gym Heroes / Challenge for KANTO, Neo Genesis to Destiny for JOHTO, Expedition / Aquapolis / Skyridge
+for HOENN, SINNOH and UNOVA) and the era's Black Star promos are in the catalogue (ids past 442, tools/tcg/regions/), but
+a card plays only once every attack, power and rule on it does (decision 2: 1,217 of 1,227; docs/TCG_REGIONS_SCOPE.md
+lists the 10 left out). One ruleset, extended: Stadiums, Tools, Supporters, Technical Machines, Darkness / Metal,
+Baby, Shining, Pokémon-ex, Poké-Powers / Bodies, choices in the middle of an effect (phase TCG_CHOICE). Aquapolis /
+Skyridge have their own e-Card face and cut (tcg_gfx.c EcardFace / AquaArt). Per region: boosters at the CARD CLUB
+counters (Tcg_PackSoldIn), 67 special trainers with their own decks and promos (tools/tcg/regions/specials.py), the
+sets' 20 real theme decks brought by the region's card players and sold at its counters for 250 CP
+(tools/tcg/regions/theme_decks.py), and the CARD CLUB's courier (src/mp/mp_cardcourier.c) bringing the promos a save
+was owed for the JOHTO / KANTO / SINNOH trainers it beat before they had their own. Tests: tools/tcg/test_regions.c,
+test_special.c; scenarios cards_theme_kanto, cards_courier, cards_variety.
