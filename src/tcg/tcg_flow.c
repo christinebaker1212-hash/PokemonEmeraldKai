@@ -184,6 +184,8 @@ const struct TcgStep *TcgFlow_PlaySteps(unsigned cardId, int *count)
     {
     case TCG_POWER_SNEAK_ATTACK:
         STEPS({TCG_ST_OPP_SLOT, TCG_F_OCCUPIED, 0, 0, 0, "SNEAK ATTACK: 10 damage to which of theirs?"});
+    case TCG_POWER_R_SURPRISE_BITE:
+        STEPS({TCG_ST_OPP_SLOT, TCG_F_OCCUPIED, 0, 0, 0, "SURPRISE BITE: 20 damage to which of theirs?"});
     case TCG_POWER_POWER_OF_DARKNESS:
         STEPS({TCG_ST_OPP_SLOT, TCG_F_OCCUPIED, 0, 0, 0, "If heads, which of theirs goes back to their hand?"});
     case TCG_POWER_REEL_IN:
@@ -365,6 +367,7 @@ static int AttackPickSteps(const struct TcgDuel *g, unsigned me, const struct Tc
             {20, TCG_F_BASIC, TCG_SRC_DECK, "Put which Basic Pokemon onto your Bench?"},
             {21, TCG_F_BABY, TCG_SRC_DECK, "Put which Baby Pokemon onto your Bench?"},
             {22, TCG_F_METAL_BASIC, TCG_SRC_DECK, "If heads, put which Metal Basic Pokemon onto your Bench?"},
+            {23, TCG_F_FOSSIL_KID, TCG_SRC_DECK, "If heads, put which card onto your Bench?"},
             {30, TCG_F_BASIC, TCG_SRC_MY_DISCARD, "Put which Basic Pokemon onto your Bench?"},
             {40, TCG_F_GARBAGE, TCG_SRC_MY_DISCARD, "Put which card into your hand?"},
             {50, TCG_F_BASIC_ENERGY, TCG_SRC_DECK, "Take which basic Energy cards?"},
@@ -615,6 +618,8 @@ int TcgFlow_CardMatches(const struct TcgDuel *g, unsigned owner, unsigned physic
         return c->kind == TCG_POKEMON && (c->flags & TCG_CF_BABY);
     case TCG_F_METAL_BASIC:
         return c->kind == TCG_POKEMON && !c->stage && c->type == TCG_METAL;
+    case TCG_F_FOSSIL_KID:
+        return c->kind == TCG_POKEMON && !strcmp(c->evolvesFrom, "Mysterious Fossil");
     case TCG_F_OMANYTE_KABUTO:
         return c->kind == TCG_POKEMON && (!strcmp(c->name, "Omanyte") || !strcmp(c->name, "Kabuto"));
     case TCG_F_LATER_STAGE:

@@ -405,7 +405,8 @@ enum
     TCG_BUFF_MISTY = 1, /* Misty: 20 more from a Pokemon with Misty in its name */
     TCG_BUFF_KOGA = 2,  /* Koga: a Koga Pokemon's damage Poisons */
     TCG_BUFF_PARK = 4,  /* Pokemon Park healed this turn */
-    TCG_BUFF_TAILWIND = 8 /* Tailwind: the Active's Retreat Cost is 0 this turn */
+    TCG_BUFF_TAILWIND = 8, /* Tailwind: the Active's Retreat Cost is 0 this turn */
+    TCG_BUFF_NEIGHBOR = 16 /* a Good Neighbor used this turn */
 };
 /* That card (Tcg_Canon) attached to that Pokemon: its card, else -1 */
 int TcgDuel_AttachedCard(const struct TcgDuel *g, unsigned who, unsigned slot, unsigned canon);
@@ -567,6 +568,8 @@ int TcgPower_EvolveBlocked(const struct TcgDuel *g, unsigned player, unsigned sl
 void TcgPower_BenchedFromHand(struct TcgDuel *g, unsigned player, unsigned slot);
 /* The regional powers between turns (Rain Dish, Burning Aura) */
 void TcgPower_BetweenTurns(struct TcgDuel *g);
+/* As an attack begins (Rebellion): 1 when it does nothing */
+int TcgPower_BeforeAttack(struct TcgDuel *g);
 int TcgPower_Frenzy(const struct TcgDuel *g, unsigned player);
 void TcgPower_KnockedOut(struct TcgDuel *g, unsigned player, unsigned slot);
 int TcgPower_NoTrainers(const struct TcgDuel *g);

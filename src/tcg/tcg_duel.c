@@ -408,9 +408,24 @@ void TcgDuel_ResolveKnockouts(struct TcgDuel *g)
                 struct TcgPlayer *winner = &g->players[who ^ 1];
                 /* (a Pokemon-ex: 2 Prizes) */
                 unsigned prize = f->noPrize ? 0 : c->kind == TCG_POKEMON && (c->flags & TCG_CF_EX) ? 2 : 1;
+                int rebirth = TcgPower_Working(g, who, s) == TCG_POWER_R_REBIRTH;
+                uint8_t top = f->stack[f->stackSize - 1];
                 TcgDuel_Log(g, "%s is Knocked Out.", c->name);
                 TcgDuel_Event(g, TCG_EV_KO, who, s, 0, c->id, 0);
                 TcgDuel_DiscardField(g, who, s);
+                if (rebirth)
+                {
+                    /* (Rocket's Moltres's Rebirth: back to the hand after it's discarded) */
+                    struct TcgPlayer *q = &g->players[who];
+                    unsigned k;
+                    for (k = q->discardSize; k > 0; k--)
+                        if (q->discard[k - 1] == top)
+                        {
+                            q->hand[q->handSize++] = TcgPile_Remove(q->discard, &q->discardSize, k - 1);
+                            TcgDuel_Log(g, "Rebirth: %s returns to the hand.", c->name);
+                            break;
+                        }
+                }
                 while (prize-- && winner->prizeSize)
                 {
                     winner->hand[winner->handSize++] = winner->prizes[--winner->prizeSize];
@@ -924,6 +939,14 @@ static int Apply(struct TcgDuel *g, const struct TcgAction *a)
             EndTurn(g);
             return TCG_OK;
         }
+        if (TcgPower_BeforeAttack(g))
+        {
+            /* (Rebellion: the attack does nothing, the attacker went into the deck) */
+            TcgDuel_ResolveKnockouts(g);
+            if (g->phase == TCG_TURN)
+                EndTurn(g);
+            return TCG_OK;
+        }
         /* Before the attack: Fox Fire, Drag Off bring out another Defending Pokemon */
         damage = attack->damage;
         if ((result = TcgDuel_AttackEffect(g, attack, a, &damage, 3)) != TCG_OK)
@@ -977,7 +1000,7 @@ static int Apply(struct TcgDuel *g, const struct TcgAction *a)
             }
             if ((!g->noWeakRes || g->noWeakRes == 3) && resistOk && TcgDuel_Resistance(g, g->current ^ 1, 0) == type)
             {
-                total -= stadium == TCG_CARD_GYM2_109 ? 10 : 30;
+                total -= stadium == TCG_CARD_GYM2_109 || TcgPower_InPlay(g, 2, TCG_POWER_R_ENERVATING_POLLEN) ? 10 : 30;
                 flags |= TCG_DMG_RESIST;
             }
             total += 10 * (int)AttachedTrainerCount(g, g->current, 0, TCG_CARD_PLUSPOWER);

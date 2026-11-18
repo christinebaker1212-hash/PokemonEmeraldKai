@@ -919,6 +919,7 @@ static int ScriptRun(struct TcgDuel *g, const char *script, const struct TcgAtta
                                              (x == 0 ? (c->flags & TCG_CF_SUPPORTER) != 0
                                               : x == 1 ? (c->flags & (TCG_CF_TM | TCG_CF_TOOL)) != 0 : 1))
                          : ScriptIs(&o, "dishand") ? c->kind == TCG_POKEMON || (c->kind == TCG_ENERGY && c->id <= 6)
+                         : x == 3 ? c->kind == TCG_POKEMON && !strcmp(c->evolvesFrom, "Mysterious Fossil") /* (dbench:3) */
                                                    : c->kind == TCG_POKEMON && !c->stage && (x != 1 || (c->flags & TCG_CF_BABY)) &&
                                                          (x != 2 || c->type == TCG_METAL); /* (dbench:2 a Metal Basic) */
                 if (!ok)
@@ -1169,6 +1170,14 @@ static int ScriptRun(struct TcgDuel *g, const char *script, const struct TcgAtta
         }
         else if (ScriptIs(&o, "shiftto"))
             self->shift = (uint8_t)(x + 1); /* (its type x for the rest of the turn) */
+        else if (ScriptIs(&o, "healact"))
+        {
+            /* x counters off each Active Pokemon (both players') */
+            unsigned w;
+            for (w = 0; w < 2; w++)
+                if (g->players[w].field[0].stackSize && g->players[w].field[0].damage)
+                    Heal(g, w, 0, (unsigned)x * 10);
+        }
         else if (ScriptIs(&o, "dheal"))
         {
             /* x counters off the Defending Pokemon (0: all of them) */
@@ -1338,7 +1347,7 @@ static int ScriptRun(struct TcgDuel *g, const char *script, const struct TcgAtta
             for (k = 0; me_card && room < TCG_FIELD_SIZE && k < p->deckSize; k++)
             {
                 const struct TcgCard *c = CardAt(g, me, p->deck[k]);
-                if (c->kind == TCG_POKEMON && !c->stage && !strcmp(c->name, me_card->name))
+                if (c->kind == TCG_POKEMON && (x || !c->stage) && !strcmp(c->name, me_card->name)) /* (:1 even an Evolution card) */
                 {
                     memset(&p->field[room], 0, sizeof(p->field[room]));
                     p->field[room].stack[p->field[room].stackSize++] = TcgPile_Remove(p->deck, &p->deckSize, k);

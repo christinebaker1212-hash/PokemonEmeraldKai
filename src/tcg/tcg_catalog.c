@@ -2909,7 +2909,7 @@ const struct TcgCard gTcgCards[TCG_CARD_COUNT + 1] = {
 {.name="",.description="",.effect="NONE",.animation="ATK_ANIM_NONE",.cost={0},.damage=0,.category=TCG_DAMAGE_NORMAL},
 }
 },
-[454] = {.id=454, .name="Rocket's Moltres", .kind=TCG_POKEMON, .type=0, .rarity=2, .set=13, .set2=255, .dark=0, .holo=1, .flags=TCG_CF_OWNER, .origin=13,
+[454] = {.id=454, .name="Rocket's Moltres", .kind=TCG_POKEMON, .type=0, .rarity=2, .set=13, .set2=255, .dark=0, .holo=1, .flags=TCG_CF_OWNER|TCG_CF_READY, .origin=13,
 .hp=60, .stage=0, .species=146, .level=26, .retreat=2, .weakness=255, .resistance=4, .evolvesFrom="", .description="", .attacks={
 {.name="Rebirth",.description="When Rocket's Moltres is Knocked Out, you may return it to your hand after discarding it. This power can't be used if Rocket's Moltres is Asleep, Confused, or Paralyzed when it is Knocked Out.",.effect="gym1-12:p",.animation="ATK_ANIM_HIT",.cost={0,0,0,0,0,0,0,0,0},.damage=0,.category=TCG_POKEMON_POWER},
 {.name="Fire Wall",.description="If an attack does damage to Rocket's Moltres during your opponent's next turn (even if Rocket's Moltres is Knocked Out), Rocket's Moltres attacks your opponent's Active Pokemon for 10 damage. (Apply Weakness and Resistance.)",.effect="gym1-12:a0",.animation="ATK_ANIM_HIT",.cost={3,0,0,0,0,0,0,0,0},.damage=40,.category=TCG_DAMAGE_NORMAL},
@@ -3658,7 +3658,7 @@ const struct TcgCard gTcgCards[TCG_CARD_COUNT + 1] = {
 {.name="",.description="",.effect="NONE",.animation="ATK_ANIM_NONE",.cost={0},.damage=0,.category=TCG_DAMAGE_NORMAL},
 }
 },
-[581] = {.id=581, .name="Misty's Gyarados", .kind=TCG_POKEMON, .type=3, .rarity=2, .set=14, .set2=255, .dark=0, .holo=1, .flags=TCG_CF_OWNER, .origin=14,
+[581] = {.id=581, .name="Misty's Gyarados", .kind=TCG_POKEMON, .type=3, .rarity=2, .set=14, .set2=255, .dark=0, .holo=1, .flags=TCG_CF_OWNER|TCG_CF_READY, .origin=14,
 .hp=100, .stage=1, .species=130, .level=42, .retreat=3, .weakness=1, .resistance=4, .evolvesFrom="Misty's Magikarp", .description="", .attacks={
 {.name="Rebellion",.description="Whenever Misty's Gyarados attacks, flip 2 coins. If both of them are tails, that attack does nothing. Instead, shuffle Misty's Gyarados and all cards attached to it into your deck. (This power works even if Misty's Gyarados is Confused.)",.effect="gym2-13:p",.animation="ATK_ANIM_HIT",.cost={0,0,0,0,0,0,0,0,0},.damage=0,.category=TCG_POKEMON_POWER},
 {.name="Tidal Wave",.description="",.effect="NONE",.animation="ATK_ANIM_HIT",.cost={0,0,0,4,0,0,0,0,0},.damage=70,.category=TCG_DAMAGE_NORMAL},
@@ -3796,7 +3796,7 @@ const struct TcgCard gTcgCards[TCG_CARD_COUNT + 1] = {
 {.name="",.description="",.effect="NONE",.animation="ATK_ANIM_NONE",.cost={0},.damage=0,.category=TCG_DAMAGE_NORMAL},
 }
 },
-[603] = {.id=603, .name="Brock's Primeape", .kind=TCG_POKEMON, .type=4, .rarity=1, .set=14, .set2=255, .dark=0, .holo=0, .flags=TCG_CF_OWNER, .origin=14,
+[603] = {.id=603, .name="Brock's Primeape", .kind=TCG_POKEMON, .type=4, .rarity=1, .set=14, .set2=255, .dark=0, .holo=0, .flags=TCG_CF_OWNER|TCG_CF_READY, .origin=14,
 .hp=70, .stage=1, .species=57, .level=32, .retreat=1, .weakness=5, .resistance=255, .evolvesFrom="Brock's Mankey", .description="", .attacks={
 {.name="Scram",.description="If Brock's Primeape ever has exactly 10 HP left, shuffle it and all cards attached to it into your deck. This power stops working while Brock's Primeape is Asleep, Confused, or Paralyzed.",.effect="gym2-35:p",.animation="ATK_ANIM_HIT",.cost={0,0,0,0,0,0,0,0,0},.damage=0,.category=TCG_POKEMON_POWER},
 {.name="Mega Thrash",.description="Brock's Primeape does 20 damage to itself. If there is a Stadium card in play, discard it.",.effect="gym2-35:a0",.animation="ATK_ANIM_HIT",.cost={0,0,0,0,3,0,0,0,0},.damage=60,.category=TCG_DAMAGE_NORMAL},
@@ -5356,7 +5356,7 @@ const struct TcgCard gTcgCards[TCG_CARD_COUNT + 1] = {
 {.name="",.description="",.effect="NONE",.animation="ATK_ANIM_NONE",.cost={0},.damage=0,.category=TCG_DAMAGE_NORMAL},
 }
 },
-[855] = {.id=855, .name="Kabuto", .kind=TCG_POKEMON, .type=3, .rarity=0, .set=16, .set2=255, .dark=0, .holo=0, .flags=0, .origin=16,
+[855] = {.id=855, .name="Kabuto", .kind=TCG_POKEMON, .type=3, .rarity=0, .set=16, .set2=255, .dark=0, .holo=0, .flags=TCG_CF_READY, .origin=16,
 .hp=50, .stage=1, .species=140, .level=21, .retreat=1, .weakness=1, .resistance=255, .evolvesFrom="Mysterious Fossil", .description="On rare occasions, some have been found as fossils which they became while hiding on the ocean floor.", .attacks={
 {.name="Revive Friends",.description="Once during your turn (before your attack), you may flip a coin. If heads, search your deck for a card named Kabuto and put it on your Bench. Shuffle your deck afterward. Treat the new Kabuto as a Basic Pokemon. This power can't be used if Kabuto is Asleep, Confused, or Paralyzed (or if your Bench is full).",.effect="neo2-56:p",.animation="ATK_ANIM_HIT",.cost={0,0,0,0,0,0,0,0,0},.damage=0,.category=TCG_POKEMON_POWER},
 {.name="Work Together",.description="Flip a coin. If heads, this attack does 10 damage plus 10 more damage for each Omanyte, Omastar, Kabuto, and Kabutops on your Bench.",.effect="neo2-56:a0",.animation="ATK_ANIM_HIT",.cost={0,0,0,0,1,0,1,0,0},.damage=10,.category=TCG_DAMAGE_PLUS},
@@ -5384,7 +5384,7 @@ const struct TcgCard gTcgCards[TCG_CARD_COUNT + 1] = {
 {.name="",.description="",.effect="NONE",.animation="ATK_ANIM_NONE",.cost={0},.damage=0,.category=TCG_DAMAGE_NORMAL},
 }
 },
-[859] = {.id=859, .name="Omanyte", .kind=TCG_POKEMON, .type=4, .rarity=0, .set=16, .set2=255, .dark=0, .holo=0, .flags=0, .origin=16,
+[859] = {.id=859, .name="Omanyte", .kind=TCG_POKEMON, .type=4, .rarity=0, .set=16, .set2=255, .dark=0, .holo=0, .flags=TCG_CF_READY, .origin=16,
 .hp=50, .stage=1, .species=138, .level=21, .retreat=1, .weakness=1, .resistance=255, .evolvesFrom="Mysterious Fossil", .description="Revived from an ancient fossil, this Pokemon uses air stored in its shell to sink and rise in water.", .attacks={
 {.name="Revive Fossil",.description="Once during your turn (before your attack), you may flip a coin. If heads, search your deck for a card that evolves from Mysterious Fossil and put it onto your Bench. Shuffle your deck afterward. Treat that card as a Basic Pokemon. This power can't be used if Omanyte is Asleep, Confused, or Paralyzed (or if your Bench is full).",.effect="neo2-60:p",.animation="ATK_ANIM_HIT",.cost={0,0,0,0,0,0,0,0,0},.damage=0,.category=TCG_POKEMON_POWER},
 {.name="Bind",.description="Flip a coin. If heads, the Defending Pokemon is now Paralyzed.",.effect="neo2-60:a0",.animation="ATK_ANIM_HIT",.cost={0,0,0,1,0,0,0,0,0},.damage=10,.category=TCG_DAMAGE_NORMAL},
@@ -5494,7 +5494,7 @@ const struct TcgCard gTcgCards[TCG_CARD_COUNT + 1] = {
 {.name="",.description="",.effect="NONE",.animation="ATK_ANIM_NONE",.cost={0},.damage=0,.category=TCG_DAMAGE_NORMAL},
 }
 },
-[877] = {.id=877, .name="Celebi", .kind=TCG_POKEMON, .type=5, .rarity=2, .set=17, .set2=255, .dark=0, .holo=1, .flags=0, .origin=17,
+[877] = {.id=877, .name="Celebi", .kind=TCG_POKEMON, .type=5, .rarity=2, .set=17, .set2=255, .dark=0, .holo=1, .flags=TCG_CF_READY, .origin=17,
 .hp=50, .stage=0, .species=251, .level=16, .retreat=1, .weakness=5, .resistance=255, .evolvesFrom="", .description="This Pokemon wanders across time. Grass and trees flourish in the forests in which it has appeared.", .attacks={
 {.name="Time Travel",.description="If an opponent's attack would Knock Out Celebi, flip a coin. If heads, Celebi isn't Knocked Out and you shuffle it and all cards attached to it into your deck. This power doesn't work if Celebi is already Asleep, Confused, or Paralyzed.",.effect="neo3-3:p",.animation="ATK_ANIM_HIT",.cost={0,0,0,0,0,0,0,0,0},.damage=0,.category=TCG_POKEMON_POWER},
 {.name="Psychic Damage",.description="Flip 3 coins. For each heads, put 1 damage counter on the Defending Pokemon.",.effect="neo3-3:a0",.animation="ATK_ANIM_HIT",.cost={0,0,0,0,0,1,0,0,0},.damage=0,.category=TCG_RESIDUAL},
@@ -5929,7 +5929,7 @@ const struct TcgCard gTcgCards[TCG_CARD_COUNT + 1] = {
 {.name="",.description="",.effect="NONE",.animation="ATK_ANIM_NONE",.cost={0},.damage=0,.category=TCG_DAMAGE_NORMAL},
 }
 },
-[942] = {.id=942, .name="Dark Crobat", .kind=TCG_POKEMON, .type=1, .rarity=2, .set=18, .set2=255, .dark=1, .holo=1, .flags=0, .origin=18,
+[942] = {.id=942, .name="Dark Crobat", .kind=TCG_POKEMON, .type=1, .rarity=2, .set=18, .set2=255, .dark=1, .holo=1, .flags=TCG_CF_READY, .origin=18,
 .hp=70, .stage=2, .species=169, .level=39, .retreat=0, .weakness=5, .resistance=4, .evolvesFrom="Dark Golbat", .description="Although the wings it has evolved on its feet allow it to fly at high speeds, they unfortunately make it difficult to perch.", .attacks={
 {.name="Surprise Bite",.description="When you play Dark Crobat from your hand, you may choose 1 of your opponent's Pokemon. This power does 20 damage to that Pokemon. (Don't apply Weakness and Resistance.)",.effect="neo4-2:p",.animation="ATK_ANIM_HIT",.cost={0,0,0,0,0,0,0,0,0},.damage=0,.category=TCG_POKEMON_POWER},
 {.name="Dark Drain",.description="Flip a coin for each of your opponent's Pokemon. For each heads, this attack does 10 damage to that Pokemon. Don't apply Weakness and Resistance. Remove a number of damage counters from Dark Crobat equal to the damage dealt. If Dark Crobat has fewer damage counters than that, remove all of them.",.effect="neo4-2:a0",.animation="ATK_ANIM_HIT",.cost={0,2,0,0,0,0,0,0,0},.damage=0,.category=TCG_RESIDUAL},
@@ -6086,7 +6086,7 @@ const struct TcgCard gTcgCards[TCG_CARD_COUNT + 1] = {
 {.name="",.description="",.effect="NONE",.animation="ATK_ANIM_NONE",.cost={0},.damage=0,.category=TCG_DAMAGE_NORMAL},
 }
 },
-[965] = {.id=965, .name="Light Machamp", .kind=TCG_POKEMON, .type=4, .rarity=2, .set=18, .set2=255, .dark=0, .holo=0, .flags=TCG_CF_LIGHT, .origin=18,
+[965] = {.id=965, .name="Light Machamp", .kind=TCG_POKEMON, .type=4, .rarity=2, .set=18, .set2=255, .dark=0, .holo=0, .flags=TCG_CF_LIGHT|TCG_CF_READY, .origin=18,
 .hp=100, .stage=2, .species=68, .level=65, .retreat=2, .weakness=5, .resistance=255, .evolvesFrom="Light Machoke", .description="It uses its four arms in combat to unleash a ceaseless flurry of punches.", .attacks={
 {.name="Tag Team",.description="When you play Light Machamp from your hand, if it is on your Bench, remove 3 damage counters from your Active Pokemon. If it has fewer damage counters than that, remove all of them. Then, switch Light Machamp with your Active Pokemon.",.effect="neo4-25:p",.animation="ATK_ANIM_HIT",.cost={0,0,0,0,0,0,0,0,0},.damage=0,.category=TCG_POKEMON_POWER},
 {.name="Beatdown",.description="If the Defending Pokemon has Dark in its name or is a Darkness Pokemon, flip a coin. If heads, this attack does 100 damage instead of 50.",.effect="neo4-25:a0",.animation="ATK_ANIM_HIT",.cost={0,0,0,0,3,0,0,0,0},.damage=50,.category=TCG_DAMAGE_NORMAL},
@@ -8015,7 +8015,7 @@ const struct TcgCard gTcgCards[TCG_CARD_COUNT + 1] = {
 {.name="",.description="",.effect="NONE",.animation="ATK_ANIM_NONE",.cost={0},.damage=0,.category=TCG_DAMAGE_NORMAL},
 }
 },
-[1261] = {.id=1261, .name="Gloom", .kind=TCG_POKEMON, .type=1, .rarity=1, .set=20, .set2=255, .dark=0, .holo=0, .flags=TCG_CF_BODY, .origin=20,
+[1261] = {.id=1261, .name="Gloom", .kind=TCG_POKEMON, .type=1, .rarity=1, .set=20, .set2=255, .dark=0, .holo=0, .flags=TCG_CF_BODY|TCG_CF_READY, .origin=20,
 .hp=70, .stage=1, .species=44, .level=0, .retreat=2, .weakness=0, .resistance=255, .evolvesFrom="Oddish", .description="", .attacks={
 {.name="Enervating Pollen",.description="As long as Gloom is in play, Resistance on each player's Active Pokemon only reduces damage by 10.",.effect="ecard2-49:p",.animation="ATK_ANIM_HIT",.cost={0,0,0,0,0,0,0,0,0},.damage=0,.category=TCG_POKEMON_POWER},
 {.name="Sleep Sap",.description="Both the Defending Pokemon and Gloom are now Asleep (after doing damage).",.effect="ecard2-49:a0",.animation="ATK_ANIM_HIT",.cost={0,0,0,0,0,0,2,0,0},.damage=20,.category=TCG_DAMAGE_NORMAL},
@@ -8309,7 +8309,7 @@ const struct TcgCard gTcgCards[TCG_CARD_COUNT + 1] = {
 {.name="",.description="",.effect="NONE",.animation="ATK_ANIM_NONE",.cost={0},.damage=0,.category=TCG_DAMAGE_NORMAL},
 }
 },
-[1303] = {.id=1303, .name="Magnemite", .kind=TCG_POKEMON, .type=2, .rarity=0, .set=20, .set2=255, .dark=0, .holo=0, .flags=TCG_CF_BODY, .origin=20,
+[1303] = {.id=1303, .name="Magnemite", .kind=TCG_POKEMON, .type=2, .rarity=0, .set=20, .set2=255, .dark=0, .holo=0, .flags=TCG_CF_BODY|TCG_CF_READY, .origin=20,
 .hp=50, .stage=0, .species=81, .level=0, .retreat=1, .weakness=4, .resistance=255, .evolvesFrom="", .description="", .attacks={
 {.name="Conductive Body",.description="You pay Colorless less to retreat Magnemite for each Magnemite on your Bench.",.effect="ecard2-91:p",.animation="ATK_ANIM_HIT",.cost={0,0,0,0,0,0,0,0,0},.damage=0,.category=TCG_POKEMON_POWER},
 {.name="Magnetic Bomb",.description="Flip a coin. If heads, this attack does 20 damage plus 10 more damage. If tails, Magnemite does 10 damage to itself.",.effect="ecard2-91:a0",.animation="ATK_ANIM_HIT",.cost={0,0,1,0,0,0,1,0,0},.damage=20,.category=TCG_DAMAGE_PLUS},
@@ -9104,7 +9104,7 @@ const struct TcgCard gTcgCards[TCG_CARD_COUNT + 1] = {
 {.name="Aqua Trick",.description="If the Defending Pokemon has any Energy cards attached to it, flip a coin. If heads, choose 1 of those Energy cards and move it to 1 of your opponent's Benched Pokemon. If your opponent has no Benched Pokemon, ignore this effect.",.effect="ecard3-33:a1",.animation="ATK_ANIM_HIT",.cost={0,0,0,1,0,0,2,0,0},.damage=40,.category=TCG_DAMAGE_NORMAL},
 }
 },
-[1428] = {.id=1428, .name="Wigglytuff", .kind=TCG_POKEMON, .type=6, .rarity=2, .set=21, .set2=255, .dark=0, .holo=0, .flags=0, .origin=21,
+[1428] = {.id=1428, .name="Wigglytuff", .kind=TCG_POKEMON, .type=6, .rarity=2, .set=21, .set2=255, .dark=0, .holo=0, .flags=TCG_CF_READY, .origin=21,
 .hp=70, .stage=1, .species=40, .level=0, .retreat=1, .weakness=4, .resistance=255, .evolvesFrom="Jigglypuff", .description="", .attacks={
 {.name="Good Neighbor",.description="Once during your turn (before your attack), if Wigglytuff is on your bench, you may flip a coin. If heads, each player removes up to 2 damage counters from his or her Active Pokemon. This power can't be used if you have already used another Wigglytuff's Good Neighbor Poke-Power this turn.",.effect="ecard3-34:p",.animation="ATK_ANIM_HIT",.cost={0,0,0,0,0,0,0,0,0},.damage=0,.category=TCG_POKEMON_POWER},
 {.name="Do the Wave",.description="Flip a coin. If heads, this attack does 10 damage times the number of Pokemon you have in play.",.effect="ecard3-34:a0",.animation="ATK_ANIM_HIT",.cost={0,0,0,0,0,0,2,0,0},.damage=10,.category=TCG_DAMAGE_X},
@@ -9566,7 +9566,7 @@ const struct TcgCard gTcgCards[TCG_CARD_COUNT + 1] = {
 {.name="",.description="",.effect="NONE",.animation="ATK_ANIM_NONE",.cost={0},.damage=0,.category=TCG_DAMAGE_NORMAL},
 }
 },
-[1494] = {.id=1494, .name="Snorlax", .kind=TCG_POKEMON, .type=6, .rarity=0, .set=21, .set2=255, .dark=0, .holo=0, .flags=0, .origin=21,
+[1494] = {.id=1494, .name="Snorlax", .kind=TCG_POKEMON, .type=6, .rarity=0, .set=21, .set2=255, .dark=0, .holo=0, .flags=TCG_CF_READY, .origin=21,
 .hp=80, .stage=0, .species=143, .level=0, .retreat=3, .weakness=4, .resistance=255, .evolvesFrom="", .description="", .attacks={
 {.name="Lolling About",.description="Once during your turn (before your attack), if Snorlax is your Active Pokemon, you may remove 1 damage counter from Snorlax. Snorlax is now Asleep. This power can't be used if Snorlax is affected by a Special Condition.",.effect="ecard3-100:p",.animation="ATK_ANIM_HIT",.cost={0,0,0,0,0,0,0,0,0},.damage=0,.category=TCG_POKEMON_POWER},
 {.name="Continuous Tumble",.description="Flip a coin until you get tails. This attack does 30 damage times the number of heads.",.effect="ecard3-100:a0",.animation="ATK_ANIM_HIT",.cost={0,0,0,0,0,0,3,0,0},.damage=30,.category=TCG_DAMAGE_X},

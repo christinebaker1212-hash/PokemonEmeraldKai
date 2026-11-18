@@ -28,6 +28,22 @@ static int RpEnergyOn(const struct TcgDuel *g, unsigned player, unsigned slot, i
     }
     return -1;
 }
+/* That Pokemon and its cards shuffled into its owner's deck (Bolt, Time Travel, Scram, Rebellion) */
+static void RpToDeck(struct TcgDuel *g, unsigned player, unsigned slot)
+{
+    struct TcgPlayer *q = &g->players[player];
+    struct TcgFieldCard *f = &q->field[slot];
+    unsigned k;
+    for (k = 0; k < f->stackSize + f->attachedSize; k++)
+    {
+        uint8_t card = k < f->stackSize ? f->stack[k] : f->attached[k - f->stackSize];
+        q->attachmentExpires[card] = 0;
+        q->deck[q->deckSize++] = card;
+    }
+    memset(f, 0, sizeof(*f));
+    TcgDuel_Shuffle(g, player);
+    TcgDuel_Event(g, TCG_EV_DECK_CHANGED, player, 0, 0, 0, 0);
+}
 /* Why a regional used power can't be used now (NULL: it can) */
 static const char *RegionBlock(const struct TcgDuel *g, unsigned player, unsigned slot, unsigned power)
 {
@@ -89,11 +105,17 @@ static const char *RegionBlock(const struct TcgDuel *g, unsigned player, unsigne
         if (s == TCG_FIELD_SIZE)
             return "Those Unown aren't all on your Bench.";
         break;
+    case TCG_POWER_R_GOOD_NEIGHBOR:
+        if (p->turnBuffs & TCG_BUFF_NEIGHBOR)
+            return "You've used a Good Neighbor this turn.";
+        break;
     case TCG_POWER_R_BACKUP:
         if (p->handSize > 2)
             return "You have more than 2 cards in your hand.";
         break;
     case TCG_POWER_R_MAGNETIC_CALL:
+    case TCG_POWER_R_REVIVE_FRIENDS:
+    case TCG_POWER_R_REVIVE_FOSSIL:
         for (s = 1; s < TCG_FIELD_SIZE && p->field[s].stackSize; s++)
             ;
         if (s == TCG_FIELD_SIZE)
@@ -172,6 +194,8 @@ static int RegionUse(struct TcgDuel *g, const struct TcgAction *a, unsigned slot
         return Fail(g, "This Pokemon Power can't be used.");
     Announce(g, g->current, slot, power);
     result = TcgDuel_RunPowerScript(g, slot, script, a);
+    if (result == TCG_OK && power == TCG_POWER_R_GOOD_NEIGHBOR)
+        g->players[g->current].turnBuffs |= TCG_BUFF_NEIGHBOR;
     return result;
 }
 
@@ -446,14 +470,15 @@ void TcgPower_Damaged(struct TcgDuel *g, unsigned player, unsigned slot, unsigne
     if (power == TCG_POWER_R_BOLT && f->damage < (c->kind == TCG_POKEMON ? c->hp : 10u) && TcgDuel_Coin(g, player))
     {
         /* (Entei and its cards into the deck: unless Knocked Out) */
-        struct TcgPlayer *q = &g->players[player];
-        unsigned k;
         Announce(g, player, slot, power);
-        for (k = 0; k < f->stackSize + f->attachedSize; k++)
-            q->deck[q->deckSize++] = k < f->stackSize ? f->stack[k] : f->attached[k - f->stackSize];
-        memset(f, 0, sizeof(*f));
-        TcgDuel_Shuffle(g, player);
-        TcgDuel_Event(g, TCG_EV_DECK_CHANGED, player, 0, 0, 0, 0);
+        RpToDeck(g, player, slot);
+        return;
+    }
+    if ((power == TCG_POWER_R_TIME_TRAVEL && c->kind == TCG_POKEMON && f->damage >= c->hp && TcgDuel_Coin(g, player)) ||
+        (power == TCG_POWER_R_SCRAM && c->kind == TCG_POKEMON && f->damage + 10u == c->hp))
+    {
+        Announce(g, player, slot, power);
+        RpToDeck(g, player, slot);
         return;
     }
     if (power == TCG_POWER_R_FORTITUDE && c->kind == TCG_POKEMON && f->damage >= c->hp && TcgDuel_Coin(g, player))
@@ -496,6 +521,37 @@ static void RegionOnPlay(struct TcgDuel *g, unsigned player, unsigned slot, unsi
     unsigned i, n, who, s;
     switch (power)
     {
+    case TCG_POWER_R_TAG_TEAM:
+        /* (played from the hand onto a Benched one) 3 counters off the Active, then it switches in */
+        if (!slot || !g->fromHand)
+            return;
+        Announce(g, player, slot, power);
+        if (p->field[0].stackSize && p->field[0].damage)
+        {
+            unsigned heal = p->field[0].damage < 30 ? p->field[0].damage : 30;
+            p->field[0].damage -= heal;
+            TcgDuel_Event(g, TCG_EV_HEAL, player, 0, heal, 0, 0);
+        }
+        if (!TcgDuel_Anchored(g, player))
+        {
+            struct TcgFieldCard temp = p->field[0];
+            p->field[0] = *f;
+            *f = temp;
+            f->condition = TCG_HEALTHY;
+            f->poison = f->burned = 0;
+            TcgDuel_Event(g, TCG_EV_SWITCH, player, slot, 0, 0, 0);
+        }
+        break;
+    case TCG_POWER_R_SURPRISE_BITE:
+        /* (played from the hand) 20 to the one of theirs chosen (sPlay), else their Active */
+        if (!g->fromHand)
+            return;
+        s = sPlay && sPlay->target < TCG_FIELD_SIZE && op->field[sPlay->target].stackSize ? sPlay->target : 0;
+        if (!op->field[s].stackSize)
+            return;
+        Announce(g, player, slot, power);
+        PlainDamage(g, player ^ 1, s, 20);
+        break;
     case TCG_POWER_R_VENOM_SPRAY:
         if (!evolvedActive || !foe->stackSize)
             return;
@@ -666,6 +722,12 @@ void TcgPower_BetweenTurns(struct TcgDuel *g)
         {
             struct TcgFieldCard *f = &g->players[who].field[s];
             unsigned power = f->stackSize ? TcgPower_Working(g, who, s) : TCG_POWER_NONE;
+            if (power == TCG_POWER_R_SCRAM && f->damage + 10u == TcgDuel_Field(g, who, s)->hp)
+            {
+                Announce(g, who, s, power);
+                RpToDeck(g, who, s);
+                continue;
+            }
             if (power == TCG_POWER_R_RAIN_DISH && f->damage >= 10)
             {
                 Announce(g, who, s, power);
@@ -764,4 +826,18 @@ void TcgPower_BenchedFromHand(struct TcgDuel *g, unsigned player, unsigned slot)
             PlainDamage(g, player, slot, 10);
             break;
         }
+}
+/* As the attack begins: Rebellion (Misty's Gyarados, while not Asleep or Paralyzed): 2 coins, both tails and the attack
+ * does nothing, it and its cards into the deck. 1: the attack is over */
+int TcgPower_BeforeAttack(struct TcgDuel *g)
+{
+    const struct TcgFieldCard *f = &g->players[g->current].field[0];
+    if (TcgPower_Id(TcgDuel_Field(g, g->current, 0)) != TCG_POWER_R_REBELLION || f->condition == TCG_ASLEEP ||
+        f->condition == TCG_PARALYZED || ToxicGas(g))
+        return 0;
+    Announce(g, g->current, 0, TCG_POWER_R_REBELLION);
+    if (TcgDuel_Coin(g, g->current) | TcgDuel_Coin(g, g->current))
+        return 0;
+    RpToDeck(g, g->current, 0);
+    return 1;
 }

@@ -67,7 +67,7 @@ P('R_WANT', '[Want]', 'put a Trainer card from your discard pile into your hand'
 P('R_GIVE', '[Give]', 'search your deck for a basic Energy card and attach it to 1 of your Pokemon', 'USED',
   'ONCE BENCH', 'c h.spike')
 P('R_LAUGH', '[Laugh]', 'each player shuffles his or her deck', 'USED', 'ONCE ANY', 'c h.shufboth')
-P('R_LOLLING_ABOUT', 'Lolling About', 'Snorlax is now Asleep', 'USED', 'ONCE ACTIVE', 'heal:1 sslp')
+P('R_LOLLING_ABOUT', 'Lolling About', 'SELF is now Asleep', 'USED', 'ONCE ACTIVE', 'heal:1 sslp')
 P('R_SOLAR_POWER', 'Solar Power', 'Your Active Pokemon and the Defending Pokemon are no longer', 'USED', 'ONCE',
   'cure4:0 cure4:1')
 P('R_BACKUP', 'Backup', 'draw cards from your deck until you have 3 cards', 'USED', 'ONCE', 'needhand:2 drawto:3')
@@ -75,6 +75,12 @@ P('R_SUBMERGE', 'Submerge', "change SELF's type to Water", 'USED', 'ONCE', 'shif
 P('R_JOIN', '[Join]', 'search your deck for a Basic Pokemon or Evolution card', 'USED', 'ONCE BENCH', 'srchk:3')
 P('R_MAGNETIC_CALL', 'Magnetic Call', 'search your deck for a Metal Basic Pokemon', 'USED', 'ONCE',
   'needroom c h.dbench:2')
+P('R_GOOD_NEIGHBOR', 'Good Neighbor', 'each player removes up to 2 damage counters from his or her Active', 'USED',
+  'ONCE BENCH', 'c h.healact:2')
+P('R_REVIVE_FRIENDS', 'Revive Friends', 'search your deck for a card named SELF and put it on your Bench', 'USED', 'ONCE',
+  'c h.benchself:1')
+P('R_REVIVE_FOSSIL', 'Revive Fossil', 'evolves from Mysterious Fossil and put it onto your Bench', 'USED', 'ONCE',
+  'c h.dbench:3')
 P('R_QUICKEN', '[Quicken]', 'prevent all effects of attacks, including damage, done to any of your Pokemon with Unown',
   'USED', 'ONCE ANY', 'c h.barunown')
 
@@ -126,7 +132,7 @@ P('R_DENSE_BODY', 'Dense Body', 'from Basic Pokemon (excluding Baby Pokemon) is 
 P('R_ENERGY_BARRIER', 'Energy Barrier', 'for each basic Energy card attached to SELF', 'PASSIVE')
 P('R_PSYCHOFLOW', 'Psychoflow', 'Psychic Energy card attached to SELF, its Retreat Cost is 0', 'PASSIVE')
 P('R_SLIPPERY_SKIN', 'Slippery Skin', 'Defending Pokemon is an Evolved Pokemon', 'PASSIVE')
-P('R_CONDUCTIVE_BODY', 'Conductive Body', 'for each Magnemite on your Bench', 'PASSIVE')
+P('R_CONDUCTIVE_BODY', 'Conductive Body', 'for each SELF on your Bench', 'PASSIVE')
 P('R_SYNCHRONIZED_LIFT', 'Synchronized Lift', 'the Retreat Cost for SELF is 0', 'PASSIVE')
 P('R_RAIN_DISH', 'Rain Dish', 'between turns, remove 1 damage counter', 'PASSIVE')
 P('R_BURNING_AURA', 'Burning Aura', 'put 1 damage counter on each Active Pokemon', 'PASSIVE')
@@ -148,6 +154,13 @@ P('R_PRISMATIC_BODY', 'Prismatic Body', 'provides every type of Energy', 'PASSIV
 P('R_AURORA_VEIL', 'Aurora Veil', 'Benched Pokemon do not take damage', 'PASSIVE')
 P('R_FLUFFY_WOOL', 'Fluffy Wool', 'the attacking Pokemon is now Asleep', 'PASSIVE')
 P('R_SCARE', 'Scare', "Baby Pokemon Powers stop working", 'PASSIVE')
+P('R_TIME_TRAVEL', 'Time Travel', "isn't Knocked Out and you shuffle it", 'PASSIVE')
+P('R_SCRAM', 'Scram', 'exactly 10 HP left', 'PASSIVE')
+P('R_REBELLION', 'Rebellion', 'flip 2 coins. If both of them are tails', 'PASSIVE', 'ANY')
+P('R_REBIRTH', 'Rebirth', 'return it to your hand after discarding it', 'PASSIVE')
+P('R_TAG_TEAM', 'Tag Team', 'Then, switch SELF with your Active Pokemon', 'PASSIVE')
+P('R_SURPRISE_BITE', 'Surprise Bite', 'This power does 20 damage to that Pokemon', 'PASSIVE')
+P('R_ENERVATING_POLLEN', 'Enervating Pollen', 'only reduces damage by 10', 'PASSIVE')
 P('R_CONDUCTIVITY', 'Conductivity', 'attaches an Energy card from his or her hand', 'PASSIVE')
 # when it's played from the hand (TcgPower_OnPlay)
 P('R_VENOM_SPRAY', 'Venom Spray', 'Paralyzed and Poisoned', 'PASSIVE')

@@ -109,7 +109,8 @@ enum
     TCG_F_EVOLVES_FROM_ACTIVE,  /* a card that evolves from the Active Pokemon */
     TCG_F_EVOLVES_FROM_TARGET,  /* a card that evolves from the Pokemon of yours chosen (action.target) */
     TCG_F_SAME_NAME_BASIC,      /* a Basic Pokemon card named as your Active Pokemon (the attacker) */
-    TCG_F_METAL_BASIC,          /* a Metal Basic Pokemon card */              /* (slot) a Pokemon the Technical Machine being played may go on (TcgDuel_TmFits) */
+    TCG_F_METAL_BASIC,          /* a Metal Basic Pokemon card */
+    TCG_F_FOSSIL_KID,           /* a card that evolves from Mysterious Fossil */              /* (slot) a Pokemon the Technical Machine being played may go on (TcgDuel_TmFits) */
     /* "with Brock in its name" and the like (+ TCG_OWNER_*): a Pokemon card; one of yours in play (slot); another
      * one of yours than the first chosen (slot: the action's target) */
     TCG_F_OWNER_CARD = 100,

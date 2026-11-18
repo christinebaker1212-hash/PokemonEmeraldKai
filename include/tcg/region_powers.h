@@ -47,6 +47,9 @@
     X(R_SUBMERGE, "SUBMERGE", 1, 1, "shiftto:3") \
     X(R_JOIN, "[JOIN]", 1, 5, "srchk:3") \
     X(R_MAGNETIC_CALL, "MAGNETIC CALL", 1, 1, "needroom c h.dbench:2") \
+    X(R_GOOD_NEIGHBOR, "GOOD NEIGHBOR", 1, 5, "c h.healact:2") \
+    X(R_REVIVE_FRIENDS, "REVIVE FRIENDS", 1, 1, "c h.benchself:1") \
+    X(R_REVIVE_FOSSIL, "REVIVE FOSSIL", 1, 1, "c h.dbench:3") \
     X(R_QUICKEN, "[QUICKEN]", 1, 9, "c h.barunown") \
     X(R_ROCK_BODY, "ROCK BODY", 0, 0, NULL) \
     X(R_SHELL_ARMOR, "SHELL ARMOR", 0, 0, NULL) \
@@ -116,6 +119,13 @@
     X(R_AURORA_VEIL, "AURORA VEIL", 0, 0, NULL) \
     X(R_FLUFFY_WOOL, "FLUFFY WOOL", 0, 0, NULL) \
     X(R_SCARE, "SCARE", 0, 0, NULL) \
+    X(R_TIME_TRAVEL, "TIME TRAVEL", 0, 0, NULL) \
+    X(R_SCRAM, "SCRAM", 0, 0, NULL) \
+    X(R_REBELLION, "REBELLION", 0, 8, NULL) \
+    X(R_REBIRTH, "REBIRTH", 0, 0, NULL) \
+    X(R_TAG_TEAM, "TAG TEAM", 0, 0, NULL) \
+    X(R_SURPRISE_BITE, "SURPRISE BITE", 0, 0, NULL) \
+    X(R_ENERVATING_POLLEN, "ENERVATING POLLEN", 0, 0, NULL) \
     X(R_CONDUCTIVITY, "CONDUCTIVITY", 0, 0, NULL) \
     X(R_VENOM_SPRAY, "VENOM SPRAY", 0, 0, NULL) \
     X(R_SOFTBOILED, "SOFTBOILED", 0, 0, NULL) \

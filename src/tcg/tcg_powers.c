@@ -279,6 +279,7 @@ static int Fail(struct TcgDuel *g, const char *message)
     snprintf(g->error, sizeof(g->error), "%s", message);
     return TCG_INVALID;
 }
+static const struct TcgAction *sPlay; /* (TcgPower_OnPlayFrom: the player's choices as the card is played) */
 #include "tcg_rpowers.inc"
 
 /* ------------------------------------------------------------------ */
@@ -985,7 +986,6 @@ int TcgDuel_Power(struct TcgDuel *g, const struct TcgAction *a)
 /* Into play                                                            */
 /* ------------------------------------------------------------------ */
 /* (the play that put it into play, while TcgPower_OnPlayFrom runs) */
-static const struct TcgAction *sPlay;
 void TcgPower_OnPlayFrom(struct TcgDuel *g, unsigned player, unsigned slot, const struct TcgAction *play)
 {
     sPlay = play && (play->option & TCG_PLAY_CHOSEN) ? play : NULL;
