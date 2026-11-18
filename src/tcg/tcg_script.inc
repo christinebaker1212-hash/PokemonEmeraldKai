@@ -91,7 +91,12 @@
  * Options (0): opt:9,T how many Energy cards of type T on all your Pokemon | dfld:T[,1] that many picked from your
  *             Pokemon in play discarded (1: a coin for each) | After (1): noconds:1 no Special Conditions as long as
  *             it's the Active Pokemon | odevb:1 into their deck, shuffled | odisbench the Basic picked from their discard
- *             pile onto their Bench with a damage counter | guard:9 30 or more prevented */
+ *             pile onto their Bench with a damage counter | guard:9 30 or more prevented
+ * After (1):  anchor:k the Defending Pokemon can't retreat and isn't switched out (TcgDuel_Anchored): through their
+ *             next turn (0), while it's your Active (1), and through your next turn (2) | koslp:i it's Knocked Out if
+ *             Asleep and it used attack i last turn | dheal:n n counters off the Defending (0 all) | oetype:x x to each
+ *             of theirs with Energy of the type chosen (opt:10) | rec doubled by boost:i,0 on that attack
+ * Blocks:     needlast:i it used attack i last turn (TcgFieldCard.lastAttack) */
 #define SCRIPT_TOKEN 48
 /* Which of the player's Pokemon "it" is: the attacker (0), or a Pokemon whose power runs a script (tcg_powers.c) */
 static unsigned sScriptSelf;
@@ -723,7 +728,36 @@ static int ScriptRun(struct TcgDuel *g, const char *script, const struct TcgAtta
                 ScriptStatus(self, o.name + 1);
         }
         else if (ScriptIs(&o, "rec"))
+        {
+            /* (doubled with its base damage by a boost:i,0 on this attack: Focus Energy) */
+            const struct TcgCard *it = TcgDuel_Field(g, me, sScriptSelf);
+            if (it && a && self->boostTurn == g->turn && self->boostAttack && !self->boostValue &&
+                a == &it->attacks[self->boostAttack - 1])
+                x *= 2;
             TcgDuel_SelfDamage(g, x);
+        }
+        else if (ScriptIs(&o, "anchor"))
+        {
+            /* the Defending Pokemon can't retreat and no effect switches it out: through their next turn (anchor:0),
+             * and only while it is your Active (1), through your next turn while it is (2) */
+            if (!blocked && foe->stackSize)
+            {
+                foe->anchorUntil = (uint16_t)(g->turn + (x == 2 ? 2 : 1));
+                foe->anchorBy = (uint8_t)(x ? self->stack[self->stackSize - 1] + 1 : 0);
+            }
+        }
+        else if (ScriptIs(&o, "koslp"))
+        {
+            /* the Defending Pokemon Knocked Out if it's Asleep and it used its attack x last turn (Perish Song) */
+            const struct TcgCard *d = TcgDuel_Field(g, them, 0);
+            if (!blocked && d && foe->condition == TCG_ASLEEP && self->lastAttack == x + 1 &&
+                self->lastAttackTurn + 2 == g->turn && foe->damage < d->hp)
+            {
+                unsigned add = d->hp - foe->damage;
+                foe->damage = d->hp;
+                TcgDuel_Event(g, TCG_EV_DAMAGE, them, 0, add, 0, 0);
+            }
+        }
         else if (ScriptIs(&o, "drain"))
         {
             /* counters off it for the damage done to the Defending Pokemon: all of it (1) / half, rounded up (2) */
@@ -1090,6 +1124,22 @@ static int ScriptRun(struct TcgDuel *g, const char *script, const struct TcgAtta
             TcgDuel_Shuffle(g, me);
         else if (ScriptIs(&o, "healh"))
             Heal(g, me, sScriptSelf, (unsigned)x * 10 * g->scriptHeads);
+        else if (ScriptIs(&o, "dheal"))
+        {
+            /* x counters off the Defending Pokemon (0: all of them) */
+            if (!blocked && foe->stackSize && foe->damage)
+                Heal(g, them, 0, x ? (unsigned)x * 10 : foe->damage);
+        }
+        else if (ScriptIs(&o, "oetype"))
+        {
+            /* x to each of theirs with an Energy card of the type chosen (opt:10) attached, no Weakness or Resistance */
+            static const uint8_t types[] = {TCG_GRASS, TCG_FIRE, TCG_WATER, TCG_LIGHTNING, TCG_FIGHTING, TCG_PSYCHIC,
+                                            TCG_DARKNESS, TCG_METAL};
+            unsigned type = types[sScriptOption < sizeof(types) ? sScriptOption : 0];
+            for (s = 0; s < TCG_FIELD_SIZE; s++)
+                if (op->field[s].stackSize && (s || !blocked) && EnergyOfType(g, them, s, type))
+                    TcgDuel_EffectDamage(g, them, s, x, 0);
+        }
         else if (ScriptIs(&o, "healallh") || ScriptIs(&o, "ohealall"))
         {
             unsigned who = ScriptIs(&o, "ohealall") ? them : me;
@@ -1140,6 +1190,7 @@ static int ScriptRun(struct TcgDuel *g, const char *script, const struct TcgAtta
             }
         }
         else if (ScriptIs(&o, "needob") || ScriptIs(&o, "needsc") || ScriptIs(&o, "needeqe") || ScriptIs(&o, "needmb") ||
+                 ScriptIs(&o, "needlast") ||
                  ScriptIs(&o, "needroom") || ScriptIs(&o, "neede"))
             ; /* (ScriptBlock) */
         else if (ScriptIs(&o, "dpowoff"))
@@ -2567,6 +2618,9 @@ static const char *ScriptBlock(const struct TcgDuel *g, unsigned player, const c
             if (ScriptIs(&o, "needroom") && n == TCG_FIELD_SIZE - 1)
                 return "Your Bench is full.";
         }
+        if (ScriptIs(&o, "needlast") && (g->players[player].field[0].lastAttack != o.arg[0] + 1 ||
+                                         g->players[player].field[0].lastAttackTurn + 2 != g->turn))
+            return "It didn't use the attack this one needs last turn.";
         if ((ScriptIs(&o, "neede") || ScriptIs(&o, "eret")) && !EnergyOfType(g, player, 0, (unsigned)o.arg[0]))
             return "It doesn't have the Energy this attack needs.";
     }
@@ -2612,6 +2666,14 @@ static unsigned ScriptOptions(const struct TcgDuel *g, unsigned player, const ch
             labels[1] = "FIRE", ok[1] = EnergyOfType(g, player, 0, TCG_FIRE) != 0;
             labels[2] = "FIGHTING", ok[2] = EnergyOfType(g, player, 0, TCG_FIGHTING) != 0;
             return 3;
+        case 10: /* an Energy type other than Colorless */
+        {
+            static const char *const types[] = {"GRASS", "FIRE", "WATER", "LIGHTNING", "FIGHTING", "PSYCHIC", "DARKNESS",
+                                                "METAL"};
+            for (i = 0; i < 8; i++)
+                labels[i] = types[i], ok[i] = 1;
+            return 8;
+        }
         case 9: /* how many Energy cards of type T on all your Pokemon */
             for (i = n = 0; i < TCG_FIELD_SIZE; i++)
                 if (g->players[player].field[i].stackSize)

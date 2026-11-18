@@ -363,7 +363,7 @@ void TcgPower_AfterRetreat(struct TcgDuel *g, unsigned player, unsigned benched)
         for (s = 1; s < TCG_FIELD_SIZE; s++)
             if (op->field[s].stackSize)
                 slots[n++] = s;
-        if (n)
+        if (n && !TcgDuel_Anchored(g, player ^ 1))
         {
             struct TcgFieldCard temp = op->field[0];
             s = slots[Tcg_RandomBelow(&g->rng, n)];
@@ -560,6 +560,8 @@ const char *TcgPower_Block(const struct TcgDuel *g, unsigned player, unsigned sl
     case TCG_POWER_STEP_IN:
         if (!slot)
             return "Dragonite has to be on your Bench.";
+        if (TcgDuel_Anchored(g, player))
+            return "Your Active Pokemon can't be switched out now.";
         break;
     /* GB2's */
     case TCG_POWER_POLLEN_STENCH:

@@ -569,6 +569,19 @@ def _(m, d):
 
 # One wording, one script (the cards' words with SELF for the card's name; tcg_script.inc's ops)
 EXACT = {
+    "Flip a coin. If tails, this attack does nothing. Either way, you can't use this attack again as long as SELF stays in play (even putting SELF on the Bench won't let you use it again).": ('FAIL_COIN', 0, 1),
+    "Flip a coin. If tails, this attack does nothing. Either way, you can't use this attack again as long as SELF stays in play (even putting SELF on the Bench won't let you use it again).": ('FAIL_COIN', 0, 1),
+    "During your next turn, SELF's Double-edge attack's damage (base damage and damage to itself) is doubled.": 'boost:1,0',
+    "This attack can't be used unless SELF used its Lie Low attack last turn.": 'needlast:0',
+    'If the Defending Pokemon is Asleep and was attacked with Night Eyes during your last turn, it is Knocked Out.': 'koslp:0',
+    'Flip 3 coins. If exactly 1 is heads, this attack does 40 damage. If exactly 2 are heads, remove 3 damage counters from the Defending Pokemon. If the Defending Pokemon has fewer damage counters than that, remove all of them. If all 3 are heads, this attack does 60 damage. If all 3 are tails, remove all damage counters from the Defending Pokemon.': 'c:3 eq1.add:40 eq2.dheal:3 ah.add:60 at.dheal:0',
+    "Choose an Energy type other than Colorless. This attack does 20 damage to each of your opponent's Pokemon with any Energy cards of that type attached to it. Don't apply Weakness and Resistance.": 'opt:10 oetype:20',
+    'Flip a number of coins equal to the total number of Pokemon in play. For each heads, you may search your deck for a basic Energy card, show it to your opponent, and put it into your hand. Shuffle your deck afterward.': 'cpk srche:0,12',
+    'Shuffle SELF and all cards attached to it into your deck. Flip a coin. If heads, shuffle a card from your discard pile into your deck.': 'selfdeck c h.distop:0 h.shuf',
+    'You may discard a Fire Energy card attached to SELF when you use this attack. If you do and if your opponent has any Benched Pokemon, choose 1 of them and this attack does 20 damage to it.': 'opt:0,0 o1.dsa:0,1 o1.b1:20',
+    "The Defending Pokemon is now Poisoned. Flip a coin. If heads, the Defending Pokemon can't retreat until the end of your opponent's next turn and if the effect of an attack, Pokemon Power, or Trainer card would change that player's Active Pokemon, that part of the effect does nothing.": 'psn c h.anchor:0',
+    "Until the end of your opponent's next turn, as long as SELF is your Active Pokemon, the Defending Pokemon can't retreat, and if the effect of an attack, Pokemon Power, or Trainer card would change that player's Active Pokemon, that part of the effect does nothing.": 'anchor:1',
+    "Flip a coin. If heads, this attack does 20 damage plus 10 more damage and, until the end of your next turn, as long as SELF is your Active Pokemon, the Defending Pokemon can't retreat, and if the effect of an attack, Pokemon Power, or Trainer card would change that player's Active Pokemon, that part of the effect does nothing. If tails, this attack does 20 damage.": 'c h.add:10 h.anchor:2',
     "During your opponent's next turn, whenever 30 or more damage is done to SELF (after applying Weakness and Resistance), prevent that damage.": 'guard:9',
     "If you have any Benched Pokemon, switch 1 of them with SELF. As long as that Pokemon is your Active Pokemon, it can't become Asleep, Confused, Paralyzed, or Poisoned. (All other effects of attacks, Pokemon Powers, and Trainer cards still happen.)": 'mb.ssw mb.noconds:1',
     'You may discard any number of Fire Energy cards attached to your Pokemon. Flip a coin for each Fire Energy card discarded in this way. This attack does 40 damage times the number of heads.': 'opt:9,0 dfld:0,1 mulh:40',

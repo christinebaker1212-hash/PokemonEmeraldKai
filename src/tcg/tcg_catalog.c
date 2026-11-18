@@ -3630,7 +3630,7 @@ const struct TcgCard gTcgCards[TCG_CARD_COUNT + 1] = {
 {.name="",.description="",.effect="NONE",.animation="ATK_ANIM_NONE",.cost={0},.damage=0,.category=TCG_DAMAGE_NORMAL},
 }
 },
-[577] = {.id=577, .name="Koga's Beedrill", .kind=TCG_POKEMON, .type=1, .rarity=2, .set=14, .set2=255, .dark=0, .holo=1, .flags=TCG_CF_OWNER, .origin=14,
+[577] = {.id=577, .name="Koga's Beedrill", .kind=TCG_POKEMON, .type=1, .rarity=2, .set=14, .set2=255, .dark=0, .holo=1, .flags=TCG_CF_OWNER|TCG_CF_READY, .origin=14,
 .hp=80, .stage=2, .species=15, .level=34, .retreat=0, .weakness=0, .resistance=4, .evolvesFrom="Koga's Kakuna", .description="", .attacks={
 {.name="Nerve Poison",.description="Flip a coin. If heads, the Defending Pokemon is now Paralyzed and Poisoned.",.effect="gym2-9:a0",.animation="ATK_ANIM_HIT",.cost={0,2,0,0,0,0,0,0,0},.damage=20,.category=TCG_DAMAGE_NORMAL},
 {.name="Hyper Needle",.description="Flip a coin. If tails, this attack does nothing. Either way, you can't use this attack again as long as Koga's Beedrill stays in play (even putting Koga's Beedrill on the Bench won't let you use it again).",.effect="gym2-9:a1",.animation="ATK_ANIM_HIT",.cost={0,0,0,0,0,0,3,0,0},.damage=70,.category=TCG_DAMAGE_NORMAL},
@@ -3705,7 +3705,7 @@ const struct TcgCard gTcgCards[TCG_CARD_COUNT + 1] = {
 {.name="",.description="",.effect="NONE",.animation="ATK_ANIM_NONE",.cost={0},.damage=0,.category=TCG_DAMAGE_NORMAL},
 }
 },
-[590] = {.id=590, .name="Brock's Dugtrio", .kind=TCG_POKEMON, .type=4, .rarity=2, .set=14, .set2=255, .dark=0, .holo=0, .flags=TCG_CF_OWNER, .origin=14,
+[590] = {.id=590, .name="Brock's Dugtrio", .kind=TCG_POKEMON, .type=4, .rarity=2, .set=14, .set2=255, .dark=0, .holo=0, .flags=TCG_CF_OWNER|TCG_CF_READY, .origin=14,
 .hp=60, .stage=1, .species=51, .level=27, .retreat=1, .weakness=1, .resistance=2, .evolvesFrom="Brock's Diglett", .description="", .attacks={
 {.name="Lie Low",.description="All damage done to Brock's Dugtrio during your opponent's next turn is reduced by 20 (after applying Weakness and Resistance).",.effect="gym2-22:a0",.animation="ATK_ANIM_HIT",.cost={0,0,0,0,1,0,0,0,0},.damage=0,.category=TCG_RESIDUAL},
 {.name="Earthdrill",.description="This attack can't be used unless Brock's Dugtrio used its Lie Low attack last turn.",.effect="gym2-22:a1",.animation="ATK_ANIM_HIT",.cost={0,0,0,0,2,0,1,0,0},.damage=60,.category=TCG_DAMAGE_NORMAL},
@@ -3922,7 +3922,7 @@ const struct TcgCard gTcgCards[TCG_CARD_COUNT + 1] = {
 {.name="",.description="",.effect="NONE",.animation="ATK_ANIM_NONE",.cost={0},.damage=0,.category=TCG_DAMAGE_NORMAL},
 }
 },
-[621] = {.id=621, .name="Lt. Surge's Raticate", .kind=TCG_POKEMON, .type=6, .rarity=1, .set=14, .set2=255, .dark=0, .holo=0, .flags=TCG_CF_OWNER, .origin=14,
+[621] = {.id=621, .name="Lt. Surge's Raticate", .kind=TCG_POKEMON, .type=6, .rarity=1, .set=14, .set2=255, .dark=0, .holo=0, .flags=TCG_CF_OWNER|TCG_CF_READY, .origin=14,
 .hp=60, .stage=1, .species=20, .level=33, .retreat=1, .weakness=4, .resistance=5, .evolvesFrom="Lt. Surge's Rattata", .description="", .attacks={
 {.name="Focus Energy",.description="During your next turn, Lt. Surge's Raticate's Double-edge attack's damage (base damage and damage to itself) is doubled.",.effect="gym2-53:a0",.animation="ATK_ANIM_HIT",.cost={0,0,0,0,0,0,1,0,0},.damage=0,.category=TCG_RESIDUAL},
 {.name="Double-edge",.description="Lt. Surge's Raticate does 20 damage to itself.",.effect="gym2-53:a1",.animation="ATK_ANIM_HIT",.cost={0,0,0,0,0,0,2,0,0},.damage=40,.category=TCG_DAMAGE_NORMAL},
@@ -4062,7 +4062,7 @@ const struct TcgCard gTcgCards[TCG_CARD_COUNT + 1] = {
 {.name="",.description="",.effect="NONE",.animation="ATK_ANIM_NONE",.cost={0},.damage=0,.category=TCG_DAMAGE_NORMAL},
 }
 },
-[641] = {.id=641, .name="Giovanni's Magikarp", .kind=TCG_POKEMON, .type=3, .rarity=0, .set=14, .set2=255, .dark=0, .holo=0, .flags=TCG_CF_OWNER, .origin=14,
+[641] = {.id=641, .name="Giovanni's Magikarp", .kind=TCG_POKEMON, .type=3, .rarity=0, .set=14, .set2=255, .dark=0, .holo=0, .flags=TCG_CF_OWNER|TCG_CF_READY, .origin=14,
 .hp=30, .stage=0, .species=129, .level=9, .retreat=1, .weakness=2, .resistance=255, .evolvesFrom="", .description="", .attacks={
 {.name="Ancestral Memory",.description="Flip a coin. If tails, this attack does nothing. Either way, you can't use this attack again as long as Giovanni's Magikarp stays in play (even putting Giovanni's Magikarp on the Bench won't let you use it again).",.effect="gym2-73:a0",.animation="ATK_ANIM_HIT",.cost={0,0,0,1,0,0,0,0,0},.damage=40,.category=TCG_DAMAGE_NORMAL},
 {.name="Flail Around",.description="Flip 3 coins. This attack does 10 damage times the number of heads.",.effect="gym2-73:a1",.animation="ATK_ANIM_HIT",.cost={0,0,0,1,0,0,1,0,0},.damage=10,.category=TCG_DAMAGE_X},
@@ -4503,7 +4503,7 @@ const struct TcgCard gTcgCards[TCG_CARD_COUNT + 1] = {
 {.name="",.description="",.effect="NONE",.animation="ATK_ANIM_NONE",.cost={0},.damage=0,.category=TCG_DAMAGE_NORMAL},
 }
 },
-[720] = {.id=720, .name="Aipom", .kind=TCG_POKEMON, .type=6, .rarity=1, .set=15, .set2=255, .dark=0, .holo=0, .flags=0, .origin=15,
+[720] = {.id=720, .name="Aipom", .kind=TCG_POKEMON, .type=6, .rarity=1, .set=15, .set2=255, .dark=0, .holo=0, .flags=TCG_CF_READY, .origin=15,
 .hp=40, .stage=0, .species=190, .level=18, .retreat=0, .weakness=4, .resistance=5, .evolvesFrom="", .description="Its tail is so powerful that it can use it to grab a tree branch and hold itself up in the air.", .attacks={
 {.name="Pilfer",.description="Shuffle Aipom and all cards attached to it into your deck. Flip a coin. If heads, shuffle a card from your discard pile into your deck.",.effect="neo1-26:a0",.animation="ATK_ANIM_HIT",.cost={0,0,0,0,0,0,1,0,0},.damage=0,.category=TCG_RESIDUAL},
 {.name="Tail Rap",.description="Flip 2 coins. This attack does 10 damage times the number of heads.",.effect="neo1-26:a1",.animation="ATK_ANIM_HIT",.cost={0,0,0,0,0,0,1,0,0},.damage=10,.category=TCG_DAMAGE_X},
@@ -4531,14 +4531,14 @@ const struct TcgCard gTcgCards[TCG_CARD_COUNT + 1] = {
 {.name="",.description="",.effect="NONE",.animation="ATK_ANIM_NONE",.cost={0},.damage=0,.category=TCG_DAMAGE_NORMAL},
 }
 },
-[724] = {.id=724, .name="Clefairy", .kind=TCG_POKEMON, .type=6, .rarity=1, .set=15, .set2=255, .dark=0, .holo=0, .flags=0, .origin=15,
+[724] = {.id=724, .name="Clefairy", .kind=TCG_POKEMON, .type=6, .rarity=1, .set=15, .set2=255, .dark=0, .holo=0, .flags=TCG_CF_READY, .origin=15,
 .hp=50, .stage=0, .species=35, .level=19, .retreat=1, .weakness=4, .resistance=5, .evolvesFrom="", .description="The moonlight that it stores in the wings on its back apparently gives it the ability to float in midair.", .attacks={
 {.name="Doubleslap",.description="Flip 2 coins. This attack does 10 damage times the number of heads.",.effect="neo1-30:a0",.animation="ATK_ANIM_HIT",.cost={0,0,0,0,0,0,2,0,0},.damage=10,.category=TCG_DAMAGE_X},
 {.name="Squaredance",.description="Flip a number of coins equal to the total number of Pokemon in play. For each heads, you may search your deck for a basic Energy card, show it to your opponent, and put it into your hand. Shuffle your deck afterward.",.effect="neo1-30:a1",.animation="ATK_ANIM_HIT",.cost={0,0,0,0,0,0,3,0,0},.damage=0,.category=TCG_RESIDUAL},
 {.name="",.description="",.effect="NONE",.animation="ATK_ANIM_NONE",.cost={0},.damage=0,.category=TCG_DAMAGE_NORMAL},
 }
 },
-[725] = {.id=725, .name="Croconaw", .kind=TCG_POKEMON, .type=3, .rarity=1, .set=15, .set2=255, .dark=0, .holo=0, .flags=0, .origin=15,
+[725] = {.id=725, .name="Croconaw", .kind=TCG_POKEMON, .type=3, .rarity=1, .set=15, .set2=255, .dark=0, .holo=0, .flags=TCG_CF_READY, .origin=15,
 .hp=70, .stage=1, .species=159, .level=34, .retreat=2, .weakness=1, .resistance=255, .evolvesFrom="Totodile", .description="If it loses a fang, a new one grows back in its place. There are always 48 fangs lining its mouth.", .attacks={
 {.name="Screech",.description="Until the end of your next turn, if an attack damages the Defending Pokemon (after applying Weakness and Resistance), that attack does 20 more damage to the Defending Pokemon",.effect="neo1-31:a0",.animation="ATK_ANIM_HIT",.cost={0,0,0,0,0,0,1,0,0},.damage=0,.category=TCG_RESIDUAL},
 {.name="Jaw Clamp",.description="Until the end of your opponent's next turn, as long as Croconaw is your Active Pokemon, the Defending Pokemon can't retreat, and if the effect of an attack, Pokemon Power, or Trainer card would change that player's Active Pokemon, that part of the effect does nothing.",.effect="neo1-31:a1",.animation="ATK_ANIM_HIT",.cost={0,0,0,2,0,0,1,0,0},.damage=30,.category=TCG_DAMAGE_NORMAL},
@@ -4573,7 +4573,7 @@ const struct TcgCard gTcgCards[TCG_CARD_COUNT + 1] = {
 {.name="",.description="",.effect="NONE",.animation="ATK_ANIM_NONE",.cost={0},.damage=0,.category=TCG_DAMAGE_NORMAL},
 }
 },
-[730] = {.id=730, .name="Gloom", .kind=TCG_POKEMON, .type=1, .rarity=1, .set=15, .set2=255, .dark=0, .holo=0, .flags=0, .origin=15,
+[730] = {.id=730, .name="Gloom", .kind=TCG_POKEMON, .type=1, .rarity=1, .set=15, .set2=255, .dark=0, .holo=0, .flags=TCG_CF_READY, .origin=15,
 .hp=60, .stage=1, .species=44, .level=26, .retreat=1, .weakness=0, .resistance=255, .evolvesFrom="Oddish", .description="What appears to be drool is actually sweet honey. It is very sticky and clings stubbornly if touched.", .attacks={
 {.name="Strange Powder",.description="Flip a coin. If heads, the Defending Pokemon is now Confused. If tails, the Defending Pokemon is now Asleep.",.effect="neo1-36:a0",.animation="ATK_ANIM_HIT",.cost={0,1,0,0,0,0,1,0,0},.damage=20,.category=TCG_DAMAGE_NORMAL},
 {.name="Sticky Nectar",.description="Flip a coin. If heads, this attack does 20 damage plus 10 more damage and, until the end of your next turn, as long as Gloom is your Active Pokemon, the Defending Pokemon can't retreat, and if the effect of an attack, Pokemon Power, or Trainer card would change that player's Active Pokemon, that part of the effect does nothing. If tails, this attack does 20 damage.",.effect="neo1-36:a1",.animation="ATK_ANIM_HIT",.cost={0,2,0,0,0,0,1,0,0},.damage=20,.category=TCG_DAMAGE_PLUS},
@@ -5508,7 +5508,7 @@ const struct TcgCard gTcgCards[TCG_CARD_COUNT + 1] = {
 {.name="",.description="",.effect="NONE",.animation="ATK_ANIM_NONE",.cost={0},.damage=0,.category=TCG_DAMAGE_NORMAL},
 }
 },
-[879] = {.id=879, .name="Delibird", .kind=TCG_POKEMON, .type=6, .rarity=2, .set=17, .set2=255, .dark=0, .holo=1, .flags=0, .origin=17,
+[879] = {.id=879, .name="Delibird", .kind=TCG_POKEMON, .type=6, .rarity=2, .set=17, .set2=255, .dark=0, .holo=1, .flags=TCG_CF_READY, .origin=17,
 .hp=60, .stage=0, .species=225, .level=34, .retreat=1, .weakness=2, .resistance=4, .evolvesFrom="", .description="It carries food all day long. There are tales about lost people who were saved by the food it had.", .attacks={
 {.name="Present",.description="Flip 3 coins. If exactly 1 is heads, this attack does 40 damage. If exactly 2 are heads, remove 3 damage counters from the Defending Pokemon. If the Defending Pokemon has fewer damage counters than that, remove all of them. If all 3 are heads, this attack does 60 damage. If all 3 are tails, remove all damage counters from the Defending Pokemon.",.effect="neo3-5:a0",.animation="ATK_ANIM_HIT",.cost={0,0,0,0,0,0,2,0,0},.damage=0,.category=TCG_RESIDUAL},
 {.name="",.description="",.effect="NONE",.animation="ATK_ANIM_NONE",.cost={0},.damage=0,.category=TCG_DAMAGE_NORMAL},
@@ -5550,7 +5550,7 @@ const struct TcgCard gTcgCards[TCG_CARD_COUNT + 1] = {
 {.name="",.description="",.effect="NONE",.animation="ATK_ANIM_NONE",.cost={0},.damage=0,.category=TCG_DAMAGE_NORMAL},
 }
 },
-[885] = {.id=885, .name="Misdreavus", .kind=TCG_POKEMON, .type=5, .rarity=2, .set=17, .set2=255, .dark=0, .holo=1, .flags=0, .origin=17,
+[885] = {.id=885, .name="Misdreavus", .kind=TCG_POKEMON, .type=5, .rarity=2, .set=17, .set2=255, .dark=0, .holo=1, .flags=TCG_CF_READY, .origin=17,
 .hp=50, .stage=0, .species=200, .level=25, .retreat=1, .weakness=255, .resistance=4, .evolvesFrom="", .description="It likes playing mischievous tricks such as screaming and wailing to startle people at night.", .attacks={
 {.name="Night Eyes",.description="The Defending Pokemon is now Asleep.",.effect="neo3-11:a0",.animation="ATK_ANIM_HIT",.cost={0,0,0,0,0,1,0,0,0},.damage=0,.category=TCG_RESIDUAL},
 {.name="Perish Song",.description="If the Defending Pokemon is Asleep and was attacked with Night Eyes during your last turn, it is Knocked Out.",.effect="neo3-11:a1",.animation="ATK_ANIM_HIT",.cost={0,0,0,0,0,3,0,0,0},.damage=0,.category=TCG_RESIDUAL},
@@ -5648,7 +5648,7 @@ const struct TcgCard gTcgCards[TCG_CARD_COUNT + 1] = {
 {.name="",.description="",.effect="NONE",.animation="ATK_ANIM_NONE",.cost={0},.damage=0,.category=TCG_DAMAGE_NORMAL},
 }
 },
-[899] = {.id=899, .name="Starmie", .kind=TCG_POKEMON, .type=5, .rarity=2, .set=17, .set2=255, .dark=0, .holo=0, .flags=0, .origin=17,
+[899] = {.id=899, .name="Starmie", .kind=TCG_POKEMON, .type=5, .rarity=2, .set=17, .set2=255, .dark=0, .holo=0, .flags=TCG_CF_READY, .origin=17,
 .hp=70, .stage=1, .species=121, .level=31, .retreat=1, .weakness=5, .resistance=255, .evolvesFrom="Staryu", .description="The center section of its body is called the core. It glows in a different color each time it is seen.", .attacks={
 {.name="Confuse Ray",.description="Flip a coin. If heads, the Defending Pokemon is now Confused.",.effect="neo3-25:a0",.animation="ATK_ANIM_HIT",.cost={0,0,0,1,0,0,0,0,0},.damage=10,.category=TCG_DAMAGE_NORMAL},
 {.name="Core Stream",.description="Choose an Energy type other than Colorless. This attack does 20 damage to each of your opponent's Pokemon with any Energy cards of that type attached to it. Don't apply Weakness and Resistance.",.effect="neo3-25:a1",.animation="ATK_ANIM_HIT",.cost={0,0,0,0,0,2,1,0,0},.damage=0,.category=TCG_RESIDUAL},
@@ -6030,7 +6030,7 @@ const struct TcgCard gTcgCards[TCG_CARD_COUNT + 1] = {
 [956] = {.id=956, .name="Miracle Energy", .kind=TCG_ENERGY, .type=6, .rarity=2, .set=18, .set2=255, .dark=0, .holo=1, .flags=TCG_CF_SPECIAL, .origin=18,
 .effect="neo4-16:t",.description="You can't have more than 1 Miracle Energy in your deck. Attach Miracle Energy to 1 of your Shining or Light Pokemon. At the end of your turn, discard Miracle Energy. While in play, Miracle Energy counts as every type of Energy but provides only 2 Energy at a time."
 },
-[957] = {.id=957, .name="Dark Ariados", .kind=TCG_POKEMON, .type=1, .rarity=2, .set=18, .set2=255, .dark=1, .holo=0, .flags=0, .origin=18,
+[957] = {.id=957, .name="Dark Ariados", .kind=TCG_POKEMON, .type=1, .rarity=2, .set=18, .set2=255, .dark=1, .holo=0, .flags=TCG_CF_READY, .origin=18,
 .hp=60, .stage=1, .species=168, .level=28, .retreat=2, .weakness=0, .resistance=255, .evolvesFrom="Spinarak", .description="Wherever it goes, it spins a thread that always leads back to its web.", .attacks={
 {.name="Entangle",.description="If your opponent has any Benched Pokemon, choose 1 of them and switch it with the Defending Pokemon, then flip a coin. If heads, the new Defending Pokemon is now Paralyzed.",.effect="neo4-17:a0",.animation="ATK_ANIM_HIT",.cost={0,1,0,0,0,0,0,0,0},.damage=0,.category=TCG_RESIDUAL},
 {.name="Poison Bind",.description="The Defending Pokemon is now Poisoned. Flip a coin. If heads, the Defending Pokemon can't retreat until the end of your opponent's next turn and if the effect of an attack, Pokemon Power, or Trainer card would change that player's Active Pokemon, that part of the effect does nothing.",.effect="neo4-17:a1",.animation="ATK_ANIM_HIT",.cost={0,3,0,0,0,0,0,0,0},.damage=30,.category=TCG_DAMAGE_NORMAL},

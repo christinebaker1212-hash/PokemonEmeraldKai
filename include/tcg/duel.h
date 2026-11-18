@@ -57,6 +57,13 @@ struct TcgFieldCard
      * retreatUntil; boostTurn: on that turn its attack boostAttack - 1 does boostValue base damage (0: double) */
     uint16_t condImmune, retreatUntil, boostTurn;
     uint8_t retreatPlus, boostAttack, boostValue;
+    /* the attack it used last (+ 1) and the turn it did ("used its Lie Low attack last turn") */
+    uint16_t lastAttackTurn;
+    uint8_t lastAttack;
+    /* (effect scripts: Jaw Clamp, Poison Bind) through turn anchorUntil it can't retreat and no effect switches it
+     * out; anchorBy: only while that card (physical + 1, the top of the stack) is the opponent's Active */
+    uint16_t anchorUntil;
+    uint8_t anchorBy;
     /* (effect scripts, until it's Benched or evolves) stuck: it can't retreat (2: while the Pokemon stuckBy - 1, the
      * top card that did it, is its opponent's Active); blindAll: whenever it attacks, a coin, tails the attack does
      * nothing; noAttackAll: it can't attack */
@@ -364,6 +371,8 @@ int TcgDuel_TmFits(const struct TcgDuel *g, unsigned who, unsigned slot, const s
 int TcgDuel_MetronomeNeedsEnergy(const struct TcgAttack *attack);
 /* Can't that player's Active retreat for an effect that lasts (an effect script's: stuck)? */
 int TcgDuel_Stuck(const struct TcgDuel *g, unsigned player);
+/* Can't the player's Active Pokemon be switched out by effects now (or retreat): Jaw Clamp and the like */
+int TcgDuel_Anchored(const struct TcgDuel *g, unsigned player);
 /* The Stadium in play (Tcg_Canon of its card; 0 none) and whose it is (*owner) */
 unsigned TcgDuel_Stadium(const struct TcgDuel *g, unsigned *owner);
 /* Why the current player can't use the Stadium in play now (NULL: they can) */

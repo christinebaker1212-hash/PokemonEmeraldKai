@@ -272,6 +272,8 @@ static void Switch(struct TcgDuel *g, unsigned who, unsigned slot)
 {
     struct TcgPlayer *p = &g->players[who];
     struct TcgFieldCard temp = p->field[0];
+    if (TcgDuel_Anchored(g, who)) /* (Jaw Clamp and the like: that part of the effect does nothing) */
+        return;
     p->field[0] = p->field[slot];
     p->field[slot] = temp;
     /* A Pokemon moved to the Bench loses its conditions and substatus. */

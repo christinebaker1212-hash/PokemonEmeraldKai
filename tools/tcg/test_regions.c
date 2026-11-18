@@ -231,6 +231,35 @@ static int Babies(void)
 }
 /* Effect scripts' turn-spanning mechanics: Focus Energy's boost next turn (Machoke's Mega Punch 80), "can't become
  * affected by a Special Condition", "pays Colorless more to retreat" */
+/* Jaw Clamp: the Defending Pokemon can't retreat and isn't switched out while Croconaw stays Active, through their
+ * turn; Earthdrill only after Lie Low the turn before */
+static int Anchors(void)
+{
+    struct TcgDuel g;
+    struct TcgAction a;
+    if (!Tcg_Card(TCG_CARD_NEO1_31) || !Tcg_Card(TCG_CARD_GYM2_22))
+        return printf("PASS anchors (Croconaw / Brock's Dugtrio not finished)\n"), 0;
+    Stage(&g, TCG_CARD_NEO1_31, 1, 3);
+    memset(&a, 0, sizeof(a));
+    a.type = TCG_ATTACK;
+    a.attack = 1;
+    if (TcgDuel_Apply(&g, &a) != TCG_OK)
+        return printf("FAIL Jaw Clamp: %s\n", g.error), 1;
+    if (g.players[1].field[0].stackSize && (!TcgDuel_Anchored(&g, 1) || !TcgDuel_Stuck(&g, 1)))
+        return printf("FAIL Jaw Clamp: the Defending Pokemon isn't held\n"), 1;
+    g.players[0].field[0].stack[g.players[0].field[0].stackSize - 1] ^= 1; /* (another card Active: it lets go) */
+    if (TcgDuel_Anchored(&g, 1))
+        return printf("FAIL Jaw Clamp holds with Croconaw gone\n"), 1;
+    Stage(&g, TCG_CARD_GYM2_22, 1, 3);
+    if (TcgDuel_CanAttack(&g, 0, 1) && TcgDuel_CanAttackNow(&g, 0, 1))
+        return printf("FAIL Earthdrill usable without Lie Low\n"), 1;
+    g.players[0].field[0].lastAttack = 1;
+    g.players[0].field[0].lastAttackTurn = (uint16_t)(g.turn - 2);
+    if (!TcgDuel_CanAttack(&g, 0, 1) || !TcgDuel_CanAttackNow(&g, 0, 1))
+        return printf("FAIL Earthdrill after Lie Low\n"), 1;
+    printf("PASS anchors: Jaw Clamp holds while Croconaw is Active, Earthdrill only after Lie Low\n");
+    return 0;
+}
 static int ScriptMechanics(void)
 {
     struct TcgDuel g;
@@ -957,7 +986,7 @@ int main(void)
     }
     printf("PASS %u finished regional cards: %u attacks used %u times, then %u AI actions after them\n", ready, used, ok,
            steps);
-    if (SpecialEnergy() || ScriptMechanics() || TechnicalMachines() || Babies())
+    if (SpecialEnergy() || ScriptMechanics() || Anchors() || TechnicalMachines() || Babies())
         return 1;
     if (PlayTrainers() || UsePowers() || UseStadiums() || AttackFlows())
         return 1;

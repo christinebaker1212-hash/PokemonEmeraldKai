@@ -155,6 +155,8 @@ int TcgDuel_Trainer(struct TcgDuel *g, const struct TcgAction *a)
         unsigned s = id == TCG_CARD_SWITCH ? a->slot : target;
         if (s < 1 || s >= TCG_FIELD_SIZE || !q->field[s].stackSize)
             return Fail(g, "Choose a Benched Pokemon.");
+        if (TcgDuel_Anchored(g, q == p ? g->current : g->current ^ 1))
+            break; /* (Jaw Clamp and the like: the switch does nothing) */
         temp = q->field[0];
         q->field[0] = q->field[s];
         q->field[s] = temp;

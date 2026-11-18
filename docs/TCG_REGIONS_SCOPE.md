@@ -6,25 +6,24 @@ plays (tools/tcg/regions/effects.py); only finished cards appear in the game.
 | Set | Cards | Finished |
 |---|---|---|
 | gym1 | 126 | 109 |
-| gym2 | 126 | 100 |
-| neo1 | 105 | 89 |
+| gym2 | 126 | 104 |
+| neo1 | 105 | 93 |
 | neo2 | 75 | 53 |
-| neo3 | 66 | 40 |
-| neo4 | 113 | 82 |
+| neo3 | 66 | 43 |
+| neo4 | 113 | 83 |
 | ecard1 | 159 | 146 |
 | ecard2 | 182 | 159 |
 | ecard3 | 182 | 153 |
 | basep | 53 | 39 |
 | np | 40 | 28 |
-| **all** | 1227 | 998 |
+| **all** | 1227 | 1010 |
 
 ## Rules the engine doesn't play yet (cards needing each)
 
 
-## Wordings to translate (206; the most cards first)
+## Wordings to translate (194; the most cards first)
 
 - 3 x POWER: Entei (neo3-17): As long as Entei is your Active Pokemon, Entei and Energy cards attached to it aren't affected by effects from Trainer cards other than Stadium cards. As long as this Power is active, discard any Trainer cards attached to E
-- 2 x attack: Koga's Beedrill (gym2-9): Flip a coin. If tails, this attack does nothing. Either way, you can't use this attack again as long as Koga's Beedrill stays in play (even putting Koga's Beedrill on the Bench won't let you use it again).
 - 2 x POWER: Forretress (neo2-2): During your opponent's turn, whenever 1 of your opponent's Benched Pokemon becomes his or her Active Pokemon, Forretress does 10 damage to it. (Don't apply Weakness and Resistance.) This power stops working if Forretres
 - 2 x attack: Magnemite (neo2-7): During your next turn, treat any tails flipped when using Magnemite's Electric Bolt attack as if they were heads. (Benching or evolving either Pokemon ends this effect.)
 - 2 x POWER: Politoed (neo2-8): Whenever Politoed's attack damages the Defending Pokemon (after applying Weakness and Resistance), if there are more than 3 Poliwags, Poliwhirls, Poliwraths, and/or Politoeds in play (including your opponent's), that atta
@@ -73,12 +72,10 @@ plays (tools/tcg/regions/effects.py); only finished cards appear in the game.
 - 1 x attack: Koga's Ditto (gym2-10): Flip a coin. If heads, Koga's Ditto's maximum HP is now 80 and Koga's Ditto's Pound attack's base damage is 30 instead of 10. (Benching Koga's Ditto ends this effect.)
 - 1 x POWER: Misty's Gyarados (gym2-13): Whenever Misty's Gyarados attacks, flip 2 coins. If both of them are tails, that attack does nothing. Instead, shuffle Misty's Gyarados and all cards attached to it into your deck. (This power works even if Misty
 - 1 x POWER: Sabrina's Alakazam (gym2-16): Sabrina's Alakazam always has a copy of every attack your Psychic Pokemon in play have (including their Energy costs and anything else required in order to use those attacks, such as discarding Energy cards). T
-- 1 x attack: Brock's Dugtrio (gym2-22): This attack can't be used unless Brock's Dugtrio used its Lie Low attack last turn.
 - 1 x attack: Blaine's Charmeleon (gym2-31): Flip 3 coins. For each heads, discard 1 Fire Energy card attached to Blaine's Charmeleon. If you can't discard Energy cards, this attack does nothing. This attack does 10 damage times the number of heads to ea
 - 1 x POWER: Brock's Primeape (gym2-35): If Brock's Primeape ever has exactly 10 HP left, shuffle it and all cards attached to it into your deck. This power stops working while Brock's Primeape is Asleep, Confused, or Paralyzed.
 - 1 x POWER: Erika's Bellsprout (gym2-38): Once during your turn (before your attack), you may take up to 2 Grass Energy cards attached to your other Pokemon and attach them to Erika's Bellsprout. This power can't be used if Erika's Bellsprout is Asleep
 - 1 x attack: Koga's Pidgey (gym2-49): Put Koga's Pidgey and all cards attached to it on top of your deck. Then search your deck for any Basic Pokemon or Evolution card not named Koga's Pidgey. Show that card to your opponent, then put it into your hand.
-- 1 x attack: Lt. Surge's Raticate (gym2-53): During your next turn, Lt. Surge's Raticate's Double-edge attack's damage (base damage and damage to itself) is doubled.
 - 1 x attack: Sabrina's Hypno (gym2-56): Choose 1 Basic Pokemon in any player's discard pile. Put it onto that player's Bench. Put a number of damage counters on that Pokemon equal to half its HP (rounded down to the nearest 10). (You can't put a Pokemon
 - 1 x attack: Sabrina's Jynx (gym2-57): Choose 1 of your opponent's Pokemon. Remove any number of damage counters from that Pokemon, then draw that many cards.
 - 1 x attack: Misty's Psyduck (gym2-90): Flip 3 coins. If exactly 1 is heads, draw a card. If exactly 2 are heads, this attack does 20 damage. If all 3 are heads, choose 1 of the Defending Pokemon's attacks. Misty's Psyduck copies that attack except for 
@@ -95,11 +92,7 @@ plays (tools/tcg/regions/effects.py); only finished cards appear in the game.
 - 1 x POWER: Heracross (neo1-6): If Heracross's remaining HP are 20 or less, you may make its Megahorn attack's base damage 120 instead of 60. This power can't be used if Heracross is Asleep, Confused, or Paralyzed.
 - 1 x POWER: Slowking (neo1-14): Whenever your opponent plays a Trainer card, you may flip a coin. If heads, that card does nothing. Put it on top of your opponent's deck. This power can't be used if Slowking is Asleep, Confused, or Paralyzed.
 - 1 x attack: Togetic (neo1-16): Flip a coin. If heads, choose an attack on 1 of your opponent's Pokemon. Super Metronome copies that attack except for its Energy cost. (You must still do anything else in order to use that attack.) (No matter what type t
-- 1 x attack: Aipom (neo1-26): Shuffle Aipom and all cards attached to it into your deck. Flip a coin. If heads, shuffle a card from your discard pile into your deck.
 - 1 x attack: Bayleef (neo1-29): Flip a coin. If heads and if any of your Pokemon have any damage counters on them, then remove 2 damage counters from 1 of them (or 1 if it only has 1). If tails and if any of your opponent's Pokemon have any damage count
-- 1 x attack: Clefairy (neo1-30): Flip a number of coins equal to the total number of Pokemon in play. For each heads, you may search your deck for a basic Energy card, show it to your opponent, and put it into your hand. Shuffle your deck afterward.
-- 1 x attack: Croconaw (neo1-31): Until the end of your opponent's next turn, as long as Croconaw is your Active Pokemon, the Defending Pokemon can't retreat, and if the effect of an attack, Pokemon Power, or Trainer card would change that player's Activ
-- 1 x attack: Gloom (neo1-36): Flip a coin. If heads, this attack does 20 damage plus 10 more damage and, until the end of your next turn, as long as Gloom is your Active Pokemon, the Defending Pokemon can't retreat, and if the effect of an attack, Pokem
 - 1 x POWER: Lanturn (neo1-38): You may make Floodlight do 10 more damage for each Water Energy attached to Lanturn, but not used to pay for Floodlight's Energy cost. This power can't be used if Lanturn is Asleep, Confused, or Paralyzed.
 - 1 x attack: Ledian (neo1-39): If you have any Grass Pokemon on your Bench, remove all Grass Energy cards from Ledian and attach them to 1 of those Pokemon, then switch Ledian with that Pokemon.
 - 1 x attack: Phanpy (neo1-43): Flip a coin. If heads, then if, during your opponent's next turn, Phanpy would be Knocked Out by an attack, Phanpy isn't Knocked Out and its remaining HP become 10 instead.
@@ -121,17 +114,14 @@ plays (tools/tcg/regions/effects.py); only finished cards appear in the game.
 - 1 x attack: Ampharos (neo3-1): Flip 3 coins. For each heads, you may search your deck for a Lightning Energy card and attach it to 1 of your Lightning Pokemon. Shuffle your deck afterward.
 - 1 x POWER: Celebi (neo3-3): If an opponent's attack would Knock Out Celebi, flip a coin. If heads, Celebi isn't Knocked Out and you shuffle it and all cards attached to it into your deck. This power doesn't work if Celebi is already Asleep, Confused, 
 - 1 x attack: Crobat (neo3-4): If your opponent attaches an Energy card to the Defending Pokemon during his or her next turn, that Pokemon becomes Poisoned.
-- 1 x attack: Delibird (neo3-5): Flip 3 coins. If exactly 1 is heads, this attack does 40 damage. If exactly 2 are heads, remove 3 damage counters from the Defending Pokemon. If the Defending Pokemon has fewer damage counters than that, remove all of the
 - 1 x POWER: Entei (neo3-6): When you play Entei from your hand, you may discard the top 5 cards of your deck. (If you have fewer cards in your deck than that, discard all of them.) If any of those are Fire Energy cards, attach them to any of your Fire 
 - 1 x attack: Jumpluff (neo3-9): Choose any number of your Hoppips and Skiplooms. Then, for each Pokemon you chose in this way, you may search your deck for a card that evolves from that Pokemon and attach it to that Pokemon. (This counts as evolving tho
 - 1 x POWER: Magneton (neo3-10): As often as you like during your turn (before your attack), you may take 1 Energy card attached to 1 of your Magnemites, Magnetons, or Dark Magnetons and attach it to a different 1 of your Magnemites, Magnetons, and Dark
-- 1 x attack: Misdreavus (neo3-11): If the Defending Pokemon is Asleep and was attacked with Night Eyes during your last turn, it is Knocked Out.
 - 1 x POWER: Porygon2 (neo3-12): Once during your turn (before your attack), you may choose 1 basic Energy card attached to 1 of your Pokemon and choose an Energy type. Treat that Energy card as that type until the end of your turn. This power can't be 
 - 1 x POWER: Raikou (neo3-13): Whenever you attach a Lightning Energy card from your hand to Raikou, if your opponent has any Benched Pokemon, he or she chooses 1 of them and switches it with the Defending Pokemon. This power stops working while Raikou 
 - 1 x POWER: Suicune (neo3-14): Prevent all effects of your opponent's attacks, other than damage, done to Suicune. This power stops working while Suicune is Asleep, Confused, or Paralyzed.
 - 1 x POWER: Aerodactyl (neo3-15): Whenever an Evolved Pokemon attacks (even if it's your opponent's), it can use any attack from its Basic Pokemon card or any Evolution card attached to it. It still has to pay for that attack's Energy cost. This power 
 - 1 x attack: Kingdra (neo3-19): Use any attack from Kingdra's Basic Pokemon card or Evolution card. (Kingdra doesn't have to pay for that attack's Energy cost.)
-- 1 x attack: Starmie (neo3-25): Choose an Energy type other than Colorless. This attack does 20 damage to each of your opponent's Pokemon with any Energy cards of that type attached to it. Don't apply Weakness and Resistance.
 - 1 x POWER: Sudowoodo (neo3-26): As long as Sudowoodo is your Active Pokemon, it copies all of the Defending Pokemon's attacks, including their costs. This power can't be used if Sudowoodo is Asleep, Confused, or Paralyzed.
 - 1 x POWER: Lanturn (neo3-32): Once during your turn (before your attack), you may change Lanturn's type to Water until the end of your turn. This power can't be used if Lanturn is Asleep, Confused, or Paralyzed. If Lanturn becomes Asleep, Confused, or
 - 1 x POWER: Magcargo (neo3-33): If Magcargo is your Active Pokemon and moves to the Bench, remove 1 Fire Energy card attached to Magcargo, if any, and attach it to the new Active Pokemon. (You can't choose an Energy card that you used to pay the Retrea
@@ -149,8 +139,6 @@ plays (tools/tcg/regions/effects.py); only finished cards appear in the game.
 - 1 x POWER: Light Dragonite (neo4-14): As long as Light Dragonite is your Active Pokemon, each Special Energy card provides Colorless Energy instead of its usual type and its other effects stop working. This power stops working while Light Dragonite is
 - 1 x POWER: Light Togetic (neo4-15): When you play Light Togetic from your hand, your opponent may search his or her deck for a Pokemon Tool card, show that card to you, and put it into his or her hand. Either way, you may do the same, and then each pl
 - 1 x ENERGY: Miracle Energy (neo4-16): You can't have more than 1 Miracle Energy in your deck. Attach Miracle Energy to 1 of your Shining or Light Pokemon. At the end of your turn, discard Miracle Energy. While in play, Miracle Energy counts as every ty
-- 1 x attack: Dark Ariados (neo4-17): The Defending Pokemon is now Poisoned. Flip a coin. If heads, the Defending Pokemon can't retreat until the end of your opponent's next turn and if the effect of an attack, Pokemon Power, or Trainer card would change
-- 1 x attack: Dark Magcargo (neo4-18): You may discard a Fire Energy card attached to Dark Magcargo when you use this attack. If you do and if your opponent has any Benched Pokemon, choose 1 of them and this attack does 20 damage to it. (Don't apply Weak
 - 1 x POWER: Dark Magcargo (neo4-18): As long as Dark Magcargo is your Active Pokemon, whenever a player puts a Baby Pokemon or Basic Pokemon onto his or her Bench from his or her hand, this power does 10 damage to that Pokemon. (Don't apply Weakness an
 - 1 x POWER: Dark Slowking (neo4-20): Once during your turn (before your attack), you may flip a coin. If heads, look at the top card of your opponent's deck. Then, you may have your opponent shuffle his or her deck. This power can't be used if Dark Slo
 - 1 x attack: Dark Ursaring (neo4-21): Look at your opponent's hand. If he or she has any Baby Pokemon and/or Basic Pokemon there, you may put any number of them onto your opponent's Bench (as long as there's room). Then, your opponent looks at your hand

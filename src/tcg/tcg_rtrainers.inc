@@ -161,6 +161,8 @@ static int RegionTrainer(struct TcgDuel *g, const struct TcgAction *a, unsigned 
         int bench = RtEmptyBench(p), at;
         if (bench < 0 || !RtPicked(p, p->hand, p->handSize, a, 0, 1, RtBasic))
             return Fail(g, "Choose a Basic Pokemon in your hand (and have room on your Bench).");
+        if (TcgDuel_Anchored(g, me))
+            return Fail(g, "Your Active Pokemon can't be switched out now.");
         p->field[bench] = p->field[0];
         Cure(&p->field[bench]);
         memset(&p->field[0], 0, sizeof(p->field[0]));
@@ -591,7 +593,7 @@ static int RegionTrainer(struct TcgDuel *g, const struct TcgAction *a, unsigned 
     case TCG_CARD_ECARD1_146: /* Pokemon Reversal: heads, their chosen Benched Pokemon becomes the Defending one */
         if (a->target < 1 || a->target >= TCG_FIELD_SIZE || !op->field[a->target].stackSize)
             return Fail(g, "Choose one of their Benched Pokemon.");
-        if (TcgDuel_Coin(g, me))
+        if (TcgDuel_Coin(g, me) && !TcgDuel_Anchored(g, me ^ 1))
         {
             struct TcgFieldCard temp = op->field[0];
             op->field[0] = op->field[a->target];
@@ -897,7 +899,7 @@ static int RegionTrainer(struct TcgDuel *g, const struct TcgAction *a, unsigned 
         unsigned k, bench = 0;
         for (k = 1; k < TCG_FIELD_SIZE; k++)
             bench += op->field[k].stackSize != 0;
-        if (a->slot && a->slot < TCG_FIELD_SIZE && p->field[a->slot].stackSize)
+        if (a->slot && a->slot < TCG_FIELD_SIZE && p->field[a->slot].stackSize && !TcgDuel_Anchored(g, me))
         {
             struct TcgFieldCard temp = p->field[0];
             p->field[0] = p->field[a->slot];
@@ -905,7 +907,7 @@ static int RegionTrainer(struct TcgDuel *g, const struct TcgAction *a, unsigned 
             Cure(&p->field[a->slot]);
             TcgDuel_Event(g, TCG_EV_SWITCH, me, a->slot, 0, 0, 0);
         }
-        if (bench)
+        if (bench && !TcgDuel_Anchored(g, me ^ 1))
         {
             g->phase = TCG_PROMOTION;
             g->promotePlayer = (uint8_t)(me ^ 1);

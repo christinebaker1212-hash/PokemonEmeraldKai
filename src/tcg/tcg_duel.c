@@ -205,10 +205,16 @@ int TcgDuel_NoAttack(const struct TcgDuel *g, unsigned player)
     const struct TcgFieldCard *f = &g->players[player].field[0];
     return f->noAttack == 1 || (f->noAttack == 2 && TcgDuel_BoundEffect(g, player, 0)) || f->noAttackAll;
 }
+int TcgDuel_Anchored(const struct TcgDuel *g, unsigned player)
+{
+    const struct TcgFieldCard *f = &g->players[player].field[0], *them = &g->players[player ^ 1].field[0];
+    return f->stackSize && f->anchorUntil >= g->turn &&
+           (!f->anchorBy || (them->stackSize && them->stack[them->stackSize - 1] == f->anchorBy - 1));
+}
 int TcgDuel_Stuck(const struct TcgDuel *g, unsigned player)
 {
     const struct TcgFieldCard *f = &g->players[player].field[0], *them = &g->players[player ^ 1].field[0];
-    return f->stuck == 1 ||
+    return f->stuck == 1 || TcgDuel_Anchored(g, player) ||
            (f->stuck == 2 && them->stackSize && them->stack[them->stackSize - 1] == f->stuckBy - 1);
 }
 static int EnergyPaid(const struct TcgDuel *g, unsigned player, unsigned attack);
@@ -432,6 +438,7 @@ static void ClearCondition(struct TcgFieldCard *f)
     f->stuck = f->stuckBy = f->blindAll = f->noAttackAll = 0;
     f->noEvolveUntil = 0;
     f->condImmune = 0;
+    f->anchorUntil = f->anchorBy = 0;
 }
 /* What the opponent's last attack did to it (Mirror Move) */
 static void ClearMirror(struct TcgFieldCard *f)
@@ -822,6 +829,8 @@ static int Apply(struct TcgDuel *g, const struct TcgAction *a)
             return Error(g, "Amnesia: that attack can't be used this turn.");
         if ((blocked = TcgDuel_EffectBlock(g, g->current, attack)))
             return Error(g, blocked);
+        f->lastAttack = (uint8_t)(a->attack + 1);
+        f->lastAttackTurn = g->turn;
         if (TcgDuel_IsMetronome(attack))
         {
             /* Metronome: one of the Defending Pokemon's attacks, without its Energy cost (its type stays its own) */
@@ -1134,7 +1143,8 @@ static int Apply(struct TcgDuel *g, const struct TcgAction *a)
             unsigned who = g->current ^ 1, bench = 0, k, hp = target->kind == TCG_TRAINER ? 10 : target->hp;
             for (k = 1; k < TCG_FIELD_SIZE; k++)
                 bench += g->players[who].field[k].stackSize != 0;
-            if (g->players[who].field[0].stackSize && g->players[who].field[0].damage < hp && bench)
+            if (g->players[who].field[0].stackSize && g->players[who].field[0].damage < hp && bench &&
+                !TcgDuel_Anchored(g, who))
             {
                 g->phase = TCG_PROMOTION;
                 g->promotePlayer = who;
