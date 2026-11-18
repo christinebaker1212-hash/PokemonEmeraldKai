@@ -176,7 +176,7 @@ static u16 RoomSlot(void)              // the half hour the room was set up for 
 // ---- the decks a guest may bring: any deck of the game that plays
 typedef struct { const char *const *cards; char label[48]; } DeckChoice;
 
-static int Decks(DeckChoice *out, int cap)
+static int AllDecks(DeckChoice *out, int cap)
 {
     int n = 0, i;
     for (i = 0; i < MTG_STARTERS && n < cap; i++) {
@@ -194,6 +194,15 @@ static int Decks(DeckChoice *out, int cap)
         }
     return n;
 }
+// ... those inside the MAGIC GEN (the host's online; all of them when none is)
+static int Decks(DeckChoice *out, int cap)
+{
+    int n = AllDecks(out, cap), i, kept = 0;
+    for (i = 0; i < n; i++)
+        if (Mtg_RecipeInGen(out[i].cards, MP_MtgGen(), NULL))
+            out[kept++] = out[i];
+    return kept ? kept : n;
+}
 
 const MtgDuelist *Mtg_Opponent(unsigned id)
 {
@@ -203,8 +212,17 @@ const MtgDuelist *Mtg_Opponent(unsigned id)
     const MtgGuest *g;
     int n;
     u32 s;
-    if (id < MTG_DUELISTS)
-        return &gMtgDuelists[id];
+    if (id < MTG_DUELISTS) {
+        // a regular brings their own deck, or under the MAGIC GEN one inside it
+        static MtgDuelist regular;
+        if (Mtg_RecipeInGen(gMtgDuelists[id].cards, MP_MtgGen(), NULL))
+            return &gMtgDuelists[id];
+        Mtg_EnsureDb();
+        n = Decks(decks, (int)(sizeof(decks) / sizeof(decks[0])));
+        regular = gMtgDuelists[id];
+        regular.cards = decks[(RoomSlot() + id) % (unsigned)n].cards;
+        return &regular;
+    }
     if (id >= (unsigned)(MTG_DUELISTS + GUESTS))
         id = MTG_DUELISTS;
     g = &sGuests[id - MTG_DUELISTS];

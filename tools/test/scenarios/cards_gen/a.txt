@@ -1,0 +1,6 @@
+pressuntil A field 5000
+wait 60
+mp cards starter 0
+mp tcgvariety
+mp mtg genvariety
+quit

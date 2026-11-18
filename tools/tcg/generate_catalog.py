@@ -114,6 +114,30 @@ out+=['};','const unsigned gTcgDeckDefinitionCount = sizeof(gTcgDeckDefinitions)
 out+=['const uint16_t gTcgGb2PackCards[TCG_GB2_PACKS][TCG_GB2_PACK_MAX] = {']
 for pk in x.get('gb2_packs',[]):out.append('{'+','.join(map(str,pk['cards']))+'},')
 out+=['};']
+# The card GEN switch (docs/TCG_REGIONS.md step 7): each card's set, as a step of the GEN list (gTcgGenNames, in release
+# order): the Game Boy games' cards by their English printing (tools/tcg/printed_art.json; Japanese-only GB2 cards and the
+# games' own cards with the Team Rocket era), the regional sets' by their set, Wizards' promos by number, Nintendo's with
+# Expedition. A new set appends a step.
+GEN_NAMES=['BASE SET','JUNGLE','FOSSIL','TEAM ROCKET','GYM HEROES','GYM CHALLENGE','NEO GENESIS','NEO DISCOVERY',
+           'NEO REVELATION','NEO DESTINY','EXPEDITION','AQUAPOLIS','SKYRIDGE']
+GEN_OF={'base1':0,'base2':1,'base3':2,'base5':3,'japan':3,'render':3,'gym1':4,'gym2':5,'neo1':6,'neo2':7,'neo3':8,
+        'neo4':9,'ecard1':10,'ecard2':11,'ecard3':12,'np':10}
+def gen_of(printing):
+ s,_,num=printing.partition('-')
+ if s=='basep':
+  n=int(''.join(ch for ch in num if ch.isdigit()) or 0)
+  return 0 if n<=14 else 4 if n<=30 else 6
+ return GEN_OF[s]
+_pr=json.loads((ROOT/'tools/tcg/printed_art.json').read_text())['cards']
+gens=[0]*(reg[-1]['id']+1)
+for _c in x['cards']:gens[_c['id']]=0 if _c['id']<=6 else gen_of(_pr[str(_c['id'])]['printing'])
+for c in reg:gens[c['id']]=0 if c['kind']=='energy' and c['name'].endswith('Energy') and c['name'].split()[0] in ('Grass','Fire','Water','Lightning','Fighting','Psychic') else gen_of(c['src'])
+out+=['/* The card GEN switch: each card\'s set as a step of gTcgGenNames (tools/tcg/generate_catalog.py) */',
+      'const char *const gTcgGenNames[TCG_GEN_STEPS] = {'+', '.join(q(n) for n in GEN_NAMES)+'};',
+      'const uint8_t gTcgCardGen[TCG_CARD_COUNT + 1] = {']
+for i in range(0,len(gens),40):out.append(','.join(map(str,gens[i:i+40]))+',')
+out+=['};']
+assert len(GEN_NAMES)==13, 'TCG_GEN_STEPS (include/tcg/tcg.h) is 13'
 (ROOT/'src/tcg/tcg_catalog.c').write_text('\n'.join(out)+'\n')
 (ROOT/'include/tcg/card_ids.h').write_text('\n'.join(ids+['#endif'])+'\n')
 print(f'Generated {len(x["cards"])} native cards, {len(reg)} regional ones ({sum(1 for c in reg if REG.ready(c))} finished) and {len(x["decks"])} decks')

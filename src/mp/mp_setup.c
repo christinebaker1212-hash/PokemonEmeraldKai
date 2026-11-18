@@ -1136,7 +1136,11 @@ static void ShowPatchReader(bool8 on)
 // playing alone, OPTIONS > GAME has the level scaling ones)
 
 enum { RULE_PADDING, RULE_ANIM, RULE_SCALE_FIRST, RULE_GEN = RULE_SCALE_FIRST + MP_SCALE_COUNT, RULE_MEGA, RULE_ZMOVES,
-       RULE_DYNAMAX, RULE_TERA, RULE_BACK, RULE_ROWS };
+       RULE_DYNAMAX, RULE_TERA, RULE_CARDGEN, RULE_MTGGEN, RULE_BACK, RULE_ROWS };
+unsigned Tcg_GenCount(void);              // the card GEN steps (tcg_collection.c, mtg_sets.c)
+const char *Tcg_GenName(unsigned gen);
+unsigned Mtg_GenCount(void);
+const char *Mtg_GenName(unsigned gen);
 #define RULE_LINE_H 10
 #define RULE_VISIBLE 11   // rows on screen at once (the list scrolls)
 
@@ -1153,6 +1157,17 @@ static void RuleValue(u8 row, char *out, int len)
         snprintf(out, len, "%s", gMpConfig.animSpeed == 30 ? "+30%" : gMpConfig.animSpeed == 25 ? "+25%" : "NORMAL");
     else if (row == RULE_GEN)
         snprintf(out, len, "GEN %d", gMpConfig.generation >= 3 && gMpConfig.generation <= 9 ? gMpConfig.generation : 3);
+    else if (row == RULE_CARDGEN)
+        snprintf(out, len, "%s", Tcg_GenName(gMpConfig.cardGen));
+    else if (row == RULE_MTGGEN)
+    {
+        // (a long set name as far as the row has room: "CLASSIC SIXTH EDITION" is "CLASSIC SIXTH ED.")
+        snprintf(out, len, "%s", Mtg_GenName(gMpConfig.mtgGen));
+        if (strlen(out) > 15 && strstr(out, " EDITION"))
+            strcpy(strstr(out, " EDITION"), " ED.");
+        if (strlen(out) > 15)
+            out[15] = 0;
+    }
     else if (row >= RULE_MEGA && row <= RULE_TERA)   // (Moemon Kai: each gimmick AUTO / ON / OFF, battle_gimmick.h)
         snprintf(out, len, "%s", (const char *[]){"AUTO", "ON", "OFF", "AUTO"}[(gMpConfig.gimmicks >> (2 * (row - RULE_MEGA))) & 3]);
     else if (row >= RULE_SCALE_FIRST && row < RULE_GEN)
@@ -1178,7 +1193,8 @@ static void DrawRules(void)
 {
     static const char *const labels[RULE_ROWS] = {"TEAM PADDING", "ANIM SPEED", "LEVEL SCALING", "  WILD", "  TRAINERS",
                                                   "  BOSS MARGIN", "  BADGE CAPS", "  PAST 8 BADGES", "  EXP CURVE", "GENERATION",
-                                                  "MEGA EVOLUTION", "Z-MOVES", "DYNAMAX", "TERASTALLIZE", "BACK"};
+                                                  "MEGA EVOLUTION", "Z-MOVES", "DYNAMAX", "TERASTALLIZE", "POKeMON CARD GEN",
+                                                  "MAGIC GEN", "BACK"};
     static const char *const help[RULE_ROWS] = {
         "ON: trainers get one extra Moemon when friends team up.",
         "How much faster battle animations play, for everyone.",
@@ -1194,6 +1210,8 @@ static void DrawRules(void)
         "AUTO: on from GEN 7. START in battle.",
         "AUTO: on from GEN 8. START in battle.",
         "AUTO: on from GEN 9. START in battle.",
+        "The POKeMON card sets decks may use, card players' and yours.",
+        "The MAGIC card sets decks may use, card players' and yours.",
         "Back to HOST A GAME.",
     };
     u8 i;
@@ -1254,6 +1272,12 @@ static void HandleRules(void)
         {
             u8 g = gMpConfig.generation >= 3 && gMpConfig.generation <= 9 ? gMpConfig.generation : 3;
             gMpConfig.generation = 3 + (g - 3 + 7 + dir) % 7;
+        }
+        else if (row == RULE_CARDGEN || row == RULE_MTGGEN)
+        {
+            u8 *v = row == RULE_CARDGEN ? &gMpConfig.cardGen : &gMpConfig.mtgGen;
+            unsigned n = (row == RULE_CARDGEN ? Tcg_GenCount() : Mtg_GenCount()) + 1;
+            *v = (u8)((*v % n + n + dir) % n);
         }
         else if (row >= RULE_MEGA && row <= RULE_TERA)
         {

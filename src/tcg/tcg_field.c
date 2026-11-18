@@ -860,6 +860,26 @@ again:
             }
         target = 0;
     }
+    // The POKeMON CARD GEN (the host's online): only decks of the sets it allows; when none of theirs is, the Game Boy
+    // decks of their kind that are (any tier), then any that are
+    if (MP_CardGen())
+    {
+        unsigned gen = MP_CardGen(), kept = 0, pass;
+        int kind = o->pool == TCG_SCALE_POOL_SPECIAL ? Gb2Kind(&gTcgSpecialDecks[o->special]) : (int)o->pool;
+        for (i = 0; i < n; i++)
+            if (Tcg_DeckInGen(list[i].deck, gen, NULL))
+                list[kept++] = list[i];
+        for (pass = 0; pass < 2 && !kept; pass++)
+            for (i = 0; i < gTcgDeckDefinitionCount && kept < ARRAY_COUNT(list); i++)
+                if ((pass || Gb2Kind(&gTcgDeckDefinitions[i]) == kind) && strcmp(gTcgDeckDefinitions[i].name, "Unnamed")
+                 && Gb2Plays(&gTcgDeckDefinitions[i]) && Tcg_DeckInGen(gTcgDeckDefinitions[i].cards, gen, NULL))
+                {
+                    list[kept].deck = gTcgDeckDefinitions[i].cards;
+                    list[kept].gb2 = !strncmp(gTcgDeckDefinitions[i].name, "GB2 ", 4);
+                    list[kept++].rating = gTcgDeckRating[i];
+                }
+        n = kept;
+    }
     if (!n)
     {
         const struct TcgDeckDefinition *def = DeckNamed("CharmanderAndFriends");
@@ -1727,6 +1747,30 @@ void Tcg_DebugVariety(void)
     }
     printf("[test] tcgvariety: %u different decks for 140 card players, %u of them GB2's, %u the region's theme decks\n",
            total, gb2, themes);
+    // (the POKeMON CARD GEN: any deck past it a player or special trainer brought)
+    {
+        unsigned outside = 0, pool;
+        for (pool = 0; pool < DECK_MIXED; pool++)
+            for (k = 0; k < 20; k++)
+            {
+                memset(&o, 0, sizeof(o) - sizeof(o.portrait));
+                o.special = TCG_SPECIAL_NONE;
+                o.pool = pool;
+                o.pick = (k + 1) * 2654435761u ^ (pool * 40503u);
+                Tcg_FitOpponent(&o, NULL);
+                outside += !Tcg_DeckInGen(o.deck, MP_CardGen(), NULL);
+            }
+        for (k = 0; k < TCG_SPECIAL_COUNT; k++)
+        {
+            memset(&o, 0, sizeof(o) - sizeof(o.portrait));
+            o.special = k;
+            o.pool = TCG_SCALE_POOL_SPECIAL;
+            o.pick = 7 * 2246822519u;
+            Tcg_FitOpponent(&o, NULL);
+            outside += !Tcg_DeckInGen(o.deck, MP_CardGen(), NULL);
+        }
+        printf("[test] tcgvariety gen %u: %u decks past it\n", MP_CardGen(), outside);
+    }
 }
 
 // ---------------------------------------------------------------------------

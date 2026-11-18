@@ -1853,6 +1853,7 @@ void MtgUi_OpenChallenge(unsigned duelist)
     MPNet_Log("mtg: challenge from %s", U.who.name);
 }
 
+static const char *sOutsideGen;   // (the MAGIC GEN's refusal: the first card past it)
 static void StartDuel(const char *const *theirCards, const char *name)
 {
     MtgCollection *c = C();
@@ -2570,6 +2571,10 @@ int MtgUi_Step(unsigned keys)
                 Say(ACT_NONE, "That slot is empty.");
             else if (!DeckValid(U.cursor))
                 Say(ACT_NONE, "%s", Mtg_DeckProblem(c, &c->decks[U.cursor]));
+            else if (!Mtg_IdsInGen(c->decks[U.cursor].cards, c->decks[U.cursor].count, MP_MtgGen(), &sOutsideGen))
+                // (the MAGIC GEN, the host's online: a deck with a card from a later set can't be played)
+                Say(ACT_NONE, "This deck holds %s, past the MAGIC GEN: %s. Swap it out to play here.", sOutsideGen,
+                    Mtg_GenName(MP_MtgGen()));
             else {
                 c->activeDeck = (uint8_t)U.cursor;
                 StartDuel(U.who.cards, U.who.name);

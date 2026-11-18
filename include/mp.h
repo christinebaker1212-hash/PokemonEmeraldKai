@@ -269,6 +269,8 @@ struct MpConfig
     u8 scale[MP_SCALE_COUNT - 1];   // LEVEL SCALING's settings past ON / OFF (MP_SCALE_WILD..), HOST A GAME > GAME RULES or OPTIONS
     u8 cardBack;              // OPTIONS > DISPLAY > CARD BACKS: MP_CARD_BACK_* (src/tcg/tcg_gfx.h G_BACK_*)
     u8 cardScaling;           // OPTIONS > GAME > CARD SCALING: card players' decks fit yours (1) or go by badges (0)
+    u8 cardGen;               // OPTIONS > GAME > POKeMON CARD GEN: 0 ALL, g the first g sets of gTcgGenNames (the host's online)
+    u8 mtgGen;                // OPTIONS > GAME > MAGIC GEN: 0 ALL, g the first g sets of gMtgSets (the host's online)
     u8 battleAnims;           // OPTIONS > DISPLAY > BATTLE ANIMS: 0 CLASSIC, 1 MODERN (mp_modernanim.c; this game only)
     u8 noShadows;             // OPTIONS > DISPLAY > SHADOWS: 0 ON (shadows under people and POKeMON: mp_shadow.c), 1 OFF
     u8 menuTheme;             // OPTIONS > DISPLAY > THEME: MP_MENU_THEME_* (every window's colors: mp_darktheme.c)
@@ -364,6 +366,8 @@ bool8 MP_TrainerPadding(void);   // the room host's TEAM PADDING (ours when we h
 bool8 MP_LevelScaling(void);
 bool8 MP_MoveSplit(void);   // Moemon Kai: OPTIONS > GAME > MOVE KIND (the host's online)
 u8 MP_Generation(void);     // Moemon Kai: OPTIONS > GAME > GENERATION (the host's online)
+u8 MP_CardGen(void);        // Moemon Kai: OPTIONS > GAME > POKeMON CARD GEN (0 ALL; the host's online)
+u8 MP_MtgGen(void);         // Moemon Kai: OPTIONS > GAME > MAGIC GEN (0 ALL; the host's online)
 bool8 MP_LevelScalingIsOurs(void);
 void MP_SendRoomRules(void);     // the host tells everyone again (a setting changed)
 // mp_levelscale.c: FF8-style level scaling

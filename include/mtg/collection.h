@@ -82,6 +82,13 @@ int Mtg_SetCards(int set, uint16_t *out, uint8_t *rarity);
 int Mtg_SetAvailable(int set);                                  // enough of it plays to fill its boosters
 int Mtg_RandomSet(uint32_t *rng);                               // one of the available sets
 int Mtg_SetMascot(int set);                                     // the card on its pack (a rare with art)
+// The card GEN switch (OPTIONS > GAME > MAGIC GEN, 0 ALL; mtg_sets.c): a card's step (the first set printing it), and
+// whether a recipe / a deck of ids is inside a GEN (the first card past it into *outside)
+unsigned Mtg_GenCount(void);
+const char *Mtg_GenName(unsigned gen);
+unsigned Mtg_CardGen(const char *cardName);
+int Mtg_RecipeInGen(const char *const *cards, unsigned gen, const char **outside);
+int Mtg_IdsInGen(const uint16_t *ids, int count, unsigned gen, const char **outside);
 int Mtg_SetOwned(const MtgCollection *c, int set, int *total);  // its usable cards owned / all of them
 int Mtg_SetByCode(const char *code);                            // -1 if none
 int Mtg_AwardPack(MtgCollection *c, int set);                   // a booster into the CARD CASE (0: full)

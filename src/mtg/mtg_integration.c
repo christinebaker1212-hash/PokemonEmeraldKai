@@ -161,6 +161,18 @@ void Mtg_Debug(const char *command)
 {
     MtgCollection *c = Mtg_GetCollection();
     unsigned n = 0;
+    if (strcmp(command, "genvariety") == 0) {
+        // (tests: under the MAGIC GEN, every regular's and guest's deck inside it)
+        unsigned id, outside = 0;
+        for (id = 0; id < MTG_DUELISTS + 12; id++) {
+            const MtgDuelist *d = Mtg_Opponent(id);
+            const char *past = NULL;
+            if (!Mtg_RecipeInGen(d->cards, MP_MtgGen(), &past))
+                outside++, MPNet_Log("mtg: genvariety %s's deck past the GEN (%s)", d->name, past);
+        }
+        MPNet_Log("mtg: genvariety gen %u: %u decks past it", MP_MtgGen(), outside);
+        return;
+    }
     if (sscanf(command, "starter %u", &n) == 1) {
         Mtg_GiveStarter(c, n);
         MPNet_Log("mtg: starter %s given", gMtgStarters[c->starter].name);

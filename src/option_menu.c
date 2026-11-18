@@ -75,6 +75,8 @@ enum
     OPT_DYNAMAX,
     OPT_TERA,
     OPT_CARDSCALE,
+    OPT_CARDGEN,      // Moemon Kai: GAME > POKeMON CARD GEN / MAGIC GEN (0 ALL; the host's online)
+    OPT_MTGGEN,
     OPT_FULLSCREEN,
     OPT_WINSCALE,
     OPT_SCALING,
@@ -211,6 +213,12 @@ static const u8 sText_CardArtGameBoy[] = _("GAME BOY");
 static const u8 sText_CardArtFull[] = _("FULL CARD");
 static const u8 sText_CardBacks[] = _("CARD BACKS");
 static const u8 sText_CardScaling[] = _("CARD SCALING");
+static const u8 sText_CardGen[] = _("POKéMON CARD GEN");
+static const u8 sText_MtgGen[] = _("MAGIC GEN");
+unsigned Tcg_GenCount(void);              // the card GEN steps (tcg_collection.c, mtg_sets.c)
+const char *Tcg_GenName(unsigned gen);
+unsigned Mtg_GenCount(void);
+const char *Mtg_GenName(unsigned gen);
 static const u8 sText_CardBackPrinted[] = _("PRINTED");
 static const u8 sText_CardBackPixel[] = _("PIXEL");
 static const u8 sText_BattleAnims[] = _("BATTLE ANIMS");
@@ -533,6 +541,8 @@ static void BuildRows(void)
         AddRow(OPT_BADGEFADE, 0);
         AddRow(OPT_CARDTITLE, 0);
         AddRow(OPT_CARDSCALE, 0);
+        AddRow(OPT_CARDGEN, 0);
+        AddRow(OPT_MTGGEN, 0);
         AddRow(OPT_CARDART, 0);
         AddRow(OPT_CARDBACK, 0);
         if (gMain.savedCallback == CB2_ReturnToFieldWithOpenMenu)   // (from the field's START menu only)
@@ -879,6 +889,10 @@ static u8 Choices(u8 row, const u8 **names, u8 *buf)
             MP_AsciiToGame(buf, ascii, 12);
         }
         break;
+    case OPT_CARDGEN:
+    case OPT_MTGGEN:
+        MP_AsciiToGame(buf, opt == OPT_CARDGEN ? Tcg_GenName(MP_CardGen()) : Mtg_GenName(MP_MtgGen()), 30);
+        break;
     case OPT_FLAGRANGE:
         {
             char ascii[16];
@@ -1202,6 +1216,18 @@ static void Change(u8 row, int dir)
         MP_SendRoomRules();
         break;
     }
+    case OPT_CARDGEN:
+    case OPT_MTGGEN:
+    {
+        u8 *v = sRows[row].opt == OPT_CARDGEN ? &gMpConfig.cardGen : &gMpConfig.mtgGen;
+        unsigned n = (sRows[row].opt == OPT_CARDGEN ? Tcg_GenCount() : Mtg_GenCount()) + 1;
+        if (MP_Lobby_InRoom() && !MP_LevelScalingIsOurs())
+            break;   // online, the host's
+        *v = (u8)((*v % n + n + dir) % n);
+        MPNet_Log("card gen: pokemon %d, magic %d", gMpConfig.cardGen, gMpConfig.mtgGen);
+        MP_SendRoomRules();
+        break;
+    }
     case OPT_GENERATION:
         if (MP_Lobby_InRoom() && !MP_LevelScalingIsOurs())
             break;   // online, the host's
@@ -1279,6 +1305,8 @@ static const u8 *RowLabel(u8 row, u8 *buf)
     case OPT_CARDBACK:    return sText_CardBacks;
     case OPT_BATTLEANIMS: return sText_BattleAnims;
     case OPT_CARDSCALE:   return sText_CardScaling;
+    case OPT_CARDGEN:     return sText_CardGen;
+    case OPT_MTGGEN:      return sText_MtgGen;
     case OPT_PADSELECT:   return sText_Controller;
     case OPT_PADLAYOUT:   return sText_PadButtons;
     case OPT_ANALOGRUN:   return sText_StickRun;
@@ -1490,6 +1518,17 @@ static bool8 HintText(u8 *buf)
                  : "THE PRINTED PICTURES IN THE FRAME");
     else if (opt == OPT_CARDSCALE)
         snprintf(ascii, sizeof(ascii), "%s", gMpConfig.cardScaling ? "CARD PLAYERS' DECKS FIT YOURS" : "CARD PLAYERS' DECKS GO BY BADGES");
+    else if (opt == OPT_CARDGEN || opt == OPT_MTGGEN)
+    {
+        unsigned g = opt == OPT_CARDGEN ? MP_CardGen() : MP_MtgGen();
+        const char *name = opt == OPT_CARDGEN ? Tcg_GenName(g) : Mtg_GenName(g);
+        if (MP_Lobby_InRoom() && !MP_LevelScalingIsOurs())
+            snprintf(ascii, sizeof(ascii), "ONLINE, THE HOST'S IS USED: %s", name);
+        else if (!g)
+            snprintf(ascii, sizeof(ascii), "DECKS FROM EVERY SET");
+        else
+            snprintf(ascii, sizeof(ascii), "DECKS FROM THE SETS UP TO %s", name);
+    }
     else if (opt == OPT_CARDBACK)
         snprintf(ascii, sizeof(ascii), "%s", gMpConfig.cardBack ? "A PIXEL-ART CARD BACK" : "THE REAL CARD BACK");
     else if (opt == OPT_BATTLEANIMS)

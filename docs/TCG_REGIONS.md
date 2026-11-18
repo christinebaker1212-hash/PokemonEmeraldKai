@@ -188,3 +188,14 @@ Total 1,158 set cards (about 1,100 attacks with effect text, 250 Pokémon Powers
    Scenario cards_courier (`mp cards record KEY WINS`).
 7. The GEN switch (POKéMON / MAGIC by set, YU-GI-OH! by summon type, FUSION the base): every set a GEN step from the
    catalogue's own set list, so a new set needs no switch code; mock-ups of where it's set first.
+   **Built (2026-11-18; the user: no mock-ups)**: OPTIONS > GAME > POKeMON CARD GEN / MAGIC GEN and HOST A GAME >
+   GAME RULES (gMpConfig.cardGen / mtgGen, "card_gen" / "magic_gen"; 0 ALL, g the first g sets; online the host's:
+   MPR_RULES bytes 23-24 + MP_SCALE_COUNT, protocol 87; MP_CardGen / MP_MtgGen, MOEMON_CARD_GEN / MOEMON_MAGIC_GEN in
+   tests). POKeMON's steps: gTcgGenNames (BASE SET, JUNGLE, FOSSIL, TEAM ROCKET, then the nine regional sets), each card's
+   in gTcgCardGen (generate_catalog.py: the Game Boy cards by their English printing, Japanese-only GB2 cards with TEAM
+   ROCKET, Wizards' promos by number, Nintendo's with EXPEDITION); MAGIC's: gMtgSets in order, a card's the first set
+   printing it (mtg_sets.c Mtg_CardGen). Card players' decks: only those inside the GEN (tcg_field.c Tcg_FitOpponent; a
+   special trainer whose own deck is past it brings a Game Boy deck of its kind; mtg_club.c Decks, a regular brings a
+   club deck inside it); the player's: a deck holding a card past the GEN is refused at the challenge with the card and
+   its set named (tcg_ui.c ChooseDeck, mtg_ui.c M_CHALLENGE). Packs, shops and prizes are unchanged. No YU-GI-OH! row
+   until a second summon type exists. Scenario cards_gen.

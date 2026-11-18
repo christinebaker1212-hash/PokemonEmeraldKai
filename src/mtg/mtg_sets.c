@@ -179,3 +179,64 @@ int Mtg_OpenPack(MtgCollection *c, int set, uint16_t out[MTG_PACK_MAX], uint8_t 
         c->packsOpened++;
     return n;
 }
+
+// ---- the card GEN switch (OPTIONS > GAME > MAGIC GEN; the host's online): the sets in order are the GEN's steps, a card's
+// step the first set that prints it (basic lands and cards no set lists: the first). GEN 0 is ALL; GEN g allows steps
+// below g.
+unsigned Mtg_GenCount(void) { return MTG_SETS; }
+const char *Mtg_GenName(unsigned gen)
+{
+    static char name[40];
+    unsigned i;
+    if (!gen || gen > MTG_SETS)
+        return "ALL";
+    for (i = 0; gMtgSets[gen - 1].name[i] && i < sizeof(name) - 1; i++)
+        name[i] = (char)(gMtgSets[gen - 1].name[i] >= 'a' && gMtgSets[gen - 1].name[i] <= 'z' ? gMtgSets[gen - 1].name[i] - 32
+                                                                                           : gMtgSets[gen - 1].name[i]);
+    name[i] = 0;
+    return name;
+}
+unsigned Mtg_CardGen(const char *cardName)
+{
+    uint32_t h = Mtg_NameHash(cardName);
+    int s, i;
+    for (s = 0; s < MTG_SETS; s++)
+        for (i = 0; i < gMtgSets[s].count; i++)
+            if (gMtgSetCards[gMtgSets[s].first + i].hash == h)
+                return (unsigned)s;
+    return 0;
+}
+// A recipe ("17 Mountain"..., NULL-ended) inside GEN gen; the first card past it into outside (NULL: not wanted)
+int Mtg_RecipeInGen(const char *const *cards, unsigned gen, const char **outside)
+{
+    int i;
+    if (!gen || gen > MTG_SETS || !cards)
+        return 1;
+    for (i = 0; cards[i]; i++) {
+        const char *name = cards[i];
+        while (*name >= '0' && *name <= '9')
+            name++;
+        while (*name == ' ')
+            name++;
+        if (Mtg_CardGen(name) >= gen) {
+            if (outside)
+                *outside = name;
+            return 0;
+        }
+    }
+    return 1;
+}
+// A deck of the pool's cards inside GEN gen
+int Mtg_IdsInGen(const uint16_t *ids, int count, unsigned gen, const char **outside)
+{
+    int i;
+    if (!gen || gen > MTG_SETS)
+        return 1;
+    for (i = 0; i < count; i++)
+        if (Mtg_Card(ids[i]) && Mtg_CardGen(Mtg_Card(ids[i])->name) >= gen) {
+            if (outside)
+                *outside = Mtg_Card(ids[i])->name;
+            return 0;
+        }
+    return 1;
+}

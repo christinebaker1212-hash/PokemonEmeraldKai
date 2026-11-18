@@ -839,3 +839,22 @@ int Tcg_CollectionSave(const struct TcgCollection *c, const char *path)
     return i;
 #endif
 }
+
+/* The card GEN switch: every card of a deck inside GEN gen (0 ALL: every set; g: the first g sets of gTcgGenNames) */
+int Tcg_DeckInGen(const uint16_t cards[TCG_DECK_SIZE], unsigned gen, unsigned *outside)
+{
+    unsigned i;
+    if (!gen || gen >= TCG_GEN_STEPS + 1)
+        return 1;
+    for (i = 0; i < TCG_DECK_SIZE; i++)
+        if (cards[i] && cards[i] <= TCG_CARD_COUNT && gTcgCardGen[cards[i]] >= gen)
+        {
+            if (outside)
+                *outside = cards[i];
+            return 0;
+        }
+    return 1;
+}
+/* (for OPTIONS and GAME RULES: the GEN steps without the card headers) */
+unsigned Tcg_GenCount(void) { return TCG_GEN_STEPS; }
+const char *Tcg_GenName(unsigned gen) { return gen && gen <= TCG_GEN_STEPS ? gTcgGenNames[gen - 1] : "ALL"; }

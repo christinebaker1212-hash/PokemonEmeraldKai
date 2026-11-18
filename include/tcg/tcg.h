@@ -142,6 +142,13 @@ struct TcgDeckDefinition
     uint16_t cards[TCG_DECK_SIZE];
 };
 extern const struct TcgCard gTcgCards[TCG_CARD_COUNT + 1];
+/* The card GEN switch (OPTIONS > GAME > POKeMON CARD GEN; online the room host's): the sets in release order, each card's
+ * set among them (tcg_catalog.c). GEN 0 is ALL; GEN g allows the cards of steps below g. */
+#define TCG_GEN_STEPS 13
+extern const char *const gTcgGenNames[TCG_GEN_STEPS];
+extern const uint8_t gTcgCardGen[TCG_CARD_COUNT + 1];
+/* Whether every card of a deck is inside GEN gen (0 ALL); the first card past it in *outside */
+int Tcg_DeckInGen(const uint16_t cards[TCG_DECK_SIZE], unsigned gen, unsigned *outside);
 extern const struct TcgDeckDefinition gTcgDeckDefinitions[];
 extern const unsigned gTcgDeckDefinitionCount;
 const struct TcgCard *Tcg_Card(unsigned id);

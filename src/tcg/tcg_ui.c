@@ -3551,6 +3551,17 @@ static void ChooseDeck(void)
         Say(ACT_NONE, "%s", reason);
         return;
     }
+    {
+        /* the POKeMON CARD GEN (the host's online): a deck with a card from a later set can't be played */
+        unsigned outside = 0;
+        if (!Tcg_DeckInGen(c->decks[U.cursor].cards, MP_CardGen(), &outside))
+        {
+            PlaySE(SE_FAILURE);
+            Say(ACT_NONE, "This deck holds %s (%s), past the POKeMON CARD GEN: %s. Swap it out to play here.",
+                Tcg_Card(outside)->name, gTcgGenNames[gTcgCardGen[outside]], gTcgGenNames[MP_CardGen() - 1]);
+            return;
+        }
+    }
     c->activeDeck = (uint8_t)U.cursor;
     if (U.vs == VS_FRIEND)
     {
