@@ -59,11 +59,13 @@ public final class Tcg {
             EV_SUDDEN_DEATH = 19, EV_WIN = 20, EV_RETREAT_FAIL = 21, EV_POWER = 22, EV_PEEK = 23, EV_DEVOLVE = 24,
             EV_TO_HAND = 25, EV_MORPH = 26, EV_DECK_CHANGED = 27;
     public static final int DMG_WEAK = 1, DMG_RESIST = 2, DMG_POISON = 4, DMG_SELF = 8;
-    public static final int PACKS = 11, DECKS = 8, DECK = 60;
+    public static final int PACKS = 20, DECKS = 8, DECK = 60, TYPES = 9;
     public static final String[] PACK_NAMES = {"COLOSSEUM", "EVOLUTION", "MYSTERY", "LABORATORY", "BEGINNING POKéMON",
             "LEGENDARY POWER", "ISLAND OF FOSSIL", "PSYCHIC BATTLE", "SKY-FLYING POKéMON", "WE ARE TEAM ROCKET",
-            "TEAM ROCKET'S AMBITION"};
-    public static final String[] TYPE_NAMES = {"FIRE", "GRASS", "LIGHTNING", "WATER", "FIGHTING", "PSYCHIC", "COLORLESS"};
+            "TEAM ROCKET'S AMBITION", "GYM HEROES", "GYM CHALLENGE", "NEO GENESIS", "NEO DISCOVERY", "NEO REVELATION",
+            "NEO DESTINY", "EXPEDITION", "AQUAPOLIS", "SKYRIDGE"};
+    public static final String[] TYPE_NAMES = {"FIRE", "GRASS", "LIGHTNING", "WATER", "FIGHTING", "PSYCHIC", "COLORLESS",
+            "DARKNESS", "METAL"};
 
     private Tcg() {}
 }

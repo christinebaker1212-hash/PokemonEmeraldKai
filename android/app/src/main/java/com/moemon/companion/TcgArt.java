@@ -22,8 +22,10 @@ import java.io.InputStream;
  */
 public final class TcgArt {
     public static final float W = 360, H = 495;   // (a card's proportions)
-    private static final int[] TYPE = {0xFFE85830, 0xFF50A838, 0xFFF0C020, 0xFF3880E0, 0xFFB86830, 0xFF9050C8, 0xFFD8D8D0};
-    private static final int[] TYPE_DARK = {0xFF902010, 0xFF206818, 0xFF987000, 0xFF184890, 0xFF683810, 0xFF502078, 0xFF888880};
+    private static final int[] TYPE = {0xFFE85830, 0xFF50A838, 0xFFF0C020, 0xFF3880E0, 0xFFB86830, 0xFF9050C8, 0xFFD8D8D0,
+            0xFF404858, 0xFF98A0B0};
+    private static final int[] TYPE_DARK = {0xFF902010, 0xFF206818, 0xFF987000, 0xFF184890, 0xFF683810, 0xFF502078, 0xFF888880,
+            0xFF181C28, 0xFF505868};
 
     private final AssetManager assets;
     private JSONObject[] catalog;
@@ -148,11 +150,11 @@ public final class TcgArt {
     // ------------------------------------------------------------------------------------------- the symbols
 
     public static int typeColor(int type) {
-        return type >= 0 && type < 7 ? TYPE[type] : 0xFF888888;
+        return type >= 0 && type < TYPE.length ? TYPE[type] : 0xFF888888;
     }
 
     public static int typeDark(int type) {
-        return type >= 0 && type < 7 ? TYPE_DARK[type] : 0xFF404040;
+        return type >= 0 && type < TYPE_DARK.length ? TYPE_DARK[type] : 0xFF404040;
     }
 
     /** An Energy symbol: a round orb in the type's color (Double Colorless: two) */

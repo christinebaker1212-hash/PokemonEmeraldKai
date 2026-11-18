@@ -10,7 +10,9 @@
 #define TCG_NAME_LEN 24
 #define TCG_TYPES 9   /* (Darkness and Metal from Neo on: docs/TCG_REGIONS.md) */
 #define TCG_ATTACKS 3 /* a Pokemon's attacks and Pokemon Power / Poke-Power / Poke-Body (3: Ho-oh, Tyranitar...) */
-#define TCG_PACK_TYPES 11    /* the first game's 4 boosters, then GB2's 7 (TCG_PACK_GB2) */
+#define TCG_PACK_TYPES 20    /* the first game's 4 boosters, GB2's 7 (TCG_PACK_GB2), the regional sets' 9 (TCG_PACK_REGIONAL) */
+#define TCG_PACK_REGIONAL 11 /* Gym Heroes, Gym Challenge (KANTO), Neo Genesis .. Destiny (JOHTO), Expedition, Aquapolis,
+                              * Skyridge (HOENN, SINNOH, UNOVA): the cards' set (TCG_ORIGIN_*) less 2 */
 #define TCG_PACK_GB2 4
 #define TCG_GB2_PACKS 7
 #define TCG_GB2_PACK_MAX 64
@@ -153,7 +155,7 @@ struct TcgSavedDeck
     uint16_t cards[TCG_DECK_SIZE];
 };
 #define TCG_DAILY_SLOTS 64 /* opponents whose full reward was taken today */
-#define TCG_SET_COUNT TCG_PACK_TYPES /* the booster sets, as the packs: COLOSSEUM ... LABORATORY, then GB2's seven */
+#define TCG_SET_COUNT TCG_PACK_TYPES /* the booster sets, as the packs: COLOSSEUM ... LABORATORY, GB2's seven, the regional nine */
 enum
 {
     TCG_FLAG_TUTORIAL = 1,    /* the teaching duel was offered */
@@ -209,7 +211,20 @@ struct TcgCollection
     /* Format 10: each saved deck's hand tray color on the duel table (TCG_TRAY_*: the deck's main type, one type, or
      * a POKe BALL color) */
     uint8_t tray[TCG_SAVED_DECKS];
+    /* Format 11: the regional boosters' milestones ((pack - TCG_PACK_REGIONAL) * 3 + n); the special trainers past
+     * the first 32 beaten and promos given (bit special - 32) */
+    uint32_t milestonesRegion;
+    uint32_t specialBeatenHi[3], promoGivenHi[3];
 };
+/* The special trainers' bits (TcgCollection.specialBeaten / promoGiven and their Hi words: up to 128) */
+int Tcg_SpecialBeaten(const struct TcgCollection *c, unsigned special);
+void Tcg_SetSpecialBeaten(struct TcgCollection *c, unsigned special);
+int Tcg_PromoGiven(const struct TcgCollection *c, unsigned special);
+void Tcg_SetPromoGiven(struct TcgCollection *c, unsigned special);
+/* Is a booster sold in a region (REGION_* of include/mp_region.h): today's 11 everywhere, the regional ones in theirs */
+int Tcg_PackSoldIn(unsigned pack, unsigned region);
+/* The set (TcgCard.set) a booster holds */
+unsigned Tcg_PackSet(unsigned pack);
 /* A deck's tray color (TcgCollection.tray, MtgCollection.tray): the deck's own main color, one of the game's colors
  * (TCG_TRAY_GAME + n), or a POKe BALL color (TCG_TRAY_BALL + n) */
 #define TCG_TRAY_AUTO 0

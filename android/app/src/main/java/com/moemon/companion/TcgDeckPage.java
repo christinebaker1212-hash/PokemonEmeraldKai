@@ -187,7 +187,7 @@ public final class TcgDeckPage extends Page {
         y += 20;
         if (filter == 1) {
             float r = 6, ox = 14;
-            for (int t = 0; t < 7; t++) {
+            for (int t = 0; t < Tcg.TYPES; t++) {
                 ta.orb(c, t, ox + t * 18, y + 7, type == t ? 8 : r);
                 final int tt = t;
                 hit(ox + t * 18 - 8, y - 2, 16, 18, () -> type = type == tt ? -1 : tt, null);

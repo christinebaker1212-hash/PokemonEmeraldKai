@@ -1195,7 +1195,7 @@ static const u8 *AskCards(struct ObjectEvent *npc, const u8 *script, u8 *answer,
         o->matType = s->matType;
         o->music = q ? q->music : s->music;
         o->promo = gTcgSpecialPromos[slot];
-        o->pack = slot % TCG_PACK_TYPES;
+        o->pack = slot % TCG_PACK_REGIONAL;
         o->pool = TCG_SCALE_POOL_SPECIAL;
         o->pick = h;
         o->prizes = 6;   // (the full game: LEADERS and the like)
@@ -1267,6 +1267,16 @@ static const u8 *AskCards(struct ObjectEvent *npc, const u8 *script, u8 *answer,
             [DECK_FIRE] = 5, [DECK_GRASS] = 9, [DECK_LIGHTNING] = 8, [DECK_WATER] = 6,
             [DECK_FIGHTING] = 6, [DECK_PSYCHIC] = 7, [DECK_COLORLESS] = 8, [DECK_MIXED] = 4};
         o->pack = cat == CAT_TEAM ? ((h >> 9) & 1 ? 9 : 10) : sGb2Pack[deck <= DECK_MIXED ? deck : DECK_MIXED];
+    }
+    // ... and a third of the time one of the region's own sets (KANTO's Gym, JOHTO's Neo, the e-Card sets elsewhere)
+    if ((h >> 13) % 3 == 0)
+    {
+        u8 own[TCG_PACK_TYPES - TCG_PACK_REGIONAL], n = 0, k;
+        for (k = TCG_PACK_REGIONAL; k < TCG_PACK_TYPES; k++)
+            if (Tcg_PackSoldIn(k, MP_Region_Current()))
+                own[n++] = k;
+        if (n)
+            o->pack = own[(h >> 16) % n];
     }
     *answer = ASK_DUEL;
     o->voice = cat;   // (CAT_KID.. CAT_STAFF are QUOTE_VOICE_KID.. QUOTE_VOICE_STAFF)

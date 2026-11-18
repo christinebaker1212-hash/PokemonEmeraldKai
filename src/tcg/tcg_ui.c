@@ -14,6 +14,7 @@
 #include "item.h"
 #include "money.h"
 #include "mp.h"
+#include "mp_region.h"
 #include "script.h"
 #include "sound.h"
 #include "constants/items.h"
@@ -2494,7 +2495,9 @@ static void ArtScreen(void)
 static const char *const sSetNames[TCG_SET_COUNT] = {"COLOSSEUM", "EVOLUTION", "MYSTERY", "LABORATORY",
                                                      "BEGINNING POKeMON", "LEGENDARY POWER", "ISLAND OF FOSSIL",
                                                      "PSYCHIC BATTLE", "SKY-FLYING POKeMON", "WE ARE TEAM ROCKET",
-                                                     "TEAM ROCKET'S AMBITION"};
+                                                     "TEAM ROCKET'S AMBITION", "GYM HEROES", "GYM CHALLENGE",
+                                                     "NEO GENESIS", "NEO DISCOVERY", "NEO REVELATION", "NEO DESTINY",
+                                                     "EXPEDITION", "AQUAPOLIS", "SKYRIDGE"};
 /* A GB2 booster's face: its first holo Pokemon, else its rarest Pokemon */
 static unsigned PackMascot(unsigned pack)
 {
@@ -2503,6 +2506,17 @@ static unsigned PackMascot(unsigned pack)
     unsigned i, best = 0;
     if (pack < TCG_PACK_GB2)
         return first[pack];
+    if (pack >= TCG_PACK_REGIONAL)
+    {
+        /* (a regional set's first finished holo Pokemon) */
+        for (i = 1; i <= TCG_CARD_COUNT; i++)
+            if (Tcg_InPack(i, pack) && Tcg_Card(i)->kind == TCG_POKEMON && Tcg_IsHolo(i))
+                return i;
+        for (i = 1; i <= TCG_CARD_COUNT; i++)
+            if (Tcg_InPack(i, pack) && Tcg_Card(i)->kind == TCG_POKEMON)
+                return i;
+        return TCG_CARD_PIKACHU_LV12;
+    }
     for (i = 0; i < TCG_GB2_PACK_MAX && gTcgGb2PackCards[pack - TCG_PACK_GB2][i]; i++)
     {
         unsigned id = gTcgGb2PackCards[pack - TCG_PACK_GB2][i];
@@ -2519,14 +2533,19 @@ static unsigned PackMascot(unsigned pack)
 /* The name printed on a pack (the strip says the full name) */
 static const char *const sPackShort[TCG_PACK_TYPES] = {"COLOSSEUM", "EVOLUTION", "MYSTERY", "LABORATORY", "BEGINNING",
                                                      "LEGENDARY", "FOSSIL ISLE", "PSYCHIC", "SKY-FLYING", "TEAM ROCKET",
-                                                     "AMBITION"};
+                                                     "AMBITION", "GYM HEROES", "GYM CHALL.", "GENESIS", "DISCOVERY",
+                                                     "REVELATION", "DESTINY", "EXPEDITION", "AQUAPOLIS", "SKYRIDGE"};
 static void PackArt(int x, int y, unsigned pack, int focus)
 {
     static const unsigned colors[TCG_PACK_TYPES][2] = {
         {0xd04838, 0x801818}, {0x38a048, 0x185820}, {0x6048c0, 0x302070}, {0x3078c8, 0x183870},
         /* GB2's */
         {0xe8c030, 0x986810}, {0xd07028, 0x702808}, {0xa88858, 0x584020}, {0xb848a8, 0x581850},
-        {0x58a8e0, 0x205888}, {0x484858, 0x101018}, {0x903040, 0x300810}};
+        {0x58a8e0, 0x205888}, {0x484858, 0x101018}, {0x903040, 0x300810},
+        /* the regional sets' (Gym: KANTO's red and gold; Neo: JOHTO's; e-Card) */
+        {0xc83030, 0x582010}, {0x2860b0, 0x101850}, {0x30a0a0, 0x105050}, {0xb0a020, 0x585010},
+        {0x5878c8, 0x182858}, {0x383848, 0x080810}, {0x309058, 0x104020}, {0x2890c8, 0x084060},
+        {0xd06030, 0x602010}};
     const char *const *names = sPackShort;
     unsigned mascot = PackMascot(pack);
     int w = 44, h = 58, i;
@@ -2539,7 +2558,7 @@ static void PackArt(int x, int y, unsigned pack, int focus)
         G_FillA(x + i, y + h - 3, 1, 3, 0xd8d8e0, 255);
     }
     G_Card(mascot, (float)x + 7, (float)y + 6, 30, 42, 0, 255, 0);
-    if (pack >= TCG_PACK_GB2)
+    if (pack >= TCG_PACK_GB2 && pack < TCG_PACK_REGIONAL)
         G_Text(x + 2, y + 2, 0xfff0a0, 0x101010, "GB2", 0, TF_NARROW);   /* (the second Game Boy game's) */
     G_FillA(x, y + 47, w, 8, 0x101010, 150);
     G_TextAlign(x + w / 2, y + 45, TA_CENTER, G_WHITE, G_NO_SHADOW, names[pack], TF_NARROW);
@@ -2745,8 +2764,21 @@ enum
 static const char *const sBuyNames[BUY_COUNT] = {"COLOSSEUM PACK", "EVOLUTION PACK", "MYSTERY PACK", "LABORATORY PACK",
                                                  "BEGINNING PACK", "LEGENDARY PACK", "FOSSIL ISLE PACK", "PSYCHIC PACK",
                                                  "SKY-FLYING PACK", "TEAM ROCKET PACK", "AMBITION PACK",
+                                                 "GYM HEROES PACK", "GYM CHALLENGE PACK", "NEO GENESIS PACK",
+                                                 "NEO DISCOVERY PACK", "NEO REVELATION PACK", "NEO DESTINY PACK",
+                                                 "EXPEDITION PACK", "AQUAPOLIS PACK", "SKYRIDGE PACK",
                                                  "A CARD YOU PICK", "RARE CANDY", "PP UP", "MOEGATCHA TICKET"};
-static const unsigned sBuyCost[BUY_COUNT] = {40, 40, 40, 40, 40, 40, 40, 40, 40, 40, 40, 0, 20, 25, 30};
+static const unsigned sBuyCost[BUY_COUNT] = {40, 40, 40, 40, 40, 40, 40, 40, 40, 40, 40,
+                                             40, 40, 40, 40, 40, 40, 40, 40, 40, 0, 20, 25, 30};
+/* The counter's rows: the boosters sold in this region (today's everywhere, a region's own there), then the rest */
+static unsigned BuyRows(uint8_t rows[BUY_COUNT])
+{
+    unsigned k, n = 0;
+    for (k = 0; k < BUY_COUNT; k++)
+        if (k >= BUY_CARD || Tcg_PackSoldIn(k - BUY_PACK0, MP_Region_Current()))
+            rows[n++] = (uint8_t)k;
+    return n;
+}
 /* Cards with spare copies, for TRADE IN. */
 static unsigned SpareList(uint16_t *out)
 {
@@ -2785,7 +2817,7 @@ static const struct
     {MS_ACHIEVEMENT, 1, TCG_CARD_HUNGRY_SNORLAX, "PURE ENERGY", "Win a duel with a deck of one type", "cardmono"},
     {MS_SETS, 1, TCG_CARD_COOL_PORYGON, "1 SET", "Own every card of a booster set", NULL},
     {MS_SETS, 4, TCG_CARD_TOGEPI, "4 SETS", "Own every card of 4 booster sets", NULL},
-    {MS_SETS, TCG_SET_COUNT, TCG_CARD_MEWTWO_LV30, "ALL SETS", "Own every card of all 11 booster sets", NULL},
+    {MS_SETS, TCG_SET_COUNT, TCG_CARD_MEWTWO_LV30, "ALL SETS", "Own every card of all 20 booster sets", NULL},
 };
 #define MILESTONE_ROWS ARRAY_COUNT(sMilestonePromos)
 #define PRIZE_ROWS (TCG_SET_COUNT * 3 + 2 + MILESTONE_ROWS)
@@ -2821,6 +2853,8 @@ static const unsigned sSetPromos[TCG_SET_COUNT] = {TCG_CARD_MOLTRES_LV37, TCG_CA
                                                    TCG_CARD_IMAKUNI_CARD, TCG_CARD_PIKACHU_LV13, TCG_CARD_LUGIA,
                                                    TCG_CARD_OMASTAR_LV36, TCG_CARD_GRS_MEWTWO, TCG_CARD_DRAGONITE_LV43,
                                                    TCG_CARD_DARK_PERSIAN_ALT_LV28, TCG_CARD_HERE_COMES_TEAM_ROCKET};
+/* A set's 75% prize: the table's, else (the regional sets) its first holo Pokemon */
+static unsigned SetPromo(unsigned set) { return sSetPromos[set] ? sSetPromos[set] : PackMascot(set); }
 #define GYM_SWEEP_BIT (1u << 30)
 /* 0 not yet, 1 ready to claim, 2 done */
 static int PrizeState(unsigned row, char *what, size_t size)
@@ -2831,7 +2865,7 @@ static int PrizeState(unsigned row, char *what, size_t size)
         unsigned set = row / 3, step = row % 3, total, have = Tcg_SetOwned(c, set, &total);
         if (step == 2)
             snprintf(what, size, "%s 75%% (%u/%u): the promo card %s", sSetNames[set], have, total,
-                     Tcg_Card(sSetPromos[set])->name);
+                     Tcg_Card(SetPromo(set))->name);
         else
             snprintf(what, size, "%s %u%% (%u/%u): %s", sSetNames[set], 25 * (step + 1), have, total,
                      step ? "3 booster packs + 30 CP" : "2 booster packs");
@@ -2888,8 +2922,8 @@ static void ClaimPrize(unsigned row)
         }
         else
         {
-            AddCard(sSetPromos[set]);
-            Say(ACT_NONE, "You received the promo card %s!", Tcg_Card(sSetPromos[set])->name);
+            AddCard(SetPromo(set));
+            Say(ACT_NONE, "You received the promo card %s!", Tcg_Card(SetPromo(set))->name);
         }
     }
     else if (row > TCG_SET_COUNT * 3 && row <= TCG_SET_COUNT * 3 + MILESTONE_ROWS)
@@ -3055,23 +3089,30 @@ static void CounterLists(int tab)
     }
     else if (tab == 1)
     {
-        n = BUY_COUNT;
+        uint8_t buy[BUY_COUNT];
+        int sel;
+        n = (int)BuyRows(buy);
+        if (U.cursor >= n)
+            U.cursor = n - 1;
+        sel = buy[U.cursor];
         if (U.scroll > n - rows)
             U.scroll = n - rows;
+        if (U.scroll < 0)
+            U.scroll = 0;
         for (i = 0; i < rows && U.scroll + i < n; i++)
         {
-            int k = U.scroll + i;
+            int k = buy[U.scroll + i];
             if (k == BUY_CARD)
                 snprintf(right, sizeof(right), "5-15");
             else
                 snprintf(right, sizeof(right), "%u", sBuyCost[k]);
-            Row(LIST_X + 2, 8 + i * ROW_H, LIST_W - 4, k == U.cursor, k == BUY_CARD || c->dust >= sBuyCost[k],
+            Row(LIST_X + 2, 8 + i * ROW_H, LIST_W - 4, U.scroll + i == U.cursor, k == BUY_CARD || c->dust >= sBuyCost[k],
                 sBuyNames[k], right);
         }
-        Strip(0, U.cursor == BUY_CARD ? "Commons and uncommons, 5 or 15 CP. Rares: the GAME CENTER in RUSTBORO."
-                 : U.cursor < BUY_CARD ? "A booster pack of 10 cards from this set."
-                 : U.cursor == BUY_TICKET ? "One pull on any MOEGATCHA banner."
-                                          : "It goes into your BAG.");
+        Strip(0, sel == BUY_CARD ? "Commons and uncommons, 5 or 15 CP. Rares: the GAME CENTER in RUSTBORO."
+                 : sel < BUY_CARD ? "A booster pack of 10 cards from this set."
+                 : sel == BUY_TICKET ? "One pull on any MOEGATCHA banner."
+                                     : "It goes into your BAG.");
     }
     else
     {
@@ -3667,22 +3708,25 @@ static void CounterStep(unsigned pressed, int tab)
     }
     else if (tab == 1)
     {
-        MoveCursor(pressed, BUY_COUNT, 1);
+        uint8_t buy[BUY_COUNT];
+        int nb = (int)BuyRows(buy), k;
+        MoveCursor(pressed, nb, 1);
+        k = buy[U.cursor < nb ? U.cursor : nb - 1];
         if (pressed & KEY_A)
         {
-            if (U.cursor == BUY_CARD)
+            if (k == BUY_CARD)
             {
                 Screen(UI_BINDER);
                 U.filter = 9;
                 U.showAll = SHOP_BINDER;
             }
-            else if (c->dust < sBuyCost[U.cursor])
+            else if (c->dust < sBuyCost[k])
             {
                 PlaySE(SE_FAILURE);
-                Say(ACT_NONE, "You need %u CARD POINTS for that.", sBuyCost[U.cursor]);
+                Say(ACT_NONE, "You need %u CARD POINTS for that.", sBuyCost[k]);
             }
             else
-                Ask(ACT_BUY, U.cursor, "%s for %u CP?", sBuyNames[U.cursor], sBuyCost[U.cursor]);
+                Ask(ACT_BUY, k, "%s for %u CP?", sBuyNames[k], sBuyCost[k]);
         }
     }
     else

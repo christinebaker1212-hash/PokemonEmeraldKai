@@ -169,12 +169,43 @@ int Tcg_IsHolo(unsigned card)
             return 1;
     return 0;
 }
+unsigned Tcg_PackSet(unsigned pack)
+{
+    return pack < TCG_PACK_GB2 ? pack : pack < TCG_PACK_REGIONAL ? pack - TCG_PACK_GB2 + TCG_SET_GB2
+                                                                 : pack - TCG_PACK_REGIONAL + TCG_ORIGIN_GYM_HEROES;
+}
 int Tcg_InPack(unsigned card, unsigned pack)
 {
     const struct TcgCard *c = Tcg_Card(card);
-    unsigned set = pack < TCG_PACK_GB2 ? pack : pack - TCG_PACK_GB2 + TCG_SET_GB2;
-    return c && pack < TCG_PACK_TYPES && (c->set == set || (pack >= TCG_PACK_GB2 && c->set2 == set));
+    unsigned set = Tcg_PackSet(pack);
+    return c && pack < TCG_PACK_TYPES && (c->set == set || (pack >= TCG_PACK_GB2 && pack < TCG_PACK_REGIONAL && c->set2 == set));
 }
+int Tcg_PackSoldIn(unsigned pack, unsigned region)
+{
+    /* (REGION_HOENN 0, JOHTO 1, KANTO 2, SINNOH 3, UNOVA 4: include/mp_region.h) */
+    if (pack < TCG_PACK_REGIONAL)
+        return pack < TCG_PACK_TYPES;
+    if (pack < TCG_PACK_REGIONAL + 2)
+        return region == 2;
+    if (pack < TCG_PACK_REGIONAL + 6)
+        return region == 1;
+    return pack < TCG_PACK_TYPES && (region == 0 || region == 3 || region == 4);
+}
+static int SpecialBit(uint32_t lo, const uint32_t *hi, unsigned special)
+{
+    return special < 32 ? (lo >> special) & 1 : special < 128 ? (hi[special / 32 - 1] >> (special % 32)) & 1 : 0;
+}
+static void SetSpecialBit(uint32_t *lo, uint32_t *hi, unsigned special)
+{
+    if (special < 32)
+        *lo |= 1u << special;
+    else if (special < 128)
+        hi[special / 32 - 1] |= 1u << (special % 32);
+}
+int Tcg_SpecialBeaten(const struct TcgCollection *c, unsigned special) { return SpecialBit(c->specialBeaten, c->specialBeatenHi, special); }
+void Tcg_SetSpecialBeaten(struct TcgCollection *c, unsigned special) { SetSpecialBit(&c->specialBeaten, c->specialBeatenHi, special); }
+int Tcg_PromoGiven(const struct TcgCollection *c, unsigned special) { return SpecialBit(c->promoGiven, c->promoGivenHi, special); }
+void Tcg_SetPromoGiven(struct TcgCollection *c, unsigned special) { SetSpecialBit(&c->promoGiven, c->promoGivenHi, special); }
 /* A card sold in boosters (not a promo or a Basic Energy) */
 static int Boosted(const struct TcgCard *c) { return c && c->set != TCG_SET_PROMO && c->set != TCG_SET_ENERGY; }
 int Tcg_OpenPack(struct TcgCollection *c, unsigned pack, uint16_t result[10])
@@ -334,14 +365,18 @@ unsigned Tcg_SetOwned(const struct TcgCollection *c, unsigned set, unsigned *tot
 /* Milestone bits: the first game's sets in milestones (set * 3 + n), GB2's in milestonesHi ((set - 4) * 3 + n) */
 int Tcg_Milestone(const struct TcgCollection *c, unsigned set, unsigned n)
 {
-    return set < TCG_PACK_GB2 ? (c->milestones >> (set * 3 + n)) & 1 : (c->milestonesHi >> ((set - TCG_PACK_GB2) * 3 + n)) & 1;
+    return set < TCG_PACK_GB2       ? (c->milestones >> (set * 3 + n)) & 1
+           : set < TCG_PACK_REGIONAL ? (c->milestonesHi >> ((set - TCG_PACK_GB2) * 3 + n)) & 1
+                                     : (c->milestonesRegion >> ((set - TCG_PACK_REGIONAL) * 3 + n)) & 1;
 }
 void Tcg_SetMilestone(struct TcgCollection *c, unsigned set, unsigned n)
 {
     if (set < TCG_PACK_GB2)
         c->milestones |= 1u << (set * 3 + n);
-    else if (set < TCG_SET_COUNT)
+    else if (set < TCG_PACK_REGIONAL)
         c->milestonesHi |= 1u << ((set - TCG_PACK_GB2) * 3 + n);
+    else if (set < TCG_SET_COUNT)
+        c->milestonesRegion |= 1u << ((set - TCG_PACK_REGIONAL) * 3 + n);
 }
 unsigned Tcg_TakeMilestones(struct TcgCollection *c)
 {
@@ -536,7 +571,7 @@ void Tcg_RecordResult(struct TcgCollection *c, uint32_t key, int won, unsigned d
 #define OLD_PACKS 4
 /* 11: the regional sets' cards (TCG_CARD_COUNT; docs/TCG_REGIONS.md) */
 #define CARDS_IN(format) ((format) >= 11 ? TCG_CARD_COUNT : (format) >= 8 ? TCG_CARD_GB_COUNT : OLD_CARDS)
-#define PACKS_IN(format) ((format) >= 8 ? TCG_PACK_TYPES : OLD_PACKS)
+#define PACKS_IN(format) ((format) >= 11 ? TCG_PACK_TYPES : (format) >= 8 ? TCG_PACK_REGIONAL : OLD_PACKS)
 #define GC_BYTES(cards) (((cards) + 8) / 8)
 #define PAYLOAD_SIZE(format)                                                                                           \
     (CARDS_IN(format) * 2 + TCG_SAVED_DECKS * (TCG_NAME_LEN + TCG_DECK_SIZE * 2) + PACKS_IN(format) * 2 + 24)
@@ -555,11 +590,13 @@ void Tcg_RecordResult(struct TcgCollection *c, uint32_t key, int won, unsigned d
 #define EXTRA9_SIZE 4
 /* 10: each deck's tray color */
 #define EXTRA10_SIZE TCG_SAVED_DECKS
+/* 11: the regional boosters' milestones, the special trainers past 31 (beaten, promo given) */
+#define EXTRA11_SIZE (4 + 12 + 12)
 #define FILE_SIZE(format)                                                                                              \
     (12u + PAYLOAD_SIZE(format) + ((format) >= 3 ? EXTRA_SIZE : 0) + ((format) >= 4 ? EXTRA4_SIZE : 0) +               \
      ((format) >= 5 ? EXTRA5_SIZE(format) : 0) + ((format) >= 6 ? EXTRA6_SIZE(format) : 0) +                           \
      ((format) >= 7 ? EXTRA7_SIZE : 0) + ((format) >= 8 ? EXTRA8_SIZE : 0) + ((format) >= 9 ? EXTRA9_SIZE : 0) +      \
-     ((format) >= 10 ? EXTRA10_SIZE : 0))
+     ((format) >= 10 ? EXTRA10_SIZE : 0) + ((format) >= 11 ? EXTRA11_SIZE : 0))
 static uint32_t Crc(const unsigned char *bytes, size_t size)
 {
     uint32_t crc = ~0u;
@@ -695,6 +732,14 @@ int Tcg_CollectionLoad(struct TcgCollection *c, const char *path)
         if (format >= 10)
             for (i = 0; i < TCG_SAVED_DECKS; i++)
                 next.tray[i] = Get(&p, 1);
+        if (format >= 11)
+        {
+            next.milestonesRegion = Get(&p, 4);
+            for (i = 0; i < 3; i++)
+                next.specialBeatenHi[i] = Get(&p, 4);
+            for (i = 0; i < 3; i++)
+                next.promoGivenHi[i] = Get(&p, 4);
+        }
     }
     else if (next.optedIn)
         next.flags = TCG_FLAG_TUTORIAL | TCG_FLAG_CLUB_MET; /* they started before the CARD CLUB */
@@ -768,6 +813,11 @@ int Tcg_CollectionSave(const struct TcgCollection *c, const char *path)
     Put(&p, c->rewards, 4);
     for (i = 0; i < TCG_SAVED_DECKS; i++)
         Put(&p, c->tray[i], 1);
+    Put(&p, c->milestonesRegion, 4);
+    for (i = 0; i < 3; i++)
+        Put(&p, c->specialBeatenHi[i], 4);
+    for (i = 0; i < 3; i++)
+        Put(&p, c->promoGivenHi[i], 4);
     p = data;
     memcpy(p, "MTCG", 4);
     p += 4;

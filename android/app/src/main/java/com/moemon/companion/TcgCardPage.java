@@ -55,7 +55,7 @@ public final class TcgCardPage extends Page {
             art.text(c, head, (w - art.width(head)) / 2, y, 0xFFF8E070, 0xFF000000);
             y += 16;
             String kind = k.optInt("k") == Tcg.POKEMON ? (k.optInt("st") == 0 ? "BASIC" : "STAGE " + k.optInt("st"))
-                    + " " + Tcg.TYPE_NAMES[Math.min(6, k.optInt("t"))] + " POKéMON"
+                    + " " + Tcg.TYPE_NAMES[Math.min(Tcg.TYPES - 1, k.optInt("t"))] + " POKéMON"
                     + (k.optString("ef").isEmpty() ? "" : " (from " + k.optString("ef") + ")")
                     : k.optInt("k") == Tcg.ENERGY ? "ENERGY" : "TRAINER";
             y = para(c, w, y, kind, 0xFFC8D0E0);
@@ -66,7 +66,7 @@ public final class TcgCardPage extends Page {
                 JSONArray cc = a.optJSONArray("c");
                 // the cost as orbs, then the name and damage
                 int ox = 14;
-                for (int t = 0; cc != null && t < 7; t++) {
+                for (int t = 0; cc != null && t < Math.min(Tcg.TYPES, cc.length()); t++) {
                     for (int n = 0; n < cc.optInt(t); n++) {
                         ta.orb(c, t, ox, y + 7, 4.5f);
                         ox += 10;
@@ -82,8 +82,8 @@ public final class TcgCardPage extends Page {
                 cost.setLength(0);
             }
             if (k.optInt("k") == Tcg.POKEMON) {
-                String wk = "WEAKNESS " + (k.optInt("w") < 7 ? Tcg.TYPE_NAMES[k.optInt("w")] : "NONE") + "   RESISTANCE "
-                        + (k.optInt("r") < 7 ? Tcg.TYPE_NAMES[k.optInt("r")] : "NONE") + "   RETREAT " + k.optInt("rc");
+                String wk = "WEAKNESS " + (k.optInt("w") < Tcg.TYPES ? Tcg.TYPE_NAMES[k.optInt("w")] : "NONE") + "   RESISTANCE "
+                        + (k.optInt("r") < Tcg.TYPES ? Tcg.TYPE_NAMES[k.optInt("r")] : "NONE") + "   RETREAT " + k.optInt("rc");
                 y = para(c, w, y + 2, wk, 0xFFB8C8E8);
             } else if (!k.optString("txt").isEmpty()) {
                 y = para(c, w, y, k.optString("txt"), 0xFFC8D0E0);
