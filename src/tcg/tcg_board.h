@@ -53,4 +53,5 @@ int TcgBoard_Busy(void);   // the duel's events are playing: the buttons do noth
 void TcgBoard_EndHoldMusic(void);   // a won game going on to the cards to take: the victory song plays on
 void TcgBoard_ReleaseMusic(void);   // ...until this (the map's song again; nothing if none is held)
 void TcgBoard_DebugFocus(int kind, int index);
+void TcgBoard_Mock(int which);
 #endif

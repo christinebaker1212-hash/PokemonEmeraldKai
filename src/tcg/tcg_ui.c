@@ -5071,6 +5071,12 @@ void Tcg_Debug(const char *command)
         printf("[tcg] AI test: %u actions, phase %u, winner %u\n", steps, U.duel.phase, U.duel.winner);
         return;
     }
+    if (sscanf(command, "mock %u", &n) == 1)
+    {
+        /* Harness helper: the regional sets' table mock-ups (tcg_board.c TcgBoard_Mock) */
+        TcgBoard_Mock((int)n);
+        return;
+    }
     if (sscanf(command, "focus %u %u", &n, &m) == 2)
     {
         TcgBoard_DebugFocus((int)n, (int)m);

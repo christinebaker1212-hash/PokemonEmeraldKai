@@ -76,7 +76,11 @@ Total 1,158 set cards (about 1,100 attacks with effect text, 250 Pokémon Powers
    MAGIC's (docs/TCG_REGIONS_SCOPE.md: which cards fully play). The report exists (tools/tcg/regions/scope.py, matching
    wordings against today's catalogue): 2026-11-18, 305 of 1,251 cards play with today's effects; 946 wait on 899
    distinct wordings (798 attack texts, 271 Poke-Powers / Bodies, 187 Trainer / Energy rules), most of them single.
-4. Effects by families, tested on staged boards; the board's new zones (a Stadium, Tools: **mock-ups first**).
+4. Effects by families, tested on staged boards; the board's new zones (a Stadium, Tools: **mock-ups first**). The
+   board mock-up (2026-11-18, waiting for the user): docs/tcg_regions/board_mockup.png, drawn by the board's own code
+   (`mp cards mock 2`, tcg_board.c MockUnder / MockOver over a staged duel): the Stadium a plate on the centre line,
+   the turn's Supporter face up beside its player's Active, Tools tucked under their Pokemon, a BRN badge, Darkness /
+   Metal orbs.
 5. Per region: boosters, shops, NPC decks (built from the region's sets and today's), special trainers with their own
    decks and promos (UNOVA's too), CARD SCALING ratings rerun, the card guide rebuilt.
 6. Retroactive promos: a courier NPC brings each promo whose (newly special) trainer the save's card record shows as

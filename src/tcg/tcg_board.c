@@ -1267,6 +1267,66 @@ void TcgBoard_CheckDone(void)
     B.checkDone = 1;
 }
 /* Test harness: put the cursor on a target (0 hand, 1 yours, 2 theirs, 10 END). */
+/* Mock-ups of the regional sets' table (docs/TCG_REGIONS.md step 4, `mp cards mock N`): what a Stadium, a Supporter,
+ * a Pokemon Tool and Burned would look like, drawn by the board's own code over a staged duel. Not the rules. */
+static int sMock;
+void TcgBoard_Mock(int which) { sMock = which; }
+static void MockUnder(void)
+{
+    struct Rect r;
+    if (!sMock)
+        return;
+    /* a Pokemon Tool tucked under your Active Pokemon and a Benched one (the card's top edge peeks out) */
+    r = SlotRect(0, 0);
+    G_Card(TCG_CARD_PLUSPOWER, (float)(r.x + r.w - 11), (float)(r.y + 9), 20.0f, 28.0f, 0, 255, 0);
+    r = SlotRect(0, 1);
+    G_Card(TCG_CARD_PLUSPOWER, (float)(r.x + 3), (float)(r.y - 6), 14.0f, 19.0f, 0, 255, 0);
+}
+static void MockOver(void)
+{
+    if (!sMock)
+        return;
+    {
+        /* the Stadium in play: a plate on the centre line, both players' (A on it: the card up close) */
+        const char *name = "BROCK'S GYM";
+        int w = G_Measure(name, TF_NARROW) + 24, x = 140, y = 76;
+        G_RoundFill(x, y, w, 11, 0x284830, 230);
+        G_RoundFrame(x, y, w, 11, 0xd8c070, 255);
+        G_FillA(x + 3, y + 3, 14, 5, 0xd8c070, 255); /* (a card on its side) */
+        G_FillA(x + 4, y + 4, 12, 3, 0x8a6818, 255);
+        G_Text(x + 20, y, G_WHITE, 0x102010, name, 0, TF_NARROW);
+    }
+    {
+        /* the Supporter played this turn: beside its player's Active Pokemon until the turn ends */
+        G_Card(TCG_CARD_PROFESSOR_OAK, 145.0f, 89.0f, 20.0f, 28.0f, 0, 255, 0);
+        G_RoundFill(166, 99, G_Measure("SUPPORTER", TF_NARROW) + 4, 9, 0x2860a8, 255);
+        G_Text(168, 98, G_WHITE, 0x102850, "SUPPORTER", 0, TF_NARROW);
+    }
+    {
+        /* Darkness and Metal Energy orbs (on the Benched Pokemon after its Fire Energy), the other orbs' 5x5 */
+        static const unsigned orb[2][3] = {{0x404858, 0x7880a0, 0x181c28}, {0x98a0b0, 0xe0e4ec, 0x505868}};
+        struct Rect r = SlotRect(0, 1);
+        unsigned k;
+        for (k = 0; k < 2; k++)
+        {
+            int x = r.x + r.w + 3, y = r.y + 7 + (int)k * 6;
+            G_Fill(x + 1, y, 3, 1, 0x202020);
+            G_Fill(x, y + 1, 1, 3, 0x202020);
+            G_Fill(x + 4, y + 1, 1, 3, 0x202020);
+            G_Fill(x + 1, y + 4, 3, 1, 0x202020);
+            G_Fill(x + 1, y + 1, 3, 3, orb[k][0]);
+            G_Fill(x + 1, y + 1, 1, 1, orb[k][1]);
+            G_Fill(x + 3, y + 3, 1, 1, orb[k][2]);
+        }
+    }
+    if (sMock >= 2)
+    {
+        /* Burned, beside the other Special Conditions */
+        int x = 144 + G_StatusBadges(144, 46, 0, 0), w = G_Measure("BRN", TF_NARROW) + 4;
+        G_RoundFill(x, 46, w, 9, 0xd85020, 255);
+        G_Text(x + 2, 45, G_WHITE, 0x602010, "BRN", 0, TF_NARROW);
+    }
+}
 void TcgBoard_DebugFocus(int kind, int index)
 {
     B.focusKind = kind;
@@ -3734,6 +3794,7 @@ void TcgBoard_Render(void)
         DrawPile(who, DeckRect(who), shownDeck, 1);
         (void)p;
     }
+    MockUnder();
     DrawSprites(0);
     for (who = 0; who < 2; who++)
     {
@@ -3752,6 +3813,7 @@ void TcgBoard_Render(void)
         }
     }
     DrawOppHand();
+    MockOver();
     if (B.mode == M_TARGET)
     {
         /* Highlight every space the held card or choice can go. */
