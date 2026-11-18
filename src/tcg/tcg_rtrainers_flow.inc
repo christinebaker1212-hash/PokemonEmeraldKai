@@ -185,3 +185,39 @@ static unsigned RegionTrainerChoices(const struct TcgDuel *g, unsigned me, unsig
         *reason = "There is nothing that can be chosen.";
     return m->count;
 }
+/* The regional sets' used powers: what each asks for (tcg_rpowers.inc; the scripts' ops in tcg_script.inc) */
+static const struct TcgStep *RegionPowerSteps(unsigned power, int *count)
+{
+    switch (power)
+    {
+    case TCG_POWER_R_FRAGRANCE_TRAP:
+    case TCG_POWER_R_FRAGRANCE_TRAP_GYM:
+        STEPS({TCG_ST_OPP_SLOT, TCG_F_BENCH, 0, 0, 0, "If heads: bring out which of their Benched Pokemon?"});
+    case TCG_POWER_R_JET_STREAM:
+        STEPS({TCG_ST_PICK, TCG_F_ENERGY, TCG_SRC_DEFENDER_ATTACHED, TCG_MIN_ALL, 1, "If heads: discard which of its Energy?"});
+    case TCG_POWER_R_BEATING_WINGS:
+        STEPS({TCG_ST_MY_SLOT, TCG_F_BENCH, 0, 0, 0, "Shuffle which Benched Pokemon into your deck?"});
+    case TCG_POWER_R_ENERGY_RETURN:
+        STEPS({TCG_ST_PICK, TCG_F_ENERGY, TCG_SRC_MY_FIELD_ATTACHED, 1, 1, "Return which Energy to your hand?"});
+    case TCG_POWER_R_WATER_CYCLONE:
+        STEPS({TCG_ST_MY_SLOT, TCG_F_BENCH, 0, 0, 0, "Move a Water Energy to which Benched Pokemon?"});
+    case TCG_POWER_R_SUPER_DYNAMO:
+        STEPS({TCG_ST_MY_SLOT, TCG_F_OCCUPIED, 0, 0, 0, "If heads: attach a Lightning Energy to which Pokemon?"});
+    case TCG_POWER_R_FLOWER_SUPPLEMENT:
+        STEPS({TCG_ST_PICK, TCG_F_BASIC_ENERGY, TCG_SRC_HAND, 1, 1, "If heads: attach which basic Energy?"},
+              {TCG_ST_MY_SLOT, TCG_F_BENCH, 0, 0, 0, "To which Benched Pokemon?"});
+    case TCG_POWER_R_CARRY_OFF:
+        STEPS({TCG_ST_PICK, TCG_F_POKEMON_CARD, TCG_SRC_OPP_HAND, 1, 1, "If heads: shuffle which into their deck?"});
+    case TCG_POWER_R_GLARING_GAZE:
+        STEPS({TCG_ST_PICK, TCG_F_TRAINER, TCG_SRC_OPP_HAND, 1, 1, "If heads: shuffle which Trainer into their deck?"});
+    case TCG_POWER_R_ENERGY_CHARGE:
+        STEPS({TCG_ST_PICK, TCG_F_LIGHTNING_ENERGY, TCG_SRC_MY_FIELD_ATTACHED, 1, 1, "Move which Lightning Energy to it?"});
+    case TCG_POWER_R_ENERGY_JUMP:
+        STEPS({TCG_ST_PICK, TCG_F_ENERGY, TCG_SRC_MY_FIELD_ATTACHED, 1, 1, "Move which Energy?"},
+              {TCG_ST_MY_SLOT, TCG_F_OTHER_HOLDER, 0, 0, 0, "Move it to which Pokemon?"});
+    case TCG_POWER_R_ENERGY_CONNECT:
+        STEPS({TCG_ST_PICK, TCG_F_BASIC_ENERGY, TCG_SRC_MY_FIELD_ATTACHED, 1, 1, "Move which basic Energy to your Active?"});
+    }
+    *count = 0;
+    return sNoSteps;
+}

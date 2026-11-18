@@ -838,7 +838,7 @@ static int PowerAction(const struct TcgDuel *g, struct TcgAction *a)
     for (s = 0; s < TCG_FIELD_SIZE; s++)
     {
         unsigned power = TcgPower_Id(TcgDuel_Field(g, me, s));
-        if (power < TCG_POWER_FIRST_USED || TcgPower_Block(g, me, s))
+        if (!TcgPower_IsUsed(power) || TcgPower_Block(g, me, s))
             continue;
         memset(a, 0, sizeof(*a));
         a->type = TCG_USE_POWER;
@@ -1007,6 +1007,10 @@ static int PowerAction(const struct TcgDuel *g, struct TcgAction *a)
             }
             break;
         }
+        default:
+            if (power >= TCG_POWER_REGION_FIRST && RegionPowerAi(g, a, s, power) && Legal(g, a))
+                return 1;
+            break;
         }
     }
     memset(a, 0, sizeof(*a));
@@ -1135,7 +1139,8 @@ static int Act(const struct TcgDuel *g, struct TcgAction *a)
                 int score;
                 if (!c || c->kind != TCG_POKEMON || !EnergyHelps(g, g->current, s, energy))
                     continue;
-                if (Tcg_EnergyRule(energy->id) == TCG_ER_BOOST && g->players[g->current].field[s].stackSize < 2)
+                if ((Tcg_EnergyRule(energy->id) == TCG_ER_BOOST && g->players[g->current].field[s].stackSize < 2) ||
+                    TcgPower_AttachBlock(g, g->current, s, energy->id))
                     continue;
                 score = s == 0 ? 40 : 0;
                 /* (Darkness Energy hurts a Pokemon that isn't Dark; Metal Energy weakens one that isn't Metal) */

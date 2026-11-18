@@ -2749,7 +2749,7 @@ int TcgBoard_Step(unsigned pressed, unsigned held, struct TcgAction *out, unsign
             }
             if (B.flow == FLOW_POWER)
             {
-                if (B.step == 0)
+                if (TcgFlow_PowerSlotIsTarget(B.steps, B.step))
                     B.action.target = (uint8_t)B.focusIndex;
                 else
                     B.action.attack = (uint8_t)B.focusIndex;

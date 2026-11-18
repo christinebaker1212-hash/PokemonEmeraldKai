@@ -29,6 +29,8 @@
  *             ddmg / dnodmg the Defending Pokemon Poisoned / Burned / damaged / not damaged | eqe / neqe it and
  *             the Defending have (not) the same number of Energy cards */
 #define SCRIPT_TOKEN 48
+/* Which of the player's Pokemon "it" is: the attacker (0), or a Pokemon whose power runs a script (tcg_powers.c) */
+static unsigned sScriptSelf;
 struct ScriptOp
 {
     char cond[8], name[12];
@@ -103,7 +105,7 @@ static int ScriptCond(const struct TcgDuel *g, const char *cond)
     if (!strncmp(cond, "ge", 2))
         return heads >= (unsigned)atoi(cond + 2);
     if (!strncmp(cond, "sc", 2) && cond[2] >= '0' && cond[2] <= '9')
-        return g->players[g->current].field[0].damage / 10 >= (unsigned)atoi(cond + 2);
+        return g->players[g->current].field[sScriptSelf].damage / 10 >= (unsigned)atoi(cond + 2);
     if (!strcmp(cond, "dpsn"))
         return foe->poison != 0;
     if (!strcmp(cond, "dbrn"))
@@ -150,7 +152,7 @@ static int ScriptRun(struct TcgDuel *g, const char *script, const struct TcgAtta
                      unsigned *damage, int after)
 {
     struct TcgPlayer *p = &g->players[g->current], *op = &g->players[g->current ^ 1];
-    struct TcgFieldCard *self = &p->field[0], *foe = &op->field[0];
+    struct TcgFieldCard *self = &p->field[sScriptSelf], *foe = &op->field[0];
     unsigned me = g->current, them = g->current ^ 1, s;
     int blocked = g->foeImmune == TCG_IMMUNE_YES;
     struct ScriptOp o;
@@ -174,7 +176,7 @@ static int ScriptRun(struct TcgDuel *g, const char *script, const struct TcgAtta
         }
         else if (ScriptIs(&o, "ce"))
         {
-            unsigned n = ScriptEnergyOf(g, me, 0, x);
+            unsigned n = ScriptEnergyOf(g, me, sScriptSelf, x);
             ScriptFlip(g, o.args > 1 && n > (unsigned)y ? (unsigned)y : n);
         }
         else if (ScriptIs(&o, "cdc"))
@@ -204,7 +206,7 @@ static int ScriptRun(struct TcgDuel *g, const char *script, const struct TcgAtta
             *damage += (unsigned)x * (foe->damage / 10);
         else if (ScriptIs(&o, "adde"))
         {
-            unsigned n = ScriptEnergyOf(g, me, 0, x);
+            unsigned n = ScriptEnergyOf(g, me, sScriptSelf, x);
             if (o.args > 2 && n > (unsigned)z)
                 n = (unsigned)z;
             *damage += (unsigned)y * n;
@@ -227,14 +229,14 @@ static int ScriptRun(struct TcgDuel *g, const char *script, const struct TcgAtta
         else if (ScriptIs(&o, "dsx"))
         {
             /* discard them "or this attack does nothing" */
-            unsigned have = ScriptEnergyOf(g, me, 0, x);
+            unsigned have = ScriptEnergyOf(g, me, sScriptSelf, x);
             if (!have || (y && have < (unsigned)y))
             {
                 *damage = 0;
                 g->attackFailed = 1;
                 return TCG_OK;
             }
-            DiscardEnergy(g, me, 0, x >= TCG_TYPES ? ANY_TYPE : (unsigned)x, (unsigned)y);
+            DiscardEnergy(g, me, sScriptSelf, x >= TCG_TYPES ? ANY_TYPE : (unsigned)x, (unsigned)y);
         }
         else if (ScriptIs(&o, "dse"))
         {
@@ -250,7 +252,7 @@ static int ScriptRun(struct TcgDuel *g, const char *script, const struct TcgAtta
                     p->discard[p->discardSize++] = TcgPile_Remove(self->attached, &self->attachedSize, (unsigned)i);
                 }
             }
-            else if (!DiscardEnergy(g, me, 0, x >= TCG_TYPES ? ANY_TYPE : (unsigned)x, (unsigned)y))
+            else if (!DiscardEnergy(g, me, sScriptSelf, x >= TCG_TYPES ? ANY_TYPE : (unsigned)x, (unsigned)y))
                 return TCG_INVALID;
         }
         /* after the damage */
@@ -272,11 +274,11 @@ static int ScriptRun(struct TcgDuel *g, const char *script, const struct TcgAtta
             if (self->stackSize)
             {
                 self->damage += (uint16_t)(x * 10);
-                TcgDuel_Event(g, TCG_EV_DAMAGE, me, 0, (unsigned)x * 10, 0, TCG_DMG_SELF);
+                TcgDuel_Event(g, TCG_EV_DAMAGE, me, sScriptSelf, (unsigned)x * 10, 0, TCG_DMG_SELF);
             }
         }
         else if (ScriptIs(&o, "heal"))
-            Heal(g, me, 0, (unsigned)x * 10);
+            Heal(g, me, sScriptSelf, (unsigned)x * 10);
         else if (ScriptIs(&o, "healall"))
         {
             for (s = 0; s < TCG_FIELD_SIZE; s++)
@@ -370,7 +372,7 @@ static int ScriptRun(struct TcgDuel *g, const char *script, const struct TcgAtta
                 if (c->kind != TCG_ENERGY || c->id > 6 || (x < TCG_TYPES && c->type != (unsigned)x))
                     continue;
                 self->attached[self->attachedSize++] = TcgPile_Remove(p->discard, &p->discardSize, k - 1);
-                TcgDuel_Event(g, TCG_EV_ATTACH, me, 0, 0, p->cards[self->attached[self->attachedSize - 1]], 0);
+                TcgDuel_Event(g, TCG_EV_ATTACH, me, sScriptSelf, 0, p->cards[self->attached[self->attachedSize - 1]], 0);
                 n++;
             }
         }
@@ -383,13 +385,13 @@ static int ScriptRun(struct TcgDuel *g, const char *script, const struct TcgAtta
                 if (c->kind != TCG_ENERGY || c->id > 6 || (x < TCG_TYPES && c->type != (unsigned)x))
                     continue;
                 self->attached[self->attachedSize++] = TcgPile_Remove(p->deck, &p->deckSize, k - 1);
-                TcgDuel_Event(g, TCG_EV_ATTACH, me, 0, 0, p->cards[self->attached[self->attachedSize - 1]], 0);
+                TcgDuel_Event(g, TCG_EV_ATTACH, me, sScriptSelf, 0, p->cards[self->attached[self->attachedSize - 1]], 0);
                 n++;
             }
             TcgDuel_Shuffle(g, me);
         }
         else if (ScriptIs(&o, "dsa"))
-            DiscardEnergy(g, me, 0, x >= TCG_TYPES ? ANY_TYPE : (unsigned)x, (unsigned)y);
+            DiscardEnergy(g, me, sScriptSelf, x >= TCG_TYPES ? ANY_TYPE : (unsigned)x, (unsigned)y);
         else if (ScriptIs(&o, "vuln"))
         {
             if (!blocked && foe->stackSize)
@@ -406,16 +408,161 @@ static int ScriptRun(struct TcgDuel *g, const char *script, const struct TcgAtta
                 (x >= TCG_TYPES || CardAt(g, me, p->deck[i])->type == (unsigned)x))
             {
                 self->attached[self->attachedSize++] = TcgPile_Remove(p->deck, &p->deckSize, (unsigned)i);
-                TcgDuel_Event(g, TCG_EV_ATTACH, me, 0, 0, p->cards[self->attached[self->attachedSize - 1]], 0);
+                TcgDuel_Event(g, TCG_EV_ATTACH, me, sScriptSelf, 0, p->cards[self->attached[self->attachedSize - 1]], 0);
             }
             TcgDuel_Shuffle(g, me);
         }
         else if (ScriptIs(&o, "draw"))
-            TcgDuel_Event(g, TCG_EV_DRAW, me, 0, TcgDuel_Draw(g, me, (unsigned)x), 0, 0);
+            TcgDuel_Event(g, TCG_EV_DRAW, me, sScriptSelf, TcgDuel_Draw(g, me, (unsigned)x), 0, 0);
         else if (ScriptIs(&o, "notr"))
             op->noTrainers = 1;
         else if (ScriptIs(&o, "nosup"))
             op->noSupporters = 1;
+        /* the regional powers' ops ("it": the Pokemon using the power) */
+        else if (ScriptIs(&o, "curea"))
+        {
+            p->field[0].condition = TCG_HEALTHY;
+            p->field[0].poison = p->field[0].burned = 0;
+            TcgDuel_Event(g, TCG_EV_STATUS, me, 0, TCG_HEALTHY, 0, 0);
+        }
+        else if (ScriptIs(&o, "bco"))
+        {
+            for (s = 1; s < TCG_FIELD_SIZE; s++)
+                if (op->field[s].stackSize)
+                {
+                    op->field[s].damage += (uint16_t)(x * 10);
+                    TcgDuel_Event(g, TCG_EV_DAMAGE, them, s, (unsigned)x * 10, 0, 0);
+                }
+        }
+        else if (ScriptIs(&o, "hit"))
+        {
+            /* x to the Defending Pokemon, Weakness and Resistance applied */
+            int amount = x;
+            unsigned type = TcgDuel_Type(g, me, sScriptSelf);
+            if (foe->stackSize)
+            {
+                if (TcgDuel_Weakness(g, them, 0) == type)
+                    amount *= 2;
+                if (TcgDuel_Resistance(g, them, 0) == type)
+                    amount -= 30;
+                if (amount > 0)
+                {
+                    foe->damage += (uint16_t)amount;
+                    TcgDuel_Event(g, TCG_EV_DAMAGE, them, 0, (unsigned)amount, 0, 0);
+                }
+            }
+        }
+        else if (ScriptIs(&o, "endturn"))
+            g->turnOver = 1;
+        else if (ScriptIs(&o, "selfhand") || ScriptIs(&o, "benchdeck"))
+        {
+            /* it (or the Benched Pokemon chosen) and its cards back to the hand / into the deck */
+            unsigned slot = ScriptIs(&o, "selfhand") ? sScriptSelf : action->target, k;
+            struct TcgFieldCard *f;
+            if (ScriptIs(&o, "benchdeck") && !ValidTarget(g, me, slot, 1))
+                return TCG_INVALID;
+            f = &p->field[slot];
+            for (k = 0; k < f->stackSize + f->attachedSize; k++)
+            {
+                uint8_t card = k < f->stackSize ? f->stack[k] : f->attached[k - f->stackSize];
+                if (slot == sScriptSelf)
+                    p->hand[p->handSize++] = card;
+                else
+                    p->deck[p->deckSize++] = card;
+            }
+            memset(f, 0, sizeof(*f));
+            if (slot != sScriptSelf)
+                TcgDuel_Shuffle(g, me);
+            TcgDuel_Event(g, TCG_EV_DECK_CHANGED, me, 0, 0, 0, 0);
+        }
+        else if (ScriptIs(&o, "plunge"))
+        {
+            /* the Active's Energy onto it, then it switches in */
+            unsigned k;
+            for (k = p->field[0].attachedSize; k > 0; k--)
+                if (CardAt(g, me, p->field[0].attached[k - 1])->kind == TCG_ENERGY)
+                    self->attached[self->attachedSize++] = TcgPile_Remove(p->field[0].attached, &p->field[0].attachedSize, k - 1);
+            if (sScriptSelf)
+                Switch(g, me, sScriptSelf);
+        }
+        else if (ScriptIs(&o, "ehand") || ScriptIs(&o, "emove"))
+        {
+            /* the Energy card picked, from one of yours: to the hand (ehand); onto the one chosen (emove 0), Lightning
+             * from the Bench onto it (emove 1), basic from the Bench onto the Active (emove 2) */
+            unsigned from = TCG_FIELD_SIZE, to = !x ? action->target : x == 1 ? sScriptSelf : 0, k;
+            int at = -1;
+            const struct TcgCard *e;
+            for (k = 0; k < TCG_FIELD_SIZE && at < 0; k++)
+                if ((at = Picked(action, 0, p->field[k].attached, p->field[k].attachedSize)) >= 0)
+                    from = k;
+            if (at < 0 || !(e = CardAt(g, me, p->field[from].attached[at])) || e->kind != TCG_ENERGY)
+                return TCG_INVALID;
+            if (ScriptIs(&o, "ehand"))
+                p->hand[p->handSize++] = TcgPile_Remove(p->field[from].attached, &p->field[from].attachedSize, (unsigned)at);
+            else
+            {
+                if (to >= TCG_FIELD_SIZE || !p->field[to].stackSize || to == from || (x && !from) ||
+                    (x == 1 && e->id != TCG_CARD_LIGHTNING_ENERGY) || (x == 2 && e->id > 6))
+                    return TCG_INVALID;
+                p->field[to].attached[p->field[to].attachedSize++] =
+                    TcgPile_Remove(p->field[from].attached, &p->field[from].attachedSize, (unsigned)at);
+                TcgDuel_Event(g, TCG_EV_ATTACH, me, to, 0, e->id, 0);
+            }
+        }
+        else if (ScriptIs(&o, "wmove"))
+        {
+            /* a Water Energy from the Active onto the Benched Pokemon chosen */
+            unsigned k;
+            if (!ValidTarget(g, me, action->target, 1))
+                return TCG_INVALID;
+            for (k = 0; k < p->field[0].attachedSize; k++)
+                if (CardAt(g, me, p->field[0].attached[k])->id == TCG_CARD_WATER_ENERGY)
+                {
+                    struct TcgFieldCard *t = &p->field[action->target];
+                    t->attached[t->attachedSize++] = TcgPile_Remove(p->field[0].attached, &p->field[0].attachedSize, k);
+                    TcgDuel_Event(g, TCG_EV_ATTACH, me, action->target, 0, TCG_CARD_WATER_ENERGY, 0);
+                    break;
+                }
+        }
+        else if (ScriptIs(&o, "attdto") || ScriptIs(&o, "handto"))
+        {
+            /* a basic Energy of type x from the discard pile (attdto) / the one picked in the hand (handto) onto the
+             * Pokemon chosen (handto: Benched) */
+            struct TcgFieldCard *t;
+            int at = -1;
+            unsigned k;
+            if (!ValidTarget(g, me, action->target, ScriptIs(&o, "handto")))
+                return TCG_INVALID;
+            t = &p->field[action->target];
+            if (ScriptIs(&o, "handto"))
+            {
+                at = Picked(action, 0, p->hand, p->handSize);
+                if (at < 0 || CardAt(g, me, p->hand[at])->id > 6)
+                    return TCG_INVALID;
+                t->attached[t->attachedSize++] = TcgPile_Remove(p->hand, &p->handSize, (unsigned)at);
+            }
+            else
+            {
+                for (k = p->discardSize; k > 0 && at < 0; k--)
+                    if (CardAt(g, me, p->discard[k - 1])->id <= 6 && CardAt(g, me, p->discard[k - 1])->type == (unsigned)x)
+                        at = (int)k - 1;
+                if (at < 0)
+                    continue;
+                t->attached[t->attachedSize++] = TcgPile_Remove(p->discard, &p->discardSize, (unsigned)at);
+            }
+            TcgDuel_Event(g, TCG_EV_ATTACH, me, action->target, 0, p->cards[t->attached[t->attachedSize - 1]], 0);
+        }
+        else if (ScriptIs(&o, "ohdeck"))
+        {
+            /* the card picked from their hand (looked at) into their deck */
+            int at = Picked(action, 0, op->hand, op->handSize);
+            if (at >= 0)
+            {
+                op->deck[op->deckSize++] = TcgPile_Remove(op->hand, &op->handSize, (unsigned)at);
+                TcgDuel_Shuffle(g, them);
+                TcgDuel_Event(g, TCG_EV_DECK_CHANGED, them, 0, 0, 0, 0);
+            }
+        }
         else if (ScriptIs(&o, "mill"))
         {
             /* each player discards the top x cards of their deck */

@@ -1,6 +1,7 @@
 #ifndef MOEMON_TCG_DUEL_H
 #define MOEMON_TCG_DUEL_H
 #include "tcg/tcg.h"
+#include "tcg/region_powers.h"
 #define TCG_FIELD_SIZE 6
 #define TCG_LOG_LINES 12
 #define TCG_LOG_WIDTH 160
@@ -177,6 +178,12 @@ enum TcgPowerId
     TCG_POWER_HELPING_HAND,
     TCG_POWER_EVOLUTIONARY_LIGHT,
     TCG_POWER_SPECIAL_DELIVERY,
+    /* the regional sets' (include/tcg/region_powers.h, from tools/tcg/regions/powers.py) */
+    TCG_POWER_REGION_FIRST,
+    TCG_POWER_REGION_BEFORE = TCG_POWER_REGION_FIRST - 1,
+#define TCG_RP_ENUM(id, name, used, flags, script) TCG_POWER_##id,
+    TCG_REGION_POWERS(TCG_RP_ENUM)
+#undef TCG_RP_ENUM
     TCG_POWER_COUNT
 };
 #define TCG_POWER_FIRST_USED TCG_POWER_SOLAR_POWER
@@ -428,6 +435,20 @@ int TcgDuel_AttackEffect(struct TcgDuel *g, const struct TcgAttack *attack, cons
  * (Shift), what to look at (Peek, TCG_PEEK_*). */
 int TcgDuel_Power(struct TcgDuel *g, const struct TcgAction *action);
 unsigned TcgPower_Id(const struct TcgCard *c);
+/* Is it used during its owner's turn (TCG_USE_POWER), rather than working on its own? */
+int TcgPower_IsUsed(unsigned power);
+/* A regional power's flags (region_powers.h: 1 once a turn, 2 only Active, 4 only Benched, 8 works while Asleep)
+ * and script (NULL: its rules are C) */
+unsigned TcgPower_Flags(unsigned power);
+const char *TcgPower_Script(unsigned power);
+/* Run a power's script with "it" the Pokemon in that slot (tcg_effects.c) */
+int TcgDuel_RunPowerScript(struct TcgDuel *g, unsigned slot, const char *script, const struct TcgAction *action);
+/* The regional powers' hooks (tcg_rpowers.inc): can that Energy card be attached from the hand; after it was; the
+ * type (and how much: *amount) an Energy on that Pokemon provides; an opponent's attack damaged it */
+int TcgPower_AttachBlock(const struct TcgDuel *g, unsigned player, unsigned slot, unsigned energy);
+void TcgPower_AfterAttach(struct TcgDuel *g, unsigned player, unsigned slot, unsigned physical);
+unsigned TcgPower_EnergyType(const struct TcgDuel *g, unsigned player, unsigned slot, unsigned type, unsigned *amount);
+void TcgPower_Damaged(struct TcgDuel *g, unsigned player, unsigned slot, unsigned damage);
 const char *TcgPower_Name(unsigned power);
 /* The power of the Pokemon in that slot, if it works now (Toxic Gas, Asleep / Confused /
  * Paralyzed), else TCG_POWER_NONE. */

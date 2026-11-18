@@ -2881,7 +2881,7 @@ const struct TcgCard gTcgCards[TCG_CARD_COUNT + 1] = {
 {.name="",.description="",.effect="NONE",.animation="ATK_ANIM_NONE",.cost={0},.damage=0,.category=TCG_DAMAGE_NORMAL},
 }
 },
-[450] = {.id=450, .name="Lt. Surge's Magneton", .kind=TCG_POKEMON, .type=2, .rarity=2, .set=13, .set2=255, .dark=0, .holo=1, .flags=TCG_CF_OWNER, .origin=13,
+[450] = {.id=450, .name="Lt. Surge's Magneton", .kind=TCG_POKEMON, .type=2, .rarity=2, .set=13, .set2=255, .dark=0, .holo=1, .flags=TCG_CF_OWNER|TCG_CF_READY, .origin=13,
 .hp=70, .stage=1, .species=82, .level=30, .retreat=2, .weakness=4, .resistance=255, .evolvesFrom="Lt. Surge's Magnemite", .description="", .attacks={
 {.name="Energy Charge",.description="As often as you like during your turn (before your attack), if Lt. Surge's Magneton is your Active Pokemon, you may take 1 Lightning Energy card attached to 1 of your Pokemon and attach it to Lt. Surge's Magneton. This power can't be used if Lt. Surge's Magneton is Asleep, Confused, or Paralyzed.",.effect="gym1-8:p",.animation="ATK_ANIM_HIT",.cost={0,0,0,0,0,0,0,0,0},.damage=0,.category=TCG_POKEMON_POWER},
 {.name="Mega Shock",.description="Flip a coin. If tails, Lt. Surge's Magneton does 20 damage to itself.",.effect="gym1-8:a0",.animation="ATK_ANIM_HIT",.cost={0,0,3,0,0,0,1,0,0},.damage=50,.category=TCG_DAMAGE_NORMAL},
@@ -2987,7 +2987,7 @@ const struct TcgCard gTcgCards[TCG_CARD_COUNT + 1] = {
 {.name="",.description="",.effect="NONE",.animation="ATK_ANIM_NONE",.cost={0},.damage=0,.category=TCG_DAMAGE_NORMAL},
 }
 },
-[468] = {.id=468, .name="Erika's Victreebel", .kind=TCG_POKEMON, .type=1, .rarity=2, .set=13, .set2=255, .dark=0, .holo=0, .flags=TCG_CF_OWNER, .origin=13,
+[468] = {.id=468, .name="Erika's Victreebel", .kind=TCG_POKEMON, .type=1, .rarity=2, .set=13, .set2=255, .dark=0, .holo=0, .flags=TCG_CF_OWNER|TCG_CF_READY, .origin=13,
 .hp=80, .stage=2, .species=71, .level=37, .retreat=2, .weakness=0, .resistance=255, .evolvesFrom="Erika's Weepinbell", .description="", .attacks={
 {.name="Fragrance Trap",.description="Once during your turn (before your attack), you may flip a coin. If heads, and if your opponent has any Benched Pokemon, choose 1 of them and switch it with his or her Active Pokemon. This power can't be used if Erika's Victreebel is Asleep, Confused, or Paralyzed.",.effect="gym1-26:p",.animation="ATK_ANIM_HIT",.cost={0,0,0,0,0,0,0,0,0},.damage=0,.category=TCG_POKEMON_POWER},
 {.name="Razor Leaf",.description="",.effect="NONE",.animation="ATK_ANIM_HIT",.cost={0,3,0,0,0,0,0,0,0},.damage=50,.category=TCG_DAMAGE_NORMAL},
@@ -3008,7 +3008,7 @@ const struct TcgCard gTcgCards[TCG_CARD_COUNT + 1] = {
 {.name="",.description="",.effect="NONE",.animation="ATK_ANIM_NONE",.cost={0},.damage=0,.category=TCG_DAMAGE_NORMAL},
 }
 },
-[471] = {.id=471, .name="Misty's Cloyster", .kind=TCG_POKEMON, .type=3, .rarity=2, .set=13, .set2=255, .dark=0, .holo=0, .flags=TCG_CF_OWNER, .origin=13,
+[471] = {.id=471, .name="Misty's Cloyster", .kind=TCG_POKEMON, .type=3, .rarity=2, .set=13, .set2=255, .dark=0, .holo=0, .flags=TCG_CF_OWNER|TCG_CF_READY, .origin=13,
 .hp=70, .stage=1, .species=91, .level=30, .retreat=2, .weakness=2, .resistance=255, .evolvesFrom="Misty's Shellder", .description="", .attacks={
 {.name="Shell Armor",.description="You may reduce all damage done by attacks to Misty's Cloyster by 10 (after applying Weakness and Resistance). (Any other effects of attacks still happen). This power can't be used if Misty's Cloyster is Asleep, Confused, or Paralyzed.",.effect="gym1-29:p",.animation="ATK_ANIM_HIT",.cost={0,0,0,0,0,0,0,0,0},.damage=0,.category=TCG_POKEMON_POWER},
 {.name="Triple Cannon",.description="Flip 3 coins. This attack does 20 damage times the number of heads.",.effect="gym1-29:a0",.animation="ATK_ANIM_HIT",.cost={0,0,0,2,0,0,1,0,0},.damage=20,.category=TCG_DAMAGE_X},
@@ -3036,7 +3036,7 @@ const struct TcgCard gTcgCards[TCG_CARD_COUNT + 1] = {
 {.name="",.description="",.effect="NONE",.animation="ATK_ANIM_NONE",.cost={0},.damage=0,.category=TCG_DAMAGE_NORMAL},
 }
 },
-[475] = {.id=475, .name="Rocket's Snorlax", .kind=TCG_POKEMON, .type=6, .rarity=2, .set=13, .set2=255, .dark=0, .holo=0, .flags=TCG_CF_OWNER, .origin=13,
+[475] = {.id=475, .name="Rocket's Snorlax", .kind=TCG_POKEMON, .type=6, .rarity=2, .set=13, .set2=255, .dark=0, .holo=0, .flags=TCG_CF_OWNER|TCG_CF_READY, .origin=13,
 .hp=90, .stage=0, .species=143, .level=40, .retreat=4, .weakness=4, .resistance=5, .evolvesFrom="", .description="", .attacks={
 {.name="Restless Sleep",.description="If your opponent's attack does damage to Rocket's Snorlax and Rocket's Snorlax is already Asleep (even if it's Knocked Out), this power does 20 damage to the attacking Pokemon.",.effect="gym1-33:p",.animation="ATK_ANIM_HIT",.cost={0,0,0,0,0,0,0,0,0},.damage=0,.category=TCG_POKEMON_POWER},
 {.name="Collapse",.description="Rocket's Snorlax is now Asleep (after doing damage).",.effect="gym1-33:a0",.animation="ATK_ANIM_HIT",.cost={0,0,0,0,0,0,3,0,0},.damage=20,.category=TCG_DAMAGE_NORMAL},
@@ -3099,7 +3099,7 @@ const struct TcgCard gTcgCards[TCG_CARD_COUNT + 1] = {
 {.name="",.description="",.effect="NONE",.animation="ATK_ANIM_NONE",.cost={0},.damage=0,.category=TCG_DAMAGE_NORMAL},
 }
 },
-[484] = {.id=484, .name="Erika's Dratini", .kind=TCG_POKEMON, .type=6, .rarity=1, .set=13, .set2=255, .dark=0, .holo=0, .flags=TCG_CF_OWNER, .origin=13,
+[484] = {.id=484, .name="Erika's Dratini", .kind=TCG_POKEMON, .type=6, .rarity=1, .set=13, .set2=255, .dark=0, .holo=0, .flags=TCG_CF_OWNER|TCG_CF_READY, .origin=13,
 .hp=40, .stage=0, .species=147, .level=14, .retreat=1, .weakness=255, .resistance=5, .evolvesFrom="", .description="", .attacks={
 {.name="Strange Barrier",.description="Whenever an attack by a Basic Pokemon (including your own) does 20 or more damage to Erika's Dratini (after applying Weakness and Resistance), reduce that damage to 10. (Any other effects of attacks still happen.) This power stops working while Erika's Dratini is Asleep, Confused, or Paralyzed.",.effect="gym1-42:p",.animation="ATK_ANIM_HIT",.cost={0,0,0,0,0,0,0,0,0},.damage=0,.category=TCG_POKEMON_POWER},
 {.name="Tail Strike",.description="Flip a coin. If heads, this attack does 10 damage plus 20 more damage; if tails, this attack does 10 damage.",.effect="gym1-42:a0",.animation="ATK_ANIM_HIT",.cost={0,0,0,0,0,0,2,0,0},.damage=10,.category=TCG_DAMAGE_PLUS},
@@ -3134,7 +3134,7 @@ const struct TcgCard gTcgCards[TCG_CARD_COUNT + 1] = {
 {.name="",.description="",.effect="NONE",.animation="ATK_ANIM_NONE",.cost={0},.damage=0,.category=TCG_DAMAGE_NORMAL},
 }
 },
-[489] = {.id=489, .name="Erika's Oddish", .kind=TCG_POKEMON, .type=1, .rarity=1, .set=13, .set2=255, .dark=0, .holo=0, .flags=TCG_CF_OWNER, .origin=13,
+[489] = {.id=489, .name="Erika's Oddish", .kind=TCG_POKEMON, .type=1, .rarity=1, .set=13, .set2=255, .dark=0, .holo=0, .flags=TCG_CF_OWNER|TCG_CF_READY, .origin=13,
 .hp=40, .stage=0, .species=43, .level=12, .retreat=1, .weakness=0, .resistance=255, .evolvesFrom="", .description="", .attacks={
 {.name="Photosynthesis",.description="All Energy cards attached to Erika's Oddish provide Grass Energy instead of their usual type. This power works even while Erika's Oddish is Asleep, Confused, or Paralyzed.",.effect="gym1-47:p",.animation="ATK_ANIM_HIT",.cost={0,0,0,0,0,0,0,0,0},.damage=0,.category=TCG_POKEMON_POWER},
 {.name="Poisonpowder",.description="Flip a coin. If heads, the Defending Pokemon is now Poisoned.",.effect="gym1-47:a0",.animation="ATK_ANIM_HIT",.cost={0,2,0,0,0,0,0,0,0},.damage=20,.category=TCG_DAMAGE_NORMAL},
@@ -3260,7 +3260,7 @@ const struct TcgCard gTcgCards[TCG_CARD_COUNT + 1] = {
 {.name="",.description="",.effect="NONE",.animation="ATK_ANIM_NONE",.cost={0},.damage=0,.category=TCG_DAMAGE_NORMAL},
 }
 },
-[507] = {.id=507, .name="Blaine's Vulpix", .kind=TCG_POKEMON, .type=0, .rarity=0, .set=13, .set2=255, .dark=0, .holo=0, .flags=TCG_CF_OWNER, .origin=13,
+[507] = {.id=507, .name="Blaine's Vulpix", .kind=TCG_POKEMON, .type=0, .rarity=0, .set=13, .set2=255, .dark=0, .holo=0, .flags=TCG_CF_OWNER|TCG_CF_READY, .origin=13,
 .hp=40, .stage=0, .species=37, .level=9, .retreat=1, .weakness=3, .resistance=255, .evolvesFrom="", .description="", .attacks={
 {.name="Natural Healing",.description="Once during your turn (before your attack), you may remove 1 damage counter from Blaine's Vulpix. This power can't be used if Blaine's Vulpix is Asleep, Confused, or Paralyzed.",.effect="gym1-65:p",.animation="ATK_ANIM_HIT",.cost={0,0,0,0,0,0,0,0,0},.damage=0,.category=TCG_POKEMON_POWER},
 {.name="Tail Fan",.description="Flip a coin. If heads, the Defending Pokemon is now Confused.",.effect="gym1-65:a0",.animation="ATK_ANIM_HIT",.cost={1,0,0,0,0,0,2,0,0},.damage=20,.category=TCG_DAMAGE_NORMAL},
@@ -3609,7 +3609,7 @@ const struct TcgCard gTcgCards[TCG_CARD_COUNT + 1] = {
 {.name="",.description="",.effect="NONE",.animation="ATK_ANIM_NONE",.cost={0},.damage=0,.category=TCG_DAMAGE_NORMAL},
 }
 },
-[574] = {.id=574, .name="Giovanni's Machamp", .kind=TCG_POKEMON, .type=4, .rarity=2, .set=14, .set2=255, .dark=0, .holo=1, .flags=TCG_CF_OWNER, .origin=14,
+[574] = {.id=574, .name="Giovanni's Machamp", .kind=TCG_POKEMON, .type=4, .rarity=2, .set=14, .set2=255, .dark=0, .holo=1, .flags=TCG_CF_OWNER|TCG_CF_READY, .origin=14,
 .hp=100, .stage=2, .species=68, .level=50, .retreat=3, .weakness=5, .resistance=255, .evolvesFrom="Giovanni's Machoke", .description="", .attacks={
 {.name="Fortitude",.description="If Giovanni's Machamp would be Knocked Out by an opponent's attack, flip a coin. If heads, Giovanni's Machamp is not Knocked Out and its remaining HP become 10 instead. This power can't be used if Giovanni's Machamp is already Asleep, Confused, or Paralyzed.",.effect="gym2-6:p",.animation="ATK_ANIM_HIT",.cost={0,0,0,0,0,0,0,0,0},.damage=0,.category=TCG_POKEMON_POWER},
 {.name="Hurricane Punch",.description="Flip 4 coins. This attack does 30 damage times the number of heads.",.effect="gym2-6:a0",.animation="ATK_ANIM_HIT",.cost={0,0,0,0,3,0,1,0,0},.damage=30,.category=TCG_DAMAGE_X},
@@ -3698,7 +3698,7 @@ const struct TcgCard gTcgCards[TCG_CARD_COUNT + 1] = {
 [588] = {.id=588, .name="Sabrina", .kind=TCG_TRAINER, .type=6, .rarity=2, .set=14, .set2=255, .dark=0, .holo=1, .flags=TCG_CF_READY, .origin=14,
 .effect="gym2-20:t",.description="Take all Energy cards attached to 1 of your Pokemon with Sabrina in its name and attach them to another 1 of your Pokemon with Sabrina in its name."
 },
-[589] = {.id=589, .name="Blaine's Ninetales", .kind=TCG_POKEMON, .type=0, .rarity=2, .set=14, .set2=255, .dark=0, .holo=0, .flags=TCG_CF_OWNER, .origin=14,
+[589] = {.id=589, .name="Blaine's Ninetales", .kind=TCG_POKEMON, .type=0, .rarity=2, .set=14, .set2=255, .dark=0, .holo=0, .flags=TCG_CF_OWNER|TCG_CF_READY, .origin=14,
 .hp=60, .stage=1, .species=38, .level=27, .retreat=2, .weakness=3, .resistance=255, .evolvesFrom="Blaine's Vulpix", .description="", .attacks={
 {.name="Healing Fire",.description="Whenever you attach a Fire Energy card from your hand to Blaine's Ninetales, remove 1 damage counter from it, if it has any. This power stops working when Blaine's Ninetales is Asleep, Confused, or Paralyzed.",.effect="gym2-21:p",.animation="ATK_ANIM_HIT",.cost={0,0,0,0,0,0,0,0,0},.damage=0,.category=TCG_POKEMON_POWER},
 {.name="Burn Up",.description="Flip a coin. If tails, discard all Fire Energy cards attached to Blaine's Ninetales.",.effect="gym2-21:a0",.animation="ATK_ANIM_HIT",.cost={2,0,0,0,0,0,0,0,0},.damage=50,.category=TCG_DAMAGE_NORMAL},
@@ -3733,7 +3733,7 @@ const struct TcgCard gTcgCards[TCG_CARD_COUNT + 1] = {
 {.name="",.description="",.effect="NONE",.animation="ATK_ANIM_NONE",.cost={0},.damage=0,.category=TCG_DAMAGE_NORMAL},
 }
 },
-[594] = {.id=594, .name="Koga's Muk", .kind=TCG_POKEMON, .type=1, .rarity=2, .set=14, .set2=255, .dark=0, .holo=0, .flags=TCG_CF_OWNER, .origin=14,
+[594] = {.id=594, .name="Koga's Muk", .kind=TCG_POKEMON, .type=1, .rarity=2, .set=14, .set2=255, .dark=0, .holo=0, .flags=TCG_CF_OWNER|TCG_CF_READY, .origin=14,
 .hp=80, .stage=1, .species=89, .level=38, .retreat=3, .weakness=5, .resistance=255, .evolvesFrom="Koga's Grimer", .description="", .attacks={
 {.name="Energy Drain",.description="If an opponent's attack does damage to Koga's Muk (even if Koga's Muk is Knocked Out), flip a coin. If heads and if it has any, choose 1 Energy card attached to the attacking Pokemon and discard it. This power can't be used if Koga's Muk is already Asleep, Confused, or Paralyzed when your opponent attacks.",.effect="gym2-26:p",.animation="ATK_ANIM_HIT",.cost={0,0,0,0,0,0,0,0,0},.damage=0,.category=TCG_POKEMON_POWER},
 {.name="Sludge Whirlpool",.description="",.effect="NONE",.animation="ATK_ANIM_HIT",.cost={0,2,0,0,0,0,1,0,0},.damage=40,.category=TCG_DAMAGE_NORMAL},
@@ -3838,7 +3838,7 @@ const struct TcgCard gTcgCards[TCG_CARD_COUNT + 1] = {
 {.name="",.description="",.effect="NONE",.animation="ATK_ANIM_NONE",.cost={0},.damage=0,.category=TCG_DAMAGE_NORMAL},
 }
 },
-[609] = {.id=609, .name="Erika's Ivysaur", .kind=TCG_POKEMON, .type=1, .rarity=1, .set=14, .set2=255, .dark=0, .holo=0, .flags=TCG_CF_OWNER, .origin=14,
+[609] = {.id=609, .name="Erika's Ivysaur", .kind=TCG_POKEMON, .type=1, .rarity=1, .set=14, .set2=255, .dark=0, .holo=0, .flags=TCG_CF_OWNER|TCG_CF_READY, .origin=14,
 .hp=60, .stage=1, .species=2, .level=22, .retreat=2, .weakness=0, .resistance=255, .evolvesFrom="Erika's Bulbasaur", .description="", .attacks={
 {.name="Relaxing Scent",.description="As long as Erika's Ivysaur is your Active Pokemon, whenever an attack (even your own) does damage to any Pokemon (after applying Weakness and Resistance), that attack only does half the damage to that Pokemon (rounded up to the nearest 10). (Any other effects of attacks still happen.) This power stops working while Erika's Ivysaur is Asleep, Confused, or Paralyzed.",.effect="gym2-41:p",.animation="ATK_ANIM_HIT",.cost={0,0,0,0,0,0,0,0,0},.damage=0,.category=TCG_POKEMON_POWER},
 {.name="Double Razor Leaf",.description="Flip 2 coins. This attack does 40 damage times the number of heads.",.effect="gym2-41:a0",.animation="ATK_ANIM_HIT",.cost={0,3,0,0,0,0,0,0,0},.damage=40,.category=TCG_DAMAGE_X},
@@ -3915,7 +3915,7 @@ const struct TcgCard gTcgCards[TCG_CARD_COUNT + 1] = {
 {.name="",.description="",.effect="NONE",.animation="ATK_ANIM_NONE",.cost={0},.damage=0,.category=TCG_DAMAGE_NORMAL},
 }
 },
-[620] = {.id=620, .name="Lt. Surge's Electrode", .kind=TCG_POKEMON, .type=2, .rarity=1, .set=14, .set2=255, .dark=0, .holo=0, .flags=TCG_CF_OWNER, .origin=14,
+[620] = {.id=620, .name="Lt. Surge's Electrode", .kind=TCG_POKEMON, .type=2, .rarity=1, .set=14, .set2=255, .dark=0, .holo=0, .flags=TCG_CF_OWNER|TCG_CF_READY, .origin=14,
 .hp=70, .stage=1, .species=101, .level=33, .retreat=2, .weakness=4, .resistance=255, .evolvesFrom="Lt. Surge's Voltorb", .description="", .attacks={
 {.name="Shock Blast",.description="If Lt. Surge's Electrode is your Active Pokemon and gets damaged (even if it's Knocked Out), flip a coin. If tails, this power does 20 damage to each Active Pokemon. This power works even if Lt. Surge's Electrode is already Asleep, Confused, or Paralyzed when it takes damage.",.effect="gym2-52:p",.animation="ATK_ANIM_HIT",.cost={0,0,0,0,0,0,0,0,0},.damage=0,.category=TCG_POKEMON_POWER},
 {.name="Power Ball",.description="Flip 3 coins. This attack does 30 damage plus 10 more damage for each heads.",.effect="gym2-52:a0",.animation="ATK_ANIM_HIT",.cost={0,0,2,0,0,0,1,0,0},.damage=30,.category=TCG_DAMAGE_PLUS},
@@ -4353,7 +4353,7 @@ const struct TcgCard gTcgCards[TCG_CARD_COUNT + 1] = {
 {.name="",.description="",.effect="NONE",.animation="ATK_ANIM_NONE",.cost={0},.damage=0,.category=TCG_DAMAGE_NORMAL},
 }
 },
-[698] = {.id=698, .name="Feraligatr", .kind=TCG_POKEMON, .type=3, .rarity=2, .set=15, .set2=255, .dark=0, .holo=1, .flags=0, .origin=15,
+[698] = {.id=698, .name="Feraligatr", .kind=TCG_POKEMON, .type=3, .rarity=2, .set=15, .set2=255, .dark=0, .holo=1, .flags=TCG_CF_READY, .origin=15,
 .hp=100, .stage=2, .species=160, .level=56, .retreat=3, .weakness=1, .resistance=255, .evolvesFrom="Croconaw", .description="When it bites with its massive and powerful jaws, it shakes its head and savagely tears its victim up.", .attacks={
 {.name="Berserk",.description="When you play Feraligatr from your hand, flip a coin. If heads, discard the top 5 cards from your opponent's deck. If tails, discard the top 5 cards from your deck.",.effect="neo1-4:p",.animation="ATK_ANIM_HIT",.cost={0,0,0,0,0,0,0,0,0},.damage=0,.category=TCG_POKEMON_POWER},
 {.name="Chomp",.description="Flip a number of coins equal to the number of damage counters on Feraligatr. This attack does 50 damage plus 10 more damage for each heads.",.effect="neo1-4:a0",.animation="ATK_ANIM_HIT",.cost={0,0,0,4,0,0,0,0,0},.damage=50,.category=TCG_DAMAGE_PLUS},
@@ -4395,14 +4395,14 @@ const struct TcgCard gTcgCards[TCG_CARD_COUNT + 1] = {
 {.name="",.description="",.effect="NONE",.animation="ATK_ANIM_NONE",.cost={0},.damage=0,.category=TCG_DAMAGE_NORMAL},
 }
 },
-[704] = {.id=704, .name="Meganium", .kind=TCG_POKEMON, .type=1, .rarity=2, .set=15, .set2=255, .dark=0, .holo=1, .flags=0, .origin=15,
+[704] = {.id=704, .name="Meganium", .kind=TCG_POKEMON, .type=1, .rarity=2, .set=15, .set2=255, .dark=0, .holo=1, .flags=TCG_CF_READY, .origin=15,
 .hp=100, .stage=2, .species=154, .level=54, .retreat=3, .weakness=0, .resistance=255, .evolvesFrom="Bayleef", .description="Meganium's breath has the power to revive dead grass and plants. It can make them healthy again.", .attacks={
 {.name="Herbal Scent",.description="When you play Meganium from your hand, you may flip a coin. If heads, remove all damage counters from all Grass Pokemon in play.",.effect="neo1-10:p",.animation="ATK_ANIM_HIT",.cost={0,0,0,0,0,0,0,0,0},.damage=0,.category=TCG_POKEMON_POWER},
 {.name="Body Slam",.description="Flip a coin. If heads, the Defending Pokemon is now Paralyzed.",.effect="neo1-10:a0",.animation="ATK_ANIM_HIT",.cost={0,2,0,0,0,0,2,0,0},.damage=40,.category=TCG_DAMAGE_NORMAL},
 {.name="",.description="",.effect="NONE",.animation="ATK_ANIM_NONE",.cost={0},.damage=0,.category=TCG_DAMAGE_NORMAL},
 }
 },
-[705] = {.id=705, .name="Meganium", .kind=TCG_POKEMON, .type=1, .rarity=2, .set=15, .set2=255, .dark=0, .holo=1, .flags=0, .origin=15,
+[705] = {.id=705, .name="Meganium", .kind=TCG_POKEMON, .type=1, .rarity=2, .set=15, .set2=255, .dark=0, .holo=1, .flags=TCG_CF_READY, .origin=15,
 .hp=100, .stage=2, .species=154, .level=57, .retreat=3, .weakness=0, .resistance=255, .evolvesFrom="Bayleef", .description="The aroma that rises from its petals contains a substance that calms aggressive feelings.", .attacks={
 {.name="Wild Growth",.description="As long as Meganium is in play each Grass Energy card attached to your Grass Pokemon instead provides GrassGrass. This power stops working while Meganium is Asleep, Confused, or Paralyzed.",.effect="neo1-11:p",.animation="ATK_ANIM_HIT",.cost={0,0,0,0,0,0,0,0,0},.damage=0,.category=TCG_POKEMON_POWER},
 {.name="Soothing Scent",.description="The Defending Pokemon is now Asleep.",.effect="neo1-11:a0",.animation="ATK_ANIM_HIT",.cost={0,4,0,0,0,0,0,0,0},.damage=40,.category=TCG_DAMAGE_NORMAL},
@@ -4475,7 +4475,7 @@ const struct TcgCard gTcgCards[TCG_CARD_COUNT + 1] = {
 {.name="",.description="",.effect="NONE",.animation="ATK_ANIM_NONE",.cost={0},.damage=0,.category=TCG_DAMAGE_NORMAL},
 }
 },
-[716] = {.id=716, .name="Elekid", .kind=TCG_POKEMON, .type=2, .rarity=2, .set=15, .set2=255, .dark=0, .holo=0, .flags=TCG_CF_BABY, .origin=15,
+[716] = {.id=716, .name="Elekid", .kind=TCG_POKEMON, .type=2, .rarity=2, .set=15, .set2=255, .dark=0, .holo=0, .flags=TCG_CF_BABY|TCG_CF_READY, .origin=15,
 .hp=30, .stage=0, .species=239, .level=6, .retreat=0, .weakness=255, .resistance=255, .evolvesFrom="", .description="It rotates its arms to generate electricity, but it tires easily, so it charges up only a little bit.", .attacks={
 {.name="Playful Punch",.description="Once during your turn (before your attack), you may flip a coin. If heads, do 20 damage to your opponent's Active Pokemon. (Apply Weakness and Resistance.) Either way, this ends your turn. This power can't be used if Elekid is Asleep, Confused, or Paralyzed.",.effect="neo1-22:p",.animation="ATK_ANIM_HIT",.cost={0,0,0,0,0,0,0,0,0},.damage=0,.category=TCG_POKEMON_POWER},
 {.name="",.description="",.effect="NONE",.animation="ATK_ANIM_NONE",.cost={0},.damage=0,.category=TCG_DAMAGE_NORMAL},
@@ -4615,7 +4615,7 @@ const struct TcgCard gTcgCards[TCG_CARD_COUNT + 1] = {
 {.name="",.description="",.effect="NONE",.animation="ATK_ANIM_NONE",.cost={0},.damage=0,.category=TCG_DAMAGE_NORMAL},
 }
 },
-[736] = {.id=736, .name="Noctowl", .kind=TCG_POKEMON, .type=6, .rarity=1, .set=15, .set2=255, .dark=0, .holo=0, .flags=0, .origin=15,
+[736] = {.id=736, .name="Noctowl", .kind=TCG_POKEMON, .type=6, .rarity=1, .set=15, .set2=255, .dark=0, .holo=0, .flags=TCG_CF_READY, .origin=15,
 .hp=60, .stage=1, .species=164, .level=23, .retreat=0, .weakness=2, .resistance=4, .evolvesFrom="Hoothoot", .description="Its eyes are specially adapted. They concentrate even faint light and enable it to see in the dark.", .attacks={
 {.name="Glaring Gaze",.description="Once during your turn (before your attack), you may flip a coin. If heads, look at your opponent's hand. If your opponent has any Trainer cards there, choose 1 of them. Your opponent shuffles that card into his or her deck. This power can't be used if Noctowl is Asleep, Confused, or Paralyzed.",.effect="neo1-42:p",.animation="ATK_ANIM_HIT",.cost={0,0,0,0,0,0,0,0,0},.damage=0,.category=TCG_POKEMON_POWER},
 {.name="Wing Attack",.description="",.effect="NONE",.animation="ATK_ANIM_HIT",.cost={0,0,0,0,0,0,3,0,0},.damage=30,.category=TCG_DAMAGE_NORMAL},
@@ -5293,7 +5293,7 @@ const struct TcgCard gTcgCards[TCG_CARD_COUNT + 1] = {
 {.name="",.description="",.effect="NONE",.animation="ATK_ANIM_NONE",.cost={0},.damage=0,.category=TCG_DAMAGE_NORMAL},
 }
 },
-[846] = {.id=846, .name="Unown [D]", .kind=TCG_POKEMON, .type=5, .rarity=1, .set=16, .set2=255, .dark=0, .holo=0, .flags=0, .origin=16,
+[846] = {.id=846, .name="Unown [D]", .kind=TCG_POKEMON, .type=5, .rarity=1, .set=16, .set2=255, .dark=0, .holo=0, .flags=TCG_CF_READY, .origin=16,
 .hp=40, .stage=0, .species=201, .level=14, .retreat=1, .weakness=5, .resistance=255, .evolvesFrom="", .description="Their shapes look like hieroglyphs on ancient tablets. It is said that the two are somehow related.", .attacks={
 {.name="[Darkness]",.description="Whenever a Darkness Pokemon damages 1 of your Pokemon, reduce that damage by 30 (after applying Weakness and Resistance). This power stops working if you have more than 1 Unown [D] in play. (This power works even if Unown [D] is Asleep, Confused, or Paralyzed.)",.effect="neo2-47:p",.animation="ATK_ANIM_HIT",.cost={0,0,0,0,0,0,0,0,0},.damage=0,.category=TCG_POKEMON_POWER},
 {.name="Hidden Power",.description="",.effect="NONE",.animation="ATK_ANIM_HIT",.cost={0,0,0,0,0,1,0,0,0},.damage=10,.category=TCG_DAMAGE_NORMAL},
@@ -5307,14 +5307,14 @@ const struct TcgCard gTcgCards[TCG_CARD_COUNT + 1] = {
 {.name="",.description="",.effect="NONE",.animation="ATK_ANIM_NONE",.cost={0},.damage=0,.category=TCG_DAMAGE_NORMAL},
 }
 },
-[848] = {.id=848, .name="Unown [M]", .kind=TCG_POKEMON, .type=5, .rarity=1, .set=16, .set2=255, .dark=0, .holo=0, .flags=0, .origin=16,
+[848] = {.id=848, .name="Unown [M]", .kind=TCG_POKEMON, .type=5, .rarity=1, .set=16, .set2=255, .dark=0, .holo=0, .flags=TCG_CF_READY, .origin=16,
 .hp=40, .stage=0, .species=201, .level=14, .retreat=1, .weakness=5, .resistance=255, .evolvesFrom="", .description="Their shapes look like hieroglyphs on ancient tablets. It is said that the two are somehow related.", .attacks={
 {.name="[Metal]",.description="Whenever a Metal Pokemon damages 1 of your Pokemon, reduce that damage by 30 (after applying Weakness and Resistance). This power stops working if you have more than 1 Unown [M] in play. (This power works even if Unown [M] is Asleep, Confused, or Paralyzed.)",.effect="neo2-49:p",.animation="ATK_ANIM_HIT",.cost={0,0,0,0,0,0,0,0,0},.damage=0,.category=TCG_POKEMON_POWER},
 {.name="Hidden Power",.description="",.effect="NONE",.animation="ATK_ANIM_HIT",.cost={0,0,0,0,0,1,0,0,0},.damage=10,.category=TCG_DAMAGE_NORMAL},
 {.name="",.description="",.effect="NONE",.animation="ATK_ANIM_NONE",.cost={0},.damage=0,.category=TCG_DAMAGE_NORMAL},
 }
 },
-[849] = {.id=849, .name="Unown [N]", .kind=TCG_POKEMON, .type=5, .rarity=1, .set=16, .set2=255, .dark=0, .holo=0, .flags=0, .origin=16,
+[849] = {.id=849, .name="Unown [N]", .kind=TCG_POKEMON, .type=5, .rarity=1, .set=16, .set2=255, .dark=0, .holo=0, .flags=TCG_CF_READY, .origin=16,
 .hp=40, .stage=0, .species=201, .level=14, .retreat=1, .weakness=5, .resistance=255, .evolvesFrom="", .description="Their shapes look like hieroglyphs on ancient tablets. It is said that the two are somehow related.", .attacks={
 {.name="[Normal]",.description="Whenever a Colorless Pokemon damages 1 of your Pokemon, reduce that damage by 30 (after applying Weakness and Resistance). This power stops working if you have more than 1 Unown [N] in play. (This power works even if Unown [N] is Asleep, Confused, or Paralyzed.)",.effect="neo2-50:p",.animation="ATK_ANIM_HIT",.cost={0,0,0,0,0,0,0,0,0},.damage=0,.category=TCG_POKEMON_POWER},
 {.name="Hidden Power",.description="",.effect="NONE",.animation="ATK_ANIM_HIT",.cost={0,0,0,0,0,1,0,0,0},.damage=10,.category=TCG_DAMAGE_NORMAL},
@@ -5487,7 +5487,7 @@ const struct TcgCard gTcgCards[TCG_CARD_COUNT + 1] = {
 {.name="",.description="",.effect="NONE",.animation="ATK_ANIM_NONE",.cost={0},.damage=0,.category=TCG_DAMAGE_NORMAL},
 }
 },
-[876] = {.id=876, .name="Blissey", .kind=TCG_POKEMON, .type=6, .rarity=2, .set=17, .set2=255, .dark=0, .holo=1, .flags=0, .origin=17,
+[876] = {.id=876, .name="Blissey", .kind=TCG_POKEMON, .type=6, .rarity=2, .set=17, .set2=255, .dark=0, .holo=1, .flags=TCG_CF_READY, .origin=17,
 .hp=120, .stage=1, .species=242, .level=62, .retreat=2, .weakness=4, .resistance=5, .evolvesFrom="Chansey", .description="Anyone who takes even one bite of Blissey's egg becomes unfailingly caring and pleasant to everyone.", .attacks={
 {.name="Softboiled",.description="When you play Blissey from your hand, you may flip a coin. If heads, remove 8 damage counters from Blissey. If tails, remove 4 damage counters from Blissey. Either way, if Blissey has fewer damage counters than that, remove all of them.",.effect="neo3-2:p",.animation="ATK_ANIM_HIT",.cost={0,0,0,0,0,0,0,0,0},.damage=0,.category=TCG_POKEMON_POWER},
 {.name="Body Slam",.description="Flip a coin. If heads, the Defending Pokemon is now Paralyzed.",.effect="neo3-2:a0",.animation="ATK_ANIM_HIT",.cost={0,0,0,0,0,0,4,0,0},.damage=30,.category=TCG_DAMAGE_NORMAL},
@@ -5830,7 +5830,7 @@ const struct TcgCard gTcgCards[TCG_CARD_COUNT + 1] = {
 {.name="",.description="",.effect="NONE",.animation="ATK_ANIM_NONE",.cost={0},.damage=0,.category=TCG_DAMAGE_NORMAL},
 }
 },
-[925] = {.id=925, .name="Shuckle", .kind=TCG_POKEMON, .type=4, .rarity=0, .set=17, .set2=255, .dark=0, .holo=0, .flags=0, .origin=17,
+[925] = {.id=925, .name="Shuckle", .kind=TCG_POKEMON, .type=4, .rarity=0, .set=17, .set2=255, .dark=0, .holo=0, .flags=TCG_CF_READY, .origin=17,
 .hp=40, .stage=0, .species=213, .level=28, .retreat=1, .weakness=1, .resistance=255, .evolvesFrom="", .description="It stores berries inside its shell. To avoid attacks, it hides beneath rocks and remains completely still.", .attacks={
 {.name="Hard Shell",.description="Whenever an attack (including your own) does 40 or less damage to Shuckle (after applying Weakness and Resistance), reduce that damage to 10. (Any other effects of attacks still happen.) This power stops working while Shuckle is Asleep, Confused, or Paralyzed.",.effect="neo3-51:p",.animation="ATK_ANIM_HIT",.cost={0,0,0,0,0,0,0,0,0},.damage=0,.category=TCG_POKEMON_POWER},
 {.name="Toxic Saliva",.description="Flip a coin. If heads, the Defending Pokemon is now Poisoned. It now takes 20 Poison damage instead of 10 after each player's turn (even if it was already Poisoned).",.effect="neo3-51:a0",.animation="ATK_ANIM_HIT",.cost={0,2,0,0,0,0,0,0,0},.damage=0,.category=TCG_RESIDUAL},
@@ -5922,7 +5922,7 @@ const struct TcgCard gTcgCards[TCG_CARD_COUNT + 1] = {
 {.name="",.description="",.effect="NONE",.animation="ATK_ANIM_NONE",.cost={0},.damage=0,.category=TCG_DAMAGE_NORMAL},
 }
 },
-[941] = {.id=941, .name="Dark Ampharos", .kind=TCG_POKEMON, .type=2, .rarity=2, .set=18, .set2=255, .dark=1, .holo=1, .flags=0, .origin=18,
+[941] = {.id=941, .name="Dark Ampharos", .kind=TCG_POKEMON, .type=2, .rarity=2, .set=18, .set2=255, .dark=1, .holo=1, .flags=TCG_CF_READY, .origin=18,
 .hp=70, .stage=2, .species=181, .level=36, .retreat=2, .weakness=4, .resistance=255, .evolvesFrom="Dark Flaaffy", .description="Its brightly lit tail can be seen for miles in the dark, even by ships on the sea.", .attacks={
 {.name="Conductivity",.description="Whenever your opponent attaches an Energy card from his or her hand to a Pokemon, this power does 10 damage to that Pokemon. (Don't apply Weakness and Resistance.) This power stops working if you have more than 1 Dark Ampharos in play or while Dark Ampharos is Asleep, Confused, or Paralyzed.",.effect="neo4-1:p",.animation="ATK_ANIM_HIT",.cost={0,0,0,0,0,0,0,0,0},.damage=0,.category=TCG_POKEMON_POWER},
 {.name="Shock Bolt",.description="Discard all Lightning Energy cards attached to Dark Ampharos or this attack does nothing.",.effect="neo4-1:a0",.animation="ATK_ANIM_HIT",.cost={0,0,1,0,0,0,2,0,0},.damage=50,.category=TCG_DAMAGE_NORMAL},
@@ -6674,14 +6674,14 @@ const struct TcgCard gTcgCards[TCG_CARD_COUNT + 1] = {
 {.name="",.description="",.effect="NONE",.animation="ATK_ANIM_NONE",.cost={0},.damage=0,.category=TCG_DAMAGE_NORMAL},
 }
 },
-[1057] = {.id=1057, .name="Blastoise", .kind=TCG_POKEMON, .type=3, .rarity=2, .set=19, .set2=255, .dark=0, .holo=1, .flags=0, .origin=19,
+[1057] = {.id=1057, .name="Blastoise", .kind=TCG_POKEMON, .type=3, .rarity=2, .set=19, .set2=255, .dark=0, .holo=1, .flags=TCG_CF_READY, .origin=19,
 .hp=100, .stage=2, .species=9, .level=0, .retreat=2, .weakness=2, .resistance=255, .evolvesFrom="Wartortle", .description="", .attacks={
 {.name="Jet Stream",.description="Once during your turn (before your attack), if Blastoise is your Active Pokemon, you may flip a coin. If heads, discard an Energy card attached to Blastoise, if any. Then, if there are any Energy cards attached to the Defending Pokemon, choose 1 of them and discard it. This power can't be used if Blastoise is affected by a Special Condition.",.effect="ecard1-4:p",.animation="ATK_ANIM_HIT",.cost={0,0,0,0,0,0,0,0,0},.damage=0,.category=TCG_POKEMON_POWER},
 {.name="Energy Cannon",.description="Does 40 damage plus 10 more damage for each Energy attached to Blastoise but not used to pay for this attack's Energy Cost. You can't add more than 20 damage in this way.",.effect="ecard1-4:a0",.animation="ATK_ANIM_HIT",.cost={0,0,0,2,0,0,1,0,0},.damage=40,.category=TCG_DAMAGE_PLUS},
 {.name="",.description="",.effect="NONE",.animation="ATK_ANIM_NONE",.cost={0},.damage=0,.category=TCG_DAMAGE_NORMAL},
 }
 },
-[1058] = {.id=1058, .name="Butterfree", .kind=TCG_POKEMON, .type=1, .rarity=2, .set=19, .set2=255, .dark=0, .holo=1, .flags=0, .origin=19,
+[1058] = {.id=1058, .name="Butterfree", .kind=TCG_POKEMON, .type=1, .rarity=2, .set=19, .set2=255, .dark=0, .holo=1, .flags=TCG_CF_READY, .origin=19,
 .hp=80, .stage=2, .species=12, .level=0, .retreat=0, .weakness=0, .resistance=255, .evolvesFrom="Metapod", .description="", .attacks={
 {.name="Miraculous Powder",.description="Once during your turn (before your attack), you may remove all Special Conditions from your Active Pokemon. This power can't be used if Butterfree is affected by a Special Condition.",.effect="ecard1-5:p",.animation="ATK_ANIM_HIT",.cost={0,0,0,0,0,0,0,0,0},.damage=0,.category=TCG_POKEMON_POWER},
 {.name="Spiral Drain",.description="Flip a coin. If heads, remove 2 damage counters from Butterfree.",.effect="ecard1-5:a0",.animation="ATK_ANIM_HIT",.cost={0,1,0,0,0,0,2,0,0},.damage=40,.category=TCG_DAMAGE_NORMAL},
@@ -6744,7 +6744,7 @@ const struct TcgCard gTcgCards[TCG_CARD_COUNT + 1] = {
 {.name="",.description="",.effect="NONE",.animation="ATK_ANIM_NONE",.cost={0},.damage=0,.category=TCG_DAMAGE_NORMAL},
 }
 },
-[1067] = {.id=1067, .name="Golem", .kind=TCG_POKEMON, .type=4, .rarity=2, .set=19, .set2=255, .dark=0, .holo=1, .flags=TCG_CF_BODY, .origin=19,
+[1067] = {.id=1067, .name="Golem", .kind=TCG_POKEMON, .type=4, .rarity=2, .set=19, .set2=255, .dark=0, .holo=1, .flags=TCG_CF_BODY|TCG_CF_READY, .origin=19,
 .hp=100, .stage=2, .species=76, .level=0, .retreat=4, .weakness=3, .resistance=255, .evolvesFrom="Graveler", .description="", .attacks={
 {.name="Rock Body",.description="All damage done by attacks to Golem is reduced by 10 (after applying Weakness and Resistance).",.effect="ecard1-14:p",.animation="ATK_ANIM_HIT",.cost={0,0,0,0,0,0,0,0,0},.damage=0,.category=TCG_POKEMON_POWER},
 {.name="Rock Tumble",.description="Don't apply Resistance.",.effect="ecard1-14:a0",.animation="ATK_ANIM_HIT",.cost={0,0,0,0,2,0,2,0,0},.damage=60,.category=TCG_DAMAGE_NORMAL},
@@ -6772,7 +6772,7 @@ const struct TcgCard gTcgCards[TCG_CARD_COUNT + 1] = {
 {.name="",.description="",.effect="NONE",.animation="ATK_ANIM_NONE",.cost={0},.damage=0,.category=TCG_DAMAGE_NORMAL},
 }
 },
-[1071] = {.id=1071, .name="Meganium", .kind=TCG_POKEMON, .type=1, .rarity=2, .set=19, .set2=255, .dark=0, .holo=1, .flags=0, .origin=19,
+[1071] = {.id=1071, .name="Meganium", .kind=TCG_POKEMON, .type=1, .rarity=2, .set=19, .set2=255, .dark=0, .holo=1, .flags=TCG_CF_READY, .origin=19,
 .hp=100, .stage=2, .species=154, .level=0, .retreat=2, .weakness=0, .resistance=3, .evolvesFrom="Bayleef", .description="", .attacks={
 {.name="Soothing Aroma",.description="Once during your turn (before your attack), you may flip a coin. If heads, remove 1 damage counter from each of your Pokemon that has any. This power can't be used if Meganium is affected by a Special Condition.",.effect="ecard1-18:p",.animation="ATK_ANIM_HIT",.cost={0,0,0,0,0,0,0,0,0},.damage=0,.category=TCG_POKEMON_POWER},
 {.name="Poisonpowder",.description="The Defending Pokemon is now Poisoned.",.effect="ecard1-18:a0",.animation="ATK_ANIM_HIT",.cost={0,2,0,0,0,0,2,0,0},.damage=40,.category=TCG_DAMAGE_NORMAL},
@@ -6807,14 +6807,14 @@ const struct TcgCard gTcgCards[TCG_CARD_COUNT + 1] = {
 {.name="",.description="",.effect="NONE",.animation="ATK_ANIM_NONE",.cost={0},.damage=0,.category=TCG_DAMAGE_NORMAL},
 }
 },
-[1076] = {.id=1076, .name="Pidgeot", .kind=TCG_POKEMON, .type=6, .rarity=2, .set=19, .set2=255, .dark=0, .holo=1, .flags=0, .origin=19,
+[1076] = {.id=1076, .name="Pidgeot", .kind=TCG_POKEMON, .type=6, .rarity=2, .set=19, .set2=255, .dark=0, .holo=1, .flags=TCG_CF_READY, .origin=19,
 .hp=80, .stage=2, .species=18, .level=0, .retreat=0, .weakness=2, .resistance=4, .evolvesFrom="Pidgeotto", .description="", .attacks={
 {.name="Beating Wings",.description="Once during your turn (before your attack), if Pidgeot is your Active Pokemon, you may shuffle 1 of your Benched Pokemon and all cards attached to it into your deck. This power can't be used if Pidgeot is affected by a Special Condition.",.effect="ecard1-23:p",.animation="ATK_ANIM_HIT",.cost={0,0,0,0,0,0,0,0,0},.damage=0,.category=TCG_POKEMON_POWER},
 {.name="Sharp Beak",.description="Flip a coin. If heads, this attack does 20 damage plus 30 more damage.",.effect="ecard1-23:a0",.animation="ATK_ANIM_HIT",.cost={0,0,0,0,0,0,3,0,0},.damage=20,.category=TCG_DAMAGE_PLUS},
 {.name="",.description="",.effect="NONE",.animation="ATK_ANIM_NONE",.cost={0},.damage=0,.category=TCG_DAMAGE_NORMAL},
 }
 },
-[1077] = {.id=1077, .name="Poliwrath", .kind=TCG_POKEMON, .type=3, .rarity=2, .set=19, .set2=255, .dark=0, .holo=1, .flags=0, .origin=19,
+[1077] = {.id=1077, .name="Poliwrath", .kind=TCG_POKEMON, .type=3, .rarity=2, .set=19, .set2=255, .dark=0, .holo=1, .flags=TCG_CF_READY, .origin=19,
 .hp=100, .stage=2, .species=62, .level=0, .retreat=2, .weakness=2, .resistance=255, .evolvesFrom="Poliwhirl", .description="", .attacks={
 {.name="Plunge",.description="Once during your turn (before your attack), if Poliwrath is on your Bench, you may flip a coin. If heads, take all Energy cards attached to your Active Pokemon, if any, and attach them to Poliwrath. Then switch Poliwrath with your Active Pokemon.",.effect="ecard1-24:p",.animation="ATK_ANIM_HIT",.cost={0,0,0,0,0,0,0,0,0},.damage=0,.category=TCG_POKEMON_POWER},
 {.name="Water Punch",.description="Flip a number of coins equal to the amount of Water Energy attached to Poliwrath. This attack does 40 damage plus 10 more damage for each heads.",.effect="ecard1-24:a0",.animation="ATK_ANIM_HIT",.cost={0,0,0,2,0,0,2,0,0},.damage=40,.category=TCG_DAMAGE_PLUS},
@@ -6849,7 +6849,7 @@ const struct TcgCard gTcgCards[TCG_CARD_COUNT + 1] = {
 {.name="",.description="",.effect="NONE",.animation="ATK_ANIM_NONE",.cost={0},.damage=0,.category=TCG_DAMAGE_NORMAL},
 }
 },
-[1082] = {.id=1082, .name="Tyranitar", .kind=TCG_POKEMON, .type=7, .rarity=2, .set=19, .set2=255, .dark=0, .holo=1, .flags=TCG_CF_BODY, .origin=19,
+[1082] = {.id=1082, .name="Tyranitar", .kind=TCG_POKEMON, .type=7, .rarity=2, .set=19, .set2=255, .dark=0, .holo=1, .flags=TCG_CF_BODY|TCG_CF_READY, .origin=19,
 .hp=120, .stage=2, .species=248, .level=0, .retreat=4, .weakness=4, .resistance=5, .evolvesFrom="Pupitar", .description="", .attacks={
 {.name="Dark Aura",.description="All Energy attached to Tyranitar is Darkness Energy instead of its usual type.",.effect="ecard1-29:p",.animation="ATK_ANIM_HIT",.cost={0,0,0,0,0,0,0,0,0},.damage=0,.category=TCG_POKEMON_POWER},
 {.name="Stamp",.description="Flip a coin. If heads, this attack does 50 damage plus 10 more damage and does 10 damage to each of your opponent's Benched Pokemon, if any. (Don't apply Weakness and Resistance for Benched Pokemon.)",.effect="ecard1-29:a0",.animation="ATK_ANIM_HIT",.cost={0,0,0,0,0,0,0,4,0},.damage=50,.category=TCG_DAMAGE_PLUS},
@@ -6863,7 +6863,7 @@ const struct TcgCard gTcgCards[TCG_CARD_COUNT + 1] = {
 {.name="",.description="",.effect="NONE",.animation="ATK_ANIM_NONE",.cost={0},.damage=0,.category=TCG_DAMAGE_NORMAL},
 }
 },
-[1084] = {.id=1084, .name="Vileplume", .kind=TCG_POKEMON, .type=1, .rarity=2, .set=19, .set2=255, .dark=0, .holo=1, .flags=0, .origin=19,
+[1084] = {.id=1084, .name="Vileplume", .kind=TCG_POKEMON, .type=1, .rarity=2, .set=19, .set2=255, .dark=0, .holo=1, .flags=TCG_CF_READY, .origin=19,
 .hp=90, .stage=2, .species=45, .level=0, .retreat=2, .weakness=5, .resistance=255, .evolvesFrom="Gloom", .description="", .attacks={
 {.name="Poison Pollen",.description="Once during your turn (before your attack), you may flip a coin. If heads, the Defending Pokemon is now Poisoned. This power can't be used if Vileplume is affected by a Special Condition.",.effect="ecard1-31:p",.animation="ATK_ANIM_HIT",.cost={0,0,0,0,0,0,0,0,0},.damage=0,.category=TCG_POKEMON_POWER},
 {.name="Petal Dance",.description="Flip 3 coins. This attack does 30 damage times the number of heads. Vileplume is now Confused.",.effect="ecard1-31:a0",.animation="ATK_ANIM_HIT",.cost={0,1,0,0,0,0,1,0,0},.damage=30,.category=TCG_DAMAGE_X},
@@ -6905,14 +6905,14 @@ const struct TcgCard gTcgCards[TCG_CARD_COUNT + 1] = {
 {.name="",.description="",.effect="NONE",.animation="ATK_ANIM_NONE",.cost={0},.damage=0,.category=TCG_DAMAGE_NORMAL},
 }
 },
-[1090] = {.id=1090, .name="Blastoise", .kind=TCG_POKEMON, .type=3, .rarity=2, .set=19, .set2=255, .dark=0, .holo=0, .flags=0, .origin=19,
+[1090] = {.id=1090, .name="Blastoise", .kind=TCG_POKEMON, .type=3, .rarity=2, .set=19, .set2=255, .dark=0, .holo=0, .flags=TCG_CF_READY, .origin=19,
 .hp=100, .stage=2, .species=9, .level=0, .retreat=2, .weakness=2, .resistance=255, .evolvesFrom="Wartortle", .description="", .attacks={
 {.name="Jet Stream",.description="Once during your turn (before your attack), if Blastoise is your Active Pokemon, you may flip a coin. If heads, discard an Energy card attached to Blastoise, if any. Then, if there are any Energy cards attached to the Defending Pokemon, choose 1 of them and discard it. This power can't be used if Blastoise is affected by a Special Condition.",.effect="ecard1-37:p",.animation="ATK_ANIM_HIT",.cost={0,0,0,0,0,0,0,0,0},.damage=0,.category=TCG_POKEMON_POWER},
 {.name="Energy Cannon",.description="Does 40 damage plus 10 more damage for each Energy attached to Blastoise but not used to pay for this attack's Energy Cost. You can't add more than 20 damage in this way.",.effect="ecard1-37:a0",.animation="ATK_ANIM_HIT",.cost={0,0,0,2,0,0,1,0,0},.damage=40,.category=TCG_DAMAGE_PLUS},
 {.name="",.description="",.effect="NONE",.animation="ATK_ANIM_NONE",.cost={0},.damage=0,.category=TCG_DAMAGE_NORMAL},
 }
 },
-[1091] = {.id=1091, .name="Butterfree", .kind=TCG_POKEMON, .type=1, .rarity=2, .set=19, .set2=255, .dark=0, .holo=0, .flags=0, .origin=19,
+[1091] = {.id=1091, .name="Butterfree", .kind=TCG_POKEMON, .type=1, .rarity=2, .set=19, .set2=255, .dark=0, .holo=0, .flags=TCG_CF_READY, .origin=19,
 .hp=80, .stage=2, .species=12, .level=0, .retreat=0, .weakness=0, .resistance=255, .evolvesFrom="Metapod", .description="", .attacks={
 {.name="Miraculous Powder",.description="Once during your turn (before your attack), you may remove all Special Conditions from your Active Pokemon. This power can't be used if Butterfree is affected by a Special Condition.",.effect="ecard1-38:p",.animation="ATK_ANIM_HIT",.cost={0,0,0,0,0,0,0,0,0},.damage=0,.category=TCG_POKEMON_POWER},
 {.name="Spiral Drain",.description="Flip a coin. If heads, remove 2 damage counters from Butterfree.",.effect="ecard1-38:a0",.animation="ATK_ANIM_HIT",.cost={0,1,0,0,0,0,2,0,0},.damage=40,.category=TCG_DAMAGE_NORMAL},
@@ -6989,7 +6989,7 @@ const struct TcgCard gTcgCards[TCG_CARD_COUNT + 1] = {
 {.name="",.description="",.effect="NONE",.animation="ATK_ANIM_NONE",.cost={0},.damage=0,.category=TCG_DAMAGE_NORMAL},
 }
 },
-[1102] = {.id=1102, .name="Golem", .kind=TCG_POKEMON, .type=4, .rarity=2, .set=19, .set2=255, .dark=0, .holo=0, .flags=TCG_CF_BODY, .origin=19,
+[1102] = {.id=1102, .name="Golem", .kind=TCG_POKEMON, .type=4, .rarity=2, .set=19, .set2=255, .dark=0, .holo=0, .flags=TCG_CF_BODY|TCG_CF_READY, .origin=19,
 .hp=100, .stage=2, .species=76, .level=0, .retreat=4, .weakness=3, .resistance=255, .evolvesFrom="Graveler", .description="", .attacks={
 {.name="Rock Body",.description="All damage done by attacks to Golem is reduced by 10 (after applying Weakness and Resistance).",.effect="ecard1-49:p",.animation="ATK_ANIM_HIT",.cost={0,0,0,0,0,0,0,0,0},.damage=0,.category=TCG_POKEMON_POWER},
 {.name="Rock Tumble",.description="Don't apply Resistance.",.effect="ecard1-49:a0",.animation="ATK_ANIM_HIT",.cost={0,0,0,0,2,0,2,0,0},.damage=60,.category=TCG_DAMAGE_NORMAL},
@@ -7024,7 +7024,7 @@ const struct TcgCard gTcgCards[TCG_CARD_COUNT + 1] = {
 {.name="",.description="",.effect="NONE",.animation="ATK_ANIM_NONE",.cost={0},.damage=0,.category=TCG_DAMAGE_NORMAL},
 }
 },
-[1107] = {.id=1107, .name="Meganium", .kind=TCG_POKEMON, .type=1, .rarity=2, .set=19, .set2=255, .dark=0, .holo=0, .flags=0, .origin=19,
+[1107] = {.id=1107, .name="Meganium", .kind=TCG_POKEMON, .type=1, .rarity=2, .set=19, .set2=255, .dark=0, .holo=0, .flags=TCG_CF_READY, .origin=19,
 .hp=100, .stage=2, .species=154, .level=0, .retreat=2, .weakness=0, .resistance=3, .evolvesFrom="Bayleef", .description="", .attacks={
 {.name="Soothing Aroma",.description="Once during your turn (before your attack), you may flip a coin. If heads, remove 1 damage counter from each of your Pokemon that has any. This power can't be used if Meganium is affected by a Special Condition.",.effect="ecard1-54:p",.animation="ATK_ANIM_HIT",.cost={0,0,0,0,0,0,0,0,0},.damage=0,.category=TCG_POKEMON_POWER},
 {.name="Poisonpowder",.description="The Defending Pokemon is now Poisoned.",.effect="ecard1-54:a0",.animation="ATK_ANIM_HIT",.cost={0,2,0,0,0,0,2,0,0},.damage=40,.category=TCG_DAMAGE_NORMAL},
@@ -7059,14 +7059,14 @@ const struct TcgCard gTcgCards[TCG_CARD_COUNT + 1] = {
 {.name="",.description="",.effect="NONE",.animation="ATK_ANIM_NONE",.cost={0},.damage=0,.category=TCG_DAMAGE_NORMAL},
 }
 },
-[1112] = {.id=1112, .name="Pidgeot", .kind=TCG_POKEMON, .type=6, .rarity=2, .set=19, .set2=255, .dark=0, .holo=0, .flags=0, .origin=19,
+[1112] = {.id=1112, .name="Pidgeot", .kind=TCG_POKEMON, .type=6, .rarity=2, .set=19, .set2=255, .dark=0, .holo=0, .flags=TCG_CF_READY, .origin=19,
 .hp=80, .stage=2, .species=18, .level=0, .retreat=0, .weakness=2, .resistance=4, .evolvesFrom="Pidgeotto", .description="", .attacks={
 {.name="Beating Wings",.description="Once during your turn (before your attack), if Pidgeot is your Active Pokemon, you may shuffle 1 of your Benched Pokemon and all cards attached to it into your deck. This power can't be used if Pidgeot is affected by a Special Condition.",.effect="ecard1-59:p",.animation="ATK_ANIM_HIT",.cost={0,0,0,0,0,0,0,0,0},.damage=0,.category=TCG_POKEMON_POWER},
 {.name="Sharp Beak",.description="Flip a coin. If heads, this attack does 20 damage plus 30 more damage.",.effect="ecard1-59:a0",.animation="ATK_ANIM_HIT",.cost={0,0,0,0,0,0,3,0,0},.damage=20,.category=TCG_DAMAGE_PLUS},
 {.name="",.description="",.effect="NONE",.animation="ATK_ANIM_NONE",.cost={0},.damage=0,.category=TCG_DAMAGE_NORMAL},
 }
 },
-[1113] = {.id=1113, .name="Poliwrath", .kind=TCG_POKEMON, .type=3, .rarity=2, .set=19, .set2=255, .dark=0, .holo=0, .flags=0, .origin=19,
+[1113] = {.id=1113, .name="Poliwrath", .kind=TCG_POKEMON, .type=3, .rarity=2, .set=19, .set2=255, .dark=0, .holo=0, .flags=TCG_CF_READY, .origin=19,
 .hp=100, .stage=2, .species=62, .level=0, .retreat=2, .weakness=2, .resistance=255, .evolvesFrom="Poliwhirl", .description="", .attacks={
 {.name="Plunge",.description="Once during your turn (before your attack), if Poliwrath is on your Bench, you may flip a coin. If heads, take all Energy cards attached to your Active Pokemon, if any, and attach them to Poliwrath. Then switch Poliwrath with your Active Pokemon.",.effect="ecard1-60:p",.animation="ATK_ANIM_HIT",.cost={0,0,0,0,0,0,0,0,0},.damage=0,.category=TCG_POKEMON_POWER},
 {.name="Water Punch",.description="Flip a number of coins equal to the amount of Water Energy attached to Poliwrath. This attack does 40 damage plus 10 more damage for each heads.",.effect="ecard1-60:a0",.animation="ATK_ANIM_HIT",.cost={0,0,0,2,0,0,2,0,0},.damage=40,.category=TCG_DAMAGE_PLUS},
@@ -7108,7 +7108,7 @@ const struct TcgCard gTcgCards[TCG_CARD_COUNT + 1] = {
 {.name="",.description="",.effect="NONE",.animation="ATK_ANIM_NONE",.cost={0},.damage=0,.category=TCG_DAMAGE_NORMAL},
 }
 },
-[1119] = {.id=1119, .name="Tyranitar", .kind=TCG_POKEMON, .type=7, .rarity=2, .set=19, .set2=255, .dark=0, .holo=0, .flags=TCG_CF_BODY, .origin=19,
+[1119] = {.id=1119, .name="Tyranitar", .kind=TCG_POKEMON, .type=7, .rarity=2, .set=19, .set2=255, .dark=0, .holo=0, .flags=TCG_CF_BODY|TCG_CF_READY, .origin=19,
 .hp=120, .stage=2, .species=248, .level=0, .retreat=4, .weakness=4, .resistance=5, .evolvesFrom="Pupitar", .description="", .attacks={
 {.name="Dark Aura",.description="All Energy attached to Tyranitar is Darkness Energy instead of its usual type.",.effect="ecard1-66:p",.animation="ATK_ANIM_HIT",.cost={0,0,0,0,0,0,0,0,0},.damage=0,.category=TCG_POKEMON_POWER},
 {.name="Stamp",.description="Flip a coin. If heads, this attack does 50 damage plus 10 more damage and does 10 damage to each of your opponent's Benched Pokemon, if any. (Don't apply Weakness and Resistance for Benched Pokemon.)",.effect="ecard1-66:a0",.animation="ATK_ANIM_HIT",.cost={0,0,0,0,0,0,0,4,0},.damage=50,.category=TCG_DAMAGE_PLUS},
@@ -7129,7 +7129,7 @@ const struct TcgCard gTcgCards[TCG_CARD_COUNT + 1] = {
 {.name="",.description="",.effect="NONE",.animation="ATK_ANIM_NONE",.cost={0},.damage=0,.category=TCG_DAMAGE_NORMAL},
 }
 },
-[1122] = {.id=1122, .name="Vileplume", .kind=TCG_POKEMON, .type=1, .rarity=2, .set=19, .set2=255, .dark=0, .holo=0, .flags=0, .origin=19,
+[1122] = {.id=1122, .name="Vileplume", .kind=TCG_POKEMON, .type=1, .rarity=2, .set=19, .set2=255, .dark=0, .holo=0, .flags=TCG_CF_READY, .origin=19,
 .hp=90, .stage=2, .species=45, .level=0, .retreat=2, .weakness=5, .resistance=255, .evolvesFrom="Gloom", .description="", .attacks={
 {.name="Poison Pollen",.description="Once during your turn (before your attack), you may flip a coin. If heads, the Defending Pokemon is now Poisoned. This power can't be used if Vileplume is affected by a Special Condition.",.effect="ecard1-69:p",.animation="ATK_ANIM_HIT",.cost={0,0,0,0,0,0,0,0,0},.damage=0,.category=TCG_POKEMON_POWER},
 {.name="Petal Dance",.description="Flip 3 coins. This attack does 30 damage times the number of heads. Vileplume is now Confused.",.effect="ecard1-69:a0",.animation="ATK_ANIM_HIT",.cost={0,1,0,0,0,0,1,0,0},.damage=30,.category=TCG_DAMAGE_X},
@@ -7688,21 +7688,21 @@ const struct TcgCard gTcgCards[TCG_CARD_COUNT + 1] = {
 {.name="",.description="",.effect="NONE",.animation="ATK_ANIM_NONE",.cost={0},.damage=0,.category=TCG_DAMAGE_NORMAL},
 }
 },
-[1215] = {.id=1215, .name="Ariados", .kind=TCG_POKEMON, .type=1, .rarity=2, .set=20, .set2=255, .dark=0, .holo=0, .flags=TCG_CF_BODY, .origin=20,
+[1215] = {.id=1215, .name="Ariados", .kind=TCG_POKEMON, .type=1, .rarity=2, .set=20, .set2=255, .dark=0, .holo=0, .flags=TCG_CF_BODY|TCG_CF_READY, .origin=20,
 .hp=70, .stage=1, .species=168, .level=0, .retreat=0, .weakness=0, .resistance=255, .evolvesFrom="Spinarak", .description="", .attacks={
 {.name="Gluey Slime",.description="As long as Ariados is in play, each player must pay an additional Colorless to retreat his or her Active Pokemon. Gluey Slime can't make a player pay more than an additional Colorless to retreat a Pokemon, even if there is more than 1 Ariados in play.",.effect="ecard2-3:p",.animation="ATK_ANIM_HIT",.cost={0,0,0,0,0,0,0,0,0},.damage=0,.category=TCG_POKEMON_POWER},
 {.name="Spider Force",.description="Flip a coin. If heads, this attack does 20 damage plus 10 more damage. If tails, this attack does 20 damage and the Defending Pokemon is now Paralyzed.",.effect="ecard2-3:a0",.animation="ATK_ANIM_HIT",.cost={0,1,0,0,0,0,1,0,0},.damage=20,.category=TCG_DAMAGE_PLUS},
 {.name="",.description="",.effect="NONE",.animation="ATK_ANIM_NONE",.cost={0},.damage=0,.category=TCG_DAMAGE_NORMAL},
 }
 },
-[1216] = {.id=1216, .name="Azumarill", .kind=TCG_POKEMON, .type=3, .rarity=2, .set=20, .set2=255, .dark=0, .holo=0, .flags=0, .origin=20,
+[1216] = {.id=1216, .name="Azumarill", .kind=TCG_POKEMON, .type=3, .rarity=2, .set=20, .set2=255, .dark=0, .holo=0, .flags=TCG_CF_READY, .origin=20,
 .hp=70, .stage=1, .species=184, .level=0, .retreat=1, .weakness=2, .resistance=255, .evolvesFrom="Marill", .description="", .attacks={
 {.name="Bubble Turn",.description="Once during your turn (before your attack), if Azumarill is on your Bench, you may flip a coin. If heads, return Azumarill and all cards attached to it to your hand.",.effect="ecard2-4:p",.animation="ATK_ANIM_HIT",.cost={0,0,0,0,0,0,0,0,0},.damage=0,.category=TCG_POKEMON_POWER},
 {.name="Aqua Sonic",.description="Don't apply Resistance.",.effect="ecard2-4:a0",.animation="ATK_ANIM_HIT",.cost={0,0,0,1,0,0,2,0,0},.damage=40,.category=TCG_DAMAGE_NORMAL},
 {.name="",.description="",.effect="NONE",.animation="ATK_ANIM_NONE",.cost={0},.damage=0,.category=TCG_DAMAGE_NORMAL},
 }
 },
-[1217] = {.id=1217, .name="Bellossom", .kind=TCG_POKEMON, .type=1, .rarity=2, .set=20, .set2=255, .dark=0, .holo=0, .flags=0, .origin=20,
+[1217] = {.id=1217, .name="Bellossom", .kind=TCG_POKEMON, .type=1, .rarity=2, .set=20, .set2=255, .dark=0, .holo=0, .flags=TCG_CF_READY, .origin=20,
 .hp=90, .stage=2, .species=182, .level=0, .retreat=2, .weakness=0, .resistance=3, .evolvesFrom="Gloom", .description="", .attacks={
 {.name="Flower Supplement",.description="Once during your turn (before your attack), you may flip a coin. If heads, attach 1 basic Energy card from your hand to 1 of your Benched Pokemon. This power can't be used if Bellossom is affected by a Special Condition.",.effect="ecard2-5:p",.animation="ATK_ANIM_HIT",.cost={0,0,0,0,0,0,0,0,0},.damage=0,.category=TCG_POKEMON_POWER},
 {.name="Knife Leaf",.description="Flip 3 coins. This attack does 30 damage times the number of heads.",.effect="ecard2-5:a0",.animation="ATK_ANIM_HIT",.cost={0,2,0,0,0,0,1,0,0},.damage=30,.category=TCG_DAMAGE_X},
@@ -7723,7 +7723,7 @@ const struct TcgCard gTcgCards[TCG_CARD_COUNT + 1] = {
 {.name="",.description="",.effect="NONE",.animation="ATK_ANIM_NONE",.cost={0},.damage=0,.category=TCG_DAMAGE_NORMAL},
 }
 },
-[1220] = {.id=1220, .name="Electrode", .kind=TCG_POKEMON, .type=2, .rarity=2, .set=20, .set2=255, .dark=0, .holo=0, .flags=0, .origin=20,
+[1220] = {.id=1220, .name="Electrode", .kind=TCG_POKEMON, .type=2, .rarity=2, .set=20, .set2=255, .dark=0, .holo=0, .flags=TCG_CF_READY, .origin=20,
 .hp=70, .stage=1, .species=101, .level=0, .retreat=1, .weakness=4, .resistance=255, .evolvesFrom="Voltorb", .description="", .attacks={
 {.name="Super Dynamo",.description="Once during your turn (before your attack), if Electrode is your Active Pokemon, you may flip a coin. If heads, choose a Lightning Energy card from your discard pile and attach it to 1 of your Pokemon. This power can't be used if Electrode is affected by a Special Condition.",.effect="ecard2-8:p",.animation="ATK_ANIM_HIT",.cost={0,0,0,0,0,0,0,0,0},.damage=0,.category=TCG_POKEMON_POWER},
 {.name="Swift",.description="This attack's damage isn't affected by Weakness, Resistance, Poke-Powers, Poke-Bodies, or any other effects on the Defending Pokemon.",.effect="ecard2-8:a0",.animation="ATK_ANIM_HIT",.cost={0,0,1,0,0,0,1,0,0},.damage=30,.category=TCG_DAMAGE_NORMAL},
@@ -7744,7 +7744,7 @@ const struct TcgCard gTcgCards[TCG_CARD_COUNT + 1] = {
 {.name="",.description="",.effect="NONE",.animation="ATK_ANIM_NONE",.cost={0},.damage=0,.category=TCG_DAMAGE_NORMAL},
 }
 },
-[1223] = {.id=1223, .name="Espeon", .kind=TCG_POKEMON, .type=5, .rarity=2, .set=20, .set2=255, .dark=0, .holo=0, .flags=0, .origin=20,
+[1223] = {.id=1223, .name="Espeon", .kind=TCG_POKEMON, .type=5, .rarity=2, .set=20, .set2=255, .dark=0, .holo=0, .flags=TCG_CF_READY, .origin=20,
 .hp=80, .stage=1, .species=196, .level=0, .retreat=0, .weakness=5, .resistance=255, .evolvesFrom="Eevee", .description="", .attacks={
 {.name="Energy Return",.description="As often as you like during your turn (before your attack), choose an Energy card attached to 1 of your Pokemon and return it to your hand. This power can't be used if Espeon is affected by a Special Condition.",.effect="ecard2-11:p",.animation="ATK_ANIM_HIT",.cost={0,0,0,0,0,0,0,0,0},.damage=0,.category=TCG_POKEMON_POWER},
 {.name="Damage Blast",.description="Flip a number of coins equal to the number of damage counters on the Defending Pokemon. This attack does 30 damage plus 10 more damage for each heads.",.effect="ecard2-11:a0",.animation="ATK_ANIM_HIT",.cost={0,0,0,0,0,1,2,0,0},.damage=30,.category=TCG_DAMAGE_PLUS},
@@ -7786,7 +7786,7 @@ const struct TcgCard gTcgCards[TCG_CARD_COUNT + 1] = {
 {.name="",.description="",.effect="NONE",.animation="ATK_ANIM_NONE",.cost={0},.damage=0,.category=TCG_DAMAGE_NORMAL},
 }
 },
-[1229] = {.id=1229, .name="Jumpluff", .kind=TCG_POKEMON, .type=1, .rarity=2, .set=20, .set2=255, .dark=0, .holo=0, .flags=TCG_CF_BODY, .origin=20,
+[1229] = {.id=1229, .name="Jumpluff", .kind=TCG_POKEMON, .type=1, .rarity=2, .set=20, .set2=255, .dark=0, .holo=0, .flags=TCG_CF_BODY|TCG_CF_READY, .origin=20,
 .hp=70, .stage=2, .species=189, .level=0, .retreat=0, .weakness=0, .resistance=3, .evolvesFrom="Skiploom", .description="", .attacks={
 {.name="Fluff",.description="During your opponent's turn, if Jumpluff would be damaged or affected by an opponent's attack and it already has at least 1 damage counter on it, flip a coin. If heads, prevent all effects of that attack (including damage).",.effect="ecard2-17:p",.animation="ATK_ANIM_HIT",.cost={0,0,0,0,0,0,0,0,0},.damage=0,.category=TCG_POKEMON_POWER},
 {.name="Cotton Punch",.description="Flip 2 coins. This attack does 30 times the number of heads.",.effect="ecard2-17:a0",.animation="ATK_ANIM_HIT",.cost={0,1,0,0,0,0,0,0,0},.damage=30,.category=TCG_DAMAGE_X},
@@ -7800,7 +7800,7 @@ const struct TcgCard gTcgCards[TCG_CARD_COUNT + 1] = {
 {.name="",.description="",.effect="NONE",.animation="ATK_ANIM_NONE",.cost={0},.damage=0,.category=TCG_DAMAGE_NORMAL},
 }
 },
-[1231] = {.id=1231, .name="Kingdra", .kind=TCG_POKEMON, .type=3, .rarity=2, .set=20, .set2=255, .dark=0, .holo=0, .flags=0, .origin=20,
+[1231] = {.id=1231, .name="Kingdra", .kind=TCG_POKEMON, .type=3, .rarity=2, .set=20, .set2=255, .dark=0, .holo=0, .flags=TCG_CF_READY, .origin=20,
 .hp=120, .stage=2, .species=230, .level=0, .retreat=3, .weakness=2, .resistance=255, .evolvesFrom="Seadra", .description="", .attacks={
 {.name="Water Cyclone",.description="As often as you like during your turn (before your attack), you may move a Water Energy card from your Active Pokemon to 1 of your Benched Pokemon. This power can't be used if Kingdra is affected by a Special Condition.",.effect="ecard2-19:p",.animation="ATK_ANIM_HIT",.cost={0,0,0,0,0,0,0,0,0},.damage=0,.category=TCG_POKEMON_POWER},
 {.name="Rapids",.description="Flip a coin. If heads, discard 1 Energy card attached to the Defending Pokemon, if any.",.effect="ecard2-19:a0",.animation="ATK_ANIM_HIT",.cost={0,0,0,2,0,0,2,0,0},.damage=50,.category=TCG_DAMAGE_NORMAL},
@@ -7835,7 +7835,7 @@ const struct TcgCard gTcgCards[TCG_CARD_COUNT + 1] = {
 {.name="",.description="",.effect="NONE",.animation="ATK_ANIM_NONE",.cost={0},.damage=0,.category=TCG_DAMAGE_NORMAL},
 }
 },
-[1236] = {.id=1236, .name="Nidoking", .kind=TCG_POKEMON, .type=4, .rarity=2, .set=20, .set2=255, .dark=0, .holo=0, .flags=0, .origin=20,
+[1236] = {.id=1236, .name="Nidoking", .kind=TCG_POKEMON, .type=4, .rarity=2, .set=20, .set2=255, .dark=0, .holo=0, .flags=TCG_CF_READY, .origin=20,
 .hp=110, .stage=2, .species=34, .level=0, .retreat=3, .weakness=1, .resistance=2, .evolvesFrom="Nidorino", .description="", .attacks={
 {.name="Earth Rage",.description="Once during your turn (before your attack), if Nidoking is your Active Pokemon, you may flip a coin. If heads, put a damage counter on each of your opponent's Benched Pokemon. This power can't be used if Nidoking is affected by a Special Condition.",.effect="ecard2-24:p",.animation="ATK_ANIM_HIT",.cost={0,0,0,0,0,0,0,0,0},.damage=0,.category=TCG_POKEMON_POWER},
 {.name="Giant Horn",.description="Flip a coin. If heads, this attack does 50 damage plus 30 more damage.",.effect="ecard2-24:a0",.animation="ATK_ANIM_HIT",.cost={0,0,0,0,2,0,2,0,0},.damage=50,.category=TCG_DAMAGE_PLUS},
@@ -7849,7 +7849,7 @@ const struct TcgCard gTcgCards[TCG_CARD_COUNT + 1] = {
 {.name="",.description="",.effect="NONE",.animation="ATK_ANIM_NONE",.cost={0},.damage=0,.category=TCG_DAMAGE_NORMAL},
 }
 },
-[1238] = {.id=1238, .name="Octillery", .kind=TCG_POKEMON, .type=3, .rarity=2, .set=20, .set2=255, .dark=0, .holo=0, .flags=TCG_CF_BODY, .origin=20,
+[1238] = {.id=1238, .name="Octillery", .kind=TCG_POKEMON, .type=3, .rarity=2, .set=20, .set2=255, .dark=0, .holo=0, .flags=TCG_CF_BODY|TCG_CF_READY, .origin=20,
 .hp=80, .stage=1, .species=224, .level=0, .retreat=2, .weakness=2, .resistance=255, .evolvesFrom="Remoraid", .description="", .attacks={
 {.name="Suction Cups",.description="As long as Octillery is your Active Pokemon, whenever the Defending Pokemon retreats, discard all Energy cards attached to the Defending Pokemon when it goes to the Bench.",.effect="ecard2-26:p",.animation="ATK_ANIM_HIT",.cost={0,0,0,0,0,0,0,0,0},.damage=0,.category=TCG_POKEMON_POWER},
 {.name="Smokescreen",.description="If the Defending Pokemon tries to attack during your opponent's next turn, your opponent flips a coin. If tails, that attack does nothing.",.effect="ecard2-26:a0",.animation="ATK_ANIM_HIT",.cost={0,0,0,1,0,0,2,0,0},.damage=40,.category=TCG_DAMAGE_NORMAL},
@@ -7926,7 +7926,7 @@ const struct TcgCard gTcgCards[TCG_CARD_COUNT + 1] = {
 {.name="",.description="",.effect="NONE",.animation="ATK_ANIM_NONE",.cost={0},.damage=0,.category=TCG_DAMAGE_NORMAL},
 }
 },
-[1249] = {.id=1249, .name="Suicune", .kind=TCG_POKEMON, .type=3, .rarity=2, .set=20, .set2=255, .dark=0, .holo=0, .flags=TCG_CF_BODY, .origin=20,
+[1249] = {.id=1249, .name="Suicune", .kind=TCG_POKEMON, .type=3, .rarity=2, .set=20, .set2=255, .dark=0, .holo=0, .flags=TCG_CF_BODY|TCG_CF_READY, .origin=20,
 .hp=70, .stage=0, .species=245, .level=0, .retreat=1, .weakness=2, .resistance=255, .evolvesFrom="", .description="", .attacks={
 {.name="Pure Body",.description="To attach a Water Energy card from your hand to Suicune, you must discard an Energy card attached to Suicune. (Attach the Water Energy, and then discard an Energy card from Suicune.)",.effect="ecard2-37:p",.animation="ATK_ANIM_HIT",.cost={0,0,0,0,0,0,0,0,0},.damage=0,.category=TCG_POKEMON_POWER},
 {.name="Hypno Wave",.description="Flip a coin. If heads, this attack does 30 damage plus 20 more damage. If tails, this attack does 30 damage and the Defending Pokemon is now Asleep.",.effect="ecard2-37:a0",.animation="ATK_ANIM_HIT",.cost={0,0,0,1,0,0,2,0,0},.damage=30,.category=TCG_DAMAGE_PLUS},
@@ -7961,7 +7961,7 @@ const struct TcgCard gTcgCards[TCG_CARD_COUNT + 1] = {
 {.name="",.description="",.effect="NONE",.animation="ATK_ANIM_NONE",.cost={0},.damage=0,.category=TCG_DAMAGE_NORMAL},
 }
 },
-[1254] = {.id=1254, .name="Victreebel", .kind=TCG_POKEMON, .type=1, .rarity=2, .set=20, .set2=255, .dark=0, .holo=0, .flags=0, .origin=20,
+[1254] = {.id=1254, .name="Victreebel", .kind=TCG_POKEMON, .type=1, .rarity=2, .set=20, .set2=255, .dark=0, .holo=0, .flags=TCG_CF_READY, .origin=20,
 .hp=90, .stage=2, .species=71, .level=0, .retreat=2, .weakness=0, .resistance=255, .evolvesFrom="Weepinbell", .description="", .attacks={
 {.name="Fragrance Trap",.description="Once during your turn (before your attack), you may flip a coin. If heads, choose 1 of your opponent's Benched Pokemon and switch the Defending Pokemon with it. This Power can't be used if Victreebel is affected by a Special Condition.",.effect="ecard2-42:p",.animation="ATK_ANIM_HIT",.cost={0,0,0,0,0,0,0,0,0},.damage=0,.category=TCG_POKEMON_POWER},
 {.name="Corrosive Acid",.description="Flip a coin. If heads, the Defending Pokemon is now Burned.",.effect="ecard2-42:a0",.animation="ATK_ANIM_HIT",.cost={0,2,0,0,0,0,1,0,0},.damage=40,.category=TCG_DAMAGE_NORMAL},
@@ -7975,7 +7975,7 @@ const struct TcgCard gTcgCards[TCG_CARD_COUNT + 1] = {
 {.name="",.description="",.effect="NONE",.animation="ATK_ANIM_NONE",.cost={0},.damage=0,.category=TCG_DAMAGE_NORMAL},
 }
 },
-[1256] = {.id=1256, .name="Zapdos", .kind=TCG_POKEMON, .type=2, .rarity=2, .set=20, .set2=255, .dark=0, .holo=0, .flags=TCG_CF_BODY, .origin=20,
+[1256] = {.id=1256, .name="Zapdos", .kind=TCG_POKEMON, .type=2, .rarity=2, .set=20, .set2=255, .dark=0, .holo=0, .flags=TCG_CF_BODY|TCG_CF_READY, .origin=20,
 .hp=80, .stage=0, .species=145, .level=0, .retreat=2, .weakness=2, .resistance=4, .evolvesFrom="", .description="", .attacks={
 {.name="Anti-Lightning",.description="You can't attach Lightning Energy cards from your hand to Zapdos.",.effect="ecard2-44:p",.animation="ATK_ANIM_HIT",.cost={0,0,0,0,0,0,0,0,0},.damage=0,.category=TCG_POKEMON_POWER},
 {.name="Plasma",.description="If there are any Lightning Energy cards in your discard pile, flip a coin. If heads, attach 1 of them to Zapdos.",.effect="ecard2-44:a0",.animation="ATK_ANIM_HIT",.cost={0,0,0,0,0,0,1,0,0},.damage=10,.category=TCG_DAMAGE_NORMAL},
@@ -8087,7 +8087,7 @@ const struct TcgCard gTcgCards[TCG_CARD_COUNT + 1] = {
 {.name="",.description="",.effect="NONE",.animation="ATK_ANIM_NONE",.cost={0},.damage=0,.category=TCG_DAMAGE_NORMAL},
 }
 },
-[1272] = {.id=1272, .name="Skiploom", .kind=TCG_POKEMON, .type=1, .rarity=1, .set=20, .set2=255, .dark=0, .holo=0, .flags=TCG_CF_BODY, .origin=20,
+[1272] = {.id=1272, .name="Skiploom", .kind=TCG_POKEMON, .type=1, .rarity=1, .set=20, .set2=255, .dark=0, .holo=0, .flags=TCG_CF_BODY|TCG_CF_READY, .origin=20,
 .hp=60, .stage=1, .species=188, .level=0, .retreat=1, .weakness=0, .resistance=3, .evolvesFrom="Hoppip", .description="", .attacks={
 {.name="Lightweight",.description="You pay Colorless less to retreat Skiploom for each Grass Energy attached to it.",.effect="ecard2-60:p",.animation="ATK_ANIM_HIT",.cost={0,0,0,0,0,0,0,0,0},.damage=0,.category=TCG_POKEMON_POWER},
 {.name="Break Powder",.description="Flip a coin. If heads, this attack does 10 damage plus 20 more damage. If tails, this attack does 10 damage and the Defending Pokemon is now Asleep.",.effect="ecard2-60:a0",.animation="ATK_ANIM_HIT",.cost={0,0,0,0,0,0,1,0,0},.damage=10,.category=TCG_DAMAGE_PLUS},
@@ -8248,7 +8248,7 @@ const struct TcgCard gTcgCards[TCG_CARD_COUNT + 1] = {
 {.name="",.description="",.effect="NONE",.animation="ATK_ANIM_NONE",.cost={0},.damage=0,.category=TCG_DAMAGE_NORMAL},
 }
 },
-[1295] = {.id=1295, .name="Hoppip", .kind=TCG_POKEMON, .type=1, .rarity=0, .set=20, .set2=255, .dark=0, .holo=0, .flags=TCG_CF_BODY, .origin=20,
+[1295] = {.id=1295, .name="Hoppip", .kind=TCG_POKEMON, .type=1, .rarity=0, .set=20, .set2=255, .dark=0, .holo=0, .flags=TCG_CF_BODY|TCG_CF_READY, .origin=20,
 .hp=40, .stage=0, .species=187, .level=0, .retreat=1, .weakness=0, .resistance=3, .evolvesFrom="", .description="", .attacks={
 {.name="Lightweight",.description="You pay Colorless less to retreat Hoppip for each Grass Energy attached to it.",.effect="ecard2-83:p",.animation="ATK_ANIM_HIT",.cost={0,0,0,0,0,0,0,0,0},.damage=0,.category=TCG_POKEMON_POWER},
 {.name="Careless Tackle",.description="Hoppip does 10 damage to itself.",.effect="ecard2-83:a0",.animation="ATK_ANIM_HIT",.cost={0,0,0,0,0,0,1,0,0},.damage=20,.category=TCG_DAMAGE_NORMAL},
@@ -8618,21 +8618,21 @@ const struct TcgCard gTcgCards[TCG_CARD_COUNT + 1] = {
 {.name="",.description="",.effect="NONE",.animation="ATK_ANIM_NONE",.cost={0},.damage=0,.category=TCG_DAMAGE_NORMAL},
 }
 },
-[1365] = {.id=1365, .name="Ariados", .kind=TCG_POKEMON, .type=1, .rarity=2, .set=20, .set2=255, .dark=0, .holo=1, .flags=TCG_CF_BODY, .origin=20,
+[1365] = {.id=1365, .name="Ariados", .kind=TCG_POKEMON, .type=1, .rarity=2, .set=20, .set2=255, .dark=0, .holo=1, .flags=TCG_CF_BODY|TCG_CF_READY, .origin=20,
 .hp=70, .stage=1, .species=168, .level=0, .retreat=0, .weakness=0, .resistance=255, .evolvesFrom="Spinarak", .description="", .attacks={
 {.name="Gluey Slime",.description="As long as Ariados is in play, each player must pay an additional Colorless to retreat his or her Active Pokemon. Gluey Slime can't make a player pay more than an additional Colorless to retreat a Pokemon, even if there is more than 1 Ariados in play.",.effect="ecard2-H3:p",.animation="ATK_ANIM_HIT",.cost={0,0,0,0,0,0,0,0,0},.damage=0,.category=TCG_POKEMON_POWER},
 {.name="Spider Force",.description="Flip a coin. If heads, this attack does 20 damage plus 10 more damage. If tails, this attack does 20 damage and the defending Pokemon is now Paralyzed.",.effect="ecard2-H3:a0",.animation="ATK_ANIM_HIT",.cost={0,1,0,0,0,0,1,0,0},.damage=20,.category=TCG_DAMAGE_PLUS},
 {.name="",.description="",.effect="NONE",.animation="ATK_ANIM_NONE",.cost={0},.damage=0,.category=TCG_DAMAGE_NORMAL},
 }
 },
-[1366] = {.id=1366, .name="Azumarill", .kind=TCG_POKEMON, .type=3, .rarity=2, .set=20, .set2=255, .dark=0, .holo=1, .flags=0, .origin=20,
+[1366] = {.id=1366, .name="Azumarill", .kind=TCG_POKEMON, .type=3, .rarity=2, .set=20, .set2=255, .dark=0, .holo=1, .flags=TCG_CF_READY, .origin=20,
 .hp=70, .stage=1, .species=184, .level=0, .retreat=1, .weakness=2, .resistance=255, .evolvesFrom="Marill", .description="", .attacks={
 {.name="Bubble Turn",.description="Once during your turn (before your attack), if Azumarill is on your Bench, you may flip a coin. If heads, return Azumarill and all cards attached to it to your hand.",.effect="ecard2-H4:p",.animation="ATK_ANIM_HIT",.cost={0,0,0,0,0,0,0,0,0},.damage=0,.category=TCG_POKEMON_POWER},
 {.name="Aqua Sonic",.description="Don't apply Resistance.",.effect="ecard2-H4:a0",.animation="ATK_ANIM_HIT",.cost={0,0,0,1,0,0,2,0,0},.damage=40,.category=TCG_DAMAGE_NORMAL},
 {.name="",.description="",.effect="NONE",.animation="ATK_ANIM_NONE",.cost={0},.damage=0,.category=TCG_DAMAGE_NORMAL},
 }
 },
-[1367] = {.id=1367, .name="Bellossom", .kind=TCG_POKEMON, .type=1, .rarity=2, .set=20, .set2=255, .dark=0, .holo=1, .flags=0, .origin=20,
+[1367] = {.id=1367, .name="Bellossom", .kind=TCG_POKEMON, .type=1, .rarity=2, .set=20, .set2=255, .dark=0, .holo=1, .flags=TCG_CF_READY, .origin=20,
 .hp=90, .stage=2, .species=182, .level=0, .retreat=2, .weakness=0, .resistance=3, .evolvesFrom="Gloom", .description="", .attacks={
 {.name="Flower Supplement",.description="Once during your turn (before your attack), you may flip a coin. If heads, attach 1 basic Energy card from your hand to 1 of your Benched Pokemon. This power can't be used if Bellossom is affected by a Special Condition.",.effect="ecard2-H5:p",.animation="ATK_ANIM_HIT",.cost={0,0,0,0,0,0,0,0,0},.damage=0,.category=TCG_POKEMON_POWER},
 {.name="Knife Leaf",.description="Flip 3 coins. This attack does 30 damage times the number of heads.",.effect="ecard2-H5:a0",.animation="ATK_ANIM_HIT",.cost={0,2,0,0,0,0,1,0,0},.damage=30,.category=TCG_DAMAGE_X},
@@ -8646,7 +8646,7 @@ const struct TcgCard gTcgCards[TCG_CARD_COUNT + 1] = {
 {.name="",.description="",.effect="NONE",.animation="ATK_ANIM_NONE",.cost={0},.damage=0,.category=TCG_DAMAGE_NORMAL},
 }
 },
-[1369] = {.id=1369, .name="Electrode", .kind=TCG_POKEMON, .type=2, .rarity=2, .set=20, .set2=255, .dark=0, .holo=1, .flags=0, .origin=20,
+[1369] = {.id=1369, .name="Electrode", .kind=TCG_POKEMON, .type=2, .rarity=2, .set=20, .set2=255, .dark=0, .holo=1, .flags=TCG_CF_READY, .origin=20,
 .hp=70, .stage=1, .species=101, .level=0, .retreat=1, .weakness=4, .resistance=255, .evolvesFrom="Voltorb", .description="", .attacks={
 {.name="Super Dynamo",.description="Once during your turn (before your attack), if Electrode is your Active Pokemon, you may flip a coin. If heads, choose a Lightning Energy card from your discard pile and attach it to 1 of your Pokemon. This power can't be used if Electrode is affected by a Special Condition.",.effect="ecard2-H7:p",.animation="ATK_ANIM_HIT",.cost={0,0,0,0,0,0,0,0,0},.damage=0,.category=TCG_POKEMON_POWER},
 {.name="Swift",.description="This attack's damage isn't affected by Weakness, Resistance, Poke-Powers, Poke-Bodies, or any other effects on the Defending Pokemon.",.effect="ecard2-H7:a0",.animation="ATK_ANIM_HIT",.cost={0,0,1,0,0,0,1,0,0},.damage=30,.category=TCG_DAMAGE_NORMAL},
@@ -8660,7 +8660,7 @@ const struct TcgCard gTcgCards[TCG_CARD_COUNT + 1] = {
 {.name="",.description="",.effect="NONE",.animation="ATK_ANIM_NONE",.cost={0},.damage=0,.category=TCG_DAMAGE_NORMAL},
 }
 },
-[1371] = {.id=1371, .name="Espeon", .kind=TCG_POKEMON, .type=5, .rarity=2, .set=20, .set2=255, .dark=0, .holo=1, .flags=0, .origin=20,
+[1371] = {.id=1371, .name="Espeon", .kind=TCG_POKEMON, .type=5, .rarity=2, .set=20, .set2=255, .dark=0, .holo=1, .flags=TCG_CF_READY, .origin=20,
 .hp=80, .stage=1, .species=196, .level=0, .retreat=0, .weakness=5, .resistance=255, .evolvesFrom="Eevee", .description="", .attacks={
 {.name="Energy Return",.description="As often as you like during your turn (before your attack), choose an Energy card attached to 1 of your Pokemon and return it to your hand. This power can't be used if Espeon is affected by a Special Condition.",.effect="ecard2-H9:p",.animation="ATK_ANIM_HIT",.cost={0,0,0,0,0,0,0,0,0},.damage=0,.category=TCG_POKEMON_POWER},
 {.name="Damage Blast",.description="Flip a number of coins equal to the number of damage counters on the Defending Pokemon. This attack does 30 damage plus 10 more damage for each heads.",.effect="ecard2-H9:a0",.animation="ATK_ANIM_HIT",.cost={0,0,0,0,0,1,2,0,0},.damage=30,.category=TCG_DAMAGE_PLUS},
@@ -8688,14 +8688,14 @@ const struct TcgCard gTcgCards[TCG_CARD_COUNT + 1] = {
 {.name="",.description="",.effect="NONE",.animation="ATK_ANIM_NONE",.cost={0},.damage=0,.category=TCG_DAMAGE_NORMAL},
 }
 },
-[1375] = {.id=1375, .name="Jumpluff", .kind=TCG_POKEMON, .type=1, .rarity=2, .set=20, .set2=255, .dark=0, .holo=1, .flags=TCG_CF_BODY, .origin=20,
+[1375] = {.id=1375, .name="Jumpluff", .kind=TCG_POKEMON, .type=1, .rarity=2, .set=20, .set2=255, .dark=0, .holo=1, .flags=TCG_CF_BODY|TCG_CF_READY, .origin=20,
 .hp=70, .stage=2, .species=189, .level=0, .retreat=0, .weakness=0, .resistance=3, .evolvesFrom="Skiploom", .description="", .attacks={
 {.name="Fluff",.description="During your opponent's turn, if Jumpluff would be damaged or affected by an opponent's attack and it already has at least 1 damage counter on it, flip a coin. If heads, prevent all effects of that attack (including damage).",.effect="ecard2-H13:p",.animation="ATK_ANIM_HIT",.cost={0,0,0,0,0,0,0,0,0},.damage=0,.category=TCG_POKEMON_POWER},
 {.name="Cotton Punch",.description="Flip 2 coins. This attack does 30 times the number of heads.",.effect="ecard2-H13:a0",.animation="ATK_ANIM_HIT",.cost={0,1,0,0,0,0,0,0,0},.damage=30,.category=TCG_DAMAGE_X},
 {.name="",.description="",.effect="NONE",.animation="ATK_ANIM_NONE",.cost={0},.damage=0,.category=TCG_DAMAGE_NORMAL},
 }
 },
-[1376] = {.id=1376, .name="Kingdra", .kind=TCG_POKEMON, .type=3, .rarity=2, .set=20, .set2=255, .dark=0, .holo=1, .flags=0, .origin=20,
+[1376] = {.id=1376, .name="Kingdra", .kind=TCG_POKEMON, .type=3, .rarity=2, .set=20, .set2=255, .dark=0, .holo=1, .flags=TCG_CF_READY, .origin=20,
 .hp=120, .stage=2, .species=230, .level=0, .retreat=3, .weakness=2, .resistance=255, .evolvesFrom="Seadra", .description="", .attacks={
 {.name="Water Cyclone",.description="As often as you like during your turn (before your attack), you may move a Water Energy card from your Active Pokemon to 1 of your Benched Pokemon. This power can't be used if Kingdra is affected by a Special Condition.",.effect="ecard2-H14:p",.animation="ATK_ANIM_HIT",.cost={0,0,0,0,0,0,0,0,0},.damage=0,.category=TCG_POKEMON_POWER},
 {.name="Rapids",.description="Flip a coin. If heads, discard 1 Energy card attached to the Defending Pokemon, if any.",.effect="ecard2-H14:a0",.animation="ATK_ANIM_HIT",.cost={0,0,0,2,0,0,2,0,0},.damage=50,.category=TCG_DAMAGE_NORMAL},
@@ -8723,7 +8723,7 @@ const struct TcgCard gTcgCards[TCG_CARD_COUNT + 1] = {
 {.name="",.description="",.effect="NONE",.animation="ATK_ANIM_NONE",.cost={0},.damage=0,.category=TCG_DAMAGE_NORMAL},
 }
 },
-[1380] = {.id=1380, .name="Nidoking", .kind=TCG_POKEMON, .type=4, .rarity=2, .set=20, .set2=255, .dark=0, .holo=1, .flags=0, .origin=20,
+[1380] = {.id=1380, .name="Nidoking", .kind=TCG_POKEMON, .type=4, .rarity=2, .set=20, .set2=255, .dark=0, .holo=1, .flags=TCG_CF_READY, .origin=20,
 .hp=110, .stage=2, .species=34, .level=0, .retreat=3, .weakness=1, .resistance=2, .evolvesFrom="Nidorino", .description="", .attacks={
 {.name="Earth Rage",.description="Once during your turn (before your attack), if Nidoking is your Active Pokemon, you may flip a coin. If heads, put a damage counter on each of your opponent's Benched Pokemon. This power can't be used if Nidoking is affected by a Special Condition.",.effect="ecard2-H18:p",.animation="ATK_ANIM_HIT",.cost={0,0,0,0,0,0,0,0,0},.damage=0,.category=TCG_POKEMON_POWER},
 {.name="Giant Horn",.description="Flip a coin. If heads, this attack does 50 damage plus 30 more damage.",.effect="ecard2-H18:a0",.animation="ATK_ANIM_HIT",.cost={0,0,0,0,2,0,2,0,0},.damage=50,.category=TCG_DAMAGE_PLUS},
@@ -8737,7 +8737,7 @@ const struct TcgCard gTcgCards[TCG_CARD_COUNT + 1] = {
 {.name="",.description="",.effect="NONE",.animation="ATK_ANIM_NONE",.cost={0},.damage=0,.category=TCG_DAMAGE_NORMAL},
 }
 },
-[1382] = {.id=1382, .name="Octillery", .kind=TCG_POKEMON, .type=3, .rarity=2, .set=20, .set2=255, .dark=0, .holo=1, .flags=TCG_CF_BODY, .origin=20,
+[1382] = {.id=1382, .name="Octillery", .kind=TCG_POKEMON, .type=3, .rarity=2, .set=20, .set2=255, .dark=0, .holo=1, .flags=TCG_CF_BODY|TCG_CF_READY, .origin=20,
 .hp=80, .stage=1, .species=224, .level=0, .retreat=2, .weakness=2, .resistance=255, .evolvesFrom="Remoraid", .description="", .attacks={
 {.name="Suction Cups",.description="As long as Octillery is your Active Pokemon, whenever the Defending Pokemon retreats, discard all Energy cards attached to the Defending Pokemon when it goes to the Bench.",.effect="ecard2-H20:p",.animation="ATK_ANIM_HIT",.cost={0,0,0,0,0,0,0,0,0},.damage=0,.category=TCG_POKEMON_POWER},
 {.name="Smokescreen",.description="If the Defending Pokemon tries to attack during your opponent's next turn, your opponent flips a coin. If tails, that attack does nothing.",.effect="ecard2-H20:a0",.animation="ATK_ANIM_HIT",.cost={0,0,0,1,0,0,2,0,0},.damage=40,.category=TCG_DAMAGE_NORMAL},
@@ -8772,7 +8772,7 @@ const struct TcgCard gTcgCards[TCG_CARD_COUNT + 1] = {
 {.name="",.description="",.effect="NONE",.animation="ATK_ANIM_NONE",.cost={0},.damage=0,.category=TCG_DAMAGE_NORMAL},
 }
 },
-[1387] = {.id=1387, .name="Suicune", .kind=TCG_POKEMON, .type=3, .rarity=2, .set=20, .set2=255, .dark=0, .holo=1, .flags=TCG_CF_BODY, .origin=20,
+[1387] = {.id=1387, .name="Suicune", .kind=TCG_POKEMON, .type=3, .rarity=2, .set=20, .set2=255, .dark=0, .holo=1, .flags=TCG_CF_BODY|TCG_CF_READY, .origin=20,
 .hp=70, .stage=0, .species=245, .level=0, .retreat=1, .weakness=2, .resistance=255, .evolvesFrom="", .description="", .attacks={
 {.name="Pure Body",.description="To attach a Water Energy card from your hand to Suicune, you must discard an Energy card attached to Suicune. (Attach the Water Energy, and then discard an Energy card from Suicune.)",.effect="ecard2-H25:p",.animation="ATK_ANIM_HIT",.cost={0,0,0,0,0,0,0,0,0},.damage=0,.category=TCG_POKEMON_POWER},
 {.name="Hypno Wave",.description="Flip a coin. If heads, this attack does 30 damage plus 20 more damage. If tails, this attack does 30 damage and the Defending Pokemon is now Asleep.",.effect="ecard2-H25:a0",.animation="ATK_ANIM_HIT",.cost={0,0,0,1,0,0,2,0,0},.damage=30,.category=TCG_DAMAGE_PLUS},
@@ -8807,7 +8807,7 @@ const struct TcgCard gTcgCards[TCG_CARD_COUNT + 1] = {
 {.name="",.description="",.effect="NONE",.animation="ATK_ANIM_NONE",.cost={0},.damage=0,.category=TCG_DAMAGE_NORMAL},
 }
 },
-[1392] = {.id=1392, .name="Victreebel", .kind=TCG_POKEMON, .type=1, .rarity=2, .set=20, .set2=255, .dark=0, .holo=1, .flags=0, .origin=20,
+[1392] = {.id=1392, .name="Victreebel", .kind=TCG_POKEMON, .type=1, .rarity=2, .set=20, .set2=255, .dark=0, .holo=1, .flags=TCG_CF_READY, .origin=20,
 .hp=90, .stage=2, .species=71, .level=0, .retreat=2, .weakness=0, .resistance=255, .evolvesFrom="Weepinbell", .description="", .attacks={
 {.name="Fragrance Trap",.description="Once during your turn (before your attack), you may flip a coin. If heads, choose 1 of your opponent's Benched Pokemon and switch the Defending Pokemon with it. This Power can't be used if Victreebel is affected by a Special Condition.",.effect="ecard2-H30:p",.animation="ATK_ANIM_HIT",.cost={0,0,0,0,0,0,0,0,0},.damage=0,.category=TCG_POKEMON_POWER},
 {.name="Corrosive Acid",.description="Flip a coin. If heads, the Defending Pokemon is now Burned.",.effect="ecard2-H30:a0",.animation="ATK_ANIM_HIT",.cost={0,2,0,0,0,0,1,0,0},.damage=40,.category=TCG_DAMAGE_NORMAL},
@@ -8821,7 +8821,7 @@ const struct TcgCard gTcgCards[TCG_CARD_COUNT + 1] = {
 {.name="",.description="",.effect="NONE",.animation="ATK_ANIM_NONE",.cost={0},.damage=0,.category=TCG_DAMAGE_NORMAL},
 }
 },
-[1394] = {.id=1394, .name="Zapdos", .kind=TCG_POKEMON, .type=2, .rarity=2, .set=20, .set2=255, .dark=0, .holo=1, .flags=TCG_CF_BODY, .origin=20,
+[1394] = {.id=1394, .name="Zapdos", .kind=TCG_POKEMON, .type=2, .rarity=2, .set=20, .set2=255, .dark=0, .holo=1, .flags=TCG_CF_BODY|TCG_CF_READY, .origin=20,
 .hp=80, .stage=0, .species=145, .level=0, .retreat=2, .weakness=2, .resistance=4, .evolvesFrom="", .description="", .attacks={
 {.name="Anti-Lightning",.description="You can't attach Lightning Energy cards from your hand to Zapdos.",.effect="ecard2-H32:p",.animation="ATK_ANIM_HIT",.cost={0,0,0,0,0,0,0,0,0},.damage=0,.category=TCG_POKEMON_POWER},
 {.name="Plasma",.description="If there are any Lightning Energy cards in your discard pile, flip a coin. If heads, attach 1 of them to Zapdos.",.effect="ecard2-H32:a0",.animation="ATK_ANIM_HIT",.cost={0,0,0,0,0,0,1,0,0},.damage=10,.category=TCG_DAMAGE_NORMAL},
@@ -8835,21 +8835,21 @@ const struct TcgCard gTcgCards[TCG_CARD_COUNT + 1] = {
 {.name="",.description="",.effect="NONE",.animation="ATK_ANIM_NONE",.cost={0},.damage=0,.category=TCG_DAMAGE_NORMAL},
 }
 },
-[1396] = {.id=1396, .name="Alakazam", .kind=TCG_POKEMON, .type=5, .rarity=2, .set=21, .set2=255, .dark=0, .holo=0, .flags=0, .origin=21,
+[1396] = {.id=1396, .name="Alakazam", .kind=TCG_POKEMON, .type=5, .rarity=2, .set=21, .set2=255, .dark=0, .holo=0, .flags=TCG_CF_READY, .origin=21,
 .hp=100, .stage=2, .species=65, .level=0, .retreat=2, .weakness=5, .resistance=255, .evolvesFrom="Kadabra", .description="", .attacks={
 {.name="Energy Jump",.description="Once during your turn (before your attack), you may move an Energy card from 1 of your Pokemon to another of your Pokemon. This power can't be used if Alakazam is affected by a Special Condition.",.effect="ecard3-2:p",.animation="ATK_ANIM_HIT",.cost={0,0,0,0,0,0,0,0,0},.damage=0,.category=TCG_POKEMON_POWER},
 {.name="Psychic",.description="This attack does 30 damage plus 10 more damage for each Energy card attached to the Defending Pokemon.",.effect="ecard3-2:a0",.animation="ATK_ANIM_HIT",.cost={0,0,0,0,0,0,3,0,0},.damage=30,.category=TCG_DAMAGE_PLUS},
 {.name="",.description="",.effect="NONE",.animation="ATK_ANIM_NONE",.cost={0},.damage=0,.category=TCG_DAMAGE_NORMAL},
 }
 },
-[1397] = {.id=1397, .name="Arcanine", .kind=TCG_POKEMON, .type=0, .rarity=2, .set=21, .set2=255, .dark=0, .holo=0, .flags=0, .origin=21,
+[1397] = {.id=1397, .name="Arcanine", .kind=TCG_POKEMON, .type=0, .rarity=2, .set=21, .set2=255, .dark=0, .holo=0, .flags=TCG_CF_READY, .origin=21,
 .hp=80, .stage=1, .species=59, .level=0, .retreat=2, .weakness=3, .resistance=255, .evolvesFrom="Growlithe", .description="", .attacks={
 {.name="Energy Recharge",.description="When you play Arcanine from your hand to evolve your Active Pokemon, you may flip 3 coins. For each heads, choose a basic Energy card from your discard pile and attach it to Arcanine.",.effect="ecard3-3:p",.animation="ATK_ANIM_HIT",.cost={0,0,0,0,0,0,0,0,0},.damage=0,.category=TCG_POKEMON_POWER},
 {.name="Shake",.description="Your opponent switches the Defending Pokemon with 1 of his or her Benched Pokemon, if any.",.effect="ecard3-3:a0",.animation="ATK_ANIM_HIT",.cost={0,0,0,0,0,0,1,0,0},.damage=10,.category=TCG_DAMAGE_NORMAL},
 {.name="White Flames",.description="Discard all Fire Energy cards attached to Arcanine.",.effect="ecard3-3:a1",.animation="ATK_ANIM_HIT",.cost={2,0,0,0,0,0,1,0,0},.damage=70,.category=TCG_DAMAGE_NORMAL},
 }
 },
-[1398] = {.id=1398, .name="Articuno", .kind=TCG_POKEMON, .type=3, .rarity=2, .set=21, .set2=255, .dark=0, .holo=0, .flags=TCG_CF_BODY, .origin=21,
+[1398] = {.id=1398, .name="Articuno", .kind=TCG_POKEMON, .type=3, .rarity=2, .set=21, .set2=255, .dark=0, .holo=0, .flags=TCG_CF_BODY|TCG_CF_READY, .origin=21,
 .hp=80, .stage=0, .species=144, .level=0, .retreat=2, .weakness=8, .resistance=4, .evolvesFrom="", .description="", .attacks={
 {.name="Water Immunity",.description="You can't attach Water Energy cards from your hand to Articuno.",.effect="ecard3-4:p",.animation="ATK_ANIM_HIT",.cost={0,0,0,0,0,0,0,0,0},.damage=0,.category=TCG_POKEMON_POWER},
 {.name="Freeze Solid",.description="If there are any Water Energy cards in your discard pile, flip a coin. If heads, attach 1 of them to Articuno.",.effect="ecard3-4:a0",.animation="ATK_ANIM_HIT",.cost={0,0,0,0,0,0,1,0,0},.damage=10,.category=TCG_DAMAGE_NORMAL},
@@ -8863,7 +8863,7 @@ const struct TcgCard gTcgCards[TCG_CARD_COUNT + 1] = {
 {.name="",.description="",.effect="NONE",.animation="ATK_ANIM_NONE",.cost={0},.damage=0,.category=TCG_DAMAGE_NORMAL},
 }
 },
-[1400] = {.id=1400, .name="Crobat", .kind=TCG_POKEMON, .type=1, .rarity=2, .set=21, .set2=255, .dark=0, .holo=0, .flags=0, .origin=21,
+[1400] = {.id=1400, .name="Crobat", .kind=TCG_POKEMON, .type=1, .rarity=2, .set=21, .set2=255, .dark=0, .holo=0, .flags=TCG_CF_READY, .origin=21,
 .hp=90, .stage=2, .species=169, .level=0, .retreat=0, .weakness=5, .resistance=255, .evolvesFrom="Golbat", .description="", .attacks={
 {.name="Carry Off",.description="Once during your turn (before your attack), you may flip a coin. If heads, look at your opponent's hand. If your opponent has any Baby Pokemon, Basic Pokemon, or Evolution cards there, choose 1 of them. Your opponent shuffles that card into his or her deck. This power can't be used if Crobat is affected by a Special Condition.",.effect="ecard3-6:p",.animation="ATK_ANIM_HIT",.cost={0,0,0,0,0,0,0,0,0},.damage=0,.category=TCG_POKEMON_POWER},
 {.name="Double Cross",.description="Flip 2 coins. This attack does 40 damage times the number of heads. If both of them are tails, the Defending Pokemon is now Confused and Poisoned.",.effect="ecard3-6:a0",.animation="ATK_ANIM_HIT",.cost={0,1,0,0,0,0,2,0,0},.damage=40,.category=TCG_DAMAGE_X},
@@ -8898,7 +8898,7 @@ const struct TcgCard gTcgCards[TCG_CARD_COUNT + 1] = {
 {.name="",.description="",.effect="NONE",.animation="ATK_ANIM_NONE",.cost={0},.damage=0,.category=TCG_DAMAGE_NORMAL},
 }
 },
-[1405] = {.id=1405, .name="Gyarados", .kind=TCG_POKEMON, .type=3, .rarity=2, .set=21, .set2=255, .dark=0, .holo=0, .flags=0, .origin=21,
+[1405] = {.id=1405, .name="Gyarados", .kind=TCG_POKEMON, .type=3, .rarity=2, .set=21, .set2=255, .dark=0, .holo=0, .flags=TCG_CF_READY, .origin=21,
 .hp=90, .stage=1, .species=130, .level=0, .retreat=2, .weakness=2, .resistance=255, .evolvesFrom="Magikarp", .description="", .attacks={
 {.name="Flame Vapor",.description="When you play Gyarados from your hand to evolve your Active Pokemon, you may flip 2 coins. For each heads, discard an Energy card attached to the Defending Pokemon.",.effect="ecard3-11:p",.animation="ATK_ANIM_HIT",.cost={0,0,0,0,0,0,0,0,0},.damage=0,.category=TCG_POKEMON_POWER},
 {.name="Dragon's Vengeance",.description="If Gyarados has 7 or more damage counters on it, this attack's base damage is 100.",.effect="ecard3-11:a0",.animation="ATK_ANIM_HIT",.cost={0,0,0,1,0,0,3,0,0},.damage=50,.category=TCG_DAMAGE_NORMAL},
@@ -8968,7 +8968,7 @@ const struct TcgCard gTcgCards[TCG_CARD_COUNT + 1] = {
 {.name="",.description="",.effect="NONE",.animation="ATK_ANIM_NONE",.cost={0},.damage=0,.category=TCG_DAMAGE_NORMAL},
 }
 },
-[1415] = {.id=1415, .name="Moltres", .kind=TCG_POKEMON, .type=0, .rarity=2, .set=21, .set2=255, .dark=0, .holo=0, .flags=TCG_CF_BODY, .origin=21,
+[1415] = {.id=1415, .name="Moltres", .kind=TCG_POKEMON, .type=0, .rarity=2, .set=21, .set2=255, .dark=0, .holo=0, .flags=TCG_CF_BODY|TCG_CF_READY, .origin=21,
 .hp=80, .stage=0, .species=146, .level=0, .retreat=2, .weakness=3, .resistance=4, .evolvesFrom="", .description="", .attacks={
 {.name="Fire Immunity",.description="You can't attach Fire Energy cards from your hand to Moltres.",.effect="ecard3-21:p",.animation="ATK_ANIM_HIT",.cost={0,0,0,0,0,0,0,0,0},.damage=0,.category=TCG_POKEMON_POWER},
 {.name="Collect Fire",.description="If there are any Fire Energy cards in your discard pile, flip a coin. If heads, attach 1 of them to Moltres.",.effect="ecard3-21:a0",.animation="ATK_ANIM_HIT",.cost={0,0,0,0,0,0,1,0,0},.damage=10,.category=TCG_DAMAGE_NORMAL},
@@ -9003,7 +9003,7 @@ const struct TcgCard gTcgCards[TCG_CARD_COUNT + 1] = {
 {.name="Energy Splash",.description="Move 2 Water Energy cards attached to Politoed to 1 or 2 of your Benched Pokemon. (You may put both on the same Pokemon or 1 each on 2 different Pokemon.) If you have no Benched Pokemon, ignore this effect.",.effect="ecard3-25:a2",.animation="ATK_ANIM_HIT",.cost={0,0,0,2,0,0,3,0,0},.damage=70,.category=TCG_DAMAGE_NORMAL},
 }
 },
-[1420] = {.id=1420, .name="Poliwrath", .kind=TCG_POKEMON, .type=4, .rarity=2, .set=21, .set2=255, .dark=0, .holo=0, .flags=0, .origin=21,
+[1420] = {.id=1420, .name="Poliwrath", .kind=TCG_POKEMON, .type=4, .rarity=2, .set=21, .set2=255, .dark=0, .holo=0, .flags=TCG_CF_READY, .origin=21,
 .hp=110, .stage=2, .species=62, .level=0, .retreat=2, .weakness=5, .resistance=255, .evolvesFrom="Poliwhirl", .description="", .attacks={
 {.name="Strange Spiral",.description="Once during your turn (before your attack), if Poliwrath is your Active Pokemon, you may discard a basic Energy card attached to Poliwrath. If you do, the Defending Pokemon is now Confused. This power can't be used if Poliwrath is affected by a Special Condition.",.effect="ecard3-26:p",.animation="ATK_ANIM_HIT",.cost={0,0,0,0,0,0,0,0,0},.damage=0,.category=TCG_POKEMON_POWER},
 {.name="Spiral Punch",.description="Flip a coin until you get tails. This attack does 40 damage plus 20 more damage for each heads.",.effect="ecard3-26:a0",.animation="ATK_ANIM_HIT",.cost={0,0,0,0,2,0,1,0,0},.damage=40,.category=TCG_DAMAGE_PLUS},
@@ -9045,7 +9045,7 @@ const struct TcgCard gTcgCards[TCG_CARD_COUNT + 1] = {
 {.name="Metal Tail",.description="Before doing damage, you may flip a coin. If heads, this attack does 80 damage. If tails, this attack does nothing.",.effect="ecard3-31:a1",.animation="ATK_ANIM_HIT",.cost={0,0,0,0,0,0,1,0,3},.damage=40,.category=TCG_DAMAGE_NORMAL},
 }
 },
-[1426] = {.id=1426, .name="Umbreon", .kind=TCG_POKEMON, .type=7, .rarity=2, .set=21, .set2=255, .dark=0, .holo=0, .flags=TCG_CF_BODY, .origin=21,
+[1426] = {.id=1426, .name="Umbreon", .kind=TCG_POKEMON, .type=7, .rarity=2, .set=21, .set2=255, .dark=0, .holo=0, .flags=TCG_CF_BODY|TCG_CF_READY, .origin=21,
 .hp=70, .stage=1, .species=197, .level=0, .retreat=1, .weakness=4, .resistance=5, .evolvesFrom="Eevee", .description="", .attacks={
 {.name="Dark Gaze",.description="As long as Umbreon is your Active Pokemon, Benched Pokemon (yours and your opponent's) can't use Poke-Powers.",.effect="ecard3-32:p",.animation="ATK_ANIM_HIT",.cost={0,0,0,0,0,0,0,0,0},.damage=0,.category=TCG_POKEMON_POWER},
 {.name="Sharp Claws",.description="Flip a coin. If heads, this attack does 10 damage plus 30 more damage.",.effect="ecard3-32:a0",.animation="ATK_ANIM_HIT",.cost={0,0,0,0,0,0,1,1,0},.damage=10,.category=TCG_DAMAGE_PLUS},
@@ -9774,21 +9774,21 @@ const struct TcgCard gTcgCards[TCG_CARD_COUNT + 1] = {
 {.name="Triple Cutter",.description="Flip 3 coins. This attack does 30 damage times the number of heads.",.effect="ecard3-150:a1",.animation="ATK_ANIM_HIT",.cost={0,0,2,0,1,0,1,0,0},.damage=30,.category=TCG_DAMAGE_X},
 }
 },
-[1545] = {.id=1545, .name="Alakazam", .kind=TCG_POKEMON, .type=5, .rarity=2, .set=21, .set2=255, .dark=0, .holo=1, .flags=0, .origin=21,
+[1545] = {.id=1545, .name="Alakazam", .kind=TCG_POKEMON, .type=5, .rarity=2, .set=21, .set2=255, .dark=0, .holo=1, .flags=TCG_CF_READY, .origin=21,
 .hp=100, .stage=2, .species=65, .level=0, .retreat=2, .weakness=5, .resistance=255, .evolvesFrom="Kadabra", .description="", .attacks={
 {.name="Energy Jump",.description="Once during your turn (before your attack), you may move an Energy card from 1 of your Pokemon to another of your Pokemon. This power can't be used if Alakazam is affected by a Special Condition.",.effect="ecard3-H1:p",.animation="ATK_ANIM_HIT",.cost={0,0,0,0,0,0,0,0,0},.damage=0,.category=TCG_POKEMON_POWER},
 {.name="Psychic",.description="This attack does 30 damage plus 10 more damage for each Energy card attached to the Defending Pokemon.",.effect="ecard3-H1:a0",.animation="ATK_ANIM_HIT",.cost={0,0,0,0,0,0,3,0,0},.damage=30,.category=TCG_DAMAGE_PLUS},
 {.name="",.description="",.effect="NONE",.animation="ATK_ANIM_NONE",.cost={0},.damage=0,.category=TCG_DAMAGE_NORMAL},
 }
 },
-[1546] = {.id=1546, .name="Arcanine", .kind=TCG_POKEMON, .type=0, .rarity=2, .set=21, .set2=255, .dark=0, .holo=1, .flags=0, .origin=21,
+[1546] = {.id=1546, .name="Arcanine", .kind=TCG_POKEMON, .type=0, .rarity=2, .set=21, .set2=255, .dark=0, .holo=1, .flags=TCG_CF_READY, .origin=21,
 .hp=80, .stage=1, .species=59, .level=0, .retreat=2, .weakness=3, .resistance=255, .evolvesFrom="Growlithe", .description="", .attacks={
 {.name="Energy Recharge",.description="When you play Arcanine from your hand to evolve your Active Pokemon, you may flip 3 coins. For each heads, choose a basic Energy card from your discard pile and attach it to Arcanine.",.effect="ecard3-H2:p",.animation="ATK_ANIM_HIT",.cost={0,0,0,0,0,0,0,0,0},.damage=0,.category=TCG_POKEMON_POWER},
 {.name="Shake",.description="Your opponent switches the Defending Pokemon with 1 of his or her Benched Pokemon, if any.",.effect="ecard3-H2:a0",.animation="ATK_ANIM_HIT",.cost={0,0,0,0,0,0,1,0,0},.damage=10,.category=TCG_DAMAGE_NORMAL},
 {.name="White Flames",.description="Discard all Fire Energy cards attached to Arcanine.",.effect="ecard3-H2:a1",.animation="ATK_ANIM_HIT",.cost={2,0,0,0,0,0,1,0,0},.damage=70,.category=TCG_DAMAGE_NORMAL},
 }
 },
-[1547] = {.id=1547, .name="Articuno", .kind=TCG_POKEMON, .type=3, .rarity=2, .set=21, .set2=255, .dark=0, .holo=1, .flags=TCG_CF_BODY, .origin=21,
+[1547] = {.id=1547, .name="Articuno", .kind=TCG_POKEMON, .type=3, .rarity=2, .set=21, .set2=255, .dark=0, .holo=1, .flags=TCG_CF_BODY|TCG_CF_READY, .origin=21,
 .hp=80, .stage=0, .species=144, .level=0, .retreat=2, .weakness=8, .resistance=4, .evolvesFrom="", .description="", .attacks={
 {.name="Water Immunity",.description="You can't attach Water Energy cards from your hand to Articuno.",.effect="ecard3-H3:p",.animation="ATK_ANIM_HIT",.cost={0,0,0,0,0,0,0,0,0},.damage=0,.category=TCG_POKEMON_POWER},
 {.name="Freeze Solid",.description="If there are any Water Energy cards in your discard pile, flip a coin. If heads, attach 1 of them to Articuno.",.effect="ecard3-H3:a0",.animation="ATK_ANIM_HIT",.cost={0,0,0,0,0,0,1,0,0},.damage=10,.category=TCG_DAMAGE_NORMAL},
@@ -9802,7 +9802,7 @@ const struct TcgCard gTcgCards[TCG_CARD_COUNT + 1] = {
 {.name="",.description="",.effect="NONE",.animation="ATK_ANIM_NONE",.cost={0},.damage=0,.category=TCG_DAMAGE_NORMAL},
 }
 },
-[1549] = {.id=1549, .name="Crobat", .kind=TCG_POKEMON, .type=1, .rarity=2, .set=21, .set2=255, .dark=0, .holo=1, .flags=0, .origin=21,
+[1549] = {.id=1549, .name="Crobat", .kind=TCG_POKEMON, .type=1, .rarity=2, .set=21, .set2=255, .dark=0, .holo=1, .flags=TCG_CF_READY, .origin=21,
 .hp=90, .stage=2, .species=169, .level=0, .retreat=0, .weakness=5, .resistance=255, .evolvesFrom="Golbat", .description="", .attacks={
 {.name="Carry Off",.description="Once during your turn (before your attack), you may flip a coin. If heads, look at your opponent's hand. If your opponent has any Baby Pokemon, Basic Pokemon, or Evolution cards there, choose 1 of them. Your opponent shuffles that card into his or her deck. This power can't be used if Crobat is affected by a Special Condition.",.effect="ecard3-H5:p",.animation="ATK_ANIM_HIT",.cost={0,0,0,0,0,0,0,0,0},.damage=0,.category=TCG_POKEMON_POWER},
 {.name="Double Cross",.description="Flip 2 coins. This attack does 40 damage times the number of heads. If both of them are tails, the Defending Pokemon is now Confused and Poisoned.",.effect="ecard3-H5:a0",.animation="ATK_ANIM_HIT",.cost={0,1,0,0,0,0,2,0,0},.damage=40,.category=TCG_DAMAGE_X},
@@ -9837,7 +9837,7 @@ const struct TcgCard gTcgCards[TCG_CARD_COUNT + 1] = {
 {.name="",.description="",.effect="NONE",.animation="ATK_ANIM_NONE",.cost={0},.damage=0,.category=TCG_DAMAGE_NORMAL},
 }
 },
-[1554] = {.id=1554, .name="Gyarados", .kind=TCG_POKEMON, .type=3, .rarity=2, .set=21, .set2=255, .dark=0, .holo=1, .flags=0, .origin=21,
+[1554] = {.id=1554, .name="Gyarados", .kind=TCG_POKEMON, .type=3, .rarity=2, .set=21, .set2=255, .dark=0, .holo=1, .flags=TCG_CF_READY, .origin=21,
 .hp=90, .stage=1, .species=130, .level=0, .retreat=2, .weakness=2, .resistance=255, .evolvesFrom="Magikarp", .description="", .attacks={
 {.name="Flame Vapor",.description="When you play Gyarados from your hand to evolve your Active Pokemon, you may flip 2 coins. For each heads, discard an Energy card attached to the Defending Pokemon.",.effect="ecard3-H10:p",.animation="ATK_ANIM_HIT",.cost={0,0,0,0,0,0,0,0,0},.damage=0,.category=TCG_POKEMON_POWER},
 {.name="Dragon's Vengeance",.description="If Gyarados has 7 or more damage counters on it, this attack's base damage is 100.",.effect="ecard3-H10:a0",.animation="ATK_ANIM_HIT",.cost={0,0,0,1,0,0,3,0,0},.damage=50,.category=TCG_DAMAGE_NORMAL},
@@ -9907,7 +9907,7 @@ const struct TcgCard gTcgCards[TCG_CARD_COUNT + 1] = {
 {.name="",.description="",.effect="NONE",.animation="ATK_ANIM_NONE",.cost={0},.damage=0,.category=TCG_DAMAGE_NORMAL},
 }
 },
-[1564] = {.id=1564, .name="Moltres", .kind=TCG_POKEMON, .type=0, .rarity=2, .set=21, .set2=255, .dark=0, .holo=1, .flags=TCG_CF_BODY, .origin=21,
+[1564] = {.id=1564, .name="Moltres", .kind=TCG_POKEMON, .type=0, .rarity=2, .set=21, .set2=255, .dark=0, .holo=1, .flags=TCG_CF_BODY|TCG_CF_READY, .origin=21,
 .hp=80, .stage=0, .species=146, .level=0, .retreat=2, .weakness=3, .resistance=4, .evolvesFrom="", .description="", .attacks={
 {.name="Fire Immunity",.description="You can't attach Fire Energy cards from your hand to Moltres.",.effect="ecard3-H20:p",.animation="ATK_ANIM_HIT",.cost={0,0,0,0,0,0,0,0,0},.damage=0,.category=TCG_POKEMON_POWER},
 {.name="Collect Fire",.description="If there are any Fire Energy cards in your discard pile, flip a coin. If heads, attach 1 of them to Moltres.",.effect="ecard3-H20:a0",.animation="ATK_ANIM_HIT",.cost={0,0,0,0,0,0,1,0,0},.damage=10,.category=TCG_DAMAGE_NORMAL},
@@ -9935,7 +9935,7 @@ const struct TcgCard gTcgCards[TCG_CARD_COUNT + 1] = {
 {.name="Energy Splash",.description="Move 2 Water Energy cards attached to Politoed to 1 or 2 of your Benched Pokemon. (You may put both on the same Pokemon or 1 each on 2 different Pokemon.) If you have no Benched Pokemon, ignore this effect.",.effect="ecard3-H23:a2",.animation="ATK_ANIM_HIT",.cost={0,0,0,2,0,0,3,0,0},.damage=70,.category=TCG_DAMAGE_NORMAL},
 }
 },
-[1568] = {.id=1568, .name="Poliwrath", .kind=TCG_POKEMON, .type=4, .rarity=2, .set=21, .set2=255, .dark=0, .holo=1, .flags=0, .origin=21,
+[1568] = {.id=1568, .name="Poliwrath", .kind=TCG_POKEMON, .type=4, .rarity=2, .set=21, .set2=255, .dark=0, .holo=1, .flags=TCG_CF_READY, .origin=21,
 .hp=110, .stage=2, .species=62, .level=0, .retreat=2, .weakness=5, .resistance=255, .evolvesFrom="Poliwhirl", .description="", .attacks={
 {.name="Strange Spiral",.description="Once during your turn (before your attack), if Poliwrath is your Active Pokemon, you may discard a basic Energy card attached to Poliwrath. If you do, the Defending Pokemon is now Confused. This power can't be used if Poliwrath is affected by a Special Condition.",.effect="ecard3-H24:p",.animation="ATK_ANIM_HIT",.cost={0,0,0,0,0,0,0,0,0},.damage=0,.category=TCG_POKEMON_POWER},
 {.name="Spiral Punch",.description="Flip a coin until you get tails. This attack does 40 damage plus 20 more damage for each heads.",.effect="ecard3-H24:a0",.animation="ATK_ANIM_HIT",.cost={0,0,0,0,2,0,1,0,0},.damage=40,.category=TCG_DAMAGE_PLUS},
@@ -9977,7 +9977,7 @@ const struct TcgCard gTcgCards[TCG_CARD_COUNT + 1] = {
 {.name="Metal Tail",.description="Before doing damage, you may flip a coin. If heads, this attack does 80 damage. If tails, this attack does nothing.",.effect="ecard3-H29:a1",.animation="ATK_ANIM_HIT",.cost={0,0,0,0,0,0,1,0,3},.damage=40,.category=TCG_DAMAGE_NORMAL},
 }
 },
-[1574] = {.id=1574, .name="Umbreon", .kind=TCG_POKEMON, .type=7, .rarity=2, .set=21, .set2=255, .dark=0, .holo=1, .flags=TCG_CF_BODY, .origin=21,
+[1574] = {.id=1574, .name="Umbreon", .kind=TCG_POKEMON, .type=7, .rarity=2, .set=21, .set2=255, .dark=0, .holo=1, .flags=TCG_CF_BODY|TCG_CF_READY, .origin=21,
 .hp=70, .stage=1, .species=197, .level=0, .retreat=1, .weakness=4, .resistance=5, .evolvesFrom="Eevee", .description="", .attacks={
 {.name="Dark Gaze",.description="As long as Umbreon is your Active Pokemon, Benched Pokemon (yours and your opponent's) can't use Poke-Powers.",.effect="ecard3-H30:p",.animation="ATK_ANIM_HIT",.cost={0,0,0,0,0,0,0,0,0},.damage=0,.category=TCG_POKEMON_POWER},
 {.name="Sharp Claws",.description="Flip a coin. If heads, this attack does 10 damage plus 30 more damage.",.effect="ecard3-H30:a0",.animation="ATK_ANIM_HIT",.cost={0,0,0,0,0,0,1,1,0},.damage=10,.category=TCG_DAMAGE_PLUS},
@@ -10346,7 +10346,7 @@ const struct TcgCard gTcgCards[TCG_CARD_COUNT + 1] = {
 {.name="",.description="",.effect="NONE",.animation="ATK_ANIM_NONE",.cost={0},.damage=0,.category=TCG_DAMAGE_NORMAL},
 }
 },
-[1629] = {.id=1629, .name="Suicune", .kind=TCG_POKEMON, .type=3, .rarity=3, .set=4, .set2=255, .dark=0, .holo=0, .flags=TCG_CF_BODY, .origin=22,
+[1629] = {.id=1629, .name="Suicune", .kind=TCG_POKEMON, .type=3, .rarity=3, .set=4, .set2=255, .dark=0, .holo=0, .flags=TCG_CF_BODY|TCG_CF_READY, .origin=22,
 .hp=70, .stage=0, .species=245, .level=0, .retreat=1, .weakness=2, .resistance=255, .evolvesFrom="", .description="", .attacks={
 {.name="Pure Body",.description="To attach a Water Energy card from your hand to Suicune, you must discard an Energy card attached to Suicune. (Attach the Water Energy, and then discard an Energy card from Suicune.)",.effect="basep-53:p",.animation="ATK_ANIM_HIT",.cost={0,0,0,0,0,0,0,0,0},.damage=0,.category=TCG_POKEMON_POWER},
 {.name="Hypno Wave",.description="Flip a coin. If heads, this attack does 30 damage plus 20 more damage. If tails, this attack does 30 damage and the Defending Pokemon is now Asleep.",.effect="basep-53:a0",.animation="ATK_ANIM_HIT",.cost={0,0,0,1,0,0,2,0,0},.damage=30,.category=TCG_DAMAGE_PLUS},

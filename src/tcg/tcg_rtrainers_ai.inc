@@ -438,3 +438,70 @@ static int RegionTrainerAi(const struct TcgDuel *g, unsigned hand, struct TcgAct
     }
     return Legal(g, a);
 }
+
+/* The regional sets' used powers: when the AI uses one, what it chooses (a->type / slot set; target, selections
+ * here). Ones that cost it something or reshuffle its board are kept for people. */
+static int RegionPowerAi(const struct TcgDuel *g, struct TcgAction *a, unsigned slot, unsigned power)
+{
+    const struct TcgPlayer *p = &g->players[g->current], *op = &g->players[g->current ^ 1];
+    const struct TcgFieldCard *foe = &op->field[0], *mine = &p->field[0];
+    unsigned me = g->current, s, best = TCG_NONE, left = 0;
+    switch (power)
+    {
+    case TCG_POWER_R_POISON_POLLEN:
+        return foe->stackSize && !foe->poison;
+    case TCG_POWER_R_SLEEP_PENDULUM:
+        return foe->stackSize && foe->condition != TCG_ASLEEP;
+    case TCG_POWER_R_MIRACULOUS_POWDER:
+        return mine->condition || mine->poison || mine->burned;
+    case TCG_POWER_R_SOOTHING_AROMA:
+        for (s = 0; s < TCG_FIELD_SIZE; s++)
+            if (p->field[s].stackSize && p->field[s].damage)
+                return 1;
+        return 0;
+    case TCG_POWER_R_NATURAL_HEALING:
+        return p->field[slot].damage != 0;
+    case TCG_POWER_R_EARTH_RAGE:
+        return 1;
+    case TCG_POWER_R_FRAGRANCE_TRAP:
+    case TCG_POWER_R_FRAGRANCE_TRAP_GYM:
+        /* their weakest Benched Pokemon, if weaker than the Defending one */
+        for (s = 1; s < TCG_FIELD_SIZE; s++)
+        {
+            const struct TcgCard *c = TcgDuel_Field(g, me ^ 1, s);
+            unsigned l;
+            if (!c || c->kind != TCG_POKEMON)
+                continue;
+            l = c->hp > op->field[s].damage ? c->hp - op->field[s].damage : 0;
+            if (best == TCG_NONE || l < left)
+                best = s, left = l;
+        }
+        {
+            const struct TcgCard *d = TcgDuel_Field(g, me ^ 1, 0);
+            if (best == TCG_NONE || !d || left + 20 > (d->hp > foe->damage ? (unsigned)(d->hp - foe->damage) : 0u))
+                return 0;
+        }
+        a->target = (uint8_t)best;
+        return 1;
+    case TCG_POWER_R_JET_STREAM:
+        if (!foe->attachedSize || TcgDuel_Energy(g, me, slot, TCG_NONE) >= TcgDuel_Energy(g, me ^ 1, 0, TCG_NONE))
+            return 0;
+        AiPick(op, foe->attachedSize ? foe->attached : NULL, foe->attachedSize, AiEnergyCard, 1, 1, TCG_NONE, a);
+        return 1;
+    case TCG_POWER_R_SUPER_DYNAMO:
+        a->target = 0;
+        return 1;
+    case TCG_POWER_R_FLOWER_SUPPLEMENT:
+        for (s = 1; s < TCG_FIELD_SIZE && !p->field[s].stackSize; s++)
+            ;
+        if (s == TCG_FIELD_SIZE || !AiPick(p, p->hand, p->handSize, AiBasicEnergy, 1, 0, TCG_NONE, a))
+            return 0;
+        a->target = (uint8_t)s;
+        return 1;
+    case TCG_POWER_R_CARRY_OFF:
+        return op->handSize && AiPick(op, op->hand, op->handSize, AiPokemonCard, 1, 1, TCG_NONE, a);
+    case TCG_POWER_R_GLARING_GAZE:
+        return op->handSize && AiPick(op, op->hand, op->handSize, AiTrainerCard, 1, 1, TCG_NONE, a);
+    }
+    return 0;
+}

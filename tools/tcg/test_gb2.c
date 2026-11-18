@@ -179,7 +179,7 @@ int main(void)
     /* Every used Pokemon Power: from the Active spot and from the Bench, some choice of target / card works
      * whenever its block says it can be used */
     used = ok = 0;
-    for (id = 229; id <= TCG_CARD_COUNT; id++)
+    for (id = 229; id <= TCG_CARD_GB_COUNT; id++)
     {
         unsigned power = TcgPower_Id(&gTcgCards[id]), where;
         if (power < TCG_POWER_FIRST_USED)

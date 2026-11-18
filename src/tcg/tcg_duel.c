@@ -186,10 +186,11 @@ unsigned TcgDuel_Energy(const struct TcgDuel *g, unsigned player, unsigned slot,
     for (i = 0; i < f->attachedSize; i++)
     {
         const struct TcgCard *c = Tcg_Card(p->cards[f->attached[i]]);
-        /* (Charizard's Energy Burn: all of it is Fire Energy this turn) */
-        unsigned kind = f->burn ? TCG_FIRE : c->type;
+        /* (Charizard's Energy Burn: all of it is Fire Energy this turn; the regional bodies: Dark Aura...) */
+        unsigned amount = c->kind == TCG_ENERGY ? Tcg_EnergyProvides(c->id) : 0;
+        unsigned kind = f->burn ? TCG_FIRE : TcgPower_EnergyType(g, player, slot, c->type, &amount);
         if (c->kind == TCG_ENERGY && (type == TCG_NONE || type == kind))
-            n += Tcg_EnergyProvides(c->id);
+            n += amount;
     }
     return n;
 }
@@ -904,6 +905,8 @@ static int Apply(struct TcgDuel *g, const struct TcgAction *a)
             f->damage = attacker->hp;
             TcgDuel_Log(g, "Destiny Bond: %s is Knocked Out too.", attacker->name);
         }
+        if (damage)
+            TcgPower_Damaged(g, g->current ^ 1, 0, damage); /* (the regional powers: Fortitude, Restless Sleep...) */
         /* Koga (the Trainer): a Koga Pokemon's damage Poisons */
         if (damage && (g->players[g->current].turnBuffs & TCG_BUFF_KOGA) && Named(attacker, "Koga") && !foe->poison)
         {
@@ -1082,7 +1085,17 @@ static int Apply(struct TcgDuel *g, const struct TcgAction *a)
         return TCG_OK;
     }
     if (a->type == TCG_USE_POWER)
-        return TcgDuel_Power(g, a);
+    {
+        int result = TcgDuel_Power(g, a);
+        if (result == TCG_OK && g->turnOver)
+        {
+            /* (Playful Punch: the turn ends) */
+            g->turnOver = 0;
+            if (g->phase == TCG_TURN)
+                EndTurn(g);
+        }
+        return result;
+    }
     if (a->type == TCG_DISCARD_DOLL)
     {
         /* Clefairy Doll / Mysterious Fossil: "At any time during your turn before your attack,
@@ -1176,12 +1189,15 @@ static int Apply(struct TcgDuel *g, const struct TcgAction *a)
             return Error(g, "Only one Energy card may be attached from your hand each turn.");
         if (Tcg_EnergyRule(c->id) == TCG_ER_BOOST && f->stackSize < 2)
             return Error(g, "Boost Energy can be attached only to an Evolved Pokemon.");
+        if (TcgPower_AttachBlock(g, g->current, s, c->id))
+            return Error(g, "That Energy can't be attached to this Pokemon (its power).");
         /* (Boost Energy: discarded at the end of the turn) */
         if (Tcg_EnergyRule(c->id) == TCG_ER_BOOST)
             p->attachmentExpires[p->hand[a->hand]] = g->turn;
         f->attached[f->attachedSize++] = TcgPile_Remove(p->hand, &p->handSize, a->hand);
         p->energyPlayed = 1;
         TcgDuel_Event(g, TCG_EV_ATTACH, g->current, s, 0, c->id, 0);
+        TcgPower_AfterAttach(g, g->current, s, f->attached[f->attachedSize - 1]);
         /* Pokemon Park: once a turn, Energy onto a Benched Pokemon takes a counter off it */
         if (TcgDuel_Stadium(g, NULL) == TCG_CARD_ECARD2_131 && s && f->damage && !(p->turnBuffs & TCG_BUFF_PARK))
         {

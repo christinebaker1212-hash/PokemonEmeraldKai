@@ -74,17 +74,74 @@ static const struct
     [TCG_POWER_SPECIAL_DELIVERY] = {"DragoniteSpecialDeliveryEffectCommands", "SPECIAL DELIVERY"},
 };
 
+#include "tcg_region_powers.inc"
+static const struct
+{
+    const char *name, *script;
+    uint8_t used, flags;
+} sRegion[] = {
+#define TCG_RP_DEF(id, name, used, flags, script) {name, script, used, flags},
+    TCG_REGION_POWERS(TCG_RP_DEF)
+#undef TCG_RP_DEF
+};
 unsigned TcgPower_Id(const struct TcgCard *c)
 {
-    unsigned i;
+    /* (by the card: a lookup once, then kept) */
+    static uint16_t cache[TCG_CARD_COUNT + 1];
+    unsigned i, power = TCG_POWER_NONE;
     if (!c || c->kind != TCG_POKEMON || c->attacks[0].category != TCG_POKEMON_POWER || !c->attacks[0].effect)
         return TCG_POWER_NONE;
-    for (i = 1; i < TCG_POWER_COUNT; i++)
-        if (!strcmp(c->attacks[0].effect, sPowers[i].effect))
-            return i;
-    return TCG_POWER_NONE;
+    if (c->id <= TCG_CARD_COUNT && cache[c->id])
+        return cache[c->id] - 1u;
+    if (c->id > TCG_CARD_GB_COUNT)
+    {
+        int lo = 0, hi = (int)(sizeof(sRegionPowerLabels) / sizeof(sRegionPowerLabels[0])) - 1;
+        while (lo <= hi)
+        {
+            int mid = (lo + hi) / 2, cmp = strcmp(c->attacks[0].effect, sRegionPowerLabels[mid].label);
+            if (!cmp)
+            {
+                power = sRegionPowerLabels[mid].power;
+                break;
+            }
+            if (cmp < 0)
+                hi = mid - 1;
+            else
+                lo = mid + 1;
+        }
+    }
+    else
+        for (i = 1; i < TCG_POWER_REGION_FIRST; i++)
+            if (sPowers[i].effect && !strcmp(c->attacks[0].effect, sPowers[i].effect))
+            {
+                power = i;
+                break;
+            }
+    if (c->id <= TCG_CARD_COUNT)
+        cache[c->id] = (uint16_t)(power + 1);
+    return power;
 }
-const char *TcgPower_Name(unsigned power) { return power && power < TCG_POWER_COUNT ? sPowers[power].name : ""; }
+const char *TcgPower_Name(unsigned power)
+{
+    if (power >= TCG_POWER_REGION_FIRST && power < TCG_POWER_COUNT)
+        return sRegion[power - TCG_POWER_REGION_FIRST].name;
+    return power && power < TCG_POWER_REGION_FIRST ? sPowers[power].name : "";
+}
+int TcgPower_IsUsed(unsigned power)
+{
+    if (power >= TCG_POWER_REGION_FIRST && power < TCG_POWER_COUNT)
+        return sRegion[power - TCG_POWER_REGION_FIRST].used;
+    return power >= TCG_POWER_FIRST_USED && power < TCG_POWER_REGION_FIRST;
+}
+unsigned TcgPower_Flags(unsigned power)
+{
+    return power >= TCG_POWER_REGION_FIRST && power < TCG_POWER_COUNT ? sRegion[power - TCG_POWER_REGION_FIRST].flags : 0;
+}
+const char *TcgPower_Script(unsigned power)
+{
+    return power >= TCG_POWER_REGION_FIRST && power < TCG_POWER_COUNT ? sRegion[power - TCG_POWER_REGION_FIRST].script
+                                                                       : NULL;
+}
 
 /* ------------------------------------------------------------------ */
 /* Does it work?                                                        */
@@ -109,10 +166,17 @@ unsigned TcgPower_Working(const struct TcgDuel *g, unsigned player, unsigned slo
     if (player > 1 || slot >= TCG_FIELD_SIZE)
         return TCG_POWER_NONE;
     id = TcgPower_Id(TcgDuel_Field(g, player, slot));
-    if (!id || Disabled(g, player, slot) || (id != TCG_POWER_TOXIC_GAS && ToxicGas(g)))
+    /* (a Poke-Body, and a power that says so, works while its Pokemon is Asleep, Confused or Paralyzed) */
+    if (!id || (Disabled(g, player, slot) && !(TcgDuel_Field(g, player, slot)->flags & TCG_CF_BODY) &&
+                !(TcgPower_Flags(id) & 8)) ||
+        (id != TCG_POWER_TOXIC_GAS && ToxicGas(g)))
         return TCG_POWER_NONE;
     /* GB2's: Goop Gas Attack (every power), Dark Arbok's Stare (that Pokemon's) */
     if (g->goopGasUntil >= g->turn || g->players[player].field[slot].powerOffUntil >= g->turn)
+        return TCG_POWER_NONE;
+    /* Dark Gaze (either Active): no Benched Pokemon's used power */
+    if (slot && TcgPower_IsUsed(id) &&
+        (TcgPower_Working(g, 0, 0) == TCG_POWER_R_DARK_GAZE || TcgPower_Working(g, 1, 0) == TCG_POWER_R_DARK_GAZE))
         return TCG_POWER_NONE;
     return id;
 }
@@ -211,6 +275,7 @@ static int Fail(struct TcgDuel *g, const char *message)
     snprintf(g->error, sizeof(g->error), "%s", message);
     return TCG_INVALID;
 }
+#include "tcg_rpowers.inc"
 
 /* ------------------------------------------------------------------ */
 /* Pokemon Card GB2's powers                                            */
@@ -262,6 +327,10 @@ unsigned TcgDuel_RetreatCost(const struct TcgDuel *g, unsigned player)
         if (stadium == TCG_CARD_GYM1_108 && strstr(c->name, "Misty") && cost)
             cost--;
     }
+    {
+        int c2 = (int)cost + RegionRetreat(g, player); /* (the regional sets' bodies) */
+        cost = c2 < 0 ? 0 : (unsigned)c2;
+    }
     return cost > aid ? cost - aid : 0;
 }
 const char *TcgPower_RetreatBlock(const struct TcgDuel *g, unsigned player)
@@ -275,6 +344,7 @@ void TcgPower_AfterRetreat(struct TcgDuel *g, unsigned player, unsigned benched)
 {
     struct TcgPlayer *op = &g->players[player ^ 1];
     unsigned s;
+    RegionAfterRetreat(g, player, benched);
     /* Dark Dugtrio's Sinkhole: they flip, tails 20 to the Pokemon that retreated */
     for (s = 0; s < TCG_FIELD_SIZE; s++)
         if (TcgPower_Working(g, player ^ 1, s) == TCG_POWER_SINKHOLE)
@@ -387,6 +457,8 @@ unsigned TcgPower_PuppetSlot(const struct TcgDuel *g, unsigned player)
 /* ------------------------------------------------------------------ */
 static int OncePerTurn(unsigned power)
 {
+    if (power >= TCG_POWER_REGION_FIRST)
+        return TcgPower_Flags(power) & 1;
     return power == TCG_POWER_SOLAR_POWER || power == TCG_POWER_HEAL || power == TCG_POWER_SHIFT ||
            power == TCG_POWER_PEEK || power == TCG_POWER_CURSE || power == TCG_POWER_STEP_IN ||
            (power >= TCG_POWER_STIFFEN && power != TCG_POWER_REBIRTH); /* (GB2's: all but Rebirth) */
@@ -398,7 +470,7 @@ const char *TcgPower_Block(const struct TcgDuel *g, unsigned player, unsigned sl
     unsigned power = TcgPower_Id(TcgDuel_Field(g, player, slot)), s, t;
     if (!power)
         return "This Pokemon has no Pokemon Power.";
-    if (power < TCG_POWER_FIRST_USED)
+    if (!TcgPower_IsUsed(power))
         return "This Pokemon Power works on its own.";
     if (g->phase != TCG_TURN || g->current != player)
         return "Pokemon Powers are used during your turn.";
@@ -410,6 +482,8 @@ const char *TcgPower_Block(const struct TcgDuel *g, unsigned player, unsigned sl
         return "Its Pokemon Power isn't working now.";
     if (OncePerTurn(power) && f->powerUsed)
         return "It has been used this turn.";
+    if (power >= TCG_POWER_REGION_FIRST)
+        return RegionBlock(g, player, slot, power);
     switch (power)
     {
     case TCG_POWER_SOLAR_POWER:
@@ -881,6 +955,13 @@ int TcgDuel_Power(struct TcgDuel *g, const struct TcgAction *a)
         break;
     }
     default:
+        if (power >= TCG_POWER_REGION_FIRST)
+        {
+            int result = RegionUse(g, a, slot, power);
+            if (result != TCG_OK)
+                return result;
+            break;
+        }
         return Fail(g, "This Pokemon Power can't be used.");
     }
     if (p->field[slot].stackSize && OncePerTurn(power))
@@ -906,6 +987,11 @@ void TcgPower_OnPlay(struct TcgDuel *g, unsigned player, unsigned slot)
     unsigned power = TcgPower_Working(g, player, slot), i, n, s, who;
     if (g->phase == TCG_SETUP || g->current != player)
         return;
+    if (power >= TCG_POWER_REGION_FIRST)
+    {
+        RegionOnPlay(g, player, slot, power);
+        return;
+    }
     switch (power)
     {
     case TCG_POWER_FIREGIVER:
@@ -1105,12 +1191,17 @@ int TcgPower_AttackDamage(struct TcgDuel *g, unsigned player, unsigned slot, int
                 break;
             }
     }
-    return amount;
+    return RegionDamage(g, player, slot, amount);
 }
 int TcgPower_Immune(struct TcgDuel *g, unsigned player, unsigned slot)
 {
     unsigned power = TcgPower_Working(g, player, slot);
     const struct TcgFieldCard *attacker = &g->players[g->current].field[0];
+    if (RegionImmune(g, player, slot))
+    {
+        Announce(g, player, slot, power);
+        return 1;
+    }
     /* Mew: nothing an opponent's evolved Pokemon does reaches it */
     if (power == TCG_POWER_NEUTRALIZING_SHIELD && player != g->current && attacker->stackSize > 1)
     {

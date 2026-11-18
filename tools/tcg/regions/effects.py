@@ -53,6 +53,20 @@ def _trainers():
 _trainers()
 
 
+def _powers():
+    import json
+    from pathlib import Path
+    import powers
+    root = Path(__file__).resolve().parents[3]
+    for c in json.loads((root / 'tools/tcg/regions/cards.json').read_text())['cards']:
+        d = powers.match(c)
+        if d:
+            POWERS[c['ability']['effect']] = d['id']
+
+
+_powers()
+
+
 def table():
     """(label, kind, amount, after, extra[, script]) for each attack (a script: ('SCRIPT', script))"""
     out = []

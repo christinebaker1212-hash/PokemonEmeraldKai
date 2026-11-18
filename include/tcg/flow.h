@@ -87,6 +87,8 @@ enum
     TCG_F_SUPPORTER_STADIUM,
     TCG_F_BALL,                 /* a Trainer with Ball in its name */
     TCG_F_UNOWN,                /* an Unown */
+    TCG_F_LIGHTNING_ENERGY,     /* a Lightning Energy card */
+    TCG_F_OTHER_HOLDER,         /* (slot) occupied, not the one the card picked is attached to */
     /* "with Brock in its name" and the like (+ TCG_OWNER_*): a Pokemon card; one of yours in play (slot); another
      * one of yours than the first chosen (slot: the action's target) */
     TCG_F_OWNER_CARD = 100,
@@ -117,6 +119,9 @@ struct TcgStep
 };
 /* Does that slot step aim at the action's target (the opponent's Pokemon, or a Trainer's second Pokemon of yours)? */
 int TcgFlow_StepIsTarget(const struct TcgStep *st);
+/* A used power's slot step: does it choose the action's target (the first Pokemon chosen) or its attack field (the
+ * second)? */
+int TcgFlow_PowerSlotIsTarget(const struct TcgStep *steps, int step);
 /* A Trainer's steps (count 0: it asks nothing); a used Pokemon Power's (the first Pokemon chosen is action.target,
  * the second action.attack: tcg_powers.c TcgDuel_Power) */
 const struct TcgStep *TcgFlow_TrainerSteps(unsigned id, int *count);

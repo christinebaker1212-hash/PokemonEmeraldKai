@@ -11,6 +11,16 @@ static const struct TcgStep sNoSteps[1] = {{0, 0, 0, 0, 0, NULL}};
 static unsigned CardOf(const struct TcgDuel *g, unsigned who, unsigned physical) { return g->players[who].cards[physical]; }
 static const struct TcgCard *Field(const struct TcgDuel *g, unsigned who, unsigned slot) { return TcgDuel_Field(g, who, slot); }
 static const struct TcgStep *RegionTrainerSteps(unsigned id, int *count);
+static const struct TcgStep *RegionPowerSteps(unsigned power, int *count);
+/* (a used power's first Pokemon chosen is action.target, the second action.attack, picks between them or not) */
+static int EarlierSlotSteps(const struct TcgStep *steps, int step)
+{
+    int i, n = 0;
+    for (i = 0; i < step; i++)
+        n += steps[i].kind == TCG_ST_MY_SLOT || steps[i].kind == TCG_ST_OPP_SLOT;
+    return n;
+}
+int TcgFlow_PowerSlotIsTarget(const struct TcgStep *steps, int step) { return !EarlierSlotSteps(steps, step); }
 static void MenuAdd(struct TcgFlowMenu *m, const char *label, unsigned value, int ok, const char *why);
 const char *TcgFlow_OwnerWord(unsigned owner)
 {
@@ -168,6 +178,8 @@ const struct TcgStep *TcgFlow_PowerSteps(unsigned power, int *count)
     case TCG_POWER_SPECIAL_DELIVERY:
         STEPS({TCG_ST_PICK, TCG_F_ANY, TCG_SRC_HAND, 0, 1, "Draw, then put which card on top? (none: the new one)"});
     }
+    if (power >= TCG_POWER_REGION_FIRST)
+        return RegionPowerSteps(power, count);
     *count = 0;
     return sNoSteps;
 }
@@ -471,6 +483,8 @@ int TcgFlow_CardMatches(const struct TcgDuel *g, unsigned owner, unsigned physic
         return c->kind == TCG_TRAINER && strstr(c->name, "Ball") != NULL;
     case TCG_F_UNOWN:
         return c->kind == TCG_POKEMON && strstr(c->name, "Unown") != NULL;
+    case TCG_F_LIGHTNING_ENERGY:
+        return c->id == TCG_CARD_LIGHTNING_ENERGY;
     default:
         if (filter >= TCG_F_OWNER_CARD && filter < TCG_F_OWNER_CARD + TCG_OWNERS)
             return c->kind == TCG_POKEMON && strstr(c->name, TcgFlow_OwnerWord((unsigned)filter - TCG_F_OWNER_CARD));
@@ -506,6 +520,14 @@ int TcgFlow_SlotMatches(const struct TcgDuel *g, unsigned me, const struct TcgAc
         return c && c->kind == TCG_POKEMON && !TcgDuel_Tool(g, who, slot, NULL);
     case TCG_F_OTHER_MINE:
         return c && slot != a->slot;
+    case TCG_F_OTHER_HOLDER:
+    {
+        unsigned i;
+        for (i = 0; c && a->selectionCount && i < f->attachedSize; i++)
+            if (f->attached[i] == a->selections[0])
+                return 0;
+        return c != NULL;
+    }
     case TCG_F_HAS_BASIC_ENERGY:
     case TCG_F_DAMAGED_BASIC_ENERGY:
     {
@@ -546,7 +568,8 @@ int TcgFlow_SlotMatches(const struct TcgDuel *g, unsigned me, const struct TcgAc
                    p->turnsTaken >= 2 && f->enteredTurn != g->turn;
         return !c && slot;
     case TCG_F_ANY_POKEMON:
-        return c && c->kind == TCG_POKEMON;
+        /* (an Energy card its power refuses: Anti-Lightning...) */
+        return c && c->kind == TCG_POKEMON && !TcgPower_AttachBlock(g, who, slot, flowCard);
     case TCG_F_HAS_GRASS:
     {
         unsigned i;
@@ -1238,7 +1261,7 @@ unsigned TcgFlow_Slot(struct TcgFlow *f, const struct TcgDuel *g, unsigned slot)
     switch (f->kind)
     {
     case TCG_FLOW_POWER:
-        if (f->step == 0)
+        if (TcgFlow_PowerSlotIsTarget(f->steps, f->step))
             f->action.target = (uint8_t)slot;
         else
             f->action.attack = (uint8_t)slot;

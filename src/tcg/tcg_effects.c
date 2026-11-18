@@ -1334,6 +1334,24 @@ static void Evolve(struct TcgDuel *g, unsigned who, unsigned slot, unsigned deck
     TcgPower_OnPlay(g, who, slot);
 }
 #include "tcg_script.inc"
+int TcgDuel_RunPowerScript(struct TcgDuel *g, unsigned slot, const char *script, const struct TcgAction *action)
+{
+    unsigned damage = 0;
+    int result;
+    sScriptSelf = slot;
+    g->scriptCoins = g->scriptHeads = 0;
+    g->attackFailed = 0;
+    g->foeImmune = TCG_IMMUNE_NO;
+    result = ScriptRun(g, script, NULL, action, &damage, 0);
+    if (result == TCG_OK && !g->attackFailed)
+        result = ScriptRun(g, script, NULL, action, &damage, 1);
+    if (result != TCG_OK && !g->error[0])
+        snprintf(g->error, sizeof(g->error), "That choice doesn't work for this power.");
+    sScriptSelf = 0;
+    g->attackFailed = 0;
+    g->scriptCoins = g->scriptHeads = 0;
+    return result;
+}
 static int Gb2Effect(struct TcgDuel *g, const struct Effect *e, const struct TcgAttack *a, const struct TcgAction *action,
                      unsigned *damage, int after)
 {

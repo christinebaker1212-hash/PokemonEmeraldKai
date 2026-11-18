@@ -373,6 +373,94 @@ static int PlayTrainers(void)
            played, refused);
     return 0;
 }
+/* Every finished regional used power through the flow (as the Active, then on the Bench), first choices answered */
+static int UsePowers(void)
+{
+    unsigned id, cards = 0, used = 0, blocked = 0;
+    for (id = TCG_CARD_GB_COUNT + 1; id <= TCG_CARD_COUNT; id++)
+    {
+        const struct TcgCard *c = Tcg_Card(id);
+        unsigned power = TcgPower_Id(c), where;
+        uint32_t seed;
+        if (!c || power < TCG_POWER_REGION_FIRST || !TcgPower_IsUsed(power))
+            continue;
+        cards++;
+        for (where = 0; where < 2; where++)
+            for (seed = 1; seed <= 6; seed++)
+            {
+                struct TcgDuel g;
+                struct TcgFlow f;
+                unsigned q, k, slot = where ? 3 : 0, guard = 0;
+                Stage(&g, where ? TCG_CARD_MACHOP : id, 0, seed);
+                if (where)
+                {
+                    /* (a card of the deck becomes it, on the Bench) */
+                    int card = Take(&g, 0, TCG_CARD_WATER_ENERGY);
+                    assert(card >= 0);
+                    g.players[0].cards[card] = (uint16_t)id;
+                    g.players[0].field[3].stack[g.players[0].field[3].stackSize++] = (uint8_t)card;
+                }
+                /* (cards for its choices: Energy in the hand and the discard pile, damage about) */
+                Give(&g, 0, TCG_CARD_LIGHTNING_ENERGY, 1);
+                Give(&g, 0, TCG_CARD_FIRE_ENERGY, 0);
+                Attach(&g, 0, 1, TCG_CARD_LIGHTNING_ENERGY, 1);
+                g.players[0].field[1].damage = 20;
+                if (!g.players[0].field[slot].stackSize || TcgPower_Block(&g, 0, slot))
+                {
+                    blocked++;
+                    continue;
+                }
+                q = TcgFlow_Begin(&f, &g, 0, TCG_FLOW_POWER, slot);
+                while (q != TCG_Q_DONE && q != TCG_Q_FAIL && guard++ < 16)
+                {
+                    if (q == TCG_Q_SLOT)
+                    {
+                        for (k = 0; k < TCG_FIELD_SIZE && !(f.slotMask >> k & 1); k++)
+                            ;
+                        q = TcgFlow_Slot(&f, &g, k);
+                    }
+                    else if (q == TCG_Q_PICK)
+                    {
+                        uint8_t chosen[TCG_DECK_SIZE];
+                        unsigned n = 0;
+                        for (k = 0; k < f.pickCount && n < f.pickMax && (n < f.pickMin || n < 1); k++)
+                            if (f.pickOk[k])
+                                chosen[n++] = f.pick[k];
+                        q = TcgFlow_Pick(&f, &g, chosen, n);
+                    }
+                    else
+                        break;
+                }
+                if (q != TCG_Q_DONE)
+                {
+                    blocked++;
+                    continue;
+                }
+                {
+                    int result = TcgDuel_Apply(&g, &f.action);
+                    if (result != TCG_OK)
+                        return printf("FAIL %s's %s (seed %u, slot %u): %s\n", c->name, TcgPower_Name(power), seed,
+                                      slot, g.error), 1;
+                    assert(TcgDuel_Conserved(&g));
+                    used++;
+                    for (k = 0; k < 16 && g.phase != TCG_FINISHED; k++)
+                    {
+                        struct TcgAction next;
+                        memset(&next, 0, sizeof(next));
+                        if (!TcgDuel_AiAction(&g, &next))
+                            break;
+                        if (TcgDuel_Apply(&g, &next) != TCG_OK)
+                            return printf("FAIL after %s's power: AI action %u refused: %s\n", c->name, next.type,
+                                          g.error), 1;
+                        assert(TcgDuel_Conserved(&g));
+                    }
+                }
+            }
+    }
+    printf("PASS %u finished regional cards with used powers: %u uses through the flow, %u not usable there\n", cards,
+           used, blocked);
+    return 0;
+}
 int main(void)
 {
     struct TcgDuel g;
@@ -447,7 +535,7 @@ int main(void)
            steps);
     if (SpecialEnergy() || Babies())
         return 1;
-    if (PlayTrainers())
+    if (PlayTrainers() || UsePowers())
         return 1;
     /* Decks of them, each type against the others, to the end */
     {
