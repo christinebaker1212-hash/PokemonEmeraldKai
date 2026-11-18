@@ -409,7 +409,8 @@ enum
     TCG_APICK_EVOLUTION,      /* Rapid Evolution: a card from the deck that evolves from the attacker */
     TCG_APICK_FIELD_FIRE,     /* Burning Fire: the option's number of Fire Energy cards from any of your Pokemon */
     TCG_APICK_MOVE_FOE_ENERGY, /* Magnetic Lines: one of the Defending's basic Energy (then target: where it goes) */
-    TCG_APICK_DECK_BASIC      /* a basic Energy from the deck onto the attacker (count: its type, 15 any) */
+    TCG_APICK_DECK_BASIC,     /* a basic Energy from the deck onto the attacker (count: its type, 15 any) */
+    TCG_APICK_FIELD_MOVE      /* a basic Energy on one of yours, then target: another of yours it moves to */
 };
 unsigned TcgDuel_AttackPick(const struct TcgAttack *attack, unsigned *count);
 /* (TCG_APICK_FAMILY / _EVOLUTION) Can this card be taken by the attacker's attack? */

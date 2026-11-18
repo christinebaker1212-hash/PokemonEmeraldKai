@@ -227,12 +227,12 @@ static const struct TcgStep *RegionPowerSteps(unsigned power, int *count)
     case TCG_POWER_R_GLARING_GAZE:
         STEPS({TCG_ST_PICK, TCG_F_TRAINER, TCG_SRC_OPP_HAND, 1, 1, "If heads: shuffle which Trainer into their deck?"});
     case TCG_POWER_R_ENERGY_CHARGE:
-        STEPS({TCG_ST_PICK, TCG_F_LIGHTNING_ENERGY, TCG_SRC_MY_FIELD_ATTACHED, 1, 1, "Move which Lightning Energy to it?"});
+        STEPS({TCG_ST_PICK, TCG_F_LIGHTNING_ENERGY, TCG_SRC_MY_BENCH_ATTACHED, 1, 1, "Move which Lightning Energy to it?"});
     case TCG_POWER_R_ENERGY_JUMP:
         STEPS({TCG_ST_PICK, TCG_F_ENERGY, TCG_SRC_MY_FIELD_ATTACHED, 1, 1, "Move which Energy?"},
               {TCG_ST_MY_SLOT, TCG_F_OTHER_HOLDER, 0, 0, 0, "Move it to which Pokemon?"});
     case TCG_POWER_R_ENERGY_CONNECT:
-        STEPS({TCG_ST_PICK, TCG_F_BASIC_ENERGY, TCG_SRC_MY_FIELD_ATTACHED, 1, 1, "Move which basic Energy to your Active?"});
+        STEPS({TCG_ST_PICK, TCG_F_BASIC_ENERGY, TCG_SRC_MY_BENCH_ATTACHED, 1, 1, "Move which basic Energy to your Active?"});
     }
     *count = 0;
     return sNoSteps;

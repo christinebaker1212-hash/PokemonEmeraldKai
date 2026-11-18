@@ -199,6 +199,9 @@ static const char *ScriptPrompt(const char *script);
 static unsigned ScriptPick(const char *script, unsigned *count);
 static const char *ScriptBlock(const struct TcgDuel *g, unsigned player, const char *script);
 static void ScriptAi(const struct TcgDuel *g, struct TcgAction *a, const char *script);
+static unsigned ScriptOptions(const struct TcgDuel *g, unsigned player, const char *script, const char *labels[],
+                              uint8_t ok[]);
+static int ScriptOrders(const char *script);
 static const struct Effect sEffects[] = {
 #include "tcg_effect_table.inc"
 };
@@ -571,6 +574,8 @@ unsigned TcgDuel_AttackAsk(const struct TcgAttack *attack)
     const struct Effect *e = attack ? Effect(attack->effect) : NULL;
     if (!e)
         return TCG_ASK_NONE;
+    if (e->kind == FX_SCRIPT)
+        return ScriptOrders(e->script) ? TCG_ASK_ORDER_TOP3 : TCG_ASK_NONE;
     switch (e->kind)
     {
     case FX_SCAVENGE:
@@ -705,6 +710,8 @@ unsigned TcgDuel_AttackOptions(const struct TcgDuel *g, unsigned player, const s
     unsigned i, n = 0;
     if (!e)
         return 0;
+    if (e->kind == FX_SCRIPT)
+        return ScriptOptions(g, player, e->script, labels, ok);
     switch (e->kind)
     {
     case FX_AMNESIA:

@@ -635,6 +635,18 @@ int main(void)
                 if (choice == 2)
                     a.target = 2;
                 TcgDuel_AiAttackChoices(&g, &a);
+                {
+                    /* (every option in turn, not only the AI's) */
+                    const char *labels[TCG_MAX_OPTIONS];
+                    uint8_t okay[TCG_MAX_OPTIONS];
+                    unsigned n = TcgDuel_AttackOptions(&g, 0, at, labels, okay);
+                    if (n && okay[seed % n])
+                    {
+                        a.option = (uint8_t)(seed % n);
+                        if (TcgDuel_AttackAsk(at) == TCG_ASK_ORDER_TOP3)
+                            a.selectionCount = 0;
+                    }
+                }
                 if (TcgDuel_IsMetronome(at) && !a.copy)
                     a.copy = 1;
                 if (!TcgDuel_CanAttack(&g, 0, attack) || !TcgDuel_CanAttackNow(&g, 0, attack))

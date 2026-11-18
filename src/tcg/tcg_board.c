@@ -1836,7 +1836,15 @@ static void OpenPick(int source, int filter, int min, int max, const char *title
         for (i = 0; i < 2 && i < p->deckSize; i++)
             sorted[count++] = p->deck[p->deckSize - 1 - i];
         pile = sorted;
+        break;    case TCG_SRC_MY_BENCH_ATTACHED: /* (Energy Connect) */
+    {
+        unsigned k;
+        for (i = 1; i < TCG_FIELD_SIZE; i++)
+            for (k = 0; k < p->field[i].attachedSize; k++)
+                sorted[count++] = p->field[i].attached[k];
+        pile = sorted;
         break;
+    }
     }
     memset(B.pickSel, 0, sizeof(B.pickSel));
     for (i = 0; i < count; i++)

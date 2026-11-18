@@ -37,7 +37,8 @@ enum
     TCG_SRC_OPP_HAND,          /* Rocket's Sneak Attack: their hand, looked at (min drops to what can be chosen) */
     TCG_SRC_HAND_TOP2,         /* Mary: your hand and the 2 cards you'll draw (the top 2 of your deck) */
     TCG_SRC_BOTTOM4,           /* Underground Expedition: the bottom 4 of your deck */
-    TCG_SRC_TOP2               /* Radio Tower: the top 2 of your deck, only looked at */
+    TCG_SRC_TOP2,              /* Radio Tower: the top 2 of your deck, only looked at */
+    TCG_SRC_MY_BENCH_ATTACHED  /* Energy Connect: your Benched Pokemon's cards */
 };
 /* Which Pokemon in play (slot steps) or which cards (picks) can be chosen */
 enum

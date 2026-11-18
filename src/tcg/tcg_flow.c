@@ -332,6 +332,26 @@ static int AttackPickSteps(const struct TcgDuel *g, unsigned me, const struct Tc
         out[n++] = st;
         break;
     }
+    case TCG_APICK_FIELD_MOVE:
+    {
+        /* (only when there's a basic Energy and somewhere else for it) */
+        unsigned i, have = 0, pokemon = 0;
+        for (s = 0; s < TCG_FIELD_SIZE; s++)
+        {
+            const struct TcgFieldCard *f = &g->players[me].field[s];
+            pokemon += f->stackSize != 0;
+            for (i = 0; i < f->attachedSize; i++)
+                have += CardOf(g, me, f->attached[i]) <= 6;
+        }
+        if (have && pokemon > 1 && n < 3)
+        {
+            struct TcgStep pick = {TCG_ST_PICK, TCG_F_BASIC_ENERGY, TCG_SRC_MY_FIELD_ATTACHED, 1, 1, "Move which basic Energy?"};
+            struct TcgStep slot = {TCG_ST_MY_SLOT, TCG_F_OTHER_HOLDER, 0, 0, 0, "Move it to which of your Pokemon?"};
+            out[n++] = pick;
+            out[n++] = slot;
+        }
+        break;
+    }
     case TCG_APICK_FIELD_FIRE:
         /* (after the option: how many) */
         if (a->option)
@@ -1064,7 +1084,15 @@ static unsigned AskPick(struct TcgFlow *f, const struct TcgDuel *g, int source, 
         for (i = 0; i < 2 && i < p->deckSize; i++)
             sorted[count++] = p->deck[p->deckSize - 1 - i];
         pile = sorted;
+        break;    case TCG_SRC_MY_BENCH_ATTACHED:
+    {
+        unsigned k;
+        for (i = 1; i < TCG_FIELD_SIZE; i++)
+            for (k = 0; k < p->field[i].attachedSize; k++)
+                sorted[count++] = p->field[i].attached[k];
+        pile = sorted;
         break;
+    }
     }
     for (i = 0; i < count; i++)
     {
