@@ -11,7 +11,7 @@ Gigashock): damage "divided as you like" goes to one chosen Pokemon; "1 of your 
 moving Energy takes it from the Defending Pokemon. (Earth Wave's 2 Benched Pokemon are chosen: the card
 audit, 2026-11-18.)
 """
-FIRE, GRASS, LIGHTNING, WATER, FIGHTING, PSYCHIC, ANY = 0, 1, 2, 3, 4, 5, 7
+FIRE, GRASS, LIGHTNING, WATER, FIGHTING, PSYCHIC, ANY = 0, 1, 2, 3, 4, 5, 15  # (ANY: tcg_effects.c ANY_TYPE)
 PAR, PSN, CNF, SLP = 1, 2, 3, 4                     # ST_*
 POWER_OFF, COIN = 1, 2                              # CA_*
 NIDORAN, MAGNEMITE, VOLTORB, IN_PLAY = 1, 2, 3, 16  # NG_*

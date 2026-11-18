@@ -98,7 +98,7 @@ JNIEXPORT jstring JNICALL FN(catalog)(JNIEnv *env, jclass cls)
                 c->retreat, c->weakness, c->resistance, c->species);
             AddStr(&b, c->evolvesFrom);
             Add(&b, ",\"a\":[");
-            for (k = 0; k < 2 && c->attacks[k].name && c->attacks[k].name[0]; k++)
+            for (k = 0; k < TCG_ATTACKS && c->attacks[k].name && c->attacks[k].name[0]; k++)
             {
                 const struct TcgAttack *a = &c->attacks[k];
                 Add(&b, "%s{\"n\":", k ? "," : "");
@@ -128,7 +128,7 @@ JNIEXPORT jint JNICALL FN(attackSound)(JNIEnv *env, jclass cls, jint card, jint 
     unsigned color;
     (void)env;
     (void)cls;
-    if (!c || attack < 0 || attack > 1)
+    if (!c || attack < 0 || attack >= TCG_ATTACKS)
         return 0;
     return (jint)TcgFlow_AttackSound(c->attacks[attack].animation, &color);
 }
@@ -422,7 +422,7 @@ JNIEXPORT jstring JNICALL FN(options)(JNIEnv *env, jclass cls, jlong h, jint sea
         Add(&b, "}");
     }
     Add(&b, "],\"attacks\":[");
-    for (i = 0; attacker && i < 2 && attacker->attacks[i].name && attacker->attacks[i].name[0]; i++)
+    for (i = 0; attacker && i < TCG_ATTACKS && attacker->attacks[i].name && attacker->attacks[i].name[0]; i++)
     {
         int ok = mine && g->phase == TCG_TURN && TcgFlow_AttackReady(g, me, i, why, sizeof(why));
         if (!mine || g->phase != TCG_TURN)

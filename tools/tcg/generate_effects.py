@@ -23,7 +23,7 @@ functions={
 # Whole command lists ported by hand from effect_functions.asm (checked
 # against each list's functions, phases and the original damage order).
 # (op, amount, extra); the handler reads both damage phases itself.
-FIRE,GRASS,LIGHTNING,WATER,FIGHTING,PSYCHIC,ANY=0,1,2,3,4,5,7
+FIRE,GRASS,LIGHTNING,WATER,FIGHTING,PSYCHIC,ANY=0,1,2,3,4,5,15  # (ANY: tcg_effects.c ANY_TYPE)
 lists={
  'CharmanderEmberEffectCommands':('DISCARD_TYPED',1,FIRE),'CharmeleonFlamethrowerEffectCommands':('DISCARD_TYPED',1,FIRE),
  'ArcanineFlamethrowerEffectCommands':('DISCARD_TYPED',1,FIRE),'MagmarFlamethrowerEffectCommands':('DISCARD_TYPED',1,FIRE),

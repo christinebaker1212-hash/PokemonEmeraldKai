@@ -7,6 +7,7 @@
 /* Pile/attachment entries identify one of the original sixty physical cards.
  * They are not catalogue IDs. This makes conservation and duplicate ownership
  * testable after every action, including evolutions and double-colourless costs. */
+#define TCG_LOCK_ALL 15 /* TcgFieldCard.lockAttack: every attack (and no retreat) */
 struct TcgFieldCard
 {
     uint8_t stack[4], stackSize, attached[TCG_DECK_SIZE], attachedSize;
@@ -36,7 +37,7 @@ struct TcgFieldCard
     uint8_t mirrorCondition, mirrorPoison, mirrorWeaken, mirrorNoAttack, mirrorNoRetreat, mirrorEffect, mirrorArg,
         mirrorWeak;
     /* Pokemon Card GB2's (turn numbers: TcgDuel.turn, so they end by themselves): lockTurn, the owner's turn its
-     * attack lockAttack (+ 1; 3 = both, and it can't retreat: Drill Dive) can't be used (Slashing Strike, Corrosive
+     * attack lockAttack (+ 1; TCG_LOCK_ALL = every one, and it can't retreat: Drill Dive) can't be used (Slashing Strike, Corrosive
      * Liquid, Focused One Shot's tails); powerOffUntil, the last turn its Pokemon Power is off (Stare); food,
      * Hungry Snorlax's Food counters; mirrorShell, Dark Wartortle's Mirror Shell (the opponent's next turn);
      * charge3, Water Power's tripling (with charged); fossilBoost, Prehistoric Dream's +10 this turn */

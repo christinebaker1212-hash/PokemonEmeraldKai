@@ -6,7 +6,8 @@
 #define TCG_DECK_SIZE 60
 #define TCG_SAVED_DECKS 8
 #define TCG_NAME_LEN 24
-#define TCG_TYPES 7
+#define TCG_TYPES 9   /* (Darkness and Metal from Neo on: docs/TCG_REGIONS.md) */
+#define TCG_ATTACKS 3 /* a Pokemon's attacks and Pokemon Power / Poke-Power / Poke-Body (3: Ho-oh, Tyranitar...) */
 #define TCG_PACK_TYPES 11    /* the first game's 4 boosters, then GB2's 7 (TCG_PACK_GB2) */
 #define TCG_PACK_GB2 4
 #define TCG_GB2_PACKS 7
@@ -28,7 +29,9 @@ enum TcgType
     TCG_WATER,
     TCG_FIGHTING,
     TCG_PSYCHIC,
-    TCG_COLORLESS
+    TCG_COLORLESS,
+    TCG_DARKNESS,
+    TCG_METAL
 };
 enum TcgCategory
 {
@@ -47,7 +50,7 @@ struct TcgAttack
 struct TcgCard
 {
     const char *name, *evolvesFrom, *description, *effect;
-    struct TcgAttack attacks[2];
+    struct TcgAttack attacks[TCG_ATTACKS];
     uint16_t id, species;
     uint8_t kind, type, rarity, set, stage, hp, retreat, weakness, resistance, level;
     /* set: its booster (TCG_SET_*: 0-3 the first game's, 4 promos, 5 energy, 6-12 GB2's); set2: the GB2 booster that

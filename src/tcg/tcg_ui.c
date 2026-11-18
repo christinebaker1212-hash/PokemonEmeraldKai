@@ -2405,7 +2405,7 @@ static void InspectScreen(void)
             y += 11;
         }
         y += 2;
-        for (i = 0; i < 2; i++)
+        for (i = 0; i < TCG_ATTACKS; i++)
         {
             const struct TcgAttack *a = &card->attacks[i];
             int x = 94;

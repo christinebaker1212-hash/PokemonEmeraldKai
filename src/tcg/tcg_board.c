@@ -666,7 +666,7 @@ static int StartEvent(const struct TcgEvent *e, int post)
     case TCG_EV_ATTACK:
     {
         unsigned color, se;
-        const struct TcgAttack *a = c ? &c->attacks[e->slot & 1] : NULL;
+        const struct TcgAttack *a = c && e->slot < TCG_ATTACKS ? &c->attacks[e->slot] : NULL;
         if (!a)
             return 0;
         se = AttackSe(a->animation, c->type, &color);
@@ -2007,7 +2007,7 @@ static void OpenFieldMenu(void)
         int any = 0;
         unsigned i;
         char why[80] = "";
-        for (i = 0; i < 2; i++)
+        for (i = 0; i < TCG_ATTACKS; i++)
             if (AttackReady(i, why, sizeof(why)))
                 any = 1;
         if (!CanAct())
@@ -2165,9 +2165,12 @@ static void Choose(struct TcgAction *out, int *result, unsigned *card)
         B.mode = M_ATTACK;
         B.attackCursor = 0;
         {
+            /* (the first one ready) */
             char reason[80];
-            if (!AttackReady(0, reason, sizeof(reason)) && AttackReady(1, reason, sizeof(reason)))
-                B.attackCursor = 1;
+            int k;
+            for (k = TCG_ATTACKS - 1; k >= 0; k--)
+                if (AttackReady((unsigned)k, reason, sizeof(reason)))
+                    B.attackCursor = k;
         }
         B.focusKind = T_MINE;
         B.focusIndex = 0;
@@ -2564,9 +2567,12 @@ int TcgBoard_Step(unsigned pressed, unsigned held, struct TcgAction *out, unsign
         if (pressed & (KEY_UP | KEY_DOWN))
         {
             const struct TcgCard *c = TcgDuel_Attacker(&B.view, 0);
-            if (c && c->attacks[B.attackCursor ^ 1].name[0])
+            int step = (pressed & KEY_UP) ? TCG_ATTACKS - 1 : 1, k = (B.attackCursor + step) % TCG_ATTACKS;
+            while (c && k != B.attackCursor && !c->attacks[k].name[0])
+                k = (k + step) % TCG_ATTACKS;
+            if (c && k != B.attackCursor)
             {
-                B.attackCursor ^= 1;
+                B.attackCursor = k;
                 PlaySE(SE_RG_BAG_CURSOR);
             }
         }
@@ -3588,17 +3594,22 @@ static void DrawMenu(void)
 static void DrawAttacks(void)
 {
     const struct TcgCard *c = TcgDuel_Attacker(&B.view, 0);
-    int i;
+    int i, rows = 0, row = 0, top;
     if (!c)
         return;
-    G_Window(0, 98, 240, 62);
-    for (i = 0; i < 2; i++)
+    for (i = 0; i < TCG_ATTACKS; i++)
+        rows += c->attacks[i].name[0] != 0;
+    /* (a third attack: the window grows upward, the description stays at the bottom) */
+    top = rows > 2 ? 98 - 15 * (rows - 2) : 98;
+    G_Window(0, top, 240, 160 - top);
+    for (i = 0; i < TCG_ATTACKS; i++)
     {
         const struct TcgAttack *a = &c->attacks[i];
         char reason[80], dmg[16];
-        int y = 104 + i * 15, x = 16, t, ready;
+        int y = top + 6 + row * 15, x = 16, t, ready;
         if (!a->name[0])
             continue;
+        row++;
         ready = AttackReady(i, reason, sizeof(reason)) || a->category == TCG_POKEMON_POWER;
         if (i == B.attackCursor)
             G_Cursor(8, y + 3);

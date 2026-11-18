@@ -208,11 +208,11 @@ const struct TcgCard *TcgDuel_Attacker(const struct TcgDuel *g, unsigned player)
 {
     return TcgDuel_Field(g, player, EnergySlot(g, player));
 }
-/* Slashing Strike, Drill Dive and the like: that attack (lockAttack 3: any) can't be used this turn */
+/* Slashing Strike, Drill Dive and the like: that attack (lockAttack TCG_LOCK_ALL: any) can't be used this turn */
 static int Locked(const struct TcgDuel *g, unsigned player, unsigned attack)
 {
     const struct TcgFieldCard *f = &g->players[player].field[0];
-    return f->lockTurn == g->turn && (f->lockAttack == 3 || f->lockAttack == attack + 1);
+    return f->lockTurn == g->turn && (f->lockAttack == TCG_LOCK_ALL || f->lockAttack == attack + 1);
 }
 int TcgDuel_CanAttack(const struct TcgDuel *g, unsigned player, unsigned attack)
 {
@@ -225,7 +225,7 @@ int TcgDuel_CanAttackNow(const struct TcgDuel *g, unsigned player, unsigned atta
 {
     const struct TcgCard *c = TcgDuel_Attacker(g, player);
     const struct TcgFieldCard *f = &g->players[player].field[0];
-    if (!c || attack > 1 || c->kind != TCG_POKEMON || f->condition == TCG_PARALYZED || TcgDuel_NoAttack(g, player) ||
+    if (!c || attack >= TCG_ATTACKS || c->kind != TCG_POKEMON || f->condition == TCG_PARALYZED || TcgDuel_NoAttack(g, player) ||
         Locked(g, player, attack))
         return 0;
     /* (Big Snore: only while Asleep) */
@@ -240,7 +240,7 @@ static int EnergyPaid(const struct TcgDuel *g, unsigned player, unsigned attack)
     /* (Rainbow Energy: any one type each) */
     for (i = 0; i < f->attachedSize; i++)
         rainbow += g->players[player].cards[f->attached[i]] == TCG_CARD_RAINBOW_ENERGY;
-    if (!c || attack > 1 || c->kind != TCG_POKEMON)
+    if (!c || attack >= TCG_ATTACKS || c->kind != TCG_POKEMON)
         return 0;
     a = &c->attacks[attack];
     if (!a->name[0] || a->category == TCG_POKEMON_POWER)
@@ -541,7 +541,7 @@ static int Apply(struct TcgDuel *g, const struct TcgAction *a)
         const char *blocked;
         int result, total;
         f = &p->field[0];
-        if (!attacker || !target || attacker->kind != TCG_POKEMON || a->attack > 1 ||
+        if (!attacker || !target || attacker->kind != TCG_POKEMON || a->attack >= TCG_ATTACKS ||
             !EnergyPaid(g, g->current, a->attack))
             return Error(g, "That attack cannot be used with the attached Energy.");
         attack = &attacker->attacks[a->attack];
@@ -777,7 +777,7 @@ static int Apply(struct TcgDuel *g, const struct TcgAction *a)
         if (p->retreated)
             return Error(g, "You can only retreat once each turn.");
         if (c->kind == TCG_TRAINER || f->condition == TCG_ASLEEP || f->condition == TCG_PARALYZED || f->noRetreat ||
-            p->confusionRetreatFailed || (f->lockTurn == g->turn && f->lockAttack == 3))
+            p->confusionRetreatFailed || (f->lockTurn == g->turn && f->lockAttack == TCG_LOCK_ALL))
             return Error(g, "This Pokemon cannot retreat.");
         {
             const char *why = TcgPower_RetreatBlock(g, g->current);

@@ -35,7 +35,7 @@ for c in x['cards']:
  if c['kind']=='pokemon':
   stage={'BASIC':0,'STAGE1':1,'STAGE2':2}[c['stage']]
   out.append(f'.hp={c["hp"]}, .stage={stage}, .species={c["species"]}, .level={c["level"]}, .retreat={c["retreat"]}, .weakness={affinity(c["weakness"])}, .resistance={affinity(c["resistance"])}, .evolvesFrom={q(c["evolves_from"])}, .description={q(c["flavor"])}, .attacks={{')
-  for a in c['attacks']+[None]*(2-len(c['attacks'])):
+  for a in c['attacks']+[None]*(3-len(c['attacks'])):  # (TCG_ATTACKS)
    if a is None:
     out.append('{.name="",.description="",.effect="NONE",.animation="ATK_ANIM_NONE",.cost={0,0,0,0,0,0,0},.damage=0,.category=TCG_DAMAGE_NORMAL},');continue
    costs=','.join(str(a['energy'].get(t,0)) for t in types)

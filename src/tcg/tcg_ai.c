@@ -51,7 +51,7 @@ static unsigned Score(const struct TcgCard *c)
         return 25;
     if (c->kind == TCG_TRAINER)
         return c->id == TCG_CARD_BILL || c->id == TCG_CARD_PROFESSOR_OAK ? 45 : 15;
-    return c->hp + c->attacks[0].damage + c->attacks[1].damage / 2;
+    return c->hp + c->attacks[0].damage + c->attacks[1].damage / 2 + c->attacks[2].damage / 2;
 }
 static int SelectCost(const struct TcgPlayer *p, unsigned played, uint8_t *out, unsigned count)
 {
@@ -495,7 +495,7 @@ static unsigned Left(const struct TcgDuel *g, unsigned who, unsigned slot)
 static unsigned NeedMost(const struct TcgCard *c, unsigned type)
 {
     unsigned i, t, most = 0;
-    for (i = 0; c && i < 2; i++)
+    for (i = 0; c && i < TCG_ATTACKS; i++)
     {
         const struct TcgAttack *m = &c->attacks[i];
         unsigned need = 0;
@@ -537,7 +537,7 @@ static int HelpsCard(const struct TcgDuel *g, unsigned who, unsigned slot, const
                      unsigned add)
 {
     unsigned k, t, total = TcgDuel_Energy(g, who, slot, TCG_NONE), cost;
-    for (k = 0; c && k < 2; k++)
+    for (k = 0; c && k < TCG_ATTACKS; k++)
     {
         const struct TcgAttack *m = &c->attacks[k];
         if (!m->name[0] || m->category == TCG_POKEMON_POWER)
@@ -619,7 +619,7 @@ static int Ready(const struct TcgDuel *g, unsigned who, unsigned slot, unsigned 
 static unsigned BestDamage(const struct TcgDuel *g, unsigned who, unsigned slot, int extra)
 {
     unsigned k, best = 0;
-    for (k = 0; k < 2; k++)
+    for (k = 0; k < TCG_ATTACKS; k++)
         if (Ready(g, who, slot, k, extra) && DamageTo(g, who, slot, k) > best)
             best = DamageTo(g, who, slot, k);
     return best;
@@ -636,7 +636,7 @@ static int TheyKnockOut(const struct TcgDuel *g, unsigned who, unsigned slot)
     unsigned k, left = Left(g, who, slot);
     if (!foe || !c || foe->kind != TCG_POKEMON)
         return 0;
-    for (k = 0; k < 2; k++)
+    for (k = 0; k < TCG_ATTACKS; k++)
     {
         const struct TcgAttack *m = &foe->attacks[k];
         unsigned damage;
@@ -922,9 +922,10 @@ static int PowerAction(const struct TcgDuel *g, struct TcgAction *a)
             /* Only when it lets Charizard attack */
             struct TcgDuel next = *g;
             unsigned k;
-            if (s || TcgDuel_CanAttack(g, me, 0) || TcgDuel_CanAttack(g, me, 1) || TcgDuel_Apply(&next, a) != TCG_OK)
+            if (s || TcgDuel_CanAttack(g, me, 0) || TcgDuel_CanAttack(g, me, 1) || TcgDuel_CanAttack(g, me, 2) ||
+                TcgDuel_Apply(&next, a) != TCG_OK)
                 break;
-            for (k = 0; k < 2; k++)
+            for (k = 0; k < TCG_ATTACKS; k++)
                 if (TcgDuel_CanAttack(&next, me, k))
                     return 1;
             break;
@@ -1021,7 +1022,7 @@ int TcgDuel_AiActionLevel(const struct TcgDuel *g, unsigned level, struct TcgAct
 static int Act(const struct TcgDuel *g, struct TcgAction *a)
 {
     const struct TcgPlayer *p;
-    unsigned i, s, attack, bestAttack = TCG_NONE, bestScore = 0;
+    unsigned i, s, attack, bestAttack = TCG_NONE, secondAttack = TCG_NONE, bestScore = 0;
     memset(a, 0, sizeof(*a));
     if (g->phase == TCG_FINISHED)
         return 0;
@@ -1131,7 +1132,7 @@ static int Act(const struct TcgDuel *g, struct TcgAction *a)
                 if (!c || c->kind != TCG_POKEMON || !EnergyHelps(g, g->current, s, energy))
                     continue;
                 score = s == 0 ? 40 : 0;
-                for (attack = 0; attack < 2; attack++)
+                for (attack = 0; attack < TCG_ATTACKS; attack++)
                 {
                     const struct TcgAttack *move = &c->attacks[attack];
                     if (move->name[0] && move->category != TCG_POKEMON_POWER)
@@ -1171,7 +1172,7 @@ static int Act(const struct TcgDuel *g, struct TcgAction *a)
             return 1;
     if (g->phase == TCG_TURN && PowerAction(g, a))
         return 1;
-    for (attack = 0; attack < 2; attack++)
+    for (attack = 0; attack < TCG_ATTACKS; attack++)
     {
         const struct TcgCard *c = TcgDuel_Attacker(g, g->current);
         unsigned score;
@@ -1180,14 +1181,15 @@ static int Act(const struct TcgDuel *g, struct TcgAction *a)
         score = ExpectedDamage(g, c, attack);
         if (bestAttack == TCG_NONE || score > bestScore)
         {
+            secondAttack = bestAttack;
             bestAttack = attack;
             bestScore = score;
         }
+        else if (secondAttack == TCG_NONE)
+            secondAttack = attack;
     }
-    if (bestAttack != TCG_NONE && TcgDuel_CanAttack(g, g->current, bestAttack ^ 1) &&
-        TcgDuel_CanAttackNow(g, g->current, bestAttack ^ 1) &&
-        TcgDuel_EffectSupported(TcgDuel_Attacker(g, g->current)->attacks[bestAttack ^ 1].effect) && Slip(sWeakAttack))
-        bestAttack ^= 1;   /* (the other attack) */
+    if (bestAttack != TCG_NONE && secondAttack != TCG_NONE && Slip(sWeakAttack))
+        bestAttack = secondAttack;   /* (another attack it can use) */
     if (bestAttack != TCG_NONE && TcgDuel_CanAttackNow(g, g->current, bestAttack))
     {
         int required;

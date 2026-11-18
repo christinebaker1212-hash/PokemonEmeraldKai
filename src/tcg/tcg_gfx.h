@@ -115,6 +115,7 @@ void G_Coin(int cx, int cy, float spin, int heads, unsigned alpha);
 int G_ButtonIcon(int x, int y, unsigned id);
 int G_ButtonIconWidth(unsigned id);
 int G_Hint(int x, int y, unsigned color, unsigned shadow, const char *text, int font, int draw);
+#define G_TYPE_TRAINER 9 /* (G_TypeColor: past the card types) */
 unsigned G_TypeColor(unsigned type, int shade); /* shade 0 base, 1 light, 2 dark */
 const char *G_TypeName(unsigned type);
 

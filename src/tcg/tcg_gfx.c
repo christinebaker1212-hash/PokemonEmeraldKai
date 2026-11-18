@@ -786,7 +786,7 @@ void G_HpPlate(int x, int y, int hp, unsigned maxHp, int small, unsigned alpha)
 /* ------------------------------------------------------------------ */
 unsigned G_TypeColor(unsigned type, int shade)
 {
-    static const unsigned colors[8][3] = {
+    static const unsigned colors[G_TYPE_TRAINER + 1][3] = {
         {0xe85830, 0xf8a878, 0x982010}, /* fire */
         {0x58b038, 0xb0e088, 0x2c6c18}, /* grass */
         {0xf0c820, 0xf8f090, 0x987800}, /* lightning */
@@ -794,16 +794,19 @@ unsigned G_TypeColor(unsigned type, int shade)
         {0xb86c38, 0xe0b080, 0x703810}, /* fighting */
         {0x9858c0, 0xd0a8e8, 0x582880}, /* psychic */
         {0xc8c8c0, 0xf4f4ec, 0x7c7c74}, /* colorless */
-        {0xd8d8e0, 0xf8f8f8, 0x707080}, /* trainer */
+        {0x404858, 0x7880a0, 0x181c28}, /* darkness */
+        {0x98a0b0, 0xe0e4ec, 0x505868}, /* metal */
+        {0xd8d8e0, 0xf8f8f8, 0x707080}, /* trainer (G_TYPE_TRAINER) */
     };
-    if (type > 7)
+    if (type > G_TYPE_TRAINER)
         type = 6;
     return colors[type][shade < 0 || shade > 2 ? 0 : shade];
 }
 const char *G_TypeName(unsigned type)
 {
-    static const char *const names[] = {"FIRE", "GRASS", "LIGHTNING", "WATER", "FIGHTING", "PSYCHIC", "COLORLESS"};
-    return type < 7 ? names[type] : "";
+    static const char *const names[] = {"FIRE",     "GRASS",     "LIGHTNING", "WATER", "FIGHTING",
+                                        "PSYCHIC", "COLORLESS", "DARKNESS",  "METAL"};
+    return type < TCG_TYPES ? names[type] : "";
 }
 void G_EnergyOrb(int x, int y, unsigned type, int big)
 {
@@ -1441,7 +1444,7 @@ static void Back(struct GSurface *s)
 static void Face(struct GSurface *s, const struct TcgCard *c)
 {
     int w = s->w, h = s->h, b = w >= 40 ? 3 : w >= 26 ? 2 : 1, i, artW, artH, artX, artY, textY;
-    unsigned type = c->kind == TCG_TRAINER ? 7 : c->type, base = G_TypeColor(type, 0), light = G_TypeColor(type, 1),
+    unsigned type = c->kind == TCG_TRAINER ? G_TYPE_TRAINER : c->type, base = G_TypeColor(type, 0), light = G_TypeColor(type, 1),
              dark = G_TypeColor(type, 2);
     struct Source *printed = sArtMode == G_ART_PRINTED_ART ? Scan(c->id) : NULL;
     struct Source *art = printed ? printed : Source(c->id, 0);
@@ -1498,7 +1501,7 @@ static void Face(struct GSurface *s, const struct TcgCard *c)
         for (l = 0; l < lines && l < 3; l++)
         {
             int y = textY + l * (w >= 40 ? 6 : w >= 26 ? 5 : 4) + 1, x = b + 2, k, cost = 0;
-            if (c->kind == TCG_POKEMON && l < 2 && c->attacks[l].name[0])
+            if (c->kind == TCG_POKEMON && l < TCG_ATTACKS && c->attacks[l].name[0])
             {
                 for (k = 0; k < TCG_TYPES; k++)
                     cost += c->attacks[l].cost[k];

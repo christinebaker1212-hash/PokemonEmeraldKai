@@ -183,7 +183,7 @@ enum { CA_POWER_OFF = 1, CA_COIN = 2 };
 /* FX_NAME_COUNT's groups */
 enum { NG_NIDORAN = 1, NG_MAGNEMITE = 2, NG_VOLTORB = 3, NG_IN_PLAY = 16 };
 #define BOTH_PHASES 2
-#define ANY_TYPE 7
+#define ANY_TYPE 15 /* (past the types: TCG_DARKNESS 7, TCG_METAL 8) */
 struct Effect
 {
     const char *name;
@@ -646,11 +646,13 @@ static int Picked(const struct TcgAction *action, unsigned k, const uint8_t *pil
     return -1;
 }
 static int RealAttack(const struct TcgAttack *a) { return a && a->name[0] && a->category != TCG_POKEMON_POWER; }
+/* The attack slots a card shows (2 at least, as the original's menus: a third only when it has one) */
+static unsigned AttackSlots(const struct TcgCard *c) { return c && c->attacks[2].name[0] ? 3 : 2; }
 const struct TcgAttack *TcgDuel_MetronomeAttack(const struct TcgDuel *g, unsigned player, unsigned copy)
 {
     const struct TcgCard *foe = TcgDuel_Field(g, player ^ 1, 0);
     const struct TcgAttack *a;
-    if (!foe || foe->kind != TCG_POKEMON || copy < 1 || copy > 2)
+    if (!foe || foe->kind != TCG_POKEMON || copy < 1 || copy > TCG_ATTACKS)
         return NULL;
     a = &foe->attacks[copy - 1];
     /* (never Metronome with Metronome) */
@@ -691,7 +693,7 @@ unsigned TcgDuel_AttackOptions(const struct TcgDuel *g, unsigned player, const s
         /* the Defending Pokemon's attacks */
         if (!foe || foe->kind != TCG_POKEMON)
             return 0;
-        for (i = 0; i < 2; i++)
+        for (i = 0; i < AttackSlots(foe); i++)
         {
             labels[i] = foe->attacks[i].name[0] ? foe->attacks[i].name : "---";
             ok[i] = e->kind == FX_AMNESIA ? RealAttack(&foe->attacks[i])
@@ -702,12 +704,12 @@ unsigned TcgDuel_AttackOptions(const struct TcgDuel *g, unsigned player, const s
         /* Amnesia used on it: which of the Defending Pokemon's attacks to give it back to */
         if (g->players[player].field[0].mirrorEffect != TCG_MIRROR_AMNESIA || !foe || foe->kind != TCG_POKEMON)
             return 0;
-        for (i = 0; i < 2; i++)
+        for (i = 0; i < AttackSlots(foe); i++)
         {
             labels[i] = foe->attacks[i].name[0] ? foe->attacks[i].name : "---";
             ok[i] = RealAttack(&foe->attacks[i]);
         }
-        return 2;
+        return AttackSlots(foe);
     case FX_WILDFIRE:
         n = FireEnergyCards(g, player, 0);
         for (i = 0; i <= n && i < TCG_MAX_OPTIONS; i++)
@@ -771,7 +773,7 @@ unsigned TcgDuel_Resistance(const struct TcgDuel *g, unsigned player, unsigned s
 void TcgDuel_AiAttackChoices(const struct TcgDuel *g, struct TcgAction *a)
 {
     const struct TcgCard *self = TcgDuel_Attacker(g, g->current), *foe = TcgDuel_Field(g, g->current ^ 1, 0);
-    const struct TcgAttack *attack = self ? &self->attacks[a->attack & 1] : NULL;
+    const struct TcgAttack *attack = self && a->attack < TCG_ATTACKS ? &self->attacks[a->attack] : NULL;
     const struct Effect *e = attack ? Effect(attack->effect) : NULL;
     const struct TcgPlayer *p = &g->players[g->current];
     unsigned i, s;
@@ -850,9 +852,17 @@ void TcgDuel_AiAttackChoices(const struct TcgDuel *g, struct TcgAction *a)
     case FX_MIRROR_MOVE:
         /* AIPickAttackForAmnesia: the second attack if it has the Energy for it, else the first real one */
         if (foe)
-            a->option = (uint8_t)(RealAttack(&foe->attacks[1]) && TcgDuel_CanAttack(g, g->current ^ 1, 1) ? 1
-                                  : RealAttack(&foe->attacks[0])                                       ? 0
-                                                                                                        : 1);
+        {
+            /* (the last real attack it has the Energy for, else the first real one) */
+            int k, pick = -1;
+            for (k = TCG_ATTACKS - 1; k >= 0 && pick < 0; k--)
+                if (RealAttack(&foe->attacks[k]) && TcgDuel_CanAttack(g, g->current ^ 1, (unsigned)k))
+                    pick = k;
+            for (k = 0; k < TCG_ATTACKS && pick < 0; k++)
+                if (RealAttack(&foe->attacks[k]))
+                    pick = k;
+            a->option = (uint8_t)(pick < 0 ? 1 : pick);
+        }
         break;
     case FX_WILDFIRE:
         a->option = 0; /* (the original's AI always discards none) */
@@ -1032,12 +1042,12 @@ const char *TcgDuel_EffectBlock(const struct TcgDuel *g, unsigned player, const 
     case FX_AMNESIA:
     {
         const struct TcgCard *c = TcgDuel_Field(g, player ^ 1, 0);
-        return c && c->kind == TCG_POKEMON && (RealAttack(&c->attacks[0]) || RealAttack(&c->attacks[1]))
+        return c && c->kind == TCG_POKEMON && (RealAttack(&c->attacks[0]) || RealAttack(&c->attacks[1]) || RealAttack(&c->attacks[2]))
                    ? NULL
                    : "The Defending Pokemon has no attacks to choose.";
     }
     case FX_METRONOME:
-        return TcgDuel_MetronomeAttack(g, player, 1) || TcgDuel_MetronomeAttack(g, player, 2)
+        return TcgDuel_MetronomeAttack(g, player, 1) || TcgDuel_MetronomeAttack(g, player, 2) || TcgDuel_MetronomeAttack(g, player, 3)
                    ? NULL
                    : "There's no attack Metronome can copy.";
     case FX_WILDFIRE:
@@ -1202,7 +1212,7 @@ static void Amnesia(struct TcgDuel *g, unsigned attack)
 {
     struct TcgFieldCard *foe = &g->players[g->current ^ 1].field[0];
     const struct TcgCard *c = TcgDuel_Field(g, g->current ^ 1, 0);
-    if (!c || attack > 1 || g->foeImmune == TCG_IMMUNE_YES)
+    if (!c || attack >= TCG_ATTACKS || g->foeImmune == TCG_IMMUNE_YES)
         return;
     foe->disabled = (uint8_t)(attack + 1);
     TcgDuel_Log(g, "%s can't use %s next turn.", c->name, c->attacks[attack].name);
@@ -1470,7 +1480,7 @@ static int Gb2Effect(struct TcgDuel *g, const struct Effect *e, const struct Tcg
         if (after)
         {
             self->lockTurn = (uint16_t)(g->turn + 2);
-            self->lockAttack = (uint8_t)(e->extra == 3 ? 3 : action->attack + 1);
+            self->lockAttack = (uint8_t)(e->extra == 3 ? TCG_LOCK_ALL : action->attack + 1);
         }
         break;
     case FX_FIREBALL:
@@ -2794,7 +2804,7 @@ int TcgDuel_AttackEffect(struct TcgDuel *g, const struct TcgAttack *a, const str
         if (!after)
         {
             const struct TcgCard *c = TcgDuel_Field(g, g->current ^ 1, 0);
-            if (!c || action->option > 1 || !RealAttack(&c->attacks[action->option]))
+            if (!c || action->option >= TCG_ATTACKS || !RealAttack(&c->attacks[action->option]))
                 return TCG_INVALID;
             /* (extra: on heads, Disable) */
             if (!e->extra || TcgDuel_Coin(g, g->current))
@@ -2937,7 +2947,7 @@ int TcgDuel_AttackEffect(struct TcgDuel *g, const struct TcgAttack *a, const str
             if (self->mirrorEffect == TCG_MIRROR_AMNESIA)
             {
                 const struct TcgCard *c = TcgDuel_Field(g, g->current ^ 1, 0);
-                if (!c || action->option > 1 || !RealAttack(&c->attacks[action->option]))
+                if (!c || action->option >= TCG_ATTACKS || !RealAttack(&c->attacks[action->option]))
                     return TCG_INVALID;
                 *damage = 0;
                 Amnesia(g, action->option);

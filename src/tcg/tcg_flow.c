@@ -691,7 +691,7 @@ int TcgFlow_AttackReady(const struct TcgDuel *g, unsigned me, unsigned attack, c
 {
     const struct TcgCard *c = TcgDuel_Attacker(g, me), *active = Field(g, me, 0);
     const struct TcgFieldCard *f = &g->players[me].field[0];
-    if (!c || c->kind != TCG_POKEMON || !c->attacks[attack].name[0])
+    if (!c || c->kind != TCG_POKEMON || attack >= TCG_ATTACKS || !c->attacks[attack].name[0])
         return snprintf(reason, size, "No attack."), 0;
     if (c->attacks[attack].category == TCG_POKEMON_POWER)
         return snprintf(reason, size, "This is a Pokemon Power."), 0;
@@ -730,7 +730,7 @@ int TcgFlow_CanRetreat(const struct TcgDuel *g, unsigned me, char *reason, size_
         return snprintf(reason, size, "%s can't retreat.", c->name), 0;
     if (f->condition == TCG_ASLEEP || f->condition == TCG_PARALYZED)
         return snprintf(reason, size, "%s is %s.", c->name, f->condition == TCG_ASLEEP ? "Asleep" : "Paralyzed"), 0;
-    if (f->lockTurn == g->turn && f->lockAttack == 3)
+    if (f->lockTurn == g->turn && f->lockAttack == TCG_LOCK_ALL)
         return snprintf(reason, size, "%s can't retreat this turn.", c->name), 0;
     if (TcgPower_RetreatBlock(g, me))
         return snprintf(reason, size, "%s", TcgPower_RetreatBlock(g, me)), 0;
@@ -1095,7 +1095,7 @@ unsigned TcgFlow_Begin(struct TcgFlow *f, const struct TcgDuel *g, unsigned me, 
     case TCG_FLOW_ATTACK:
     {
         const struct TcgCard *c = TcgDuel_Attacker(g, f->me);
-        if (g->phase != TCG_TURN || index > 1)
+        if (g->phase != TCG_TURN || index >= TCG_ATTACKS)
             return Fail(f, "You can't attack now.");
         if (!TcgFlow_AttackReady(g, f->me, index, reason, sizeof(reason)))
             return Fail(f, reason);
