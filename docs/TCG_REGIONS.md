@@ -73,7 +73,9 @@ Total 1,158 set cards (about 1,100 attacks with effect text, 250 Pokémon Powers
 2. Data model: card count, types (Darkness, Metal), subtypes (Stadium, Tool, Supporter, TM, Baby, Owner's, Shining,
    Light / Dark, Crystal), Poké-Powers / Bodies, the collection format (migration), boosters per region.
 3. Importer (pokemon-tcg-data -> catalog), printed art (fetch_art.py / build_printed_art.py), a coverage report like
-   MAGIC's (docs/TCG_REGIONS_SCOPE.md: which cards fully play).
+   MAGIC's (docs/TCG_REGIONS_SCOPE.md: which cards fully play). The report exists (tools/tcg/regions/scope.py, matching
+   wordings against today's catalogue): 2026-11-18, 305 of 1,251 cards play with today's effects; 946 wait on 899
+   distinct wordings (798 attack texts, 271 Poke-Powers / Bodies, 187 Trainer / Energy rules), most of them single.
 4. Effects by families, tested on staged boards; the board's new zones (a Stadium, Tools: **mock-ups first**).
 5. Per region: boosters, shops, NPC decks (built from the region's sets and today's), special trainers with their own
    decks and promos (UNOVA's too), CARD SCALING ratings rerun, the card guide rebuilt.
