@@ -8297,3 +8297,12 @@ POKeMON, the boxes), as the Game Boy's colours 1-3. Sprite colours: Red's in GB 
 own CGB palettes. Moves past the game's own: MP_GbMoves_StandIn (by the name's words: PUNCH, KICK, FANG, BEAM...,
 else by type and power, status moves by type; Moemon Maker moves by their base). Sounds: mp_legacy_sound.c's move
 voice (one at a time, as the Game Boy's channels). MOEMON_GBMOVES_TRACE=1 logs each frame. Scenario gb_moves.
+
+### RED / CRYSTAL letters the Game Boy fonts lack (2026-11-18)
+Every code of KAI's charset now has a letter in the RED / CRYSTAL fonts (tools/ui_styles/gbstyle.py glyph(), gb_build.py
+fonts()): accented letters are the font's own letter with a small accent laid over it (a capital moved down a row), ▲ is
+the font's ▼ turned over, ¿ ¡ the ? and ! turned round, < “ ” · $ ß œ º ª drawn in the font's thin strokes, <PK><MN> the
+games' own tiles ($E1 / $E2), the level mark the battle font's, POKéBLOCK's five codes its letters. The arrows sit at the
+game's UP_ARROW / RIGHT_ARROW codes, and the d-pad's icons ({UPDOWN}, {LEFTRIGHT}, {DPAD_UP}...) are written with them
+in every style (mp_uistyle.c KeypadWord). Only kana are left as ?. FIRERED's builder pictures draw any code by FireRed's
+own font (fr.py code()).

@@ -51,7 +51,15 @@ def png_pal(im):
 
 
 def code(ch):
-    return EXTRA[ch] if ch in EXTRA else s2._code(ch)
+    if ch in EXTRA:
+        return EXTRA[ch]
+    k = s2._code(ch)
+    if k == s2._code('?') and ch != '?':
+        # (FireRed's font holds the same codes as KAI's charset: what the short table lacks is drawn at its own code,
+        # never as a ?)
+        import uipack
+        k = uipack.charmap().get(ch, uipack.EXTRA_CODES.get(ch, k))
+    return k
 
 
 def tokens(s):

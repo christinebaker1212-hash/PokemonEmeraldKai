@@ -39,12 +39,22 @@ class GBPack:
                 mid = g.mid
                 g.mid = sh
                 try:
-                    g.tile(im, g.glyph(s), x, y, ink)
+                    for k, ch in enumerate(cells(s)):
+                        g.tile(im, g.glyph(ch), x + pitch * k, y, ink)
                 finally:
                     g.mid = mid
             return d
-        self.font = self.p.font('gb', U.font_from(draw(8), lambda s: 8, 8))
-        f7 = U.font_from(draw(7), lambda s: 7, 8)
+
+        def cells(s):
+            return [s] if s in TOKENS else list(s)
+        # (the codes KAI's charset has no single letter for, as the Game Boy fonts write them: the arrows the
+        # d-pad's icons are written with, <PK><MN> and the level mark from the games' own tiles, POKéBLOCK's five
+        # codes as its letters, the French ordinals' small letters)
+        TOKENS = ('PK', 'MN', 'LV')
+        extra = {0x79: '▲', 0x7C: '▶', 0x53: 'PK', 0x54: 'MN', 0x34: 'LV', 0x55: 'PO', 0x56: 'Ké', 0x57: 'BL',
+                 0x58: 'OC', 0x59: 'K', 0x2C: 'er', 0x84: 'e', 0xA0: 're'}
+        self.font = self.p.font('gb', U.font_from(draw(8), lambda s: 8 * len(cells(s)), 8, extra))
+        f7 = U.font_from(draw(7), lambda s: 7 * len(cells(s)), 8, extra)
         self.font7 = self.p.font('gb7', f7)
 
     # ---------------------------------------------------------------------------------------------------- pieces

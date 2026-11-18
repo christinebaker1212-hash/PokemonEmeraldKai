@@ -91,7 +91,23 @@ class GB(Style):
              '=': ('........', '........', '........', '.######.', '........', '.######.', '........', '........'),
              '%': ('........', '.##...#.', '.##..#..', '....#...', '...#....', '..#..##.', '.#...##.', '........'),
              '&': ('..##....', '.#..#...', '.#..#...', '..##....', '.#..#.#.', '.#...#..', '..###.#.', '........'),
-             '>': ('........', '.#......', '..#.....', '...#....', '....#...', '...#....', '..#.....', '.#......')}
+             '>': ('........', '.#......', '..#.....', '...#....', '....#...', '...#....', '..#.....', '.#......'),
+             '<': ('........', '......#.', '.....#..', '....#...', '...#....', '....#...', '.....#..', '......#.'),
+             '“': ('.##.##..', '.##.##..', '.#..#...', '#..#....', '........', '........', '........', '........'),
+             '”': ('.##.##..', '.##.##..', '..#..#..', '.#..#...', '........', '........', '........', '........'),
+             '·': ('........', '........', '........', '...##...', '...##...', '........', '........', '........'),
+             '$': ('...#....', '.#####..', '#..#....', '.####...', '...#.#..', '#####...', '...#....', '........'),
+             'ß': ('.####...', '#....#..', '#...#...', '#.###...', '#....#..', '#....#..', '#.###...', '........'),
+             'œ': ('........', '........', '.##.##..', '#..#..#.', '#..####.', '#..#....', '.##.###.', '........'),
+             'Œ': ('.#.####.', '#.#.....', '#.#.....', '#.####..', '#.#.....', '#.#.....', '.#.####.', '........'),
+             'º': ('..##....', '.#..#...', '..##....', '........', '.####...', '........', '........', '........'),
+             'ª': ('..##....', '...#....', '.###....', '..##....', '.####...', '........', '........', '........')}
+    # accents over KAI's accented letters: two rows over a small letter, one over a capital (moved down a row)
+    ACCENT = {'\u0300': ('..#.....', '...#....'), '\u0301': ('....#...', '...#....'),
+              '\u0302': ('...#....', '..#.#...'), '\u0308': ('........', '..#.#...'),
+              '\u0303': ('..#.#...', '.#.#....')}
+    ACCENT_CAP = {'\u0300': '..#.....', '\u0301': '....#...', '\u0302': '..###...', '\u0308': '.#...#..',
+                  '\u0303': '.##.#...'}
 
     def glyph(self, ch):
         if ch == '◀':
@@ -100,6 +116,49 @@ class GB(Style):
             return self.extra[0x75 - 0x60]   # (charmap.asm's "…", $75: font_extra)
         if ch == '&' and self.kind == 'crystal':
             return self.font[0xE9 - 0x80]   # (Crystal's own &: charmap.asm $E9)
+        if ch in ('PK', 'MN'):    # (<PK> $E1, <MN> $E2 in both games' fonts)
+            return self.font[(0xE1 if ch == 'PK' else 0xE2) - 0x80]
+        if ch == 'LV':            # (the level mark, as level() draws it)
+            return self.batt[12 if self.kind == 'red' else 14]
+        if ch == '▲':      # (the font's ▼ turned over, kept on the ▼'s rows)
+            dn = self.font[CODES['▼'] - 0x80]
+            t = dn.transpose(Image.FLIP_TOP_BOTTOM)
+            box = t.point(lambda v: 255 if v >= 160 else 0).getbbox()
+            dbox = dn.point(lambda v: 255 if v < 160 else 0).getbbox()
+            if box is None or dbox is None:
+                return t
+            out = Image.new('L', (8, 8), 255)
+            inv = Image.eval(t, lambda v: v)
+            out.paste(inv.crop((0, 8 - dbox[3], 8, 8 - dbox[1])), (0, dbox[1]))
+            return out
+        if ch in ('¿', '¡'):   # (the font's ? and ! turned over)
+            return self.font[CODES['?' if ch == '¿' else '!'] - 0x80].rotate(180)
+        if ch not in CODES and ch not in self.SYNTH:
+            import unicodedata
+            d = unicodedata.normalize('NFD', ch)
+            if len(d) == 2 and d[0] in CODES:
+                base, mark = d[0], d[1]
+                t = self.glyph(base).copy()
+                if mark == '\u0327':     # (a cedilla under the letter's foot)
+                    t.putpixel((3, 7), 0)
+                    return t
+                if base.isupper() and mark in self.ACCENT_CAP:
+                    out = Image.new('L', (8, 8), 255)
+                    out.paste(t.crop((0, 0, 8, 7)), (0, 1))
+                    for x, c in enumerate(self.ACCENT_CAP[mark]):
+                        if c == '#':
+                            out.putpixel((x, 0), 0)
+                    return out
+                if mark in self.ACCENT:
+                    if base == 'i':          # (a dotless i under the accent)
+                        for y in range(2):
+                            for x in range(8):
+                                t.putpixel((x, y), 255)
+                    for y, row in enumerate(self.ACCENT[mark]):
+                        for x, c in enumerate(row):
+                            if c == '#':
+                                t.putpixel((x, y), 0)
+                    return t
         if ch in self.SYNTH:
             t = Image.new('L', (8, 8), 255)
             for y, row in enumerate(self.SYNTH[ch]):

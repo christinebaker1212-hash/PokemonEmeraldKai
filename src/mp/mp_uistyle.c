@@ -902,6 +902,10 @@ static const u8 *KeypadWord(u8 icon)
 {
     static const u8 sA[] = _("A"), sB[] = _("B"), sL[] = _("L"), sR[] = _("R"), sStart[] = _("START"),
                     sSelect[] = _("SELECT");
+    // (the d-pad's icons as the font's own arrows: {UPDOWN}PICK is ▲▼PICK)
+    static const u8 sUp[] = _("{UP_ARROW}"), sDown[] = _("{DOWN_ARROW}"), sLeft[] = _("{LEFT_ARROW}"),
+                    sRight[] = _("{RIGHT_ARROW}"), sUpDown[] = _("{UP_ARROW}{DOWN_ARROW}"),
+                    sLeftRight[] = _("{LEFT_ARROW}{RIGHT_ARROW}");
     // (the controller-only buttons by the names the controller in hand prints on them, as mp_buttons.c draws them)
     static const u8 sLt[3][3] = {_("ZL"), _("L2"), _("LT")}, sRt[3][3] = {_("ZR"), _("R2"), _("RT")},
                     sLs[3][3] = {_("LS"), _("L3"), _("LS")}, sRs[3][3] = {_("RS"), _("R3"), _("RS")},
@@ -916,6 +920,12 @@ static const u8 *KeypadWord(u8 icon)
     case CHAR_R_BUTTON: return sR;
     case CHAR_START_BUTTON: return sStart;
     case CHAR_SELECT_BUTTON: return sSelect;
+    case CHAR_DPAD_UP: return sUp;
+    case CHAR_DPAD_DOWN: return sDown;
+    case CHAR_DPAD_LEFT: return sLeft;
+    case CHAR_DPAD_RIGHT: return sRight;
+    case CHAR_DPAD_UPDOWN: return sUpDown;
+    case CHAR_DPAD_LEFTRIGHT: return sLeftRight;
     case CHAR_MP_LT: return sLt[k];
     case CHAR_MP_RT: return sRt[k];
     case CHAR_MP_LS: return sLs[k];
