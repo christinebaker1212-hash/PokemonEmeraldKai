@@ -11357,6 +11357,7 @@ static void Cmd_displaydexinfo(void)
         {
             FreeAllWindowBuffers();
             gMpBattleSceneHidden = TRUE;   // Moemon Co-op: the layers drawn over the battle wait (mp.h)
+            MP_LegacyAnim_ClearKept(MAX_BATTLERS_COUNT);   // Moemon Kai: a GENESIS / EPOCH BALL's caught ball faded with the scene
             gBattleCommunication[TASK_ID] = DisplayCaughtMonDexPage(SpeciesToNationalPokedexNum(species),
                                                                         gBattleMons[gBattlerTarget].otId,
                                                                         gBattleMons[gBattlerTarget].personality);
@@ -11486,6 +11487,7 @@ static void Cmd_trygivecaughtmonnick(void)
     switch (gBattleCommunication[MULTIUSE_STATE])
     {
     case 0:
+        MP_LegacyAnim_ClearKept(MAX_BATTLERS_COUNT);   // Moemon Kai: (no POKéDEX page: the caught ball goes here)
         HandleBattleWindow(YESNOBOX_X_Y, 0);
         BattlePutTextOnWindow(gText_BattleYesNoChoice, B_WIN_YESNO);
         gBattleCommunication[MULTIUSE_STATE]++;

@@ -8335,3 +8335,11 @@ nearest row of the other column, up / down within a column or to CANCEL); FIRERE
 Double / Triple moves (party_menu.c UpdateCurrentPartySelection, MP_UiStyle_PartyOwnLayout). A solo Triple Battle
 (UNOVA's) now opens PARTY_LAYOUT_TRIPLE too, not the Double's (GetPartyLayoutFromBattleType), its slots never in the
 co-op partner's colour. Scenario ui_style_party_layouts.
+
+### A Game Boy catch's jingle and its kept ball (1.204.6)
+"Gotcha!"'s {WAIT_SE} also waits for a Game Boy sound (text.c RENDER_STATE_WAIT_SE: MP_LegacySfx_Playing; its voices
+advance in m4aSoundVSync each frame, so it never waits on the audio device), so MUS_CAUGHT starts after the RED / CRYSTAL
+/ GENESIS / EPOCH catch jingle. The caught ball a legacy throw keeps on the field (mp_legacy_anim.c sAnim.kept) goes once
+the screen has faded for the POKéDEX page (Cmd_displaydexinfo), at the nickname question (Cmd_trygivecaughtmonnick) and
+whenever the battle has an outcome (MP_LegacyAnim_Composite): the dex page, naming screen and fade-out are drawn while
+BattleMainCB2 still runs.

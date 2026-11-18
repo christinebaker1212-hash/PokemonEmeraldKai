@@ -876,6 +876,8 @@ void MP_LegacyAnim_Composite(u16 *frame)
             sMove[b].active = FALSE;
         return;
     }
+    if (gBattleOutcome != 0)
+        sAnim.kept = FALSE;   // (the battle's over: its fade-out and what follows never show the caught ball)
     if (gMain.callback2 != BattleMainCB2 || !MP_OBJ_LAYER_SHOWN())
         return;
     DrawMoves(frame);

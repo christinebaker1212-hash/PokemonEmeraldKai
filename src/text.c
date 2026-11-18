@@ -1299,7 +1299,9 @@ static u16 RenderText(struct TextPrinter *textPrinter)
         }
         return RENDER_UPDATE;
     case RENDER_STATE_WAIT_SE:
-        if (!IsSEPlaying())
+        // Moemon Kai: a Game Boy sound (a GENESIS / EPOCH BALL's or a RED / CRYSTAL throw's catch jingle) is waited
+        // for too: "Gotcha!"'s {WAIT_SE} let the caught song start over it
+        if (!IsSEPlaying() && !MP_LegacySfx_Playing())
             textPrinter->state = RENDER_STATE_HANDLE_CHAR;
         return RENDER_UPDATE;
     case RENDER_STATE_PAUSE:
