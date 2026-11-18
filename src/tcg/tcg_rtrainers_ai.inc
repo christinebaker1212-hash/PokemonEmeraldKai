@@ -528,6 +528,35 @@ static int RegionPowerAi(const struct TcgDuel *g, struct TcgAction *a, unsigned 
     unsigned me = g->current, s, best = TCG_NONE, left = 0;
     switch (power)
     {
+    case TCG_POWER_R_EMERGE:
+    case TCG_POWER_R_EVOLUTION_HELPER:
+    {
+        /* the evolution with the most HP (Emerge: of itself; Evolution Helper: of the Active) */
+        const struct TcgCard *from = TcgDuel_Field(g, me, power == TCG_POWER_R_EMERGE ? slot : 0);
+        int pick = -1;
+        unsigned k;
+        for (k = 0; k < p->deckSize; k++)
+            if (TcgDuel_EvolvesFrom(Tcg_Card(p->cards[p->deck[k]]), from) &&
+                (pick < 0 || Tcg_Card(p->cards[p->deck[k]])->hp > Tcg_Card(p->cards[p->deck[pick]])->hp))
+                pick = (int)k;
+        if (pick < 0)
+            return 0;
+        a->selectionCount = 1;
+        a->selections[0] = p->deck[pick];
+        return 1;
+    }
+    case TCG_POWER_R_BURNING_ENERGY:
+    {
+        /* only when it lets the Active attack */
+        struct TcgDuel next = *g;
+        unsigned k;
+        if (AiCanAttack(g) || TcgDuel_Apply(&next, a) != TCG_OK)
+            return 0;
+        for (k = 0; k < TCG_ATTACKS; k++)
+            if (TcgDuel_CanAttack(&next, me, k) && TcgDuel_CanAttackNow(&next, me, k))
+                return 1;
+        return 0;
+    }
     case TCG_POWER_R_POISON_POLLEN:
         return foe->stackSize && !foe->poison;
     case TCG_POWER_R_SLEEP_PENDULUM:

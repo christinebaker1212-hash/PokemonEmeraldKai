@@ -37,6 +37,48 @@ static const char *RegionBlock(const struct TcgDuel *g, unsigned player, unsigne
         return "It works only while it's your Active Pokemon.";
     if ((flags & 4) && !slot)
         return "It works only while it's on your Bench.";
+    {
+        /* (the e-Card sets' words: "can't be used if it is affected by a Special Condition": Poisoned and Burned too) */
+        const struct TcgCard *c = TcgDuel_Field(g, player, slot);
+        const struct TcgFieldCard *f = &p->field[slot];
+        const char *have;
+        if (c && c->attacks[0].description && strstr(c->attacks[0].description, "affected by a Special Condition") &&
+            (f->condition || f->poison || f->burned))
+            return "It's affected by a Special Condition.";
+        /* (Unown: "if you have Unown [F], Unown [I], Unown [N], and Unown [D] on your Bench") */
+        if (c && c->attacks[0].description && (have = strstr(c->attacks[0].description, "if you have Unown [")) != NULL)
+        {
+            const char *end = strstr(have, "on your Bench");
+            for (have = strstr(have, "Unown ["); have && end && have < end; have = strstr(have + 1, "Unown ["))
+            {
+                char want[16];
+                unsigned k = 0, b;
+                while (have[k] && have[k] != ']' && k < sizeof(want) - 2)
+                    want[k] = have[k], k++;
+                want[k] = ']', want[k + 1] = 0;
+                for (b = 1; b < TCG_FIELD_SIZE; b++)
+                    if (TcgDuel_Field(g, player, b) && !strcmp(TcgDuel_Field(g, player, b)->name, want))
+                        break;
+                if (b == TCG_FIELD_SIZE)
+                    return "Those Unown aren't all on your Bench.";
+            }
+        }
+    }
+    switch (power)
+    {
+    case TCG_POWER_R_EVOLUTION_HELPER:
+    {
+        unsigned k;
+        for (k = 0; k < p->deckSize; k++)
+            if (TcgDuel_EvolvesFrom(Tcg_Card(p->cards[p->deck[k]]), TcgDuel_Field(g, player, 0)))
+                break;
+        if (k == p->deckSize)
+            return "Nothing in your deck evolves from your Active Pokemon.";
+        break;
+    }
+    default:
+        break;
+    }
     switch (power)
     {
     case TCG_POWER_R_EARTH_RAGE:
@@ -129,6 +171,10 @@ static int RegionDamage(struct TcgDuel *g, unsigned player, unsigned slot, int a
     case TCG_POWER_R_SHELL_ARMOR:
         amount -= 10;
         break;
+    case TCG_POWER_R_EXOSKELETON:
+    case TCG_POWER_R_VASE_BODY:
+        amount -= 20;
+        break;
     case TCG_POWER_R_HARD_SHELL:
         if (amount <= 40 && amount > 10)
             amount = 10;
@@ -172,6 +218,11 @@ static int RegionRetreat(const struct TcgDuel *g, unsigned player)
                 delta = 1;
                 break;
             }
+    /* (Unown [Z]'s Zoom on the Bench: an Unown retreats for nothing) */
+    for (s = 1; s < TCG_FIELD_SIZE; s++)
+        if (TcgPower_Working(g, player, s) == TCG_POWER_R_ZOOM && TcgDuel_Field(g, player, 0) &&
+            strstr(TcgDuel_Field(g, player, 0)->name, "Unown"))
+            return -99;
     if (power == TCG_POWER_R_LIGHTWEIGHT)
         delta -= (int)TcgDuel_Energy(g, player, 0, TCG_GRASS);
     else if (power == TCG_POWER_R_EXTREME_SPEED)
@@ -332,6 +383,59 @@ static void RegionOnPlay(struct TcgDuel *g, unsigned player, unsigned slot, unsi
         foe->condition = TCG_PARALYZED;
         foe->poison = 10;
         TcgDuel_Event(g, TCG_EV_STATUS, player ^ 1, 0, TCG_PARALYZED, 0, 10);
+        break;
+    case TCG_POWER_R_FIRE_BOOST:
+        /* (played from the hand) a coin: heads, up to 4 Fire Energy cards from the deck onto it */
+        if (!g->fromHand)
+            return;
+        Announce(g, player, slot, power);
+        if (TcgDuel_Coin(g, player))
+            for (i = p->deckSize, n = 0; i > 0 && n < 4; i--)
+                if (p->cards[p->deck[i - 1]] == TCG_CARD_FIRE_ENERGY)
+                {
+                    f->attached[f->attachedSize++] = TcgPile_Remove(p->deck, &p->deckSize, i - 1);
+                    TcgDuel_Event(g, TCG_EV_ATTACH, player, slot, 0, TCG_CARD_FIRE_ENERGY, 0);
+                    n++;
+                }
+        TcgDuel_Shuffle(g, player);
+        break;
+    case TCG_POWER_R_CALL_THE_BOSS:
+        /* (played from the hand) the Trainer named Giovanni from the deck into the hand */
+        if (!g->fromHand)
+            return;
+        Announce(g, player, slot, power);
+        for (i = p->deckSize; i > 0; i--)
+            if (Tcg_Card(p->cards[p->deck[i - 1]])->kind == TCG_TRAINER &&
+                !strcmp(Tcg_Card(p->cards[p->deck[i - 1]])->name, "Giovanni"))
+            {
+                TcgDuel_Log(g, "Shown: Giovanni.");
+                p->hand[p->handSize++] = TcgPile_Remove(p->deck, &p->deckSize, i - 1);
+                break;
+            }
+        TcgDuel_Shuffle(g, player);
+        break;
+    case TCG_POWER_R_INCREASE:
+        /* (played from the hand) a card with Unown in its name from the deck onto the Bench */
+        if (!g->fromHand)
+            return;
+        for (s = 1; s < TCG_FIELD_SIZE && p->field[s].stackSize; s++)
+            ;
+        if (s == TCG_FIELD_SIZE)
+            return;
+        Announce(g, player, slot, power);
+        for (i = p->deckSize; i > 0; i--)
+        {
+            const struct TcgCard *c = Tcg_Card(p->cards[p->deck[i - 1]]);
+            if (c && c->kind == TCG_POKEMON && !c->stage && strstr(c->name, "Unown"))
+            {
+                memset(&p->field[s], 0, sizeof(p->field[s]));
+                p->field[s].stack[p->field[s].stackSize++] = TcgPile_Remove(p->deck, &p->deckSize, i - 1);
+                p->field[s].enteredTurn = g->turn;
+                TcgDuel_Event(g, TCG_EV_PLAY, player, s, 0, c->id, 0);
+                break;
+            }
+        }
+        TcgDuel_Shuffle(g, player);
         break;
     case TCG_POWER_R_SOFTBOILED:
         if (!f->damage)

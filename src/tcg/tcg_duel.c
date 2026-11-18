@@ -253,7 +253,7 @@ int TcgDuel_TmFits(const struct TcgDuel *g, unsigned who, unsigned slot, const s
     unsigned t, named = 0, fits = 0;
     if (!c || c->kind != TCG_POKEMON)
         return 0;
-    if (!of)
+    if (!of || TcgPower_Working(g, who, slot) == TCG_POWER_R_SYNCHRONICITY) /* (Xatu's Synchronicity: any) */
         return 1;
     of += strlen("Attach this card to 1 of your ");
     if (!strncmp(of, "Evolved ", 8))

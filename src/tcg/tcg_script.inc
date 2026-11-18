@@ -1648,6 +1648,63 @@ static int ScriptRun(struct TcgDuel *g, const char *script, const struct TcgAtta
                 TcgDuel_Log(g, "%s devolved.", CardAt(g, them, f->stack[f->stackSize - 1])->name);
             }
         }
+        else if (ScriptIs(&o, "evactive"))
+        {
+            /* the card picked from the deck that evolves from the Active, onto it */
+            int at = Picked(action, 0, p->deck, p->deckSize);
+            if (at >= 0 && !EvolvesFrom(CardAt(g, me, p->deck[at]), TcgDuel_Field(g, me, 0)))
+                return TCG_INVALID;
+            if (at >= 0)
+                Evolve(g, me, 0, (unsigned)at);
+            TcgDuel_Shuffle(g, me);
+        }
+        else if (ScriptIs(&o, "burnall"))
+        {
+            /* every one of yours: its Energy all Fire for the rest of the turn (Energy Burn's way) */
+            for (s = 0; s < TCG_FIELD_SIZE; s++)
+                if (p->field[s].stackSize)
+                    p->field[s].burn = 1;
+        }
+        else if (ScriptIs(&o, "shufboth"))
+        {
+            TcgDuel_Shuffle(g, me);
+            TcgDuel_Shuffle(g, them);
+        }
+        else if (ScriptIs(&o, "hredraw"))
+        {
+            /* the hand shuffled into the deck, then as many cards drawn */
+            unsigned n = p->handSize;
+            while (p->handSize)
+                p->deck[p->deckSize++] = p->hand[--p->handSize];
+            TcgDuel_Shuffle(g, me);
+            TcgDuel_Event(g, TCG_EV_DRAW, me, sScriptSelf, TcgDuel_Draw(g, me, n), 0, 0);
+        }
+        else if (ScriptIs(&o, "acthand"))
+        {
+            /* the Active and its cards back to the hand */
+            struct TcgFieldCard *f = &p->field[0];
+            unsigned k;
+            for (k = 0; k < f->stackSize + f->attachedSize; k++)
+                p->hand[p->handSize++] = k < f->stackSize ? f->stack[k] : f->attached[k - f->stackSize];
+            memset(f, 0, sizeof(*f));
+            TcgDuel_Event(g, TCG_EV_DECK_CHANGED, me, 0, 0, 0, 0);
+        }
+        else if (ScriptIs(&o, "distr"))
+        {
+            /* the Trainer picked from the discard pile into the hand */
+            int at = Picked(action, 0, p->discard, p->discardSize);
+            if (at >= 0 && CardAt(g, me, p->discard[at])->kind != TCG_TRAINER)
+                return TCG_INVALID;
+            if (at >= 0)
+                p->hand[p->handSize++] = TcgPile_Remove(p->discard, &p->discardSize, (unsigned)at);
+        }
+        else if (ScriptIs(&o, "barunown"))
+        {
+            /* every one of yours with Unown in its name: no effect of attacks, damage too, until your next turn */
+            for (s = 0; s < TCG_FIELD_SIZE; s++)
+                if (TcgDuel_Field(g, me, s) && strstr(TcgDuel_Field(g, me, s)->name, "Unown"))
+                    p->field[s].barrier = 2;
+        }
         else if (ScriptIs(&o, "noconds"))
             self->condImmune = (uint16_t)(g->turn + 1);
         else if (ScriptIs(&o, "rt1"))

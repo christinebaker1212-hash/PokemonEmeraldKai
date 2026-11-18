@@ -294,7 +294,38 @@ static int ScriptMechanics(void)
         if (TcgDuel_Type(&g, 0, 0) != TCG_WATER)
             return printf("FAIL Crystal Type: Celebi is type %u after a Water Energy\n", TcgDuel_Type(&g, 0, 0)), 1;
     }
-    printf("PASS script mechanics: Focus Energy's boost next turn (and only then), Retreat Cost + 1, Crystal Type\n");
+    /* Unown [F]'s [Find]: only with Unown [F], [I], [N] and [D] on the Bench */
+    {
+        static const char *const letters[4] = {"Unown [F]", "Unown [I]", "Unown [N]", "Unown [D]"};
+        unsigned ids[4] = {0}, k, id;
+        for (k = 0; k < 4; k++)
+            for (id = TCG_CARD_GB_COUNT + 1; id <= TCG_CARD_COUNT && !ids[k]; id++)
+                if (Tcg_Card(id) && !strcmp(Tcg_Card(id)->name, letters[k]) && (k || TcgPower_Id(Tcg_Card(id))))
+                    ids[k] = id;
+        if (ids[0] && ids[1] && ids[2] && ids[3])
+        {
+            struct TcgPlayer *p;
+            Stage(&g, TCG_CARD_MACHOP, 0, 13);
+            p = &g.players[0];
+            /* their Bench: the four letters in slots 1-4 (the cards in place of whatever was there) */
+            for (k = 0; k < 4; k++)
+            {
+                struct TcgFieldCard *f = &p->field[1 + k];
+                if (!f->stackSize)
+                {
+                    uint8_t c = p->deck[--p->deckSize];
+                    f->stack[f->stackSize++] = c;
+                }
+                p->cards[f->stack[0]] = (uint16_t)ids[k];
+            }
+            if (TcgPower_Block(&g, 0, 1))
+                return printf("FAIL [Find] with the four Unown on the Bench: %s\n", TcgPower_Block(&g, 0, 1)), 1;
+            p->cards[p->field[4].stack[0]] = TCG_CARD_MACHOP;
+            if (!TcgPower_Block(&g, 0, 1))
+                return printf("FAIL [Find] usable without Unown [D] on the Bench\n"), 1;
+        }
+    }
+    printf("PASS script mechanics: Focus Energy's boost next turn (and only then), Retreat Cost + 1, Crystal Type, Unown letters\n");
     return 0;
 }
 /* Technical Machines: each finished one attached to a Pokemon it names, its attack used (TCG_ATTACK_TM), then

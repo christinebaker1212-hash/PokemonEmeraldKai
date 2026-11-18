@@ -32,6 +32,16 @@
     X(R_MOONLIGHT, "MOONLIGHT", 1, 1, "moon") \
     X(R_GAZE, "GAZE", 1, 1, "gaze") \
     X(R_DOWNPOUR, "DOWNPOUR", 1, 0, "hdis:3") \
+    X(R_EMERGE, "EMERGE", 1, 1, "c h.evdeck") \
+    X(R_EVOLUTION_HELPER, "EVOLUTION HELPER", 1, 5, "evactive") \
+    X(R_BURNING_ENERGY, "BURNING ENERGY", 1, 1, "burnall") \
+    X(R_FIND, "[FIND]", 1, 5, "srchk:2") \
+    X(R_UNDO, "[UNDO]", 1, 5, "acthand") \
+    X(R_HELP, "[HELP]", 1, 5, "hredraw") \
+    X(R_WANT, "[WANT]", 1, 5, "c h.distr") \
+    X(R_GIVE, "[GIVE]", 1, 5, "c h.spike") \
+    X(R_LAUGH, "[LAUGH]", 1, 9, "c h.shufboth") \
+    X(R_QUICKEN, "[QUICKEN]", 1, 9, "c h.barunown") \
     X(R_ROCK_BODY, "ROCK BODY", 0, 0, NULL) \
     X(R_SHELL_ARMOR, "SHELL ARMOR", 0, 0, NULL) \
     X(R_HARD_SHELL, "HARD SHELL", 0, 0, NULL) \
@@ -56,6 +66,10 @@
     X(R_POISON_RESISTANCE, "POISON RESISTANCE", 0, 0, NULL) \
     X(R_RARE_METAL, "RARE METAL", 0, 0, NULL) \
     X(R_CRYSTAL_TYPE, "CRYSTAL TYPE", 0, 0, NULL) \
+    X(R_EXOSKELETON, "EXOSKELETON", 0, 0, NULL) \
+    X(R_VASE_BODY, "VASE BODY", 0, 0, NULL) \
+    X(R_SYNCHRONICITY, "SYNCHRONICITY", 0, 0, NULL) \
+    X(R_ZOOM, "[ZOOM]", 0, 0, NULL) \
     X(R_HEALING_FIRE, "HEALING FIRE", 0, 0, NULL) \
     X(R_DARK_AURA, "DARK AURA", 0, 0, NULL) \
     X(R_PHOTOSYNTHESIS, "PHOTOSYNTHESIS", 0, 8, NULL) \
@@ -74,6 +88,9 @@
     X(R_BERSERK, "BERSERK", 0, 0, NULL) \
     X(R_HERBAL_SCENT, "HERBAL SCENT", 0, 0, NULL) \
     X(R_FLAME_VAPOR, "FLAME VAPOR", 0, 0, NULL) \
+    X(R_FIRE_BOOST, "FIRE BOOST", 0, 0, NULL) \
+    X(R_CALL_THE_BOSS, "CALL THE BOSS", 0, 0, NULL) \
+    X(R_INCREASE, "[INCREASE]", 0, 0, NULL) \
     X(R_ENERGY_RECHARGE, "ENERGY RECHARGE", 0, 0, NULL) \
 
 #endif

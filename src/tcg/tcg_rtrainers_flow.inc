@@ -244,6 +244,17 @@ static const struct TcgStep *RegionPowerSteps(unsigned power, int *count)
         STEPS({TCG_ST_OPP_SLOT, TCG_F_HAS_POWER, 0, 0, 0, "Stop which of their Benched Pokemon's power?"});
     case TCG_POWER_R_DOWNPOUR:
         STEPS({TCG_ST_PICK, TCG_F_WATER_ENERGY, TCG_SRC_HAND, 1, 1, "Discard which Water Energy?"});
+    case TCG_POWER_R_FIND:
+        STEPS({TCG_ST_PICK, TCG_F_TRAINER, TCG_SRC_DECK, 0, 1, "Take which Trainer?"});
+    case TCG_POWER_R_WANT:
+        STEPS({TCG_ST_PICK, TCG_F_TRAINER, TCG_SRC_MY_DISCARD, 0, 1, "If heads: take which Trainer?"});
+    case TCG_POWER_R_GIVE:
+        STEPS({TCG_ST_PICK, TCG_F_BASIC_ENERGY, TCG_SRC_DECK, 0, 1, "If heads: attach which basic Energy?"},
+              {TCG_ST_MY_SLOT, TCG_F_OCCUPIED, 0, 0, 0, "To which of your Pokemon?"});
+    case TCG_POWER_R_EMERGE:
+        STEPS({TCG_ST_PICK, TCG_F_EVOLVES_FROM_USER, TCG_SRC_DECK, 0, 1, "If heads: evolve it into which card?"});
+    case TCG_POWER_R_EVOLUTION_HELPER:
+        STEPS({TCG_ST_PICK, TCG_F_EVOLVES_FROM_ACTIVE, TCG_SRC_DECK, 1, 1, "Evolve your Active Pokemon into which card?"});
     case TCG_POWER_R_ENERGY_CONNECT:
         STEPS({TCG_ST_PICK, TCG_F_BASIC_ENERGY, TCG_SRC_MY_BENCH_ATTACHED, 1, 1, "Move which basic Energy to your Active?"});
     }

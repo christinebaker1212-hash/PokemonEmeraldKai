@@ -613,6 +613,9 @@ int TcgFlow_PickMatches(const struct TcgDuel *g, unsigned me, const struct TcgAc
         const struct TcgCard *first = a->selectionCount ? Tcg_Card(CardOf(g, me, a->selections[0])) : NULL;
         return c && first && c->kind == TCG_POKEMON && !c->stage && c->type == first->type;
     }
+    if (filter == TCG_F_EVOLVES_FROM_USER || filter == TCG_F_EVOLVES_FROM_ACTIVE)
+        return TcgDuel_EvolvesFrom(Tcg_Card(CardOf(g, owner, physical)),
+                                   Field(g, me, filter == TCG_F_EVOLVES_FROM_USER ? a->slot : 0));
     return TcgFlow_CardMatches(g, owner, physical, filter);
 }
 

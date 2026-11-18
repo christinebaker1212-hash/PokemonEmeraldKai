@@ -3623,7 +3623,7 @@ const struct TcgCard gTcgCards[TCG_CARD_COUNT + 1] = {
 {.name="",.description="",.effect="NONE",.animation="ATK_ANIM_NONE",.cost={0},.damage=0,.category=TCG_DAMAGE_NORMAL},
 }
 },
-[576] = {.id=576, .name="Giovanni's Persian", .kind=TCG_POKEMON, .type=6, .rarity=2, .set=14, .set2=255, .dark=0, .holo=1, .flags=TCG_CF_OWNER, .origin=14,
+[576] = {.id=576, .name="Giovanni's Persian", .kind=TCG_POKEMON, .type=6, .rarity=2, .set=14, .set2=255, .dark=0, .holo=1, .flags=TCG_CF_OWNER|TCG_CF_READY, .origin=14,
 .hp=60, .stage=1, .species=53, .level=23, .retreat=0, .weakness=4, .resistance=5, .evolvesFrom="Giovanni's Meowth", .description="", .attacks={
 {.name="Call the Boss",.description="When you play Giovanni's Persian from your hand, you may search your deck for the Trainer card named Giovanni, show it to your opponent, and put it into your hand. Shuffle your deck afterward.",.effect="gym2-8:p",.animation="ATK_ANIM_HIT",.cost={0,0,0,0,0,0,0,0,0},.damage=0,.category=TCG_POKEMON_POWER},
 {.name="Ambush",.description="Flip a coin. If heads, this attack does 20 damage plus 20 more damage; if tails, this attack does 20 damage.",.effect="gym2-8:a0",.animation="ATK_ANIM_HIT",.cost={0,0,0,0,0,0,3,0,0},.damage=20,.category=TCG_DAMAGE_PLUS},
@@ -3880,7 +3880,7 @@ const struct TcgCard gTcgCards[TCG_CARD_COUNT + 1] = {
 {.name="",.description="",.effect="NONE",.animation="ATK_ANIM_NONE",.cost={0},.damage=0,.category=TCG_DAMAGE_NORMAL},
 }
 },
-[615] = {.id=615, .name="Koga's Kakuna", .kind=TCG_POKEMON, .type=1, .rarity=1, .set=14, .set2=255, .dark=0, .holo=0, .flags=TCG_CF_OWNER, .origin=14,
+[615] = {.id=615, .name="Koga's Kakuna", .kind=TCG_POKEMON, .type=1, .rarity=1, .set=14, .set2=255, .dark=0, .holo=0, .flags=TCG_CF_OWNER|TCG_CF_READY, .origin=14,
 .hp=60, .stage=1, .species=14, .level=21, .retreat=2, .weakness=0, .resistance=255, .evolvesFrom="Koga's Weedle", .description="", .attacks={
 {.name="Emerge",.description="Once during your turn (before your attack), you may flip a coin. If heads, search your deck for an Evolution card named Koga's Beedrill and put it on Koga's Kakuna. (This counts as evolving Koga's Kakuna.) Shuffle your deck afterward. This power can't be used if Koga's Kakuna is Asleep, Confused, or Paralyzed.",.effect="gym2-47:p",.animation="ATK_ANIM_HIT",.cost={0,0,0,0,0,0,0,0,0},.damage=0,.category=TCG_POKEMON_POWER},
 {.name="Toxic Secretion",.description="Flip a coin. If heads, the Defending Pokemon is now Poisoned. It now takes 20 Poison damage instead of 10 after each player's turn (even if it was already Poisoned).",.effect="gym2-47:a0",.animation="ATK_ANIM_HIT",.cost={0,1,0,0,0,0,0,0,0},.damage=0,.category=TCG_RESIDUAL},
@@ -4451,7 +4451,7 @@ const struct TcgCard gTcgCards[TCG_CARD_COUNT + 1] = {
 {.name="",.description="",.effect="NONE",.animation="ATK_ANIM_NONE",.cost={0},.damage=0,.category=TCG_DAMAGE_NORMAL},
 }
 },
-[712] = {.id=712, .name="Typhlosion", .kind=TCG_POKEMON, .type=0, .rarity=2, .set=15, .set2=255, .dark=0, .holo=1, .flags=0, .origin=15,
+[712] = {.id=712, .name="Typhlosion", .kind=TCG_POKEMON, .type=0, .rarity=2, .set=15, .set2=255, .dark=0, .holo=1, .flags=TCG_CF_READY, .origin=15,
 .hp=100, .stage=2, .species=157, .level=57, .retreat=2, .weakness=3, .resistance=255, .evolvesFrom="Quilava", .description="It has a secret, devastating move. It rubs its blazing fur together to cause huge explosions.", .attacks={
 {.name="Fire Boost",.description="When you play Typhlosion from your hand, you may flip a coin. If heads, search your deck for up to 4 Fire Energy cards and attach them to Typhlosion. Shuffle your deck afterward.",.effect="neo1-18:p",.animation="ATK_ANIM_HIT",.cost={0,0,0,0,0,0,0,0,0},.damage=0,.category=TCG_POKEMON_POWER},
 {.name="Flame Wheel",.description="Discard 3 Fire Energy cards attached to Typhlosion in order to use this attack. Do 20 damage to each Benched Pokemon (yours and your opponent's). (Don't apply Weakness and Resistance for Benched Pokemon.)",.effect="neo1-18:a0",.animation="ATK_ANIM_HIT",.cost={4,0,0,0,0,0,0,0,0},.damage=80,.category=TCG_DAMAGE_NORMAL},
@@ -5300,7 +5300,7 @@ const struct TcgCard gTcgCards[TCG_CARD_COUNT + 1] = {
 {.name="",.description="",.effect="NONE",.animation="ATK_ANIM_NONE",.cost={0},.damage=0,.category=TCG_DAMAGE_NORMAL},
 }
 },
-[847] = {.id=847, .name="Unown [F]", .kind=TCG_POKEMON, .type=5, .rarity=1, .set=16, .set2=255, .dark=0, .holo=0, .flags=0, .origin=16,
+[847] = {.id=847, .name="Unown [F]", .kind=TCG_POKEMON, .type=5, .rarity=1, .set=16, .set2=255, .dark=0, .holo=0, .flags=TCG_CF_READY, .origin=16,
 .hp=40, .stage=0, .species=201, .level=14, .retreat=1, .weakness=5, .resistance=255, .evolvesFrom="", .description="Their shapes look like hieroglyphs on ancient tablets. It is said that the two are somehow related.", .attacks={
 {.name="[Find]",.description="Once during your turn (before your attack), if you have Unown [F], Unown [I], Unown [N], and Unown [D] on your Bench, you may search your deck for a Trainer card. Show that card to your opponent, then put it into your hand. Shuffle your deck afterward.",.effect="neo2-48:p",.animation="ATK_ANIM_HIT",.cost={0,0,0,0,0,0,0,0,0},.damage=0,.category=TCG_POKEMON_POWER},
 {.name="Hidden Power",.description="",.effect="NONE",.animation="ATK_ANIM_HIT",.cost={0,0,0,0,0,1,0,0,0},.damage=10,.category=TCG_DAMAGE_NORMAL},
@@ -5321,7 +5321,7 @@ const struct TcgCard gTcgCards[TCG_CARD_COUNT + 1] = {
 {.name="",.description="",.effect="NONE",.animation="ATK_ANIM_NONE",.cost={0},.damage=0,.category=TCG_DAMAGE_NORMAL},
 }
 },
-[850] = {.id=850, .name="Unown [U]", .kind=TCG_POKEMON, .type=5, .rarity=1, .set=16, .set2=255, .dark=0, .holo=0, .flags=0, .origin=16,
+[850] = {.id=850, .name="Unown [U]", .kind=TCG_POKEMON, .type=5, .rarity=1, .set=16, .set2=255, .dark=0, .holo=0, .flags=TCG_CF_READY, .origin=16,
 .hp=40, .stage=0, .species=201, .level=14, .retreat=1, .weakness=5, .resistance=255, .evolvesFrom="", .description="Their shapes look like hieroglyphs on ancient tablets. It is said that the two are somehow related.", .attacks={
 {.name="[Undo]",.description="Once during your turn (before your attack), if you have Unown [U], Unown [N], Unown [D], and Unown [O] on your Bench, you may return your Active Pokemon and all cards attached to it to your hand.",.effect="neo2-51:p",.animation="ATK_ANIM_HIT",.cost={0,0,0,0,0,0,0,0,0},.damage=0,.category=TCG_POKEMON_POWER},
 {.name="Hidden Power",.description="",.effect="NONE",.animation="ATK_ANIM_HIT",.cost={0,0,0,0,0,1,0,0,0},.damage=10,.category=TCG_DAMAGE_NORMAL},
@@ -5440,7 +5440,7 @@ const struct TcgCard gTcgCards[TCG_CARD_COUNT + 1] = {
 {.name="",.description="",.effect="NONE",.animation="ATK_ANIM_NONE",.cost={0},.damage=0,.category=TCG_DAMAGE_NORMAL},
 }
 },
-[867] = {.id=867, .name="Unown [I]", .kind=TCG_POKEMON, .type=5, .rarity=0, .set=16, .set2=255, .dark=0, .holo=0, .flags=0, .origin=16,
+[867] = {.id=867, .name="Unown [I]", .kind=TCG_POKEMON, .type=5, .rarity=0, .set=16, .set2=255, .dark=0, .holo=0, .flags=TCG_CF_READY, .origin=16,
 .hp=40, .stage=0, .species=201, .level=14, .retreat=1, .weakness=5, .resistance=255, .evolvesFrom="", .description="Their shapes look like hieroglyphs on ancient tablets. It is said that the two are somehow related.", .attacks={
 {.name="[Increase]",.description="When you play Unown [I] from your hand, you may search your deck for a card with Unown in its name and put it onto your Bench. Shuffle your deck afterward. You can't use this power if your Bench is full.",.effect="neo2-68:p",.animation="ATK_ANIM_HIT",.cost={0,0,0,0,0,0,0,0,0},.damage=0,.category=TCG_POKEMON_POWER},
 {.name="Hidden Power",.description="",.effect="NONE",.animation="ATK_ANIM_HIT",.cost={0,0,0,0,0,1,0,0,0},.damage=10,.category=TCG_DAMAGE_NORMAL},
@@ -6100,21 +6100,21 @@ const struct TcgCard gTcgCards[TCG_CARD_COUNT + 1] = {
 {.name="",.description="",.effect="NONE",.animation="ATK_ANIM_NONE",.cost={0},.damage=0,.category=TCG_DAMAGE_NORMAL},
 }
 },
-[967] = {.id=967, .name="Unown [G]", .kind=TCG_POKEMON, .type=5, .rarity=2, .set=18, .set2=255, .dark=0, .holo=0, .flags=0, .origin=18,
+[967] = {.id=967, .name="Unown [G]", .kind=TCG_POKEMON, .type=5, .rarity=2, .set=18, .set2=255, .dark=0, .holo=0, .flags=TCG_CF_READY, .origin=18,
 .hp=40, .stage=0, .species=201, .level=16, .retreat=1, .weakness=5, .resistance=255, .evolvesFrom="", .description="It is believed that the variety of types of this Pokemon were created by evolutionary adaptation, as each possesses a different ability.", .attacks={
 {.name="[Give]",.description="Once during your turn (before your attack), if you have Unown [G], Unown [I], Unown [V], and Unown [E] on your Bench, you may flip a coin. If heads, search your deck for a basic Energy card and attach it to 1 of your Pokemon. Shuffle your deck afterward.",.effect="neo4-27:p",.animation="ATK_ANIM_HIT",.cost={0,0,0,0,0,0,0,0,0},.damage=0,.category=TCG_POKEMON_POWER},
 {.name="Hidden Power",.description="",.effect="NONE",.animation="ATK_ANIM_HIT",.cost={0,0,0,0,0,1,0,0,0},.damage=10,.category=TCG_DAMAGE_NORMAL},
 {.name="",.description="",.effect="NONE",.animation="ATK_ANIM_NONE",.cost={0},.damage=0,.category=TCG_DAMAGE_NORMAL},
 }
 },
-[968] = {.id=968, .name="Unown [H]", .kind=TCG_POKEMON, .type=5, .rarity=2, .set=18, .set2=255, .dark=0, .holo=0, .flags=0, .origin=18,
+[968] = {.id=968, .name="Unown [H]", .kind=TCG_POKEMON, .type=5, .rarity=2, .set=18, .set2=255, .dark=0, .holo=0, .flags=TCG_CF_READY, .origin=18,
 .hp=40, .stage=0, .species=201, .level=16, .retreat=1, .weakness=5, .resistance=255, .evolvesFrom="", .description="It is believed that the variety of types of this Pokemon were created by evolutionary adaptation, as each possesses a different ability.", .attacks={
 {.name="[Help]",.description="Once during your turn (before your attack), if you have Unown [H], Unown [E], Unown [L], and Unown [P] on your Bench, you may shuffle your hand into your deck, then draw a new hand of the same number of cards.",.effect="neo4-28:p",.animation="ATK_ANIM_HIT",.cost={0,0,0,0,0,0,0,0,0},.damage=0,.category=TCG_POKEMON_POWER},
 {.name="Hidden Power",.description="",.effect="NONE",.animation="ATK_ANIM_HIT",.cost={0,0,0,0,0,1,0,0,0},.damage=10,.category=TCG_DAMAGE_NORMAL},
 {.name="",.description="",.effect="NONE",.animation="ATK_ANIM_NONE",.cost={0},.damage=0,.category=TCG_DAMAGE_NORMAL},
 }
 },
-[969] = {.id=969, .name="Unown [W]", .kind=TCG_POKEMON, .type=5, .rarity=2, .set=18, .set2=255, .dark=0, .holo=0, .flags=0, .origin=18,
+[969] = {.id=969, .name="Unown [W]", .kind=TCG_POKEMON, .type=5, .rarity=2, .set=18, .set2=255, .dark=0, .holo=0, .flags=TCG_CF_READY, .origin=18,
 .hp=40, .stage=0, .species=201, .level=16, .retreat=1, .weakness=5, .resistance=255, .evolvesFrom="", .description="It is believed that the variety of types of this Pokemon were created by evolutionary adaptation, as each possesses a different ability.", .attacks={
 {.name="[Want]",.description="Once during your turn (before your attack), if you have Unown [W], Unown [A], Unown [N], and Unown [T] on your Bench, you may flip a coin. If heads, put a Trainer card from your discard pile into your hand.",.effect="neo4-29:p",.animation="ATK_ANIM_HIT",.cost={0,0,0,0,0,0,0,0,0},.damage=0,.category=TCG_POKEMON_POWER},
 {.name="Hidden Power",.description="",.effect="NONE",.animation="ATK_ANIM_HIT",.cost={0,0,0,0,0,1,0,0,0},.damage=10,.category=TCG_DAMAGE_NORMAL},
@@ -6324,14 +6324,14 @@ const struct TcgCard gTcgCards[TCG_CARD_COUNT + 1] = {
 {.name="",.description="",.effect="NONE",.animation="ATK_ANIM_NONE",.cost={0},.damage=0,.category=TCG_DAMAGE_NORMAL},
 }
 },
-[999] = {.id=999, .name="Unown [Q]", .kind=TCG_POKEMON, .type=5, .rarity=1, .set=18, .set2=255, .dark=0, .holo=0, .flags=0, .origin=18,
+[999] = {.id=999, .name="Unown [Q]", .kind=TCG_POKEMON, .type=5, .rarity=1, .set=18, .set2=255, .dark=0, .holo=0, .flags=TCG_CF_READY, .origin=18,
 .hp=40, .stage=0, .species=201, .level=12, .retreat=1, .weakness=5, .resistance=255, .evolvesFrom="", .description="It is believed that the variety of types of this Pokemon were created by evolutionary adaptation, as each possesses a different ability.", .attacks={
 {.name="[Quicken]",.description="Once during your turn (before your attack), you may flip a coin. If heads, prevent all effects of attacks, including damage, done to any of your Pokemon with Unown in its name during your opponent's next turn. If you have more than 1 Unown [Q] in play, use only 1 [Quicken] each turn. This power can be used even if Unown [Q] is Asleep, Confused, or Paralyzed.",.effect="neo4-59:p",.animation="ATK_ANIM_HIT",.cost={0,0,0,0,0,0,0,0,0},.damage=0,.category=TCG_POKEMON_POWER},
 {.name="Hidden Power",.description="",.effect="NONE",.animation="ATK_ANIM_HIT",.cost={0,0,0,0,0,1,0,0,0},.damage=10,.category=TCG_DAMAGE_NORMAL},
 {.name="",.description="",.effect="NONE",.animation="ATK_ANIM_NONE",.cost={0},.damage=0,.category=TCG_DAMAGE_NORMAL},
 }
 },
-[1000] = {.id=1000, .name="Unown [Z]", .kind=TCG_POKEMON, .type=5, .rarity=1, .set=18, .set2=255, .dark=0, .holo=0, .flags=0, .origin=18,
+[1000] = {.id=1000, .name="Unown [Z]", .kind=TCG_POKEMON, .type=5, .rarity=1, .set=18, .set2=255, .dark=0, .holo=0, .flags=TCG_CF_READY, .origin=18,
 .hp=40, .stage=0, .species=201, .level=9, .retreat=1, .weakness=5, .resistance=255, .evolvesFrom="", .description="It is believed that the variety of types of this Pokemon were created by evolutionary adaptation, as each possesses a different ability.", .attacks={
 {.name="[Zoom]",.description="As long as Unown [Z] is Benched, you pay no Energy cost to retreat a Pokemon with Unown in its name.",.effect="neo4-60:p",.animation="ATK_ANIM_HIT",.cost={0,0,0,0,0,0,0,0,0},.damage=0,.category=TCG_POKEMON_POWER},
 {.name="Hidden Power",.description="",.effect="NONE",.animation="ATK_ANIM_HIT",.cost={0,0,0,0,0,1,0,0,0},.damage=10,.category=TCG_DAMAGE_NORMAL},
@@ -6513,7 +6513,7 @@ const struct TcgCard gTcgCards[TCG_CARD_COUNT + 1] = {
 {.name="",.description="",.effect="NONE",.animation="ATK_ANIM_NONE",.cost={0},.damage=0,.category=TCG_DAMAGE_NORMAL},
 }
 },
-[1026] = {.id=1026, .name="Unown [L]", .kind=TCG_POKEMON, .type=5, .rarity=0, .set=18, .set2=255, .dark=0, .holo=0, .flags=0, .origin=18,
+[1026] = {.id=1026, .name="Unown [L]", .kind=TCG_POKEMON, .type=5, .rarity=0, .set=18, .set2=255, .dark=0, .holo=0, .flags=TCG_CF_READY, .origin=18,
 .hp=50, .stage=0, .species=201, .level=19, .retreat=1, .weakness=5, .resistance=255, .evolvesFrom="", .description="It is believed that the variety of types of this Pokemon were created by evolutionary adaptation, as each possesses a different ability.", .attacks={
 {.name="[Laugh]",.description="Once during your turn (before your attack), you may flip a coin. If heads, each player shuffles his or her deck. This power can be used even if Unown [L] is Asleep, Confused, or Paralyzed.",.effect="neo4-86:p",.animation="ATK_ANIM_HIT",.cost={0,0,0,0,0,0,0,0,0},.damage=0,.category=TCG_POKEMON_POWER},
 {.name="Hidden Power",.description="",.effect="NONE",.animation="ATK_ANIM_HIT",.cost={0,0,0,0,0,1,0,0,0},.damage=10,.category=TCG_DAMAGE_NORMAL},
@@ -6688,7 +6688,7 @@ const struct TcgCard gTcgCards[TCG_CARD_COUNT + 1] = {
 {.name="",.description="",.effect="NONE",.animation="ATK_ANIM_NONE",.cost={0},.damage=0,.category=TCG_DAMAGE_NORMAL},
 }
 },
-[1059] = {.id=1059, .name="Charizard", .kind=TCG_POKEMON, .type=0, .rarity=2, .set=19, .set2=255, .dark=0, .holo=1, .flags=0, .origin=19,
+[1059] = {.id=1059, .name="Charizard", .kind=TCG_POKEMON, .type=0, .rarity=2, .set=19, .set2=255, .dark=0, .holo=1, .flags=TCG_CF_READY, .origin=19,
 .hp=120, .stage=2, .species=6, .level=0, .retreat=3, .weakness=3, .resistance=255, .evolvesFrom="Charmeleon", .description="", .attacks={
 {.name="Burning Energy",.description="Once during your turn (before your attack), you may turn all basic Energy attached to all of your Pokemon into Fire Energy for the rest of the turn. This power can't be used if Charizard is affected by a Special Condition.",.effect="ecard1-6:p",.animation="ATK_ANIM_HIT",.cost={0,0,0,0,0,0,0,0,0},.damage=0,.category=TCG_POKEMON_POWER},
 {.name="Scorching Whirlwind",.description="Flip 2 coins. If 1 of them is tails, discard 2 Energy cards attached to Charizard. If both are tails, discard all Energy cards attached to Charizard.",.effect="ecard1-6:a0",.animation="ATK_ANIM_HIT",.cost={4,0,0,0,0,0,0,0,0},.damage=120,.category=TCG_DAMAGE_NORMAL},
@@ -6926,7 +6926,7 @@ const struct TcgCard gTcgCards[TCG_CARD_COUNT + 1] = {
 {.name="",.description="",.effect="NONE",.animation="ATK_ANIM_NONE",.cost={0},.damage=0,.category=TCG_DAMAGE_NORMAL},
 }
 },
-[1093] = {.id=1093, .name="Charizard", .kind=TCG_POKEMON, .type=0, .rarity=2, .set=19, .set2=255, .dark=0, .holo=0, .flags=0, .origin=19,
+[1093] = {.id=1093, .name="Charizard", .kind=TCG_POKEMON, .type=0, .rarity=2, .set=19, .set2=255, .dark=0, .holo=0, .flags=TCG_CF_READY, .origin=19,
 .hp=120, .stage=2, .species=6, .level=0, .retreat=3, .weakness=3, .resistance=255, .evolvesFrom="Charmeleon", .description="", .attacks={
 {.name="Burning Energy",.description="Once during your turn (before your attack), you may turn all basic Energy attached to all of your Pokemon into Fire Energy for the rest of the turn. This power can't be used if Charizard is affected by a Special Condition.",.effect="ecard1-40:p",.animation="ATK_ANIM_HIT",.cost={0,0,0,0,0,0,0,0,0},.damage=0,.category=TCG_POKEMON_POWER},
 {.name="Scorching Whirlwind",.description="Flip 2 coins. If 1 of them is tails, discard 2 Energy cards attached to Charizard. If both are tails, discard all Energy cards attached to Charizard.",.effect="ecard1-40:a0",.animation="ATK_ANIM_HIT",.cost={4,0,0,0,0,0,0,0,0},.damage=120,.category=TCG_DAMAGE_NORMAL},
@@ -7255,7 +7255,7 @@ const struct TcgCard gTcgCards[TCG_CARD_COUNT + 1] = {
 {.name="",.description="",.effect="NONE",.animation="ATK_ANIM_NONE",.cost={0},.damage=0,.category=TCG_DAMAGE_NORMAL},
 }
 },
-[1140] = {.id=1140, .name="Metapod", .kind=TCG_POKEMON, .type=1, .rarity=1, .set=19, .set2=255, .dark=0, .holo=0, .flags=TCG_CF_BODY, .origin=19,
+[1140] = {.id=1140, .name="Metapod", .kind=TCG_POKEMON, .type=1, .rarity=1, .set=19, .set2=255, .dark=0, .holo=0, .flags=TCG_CF_BODY|TCG_CF_READY, .origin=19,
 .hp=60, .stage=1, .species=11, .level=0, .retreat=2, .weakness=0, .resistance=255, .evolvesFrom="Caterpie", .description="", .attacks={
 {.name="Exoskeleton",.description="All damage done by attacks to Metapod is reduced by 20 (after applying Weakness and Resistance).",.effect="ecard1-87:p",.animation="ATK_ANIM_HIT",.cost={0,0,0,0,0,0,0,0,0},.damage=0,.category=TCG_POKEMON_POWER},
 {.name="Rollout",.description="",.effect="NONE",.animation="ATK_ANIM_HIT",.cost={0,0,0,0,0,0,1,0,0},.damage=10,.category=TCG_DAMAGE_NORMAL},
@@ -9020,7 +9020,7 @@ const struct TcgCard gTcgCards[TCG_CARD_COUNT + 1] = {
 {.name="Burning Tail",.description="Flip a coin. If tails, discard a Fire Energy card attached to Moltres.",.effect="ecard3-21:a1",.animation="ATK_ANIM_HIT",.cost={2,0,0,0,0,0,2,0,0},.damage=60,.category=TCG_DAMAGE_NORMAL},
 }
 },
-[1416] = {.id=1416, .name="Nidoqueen", .kind=TCG_POKEMON, .type=1, .rarity=2, .set=21, .set2=255, .dark=0, .holo=0, .flags=0, .origin=21,
+[1416] = {.id=1416, .name="Nidoqueen", .kind=TCG_POKEMON, .type=1, .rarity=2, .set=21, .set2=255, .dark=0, .holo=0, .flags=TCG_CF_READY, .origin=21,
 .hp=110, .stage=2, .species=31, .level=0, .retreat=3, .weakness=5, .resistance=255, .evolvesFrom="Nidorina", .description="", .attacks={
 {.name="Evolution Helper",.description="Once during your turn (before your attack), if Nidoqueen is on your Bench, you may search your deck for a card that evolves from your Active Pokemon and attach it to your Active Pokemon. (This counts as evolving that Pokemon.) Shuffle your deck afterward.",.effect="ecard3-22:p",.animation="ATK_ANIM_HIT",.cost={0,0,0,0,0,0,0,0,0},.damage=0,.category=TCG_POKEMON_POWER},
 {.name="Double Claw",.description="Flip 2 coins. This attack does 30 damage plus 20 more damage for each heads",.effect="ecard3-22:a0",.animation="ATK_ANIM_HIT",.cost={0,1,0,0,0,0,2,0,0},.damage=30,.category=TCG_DAMAGE_PLUS},
@@ -9111,7 +9111,7 @@ const struct TcgCard gTcgCards[TCG_CARD_COUNT + 1] = {
 {.name="",.description="",.effect="NONE",.animation="ATK_ANIM_NONE",.cost={0},.damage=0,.category=TCG_DAMAGE_NORMAL},
 }
 },
-[1429] = {.id=1429, .name="Xatu", .kind=TCG_POKEMON, .type=5, .rarity=2, .set=21, .set2=255, .dark=0, .holo=0, .flags=TCG_CF_BODY, .origin=21,
+[1429] = {.id=1429, .name="Xatu", .kind=TCG_POKEMON, .type=5, .rarity=2, .set=21, .set2=255, .dark=0, .holo=0, .flags=TCG_CF_BODY|TCG_CF_READY, .origin=21,
 .hp=80, .stage=1, .species=178, .level=0, .retreat=1, .weakness=5, .resistance=255, .evolvesFrom="Natu", .description="", .attacks={
 {.name="Synchronicity",.description="You may attach any Technical Machine to Xatu.",.effect="ecard3-35:p",.animation="ATK_ANIM_HIT",.cost={0,0,0,0,0,0,0,0,0},.damage=0,.category=TCG_POKEMON_POWER},
 {.name="Warp Hole",.description="Flip a coin. If heads, choose a card from your discard pile and put it on top of your deck.",.effect="ecard3-35:a0",.animation="ATK_ANIM_HIT",.cost={0,0,0,0,0,0,3,0,0},.damage=30,.category=TCG_DAMAGE_NORMAL},
@@ -9538,7 +9538,7 @@ const struct TcgCard gTcgCards[TCG_CARD_COUNT + 1] = {
 {.name="",.description="",.effect="NONE",.animation="ATK_ANIM_NONE",.cost={0},.damage=0,.category=TCG_DAMAGE_NORMAL},
 }
 },
-[1490] = {.id=1490, .name="Shuckle", .kind=TCG_POKEMON, .type=1, .rarity=0, .set=21, .set2=255, .dark=0, .holo=0, .flags=TCG_CF_BODY, .origin=21,
+[1490] = {.id=1490, .name="Shuckle", .kind=TCG_POKEMON, .type=1, .rarity=0, .set=21, .set2=255, .dark=0, .holo=0, .flags=TCG_CF_BODY|TCG_CF_READY, .origin=21,
 .hp=30, .stage=0, .species=213, .level=0, .retreat=2, .weakness=0, .resistance=255, .evolvesFrom="", .description="", .attacks={
 {.name="Vase Body",.description="All damage done by attacks to Shuckle is reduced by 20 (after applying Weakness and Resistance).",.effect="ecard3-96:p",.animation="ATK_ANIM_HIT",.cost={0,0,0,0,0,0,0,0,0},.damage=0,.category=TCG_POKEMON_POWER},
 {.name="Poisonous Saliva",.description="The Defending Pokemon is now Poisoned.",.effect="ecard3-96:a0",.animation="ATK_ANIM_HIT",.cost={0,1,0,0,0,0,1,0,0},.damage=10,.category=TCG_DAMAGE_NORMAL},
@@ -9994,7 +9994,7 @@ const struct TcgCard gTcgCards[TCG_CARD_COUNT + 1] = {
 {.name="Burning Tail",.description="Flip a coin. If tails, discard a Fire Energy card attached to Moltres.",.effect="ecard3-H20:a1",.animation="ATK_ANIM_HIT",.cost={2,0,0,0,0,0,2,0,0},.damage=60,.category=TCG_DAMAGE_NORMAL},
 }
 },
-[1565] = {.id=1565, .name="Nidoqueen", .kind=TCG_POKEMON, .type=1, .rarity=2, .set=21, .set2=255, .dark=0, .holo=1, .flags=0, .origin=21,
+[1565] = {.id=1565, .name="Nidoqueen", .kind=TCG_POKEMON, .type=1, .rarity=2, .set=21, .set2=255, .dark=0, .holo=1, .flags=TCG_CF_READY, .origin=21,
 .hp=110, .stage=2, .species=31, .level=0, .retreat=3, .weakness=5, .resistance=255, .evolvesFrom="Nidorina", .description="", .attacks={
 {.name="Evolution Helper",.description="Once during your turn (before your attack), if Nidoqueen is on your Bench, you may search your deck for a card that evolves from your Active Pokemon and attach it to your Active Pokemon. (This counts as evolving that Pokemon.) Shuffle your deck afterward.",.effect="ecard3-H21:p",.animation="ATK_ANIM_HIT",.cost={0,0,0,0,0,0,0,0,0},.damage=0,.category=TCG_POKEMON_POWER},
 {.name="Double Claw",.description="Flip 2 coins. This attack does 30 damage plus 20 more damage for each heads",.effect="ecard3-H21:a0",.animation="ATK_ANIM_HIT",.cost={0,1,0,0,0,0,2,0,0},.damage=30,.category=TCG_DAMAGE_PLUS},
@@ -10071,7 +10071,7 @@ const struct TcgCard gTcgCards[TCG_CARD_COUNT + 1] = {
 {.name="Aqua Trick",.description="If the Defending Pokemon has any Energy cards attached to it, flip a coin. If heads, choose 1 of those Energy cards and move it to 1 of your opponent's Benched Pokemon. If your opponent has no Benched Pokemon, ignore this effect.",.effect="ecard3-H31:a1",.animation="ATK_ANIM_HIT",.cost={0,0,0,1,0,0,2,0,0},.damage=40,.category=TCG_DAMAGE_NORMAL},
 }
 },
-[1576] = {.id=1576, .name="Xatu", .kind=TCG_POKEMON, .type=5, .rarity=2, .set=21, .set2=255, .dark=0, .holo=1, .flags=TCG_CF_BODY, .origin=21,
+[1576] = {.id=1576, .name="Xatu", .kind=TCG_POKEMON, .type=5, .rarity=2, .set=21, .set2=255, .dark=0, .holo=1, .flags=TCG_CF_BODY|TCG_CF_READY, .origin=21,
 .hp=80, .stage=1, .species=178, .level=0, .retreat=1, .weakness=5, .resistance=255, .evolvesFrom="Natu", .description="", .attacks={
 {.name="Synchronicity",.description="You may attach any Technical Machine to Xatu.",.effect="ecard3-H32:p",.animation="ATK_ANIM_HIT",.cost={0,0,0,0,0,0,0,0,0},.damage=0,.category=TCG_POKEMON_POWER},
 {.name="Warp Hole",.description="Flip a coin. If heads, choose a card from your discard pile and put it on top of your deck.",.effect="ecard3-H32:a0",.animation="ATK_ANIM_HIT",.cost={0,0,0,0,0,0,3,0,0},.damage=30,.category=TCG_DAMAGE_NORMAL},
