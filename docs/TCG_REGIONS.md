@@ -104,6 +104,12 @@ Total 1,158 set cards (about 1,100 attacks with effect text, 250 Pokémon Powers
      TCG_APICK_FIELD_MOVE / DISCARD_CARD / SEARCH / HAND_ENERGY.
    - Tests: tools/tcg/test_regions.c (every finished attack directly and built through the flow with every option,
      Trainer, used power and Stadium through the flow, every Technical Machine attached and its attack used, AI duels).
+   - Printed cards (CARD ART): graphics/tcg/regional.bin (tools/tcg/regions/build_art.py: `--fetch` keeps each scan
+     at 300x412 in ~/.cache/moemon/tcgart/regions; the illustration's window from LAYOUTS by era and kind (WotC, e-Card,
+     the EX-era promos), each edge moved to the card's own frame line within 10 scan pixels, 6 in; `--check SHEET`
+     draws samples), built in by tcg_art_data.c; tcg_gfx.c PrintedEntry reads ids past 442 from it (the back stays
+     printed.bin's), CleanArtCorners fills the e-Card windows' rounded corners. The phone: android/build_assets.py
+     joins it after printed.bin into one tcg_cards.bin (joined_packs), so CardPack.java reads ids past 442 unchanged.
    - Special trainers: tools/tcg/regions/specials.py (67: JOHTO 16, KANTO 15, SINNOH 16, UNOVA 20; decks from their
      region's finished cards, a promo each) -> gen_special_decks.py -> include/tcg/region_specials.h, tcg_decks.c;
      tcg_field.c sQzSpecials in the same order (people by their sprite: UNOVA's by Black's object code); rated against

@@ -2,6 +2,7 @@
 //   graphics/tcg/original.bin  the Game Boy illustrations (tools/tcg/build_original_art.py)
 //   graphics/tcg/printed.bin   the printed cards and where each one's illustration sits
 //                              (tools/tcg/build_printed_art.py)
+//   graphics/tcg/regional.bin  the regional sets' printed cards, ids 443 on (tools/tcg/regions/build_art.py)
 // json_data_rules.mk makes this file depend on both.
 #include "global.h"
 
@@ -26,5 +27,12 @@ __asm__(
     ".incbin \"graphics/tcg/printed.bin\"\n"
     ".global gTcgPrintedArtEnd\n"
     "gTcgPrintedArtEnd:\n"
+    ".byte 0\n"
+    ".balign 16\n"
+    ".global gTcgRegionalArt\n"
+    "gTcgRegionalArt:\n"
+    ".incbin \"graphics/tcg/regional.bin\"\n"
+    ".global gTcgRegionalArtEnd\n"
+    "gTcgRegionalArtEnd:\n"
     ".byte 0\n"
     ".text\n");

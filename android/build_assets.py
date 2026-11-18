@@ -125,17 +125,36 @@ def tt_art():
     open(os.path.join(OUT, 'tt_cards.bin'), 'wb').write(bytes(out))
 
 
-def webp_pack(src_name, out_name, quality):
+def joined_packs(first, more):
+    """the game's printed pack `first` with `more`'s cards after its own (graphics/tcg/regional.bin: the cards past
+    the Game Boy games' 442), `first`'s back after them all: one pack in the same layout"""
+    a, b = open(first, 'rb').read(), open(more, 'rb').read()
+    na, nb = struct.unpack('<I', a[4:8])[0], struct.unpack('<I', b[4:8])[0]
+    rows = [a[8 + 16 * i:24 + 16 * i] for i in range(na)] + [b[8 + 16 * i:24 + 16 * i] for i in range(nb)] + \
+        [a[8 + 16 * na:24 + 16 * na]]
+    head = 8 + 16 * len(rows)
+    out = bytearray(a[0:4] + struct.pack('<I', na + nb) + bytes(16 * len(rows)))
+    for i, row in enumerate(rows):
+        off, size, x, y, w, h = struct.unpack('<IIHHHH', row)
+        src = b if na <= i < na + nb else a
+        if size:
+            out[8 + 16 * i:24 + 16 * i] = struct.pack('<IIHHHH', len(out), size, x, y, w, h)
+            out += src[off:off + size]
+    assert len(out) >= head
+    return bytes(out)
+
+
+def webp_pack(src_name, out_name, quality, more=None):
     """A card game's printed pictures (the game's pack: a count, then offset, size and the illustration's x, y, w, h per
     card, then the back) re-encoded as WebP in the same layout (CardPack.java reads it); made once while the game's
-    pack is older"""
+    pack is older (`more`: a second pack whose cards follow, joined_packs)"""
     import io
     from PIL import Image
     out_path = os.path.join(OUT, out_name)
-    src_path = os.path.join(ROOT, src_name)
-    if os.path.exists(out_path) and os.path.getmtime(out_path) >= os.path.getmtime(src_path):
+    src_paths = [os.path.join(ROOT, n) for n in [src_name] + ([more] if more else [])]
+    if os.path.exists(out_path) and all(os.path.getmtime(out_path) >= os.path.getmtime(p) for p in src_paths):
         return   # (made already: the WebP encoding takes a while)
-    src = open(src_path, 'rb').read()
+    src = joined_packs(*src_paths) if more else open(src_paths[0], 'rb').read()
     count = struct.unpack('<I', src[4:8])[0]
     head = 8 + 16 * (count + 1)
     out = bytearray(src[0:head])
@@ -152,9 +171,10 @@ def webp_pack(src_name, out_name, quality):
 
 
 def tcg_art():
-    """The POKéMON cards for the phone: the game's printed cards (graphics/tcg/printed.bin, "TCGP") as WebP: 443
-    pictures in about 13 MB instead of 19 (the phone shows them at most a little larger than they are)"""
-    webp_pack('graphics/tcg/printed.bin', 'tcg_cards.bin', 78)
+    """The POKéMON cards for the phone: the game's printed cards (graphics/tcg/printed.bin, "TCGP", and the regional
+    sets' past them, graphics/tcg/regional.bin) as WebP, one pack (the phone shows them at most a little larger than
+    they are)"""
+    webp_pack('graphics/tcg/printed.bin', 'tcg_cards.bin', 78, more='graphics/tcg/regional.bin')
 
 
 def ygo_art():

@@ -13,6 +13,7 @@
 
 unsigned char *stbi_load_from_memory(const unsigned char *, int, int *, int *, int *, int);
 extern const unsigned char gTcgOriginalArt[], gTcgOriginalArtEnd[], gTcgPrintedArt[], gTcgPrintedArtEnd[];
+extern const unsigned char gTcgRegionalArt[], gTcgRegionalArtEnd[];
 void stbi_image_free(void *);
 
 static SDL_Renderer *sR;
@@ -1194,8 +1195,16 @@ static const unsigned char *Entry(const unsigned char *start, const unsigned cha
         return NULL;
     return b;
 }
-static const unsigned char *PrintedEntry(unsigned id, unsigned *offset, unsigned *size)
+/* the printed card: graphics/tcg/printed.bin for the Game Boy games' 442 (id 0 = the back), the regional sets' past
+ * them from graphics/tcg/regional.bin (entry 1 = card TCG_CARD_GB_COUNT + 1); *base = the file the offset is in */
+static const unsigned char *PrintedEntry(unsigned id, unsigned *offset, unsigned *size, const unsigned char **base)
 {
+    if (id > TCG_CARD_GB_COUNT)
+    {
+        *base = gTcgRegionalArt;
+        return Entry(gTcgRegionalArt, gTcgRegionalArtEnd, "TCGP", 16, 0, id - TCG_CARD_GB_COUNT, offset, size);
+    }
+    *base = gTcgPrintedArt;
     return Entry(gTcgPrintedArt, gTcgPrintedArtEnd, "TCGP", 16, 1, id, offset, size);
 }
 /* Moemon Kai: a GB2 card's printed illustration (ids 229-442) whose window still shows a wedge of the yellow card
@@ -1206,9 +1215,8 @@ static int BorderYellow(uint32_t c)
     int r = c >> 16 & 0xFF, g = c >> 8 & 0xFF, b = c & 0xFF;
     return r > 140 && g > 100 && b * 100 < g * 62 && r - b > 70;
 }
-static void CleanArtCorners(struct Source *s)
+static void CleanArtCorners(struct Source *s, int R)
 {
-    enum { R = 8 };
     int corner, i, j;
     if (s->artW < 4 * R || s->artH < 4 * R)
         return;
@@ -1228,6 +1236,8 @@ static void CleanArtCorners(struct Source *s)
                     uint32_t q = s->px[(y + dy * k) * s->w + x + dx * k];
                     if (!BorderYellow(q))
                     {
+                        if (R > 8)   /* (the regional windows' dark line inside the yellow: past it) */
+                            q = s->px[(y + dy * (k + 3)) * s->w + x + dx * (k + 3)];
                         *p = q;
                         break;
                     }
@@ -1241,7 +1251,7 @@ static int LoadSource(struct Source *s, unsigned id, unsigned kind)
     const unsigned char *start = kind ? gTcgPrintedArt : gTcgOriginalArt, *b;
     unsigned offset, size;
     int channels;
-    b = kind ? PrintedEntry(id, &offset, &size)
+    b = kind ? PrintedEntry(id, &offset, &size, &start)
              : Entry(gTcgOriginalArt, gTcgOriginalArtEnd, "TCGA", 8, 0, id, &offset, &size);
     if (!b)
         return 0;
@@ -1258,7 +1268,9 @@ static int LoadSource(struct Source *s, unsigned id, unsigned kind)
         if (!s->artW || !s->artH || s->artX + s->artW > s->w || s->artY + s->artH > s->h)
             s->artX = 0, s->artY = 0, s->artW = s->w, s->artH = s->h;
         else if (id >= 229 && id <= 442)
-            CleanArtCorners(s);
+            CleanArtCorners(s, 8);
+        else if (id > TCG_CARD_GB_COUNT)   /* (the regional sets' windows: the e-Card ones round more) */
+            CleanArtCorners(s, 24);
     }
     return 1;
 }
@@ -1350,7 +1362,8 @@ void G_CardArtRect(unsigned id, int w, int h, int *ax, int *ay, int *aw, int *ah
 int G_HasPrinted(unsigned id)
 {
     unsigned offset, size;
-    return PrintedEntry(id, &offset, &size) != NULL;
+    const unsigned char *base;
+    return PrintedEntry(id, &offset, &size, &base) != NULL;
 }
 /* Area-averaging resample of a source rectangle (premultiplied by alpha). */
 static void Resample(const struct Source *src, float sx, float sy, float sw, float sh, struct GSurface *dst, int dx,
