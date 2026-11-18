@@ -182,6 +182,7 @@ static const struct { const char *label; uint16_t power; } sRegionPowerLabels[] 
     {"gym2-26:p", TCG_POWER_R_ENERGY_DRAIN},
     {"gym2-35:p", TCG_POWER_R_SCRAM},
     {"gym2-38:p", TCG_POWER_R_SOAK_UP},
+    {"gym2-3:p", TCG_POWER_R_SHAPESHIFT},
     {"gym2-41:p", TCG_POWER_R_RELAXING_SCENT},
     {"gym2-47:p", TCG_POWER_R_EMERGE},
     {"gym2-52:p", TCG_POWER_R_SHOCK_BLAST},

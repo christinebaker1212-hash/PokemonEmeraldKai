@@ -94,6 +94,16 @@ const struct TcgCard *TcgDuel_Field(const struct TcgDuel *g, unsigned player, un
     if (player > 1 || slot >= TCG_FIELD_SIZE)
         return NULL;
     f = &g->players[player].field[slot];
+    if (f->shape && f->stackSize)
+        return Tcg_Card(g->players[player].cards[f->shape - 1]); /* (Shapeshift: it plays as that card) */
+    return f->stackSize ? Tcg_Card(g->players[player].cards[f->stack[f->stackSize - 1]]) : NULL;
+}
+const struct TcgCard *TcgDuel_PowerCard(const struct TcgDuel *g, unsigned player, unsigned slot)
+{
+    const struct TcgFieldCard *f;
+    if (player > 1 || slot >= TCG_FIELD_SIZE)
+        return NULL;
+    f = &g->players[player].field[slot];
     return f->stackSize ? Tcg_Card(g->players[player].cards[f->stack[f->stackSize - 1]]) : NULL;
 }
 void TcgDuel_Shuffle(struct TcgDuel *g, unsigned player)
@@ -1984,6 +1994,8 @@ static int Apply(struct TcgDuel *g, const struct TcgAction *a)
         }
         return TCG_OK;
     case TCG_EVOLVE:
+        if (f->shape)
+            return Error(g, "Shapeshift: it can't evolve while it plays as an Evolution card.");
         if (c->kind != TCG_POKEMON || !f->stackSize || f->stackSize == 4 ||
             !TcgDuel_EvolvesFrom(c, TcgDuel_Field(g, g->current, s)))
             return Error(g, "This Pokemon does not evolve from that card.");

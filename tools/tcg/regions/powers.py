@@ -142,6 +142,7 @@ P('R_HEAVYWEIGHT', 'Heavyweight', 'Grass Energy attached', 'PASSIVE')
 P('R_ANTI_LIGHTNING', 'Anti-Lightning', "can't attach Lightning", 'PASSIVE')
 P('R_WATER_IMMUNITY', 'Water Immunity', "can't attach Water", 'PASSIVE')
 P('R_FIRE_IMMUNITY', 'Fire Immunity', "can't attach Fire", 'PASSIVE')
+P('R_SHAPESHIFT', 'Shapeshift', 'you may attach an Evolution card from your hand to', 'USED', 'ONCE')
 P('R_KEEP', '[Keep]', "can't discard Energy cards from your Pokemon with Unown in their names", 'PASSIVE', 'ANY')
 P('R_ALLERGIC_POLLEN', 'Allergic Pollen', "cards in any player's discard piles are not affected by attacks", 'PASSIVE')
 P('R_LEGENDARY_BODY', 'Legendary Body', "aren't affected by effects from Trainer cards other than Stadium cards", 'PASSIVE',

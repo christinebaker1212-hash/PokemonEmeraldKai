@@ -85,6 +85,9 @@ struct TcgFieldCard
     uint16_t noEvolveUntil;
     /* (effect scripts) markers on it while it's in play (TCG_MARK_*); colorType: a Coloring counter's type + 1 */
     uint8_t markers, colorType;
+    /* Brock's Ninetales's Shapeshift: the Evolution card attached that it plays as (physical + 1; TcgDuel_Field
+     * gives that card, TcgDuel_PowerCard Ninetales's own) */
+    uint8_t shape;
 };
 enum
 {
@@ -494,6 +497,8 @@ int TcgDuel_Init(struct TcgDuel *g, const uint16_t a[60], const uint16_t b[60], 
 int TcgDuel_Apply(struct TcgDuel *g, const struct TcgAction *action);
 int TcgDuel_Conserved(const struct TcgDuel *g);
 const struct TcgCard *TcgDuel_Field(const struct TcgDuel *g, unsigned player, unsigned slot);
+/* The card whose Pokemon Power a Pokemon in play has: its own (TcgDuel_Field, but not a Shapeshift's Evolution card) */
+const struct TcgCard *TcgDuel_PowerCard(const struct TcgDuel *g, unsigned player, unsigned slot);
 unsigned TcgDuel_Energy(const struct TcgDuel *g, unsigned player, unsigned slot, unsigned type);
 int TcgDuel_CanAttack(const struct TcgDuel *g, unsigned player, unsigned attack);
 /* Is the effect on this Pokemon tied to its opponent's Active (effectBy) still in force? */

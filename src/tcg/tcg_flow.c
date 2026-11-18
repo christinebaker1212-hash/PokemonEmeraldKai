@@ -1325,7 +1325,7 @@ unsigned TcgFlow_TrainerChoices(const struct TcgDuel *g, unsigned me, unsigned c
 unsigned TcgFlow_PowerChoices(const struct TcgDuel *g, unsigned me, unsigned slot, struct TcgFlowMenu *m,
                               const char **reason)
 {
-    unsigned power = TcgPower_Id(Field(g, me, slot)), t, who, s;
+    unsigned power = TcgPower_Id(TcgDuel_PowerCard(g, me, slot)), t, who, s;
     memset(m, 0, sizeof(*m));
     *reason = NULL;
     if (power == TCG_POWER_R_ENERGY_CONVERTER)

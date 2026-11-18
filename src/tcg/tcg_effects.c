@@ -1532,7 +1532,7 @@ static int Gb2Effect(struct TcgDuel *g, const struct Effect *e, const struct Tcg
             if (!g->coinResult || (action->target == 0 && blocked))
                 break;
             HitSlot(g, them, action->target, (int)e->amount, 0);
-            if ((e->extra & CA_POWER_OFF) && TcgPower_Id(TcgDuel_Field(g, them, action->target)))
+            if ((e->extra & CA_POWER_OFF) && TcgPower_Id(TcgDuel_PowerCard(g, them, action->target)))
             {
                 op->field[action->target].powerOffUntil = (uint16_t)(g->turn + 1);
                 TcgDuel_Log(g, "%s's Pokemon Power stops working.", TcgDuel_Field(g, them, action->target)->name);

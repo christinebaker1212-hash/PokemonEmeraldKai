@@ -2101,7 +2101,7 @@ static int UsablePower(void)
 }
 static void BeginPower(unsigned slot, struct TcgAction *out, int *result)
 {
-    unsigned power = TcgPower_Id(Field(0, slot));
+    unsigned power = TcgPower_Id(TcgDuel_PowerCard(&B.view, 0, slot));
     const char *block = TcgPower_Block(&B.view, 0, slot);
     if (block)
     {

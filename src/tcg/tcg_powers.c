@@ -157,7 +157,7 @@ static int ToxicGas(const struct TcgDuel *g)
     unsigned who, s;
     for (who = 0; who < 2; who++)
         for (s = 0; s < TCG_FIELD_SIZE; s++)
-            if (TcgPower_Id(TcgDuel_Field(g, who, s)) == TCG_POWER_TOXIC_GAS && !Disabled(g, who, s))
+            if (TcgPower_Id(TcgDuel_PowerCard(g, who, s)) == TCG_POWER_TOXIC_GAS && !Disabled(g, who, s))
                 return 1;
     return 0;
 }
@@ -166,21 +166,21 @@ unsigned TcgPower_Working(const struct TcgDuel *g, unsigned player, unsigned slo
     unsigned id;
     if (player > 1 || slot >= TCG_FIELD_SIZE)
         return TCG_POWER_NONE;
-    id = TcgPower_Id(TcgDuel_Field(g, player, slot));
+    id = TcgPower_Id(TcgDuel_PowerCard(g, player, slot));
     /* (a Poke-Body, and a power that says so, works while its Pokemon is Asleep, Confused or Paralyzed) */
-    if (!id || (Disabled(g, player, slot) && !(TcgDuel_Field(g, player, slot)->flags & TCG_CF_BODY) &&
+    if (!id || (Disabled(g, player, slot) && !(TcgDuel_PowerCard(g, player, slot)->flags & TCG_CF_BODY) &&
                 !(TcgPower_Flags(id) & 8)) ||
         (id != TCG_POWER_TOXIC_GAS && ToxicGas(g)))
         return TCG_POWER_NONE;
     /* Dark Feraligatr's Scare (their Active): a Baby's power stops working */
-    if ((TcgDuel_Field(g, player, slot)->flags & TCG_CF_BABY) && id != TCG_POWER_R_SCARE &&
-        TcgPower_Id(TcgDuel_Field(g, player ^ 1, 0)) == TCG_POWER_R_SCARE && TcgPower_Working(g, player ^ 1, 0) == TCG_POWER_R_SCARE)
+    if ((TcgDuel_PowerCard(g, player, slot)->flags & TCG_CF_BABY) && id != TCG_POWER_R_SCARE &&
+        TcgPower_Id(TcgDuel_PowerCard(g, player ^ 1, 0)) == TCG_POWER_R_SCARE && TcgPower_Working(g, player ^ 1, 0) == TCG_POWER_R_SCARE)
         return TCG_POWER_NONE;
     /* GB2's: Goop Gas Attack (every power), Dark Arbok's Stare (that Pokemon's) */
     if (g->goopGasUntil >= g->turn || g->players[player].field[slot].powerOffUntil >= g->turn)
         return TCG_POWER_NONE;
     /* Ancient Wind: every Poke-Body ignored this turn */
-    if (g->bodiesOffTurn && g->bodiesOffTurn == g->turn && (TcgDuel_Field(g, player, slot)->flags & TCG_CF_BODY))
+    if (g->bodiesOffTurn && g->bodiesOffTurn == g->turn && (TcgDuel_PowerCard(g, player, slot)->flags & TCG_CF_BODY))
         return TCG_POWER_NONE;
     /* Dark Gaze (either Active): no Benched Pokemon's used power */
     if (slot && TcgPower_IsUsed(id) &&
@@ -394,7 +394,7 @@ int TcgPower_Frenzy(const struct TcgDuel *g, unsigned player)
 {
     /* (Dark Primeape: it works while Confused, the one condition it's about) */
     const struct TcgFieldCard *f = &g->players[player].field[0];
-    return f->condition == TCG_CONFUSED && TcgPower_Id(TcgDuel_Field(g, player, 0)) == TCG_POWER_FRENZY &&
+    return f->condition == TCG_CONFUSED && TcgPower_Id(TcgDuel_PowerCard(g, player, 0)) == TCG_POWER_FRENZY &&
            !ToxicGas(g) && g->goopGasUntil < g->turn && f->powerOffUntil < g->turn;
 }
 int TcgPower_AttackBonus(struct TcgDuel *g, int amount, const struct TcgAttack *attack)
@@ -481,7 +481,7 @@ const char *TcgPower_Block(const struct TcgDuel *g, unsigned player, unsigned sl
 {
     const struct TcgPlayer *p = &g->players[player], *op = &g->players[player ^ 1];
     const struct TcgFieldCard *f = &p->field[slot];
-    unsigned power = TcgPower_Id(TcgDuel_Field(g, player, slot)), s, t;
+    unsigned power = TcgPower_Id(TcgDuel_PowerCard(g, player, slot)), s, t;
     if (!power)
         return "This Pokemon has no Pokemon Power.";
     if (!TcgPower_IsUsed(power))
@@ -644,7 +644,7 @@ int TcgDuel_Power(struct TcgDuel *g, const struct TcgAction *a)
         return Fail(g, "Choose one of your Pokemon.");
     if ((blocked = TcgPower_Block(g, me, slot)))
         return Fail(g, blocked);
-    power = TcgPower_Id(TcgDuel_Field(g, me, slot));
+    power = TcgPower_Id(TcgDuel_PowerCard(g, me, slot));
     f = &p->field[slot];
     switch (power)
     {
@@ -1246,6 +1246,14 @@ void TcgPower_Sanitize(struct TcgDuel *g)
         {
             struct TcgFieldCard *f = &g->players[who].field[s];
             const struct TcgCard *c = TcgDuel_Field(g, who, s);
+            if (f->shape && (f->condition == TCG_ASLEEP || f->condition == TCG_CONFUSED || f->condition == TCG_PARALYZED))
+            {
+                /* Shapeshift: Asleep, Confused or Paralyzed, its Evolution card is discarded */
+                unsigned physical = f->shape - 1u;
+                f->shape = 0;
+                TcgDuel_DiscardAttached(g, who, s, physical);
+                c = TcgDuel_Field(g, who, s);
+            }
             /* Snorlax can't become Asleep, Confused, Paralyzed or Poisoned; nor can
              * Clefairy Doll and Mysterious Fossil (their text) */
             if (c && (c->kind == TCG_TRAINER || TcgPower_Working(g, who, s) == TCG_POWER_THICK_SKINNED ||
@@ -1266,7 +1274,7 @@ void TcgPower_StrikesBack(struct TcgDuel *g, const uint16_t before[TCG_FIELD_SIZ
     {
         const struct TcgFieldCard *f = &g->players[them].field[s];
         /* (it doesn't work if Machamp was already Asleep, Confused or Paralyzed) */
-        if (TcgPower_Id(TcgDuel_Field(g, them, s)) != TCG_POWER_STRIKES_BACK || ToxicGas(g) ||
+        if (TcgPower_Id(TcgDuel_PowerCard(g, them, s)) != TCG_POWER_STRIKES_BACK || ToxicGas(g) ||
             (!s && activeCondition != TCG_HEALTHY) || f->damage <= before[s])
             continue;
         Announce(g, them, s, TCG_POWER_STRIKES_BACK);

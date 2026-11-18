@@ -293,6 +293,37 @@ static int RegionUse(struct TcgDuel *g, const struct TcgAction *a, unsigned slot
 {
     const char *script = TcgPower_Script(power);
     int result;
+    if (power == TCG_POWER_R_SHAPESHIFT)
+    {
+        /* Brock's Ninetales: an Evolution card from the hand attached, played as (the one it had discarded); none
+         * picked, the one it has discarded */
+        struct TcgPlayer *p = &g->players[g->current];
+        struct TcgFieldCard *f = &p->field[slot];
+        int at = -1, k;
+        for (k = 0; a->selectionCount == 1 && k < (int)p->handSize; k++)
+            if (p->hand[k] == a->selections[0])
+                at = k;
+        const struct TcgCard *c = at >= 0 ? Tcg_Card(p->cards[a->selections[0]]) : NULL;
+        if (a->selectionCount > 1 || (a->selectionCount == 1 && (!c || c->kind != TCG_POKEMON || !c->stage)))
+            return Fail(g, "Choose an Evolution card from your hand.");
+        if (!a->selectionCount && !f->shape)
+            return Fail(g, "Choose an Evolution card from your hand.");
+        Announce(g, g->current, slot, power);
+        if (f->shape)
+        {
+            unsigned old = f->shape - 1u;
+            f->shape = 0;
+            TcgDuel_DiscardAttached(g, g->current, slot, old);
+        }
+        if (c)
+        {
+            f->attached[f->attachedSize++] = TcgPile_Remove(p->hand, &p->handSize, (unsigned)at);
+            f->shape = (uint8_t)(f->attached[f->attachedSize - 1] + 1);
+            TcgDuel_Log(g, "Shapeshift: Brock's Ninetales plays as %s.", c->name);
+        }
+        TcgDuel_Event(g, TCG_EV_STATUS, g->current, slot, f->condition, 0, f->poison);
+        return TCG_OK;
+    }
     if (!script)
         return Fail(g, "This Pokemon Power can't be used.");
     Announce(g, g->current, slot, power);
@@ -1065,7 +1096,7 @@ void TcgPower_BenchedFromHand(struct TcgDuel *g, unsigned player, unsigned slot)
 int TcgPower_BeforeAttack(struct TcgDuel *g)
 {
     const struct TcgFieldCard *f = &g->players[g->current].field[0];
-    if (TcgPower_Id(TcgDuel_Field(g, g->current, 0)) != TCG_POWER_R_REBELLION || f->condition == TCG_ASLEEP ||
+    if (TcgPower_Id(TcgDuel_PowerCard(g, g->current, 0)) != TCG_POWER_R_REBELLION || f->condition == TCG_ASLEEP ||
         f->condition == TCG_PARALYZED || ToxicGas(g))
         return 0;
     Announce(g, g->current, 0, TCG_POWER_R_REBELLION);

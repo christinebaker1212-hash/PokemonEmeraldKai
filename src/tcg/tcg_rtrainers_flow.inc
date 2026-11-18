@@ -300,6 +300,9 @@ static const struct TcgStep *RegionPowerSteps(unsigned power, int *count)
               {TCG_ST_MY_SLOT, TCG_F_OCCUPIED, 0, 0, 0, "To which of your Pokemon?"});
     case TCG_POWER_R_EMERGE:
         STEPS({TCG_ST_PICK, TCG_F_EVOLVES_FROM_USER, TCG_SRC_DECK, 0, 1, "If heads: evolve it into which card?"});
+    case TCG_POWER_R_SHAPESHIFT:
+        STEPS({TCG_ST_PICK, TCG_F_EVOLUTION, TCG_SRC_HAND, 0, 1,
+               "Shapeshift into which Evolution card? (none: discard the one it has)"});
     case TCG_POWER_R_EVOLUTION_HELPER:
         STEPS({TCG_ST_PICK, TCG_F_EVOLVES_FROM_ACTIVE, TCG_SRC_DECK, 1, 1, "Evolve your Active Pokemon into which card?"});
     case TCG_POWER_R_MAJOR_TSUNAMI:

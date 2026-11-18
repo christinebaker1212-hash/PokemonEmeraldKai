@@ -841,7 +841,7 @@ static int PowerAction(const struct TcgDuel *g, struct TcgAction *a)
     unsigned me = g->current, s, t, best;
     for (s = 0; s < TCG_FIELD_SIZE; s++)
     {
-        unsigned power = TcgPower_Id(TcgDuel_Field(g, me, s));
+        unsigned power = TcgPower_Id(TcgDuel_PowerCard(g, me, s));
         if (!TcgPower_IsUsed(power) || TcgPower_Block(g, me, s))
             continue;
         memset(a, 0, sizeof(*a));

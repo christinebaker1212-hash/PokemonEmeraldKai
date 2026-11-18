@@ -1818,7 +1818,35 @@ static int HeldAttacks(void)
     }
     if (seen != 7)
         return printf("FAIL Misty's Psyduck: outcomes %u\n", seen), 1;
-    printf("PASS held attacks: Koga's Ninja Trick, Vermilion City Gym (both coins), Sabrina's ESP (KEEP, RE-FLIP), Charity; Narrow Gym; Misty's Psyduck\n");
+    /* Brock's Ninetales's Shapeshift: plays as the Machoke attached (its attack, its HP), Shapeshift still its own; it
+     * can't evolve; Paralyzed, the Machoke is discarded */
+    Stage(&g, TCG_CARD_GYM2_3, 1, 1);
+    for (c = 0; c < 2; c++)
+        g.players[c].field[0].poison = g.players[c].field[0].burned = 0, g.players[c].field[0].condition = TCG_HEALTHY;
+    c = Relabel(&g, 0, TCG_CARD_MACHOKE);
+    g.players[0].hand[g.players[0].handSize++] = (uint8_t)c;
+    memset(&a, 0, sizeof(a));
+    a.type = TCG_USE_POWER;
+    a.slot = 0;
+    a.selections[0] = (uint8_t)c, a.selectionCount = 1;
+    if (TcgDuel_Apply(&g, &a) != TCG_OK)
+        return printf("FAIL Shapeshift: %s\n", g.error), 1;
+    if (TcgDuel_Field(&g, 0, 0)->id != TCG_CARD_MACHOKE || TcgPower_Working(&g, 0, 0) != TCG_POWER_R_SHAPESHIFT ||
+        TcgDuel_PowerCard(&g, 0, 0)->id != TCG_CARD_GYM2_3)
+        return printf("FAIL Shapeshift: it doesn't play as Machoke\n"), 1;
+    c = Relabel(&g, 0, TCG_CARD_MACHAMP);
+    g.players[0].hand[g.players[0].handSize++] = (uint8_t)c;
+    memset(&a, 0, sizeof(a));
+    a.type = TCG_EVOLVE;
+    a.hand = (uint8_t)(g.players[0].handSize - 1);
+    a.slot = 0;
+    if (TcgDuel_Apply(&g, &a) == TCG_OK)
+        return printf("FAIL Shapeshift: it evolved\n"), 1;
+    g.players[0].field[0].condition = TCG_PARALYZED;
+    TcgPower_Sanitize(&g);
+    if (g.players[0].field[0].shape || TcgDuel_Field(&g, 0, 0)->id != TCG_CARD_GYM2_3)
+        return printf("FAIL Shapeshift: Paralyzed, still Machoke\n"), 1;
+    printf("PASS held attacks: Koga's Ninja Trick, Vermilion City Gym (both coins), Sabrina's ESP (KEEP, RE-FLIP), Charity; Narrow Gym; Misty's Psyduck; Shapeshift\n");
     return 0;
 }
 static int Choices(void)

@@ -3588,7 +3588,7 @@ const struct TcgCard gTcgCards[TCG_CARD_COUNT + 1] = {
 {.name="",.description="",.effect="NONE",.animation="ATK_ANIM_NONE",.cost={0},.damage=0,.category=TCG_DAMAGE_NORMAL},
 }
 },
-[571] = {.id=571, .name="Brock's Ninetales", .kind=TCG_POKEMON, .type=0, .rarity=2, .set=14, .set2=255, .dark=0, .holo=1, .flags=TCG_CF_OWNER, .origin=14,
+[571] = {.id=571, .name="Brock's Ninetales", .kind=TCG_POKEMON, .type=0, .rarity=2, .set=14, .set2=255, .dark=0, .holo=1, .flags=TCG_CF_OWNER|TCG_CF_READY, .origin=14,
 .hp=70, .stage=1, .species=38, .level=30, .retreat=1, .weakness=3, .resistance=255, .evolvesFrom="Brock's Vulpix", .description="", .attacks={
 {.name="Shapeshift",.description="Once during your turn (before your attack), you may attach an Evolution card from your hand to Brock's Ninetales. (This doesn't count as evolving Brock's Ninetales.) Treat Brock's Ninetales as if it were that Pokemon instead. It can't evolve, devolve, or use the Pokemon Power of that Pokemon. During your turn, you may discard the Evolution card attached to Brock's Ninetales. This power can't be used if Brock's Ninetales is Asleep, Confused, or Paralyzed. If Brock's Ninetales becomes Asleep, Confused, or Paralyzed, discard all Evolution cards attached to it.",.effect="gym2-3:p",.animation="ATK_ANIM_HIT",.cost={0,0,0,0,0,0,0,0,0},.damage=0,.category=TCG_POKEMON_POWER},
 {.name="Will-o'-the-wisp",.description="",.effect="NONE",.animation="ATK_ANIM_HIT",.cost={2,0,0,0,0,0,0,0,0},.damage=30,.category=TCG_DAMAGE_NORMAL},
