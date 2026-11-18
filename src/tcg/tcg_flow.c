@@ -1743,9 +1743,17 @@ unsigned TcgFlow_Begin(struct TcgFlow *f, const struct TcgDuel *g, unsigned me, 
         return AskSlot(f, g, f->me, TCG_F_BENCH, "Switch in which Benched Pokemon?");
     case TCG_FLOW_POWER:
     {
-        const struct TcgCard *c = index < TCG_FIELD_SIZE ? Field(g, f->me, index) : NULL;
+        const struct TcgCard *c = index < TCG_FIELD_SIZE ? TcgDuel_PowerCard(g, f->me, index) : NULL;
         const char *block;
         unsigned power;
+        if (index < TCG_FIELD_SIZE && g->players[f->me].field[index].faceDown)
+        {
+            /* (Lt. Surge's Secret Plan: turned over, nothing to ask) */
+            f->action.type = TCG_USE_POWER;
+            f->action.slot = (uint8_t)index;
+            f->steps = NULL, f->nsteps = 0;
+            return Next(f, g);
+        }
         if (!TcgFlow_HasPower(c))
             return Fail(f, "It has no Pokemon Power.");
         if ((block = TcgPower_Block(g, f->me, index)) != NULL)

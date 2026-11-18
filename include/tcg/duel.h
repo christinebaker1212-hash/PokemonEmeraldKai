@@ -88,6 +88,9 @@ struct TcgFieldCard
     /* Brock's Ninetales's Shapeshift: the Evolution card attached that it plays as (physical + 1; TcgDuel_Field
      * gives that card, TcgDuel_PowerCard Ninetales's own) */
     uint8_t shape;
+    /* Lt. Surge's Secret Plan: a card face down on the Bench, played as a Basic Pokemon until it's turned over
+     * (TcgDuel_Field gives a face-down card, id 0) */
+    uint8_t faceDown;
 };
 enum
 {
@@ -508,6 +511,8 @@ const struct TcgCard *TcgDuel_Field(const struct TcgDuel *g, unsigned player, un
 const struct TcgCard *TcgDuel_PowerCard(const struct TcgDuel *g, unsigned player, unsigned slot);
 /* A Trainer another player may use as their own (Sabrina's Psychic Control, Chaos Gym): not one put in play */
 int TcgDuel_Borrowable(const struct TcgCard *c);
+/* Lt. Surge's Secret Plan: the face-down card turned over (not a Basic Pokemon: it and its cards discarded); 1 kept */
+int TcgDuel_TurnOver(struct TcgDuel *g, unsigned player, unsigned slot);
 /* proxyPlayer's own card (in the discard pile: from 0; the bottom of the deck: 1) into their hand as that Trainer */
 int TcgDuel_ProxyStart(struct TcgDuel *g, unsigned who, unsigned physical, unsigned trainer, unsigned from);
 unsigned TcgDuel_Energy(const struct TcgDuel *g, unsigned player, unsigned slot, unsigned type);

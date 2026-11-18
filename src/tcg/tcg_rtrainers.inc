@@ -1062,6 +1062,21 @@ static int RegionTrainer(struct TcgDuel *g, const struct TcgAction *a, unsigned 
         break;
     case TCG_CARD_GYM2_102:   /* Chaos Gym (tcg_duel.c, TCG_PLAY_TRAINER) */
         break;
+    case TCG_CARD_GYM2_107:   /* Lt. Surge's Secret Plan: a card of the hand face down onto the Bench, as a Basic Pokemon */
+    {
+        int at = -1, slot = RtEmptyBench(p);
+        for (i = 0; a->selectionCount == 1 && i < p->handSize; i++)
+            if (p->hand[i] == a->selections[0])
+                at = (int)i;
+        if (slot < 0 || at < 0)
+            return Fail(g, slot < 0 ? "Your Bench is full." : "Choose a card from your hand.");
+        memset(&p->field[slot], 0, sizeof(p->field[slot]));
+        p->field[slot].stack[p->field[slot].stackSize++] = TcgPile_Remove(p->hand, &p->handSize, (unsigned)at);
+        p->field[slot].faceDown = 1;
+        p->field[slot].enteredTurn = g->turn;
+        TcgDuel_Event(g, TCG_EV_PLAY, me, (unsigned)slot, 0, 0, 0);
+        break;
+    }
     case TCG_CARD_GYM2_121:   /* Sabrina's Psychic Control: heads, a Trainer of their discard pile used as this card */
         if (TcgDuel_Coin(g, me))
         {

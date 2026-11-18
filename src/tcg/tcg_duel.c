@@ -88,12 +88,18 @@ uint8_t TcgPile_Remove(uint8_t *pile, uint8_t *count, unsigned index)
     --*count;
     return card;
 }
+/* (Lt. Surge's Secret Plan: what a face-down card plays as, a Basic Pokemon with nothing; id 0 draws as a card back) */
+static const struct TcgCard sFaceDown = {.name = "Face-down card", .evolvesFrom = "", .description = "", .effect = "",
+                                         .kind = TCG_POKEMON, .type = TCG_COLORLESS, .hp = 250, .weakness = 255,
+                                         .resistance = 255, .set2 = 255};
 const struct TcgCard *TcgDuel_Field(const struct TcgDuel *g, unsigned player, unsigned slot)
 {
     const struct TcgFieldCard *f;
     if (player > 1 || slot >= TCG_FIELD_SIZE)
         return NULL;
     f = &g->players[player].field[slot];
+    if (f->faceDown && f->stackSize)
+        return &sFaceDown;
     if (f->shape && f->stackSize)
         return Tcg_Card(g->players[player].cards[f->shape - 1]); /* (Shapeshift: it plays as that card) */
     return f->stackSize ? Tcg_Card(g->players[player].cards[f->stack[f->stackSize - 1]]) : NULL;
@@ -104,6 +110,8 @@ const struct TcgCard *TcgDuel_PowerCard(const struct TcgDuel *g, unsigned player
     if (player > 1 || slot >= TCG_FIELD_SIZE)
         return NULL;
     f = &g->players[player].field[slot];
+    if (f->faceDown && f->stackSize)
+        return &sFaceDown;
     return f->stackSize ? Tcg_Card(g->players[player].cards[f->stack[f->stackSize - 1]]) : NULL;
 }
 void TcgDuel_Shuffle(struct TcgDuel *g, unsigned player)
@@ -1106,6 +1114,24 @@ static int Error(struct TcgDuel *g, const char *s)
     snprintf(g->error, sizeof(g->error), "%s", s);
     return TCG_INVALID;
 }
+int TcgDuel_TurnOver(struct TcgDuel *g, unsigned player, unsigned slot)
+{
+    struct TcgFieldCard *f = &g->players[player].field[slot];
+    const struct TcgCard *c;
+    if (!f->faceDown || !f->stackSize)
+        return 1;
+    f->faceDown = 0;
+    c = TcgDuel_Field(g, player, slot);
+    TcgDuel_Event(g, TCG_EV_PLAY, player, slot, 0, c->id, 0);
+    if (c->kind == TCG_POKEMON && !c->stage)
+    {
+        TcgDuel_Log(g, "Lt. Surge's Secret Plan: it's %s.", c->name);
+        return 1;
+    }
+    TcgDuel_Log(g, "Lt. Surge's Secret Plan: it's %s, not a Basic Pokemon: discarded.", c->name);
+    TcgDuel_DiscardField(g, player, slot);
+    return 0;
+}
 /* ------------------------------------------------------------------------------------------------ cards as others
  * (Sabrina's Psychic Control, Chaos Gym: TcgDuel.proxy*) */
 int TcgDuel_Borrowable(const struct TcgCard *c)
@@ -1939,6 +1965,13 @@ static int Apply(struct TcgDuel *g, const struct TcgAction *a)
         TcgDuel_ResolveKnockouts(g);
         return TCG_OK;
     }
+    if (a->type == TCG_USE_POWER && s < TCG_FIELD_SIZE && p->field[s].faceDown && g->phase == TCG_TURN)
+    {
+        /* (Lt. Surge's Secret Plan: its player turns it over any time in their turn) */
+        TcgDuel_TurnOver(g, g->current, s);
+        TcgDuel_ResolveKnockouts(g);
+        return TCG_OK;
+    }
     if (a->type == TCG_USE_POWER)
     {
         int result = TcgDuel_Power(g, a);
@@ -2433,6 +2466,13 @@ int TcgDuel_Apply(struct TcgDuel *g, const struct TcgAction *action)
                         }
                 }
         Undo(g, &next);
+        {
+            /* (Lt. Surge's Secret Plan: a face-down card that becomes the Active Pokemon is turned over) */
+            unsigned w;
+            for (w = 0; w < 2; w++)
+                if (next.players[w].field[0].faceDown && !TcgDuel_TurnOver(&next, w, 0))
+                    TcgDuel_ResolveKnockouts(&next);
+        }
         if (next.proxyOn && next.phase != TCG_CHOICE &&
             PilePos(next.players[next.proxyPlayer].hand, next.players[next.proxyPlayer].handSize, next.proxyCard) < 0)
             ProxyRestore(&next); /* (the card played as another: played, so itself again) */

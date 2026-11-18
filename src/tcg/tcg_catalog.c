@@ -4272,7 +4272,7 @@ const struct TcgCard gTcgCards[TCG_CARD_COUNT + 1] = {
 [674] = {.id=674, .name="Koga", .kind=TCG_TRAINER, .type=6, .rarity=2, .set=14, .set2=255, .dark=0, .holo=0, .flags=TCG_CF_READY, .origin=14, .canon=587,
 .effect="gym2-106:t",.description="If an attack from a Pokemon with Koga in its name does damage to a Defending Pokemon this turn, that Pokemon is then Poisoned."
 },
-[675] = {.id=675, .name="Lt. Surge's Secret Plan", .kind=TCG_TRAINER, .type=6, .rarity=2, .set=14, .set2=255, .dark=0, .holo=0, .flags=0, .origin=14,
+[675] = {.id=675, .name="Lt. Surge's Secret Plan", .kind=TCG_TRAINER, .type=6, .rarity=2, .set=14, .set2=255, .dark=0, .holo=0, .flags=TCG_CF_READY, .origin=14,
 .effect="gym2-107:t",.description="Put 1 card from your hand face down onto your Bench. (You can't play this card if your Bench is full.) Treat that card as a Basic Pokemon as long as it's face down. Flip the card if either player needs to know what it is in order to use an attack, a Pokemon Power, or a Trainer card. Flip the card if it ever uses an attack or Pokemon Power, evolves, retreats, is damaged by an attack, or is otherwise affected by an attack. At any time during your turn, you may flip the card over. When you flip that card over, if it isn't a Basic Pokemon, discard it and all cards attached to it."
 },
 [676] = {.id=676, .name="Misty's Wish", .kind=TCG_TRAINER, .type=6, .rarity=2, .set=14, .set2=255, .dark=0, .holo=0, .flags=TCG_CF_READY, .origin=14,

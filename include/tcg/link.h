@@ -12,7 +12,7 @@ enum
 };
 /* Versioned extension relayed by the existing server; no native structs on wire. */
 #define TCG_LINK_RELAY 255
-#define TCG_LINK_VERSION 18  /* 6: Yu-Gi-Oh! duels and trades (types 8-13: src/ygo/ygo_net.c; request kinds 2-3);
+#define TCG_LINK_VERSION 19  /* 6: Yu-Gi-Oh! duels and trades (types 8-13: src/ygo/ygo_net.c; request kinds 2-3);
                                * 7: a Yu-Gi-Oh! answer carries the zone a card goes to (YgoAnswer.zone);
                                * 8: Triple Triad games and trades (type 14: src/tt/tt_net.c; request kinds 4-5);
                                * 9: an action carries an attack's option and Metronome's copy (the last 20 attacks);
@@ -24,7 +24,8 @@ enum
                                * 15: Pokemon Card GB2's cards (ids 229-442) and their rules;
                                * 16: attacks that ask the player for cards (the card audit: Energy Spike...);
                                * 17: the regional sets' cards (Stadiums, Supporters, Tools, TCG_USE_STADIUM...);
-                               * 18: phase TCG_CHOICE, a player's choice in the middle of a card's effect */
+                               * 18: phase TCG_CHOICE, a player's choice in the middle of a card's effect;
+                               * 19: held attacks, borrowed Trainers, Shapeshift and face-down cards in the duel */
 struct TcgLink
 {
     struct TcgDuel game;

@@ -338,6 +338,9 @@ void TcgDuel_EffectDamage(struct TcgDuel *g, unsigned player, unsigned slot, int
     unsigned i;
     if (!f->stackSize || amount <= 0)
         return;
+    /* (Lt. Surge's Secret Plan: a face-down card damaged is turned over first; not a Basic Pokemon, it's gone) */
+    if (f->faceDown && !TcgDuel_TurnOver(g, player, slot))
+        return;
     /* (Transparent Walls: none to the Bench from attacks) */
     if (slot && p->benchShieldUntil && g->turn <= p->benchShieldUntil)
         return;

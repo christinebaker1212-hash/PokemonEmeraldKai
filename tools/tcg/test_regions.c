@@ -1914,7 +1914,44 @@ static int HeldAttacks(void)
     }
     if (seed == 60)
         return printf("FAIL Chaos Gym: never tails\n"), 1;
-    printf("PASS held attacks: Koga's Ninja Trick, Vermilion City Gym (both coins), Sabrina's ESP (KEEP, RE-FLIP), Charity; Narrow Gym; Misty's Psyduck; Shapeshift; Psychic Control; Chaos Gym\n");
+    /* Lt. Surge's Secret Plan: a Machoke face down (turned over: discarded), a Machop face down (damaged: kept) */
+    {
+        unsigned round;
+        for (round = 0; round < 2; round++)
+        {
+            int down, slot = -1;
+            unsigned i, discards;
+            Stage(&g, TCG_CARD_MACHOP, 0, 7);
+            down = Relabel(&g, 0, round ? TCG_CARD_MACHOP : TCG_CARD_GYM2_3);
+            g.players[0].hand[g.players[0].handSize++] = (uint8_t)down;
+            if (PlayAt(&g, TCG_CARD_GYM2_107, 0, down) != TCG_OK)
+                return printf("FAIL Secret Plan: %s\n", g.error), 1;
+            for (i = 1; i < TCG_FIELD_SIZE; i++)
+                if (g.players[0].field[i].faceDown)
+                    slot = (int)i;
+            if (slot < 0 || TcgDuel_Field(&g, 0, (unsigned)slot)->id != 0 || TcgDuel_Field(&g, 0, (unsigned)slot)->stage)
+                return printf("FAIL Secret Plan: no face-down Basic on the Bench\n"), 1;
+            discards = g.players[0].discardSize;
+            if (!round)
+            {
+                memset(&a, 0, sizeof(a));
+                a.type = TCG_USE_POWER;
+                a.slot = (uint8_t)slot;
+                if (TcgDuel_Apply(&g, &a) != TCG_OK)
+                    return printf("FAIL Secret Plan: turning it over: %s\n", g.error), 1;
+                if (g.players[0].field[slot].stackSize || g.players[0].discardSize != discards + 1)
+                    return printf("FAIL Secret Plan: Machoke turned over wasn't discarded\n"), 1;
+            }
+            else
+            {
+                TcgDuel_EffectDamage(&g, 0, (unsigned)slot, 20, 0);
+                if (g.players[0].field[slot].faceDown || TcgDuel_Field(&g, 0, (unsigned)slot)->id != TCG_CARD_MACHOP ||
+                    g.players[0].field[slot].damage != 20)
+                    return printf("FAIL Secret Plan: Machop damaged wasn't turned over and kept\n"), 1;
+            }
+        }
+    }
+    printf("PASS held attacks: Koga's Ninja Trick, Vermilion City Gym (both coins), Sabrina's ESP (KEEP, RE-FLIP), Charity; Narrow Gym; Misty's Psyduck; Shapeshift; Psychic Control; Chaos Gym; Lt. Surge's Secret Plan\n");
     return 0;
 }
 static int Choices(void)

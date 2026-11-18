@@ -81,7 +81,7 @@ Total 1,158 set cards (about 1,100 attacks with effect text, 250 Pokémon Powers
    (`mp cards mock 2`, tcg_board.c MockUnder / MockOver over a staged duel): the Stadium a plate on the centre line,
    the turn's Supporter face up beside its player's Active, Tools tucked under their Pokemon, a BRN badge, Darkness /
    Metal orbs. **Approved and built** (2026-11-18: docs/tcg_regions/board_table.png from a staged duel).
-   **Status (2026-11-18): 1,217 of 1,227 finished.** Where each part lives:
+   **Status (2026-11-18): all 1,227 finished.** Where each part lives:
    - Attacks: tools/tcg/regions/families.py (regex families + EXACT, one script per wording; ops in
      src/tcg/tcg_script.inc, listed at its top and in each op's comment).
    - Trainers: src/tcg/tcg_rtrainers.inc (rules), tcg_rtrainers_flow.inc (steps, playability, menus),
@@ -133,6 +133,18 @@ Total 1,158 set cards (about 1,100 attacks with effect text, 250 Pokémon Powers
      (TCG_CHOICE_FLEE, STAY or a Benched one); Bench Guard takes 10 of a Benched one's damage while Rhydon survives it
      (TcgDuel_EffectDamage); Time Shard / EXP.ALL as their Pokemon is Knocked Out by an attack (KnockedOutByAttack,
      TcgDuel.attackTurn); Super Metronome (Metronome source 16) lists every attack of their Pokemon in play.
+   - The last ten ("The last ten", 2026-11-18): held attacks (TcgDuel.heldAttack, tcg_duel.c HoldAttack: the attack waits while a
+     choice is asked before its damage: Koga's Ninja Trick TCG_CHOICE_NINJA, Vermilion City Gym's coin
+     TCG_CHOICE_VERMILION, Sabrina's ESP TCG_CHOICE_ESP (KEEP the coins / RE-FLIP ALL, counted by TcgDuel_Coin),
+     Misty's Psyduck's copy TCG_CHOICE_PSY_COPY; Charity TCG_CHOICE_CHARITY before Flee); Narrow Gym (a Bench past 4
+     asked of its player: TCG_CHOICE_NARROW in ChoiceBoth); Shapeshift (TcgFieldCard.shape: TcgDuel_Field gives the
+     shape, TcgDuel_PowerCard the card under it; gone when Asleep, Confused, Paralyzed); borrowed Trainers (Sabrina's
+     Psychic Control TCG_CHOICE_CONTROL_PICK, Chaos Gym's tails TCG_CHOICE_CHAOS_USE: TcgDuel_ProxyStart puts the card
+     in the user's hand as the other player's, ProxyRestore puts both back; a Chaos Gym use is a turn with only that
+     card); Lt. Surge's Secret Plan (TcgFieldCard.faceDown: TcgDuel_Field gives a face-down Basic with nothing, id 0
+     the card back; TcgDuel_TurnOver when its player chooses TURN OVER (TCG_USE_POWER on it), when it becomes the
+     Active Pokemon or when an effect damages it; not a Basic Pokemon, it's discarded). Tests: test_regions.c
+     HeldAttacks.
    - Stadiums used during a turn (Healing Field, Power Plant...): TCG_USE_STADIUM, A on the Stadium's plate (USE /
      CHECK), steps TcgFlow_StadiumSteps, rules RegionStadiumUse / RegionStadiumBlock (tcg_rtrainers.inc), AI
      RegionStadiumAi; once a turn (TcgPlayer.stadiumUsed) but Celadon / Saffron City Gym.
@@ -171,8 +183,8 @@ Total 1,158 set cards (about 1,100 attacks with effect text, 250 Pokémon Powers
      (tools/tcg/regions/theme_decks.py from theme_decks.json, pokemon-tcg-data's decks/en: Gym Heroes / Challenge's 8
      for KANTO, Neo Genesis / Discovery / Destiny's 6 for JOHTO, Expedition / Aquapolis / Skyridge's 6 for HOENN, SINNOH
      and UNOVA; Base Set 2's Trainers as the Game Boy games' cards of that name; Vermilion City Gym and Sabrina's
-     Psychic Control, which don't play, stood in for by Potion / Bill) -> gen_special_decks.py -> tcg_decks.c
-     gTcgThemeDecks (gTcgThemeDeckSet, gTcgThemeDeckRegions). Their region's card players bring them among the Game Boy
+     Psychic Control stood in for by Potion / Bill until they played; stand-ins only for a card not finished)
+     -> gen_special_decks.py -> tcg_decks.c gTcgThemeDecks (gTcgThemeDeckSet, gTcgThemeDeckRegions). Their region's card players bring them among the Game Boy
      decks of their kind (tcg_field.c ThemeHere, weighted 3), rated as the regional special trainers' are
      (rate_decks.c: gTcgThemeRating); their region's CARD CLUB counters sell them for 250 CP each (tcg_ui.c
      BUY_THEME0, put in the first empty DECKS slot). Tests: test_special.c (each legal, playing to the end), scenarios

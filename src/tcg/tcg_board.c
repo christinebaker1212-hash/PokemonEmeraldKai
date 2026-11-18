@@ -211,6 +211,7 @@ enum
     MENU_STAGE1,
     MENU_STAGE2,
     MENU_DISCARD,
+    MENU_TURN_OVER,
     MENU_USE_STADIUM,
     MENU_CHOICE /* + the value (TCG_ST_CHOICE) */
 };
@@ -439,7 +440,8 @@ static void Layout(void)
             for (j = 0; j < f->stackSize; j++)
             {
                 int top = j + 1 == f->stackSize;
-                Place(who, f->stack[j], top ? Z_FIELD : Z_UNDER, (int)s, j, r, !hidden, top ? 5 : 4, top);
+                Place(who, f->stack[j], top ? Z_FIELD : Z_UNDER, (int)s, j, r, !hidden && !f->faceDown, top ? 5 : 4,
+                      top);
                 if (top)
                     B.sprite[who][f->stack[j]].tangle = (who ? 180.0f : 0.0f) + (float)StatusAngle(who, s);
             }
@@ -2095,7 +2097,7 @@ static int UsablePower(void)
 {
     unsigned s;
     for (s = 0; s < TCG_FIELD_SIZE; s++)
-        if (HasPower(Field(0, s)) && !TcgPower_Block(&B.view, 0, s))
+        if (HasPower(TcgDuel_PowerCard(&B.view, 0, s)) && !TcgPower_Block(&B.view, 0, s))
             return (int)s;
     return -1;
 }
@@ -2173,11 +2175,17 @@ static void OpenFieldMenu(void)
         AddMenu("ATTACK", MENU_ATTACK, c->kind == TCG_POKEMON && CanAct(), any ? NULL : why);
         AddMenu("RETREAT", MENU_RETREAT, CanAct() && CanRetreat(reason, sizeof(reason)), reason);
     }
-    if (HasPower(c))
+    if (HasPower(TcgDuel_PowerCard(&B.view, 0, B.focusIndex)))
     {
         const char *block = CanAct() ? TcgPower_Block(&B.view, 0, B.focusIndex)
                                      : MyTurn() ? "Wait a moment." : "It isn't your turn.";
         AddMenu("PKMN POWER", MENU_POWER, !block, block);
+    }
+    if (B.view.players[0].field[B.focusIndex].faceDown)
+    {
+        /* (Lt. Surge's Secret Plan: turn it over any time in your turn) */
+        const char *why = CanAct() ? NULL : MyTurn() ? "Wait a moment." : "It isn't your turn.";
+        AddMenu("TURN OVER", MENU_TURN_OVER, !why, why);
     }
     if (c->kind == TCG_TRAINER && B.view.phase == TCG_TURN)
     {
@@ -2397,6 +2405,12 @@ static void Choose(struct TcgAction *out, int *result, unsigned *card)
         if (B.nsteps && B.steps[0].kind == TCG_ST_MY_SLOT)
             B.focusKind = T_MINE, B.focusIndex = 0;
         ContinueTrainer(out, result);
+        break;
+    case MENU_TURN_OVER:
+        memset(&B.action, 0, sizeof(B.action));
+        B.action.type = TCG_USE_POWER;
+        B.action.slot = (uint8_t)B.focusIndex;
+        Submit(out, result);
         break;
     case MENU_DISCARD:
         memset(&B.action, 0, sizeof(B.action));

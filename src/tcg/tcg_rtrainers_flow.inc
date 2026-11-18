@@ -150,6 +150,8 @@ static const struct TcgStep *RegionTrainerSteps(unsigned id, int *count)
         STEPS({TCG_ST_MY_SLOT, TCG_F_ACTIVE_NO_TOOL, 0, 0, 0, "Attach it to your Active Pokemon."});
     case TCG_CARD_GYM1_117:
         STEPS({TCG_ST_MY_SLOT, TCG_F_OWNER_SLOT + TCG_OWNER_SABRINA, 0, 0, 0, "Attach it to which Sabrina Pokemon?"});
+    case TCG_CARD_GYM2_107:
+        STEPS({TCG_ST_PICK, TCG_F_ANY, TCG_SRC_HAND, 1, 1, "Put which card face down onto your Bench?"});
     }
     if (Tcg_Card(id) && (Tcg_Card(id)->flags & TCG_CF_TOOL))
         STEPS({TCG_ST_MY_SLOT, TCG_F_NO_TOOL, 0, 0, 0, "Attach it to which Pokemon?"});
@@ -171,6 +173,12 @@ static int RegionTrainerPlayable(const struct TcgDuel *g, unsigned me, const str
         return snprintf(reason, size, "That Stadium is already in play."), 0;
     switch (id)
     {
+    case TCG_CARD_GYM2_107:
+        if (!bench)
+            return snprintf(reason, size, "Your Bench is full."), 0;
+        if (p->handSize < 2)
+            return snprintf(reason, size, "You have no other card in your hand."), 0;
+        return 1;
     case TCG_CARD_GYM2_115:
         if (!p->field[0].stackSize || !strstr(TcgDuel_Field(g, me, 0)->name, "Koga") || TcgDuel_Tool(g, me, 0, NULL))
             return snprintf(reason, size, "Your Active Pokemon must have Koga in its name and no Tool."), 0;
