@@ -204,8 +204,12 @@ struct TcgPlayer
     struct TcgFieldCard field[TCG_FIELD_SIZE];
     uint8_t energyPlayed, confusionRetreatFailed, setupDone, retreated, noTrainers;
     uint16_t turnsTaken;
-    /* noSupporters: no Supporter this turn (Ruins of Alph's attacks...) */
-    uint8_t noSupporters;
+    /* noSupporters: no Supporter this turn (Ruins of Alph's attacks...); supporterPlayed: a Supporter played this
+     * turn (one a turn; shown beside the Active until the turn ends: supporterCard, its card + 1); stadium: the
+     * Stadium this player put in play (its card + 1; one of the two players' at most) */
+    uint8_t noSupporters, supporterPlayed, supporterCard, stadium;
+    /* turnBuffs: what a Trainer did for this turn's attack (TCG_BUFF_*) */
+    uint8_t turnBuffs;
     /* GB2's, as turn numbers: skipDrawTurn, the turn this player doesn't draw (Perplex); poisonMistUntil, Poison
      * Mist's 20 a turn (theirs too) until then; strangeBeamUntil, their damaged Water Pokemon have no Weakness;
      * noTrainersTurn, their turn without Trainers (Spookify). prizesUp: their Prizes face up (Here Comes Team
@@ -318,6 +322,21 @@ int TcgDuel_CanAttack(const struct TcgDuel *g, unsigned player, unsigned attack)
 int TcgDuel_BoundEffect(const struct TcgDuel *g, unsigned player, unsigned slot);
 /* Leer / Tail Wag / Bone Attack: the Active Pokemon can't attack now. */
 unsigned TcgDuel_AttachedRule(const struct TcgDuel *g, unsigned who, unsigned slot, unsigned rule);
+/* The Stadium in play (Tcg_Canon of its card; 0 none) and whose it is (*owner) */
+unsigned TcgDuel_Stadium(const struct TcgDuel *g, unsigned *owner);
+/* TcgPlayer.turnBuffs */
+enum
+{
+    TCG_BUFF_MISTY = 1, /* Misty: 20 more from a Pokemon with Misty in its name */
+    TCG_BUFF_KOGA = 2,  /* Koga: a Koga Pokemon's damage Poisons */
+    TCG_BUFF_PARK = 4   /* Pokemon Park healed this turn */
+};
+/* That card (Tcg_Canon) attached to that Pokemon: its card, else -1 */
+int TcgDuel_AttachedCard(const struct TcgDuel *g, unsigned who, unsigned slot, unsigned canon);
+/* Take an attached card off to its owner's discard pile */
+void TcgDuel_DiscardAttached(struct TcgDuel *g, unsigned who, unsigned slot, unsigned physical);
+/* The Pokemon Tool attached to that Pokemon (Tcg_Canon of its card; 0 none) and its card (*physical) */
+unsigned TcgDuel_Tool(const struct TcgDuel *g, unsigned who, unsigned slot, unsigned *physical);
 int TcgDuel_NoAttack(const struct TcgDuel *g, unsigned player);
 int TcgDuel_EffectSupported(const char *name);
 int TcgDuel_EffectTouchesDefender(const struct TcgAttack *attack);

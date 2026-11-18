@@ -15,6 +15,10 @@ const struct TcgCard *Tcg_Card(unsigned id)
                ? &gTcgCards[id]
                : NULL;
 }
+unsigned Tcg_Canon(unsigned id)
+{
+    return id && id <= TCG_CARD_COUNT && gTcgCards[id].canon ? gTcgCards[id].canon : id;
+}
 unsigned Tcg_EnergyRule(unsigned id)
 {
     switch (id)

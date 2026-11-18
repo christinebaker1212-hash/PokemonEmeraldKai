@@ -774,6 +774,8 @@ unsigned TcgDuel_Weakness(const struct TcgDuel *g, unsigned player, unsigned slo
         return TCG_NONE;
     if (c->weakness != TCG_NONE && TcgPower_NoWeakness(g, player, slot)) /* (Green Shield, Dampening Shield) */
         return TCG_NONE;
+    if (TcgDuel_AttachedCard(g, player, slot, TCG_CARD_ECARD2_141) >= 0) /* (Weakness Guard) */
+        return TCG_NONE;
     return f->weakAs && c->weakness != TCG_NONE ? f->weakAs - 1u : c->weakness;
 }
 unsigned TcgDuel_Resistance(const struct TcgDuel *g, unsigned player, unsigned slot)

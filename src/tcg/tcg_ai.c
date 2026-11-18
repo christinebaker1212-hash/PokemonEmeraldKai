@@ -134,10 +134,11 @@ static int Lowest(const struct TcgPlayer *p, unsigned skip)
             worst = p->hand[i];
     return worst;
 }
+#include "tcg_rtrainers_ai.inc"
 static int TrainerAction(const struct TcgDuel *g, unsigned hand, struct TcgAction *a)
 {
     const struct TcgPlayer *p = &g->players[g->current], *op = &g->players[g->current ^ 1];
-    unsigned id = p->cards[p->hand[hand]], i, j;
+    unsigned id = Tcg_Canon(p->cards[p->hand[hand]]), i, j;
     int selected;
     unsigned best = 0;
     memset(a, 0, sizeof(*a));
@@ -452,7 +453,7 @@ static int TrainerAction(const struct TcgDuel *g, unsigned hand, struct TcgActio
             return 0;
         break;
     default:
-        return 0;
+        return RegionTrainerAi(g, hand, a, id);
     }
     return Legal(g, a);
 }

@@ -1738,14 +1738,14 @@ static void OpenPick(int source, int filter, int min, int max, const char *title
     }
     B.pickCount = (uint8_t)n;
     B.pickOwner = (uint8_t)owner;
-    if (source == TCG_SRC_OPP_HAND)
+    if (source == TCG_SRC_OPP_HAND || min == TCG_MIN_ALL)
     {
-        /* (none of theirs to choose: their hand is only looked at) */
+        /* (none of theirs to choose: their hand is only looked at; TCG_MIN_ALL: as many as there are) */
         unsigned valid = 0;
         for (i = 0; i < n; i++)
             valid += CardMatches(owner, B.pickCards[i], filter);
-        if (valid < (unsigned)min)
-            min = (int)valid;
+        if (valid < (unsigned)min || min == TCG_MIN_ALL)
+            min = (int)(valid < (unsigned)max ? valid : (unsigned)max);
     }
     B.pickSource = source;
     B.pickFilter = filter;
@@ -1981,7 +1981,8 @@ static void PowerChoices(void)
     const char *why;
     unsigned i;
     B.menuCount = 0;
-    if (!TcgFlow_PowerChoices(&B.view, 0, B.action.slot, &m, &why))
+    if (B.flow == FLOW_TRAINER ? !TcgFlow_TrainerChoices(&B.view, 0, B.flowCard, &m, &why)
+                               : !TcgFlow_PowerChoices(&B.view, 0, B.action.slot, &m, &why))
     {
         TcgBoard_Reject(why);
         CancelFlow();
@@ -2676,7 +2677,7 @@ int TcgBoard_Step(unsigned pressed, unsigned held, struct TcgAction *out, unsign
             }
             if (B.flow == FLOW_TRAINER)
             {
-                if (B.steps[B.step].kind == TCG_ST_OPP_SLOT)
+                if (TcgFlow_StepIsTarget(&B.steps[B.step]))
                     B.action.target = (uint8_t)B.focusIndex;
                 else
                     B.action.slot = (uint8_t)B.focusIndex;

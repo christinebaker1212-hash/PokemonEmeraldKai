@@ -51,6 +51,11 @@ REG_TYPES=['Fire','Grass','Lightning','Water','Fighting','Psychic','Colorless','
 reg=json.loads((ROOT/'tools/tcg/regions/cards.json').read_text())['cards']
 assert reg[0]['id']==len(x['cards'])+1, 'the regional cards follow the Game Boy games\''
 def rtype(t):return REG_TYPES.index(t) if t in REG_TYPES else 255
+# the Game Boy games' Trainers by name (a regional reprint plays as theirs), first printings by name and rules
+gb_names={}
+for _c in x['cards']:
+ if _c['kind']=='trainer':gb_names.setdefault(_c['name'],_c['id'])
+first_print={}
 for c in reg:
  n=c['id']
  sym=c['src'].upper().replace('-','_')
@@ -64,9 +69,16 @@ for c in reg:
  if c.get('ability') and c['ability']['kind']=='BODY':flags.append('TCG_CF_BODY')
  if REG.ready(c):flags.append('TCG_CF_READY')
  flagx='|'.join(flags) or '0'
+ # (a reprint plays as its first printing: the Game Boy games' card of that name, or the first regional one with
+ # the same name and rules)
+ canon=gb_names.get(c['name']) if c['kind']=='trainer' else None
+ if canon is None and c['kind']!='pokemon':
+  canon=first_print.setdefault((c['name'],c.get('text')),n)
+  canon=None if canon==n else canon
+ canonx=f', .canon={canon}' if canon else ''
  # (Darkness / Metal Energy provide their own type)
  ctype=c['name'].split()[0] if c['kind']=='energy' and c['name'] in ('Darkness Energy','Metal Energy') else c['type']
- out.append(f'[{n}] = {{.id={n}, .name={q(c["name"])}, .kind={kind}, .type={rtype(ctype)}, .rarity={rarity}, .set={cardset}, .set2=255, .dark={1 if "DARK" in c["flags"] else 0}, .holo={1 if holo else 0}, .flags={flagx}, .origin={c["origin"]},')
+ out.append(f'[{n}] = {{.id={n}, .name={q(c["name"])}, .kind={kind}, .type={rtype(ctype)}, .rarity={rarity}, .set={cardset}, .set2=255, .dark={1 if "DARK" in c["flags"] else 0}, .holo={1 if holo else 0}, .flags={flagx}, .origin={c["origin"]}{canonx},')
  if c['kind']=='pokemon':
   out.append(f'.hp={c["hp"]}, .stage={c["stage"]}, .species={c["species"]}, .level={c["level"]}, .retreat={c["retreat"]}, .weakness={rtype(c["weakness"])}, .resistance={rtype(c["resistance"])}, .evolvesFrom={q(c["evolvesFrom"])}, .description={q(c["flavor"])}, .attacks={{')
   attacks=[]

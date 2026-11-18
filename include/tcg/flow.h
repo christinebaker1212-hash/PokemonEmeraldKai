@@ -74,13 +74,49 @@ enum
     /* an attack's own pick (TcgDuel_AttackCardOk): the attacker's first / second attack */
     TCG_F_ATTACK_CARD0,
     TCG_F_ATTACK_CARD1,
-    TCG_F_FIRE_ENERGY
+    TCG_F_FIRE_ENERGY,
+    /* the regional sets' Trainers (src/tcg/tcg_rtrainers_flow.inc) */
+    TCG_F_NO_TOOL,              /* (slot) a Pokemon without a Pokemon Tool */
+    TCG_F_OTHER_MINE,           /* (slot) another of yours than the first chosen: the action's target */
+    TCG_F_HAS_BASIC_ENERGY,     /* (slot) with a basic Energy card */
+    TCG_F_DAMAGED_BASIC_ENERGY, /* (slot) damaged, with a basic Energy card */
+    TCG_F_WATER_ENERGY,         /* a Water Energy card */
+    TCG_F_BASIC_NOT_BABY,       /* a Basic Pokemon card, not a Baby */
+    TCG_F_POKEMON_CARD,         /* any Pokemon card */
+    TCG_F_TM_TOOL,              /* a Technical Machine or Pokemon Tool */
+    TCG_F_SUPPORTER_STADIUM,
+    TCG_F_BALL,                 /* a Trainer with Ball in its name */
+    TCG_F_UNOWN,                /* an Unown */
+    /* "with Brock in its name" and the like (+ TCG_OWNER_*): a Pokemon card; one of yours in play (slot); another
+     * one of yours than the first chosen (slot: the action's target) */
+    TCG_F_OWNER_CARD = 100,
+    TCG_F_OWNER_SLOT = 110,
+    TCG_F_OWNER_OTHER = 120
 };
+enum
+{
+    TCG_OWNER_BROCK,
+    TCG_OWNER_MISTY,
+    TCG_OWNER_ERIKA,
+    TCG_OWNER_SURGE,
+    TCG_OWNER_SABRINA,
+    TCG_OWNER_BLAINE,
+    TCG_OWNER_GIOVANNI,
+    TCG_OWNER_KOGA,
+    TCG_OWNERS
+};
+/* A pick's min: as many as there are, up to its max */
+#define TCG_MIN_ALL 99
+/* The owner's word in a Pokemon's name ("Brock", "Lt. Surge"...) */
+const char *TcgFlow_OwnerWord(unsigned owner);
+
 struct TcgStep
 {
     uint8_t kind, filter, source, min, max;
     const char *prompt;
 };
+/* Does that slot step aim at the action's target (the opponent's Pokemon, or a Trainer's second Pokemon of yours)? */
+int TcgFlow_StepIsTarget(const struct TcgStep *st);
 /* A Trainer's steps (count 0: it asks nothing); a used Pokemon Power's (the first Pokemon chosen is action.target,
  * the second action.attack: tcg_powers.c TcgDuel_Power) */
 const struct TcgStep *TcgFlow_TrainerSteps(unsigned id, int *count);
@@ -119,6 +155,9 @@ struct TcgFlowMenu
 };
 unsigned TcgFlow_PowerChoices(const struct TcgDuel *g, unsigned me, unsigned slot, struct TcgFlowMenu *m,
                               const char **reason);
+/* A Trainer's menu (TCG_ST_CHOICE: the value is action.target): the regional Erika's draw */
+unsigned TcgFlow_TrainerChoices(const struct TcgDuel *g, unsigned me, unsigned cardId, struct TcgFlowMenu *m,
+                                const char **reason);
 /* The prompt for an attack's menu */
 const char *TcgFlow_AttackPrompt(const char *attackName);
 

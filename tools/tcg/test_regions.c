@@ -3,6 +3,7 @@
  * every card kept where it can be counted. */
 #include "tcg/card_ids.h"
 #include "tcg/duel.h"
+#include "tcg/flow.h"
 #include <assert.h>
 #include <stdio.h>
 #include <string.h>
@@ -146,6 +147,15 @@ static int TypeDeck(uint16_t out[60], unsigned type, unsigned skip)
     }
     if (!basics)
         return 0;
+    /* a dozen finished regional Trainers, a different run for each deck */
+    {
+        unsigned trainers[256], nt = 0, t;
+        for (id = TCG_CARD_GB_COUNT + 1; id <= TCG_CARD_COUNT && nt < 256; id++)
+            if (Tcg_Card(id) && Tcg_Card(id)->kind == TCG_TRAINER)
+                trainers[nt++] = id;
+        for (t = 0; nt && t < 12 && n < 44; t++)
+            out[n++] = (uint16_t)trainers[(type * 13 + skip * 5 + t * 7) % nt];
+    }
     /* (Darkness / Metal: four of the special Energy, the rest Colorless-paying basic Energy) */
     if (type == TCG_DARKNESS || type == TCG_METAL)
         for (k = 0; k < 4 && n < 60; k++, n++)
@@ -205,6 +215,125 @@ static int SpecialEnergy(void)
         p->cards[c] = keep;
     }
     printf("PASS special Energy: Darkness Energy's 10 more and its damage counter, Metal Energy both ways, Boost Energy\n");
+    return 0;
+}
+/* Every finished regional Trainer played through the flow (the board's and the phone's questions, answered with the
+ * first choices; with the most cards picked on even seeds) on staged boards: the rules must take what the flow built;
+ * then the duel goes on with the AI. */
+static void Give(struct TcgDuel *g, unsigned who, unsigned id, int toDiscard)
+{
+    struct TcgPlayer *p = &g->players[who];
+    int c = Take(g, who, id);
+    if (c < 0)
+        return;
+    if (toDiscard)
+        p->discard[p->discardSize++] = (uint8_t)c;
+    else
+        p->hand[p->handSize++] = (uint8_t)c;
+}
+static int PlayTrainers(void)
+{
+    unsigned id, played = 0, refused = 0, tried = 0;
+    for (id = TCG_CARD_GB_COUNT + 1; id <= TCG_CARD_COUNT; id++)
+    {
+        const struct TcgCard *c = Tcg_Card(id);
+        uint32_t seed;
+        if (!c || c->kind != TCG_TRAINER)
+            continue;
+        tried++;
+        for (seed = 1; seed <= 8; seed++)
+        {
+            struct TcgDuel g;
+            struct TcgFlow f;
+            unsigned q, k, guard = 0;
+            int at = -1;
+            Stage(&g, TCG_CARD_MACHOP, 0, seed);
+            {
+                struct TcgPlayer *p = &g.players[0];
+                /* the card itself (in place of a Potion), cards to pick in the hand, the discard pile and the deck */
+                int pot = Take(&g, 0, TCG_CARD_BILL);
+                if (pot < 0)
+                    continue;
+                p->cards[pot] = (uint16_t)id;
+                p->hand[p->handSize++] = (uint8_t)pot;
+                at = (int)p->handSize - 1;
+                Give(&g, 0, TCG_CARD_DIGLETT, seed & 1);
+                Give(&g, 0, TCG_CARD_FIRE_ENERGY, 0);
+                Give(&g, 0, TCG_CARD_FIRE_ENERGY, 0);
+                Give(&g, 0, TCG_CARD_WATER_ENERGY, 1);
+                Give(&g, 0, TCG_CARD_PSYCHIC_ENERGY, 1);
+                Give(&g, 0, TCG_CARD_POTION, 1);
+                if (seed % 3 == 0)
+                    p->field[1].damage = 30;
+                if (seed == 5)
+                    g.players[0].energyPlayed = 1;
+            }
+            if (!TcgFlow_TrainerHasUse(&g, 0, id))
+            {
+                refused++;
+                continue;
+            }
+            q = TcgFlow_Begin(&f, &g, 0, TCG_FLOW_HAND, (unsigned)at);
+            while (q != TCG_Q_DONE && q != TCG_Q_FAIL && guard++ < 16)
+            {
+                if (q == TCG_Q_SLOT)
+                {
+                    for (k = 0; k < TCG_FIELD_SIZE && !(f.slotMask >> k & 1); k++)
+                        ;
+                    q = TcgFlow_Slot(&f, &g, k);
+                }
+                else if (q == TCG_Q_PICK)
+                {
+                    uint8_t chosen[TCG_DECK_SIZE];
+                    unsigned n = 0, want = seed % 2 ? f.pickMin : f.pickMax;
+                    for (k = 0; k < f.pickCount && n < want; k++)
+                        if (f.pickOk[k])
+                            chosen[n++] = f.pick[k];
+                    if (n < f.pickMin)
+                        break;
+                    q = TcgFlow_Pick(&f, &g, chosen, n);
+                }
+                else if (q == TCG_Q_MENU)
+                {
+                    for (k = 0; k < f.menu.count && !f.menu.ok[k]; k++)
+                        ;
+                    if (k == f.menu.count)
+                        break;
+                    q = TcgFlow_Menu(&f, &g, f.menu.value[k]);
+                }
+            }
+            if (q != TCG_Q_DONE)
+            {
+                refused++;
+                continue;
+            }
+            {
+                int result = TcgDuel_Apply(&g, &f.action);
+                if (result != TCG_OK)
+                {
+                    printf("FAIL %s (seed %u): the flow's action was refused: %d %s\n", c->name, seed, result, g.error);
+                    return 1;
+                }
+                assert(TcgDuel_Conserved(&g));
+                played++;
+                for (k = 0; k < 24 && g.phase != TCG_FINISHED; k++)
+                {
+                    struct TcgAction next;
+                    memset(&next, 0, sizeof(next));
+                    if (!TcgDuel_AiAction(&g, &next))
+                        break;
+                    if ((result = TcgDuel_Apply(&g, &next)) != TCG_OK)
+                    {
+                        printf("FAIL after %s (seed %u): AI action %u refused: %s\n", c->name, seed, next.type, g.error);
+                        return 1;
+                    }
+                    assert(TcgDuel_Conserved(&g));
+                }
+            }
+        }
+    }
+    printf("PASS %u finished regional Trainers through the flow: %u played, %u not playable on that board\n", tried,
+           played, refused);
     return 0;
 }
 int main(void)
@@ -280,6 +409,8 @@ int main(void)
     printf("PASS %u finished regional cards: %u attacks used %u times, then %u AI actions after them\n", ready, used, ok,
            steps);
     if (SpecialEnergy())
+        return 1;
+    if (PlayTrainers())
         return 1;
     /* Decks of them, each type against the others, to the end */
     {

@@ -91,11 +91,13 @@ static int HasBasic(const struct TcgPlayer *p)
     }
     return 0;
 }
+static void ToolsBetweenTurns(struct TcgDuel *g, int start);
 static void StartTurn(struct TcgDuel *g)
 {
     struct TcgPlayer *p = &g->players[g->current];
     unsigned s;
     p->energyPlayed = 0;
+    p->supporterPlayed = 0;
     p->confusionRetreatFailed = 0;
     p->retreated = 0;
     p->turnsTaken++;
@@ -115,6 +117,10 @@ static void StartTurn(struct TcgDuel *g)
         p->field[s].mirrorShell = 0; /* (Mirror Shell too) */
     }
     TcgDuel_Event(g, TCG_EV_TURN, g->current, 0, g->turn, 0, 0);
+    ToolsBetweenTurns(g, 1);
+    /* (Rocket's Secret Experiment's tails: no Trainers this turn either) */
+    if (p->noTrainersTurn == g->turn)
+        p->noTrainers = 1;
     if (p->skipDrawTurn == g->turn)
     {
         /* Perplex: no card this turn */
@@ -369,11 +375,107 @@ static unsigned AttachedTrainerCount(const struct TcgDuel *g, unsigned player, u
     const struct TcgFieldCard *f = &p->field[slot];
     unsigned i, count = 0;
     for (i = 0; i < f->attachedSize; i++)
-        if (p->cards[f->attached[i]] == id)
+        if (Tcg_Canon(p->cards[f->attached[i]]) == id)
             count++;
     return count;
 }
+int TcgDuel_AttachedCard(const struct TcgDuel *g, unsigned who, unsigned slot, unsigned canon)
+{
+    const struct TcgPlayer *p = &g->players[who];
+    const struct TcgFieldCard *f = &p->field[slot];
+    unsigned i;
+    for (i = 0; i < f->attachedSize; i++)
+        if (Tcg_Canon(p->cards[f->attached[i]]) == canon)
+            return f->attached[i];
+    return -1;
+}
+void TcgDuel_DiscardAttached(struct TcgDuel *g, unsigned who, unsigned slot, unsigned physical)
+{
+    struct TcgPlayer *p = &g->players[who];
+    struct TcgFieldCard *f = &p->field[slot];
+    unsigned i;
+    for (i = 0; i < f->attachedSize; i++)
+        if (f->attached[i] == physical)
+        {
+            p->attachmentExpires[physical] = 0;
+            p->discard[p->discardSize++] = TcgPile_Remove(f->attached, &f->attachedSize, i);
+            return;
+        }
+}
+static int Named(const struct TcgCard *c, const char *word) { return c && strstr(c->name, word) != NULL; }
+/* The regional Pokemon Tools that act between turns: Berry, Gold Berry, Miracle Berry at the start of each turn;
+ * Healing Berry at the end of any */
+static void ToolsBetweenTurns(struct TcgDuel *g, int start)
+{
+    unsigned who, s;
+    for (who = 0; who < 2; who++)
+        for (s = 0; s < TCG_FIELD_SIZE; s++)
+        {
+            struct TcgFieldCard *f = &g->players[who].field[s];
+            const struct TcgCard *c = TcgDuel_Field(g, who, s);
+            unsigned physical, tool = c ? TcgDuel_Tool(g, who, s, &physical) : 0, heal = 0;
+            if (!tool)
+                continue;
+            if (start && (tool == TCG_CARD_NEO1_99 || tool == TCG_CARD_NEO1_93))
+            {
+                unsigned need = tool == TCG_CARD_NEO1_99 ? 20 : 40;
+                if (f->damage < need)
+                    continue;
+                heal = need;
+            }
+            else if (start && tool == TCG_CARD_NEO1_94)
+            {
+                if (!f->condition && !f->poison && !f->burned)
+                    continue;
+                f->condition = TCG_HEALTHY;
+                f->poison = f->burned = 0;
+                TcgDuel_Event(g, TCG_EV_STATUS, who, s, TCG_HEALTHY, 0, 0);
+            }
+            else if (!start && tool == TCG_CARD_ECARD2_125 && c->kind == TCG_POKEMON && f->damage && f->damage < c->hp &&
+                     c->hp - f->damage <= 20)
+                heal = 30;
+            else
+                continue;
+            if (heal)
+            {
+                heal = heal < f->damage ? heal : f->damage;
+                f->damage -= heal;
+                TcgDuel_Event(g, TCG_EV_HEAL, who, s, heal, 0, 0);
+            }
+            TcgDuel_Log(g, "%s's %s.", c->name, Tcg_Card(tool)->name);
+            TcgDuel_DiscardAttached(g, who, s, physical);
+        }
+}
 
+unsigned TcgDuel_Stadium(const struct TcgDuel *g, unsigned *owner)
+{
+    unsigned who;
+    for (who = 0; who < 2; who++)
+        if (g->players[who].stadium)
+        {
+            if (owner)
+                *owner = who;
+            return Tcg_Canon(g->players[who].cards[g->players[who].stadium - 1]);
+        }
+    return 0;
+}
+unsigned TcgDuel_Tool(const struct TcgDuel *g, unsigned who, unsigned slot, unsigned *physical)
+{
+    const struct TcgPlayer *p = &g->players[who];
+    const struct TcgFieldCard *f = &p->field[slot];
+    unsigned i;
+    for (i = 0; i < f->attachedSize; i++)
+    {
+        const struct TcgCard *c = Tcg_Card(p->cards[f->attached[i]]);
+        if (c && c->kind == TCG_TRAINER && (c->flags & TCG_CF_TOOL))
+        {
+            if (physical)
+                *physical = f->attached[i];
+            return Tcg_Canon(c->id);
+        }
+    }
+    return 0;
+}
 /* How many Energy cards attached to that Pokemon have this rule (Tcg_EnergyRule) */
 unsigned TcgDuel_AttachedRule(const struct TcgDuel *g, unsigned who, unsigned slot, unsigned rule)
 {
@@ -418,6 +520,13 @@ static void EndTurn(struct TcgDuel *g)
         p->field[s].fossilBoost = 0;
     }
     p->noTrainers = p->noSupporters = 0;
+    p->turnBuffs = 0;
+    /* (the turn's Supporter goes to the discard pile as the turn ends) */
+    if (p->supporterCard)
+    {
+        p->discard[p->discardSize++] = (uint8_t)(p->supporterCard - 1);
+        p->supporterCard = 0;
+    }
     for (who = 0; who < 2; who++)
     {
         struct TcgFieldCard *f = &g->players[who].field[0];
@@ -445,6 +554,7 @@ static void EndTurn(struct TcgDuel *g)
         if (f->defender)
             f->defender--;
     }
+    ToolsBetweenTurns(g, 0);
     /* Darkness Energy: at the end of every turn, a damage counter on a Pokemon that isn't Darkness or Dark */
     for (who = 0; who < 2; who++)
         for (s = 0; s < TCG_FIELD_SIZE; s++)
@@ -664,15 +774,21 @@ static int Apply(struct TcgDuel *g, const struct TcgAction *a)
             /* Metal Energy on a Pokemon that isn't Metal: its damage 10 less each (before Weakness, Resistance) */
             if (type != TCG_METAL)
                 total -= 10 * (int)TcgDuel_AttachedRule(g, g->current, 0, TCG_ER_METAL);
-            /* (noWeakRes 1: neither, 2: no Resistance, 3: no Weakness) */
-            if ((!g->noWeakRes || g->noWeakRes == 2) && TcgDuel_Weakness(g, g->current ^ 1, 0) == type)
+            /* (noWeakRes 1: neither, 2: no Resistance, 3: no Weakness; the regional Stadiums: Cinnabar City Gym, no
+             * Weakness when Water hits a Blaine Pokemon; Pewter City Gym, a Brock Pokemon ignores Resistance;
+             * Magnifier, the same; Resistance Gym, every Resistance 20 less) */
+            unsigned stadium = TcgDuel_Stadium(g, NULL);
+            int weakOk = !(stadium == TCG_CARD_GYM2_113 && type == TCG_WATER && Named(target, "Blaine"));
+            int resistOk = !(stadium == TCG_CARD_GYM1_115 && Named(attacker, "Brock")) &&
+                           TcgDuel_AttachedCard(g, g->current, 0, TCG_CARD_NEO4_101) < 0;
+            if ((!g->noWeakRes || g->noWeakRes == 2) && weakOk && TcgDuel_Weakness(g, g->current ^ 1, 0) == type)
             {
                 total *= 2;
                 flags |= TCG_DMG_WEAK;
             }
-            if ((!g->noWeakRes || g->noWeakRes == 3) && TcgDuel_Resistance(g, g->current ^ 1, 0) == type)
+            if ((!g->noWeakRes || g->noWeakRes == 3) && resistOk && TcgDuel_Resistance(g, g->current ^ 1, 0) == type)
             {
-                total -= 30;
+                total -= stadium == TCG_CARD_GYM2_109 ? 10 : 30;
                 flags |= TCG_DMG_RESIST;
             }
             total += 10 * (int)AttachedTrainerCount(g, g->current, 0, TCG_CARD_PLUSPOWER);
@@ -680,6 +796,21 @@ static int Apply(struct TcgDuel *g, const struct TcgAction *a)
              * less each, and any Metal Energy on the Defending Pokemon 10 less each (after Weakness, Resistance) */
             if (total > 0)
                 total += 10 * (int)TcgDuel_AttachedRule(g, g->current, 0, TCG_ER_DARKNESS);
+            /* Misty (the Trainer): 20 more from a Misty Pokemon; Strength Charm 10 more (then discarded as the turn
+             * ends); Sprout Tower: a Colorless Pokemon's attacks 30 less */
+            if (total > 0 && (g->players[g->current].turnBuffs & TCG_BUFF_MISTY) && Named(attacker, "Misty"))
+                total += 20;
+            if (total > 0)
+            {
+                int charm = TcgDuel_AttachedCard(g, g->current, 0, TCG_CARD_ECARD1_150);
+                if (charm >= 0)
+                {
+                    total += 10;
+                    g->players[g->current].attachmentExpires[charm] = g->turn;
+                }
+            }
+            if (stadium == TCG_CARD_NEO1_97 && type == TCG_COLORLESS)
+                total -= 30;
             if (type != TCG_METAL)
                 total -= 10 * (int)TcgDuel_AttachedRule(g, g->current, 0, TCG_ER_METAL_LATE);
             if (!g->swift)
@@ -744,6 +875,43 @@ static int Apply(struct TcgDuel *g, const struct TcgAction *a)
             TcgDuel_Event(g, TCG_EV_DAMAGE, g->current, 0, attacker->hp - f->damage, 0, TCG_DMG_SELF);
             f->damage = attacker->hp;
             TcgDuel_Log(g, "Destiny Bond: %s is Knocked Out too.", attacker->name);
+        }
+        /* Koga (the Trainer): a Koga Pokemon's damage Poisons */
+        if (damage && (g->players[g->current].turnBuffs & TCG_BUFF_KOGA) && Named(attacker, "Koga") && !foe->poison)
+        {
+            foe->poison = 10;
+            TcgDuel_Event(g, TCG_EV_STATUS, g->current ^ 1, 0, foe->condition, 0, foe->poison);
+        }
+        /* Focus Band: a Knock Out by this attack, heads, leaves it at 10 HP (then discarded) */
+        if (damage && target->kind == TCG_POKEMON && foe->damage >= target->hp)
+        {
+            int band = TcgDuel_AttachedCard(g, g->current ^ 1, 0, TCG_CARD_NEO1_86);
+            if (band >= 0 && TcgDuel_Coin(g, g->current ^ 1))
+            {
+                foe->damage = target->hp - 10u;
+                TcgDuel_Log(g, "Focus Band: %s hangs on.", target->name);
+                TcgDuel_DiscardAttached(g, g->current ^ 1, 0, (unsigned)band);
+            }
+        }
+        /* Counterattack Claws: damaged, a coin, heads 2 counters on the attacker (then discarded) */
+        if (damage)
+        {
+            int claws = TcgDuel_AttachedCard(g, g->current ^ 1, 0, TCG_CARD_NEO4_97);
+            if (claws >= 0)
+            {
+                if (TcgDuel_Coin(g, g->current ^ 1))
+                {
+                    f->damage += 20;
+                    TcgDuel_Event(g, TCG_EV_DAMAGE, g->current, 0, 20, 0, TCG_DMG_SELF);
+                }
+                TcgDuel_DiscardAttached(g, g->current ^ 1, 0, (unsigned)claws);
+            }
+        }
+        /* Crystal Shard: discarded at the end of a turn its Pokemon attacked */
+        {
+            int shard = TcgDuel_AttachedCard(g, g->current, 0, TCG_CARD_ECARD3_122);
+            if (shard >= 0)
+                g->players[g->current].attachmentExpires[shard] = g->turn;
         }
         if (damage && foe->damage >= (target->kind == TCG_TRAINER ? 10u : target->hp))
             TcgPower_KnockedOut(g, g->current ^ 1, 0); /* (Dark Gyarados's Final Beam) */
@@ -836,6 +1004,19 @@ static int Apply(struct TcgDuel *g, const struct TcgAction *a)
             if (why)
                 return Error(g, why);
         }
+        /* Mirage Stadium: a coin first; tails, it can't retreat this turn (nothing discarded) */
+        if (TcgDuel_Stadium(g, NULL) == TCG_CARD_ECARD3_132 && !TcgDuel_Coin(g, g->current))
+        {
+            f->noRetreat = 1;
+            p->retreated = 1;
+            TcgDuel_Event(g, TCG_EV_RETREAT_FAIL, g->current, 0, 0, 0, 0);
+            TcgDuel_Log(g, "Mirage Stadium: it can't retreat this turn.");
+            return TCG_OK;
+        }
+        /* Balloon Berry: discarded instead of the Energy (TcgDuel_RetreatCost is then 0) */
+        int berry = TcgDuel_AttachedCard(g, g->current, 0, TCG_CARD_NEO3_60);
+        if (berry >= 0)
+            TcgDuel_DiscardAttached(g, g->current, 0, (unsigned)berry);
         for (i = 0; i < a->selectionCount; i++)
         {
             unsigned j;
@@ -851,7 +1032,7 @@ static int Apply(struct TcgDuel *g, const struct TcgAction *a)
         }
         c = TcgDuel_Field(g, g->current, 0);
         /* (each Dodrio on the Bench: Retreat Aid, one Colorless less; Dark Muk's Sticky Goo, 2 more) */
-        if (n < TcgDuel_RetreatCost(g, g->current))
+        if (berry < 0 && n < TcgDuel_RetreatCost(g, g->current))
             return Error(g, "Not enough Energy selected for retreat.");
         p->retreated = 1;
         if (f->condition == TCG_CONFUSED && !TcgDuel_Coin(g, g->current))
@@ -949,6 +1130,13 @@ static int Apply(struct TcgDuel *g, const struct TcgAction *a)
         ClearCondition(f);
         TcgDuel_Event(g, TCG_EV_EVOLVE, g->current, s, 0, c->id, 0);
         TcgDuel_Log(g, "Evolved into %s.", c->name);
+        /* Viridian City Gym: a Giovanni Pokemon evolving loses 2 counters */
+        if (TcgDuel_Stadium(g, NULL) == TCG_CARD_GYM2_123 && Named(c, "Giovanni") && f->damage)
+        {
+            unsigned heal = f->damage < 20 ? f->damage : 20;
+            f->damage -= heal;
+            TcgDuel_Event(g, TCG_EV_HEAL, g->current, s, heal, 0, 0);
+        }
         g->fromHand = 1;
         TcgPower_OnPlayFrom(g, g->current, s, a); /* (Healing Wind) */
         g->fromHand = 0;
@@ -966,6 +1154,13 @@ static int Apply(struct TcgDuel *g, const struct TcgAction *a)
         f->attached[f->attachedSize++] = TcgPile_Remove(p->hand, &p->handSize, a->hand);
         p->energyPlayed = 1;
         TcgDuel_Event(g, TCG_EV_ATTACH, g->current, s, 0, c->id, 0);
+        /* Pokemon Park: once a turn, Energy onto a Benched Pokemon takes a counter off it */
+        if (TcgDuel_Stadium(g, NULL) == TCG_CARD_ECARD2_131 && s && f->damage && !(p->turnBuffs & TCG_BUFF_PARK))
+        {
+            p->turnBuffs |= TCG_BUFF_PARK;
+            f->damage -= 10;
+            TcgDuel_Event(g, TCG_EV_HEAL, g->current, s, 10, 0, 0);
+        }
         /* GB2's special Energy, attached from the hand */
         if (c->id == TCG_CARD_POTION_ENERGY && f->damage)
         {
@@ -1014,6 +1209,10 @@ int TcgDuel_Conserved(const struct TcgDuel *g)
             CHECK_CARD(p->discard[i]);
         for (i = 0; i < p->prizeSize; i++)
             CHECK_CARD(p->prizes[i]);
+        if (p->stadium)
+            CHECK_CARD(p->stadium - 1u);
+        if (p->supporterCard)
+            CHECK_CARD(p->supporterCard - 1u);
         for (i = 0; i < TCG_FIELD_SIZE; i++)
         {
             const struct TcgFieldCard *f = &p->field[i];

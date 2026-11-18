@@ -15,12 +15,42 @@ ATTACKS = {}
 POWERS = {}
 TRAINERS = {}
 # rules: TcgCard flags (import_sets.py) the engine plays; DARK_ENERGY / METAL_ENERGY: Darkness / Metal costs payable
-RULES = {'OWNER', 'DARK', 'LIGHT', 'DARK_ENERGY', 'METAL_ENERGY', 'SPECIAL'}
+RULES = {'OWNER', 'DARK', 'LIGHT', 'DARK_ENERGY', 'METAL_ENERGY', 'SPECIAL', 'SUPPORTER', 'STADIUM', 'TOOL', 'RSM',
+         'GAME_CORNER'}
 # special Energy whose rules the engine plays (Tcg_EnergyRule, src/tcg/tcg_collection.c)
 for _label, _rule in (('neo1-19', 'METAL'), ('neo1-104', 'DARKNESS'), ('neo1-105', 'RECYCLE'), ('ecard1-158', 'DARKNESS'),
                       ('ecard1-159', 'METAL_LATE'), ('ecard2-142', 'DARKNESS'), ('ecard2-143', 'METAL'),
                       ('ecard2-144', 'RAINBOW'), ('ecard2-145', 'BOOST')):
     TRAINERS[_label + ':t'] = 'ENERGY_' + _rule
+
+
+# Trainers with a handler in src/tcg/tcg_rtrainers.inc (their first printings; a reprint with the same name and rules
+# plays as its first printing, a Game Boy games' Trainer's reprint as theirs: generate_catalog.py's canon)
+RTRAINERS = '''gym1-15 gym1-16 gym1-17 gym1-18 gym1-104 gym1-105 gym1-106 gym1-108 gym1-109 gym1-110 gym1-111 gym1-113
+gym1-114 gym1-115 gym1-118 gym1-121 gym1-122 gym1-123 gym1-125 gym1-126 gym2-17 gym2-19 gym2-20 gym2-103 gym2-105
+gym2-109 gym2-113 gym2-118 gym2-120 gym2-123 gym2-124 neo1-83 neo1-85 neo1-86 neo1-88 neo1-93 neo1-94 neo1-96 neo1-97
+neo1-99 neo1-101 neo1-103 neo2-73 neo2-74 neo2-75 neo3-60 neo3-64 neo4-92 neo4-96 neo4-97 neo4-98 neo4-101 neo4-103
+neo4-104 neo4-105 ecard1-137 ecard1-138 ecard1-139 ecard1-140 ecard1-141 ecard1-142 ecard1-145 ecard1-146 ecard1-147
+ecard1-148 ecard1-149 ecard1-150 ecard2-120 ecard2-125 ecard2-126 ecard2-130 ecard2-131 ecard2-133 ecard2-134 ecard2-136
+ecard2-137 ecard2-141 ecard3-120 ecard3-121 ecard3-122 ecard3-123 ecard3-124 ecard3-125 ecard3-127 ecard3-128 ecard3-132
+ecard3-138 np-26 np-27 np-36'''.split()
+
+
+def _trainers():
+    import json
+    from pathlib import Path
+    root = Path(__file__).resolve().parents[3]
+    gb = {c['name'] for c in json.loads((root / 'tools/tcg/catalog.json').read_text())['cards'] if c['kind'] == 'trainer'}
+    first = {}
+    for c in json.loads((root / 'tools/tcg/regions/cards.json').read_text())['cards']:
+        if c['kind'] != 'trainer':
+            continue
+        head = first.setdefault((c['name'], c['text']), c['src'])
+        if c['name'] in gb or head in RTRAINERS:
+            TRAINERS[c['effect']] = 'C'
+
+
+_trainers()
 
 
 def table():

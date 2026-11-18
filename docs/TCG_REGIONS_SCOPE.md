@@ -5,33 +5,28 @@ plays (tools/tcg/regions/effects.py); only finished cards appear in the game.
 
 | Set | Cards | Finished |
 |---|---|---|
-| gym1 | 126 | 39 |
-| gym2 | 126 | 21 |
-| neo1 | 105 | 34 |
-| neo2 | 75 | 23 |
-| neo3 | 66 | 12 |
-| neo4 | 113 | 28 |
-| ecard1 | 159 | 86 |
-| ecard2 | 182 | 48 |
-| ecard3 | 182 | 35 |
-| basep | 53 | 10 |
-| np | 40 | 16 |
-| **all** | 1227 | 352 |
+| gym1 | 126 | 64 |
+| gym2 | 126 | 37 |
+| neo1 | 105 | 48 |
+| neo2 | 75 | 26 |
+| neo3 | 66 | 14 |
+| neo4 | 113 | 36 |
+| ecard1 | 159 | 105 |
+| ecard2 | 182 | 58 |
+| ecard3 | 182 | 45 |
+| basep | 53 | 12 |
+| np | 40 | 19 |
+| **all** | 1227 | 464 |
 
 ## Rules the engine doesn't play yet (cards needing each)
 
-- STADIUM: 33
 - BABY: 19
-- SUPPORTER: 18
 - TM: 16
-- TOOL: 13
 - SHINING: 10
 - CRYSTAL: 9
 - EX: 8
-- RSM: 3
-- GAME_CORNER: 2
 
-## Wordings to translate (859; the most cards first)
+## Wordings to translate (757; the most cards first)
 
 - 6 x BODY: Zapdos (ecard2-44): You can't attach Lightning Energy cards from your hand to Zapdos.
 - 6 x TRAINER: Darkness Cube 01 (ecard2-119): Attach this card to 1 of your Darkness Pokemon in play. That Pokemon may use this card's attack instead of its own. At the end of your turn, discard Darkness Cube 01.
@@ -46,10 +41,6 @@ plays (tools/tcg/regions/effects.py); only finished cards appear in the game.
 - 3 x attack: Ninetales (ecard2-25): Flip a coin. If heads, choose a Special Condition (Asleep, Burned, Confused, Paralyzed, or Poisoned). The Defending Pokemon is now affected by that Special Condition.
 - 3 x attack: Sudowoodo (ecard2-36): Choose 1 of the Defending Pokemon's attacks. Copy copies that attack. This attack does nothing if Sudowoodo doesn't have the Energy necessary to use that attack. (You must still do anything else required in order to u
 - 3 x BODY: Kingdra (ecard2-148): Whenever you attach a Water, Lightning, or Psychic basic Energy card from your hand to Kingdra, Kingdra's type (color) becomes the same as that Energy card type until the end of the turn.
-- 2 x TRAINER: Brock (gym1-15): Remove 1 damage counter from each of your Pokemon that has any damage counters on it.
-- 2 x TRAINER: Erika (gym1-16): You may draw up to 3 cards, then your opponent may draw up to 3 cards.
-- 2 x TRAINER: Lt. Surge (gym1-17): You can play this card only if you have at least 1 Basic Pokemon card in your hand. Put a Basic Pokemon card from your hand into play as your Active Pokemon. Put your old Active Pokemon onto your Bench. (You can't play 
-- 2 x TRAINER: Misty (gym1-18): Discard 2 of the other cards in your hand in order to play this card. If this turn's attack does damage to the Defending Pokemon (after applying Weakness and Resistance), and if the attacking Pokemon has Misty in its name, 
 - 2 x attack: Sabrina's Venomoth (gym1-34): Flip 3 coins. For each heads, remove 1 damage counter from each of your Pokemon. If a Pokemon has fewer damage counters than the number of heads, remove all of them.
 - 2 x attack: Blaine's Magmar (gym1-37): Discard the top 5 cards of your deck. (If there are fewer than 5 cards in your deck, discard all of them.) This attack does 20 damage for each Fire Energy card you discarded in this way.
 - 2 x attack: Erika's Exeggcute (gym1-43): During your opponent's next turn, whenever Erika's Exeggcute takes damage, divide that damage in half (rounded down to the nearest 10). (Any other effects still happen.)
@@ -57,19 +48,13 @@ plays (tools/tcg/regions/effects.py); only finished cards appear in the game.
 - 2 x attack: Erika's Oddish (gym1-78): If there are any damage counters on Erika's Oddish, remove 1 of them.
 - 2 x attack: Erika's Venusaur (gym2-4): Flip a coin. If heads, you may attach up to 2 Grass Energy cards from your hand to Erika's Venusaur.
 - 2 x attack: Koga's Beedrill (gym2-9): Flip a coin. If tails, this attack does nothing. Either way, you can't use this attack again as long as Koga's Beedrill stays in play (even putting Koga's Beedrill on the Bench won't let you use it again).
-- 2 x TRAINER: Blaine (gym2-17): During this turn, instead of attaching your free Energy card, you may instead attach 2 Fire Energy cards to 1 of your Pokemon with Blaine in its name. (Playing additional copies of this card this turn has no effect.)
 - 2 x TRAINER: Giovanni (gym2-18): Choose 1 of your Pokemon in play with Giovanni in its name. For the rest of your turn, you may evolve that Pokemon even if you just played or evolved it this turn or if this is your first turn. This effect also applies t
-- 2 x TRAINER: Koga (gym2-19): If an attack from a Pokemon with Koga in its name does damage to a Defending Pokemon this turn, that Pokemon is then Poisoned.
-- 2 x TRAINER: Sabrina (gym2-20): Take all Energy cards attached to 1 of your Pokemon with Sabrina in its name and attach them to another 1 of your Pokemon with Sabrina in its name.
 - 2 x attack: Sabrina's Abra (gym2-93): This attack can't be used unless Sabrina's Abra and the Defending Pokemon have the same number of Energy cards attached to them.
 - 2 x attack: Sabrina's Abra (gym2-94): Look at your opponent's hand.
 - 2 x attack: Jumpluff (neo1-7): If this attack damages the Defending Pokemon (after applying Weakness and Resistance), remove 1 damage counter from Jumpluff, if it has any.
 - 2 x attack: Xatu (neo1-52): Look at the top 3 cards of either player's deck and rearrange them as you like.
 - 2 x attack: Chikorita (neo1-54): If the Defending Pokemon attacks Chikorita during your opponent's next turn, any damage done to Chikorita is reduced by 10 (before applying Weakness and Resistance). (Benching or evolving either Pokemon ends this effect
 - 2 x attack: Cyndaquil (neo1-56): Flip a coin. If heads, the Defending Pokemon can't attack Cyndaquil during your opponent's next turn. (Benching or evolving either Pokemon ends this effect.)
-- 2 x TRAINER: Gold Berry (neo1-93): Attach Gold Berry to 1 of your Pokemon that doesn't have a Pokemon Tool attached to it. At any time between turns, if there are at least 4 damage counters on the Pokemon Gold Berry is attached to, you may remove 4 of t
-- 2 x TRAINER: Super Scoop Up (neo1-98): Flip a coin. If heads, return 1 of your Pokemon and all cards attached to it to your hand.
-- 2 x TRAINER: Moo-Moo Milk (neo1-101): Choose 1 of your Pokemon. Flip 2 coins. Remove 2 damage counters times the number of heads from that Pokemon. If the Pokemon has fewer damage counters than that, remove all of them.
 - 2 x POWER: Forretress (neo2-2): During your opponent's turn, whenever 1 of your opponent's Benched Pokemon becomes his or her Active Pokemon, Forretress does 10 damage to it. (Don't apply Weakness and Resistance.) This power stops working if Forretres
 - 2 x attack: Magnemite (neo2-7): During your next turn, treat any tails flipped when using Magnemite's Electric Bolt attack as if they were heads. (Benching or evolving either Pokemon ends this effect.)
 - 2 x POWER: Politoed (neo2-8): Whenever Politoed's attack damages the Defending Pokemon (after applying Weakness and Resistance), if there are more than 3 Poliwags, Poliwhirls, Poliwraths, and/or Politoeds in play (including your opponent's), that atta
@@ -205,7 +190,6 @@ plays (tools/tcg/regions/effects.py); only finished cards appear in the game.
 - 1 x attack: Rocket's Scyther (gym1-13): Whenever Rocket's Scyther is attacked, your opponent flips a coin. If tails, that attack does no damage to Rocket's Scyther. (Any other effects of the attack still happen.) This effect lasts until Rocket's Scythe
 - 1 x attack: Sabrina's Gengar (gym1-14): Put a damage counter on each of your opponent's Pokemon has already has any damage counters on it.
 - 1 x attack: Sabrina's Gengar (gym1-14): Unless this attack Knocks Out the Defending Pokemon, flip 2 coins. If both of them are heads, your opponent shuffles his or her Active Pokemon and all cards attached to it into his or her deck.
-- 1 x TRAINER: The Rocket's Trap (gym1-19): Flip a coin. If heads, choose up to 3 cards at random from your opponent's hand (don't look at them). Your opponent shuffles those cards into his or her deck.
 - 1 x attack: Brock's Onix (gym1-21): If your opponent has any Benched Pokemon, choose up to 2 of them. This attack does 20 damage to each of them. (Don't apply Weakness and Resistance for Benched Pokemon.) Brock's Onix can't attack during your next turn
 - 1 x attack: Brock's Zubat (gym1-24): Draw a card. Then, switch Brock's Zubat with 1 of your Benched Pokemon. You can't use this attack if your Bench is empty.
 - 1 x attack: Erika's Clefairy (gym1-25): Search your deck for a basic Energy card. Show that card to your opponent, then put it into your hand. Shuffle your deck afterward.
@@ -249,29 +233,13 @@ plays (tools/tcg/regions/effects.py); only finished cards appear in the game.
 - 1 x TRAINER: Blaine's Quiz #1 (gym1-97): Put a Basic Pokemon or Evolution card from your hand face down in front of you and tell your opponent its name. Your opponent guesses the length of that Pokemon. Flip the card over. If your opponent guessed right
 - 1 x TRAINER: Charity (gym1-99): Attach Charity to your Active Pokemon. Unless that Pokemon gets Knocked Out, return Charity to your hand at the end of your turn. If that Pokemon attacks and does damage to the Defending Pokemon, you may reduce that damag
 - 1 x TRAINER: No Removal Gym (gym1-103): This card stays in play when you play it. Discard this card if another Stadium card comes into play. A player must discard 2 cards from his or her hand in order to play an Energy Removal or Super Energy Removal ca
-- 1 x TRAINER: The Rocket's Training Gym (gym1-104): This card stays in play when you play it. Discard this card if another Stadium card comes into play. Each player pays Colorless more to retreat his or her Active Pokemon.
-- 1 x TRAINER: Blaine's Last Resort (gym1-105): You can't play this card if you have any cards in your hand other than Blaine's Last Resort. Show your hand to your opponent, then draw 5 cards.
-- 1 x TRAINER: Brock's Training Method (gym1-106): Search your deck for a Basic Pokemon or Evolution card with Brock in its name. Show that card to your opponent, then put it into your hand. Shuffle your deck afterward.
 - 1 x TRAINER: Celadon City Gym (gym1-107): This card stays in play when you play it. Discard this card if another Stadium card comes into play. During each player's turn, that player may choose to discard an Energy card attached to 1 of his or her Pokemo
-- 1 x TRAINER: Cerulean City Gym (gym1-108): This card stays in play when you play it. Discard this card if another Stadium card comes into play. Each player pays Colorless less to retreat his or her Pokemon if it has Misty in its name.
-- 1 x TRAINER: Erika's Maids (gym1-109): Trade 2 of the other cards in your hand for up to 2 Basic Pokemon and/or Evolution cards with Erika in their names from your deck. Show those cards to your opponent, then put them into your hand. Shuffle your deck 
-- 1 x TRAINER: Erika's Perfume (gym1-110): Look at your opponent's hand. If he or she has any Basic Pokemon cards there, you may put any number of them onto your opponent's Bench (as long as there's room).
-- 1 x TRAINER: Good Manners (gym1-111): In order to play this card, you can't have any Basic Pokemon cards in your hand. Show your hand to your opponent, then search your deck for a Basic Pokemon card, show it to your opponent, and put it into your hand. 
 - 1 x TRAINER: Lt. Surge's Treaty (gym1-112): Your opponent chooses 1 of the following: everyone chooses 1 of his or her own Prizes and put it into his or her hand, or you draw a card.
-- 1 x TRAINER: Minion of Team Rocket (gym1-113): Flip 2 coins. If both of them are heads, choose 1 of your opponent's Benched Pokemon and return it and all cards attached to it to his or her hand. If 1 or both of them are tails, your turn ends immediately
-- 1 x TRAINER: Misty's Wrath (gym1-114): Look at the top 7 cards of your deck. Choose 2 of those cards and put them into your hand. Discard the rest.
-- 1 x TRAINER: Pewter City Gym (gym1-115): This card stays in play when you play it. Discard this card if another Stadium card comes into play. Don't apply Resistance to any attacks made by Pokemon with Brock in their names.
 - 1 x TRAINER: Recall (gym1-116): For your attack this turn, your Active Pokemon can use any attack from its Basic Pokemon card or any Evolution card attached to it. (You still have to pay for that attack's Energy cost.)
 - 1 x TRAINER: Sabrina's ESP (gym1-117): Attach Sabrina's ESP to 1 of your Pokemon with Sabrina in its name. At the end of your turn, discard Sabrina's ESP. If that Pokemon uses and attack that involves flipping coins, Sabrina's ESP lets you re-flip those
-- 1 x TRAINER: Secret Mission (gym1-118): Look at your opponent's hand. Then, you may discard as many other cards as you want from your hand and draw that many cards.
 - 1 x TRAINER: Tickling Machine (gym1-119): Flip a coin. If heads, your opponent sets aside all the cards in his or her hand face down. Nobody may look at those cards. At the end of your opponent's next turn, your opponent puts those cards back into his o
 - 1 x TRAINER: Vermilion City Gym (gym1-120): This card stays in play when you play it. Discard this card if another Stadium card comes into play. Whenever a player attacks with a Pokemon with Lt. Surge in its name, he or she may flip a coin. If heads, an
-- 1 x TRAINER: Blaine's Gamble (gym1-121): Discard any number of other cards from your hand, then flip a coin. If heads, draw twice that many cards.
-- 1 x TRAINER: Energy Flow (gym1-122): For each of your Pokemon, you may return any number of Energy cards attached to it to your hand.
-- 1 x TRAINER: Misty's Duel (gym1-123): You and your opponent play a game of Rock-Paper-Scissors. The winner shuffles his or her hand into his or her deck and draws a new hand of 5 cards. (If you don't know how to play Rock-Paper-Scissors, flip a coin to 
 - 1 x TRAINER: Narrow Gym (gym1-124): This card stays in play when you play it. Discard this card if another Stadium card comes into play. No player may have more than 4 Pokemon on his or her Bench. When this card is played, if a player has 5 Pokemon on h
-- 1 x TRAINER: Sabrina's Gaze (gym1-125): Each player shuffles his or her hand into his or her deck and draws a new hand of the same number of cards.
-- 1 x TRAINER: Trash Exchange (gym1-126): Count the number of cards in your discard pile and shuffle them into your deck. Then discard that many cards from the top of your deck.
 - 1 x attack: Blaine's Arcanine (gym2-1): Discard 3 Fire Energy cards attached to Blaine's Arcanine in order to use this attack.
 - 1 x attack: Blaine's Charizard (gym2-2): Discard all Fire Energy cards attached to Blaine's Charizard. If all Energy cards attached to Blaine's Charizard provide 2 Fire Energy, discard all of them. This attack does 20 damage plus 20 more damage for eac
 - 1 x attack: Blaine's Charizard (gym2-2): Flip a coin. If heads, choose 1 of your opponent's Pokemon. This attack does 40 damage to that Pokemon. Don't apply Weakness and Resistance for this attack. (Any other effects that would happen after applying We
@@ -352,25 +320,15 @@ plays (tools/tcg/regions/effects.py); only finished cards appear in the game.
 - 1 x attack: Sabrina's Psyduck (gym2-99): Flip a coin. If heads, the Defending Pokemon is now Confused. If tails, this attack does no damage and Sabrina's Psyduck is now Confused.
 - 1 x TRAINER: Brock's Protection (gym2-101): Attach Brock's Protection to 1 of your Pokemon with Brock in its name. Energy cards attached to that Pokemon can't be removed by your opponent's attacks or Trainer cards. (This doesn't stop the rest of the att
 - 1 x TRAINER: Chaos Gym (gym2-102): This card stays in play after being played. Discard this card if another Stadium card comes into play. Whenever a player plays a Trainer card other than a Stadium card, he or she flips a coin. If heads, that player pla
-- 1 x TRAINER: Erika's Kindness (gym2-103): Remove 2 damage counters from each Pokemon (yours and your opponent's) with any damage counters on it. If a Pokemon has just 1 damage counter, remove it.
-- 1 x TRAINER: Giovanni's Last Resort (gym2-105): Remove all damage counters from 1 of your Pokemon with Giovanni in its name. Then discard your hand.
 - 1 x TRAINER: Lt. Surge's Secret Plan (gym2-107): Put 1 card from your hand face down onto your Bench. (You can't play this card if your Bench is full.) Treat that card as a Basic Pokemon as long as it's face down. Flip the card if either player needs to
 - 1 x TRAINER: Misty's Wish (gym2-108): Look at 1 of your Prize cards. Then, ask your opponent if you may switch that card with 1 of the cards in your hand. If your opponent accepts and if you have any other cards in your hand, switch those cards. If your
-- 1 x TRAINER: Resistance Gym (gym2-109): This card stays in play after being played. Discard this card if another Stadium card comes into play. Each Pokemon's Resistance is reduced by 20. (If a Pokemon's Resistance is -30, it becomes -10.)
 - 1 x TRAINER: Blaine's Quiz #2 (gym2-111): Put a card from your hand face down in front of you. Your opponent guesses whether it is an Energy card, a Trainer card, or a Pokemon (Basic or Evolution) card. Flip the card over. If your opponent guessed right
 - 1 x TRAINER: Blaine's Quiz #3 (gym2-112): Put a Basic or Evolution card from your hand face down in front of you and tell your opponent the name of an attack of that card. Your opponent guesses the name of that card. Flip the card over. If your opponent
-- 1 x TRAINER: Cinnabar City Gym (gym2-113): This card stays in play after being played. Discard this card if another Stadium card comes into play. Ignore Weakness when a Water Pokemon does damage to a Pokemon with Blaine in its name.
 - 1 x TRAINER: Fuchsia City Gym (gym2-114): This card stays in play after being played. Discard this card if another Stadium card comes into play. Once during each player's turn (before attacking), that player may flip a coin. If heads, that player may sh
 - 1 x TRAINER: Koga's Ninja Trick (gym2-115): Attach Koga's Ninja Trick to your Active Pokemon with Koga in its name. If this Pokemon goes to your Bench, discard this card. When your opponent attacks, you may switch this Pokemon with 1 of your Benched Pok
-- 1 x TRAINER: Master Ball (gym2-116): Look at 7 cards from the top of your deck. You may choose a Basic Pokemon or Evolution card from those cards, show it to your opponent, then put it into your hand. Shuffle the rest into your deck.
-- 1 x TRAINER: Max Revive (gym2-117): Discard 2 Energy cards from your hand in order to put 1 Basic Pokemon from your discard pile onto your Bench. (You can't play Max Revive if your Bench is full.)
-- 1 x TRAINER: Misty's Tears (gym2-118): Discard 1 of the other cards in your hand in order to search your deck for up to 2 Water Energy cards. Show those cards to your opponent, then put them into your hand. Shuffle your deck afterward.
 - 1 x TRAINER: Rocket's Minefield Gym (gym2-119): This card stays in play after being played. Discard this card if another Stadium card comes into play. Whenever a player puts a Basic Pokemon onto his or her Bench from his or her hand, he or she flips a c
-- 1 x TRAINER: Rocket's Secret Experiment (gym2-120): Flip a coin. If heads, search your deck for any card and put it into your hand. Shuffle your deck afterward. If tails, you can't play Trainer cards until the end of your next turn.
 - 1 x TRAINER: Sabrina's Psychic Control (gym2-121): Flip a coin. If heads, choose a Trainer card in your opponent's discard pile that isn't put in play (like PlusPower or Mysterious Fossil). You may use that card as if it were in your hand, if you do eve
 - 1 x TRAINER: Saffron City Gym (gym2-122): This card stays in play after being played. Discard this card if another Stadium card comes into play. As often as each player like during his or her turn (before attacking), that player may return 1 basic Energ
-- 1 x TRAINER: Viridian City Gym (gym2-123): This card stays in play after being played. Discard this card if another Stadium card comes into play. Whenever a Pokemon with Giovanni in its name evolves, its owner removes 2 damage counters from that Pokemon
-- 1 x TRAINER: Fervor (gym2-124): Show the top 3 cards of your deck to all players. Put any Fire Energy cards there into your hand and discard the rest.
 - 1 x TRAINER: Transparent Walls (gym2-125): Until the end of your opponent's next turn, prevent all damage from attacks done to your Benched Pokemon. (Any other effects of attacks still happen.)
 - 1 x TRAINER: Warp Point (gym2-126): If your opponent has any Benched Pokemon, he or she chooses 1 of them and switches it with his or her Active Pokemon, then, if you have any Benched Pokemon, you switch 1 of them with your Active Pokemon.
 - 1 x attack: Bellossom (neo1-3): Flip a coin. If heads, remove all damage counters from 1 of your Pokemon.
@@ -424,23 +382,13 @@ plays (tools/tcg/regions/effects.py); only finished cards appear in the game.
 - 1 x attack: Mareep (neo1-65): For each Mareep in play, you may search your deck for a Lightning Energy card and attach it to Mareep. Shuffle your deck afterward.
 - 1 x attack: Snubbull (neo1-74): Flip a coin. If heads and if your opponent has any Benched Pokemon, he of she chooses 1 of them and switches it with the Defending Pokemon. (Do the damage before switching the Pokemon.)
 - 1 x attack: Spinarak (neo1-75): Flip a coin. If heads, until the end of your opponent's next turn, the Defending Pokemon can't attack or retreat.
-- 1 x TRAINER: Arcade Game (neo1-83): Shuffle your deck, then reveal the top 3 cards of it. If at least 2 of those cards share the same name, put all the ones with that name into your hand and shuffle the rest into your deck. If none of them do, shuffle a
 - 1 x TRAINER: Ecogym (neo1-84): This card stays in play when you play it. Discard this card if another Stadium card comes into play. Whenever an attack, Pokemon Power, or Trainer card discards another player's non-Colorless Energy card from a Pokemon, re
-- 1 x TRAINER: Energy Charge (neo1-85): Flip a coin. If heads, shuffle up to 2 Energy cards from your discard pile into your deck.
-- 1 x TRAINER: Focus Band (neo1-86): Attach Focus Band to 1 of your Pokemon that doesn't have a Pokemon Tool attached to it. If the Pokemon Focus Band is attached to would be Knocked Out by your opponent's attack, flip a coin. If heads, that Pokemon is no
 - 1 x TRAINER: Mary (neo1-87): Draw 2 cards. Then, shuffle 2 cards from your hand into your deck.
-- 1 x TRAINER: PokeGear (neo1-88): Look at the top 7 cards of your deck. If any of them are Trainer cards, you may show 1 of them to your opponent and put it into your hand. Shuffle your deck afterward. You can't play any more Trainer cards this turn.
-- 1 x TRAINER: Super Energy Retrieval (neo1-89): Trade 2 of the other cards in your hand for 4 basic Energy cards from your discard pile. If you have fewer than 4 basic Energy cards there, take all of them.
 - 1 x TRAINER: Time Capsule (neo1-90): Your opponent may choose 5 Basic Pokemon, Evolution, and/or basic Energy cards in his or her discard pile. (If your opponent doesn't have that many, he or she chooses all or none of them.) If your opponent chooses an
-- 1 x TRAINER: Bill's Teleporter (neo1-91): Flip a coin. If heads, draw 4 cards.
 - 1 x TRAINER: Card-Flip Game (neo1-92): Choose 1 of your opponent's face-down Prizes. Guess whether it is an Energy card, a Trainer card, or a Pokemon (Basic or Evolution) card. Flip the card face up (and leave it face up). If you guessed right, draw 2 c
-- 1 x TRAINER: Miracle Berry (neo1-94): Attach Miracle Berry to 1 of your Pokemon that doesn't have a Pokemon Tool attached to it. At any time between turns, if the Pokemon Miracle Berry is attached to is Asleep, Confused, Paralyzed, or Poisoned, you may 
 - 1 x TRAINER: New Pokedex (neo1-95): Shuffle your deck. Then, look at up to 5 cards from the top of your deck and rearrange them as you like.
-- 1 x TRAINER: Professor Elm (neo1-96): Shuffle your hand into your deck. Then, draw 7 cards. You can't play any more Trainer cards this turn.
-- 1 x TRAINER: Sprout Tower (neo1-97): This card stays in play when you play it. Discard this card if another Stadium card comes into play. All damage done by Colorless Pokemon's attacks is reduced by 30 (after applying Weakness and Resistance).
 - 1 x TRAINER: Double Gust (neo1-100): If you have any Benched Pokemon, your opponent chooses 1 of them and switches it with your Active Pokemon. Then, if your opponent has any Benched Pokemon, choose 1 of them and switch it with his or her Active Pokemon
 - 1 x TRAINER: Pokemon March (neo1-102): Your opponent may search his or her deck for 1 Basic Pokemon card and put it onto his or her Bench. Then, you may search your deck for 1 Basic Pokemon card and put it onto your Bench. Then, each player shuffles his
-- 1 x TRAINER: Super Rod (neo1-103): Flip a coin. If heads, put an Evolution card from your discard pile, if any, into your hand. If tails, put a Basic Pokemon card from your discard pile, if any, into your hand.
 - 1 x attack: Beedrill (neo2-18): Flip a coin. If heads, the Defending Pokemon is now Poisoned. Your opponent now puts 3 damage counters on it instead of 1 after each player's turn (even if it was already Poisoned).
 - 1 x attack: Butterfree (neo2-19): Flip a coin. If heads, the Defending Pokemon is now either Asleep, Confused, Paralyzed, or Poisoned (your choice).
 - 1 x attack: Butterfree (neo2-19): Does 10 damage times the number of Energy attached to the Defending Pokemon. After doing damage, remove a number of damage counters from Butterfree equal to the amount of damage done to the Defending Pokemon (after app
@@ -473,9 +421,6 @@ plays (tools/tcg/regions/effects.py); only finished cards appear in the game.
 - 1 x attack: Weedle (neo2-70): Flip a coin. If heads, the Defending Pokemon is now Poisoned. If tails, this attack does nothing (not even damage).
 - 1 x attack: Wooper (neo2-71): If an attack would do damage to Wooper during your opponent's next turn, your opponent flips a coin. If tails, prevent all damage to Wooper from that attack. (Any other effects of that attack happen.)
 - 1 x TRAINER: Fossil Egg (neo2-72): Flip a coin. If heads, search your deck for a card that evolves from Mysterious Fossil and put it onto your Bench or put a card that evolves from Mysterious Fossil from your hand onto your Bench. Either way, treat the 
-- 1 x TRAINER: Hyper Devolution Spray (neo2-73): Choose 1 of your evolved Pokemon. Take the highest Stage Evolution card from that Pokemon and put it into your hand. (You can't evolve a Pokemon the turn you devolve it.)
-- 1 x TRAINER: Ruin Wall (neo2-74): Search your deck for a card with Unown in its name and put it onto your Bench. Shuffle your deck afterward. (You can't play this card if your Bench is full.)
-- 1 x TRAINER: Energy Ark (neo2-75): Flip 2 coins. For each heads, search your deck for a Basic Energy card. Show that card to your opponent, then put it into your hand. Shuffle your deck afterward.
 - 1 x attack: Ampharos (neo3-1): Flip 3 coins. For each heads, you may search your deck for a Lightning Energy card and attach it to 1 of your Lightning Pokemon. Shuffle your deck afterward.
 - 1 x POWER: Blissey (neo3-2): When you play Blissey from your hand, you may flip a coin. If heads, remove 8 damage counters from Blissey. If tails, remove 4 damage counters from Blissey. Either way, if Blissey has fewer damage counters than that, remov
 - 1 x attack: Celebi (neo3-3): Flip 3 coins. For each heads, put 1 damage counter on the Defending Pokemon.
@@ -531,11 +476,9 @@ plays (tools/tcg/regions/effects.py); only finished cards appear in the game.
 - 1 x attack: Smoochum (neo3-54): Flip a coin. If heads, choose a Special Energy card attached to 1 of your opponent's Pokemon. Your opponent shuffles that card into his or her deck.
 - 1 x attack: Snubbull (neo3-55): Flip a coin. If heads, this attack does 10 damage plus 10 damage times the number of damage counters on Snubbull. If tails, this attack does 10 damage.
 - 1 x POWER: Unown [K] (neo3-58): Your opponent's attacks, Pokemon Powers, and Trainer cards can't discard Energy cards from your Pokemon with Unown in their names. (Any other effects still happen.)
-- 1 x TRAINER: Balloon Berry (neo3-60): Attach Balloon Berry to 1 of your Pokemon that doesn't have a Pokemon Tool attached to it. When the Pokemon Balloon Berry is attached to retreats, discard Balloon Berry instead of discarding Energy cards.
 - 1 x TRAINER: Healing Field (neo3-61): This card stays in play when you play it. Discard this card if another Stadium card comes into play. Once during each player's turn, he or she may flip a coin. If heads, that player removes 2 damage counters from hi
 - 1 x TRAINER: Pokemon Breeder Fields (neo3-62): Flip a coin for 1 or 2 of your non-Baby Pokemon that can evolve. For each heads, search your deck for a later-Stage card that matches that Pokemon. Then put that card into your hand. Shuffle your deck after
 - 1 x TRAINER: Rocket's Hideout (neo3-63): This card stays in play when you play it. Discard this card if another Stadium card comes into play. Each Pokemon in play with Dark in its name (even your opponent's) gets +20 HP.
-- 1 x TRAINER: Old Rod (neo3-64): Flip 2 coins. If both are heads, put a Baby Pokemon, Basic Pokemon, or Evolution card from your discard pile into your hand. If both are tails, put a Trainer card from your discard pile into your hand.
 - 1 x attack: Shining Gyarados (neo3-65): Flip a coin. If heads, this attack does 30 damage plus 10 more damage for each damage counter on Shining Gyarados. If tails, this attack does nothing.
 - 1 x attack: Shining Gyarados (neo3-65): Discard 2 Fire Energy cards attached to Shining Gyarados or this attack does nothing. This attack does 10 damage to each of your opponent's Benched Pokemon. (Don't apply Weakness and Resistance for Benched Pokemo
 - 1 x attack: Shining Magikarp (neo3-66): Your opponent may draw 2 cards. Either way, you may draw 2 cards.
@@ -624,19 +567,11 @@ plays (tools/tcg/regions/effects.py); only finished cards appear in the game.
 - 1 x POWER: Unown [S] (neo4-87): Once during your turn (before your attack), you may look at 1 of your Prize cards. Return that Prize card face down. This power can be used even if Unown [S] is Asleep, Confused, or Paralyzed.
 - 1 x POWER: Unown [T] (neo4-88): Once during your turn (before your attack), you may flip a coin. If heads, look at your opponent's hand and show your hand to your opponent. This power can be used even if Unown [T] is Asleep, Confused, or Paralyzed.
 - 1 x POWER: Unown [V] (neo4-89): When you play Unown [V] from your hand, you may flip a coin. If heads, return 1 of your Pokemon with Unown in its name (other than Unown [V]) to your hand. (Discard all cards attached to that card.)
-- 1 x TRAINER: Broken Ground Gym (neo4-92): This card stays in play when you play it. Discard this card if another Stadium card comes into play. Each player pays Colorless more to retreat a Baby Pokemon or Basic Pokemon.
 - 1 x TRAINER: EXP.ALL (neo4-93): Attach EXP.ALL to 1 of your Pokemon that doesn't have a Pokemon Tool attached to it. During your opponent's turn, if your Active Pokemon would be Knocked Out by your opponent's attack, you may take 1 of the basic Energy c
 - 1 x TRAINER: Impostor Professor Oak's Invention (neo4-94): Look at your opponent's Prize cards. You may have your opponent shuffle them into his or her deck. If you do, your opponent takes that many cards from the top of his or her deck and sets them as
 - 1 x TRAINER: Radio Tower (neo4-95): This card stays in play when you play it. Discard this card if another Stadium card comes into play. Once during each player's turn (before attacking), that player may look at the top 2 cards of his or her deck and pu
-- 1 x TRAINER: Thought Wave Machine (neo4-96): Flip a coin until you get tails. For each heads, return an Energy card attached to your opponent's Active Pokemon to your opponent's hand. If the Pokemon has fewer attached Energy cards than that, return all 
-- 1 x TRAINER: Counterattack Claws (neo4-97): Attach Counterattack Claws to 1 of your Pokemon that doesn't have a Pokemon Tool attached to it. During your opponent's turn, if the Pokemon Counterattack Claws is attached to is your Active Pokemon and an opp
-- 1 x TRAINER: Energy Amplifier (neo4-98): Choose an Energy card in your hand, show it to your opponent, and shuffle it into your deck. Then flip a coin. If heads, search your deck for up to 3 basic Energy cards. Show them to your opponent, and put them i
 - 1 x TRAINER: Energy Stadium (neo4-99): This card stays in play when you play it. Discard this card if another Stadium card comes into play. Once during each player's turn (before attacking), that player may flip a coin. If heads, that player puts a basi
-- 1 x TRAINER: Magnifier (neo4-101): Attach Magnifier to 1 of your Pokemon. At the end of your turn, discard Magnifier. If the Pokemon Magnifier is attached to attacks, don't apply Resistance for that attack.
 - 1 x TRAINER: Pokemon Personality Test (neo4-102): Put an Evolution card from your hand face down in front of you. Your opponent guesses whether it is a Pokemon card with Light in its name, a Pokemon card with Dark in its name, or neither one. Flip the c
-- 1 x TRAINER: Team Rocket's Evil Deeds (neo4-103): Look at your opponent's hand and choose a card there. Your opponent shuffles that card into his or her deck. Then, your opponent may draw up to 2 cards.
-- 1 x TRAINER: Heal Powder (neo4-104): Flip a coin. If heads, your Active Pokemon is no longer Asleep, Confused, Paralyzed, or Poisoned and remove 2 damage counters from it. If your Active Pokemon has fewer damage counters than that, remove all of them.
-- 1 x TRAINER: Mail from Bill (neo4-105): You can't play this card if you have 5 or more cards in your hand (including this one). Draw cards until you have exactly 4 cards in your hand.
 - 1 x attack: Shining Celebi (neo4-106): Remove a number of damage counters from 1 of your Benched Pokemon equal to the number of Water Energy cards attached to Shining Celebi. If the Pokemon has fewer damage counters than that, remove all of them.
 - 1 x attack: Shining Celebi (neo4-106): Flip a number of coins equal to the number of Energy attached to the Defending Pokemon. If you get 1 or more heads, the Defending Pokemon is now Asleep, Confused, or Poisoned (your choice).
 - 1 x attack: Shining Charizard (neo4-107): Discard 1 Fire Energy card and 1 Lightning Energy card attached to Shining Charizard or this attack does nothing. Flip a coin. If tails, Shining Charizard does 30 damage to itself.
@@ -657,24 +592,7 @@ plays (tools/tcg/regions/effects.py); only finished cards appear in the game.
 - 1 x attack: Kadabra (ecard1-84): Attach 2 basic Energy cards from your discard pile to Kadabra (1 if you have only 1).
 - 1 x attack: Magmar (ecard1-86): Flip a coin. If heads this attack does 30 damage plus 10 more damage. If tails, Magmar does 10 damage to itself.
 - 1 x attack: Meowth (ecard1-121): Flip a coin. If heads, draw a card.
-- 1 x TRAINER: Bill's Maintenance (ecard1-137): You can play only one Supporter card each turn. When you play this card, put it next to your Active Pokemon. When your turn ends, discard this card. If you have any cards in your hand, shuffle 1 of them into
-- 1 x TRAINER: Copycat (ecard1-138): You can play only one Supporter card each turn. When you play this card, put it next to your Active Pokemon. When your turn ends, discard this card. Shuffle your hand into your deck. Then, count the number of cards in 
-- 1 x TRAINER: Dual Ball (ecard1-139): Flip 2 coins. For each heads, search your deck for a Basic Pokemon card other than a Baby Pokemon card, show it to your opponent, and put it into your hand. Shuffle your deck afterward.
-- 1 x TRAINER: Energy Removal 2 (ecard1-140): Flip a coin. If heads, choose 1 Energy card attached to 1 of your opponent's Pokemon and discard it.
-- 1 x TRAINER: Energy Restore (ecard1-141): Flip 3 coins. For each heads, put a Basic Energy card from your discard pile into your hand. If you don't have that many basic Energy cards in your discard pile, put all of them into your hand.
-- 1 x TRAINER: Mary's Impulse (ecard1-142): You can play only one Supporter card each turn. When you play this card, put it next to your Active Pokemon. When your turn ends, discard this card. Flip a coin until you get tails. For each heads, draw 2 cards.
-- 1 x TRAINER: Master Ball (ecard1-143): Look at 7 cards from the top of your deck. You may choose a Basic Pokemon or Evolution card from those cards, show it your opponent, and put it into your hand. Shuffle the rest into your deck.
-- 1 x TRAINER: Pokemon Nurse (ecard1-145): You can play only one Supporter card each turn. When you play this card, put it next to your Active Pokemon. When your turn ends, discard this card. Remove all damage counters from 1 of your Pokemon. Then discard
-- 1 x TRAINER: Pokemon Reversal (ecard1-146): Choose 1 of your opponent's Benched Pokemon. Flip a coin. If heads, switch that Pokemon with the Defending Pokemon.
-- 1 x TRAINER: Power Charge (ecard1-147): Flip a coin. If heads, shuffle 2 Energy cards from your discard pile into your deck (1 if you have only 1).
-- 1 x TRAINER: Professor Elm's Training Method (ecard1-148): You can play only one Supporter card each turn. When you play this card, put it next to your Active Pokemon. When your turn ends, discard this card. Search your deck for an Evolution card, show 
-- 1 x TRAINER: Professor Oak's Research (ecard1-149): You can play only one Supporter card each turn. When you play this card, put it next to your Active Pokemon. When your turn ends, discard this card. Shuffle your hand into your deck, then draw 5 cards.
-- 1 x TRAINER: Strength Charm (ecard1-150): Attach Strength Charm to 1 of your Pokemon that doesn't have a Pokemon Tool attached to it. Whenever an attack from the Pokemon that Strength Charm is attached to does damage (after applying Weakness and Resista
 - 1 x TRAINER: Warp Point (ecard1-152): Your opponent switches the Defending Pokemon with 1 of his or her Benched Pokemon, if any; then you switch your Active Pokemon with 1 of your Benched Pokemon, if any.
-- 1 x TRAINER: Energy Search (ecard1-153): Search your deck for a basic Energy card, show it to your opponent, and put it into your hand. Shuffle your deck afterward.
-- 1 x TRAINER: Full Heal (ecard1-154): Remove all Special Conditions from your Active Pokemon.
-- 1 x TRAINER: Potion (ecard1-156): Remove 2 damage counters from 1 of your Pokemon (1 if that Pokemon has only 1).
-- 1 x TRAINER: Switch (ecard1-157): Switch your Active Pokemon with 1 of your Benched Pokemon.
 - 1 x attack: Elekid (ecard2-9): Flip a coin. If heads, choose an Energy card attached to the Defending Pokemon. Your opponent moves that card to 1 of his or her other Pokemon. (If your opponent has no Benched Pokemon, this attack does nothing.)
 - 1 x attack: Exeggutor (ecard2-13): Flip a number of coins equal to the amount of Energy attached to all of of your Benched Pokemon. This attack does 30 damage plus 10 more damage for each heads.
 - 1 x attack: Jynx (ecard2-18): This attack does 10 damage plus 10 more damage for each damage counter on the Defending Pokemon.
@@ -724,23 +642,13 @@ plays (tools/tcg/regions/effects.py); only finished cards appear in the game.
 - 1 x attack: Tentacool (ecard2-113): Discard 1 Water Energy card attached to Tentacool in order to use this attack. Remove all damage counters from Tentacool.
 - 1 x attack: Togepi (ecard2-114): Flip 2 coins. For each heads, search your deck for a basic Energy card. Show those cards to your opponent, and then put them into your hand. Shuffle your deck afterward.
 - 1 x TRAINER: Apricorn Forest (ecard2-118): This card stays in play when you play it. Discard this card if another Stadium card comes into play. Once during each player's turn (before attacking), if that player's Bench isn't full, that player flips a coi
-- 1 x TRAINER: Energy Switch (ecard2-120): Move a basic Energy card attached to 1 of your Pokemon to another of your Pokemon.
 - 1 x TRAINER: Fighting Cube 01 (ecard2-121): Attach this card to 1 of your Fighting Pokemon in play. That Pokemon my use this card's attack instead of its own. At the end of your turn, discard Fighting Cube 01.
 - 1 x TRAINER: Forest Guardian (ecard2-123): You can play only one Supporter card each turn. When you play this card, put it next to your Active Pokemon. When your turn ends, discard this card. Shuffle your deck. Then, look at the top 7 cards of your deck
-- 1 x TRAINER: Healing Berry (ecard2-125): Attach Healing Berry to 1 of your Pokemon that doesn't already have a Pokemon Tool card attached to it. If that Pokemon is Knocked Out, discard this card. At the end of any turn, if the Pokemon this card is attac
-- 1 x TRAINER: Juggler (ecard2-126): You can play only one Supporter card each turn. When you play this card, put it next to your Active Pokemon. When your turn ends, discard this card. Discard up to 2 basic Energy cards from your hand. If you discarded 1
 - 1 x TRAINER: Memory Berry (ecard2-128): Attach Memory Berry to 1 of your Pokemon that doesn't have a Pokemon Tool attached to it. If that Pokemon is Knocked Out, discard this card. The Pokemon this card is attached to can use any attack from its Basic P
-- 1 x TRAINER: Pokemon Fan Club (ecard2-130): You can play only one Supporter card each turn. When you play this card, put it next to your Active Pokemon. When your turn ends, discard this card. Search your deck for up to 2 Baby Pokemon and/or Basic Pokem
-- 1 x TRAINER: Pokemon Park (ecard2-131): This card stays in play when you play it. Discard this card if another Stadium card comes into play. Once during each of his or her turns, whenever a player attaches an Energy card from his or her hand to 1 of his
 - 1 x TRAINER: Psychic Cube 01 (ecard2-132): Attach this card to 1 of your Psychic Pokemon in play. That Pokemon may us this card's attack instead of its own. At the end of your turn, discard Psychic Cube 01.
-- 1 x TRAINER: Seer (ecard2-133): You can play only one Supporter card each turn. When you play this card, put it next to your Active Pokemon. When your turn ends, discard this card. Look at the top 6 cards of your deck. Take all Basic Energy cards you fi
-- 1 x TRAINER: Super Energy Removal 2 (ecard2-134): Flip 2 coins. If both are heads, discard all Energy cards attached to the Defending Pokemon. If both are tails, discard all Energy cards attached to your Active Pokemon. If 1 is heads and 1 is tails, thi
 - 1 x TRAINER: Time Shard (ecard2-135): Attach Time Shard to 1 of your Pokemon that doesn't already have a Pokemon Tool card attached to it. If that Pokemon is Knocked Out, discard this card. If the Pokemon this card is attached to is Knocked Out by damag
-- 1 x TRAINER: Town Volunteers (ecard2-136): You can play only one Supporter card each turn. When you play this card, put it next to your Active Pokemon. When your turn ends, discard this card. Take 5 Baby Pokemon, Basic Pokemon, Evolution, and/or basic E
-- 1 x TRAINER: Traveling Salesman (ecard2-137): You can play only one Supporter card each turn. When you play this card, put it next to your Active Pokemon. When your turn ends, discard this card. Search your deck for up to 2 Technical Machine and/or Poke
 - 1 x TRAINER: Undersea Ruins (ecard2-138): This card stays in play when you play it. Discard this card if another Stadium card comes into play. Once during each player's turn (before attacking), that player may flip a coin. If heads, that player chooses 
 - 1 x TRAINER: Power Plant (ecard2-139): This card stays in play when you play it. Discard this card if another Stadium card comes into play. Once during each of his or her turns, a player may discard a basic Energy card from his or her hand. If that play
-- 1 x TRAINER: Weakness Guard (ecard2-141): Attach this card to 1 of your Pokemon. Discard it at the end of your opponent's next turn. As long as this card is attached, this Pokemon has no Weakness.
 - 1 x ENERGY: Crystal Energy (ecard2-146): Crystal Energy provides 1 Energy of all types (colors) of basic Energy cards attached to the Pokemon Crystal Energy is attached to. If there are no basic Energy cards attached to the Pokemon Crystal Energy is at
 - 1 x ENERGY: Warp Energy (ecard2-147): Warp Energy provides 1 Colorless Energy. When you attach Warp Energy from your hand to your Active Pokemon, switch your Active Pokemon with 1 of your Benched Pokemon.
 - 1 x attack: Kingdra (ecard2-148): Kingdra does 10 damage to itself. (Don't apply Weakness or Resistance when Kingdra damages itself with this attack.)
@@ -797,19 +705,9 @@ plays (tools/tcg/regions/effects.py); only finished cards appear in the game.
 - 1 x attack: Staryu (ecard3-103): Remove 2 damage counters from Staryu for each Energy attached to it. If it has fewer damage counters than that, remove all of them.
 - 1 x attack: Sunflora (ecard3-105): Search your deck for a basic Energy card and attach it to 1 of your Pokemon. Shuffle your deck afterward.
 - 1 x TRAINER: Ancient Ruins (ecard3-119): This card stays in play when you play it. Discard this card if another Stadium card comes into play. Once during each player's turn (before he or she attacks), if he or she has not played a Supporter card, that p
-- 1 x TRAINER: Relic Hunter (ecard3-120): You can play only 1 Supporter card each turn. When you play this card, put it next to your Active Pokemon. When your turn ends, discard this card. Search your deck for up to 2 Supporter and/or Stadium cards, show 
-- 1 x TRAINER: Apricorn Maker (ecard3-121): You can play only 1 Supporter card each turn. When you play this card, put it next to your Active Pokemon. When your turn ends, discard this card. Search your deck for up to 2 Trainer cards with Ball in their na
-- 1 x TRAINER: Crystal Shard (ecard3-122): Attach Crystal Shard to 1 of your Pokemon that doesn't already have a Pokemon Tool attached to it. If that Pokemon is Knocked Out, discard this card. As long as this card is attached to a Pokemon, that Pokemon's 
-- 1 x TRAINER: Desert Shaman (ecard3-123): You can play only 1 Supporter card each turn. When you play this card, put it next to your Active Pokemon. When your turn ends, discard this card. Shuffle your hand into your deck and draw up to 4 cards. Your opp
-- 1 x TRAINER: Fast Ball (ecard3-124): Reveal cards from your deck until you reveal an Evolution card. Show that card to your opponent and put it into your hand. Shuffle the other revealed cards into your deck. (If you don't reveal an Evolution card, shuf
-- 1 x TRAINER: Fisherman (ecard3-125): You can play only 1 Supporter card each turn. When you play this card, put it next to your Active Pokemon. When your turn ends, discard this card. Choose 4 basic Energy cards from your discard pile (if there are fewe
 - 1 x TRAINER: Friend Ball (ecard3-126): Choose 1 of your opponent's Pokemon. Search your deck for a Baby Pokemon, Basic Pokemon, or Evolution card of the same type (color), show it to your opponent, and put it into your hand. Shuffle your deck afterward.
-- 1 x TRAINER: Hyper Potion (ecard3-127): Choose 1 of your Pokemon. Discard 1 or 2 basic Energy cards attached to that Pokemon. If you discarded 1 Energy card, remove up to 3 damage counters from that Pokemon. If you discarded 2 Energy cards, remove up to
-- 1 x TRAINER: Lure Ball (ecard3-128): Flip 3 coins. For each heads, choose an Evolution card from your discard pile, show it to your opponent, and put it into your hand.
 - 1 x TRAINER: Miracle Sphere Alpha (ecard3-129): Attach this card to 1 of your Evolved Fire, Lightning, or Fighting Pokemon in play. That Pokemon may use this card's attack instead of its own. At the end of your turn, discard Miracle Plate Alpha.
-- 1 x TRAINER: Mirage Stadium (ecard3-132): This card stays in play when you play it. Discard this card if another Stadium card comes into play. Whenever a player tries to retreat a Pokemon during his or her turn, that player flips a coin. If heads, that 
 - 1 x TRAINER: Mystery Zone (ecard3-137): This card stays in play when you play it. Discard this card if another Stadium card comes into play. Once during each player's turn (before he or she attacks), if that player has an Evolution card in his or her ha
-- 1 x TRAINER: Oracle (ecard3-138): You can play only 1 Supporter card each turn. When you play this card, put it next to your Active Pokemon. When your turn ends, discard this card. Choose 2 cards from your deck and shuffle the rest of your deck. Put the
 - 1 x TRAINER: Star Piece (ecard3-139): Attach Star Piece to 1 of your Pokemon that doesn't already have a Pokemon Tool attached to it. If that Pokemon is Knocked Out, discard this card. At any time between turns, if the Pokemon this card is attached to i
 - 1 x TRAINER: Underground Expedition (ecard3-140): You can play only 1 Supporter card each turn. When you play this card, put it next to your Active Pokemon. When your turn ends, discard this card. Look at the bottom 4 cards of your deck. Put 2 of those 
 - 1 x TRAINER: Underground Lake (ecard3-141): This card stays in play when you play it. Discard this card if another Stadium card comes into play. Once during each player's turn, that player may put an Omanyte or a Kabuto card from his or her discard pile
@@ -829,7 +727,6 @@ plays (tools/tcg/regions/effects.py); only finished cards appear in the game.
 - 1 x attack: Mewtwo (basep-12): Flip a coin. If heads, choose a basic Energy card attached to 1 of your opponent's Pokemon and attach it to another of your opponent's Pokemon of your choice.
 - 1 x POWER: Venusaur (basep-13): Once during your turn (before your attack), you may use this power. Your Active Pokemon and the Defending Pokemon are no longer Asleep, Confused, Paralyzed, or Poisoned. This power can't be used if Venusaur is Asleep, C
 - 1 x attack: Cool Porygon (basep-15): You may change Cool Porygon's Resistance to a type of your choice other than Colorless. If the Defending Pokemon has a Weakness, you may change it to a type of your choice other than Colorless. (Benching either Poke
-- 1 x TRAINER: Computer Error (basep-16): You may draw up to 5 cards, then your opponent may draw up to 5 cards. Your turn is over now (you don't get to attack).
 - 1 x attack: Dark Persian (basep-17): If your opponent has any Benched Pokemon, flip a coin. If heads, choose 1 of your opponent's Benched Pokemon and switch it with the Defending Pokemon.
 - 1 x attack: Team Rocket's Meowth (basep-18): Flip a number of coins equal to the number of Pokemon in play. This attack does 10 damage times the number of heads. Then Team Rocket's Meowth does 10 damage times the number of tails to itself.
 - 1 x attack: Psyduck (basep-20): Your opponent can't play Trainer cards during his or her next turn.
@@ -847,7 +744,6 @@ plays (tools/tcg/regions/effects.py); only finished cards appear in the game.
 - 1 x attack: Pichu (basep-35): Search your deck for a Baby Pokemon card and put it onto your Bench. Shuffle your deck afterward. (You can't use this attack if your Bench is full.)
 - 1 x POWER: Unown [J] (basep-38): Once during your turn (before your attack), if you have Unown [J], Unown [O], Unown [I], and Unown Dragon on your Bench, you may search your deck for a Basic Pokemon or Evolution card. Show that card to your opponent, 
 - 1 x attack: Misdreavus (basep-39): Put 1 damage counter on the Defending Pokemon for each damage counter on Misdreavus.
-- 1 x TRAINER: Pokemon Center (basep-40): Remove all damage counters from all of your own Pokemon with damage counters on them, then discard all Energy cards attached to those Pokemon.
 - 1 x TRAINER: Pokemon Tower (basep-42): This card stays in play when you play it. Discard this card if another Stadium card comes into play. If the effect of a Pokemon Power, attack, Energy card, or Trainer card would put a card in a discard pile into it
 - 1 x attack: Magmar (basep-44): When you use this attack, you may discard any number of Fire Energy cards attached to your Pokemon in play. This attack does 10 damage plus 10 more damage for each Fire Energy card you discarded in this way.
 - 1 x attack: Scyther (basep-45): Scyther can't use this attack during your next turn. (Benching or evolving Scyther ends this effect.)
@@ -872,8 +768,6 @@ plays (tools/tcg/regions/effects.py); only finished cards appear in the game.
 - 1 x attack: Chimecho (np-24): Your opponent switches each Defending Pokemon with his or her Benched Pokemon. If your opponent has only 1 Benched Pokemon, you choose the Defending Pokemon to switch.
 - 1 x attack: Chimecho (np-24): Remove 3 damage counters from each of your Active Pokemon. Each Defending Pokemon is now Asleep.
 - 1 x attack: Flygon (np-25): The Defending Pokemon can't retreat until the end of your opponent's next turn.
-- 1 x TRAINER: Tropical Wind (np-26): Flip a coin. If heads, remove 2 damage counters from each Active Pokemon (remove 1 damage counter if a Pokemon has only 1). If tails, each Active Pokemon is now Asleep.
-- 1 x TRAINER: Tropical Tidal Wave (np-27): Flip a coin. If heads, discard all Trainer cards your opponent has in play. If tails, discard all Trainer (excluding Supporter cards) you have in play.
 - 1 x TRAINER: Championship Arena (np-28): This card stays in play when you play it. Discard this card if another Stadium card comes into play. If another card with the same name is in play, you can't play this card. At the end of each player's turn, if t
 - 1 x BODY: Suicune (np-30): Whenever you attach a Water Energy card from your hand to Suicune, discard an Energy card attached to Suicune. (You can't attach a Water Energy card from your hand if Suicune has no Energy cards attached.)
 - 1 x attack: Moltres ex (np-31): Discard all Fire Energy attached to Moltres ex.
@@ -883,7 +777,6 @@ plays (tools/tcg/regions/effects.py); only finished cards appear in the game.
 - 1 x attack: Zapdos ex (np-33): Does 10 damage to 1 of your Benched Pokemon. (Don't apply Weakness and Resistance for Benched Pokemon.)
 - 1 x BODY: Zapdos ex (np-33): As long as you have Articuno ex and Moltres ex in play, the Retreat Cost for Zapdos ex is 0.
 - 1 x BODY: Typhlosion (np-34): As long as Typhlosion is your Active Pokemon, put 1 damage counter on each Active Pokemon (both yours and your opponent's) between turns.
-- 1 x TRAINER: Tropical Tidal Wave (np-36): Flip a coin. If heads, discard all Trainer cards your opponent has in play. If tails, discard all Trainer cards (excluding Supporter cards) you have in play.
 - 1 x attack: Kyogre ex (np-37): You may attach a basic Energy card from your hand to 1 of your Pokemon.
 - 1 x BODY: Kyogre ex (np-37): As long as your opponent has Groudon, Groudon ex, Rayquaza, or Rayquaza ex in play. Kyogre ex's attacks do 40 more damage to the Defending Pokemon (before applying Weakness and Resistance).
 - 1 x attack: Groudon ex (np-38): Flip a coin. If heads, your opponent discards the top card from his or her deck.

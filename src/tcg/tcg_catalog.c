@@ -2930,19 +2930,19 @@ const struct TcgCard gTcgCards[TCG_CARD_COUNT + 1] = {
 {.name="",.description="",.effect="NONE",.animation="ATK_ANIM_NONE",.cost={0},.damage=0,.category=TCG_DAMAGE_NORMAL},
 }
 },
-[457] = {.id=457, .name="Brock", .kind=TCG_TRAINER, .type=6, .rarity=2, .set=13, .set2=255, .dark=0, .holo=1, .flags=0, .origin=13,
+[457] = {.id=457, .name="Brock", .kind=TCG_TRAINER, .type=6, .rarity=2, .set=13, .set2=255, .dark=0, .holo=1, .flags=TCG_CF_READY, .origin=13,
 .effect="gym1-15:t",.description="Remove 1 damage counter from each of your Pokemon that has any damage counters on it."
 },
-[458] = {.id=458, .name="Erika", .kind=TCG_TRAINER, .type=6, .rarity=2, .set=13, .set2=255, .dark=0, .holo=1, .flags=0, .origin=13,
+[458] = {.id=458, .name="Erika", .kind=TCG_TRAINER, .type=6, .rarity=2, .set=13, .set2=255, .dark=0, .holo=1, .flags=TCG_CF_READY, .origin=13,
 .effect="gym1-16:t",.description="You may draw up to 3 cards, then your opponent may draw up to 3 cards."
 },
-[459] = {.id=459, .name="Lt. Surge", .kind=TCG_TRAINER, .type=6, .rarity=2, .set=13, .set2=255, .dark=0, .holo=1, .flags=0, .origin=13,
+[459] = {.id=459, .name="Lt. Surge", .kind=TCG_TRAINER, .type=6, .rarity=2, .set=13, .set2=255, .dark=0, .holo=1, .flags=TCG_CF_READY, .origin=13,
 .effect="gym1-17:t",.description="You can play this card only if you have at least 1 Basic Pokemon card in your hand. Put a Basic Pokemon card from your hand into play as your Active Pokemon. Put your old Active Pokemon onto your Bench. (You can't play this card if your Bench is full.)"
 },
-[460] = {.id=460, .name="Misty", .kind=TCG_TRAINER, .type=6, .rarity=2, .set=13, .set2=255, .dark=0, .holo=1, .flags=0, .origin=13,
+[460] = {.id=460, .name="Misty", .kind=TCG_TRAINER, .type=6, .rarity=2, .set=13, .set2=255, .dark=0, .holo=1, .flags=TCG_CF_READY, .origin=13,
 .effect="gym1-18:t",.description="Discard 2 of the other cards in your hand in order to play this card. If this turn's attack does damage to the Defending Pokemon (after applying Weakness and Resistance), and if the attacking Pokemon has Misty in its name, the attack does 20 more damage to the Defending Pokemon."
 },
-[461] = {.id=461, .name="The Rocket's Trap", .kind=TCG_TRAINER, .type=6, .rarity=2, .set=13, .set2=255, .dark=0, .holo=1, .flags=0, .origin=13,
+[461] = {.id=461, .name="The Rocket's Trap", .kind=TCG_TRAINER, .type=6, .rarity=2, .set=13, .set2=255, .dark=0, .holo=1, .flags=TCG_CF_READY, .origin=13, .canon=442,
 .effect="gym1-19:t",.description="Flip a coin. If heads, choose up to 3 cards at random from your opponent's hand (don't look at them). Your opponent shuffles those cards into his or her deck."
 },
 [462] = {.id=462, .name="Brock's Golem", .kind=TCG_POKEMON, .type=4, .rarity=2, .set=13, .set2=255, .dark=0, .holo=0, .flags=TCG_CF_OWNER|TCG_CF_READY, .origin=13,
@@ -3487,58 +3487,58 @@ const struct TcgCard gTcgCards[TCG_CARD_COUNT + 1] = {
 [539] = {.id=539, .name="Blaine's Quiz #1", .kind=TCG_TRAINER, .type=6, .rarity=2, .set=13, .set2=255, .dark=0, .holo=0, .flags=0, .origin=13,
 .effect="gym1-97:t",.description="Put a Basic Pokemon or Evolution card from your hand face down in front of you and tell your opponent its name. Your opponent guesses the length of that Pokemon. Flip the card over. If your opponent guessed right, he or she draws 2 cards. If your opponent guessed wrong, you draw 2 cards. Either way, return the card to your hand."
 },
-[540] = {.id=540, .name="Brock", .kind=TCG_TRAINER, .type=6, .rarity=2, .set=13, .set2=255, .dark=0, .holo=0, .flags=0, .origin=13,
+[540] = {.id=540, .name="Brock", .kind=TCG_TRAINER, .type=6, .rarity=2, .set=13, .set2=255, .dark=0, .holo=0, .flags=TCG_CF_READY, .origin=13, .canon=457,
 .effect="gym1-98:t",.description="Remove 1 damage counter from each of your Pokemon that has any damage counters on it."
 },
 [541] = {.id=541, .name="Charity", .kind=TCG_TRAINER, .type=6, .rarity=2, .set=13, .set2=255, .dark=0, .holo=0, .flags=0, .origin=13,
 .effect="gym1-99:t",.description="Attach Charity to your Active Pokemon. Unless that Pokemon gets Knocked Out, return Charity to your hand at the end of your turn. If that Pokemon attacks and does damage to the Defending Pokemon, you may reduce that damage by any amount (rounded to the nearest 10)."
 },
-[542] = {.id=542, .name="Erika", .kind=TCG_TRAINER, .type=6, .rarity=2, .set=13, .set2=255, .dark=0, .holo=0, .flags=0, .origin=13,
+[542] = {.id=542, .name="Erika", .kind=TCG_TRAINER, .type=6, .rarity=2, .set=13, .set2=255, .dark=0, .holo=0, .flags=TCG_CF_READY, .origin=13, .canon=458,
 .effect="gym1-100:t",.description="You may draw up to 3 cards, then your opponent may draw up to 3 cards."
 },
-[543] = {.id=543, .name="Lt. Surge", .kind=TCG_TRAINER, .type=6, .rarity=2, .set=13, .set2=255, .dark=0, .holo=0, .flags=0, .origin=13,
+[543] = {.id=543, .name="Lt. Surge", .kind=TCG_TRAINER, .type=6, .rarity=2, .set=13, .set2=255, .dark=0, .holo=0, .flags=TCG_CF_READY, .origin=13, .canon=459,
 .effect="gym1-101:t",.description="You can play this card only if you have at least 1 Basic Pokemon card in your hand. Put a Basic Pokemon card from your hand into play as your Active Pokemon. Put your old Active Pokemon onto your Bench. (You can't play this card if your Bench is full.)"
 },
-[544] = {.id=544, .name="Misty", .kind=TCG_TRAINER, .type=6, .rarity=2, .set=13, .set2=255, .dark=0, .holo=0, .flags=0, .origin=13,
+[544] = {.id=544, .name="Misty", .kind=TCG_TRAINER, .type=6, .rarity=2, .set=13, .set2=255, .dark=0, .holo=0, .flags=TCG_CF_READY, .origin=13, .canon=460,
 .effect="gym1-102:t",.description="Discard 2 of the other cards in your hand in order to play this card. If this turn's attack does damage to the Defending Pokemon (after applying Weakness and Resistance), and if the attacking Pokemon has Misty in its name, the attack does 20 more damage to the Defending Pokemon."
 },
 [545] = {.id=545, .name="No Removal Gym", .kind=TCG_TRAINER, .type=6, .rarity=2, .set=13, .set2=255, .dark=0, .holo=0, .flags=TCG_CF_STADIUM, .origin=13,
 .effect="gym1-103:t",.description="This card stays in play when you play it. Discard this card if another Stadium card comes into play. A player must discard 2 cards from his or her hand in order to play an Energy Removal or Super Energy Removal card."
 },
-[546] = {.id=546, .name="The Rocket's Training Gym", .kind=TCG_TRAINER, .type=6, .rarity=2, .set=13, .set2=255, .dark=0, .holo=0, .flags=TCG_CF_STADIUM, .origin=13,
+[546] = {.id=546, .name="The Rocket's Training Gym", .kind=TCG_TRAINER, .type=6, .rarity=2, .set=13, .set2=255, .dark=0, .holo=0, .flags=TCG_CF_STADIUM|TCG_CF_READY, .origin=13,
 .effect="gym1-104:t",.description="This card stays in play when you play it. Discard this card if another Stadium card comes into play. Each player pays Colorless more to retreat his or her Active Pokemon."
 },
-[547] = {.id=547, .name="Blaine's Last Resort", .kind=TCG_TRAINER, .type=6, .rarity=1, .set=13, .set2=255, .dark=0, .holo=0, .flags=0, .origin=13,
+[547] = {.id=547, .name="Blaine's Last Resort", .kind=TCG_TRAINER, .type=6, .rarity=1, .set=13, .set2=255, .dark=0, .holo=0, .flags=TCG_CF_READY, .origin=13,
 .effect="gym1-105:t",.description="You can't play this card if you have any cards in your hand other than Blaine's Last Resort. Show your hand to your opponent, then draw 5 cards."
 },
-[548] = {.id=548, .name="Brock's Training Method", .kind=TCG_TRAINER, .type=6, .rarity=1, .set=13, .set2=255, .dark=0, .holo=0, .flags=0, .origin=13,
+[548] = {.id=548, .name="Brock's Training Method", .kind=TCG_TRAINER, .type=6, .rarity=1, .set=13, .set2=255, .dark=0, .holo=0, .flags=TCG_CF_READY, .origin=13,
 .effect="gym1-106:t",.description="Search your deck for a Basic Pokemon or Evolution card with Brock in its name. Show that card to your opponent, then put it into your hand. Shuffle your deck afterward."
 },
 [549] = {.id=549, .name="Celadon City Gym", .kind=TCG_TRAINER, .type=6, .rarity=1, .set=13, .set2=255, .dark=0, .holo=0, .flags=TCG_CF_STADIUM, .origin=13,
 .effect="gym1-107:t",.description="This card stays in play when you play it. Discard this card if another Stadium card comes into play. During each player's turn, that player may choose to discard an Energy card attached to 1 of his or her Pokemon with Erika in its name. If that player does so, that Pokemon is no longer Asleep, Confused, Paralyzed, or Poisoned."
 },
-[550] = {.id=550, .name="Cerulean City Gym", .kind=TCG_TRAINER, .type=6, .rarity=1, .set=13, .set2=255, .dark=0, .holo=0, .flags=TCG_CF_STADIUM, .origin=13,
+[550] = {.id=550, .name="Cerulean City Gym", .kind=TCG_TRAINER, .type=6, .rarity=1, .set=13, .set2=255, .dark=0, .holo=0, .flags=TCG_CF_STADIUM|TCG_CF_READY, .origin=13,
 .effect="gym1-108:t",.description="This card stays in play when you play it. Discard this card if another Stadium card comes into play. Each player pays Colorless less to retreat his or her Pokemon if it has Misty in its name."
 },
-[551] = {.id=551, .name="Erika's Maids", .kind=TCG_TRAINER, .type=6, .rarity=1, .set=13, .set2=255, .dark=0, .holo=0, .flags=0, .origin=13,
+[551] = {.id=551, .name="Erika's Maids", .kind=TCG_TRAINER, .type=6, .rarity=1, .set=13, .set2=255, .dark=0, .holo=0, .flags=TCG_CF_READY, .origin=13,
 .effect="gym1-109:t",.description="Trade 2 of the other cards in your hand for up to 2 Basic Pokemon and/or Evolution cards with Erika in their names from your deck. Show those cards to your opponent, then put them into your hand. Shuffle your deck afterward."
 },
-[552] = {.id=552, .name="Erika's Perfume", .kind=TCG_TRAINER, .type=6, .rarity=1, .set=13, .set2=255, .dark=0, .holo=0, .flags=0, .origin=13,
+[552] = {.id=552, .name="Erika's Perfume", .kind=TCG_TRAINER, .type=6, .rarity=1, .set=13, .set2=255, .dark=0, .holo=0, .flags=TCG_CF_READY, .origin=13,
 .effect="gym1-110:t",.description="Look at your opponent's hand. If he or she has any Basic Pokemon cards there, you may put any number of them onto your opponent's Bench (as long as there's room)."
 },
-[553] = {.id=553, .name="Good Manners", .kind=TCG_TRAINER, .type=6, .rarity=1, .set=13, .set2=255, .dark=0, .holo=0, .flags=0, .origin=13,
+[553] = {.id=553, .name="Good Manners", .kind=TCG_TRAINER, .type=6, .rarity=1, .set=13, .set2=255, .dark=0, .holo=0, .flags=TCG_CF_READY, .origin=13,
 .effect="gym1-111:t",.description="In order to play this card, you can't have any Basic Pokemon cards in your hand. Show your hand to your opponent, then search your deck for a Basic Pokemon card, show it to your opponent, and put it into your hand. Shuffle your deck afterward."
 },
 [554] = {.id=554, .name="Lt. Surge's Treaty", .kind=TCG_TRAINER, .type=6, .rarity=1, .set=13, .set2=255, .dark=0, .holo=0, .flags=0, .origin=13,
 .effect="gym1-112:t",.description="Your opponent chooses 1 of the following: everyone chooses 1 of his or her own Prizes and put it into his or her hand, or you draw a card."
 },
-[555] = {.id=555, .name="Minion of Team Rocket", .kind=TCG_TRAINER, .type=6, .rarity=1, .set=13, .set2=255, .dark=0, .holo=0, .flags=0, .origin=13,
+[555] = {.id=555, .name="Minion of Team Rocket", .kind=TCG_TRAINER, .type=6, .rarity=1, .set=13, .set2=255, .dark=0, .holo=0, .flags=TCG_CF_READY, .origin=13,
 .effect="gym1-113:t",.description="Flip 2 coins. If both of them are heads, choose 1 of your opponent's Benched Pokemon and return it and all cards attached to it to his or her hand. If 1 or both of them are tails, your turn ends immediately (you can't attack this turn)."
 },
-[556] = {.id=556, .name="Misty's Wrath", .kind=TCG_TRAINER, .type=6, .rarity=1, .set=13, .set2=255, .dark=0, .holo=0, .flags=0, .origin=13,
+[556] = {.id=556, .name="Misty's Wrath", .kind=TCG_TRAINER, .type=6, .rarity=1, .set=13, .set2=255, .dark=0, .holo=0, .flags=TCG_CF_READY, .origin=13,
 .effect="gym1-114:t",.description="Look at the top 7 cards of your deck. Choose 2 of those cards and put them into your hand. Discard the rest."
 },
-[557] = {.id=557, .name="Pewter City Gym", .kind=TCG_TRAINER, .type=6, .rarity=1, .set=13, .set2=255, .dark=0, .holo=0, .flags=TCG_CF_STADIUM, .origin=13,
+[557] = {.id=557, .name="Pewter City Gym", .kind=TCG_TRAINER, .type=6, .rarity=1, .set=13, .set2=255, .dark=0, .holo=0, .flags=TCG_CF_STADIUM|TCG_CF_READY, .origin=13,
 .effect="gym1-115:t",.description="This card stays in play when you play it. Discard this card if another Stadium card comes into play. Don't apply Resistance to any attacks made by Pokemon with Brock in their names."
 },
 [558] = {.id=558, .name="Recall", .kind=TCG_TRAINER, .type=6, .rarity=1, .set=13, .set2=255, .dark=0, .holo=0, .flags=0, .origin=13,
@@ -3547,7 +3547,7 @@ const struct TcgCard gTcgCards[TCG_CARD_COUNT + 1] = {
 [559] = {.id=559, .name="Sabrina's ESP", .kind=TCG_TRAINER, .type=6, .rarity=1, .set=13, .set2=255, .dark=0, .holo=0, .flags=0, .origin=13,
 .effect="gym1-117:t",.description="Attach Sabrina's ESP to 1 of your Pokemon with Sabrina in its name. At the end of your turn, discard Sabrina's ESP. If that Pokemon uses and attack that involves flipping coins, Sabrina's ESP lets you re-flip those coins once. If you do, re-flip all the coins."
 },
-[560] = {.id=560, .name="Secret Mission", .kind=TCG_TRAINER, .type=6, .rarity=1, .set=13, .set2=255, .dark=0, .holo=0, .flags=0, .origin=13,
+[560] = {.id=560, .name="Secret Mission", .kind=TCG_TRAINER, .type=6, .rarity=1, .set=13, .set2=255, .dark=0, .holo=0, .flags=TCG_CF_READY, .origin=13,
 .effect="gym1-118:t",.description="Look at your opponent's hand. Then, you may discard as many other cards as you want from your hand and draw that many cards."
 },
 [561] = {.id=561, .name="Tickling Machine", .kind=TCG_TRAINER, .type=6, .rarity=1, .set=13, .set2=255, .dark=0, .holo=0, .flags=TCG_CF_RSM, .origin=13,
@@ -3556,22 +3556,22 @@ const struct TcgCard gTcgCards[TCG_CARD_COUNT + 1] = {
 [562] = {.id=562, .name="Vermilion City Gym", .kind=TCG_TRAINER, .type=6, .rarity=1, .set=13, .set2=255, .dark=0, .holo=0, .flags=TCG_CF_STADIUM, .origin=13,
 .effect="gym1-120:t",.description="This card stays in play when you play it. Discard this card if another Stadium card comes into play. Whenever a player attacks with a Pokemon with Lt. Surge in its name, he or she may flip a coin. If heads, and if that Pokemon's attack does damage to the Defending Pokemon (after applying Weakness and Resistance), that attack does 10 more damage to the Defending Pokemon. If tails, the attacking Pokemon does 10 damage to itself in addition to whatever its attack usually does."
 },
-[563] = {.id=563, .name="Blaine's Gamble", .kind=TCG_TRAINER, .type=6, .rarity=0, .set=13, .set2=255, .dark=0, .holo=0, .flags=0, .origin=13,
+[563] = {.id=563, .name="Blaine's Gamble", .kind=TCG_TRAINER, .type=6, .rarity=0, .set=13, .set2=255, .dark=0, .holo=0, .flags=TCG_CF_READY, .origin=13,
 .effect="gym1-121:t",.description="Discard any number of other cards from your hand, then flip a coin. If heads, draw twice that many cards."
 },
-[564] = {.id=564, .name="Energy Flow", .kind=TCG_TRAINER, .type=6, .rarity=0, .set=13, .set2=255, .dark=0, .holo=0, .flags=0, .origin=13,
+[564] = {.id=564, .name="Energy Flow", .kind=TCG_TRAINER, .type=6, .rarity=0, .set=13, .set2=255, .dark=0, .holo=0, .flags=TCG_CF_READY, .origin=13,
 .effect="gym1-122:t",.description="For each of your Pokemon, you may return any number of Energy cards attached to it to your hand."
 },
-[565] = {.id=565, .name="Misty's Duel", .kind=TCG_TRAINER, .type=6, .rarity=0, .set=13, .set2=255, .dark=0, .holo=0, .flags=0, .origin=13,
+[565] = {.id=565, .name="Misty's Duel", .kind=TCG_TRAINER, .type=6, .rarity=0, .set=13, .set2=255, .dark=0, .holo=0, .flags=TCG_CF_READY, .origin=13,
 .effect="gym1-123:t",.description="You and your opponent play a game of Rock-Paper-Scissors. The winner shuffles his or her hand into his or her deck and draws a new hand of 5 cards. (If you don't know how to play Rock-Paper-Scissors, flip a coin to decide who's the winner.)"
 },
 [566] = {.id=566, .name="Narrow Gym", .kind=TCG_TRAINER, .type=6, .rarity=0, .set=13, .set2=255, .dark=0, .holo=0, .flags=TCG_CF_STADIUM, .origin=13,
 .effect="gym1-124:t",.description="This card stays in play when you play it. Discard this card if another Stadium card comes into play. No player may have more than 4 Pokemon on his or her Bench. When this card is played, if a player has 5 Pokemon on his or her Bench, that player chooses 1 of them and returns it and all cards attached to it to his or her hand. (If both players have to return a Pokemon, your opponent returns a Pokemon first.)"
 },
-[567] = {.id=567, .name="Sabrina's Gaze", .kind=TCG_TRAINER, .type=6, .rarity=0, .set=13, .set2=255, .dark=0, .holo=0, .flags=0, .origin=13,
+[567] = {.id=567, .name="Sabrina's Gaze", .kind=TCG_TRAINER, .type=6, .rarity=0, .set=13, .set2=255, .dark=0, .holo=0, .flags=TCG_CF_READY, .origin=13,
 .effect="gym1-125:t",.description="Each player shuffles his or her hand into his or her deck and draws a new hand of the same number of cards."
 },
-[568] = {.id=568, .name="Trash Exchange", .kind=TCG_TRAINER, .type=6, .rarity=0, .set=13, .set2=255, .dark=0, .holo=0, .flags=0, .origin=13,
+[568] = {.id=568, .name="Trash Exchange", .kind=TCG_TRAINER, .type=6, .rarity=0, .set=13, .set2=255, .dark=0, .holo=0, .flags=TCG_CF_READY, .origin=13,
 .effect="gym1-126:t",.description="Count the number of cards in your discard pile and shuffle them into your deck. Then discard that many cards from the top of your deck."
 },
 [569] = {.id=569, .name="Blaine's Arcanine", .kind=TCG_POKEMON, .type=0, .rarity=2, .set=14, .set2=255, .dark=0, .holo=1, .flags=TCG_CF_OWNER, .origin=14,
@@ -3686,16 +3686,16 @@ const struct TcgCard gTcgCards[TCG_CARD_COUNT + 1] = {
 {.name="",.description="",.effect="NONE",.animation="ATK_ANIM_NONE",.cost={0},.damage=0,.category=TCG_DAMAGE_NORMAL},
 }
 },
-[585] = {.id=585, .name="Blaine", .kind=TCG_TRAINER, .type=6, .rarity=2, .set=14, .set2=255, .dark=0, .holo=1, .flags=0, .origin=14,
+[585] = {.id=585, .name="Blaine", .kind=TCG_TRAINER, .type=6, .rarity=2, .set=14, .set2=255, .dark=0, .holo=1, .flags=TCG_CF_READY, .origin=14,
 .effect="gym2-17:t",.description="During this turn, instead of attaching your free Energy card, you may instead attach 2 Fire Energy cards to 1 of your Pokemon with Blaine in its name. (Playing additional copies of this card this turn has no effect.)"
 },
 [586] = {.id=586, .name="Giovanni", .kind=TCG_TRAINER, .type=6, .rarity=2, .set=14, .set2=255, .dark=0, .holo=1, .flags=0, .origin=14,
 .effect="gym2-18:t",.description="Choose 1 of your Pokemon in play with Giovanni in its name. For the rest of your turn, you may evolve that Pokemon even if you just played or evolved it this turn or if this is your first turn. This effect also applies to the Pokemon it evolves into."
 },
-[587] = {.id=587, .name="Koga", .kind=TCG_TRAINER, .type=6, .rarity=2, .set=14, .set2=255, .dark=0, .holo=1, .flags=0, .origin=14,
+[587] = {.id=587, .name="Koga", .kind=TCG_TRAINER, .type=6, .rarity=2, .set=14, .set2=255, .dark=0, .holo=1, .flags=TCG_CF_READY, .origin=14,
 .effect="gym2-19:t",.description="If an attack from a Pokemon with Koga in its name does damage to a Defending Pokemon this turn, that Pokemon is then Poisoned."
 },
-[588] = {.id=588, .name="Sabrina", .kind=TCG_TRAINER, .type=6, .rarity=2, .set=14, .set2=255, .dark=0, .holo=1, .flags=0, .origin=14,
+[588] = {.id=588, .name="Sabrina", .kind=TCG_TRAINER, .type=6, .rarity=2, .set=14, .set2=255, .dark=0, .holo=1, .flags=TCG_CF_READY, .origin=14,
 .effect="gym2-20:t",.description="Take all Energy cards attached to 1 of your Pokemon with Sabrina in its name and attach them to another 1 of your Pokemon with Sabrina in its name."
 },
 [589] = {.id=589, .name="Blaine's Ninetales", .kind=TCG_POKEMON, .type=0, .rarity=2, .set=14, .set2=255, .dark=0, .holo=0, .flags=TCG_CF_OWNER, .origin=14,
@@ -4251,7 +4251,7 @@ const struct TcgCard gTcgCards[TCG_CARD_COUNT + 1] = {
 {.name="",.description="",.effect="NONE",.animation="ATK_ANIM_NONE",.cost={0},.damage=0,.category=TCG_DAMAGE_NORMAL},
 }
 },
-[668] = {.id=668, .name="Blaine", .kind=TCG_TRAINER, .type=6, .rarity=2, .set=14, .set2=255, .dark=0, .holo=0, .flags=0, .origin=14,
+[668] = {.id=668, .name="Blaine", .kind=TCG_TRAINER, .type=6, .rarity=2, .set=14, .set2=255, .dark=0, .holo=0, .flags=TCG_CF_READY, .origin=14, .canon=585,
 .effect="gym2-100:t",.description="During this turn, instead of attaching your free Energy card, you may instead attach 2 Fire Energy cards to 1 of your Pokemon with Blaine in its name. (Playing additional copies of this card this turn has no effect.)"
 },
 [669] = {.id=669, .name="Brock's Protection", .kind=TCG_TRAINER, .type=6, .rarity=2, .set=14, .set2=255, .dark=0, .holo=0, .flags=0, .origin=14,
@@ -4260,16 +4260,16 @@ const struct TcgCard gTcgCards[TCG_CARD_COUNT + 1] = {
 [670] = {.id=670, .name="Chaos Gym", .kind=TCG_TRAINER, .type=6, .rarity=2, .set=14, .set2=255, .dark=0, .holo=0, .flags=TCG_CF_STADIUM, .origin=14,
 .effect="gym2-102:t",.description="This card stays in play after being played. Discard this card if another Stadium card comes into play. Whenever a player plays a Trainer card other than a Stadium card, he or she flips a coin. If heads, that player plays that card normally. If tails, the player can't play that card. If the card isn't put into play, the player's opponent may use that card instead, if he or she does everything required in order to play that card (like discarding cards). Either way, the card goes to its owner's discard pile."
 },
-[671] = {.id=671, .name="Erika's Kindness", .kind=TCG_TRAINER, .type=6, .rarity=2, .set=14, .set2=255, .dark=0, .holo=0, .flags=0, .origin=14,
+[671] = {.id=671, .name="Erika's Kindness", .kind=TCG_TRAINER, .type=6, .rarity=2, .set=14, .set2=255, .dark=0, .holo=0, .flags=TCG_CF_READY, .origin=14,
 .effect="gym2-103:t",.description="Remove 2 damage counters from each Pokemon (yours and your opponent's) with any damage counters on it. If a Pokemon has just 1 damage counter, remove it."
 },
-[672] = {.id=672, .name="Giovanni", .kind=TCG_TRAINER, .type=6, .rarity=2, .set=14, .set2=255, .dark=0, .holo=0, .flags=0, .origin=14,
+[672] = {.id=672, .name="Giovanni", .kind=TCG_TRAINER, .type=6, .rarity=2, .set=14, .set2=255, .dark=0, .holo=0, .flags=0, .origin=14, .canon=586,
 .effect="gym2-104:t",.description="Choose 1 of your Pokemon in play with Giovanni in its name. For the rest of your turn, you may evolve that Pokemon even if you just played or evolved it this turn or if this is your first turn. This effect also applies to the Pokemon it evolves into."
 },
-[673] = {.id=673, .name="Giovanni's Last Resort", .kind=TCG_TRAINER, .type=6, .rarity=2, .set=14, .set2=255, .dark=0, .holo=0, .flags=0, .origin=14,
+[673] = {.id=673, .name="Giovanni's Last Resort", .kind=TCG_TRAINER, .type=6, .rarity=2, .set=14, .set2=255, .dark=0, .holo=0, .flags=TCG_CF_READY, .origin=14,
 .effect="gym2-105:t",.description="Remove all damage counters from 1 of your Pokemon with Giovanni in its name. Then discard your hand."
 },
-[674] = {.id=674, .name="Koga", .kind=TCG_TRAINER, .type=6, .rarity=2, .set=14, .set2=255, .dark=0, .holo=0, .flags=0, .origin=14,
+[674] = {.id=674, .name="Koga", .kind=TCG_TRAINER, .type=6, .rarity=2, .set=14, .set2=255, .dark=0, .holo=0, .flags=TCG_CF_READY, .origin=14, .canon=587,
 .effect="gym2-106:t",.description="If an attack from a Pokemon with Koga in its name does damage to a Defending Pokemon this turn, that Pokemon is then Poisoned."
 },
 [675] = {.id=675, .name="Lt. Surge's Secret Plan", .kind=TCG_TRAINER, .type=6, .rarity=2, .set=14, .set2=255, .dark=0, .holo=0, .flags=0, .origin=14,
@@ -4278,10 +4278,10 @@ const struct TcgCard gTcgCards[TCG_CARD_COUNT + 1] = {
 [676] = {.id=676, .name="Misty's Wish", .kind=TCG_TRAINER, .type=6, .rarity=2, .set=14, .set2=255, .dark=0, .holo=0, .flags=0, .origin=14,
 .effect="gym2-108:t",.description="Look at 1 of your Prize cards. Then, ask your opponent if you may switch that card with 1 of the cards in your hand. If your opponent accepts and if you have any other cards in your hand, switch those cards. If your opponent declines, return the Prize card face down and draw a card."
 },
-[677] = {.id=677, .name="Resistance Gym", .kind=TCG_TRAINER, .type=6, .rarity=2, .set=14, .set2=255, .dark=0, .holo=0, .flags=TCG_CF_STADIUM, .origin=14,
+[677] = {.id=677, .name="Resistance Gym", .kind=TCG_TRAINER, .type=6, .rarity=2, .set=14, .set2=255, .dark=0, .holo=0, .flags=TCG_CF_STADIUM|TCG_CF_READY, .origin=14,
 .effect="gym2-109:t",.description="This card stays in play after being played. Discard this card if another Stadium card comes into play. Each Pokemon's Resistance is reduced by 20. (If a Pokemon's Resistance is -30, it becomes -10.)"
 },
-[678] = {.id=678, .name="Sabrina", .kind=TCG_TRAINER, .type=6, .rarity=2, .set=14, .set2=255, .dark=0, .holo=0, .flags=0, .origin=14,
+[678] = {.id=678, .name="Sabrina", .kind=TCG_TRAINER, .type=6, .rarity=2, .set=14, .set2=255, .dark=0, .holo=0, .flags=TCG_CF_READY, .origin=14, .canon=588,
 .effect="gym2-110:t",.description="Take all Energy cards attached to 1 of your Pokemon with Sabrina in its name and attach them to another 1 of your Pokemon with Sabrina in its name."
 },
 [679] = {.id=679, .name="Blaine's Quiz #2", .kind=TCG_TRAINER, .type=6, .rarity=1, .set=14, .set2=255, .dark=0, .holo=0, .flags=0, .origin=14,
@@ -4290,7 +4290,7 @@ const struct TcgCard gTcgCards[TCG_CARD_COUNT + 1] = {
 [680] = {.id=680, .name="Blaine's Quiz #3", .kind=TCG_TRAINER, .type=6, .rarity=1, .set=14, .set2=255, .dark=0, .holo=0, .flags=0, .origin=14,
 .effect="gym2-112:t",.description="Put a Basic or Evolution card from your hand face down in front of you and tell your opponent the name of an attack of that card. Your opponent guesses the name of that card. Flip the card over. If your opponent guessed right, he or she draws 3 cards. If your opponent guessed wrong, you draw 3 cards. Either way, return the card to your hand."
 },
-[681] = {.id=681, .name="Cinnabar City Gym", .kind=TCG_TRAINER, .type=6, .rarity=1, .set=14, .set2=255, .dark=0, .holo=0, .flags=TCG_CF_STADIUM, .origin=14,
+[681] = {.id=681, .name="Cinnabar City Gym", .kind=TCG_TRAINER, .type=6, .rarity=1, .set=14, .set2=255, .dark=0, .holo=0, .flags=TCG_CF_STADIUM|TCG_CF_READY, .origin=14,
 .effect="gym2-113:t",.description="This card stays in play after being played. Discard this card if another Stadium card comes into play. Ignore Weakness when a Water Pokemon does damage to a Pokemon with Blaine in its name."
 },
 [682] = {.id=682, .name="Fuchsia City Gym", .kind=TCG_TRAINER, .type=6, .rarity=1, .set=14, .set2=255, .dark=0, .holo=0, .flags=TCG_CF_STADIUM, .origin=14,
@@ -4299,19 +4299,19 @@ const struct TcgCard gTcgCards[TCG_CARD_COUNT + 1] = {
 [683] = {.id=683, .name="Koga's Ninja Trick", .kind=TCG_TRAINER, .type=6, .rarity=1, .set=14, .set2=255, .dark=0, .holo=0, .flags=0, .origin=14,
 .effect="gym2-115:t",.description="Attach Koga's Ninja Trick to your Active Pokemon with Koga in its name. If this Pokemon goes to your Bench, discard this card. When your opponent attacks, you may switch this Pokemon with 1 of your Benched Pokemon (before damage or other effects of attacks)."
 },
-[684] = {.id=684, .name="Master Ball", .kind=TCG_TRAINER, .type=6, .rarity=1, .set=14, .set2=255, .dark=0, .holo=0, .flags=0, .origin=14,
+[684] = {.id=684, .name="Master Ball", .kind=TCG_TRAINER, .type=6, .rarity=1, .set=14, .set2=255, .dark=0, .holo=0, .flags=TCG_CF_READY, .origin=14, .canon=437,
 .effect="gym2-116:t",.description="Look at 7 cards from the top of your deck. You may choose a Basic Pokemon or Evolution card from those cards, show it to your opponent, then put it into your hand. Shuffle the rest into your deck."
 },
-[685] = {.id=685, .name="Max Revive", .kind=TCG_TRAINER, .type=6, .rarity=1, .set=14, .set2=255, .dark=0, .holo=0, .flags=0, .origin=14,
+[685] = {.id=685, .name="Max Revive", .kind=TCG_TRAINER, .type=6, .rarity=1, .set=14, .set2=255, .dark=0, .holo=0, .flags=TCG_CF_READY, .origin=14, .canon=424,
 .effect="gym2-117:t",.description="Discard 2 Energy cards from your hand in order to put 1 Basic Pokemon from your discard pile onto your Bench. (You can't play Max Revive if your Bench is full.)"
 },
-[686] = {.id=686, .name="Misty's Tears", .kind=TCG_TRAINER, .type=6, .rarity=1, .set=14, .set2=255, .dark=0, .holo=0, .flags=0, .origin=14,
+[686] = {.id=686, .name="Misty's Tears", .kind=TCG_TRAINER, .type=6, .rarity=1, .set=14, .set2=255, .dark=0, .holo=0, .flags=TCG_CF_READY, .origin=14,
 .effect="gym2-118:t",.description="Discard 1 of the other cards in your hand in order to search your deck for up to 2 Water Energy cards. Show those cards to your opponent, then put them into your hand. Shuffle your deck afterward."
 },
 [687] = {.id=687, .name="Rocket's Minefield Gym", .kind=TCG_TRAINER, .type=6, .rarity=1, .set=14, .set2=255, .dark=0, .holo=0, .flags=TCG_CF_STADIUM, .origin=14,
 .effect="gym2-119:t",.description="This card stays in play after being played. Discard this card if another Stadium card comes into play. Whenever a player puts a Basic Pokemon onto his or her Bench from his or her hand, he or she flips a coin. If tails, put damage counters on that Pokemon."
 },
-[688] = {.id=688, .name="Rocket's Secret Experiment", .kind=TCG_TRAINER, .type=6, .rarity=1, .set=14, .set2=255, .dark=0, .holo=0, .flags=0, .origin=14,
+[688] = {.id=688, .name="Rocket's Secret Experiment", .kind=TCG_TRAINER, .type=6, .rarity=1, .set=14, .set2=255, .dark=0, .holo=0, .flags=TCG_CF_READY, .origin=14,
 .effect="gym2-120:t",.description="Flip a coin. If heads, search your deck for any card and put it into your hand. Shuffle your deck afterward. If tails, you can't play Trainer cards until the end of your next turn."
 },
 [689] = {.id=689, .name="Sabrina's Psychic Control", .kind=TCG_TRAINER, .type=6, .rarity=1, .set=14, .set2=255, .dark=0, .holo=0, .flags=0, .origin=14,
@@ -4320,10 +4320,10 @@ const struct TcgCard gTcgCards[TCG_CARD_COUNT + 1] = {
 [690] = {.id=690, .name="Saffron City Gym", .kind=TCG_TRAINER, .type=6, .rarity=1, .set=14, .set2=255, .dark=0, .holo=0, .flags=TCG_CF_STADIUM, .origin=14,
 .effect="gym2-122:t",.description="This card stays in play after being played. Discard this card if another Stadium card comes into play. As often as each player like during his or her turn (before attacking), that player may return 1 basic Energy card attached to 1 of his or her Pokemon with Sabrina in its name to his or her hand."
 },
-[691] = {.id=691, .name="Viridian City Gym", .kind=TCG_TRAINER, .type=6, .rarity=1, .set=14, .set2=255, .dark=0, .holo=0, .flags=TCG_CF_STADIUM, .origin=14,
+[691] = {.id=691, .name="Viridian City Gym", .kind=TCG_TRAINER, .type=6, .rarity=1, .set=14, .set2=255, .dark=0, .holo=0, .flags=TCG_CF_STADIUM|TCG_CF_READY, .origin=14,
 .effect="gym2-123:t",.description="This card stays in play after being played. Discard this card if another Stadium card comes into play. Whenever a Pokemon with Giovanni in its name evolves, its owner removes 2 damage counters from that Pokemon (or 1 if it only has 1)."
 },
-[692] = {.id=692, .name="Fervor", .kind=TCG_TRAINER, .type=6, .rarity=0, .set=14, .set2=255, .dark=0, .holo=0, .flags=0, .origin=14,
+[692] = {.id=692, .name="Fervor", .kind=TCG_TRAINER, .type=6, .rarity=0, .set=14, .set2=255, .dark=0, .holo=0, .flags=TCG_CF_READY, .origin=14,
 .effect="gym2-124:t",.description="Show the top 3 cards of your deck to all players. Put any Fire Energy cards there into your hand and discard the rest."
 },
 [693] = {.id=693, .name="Transparent Walls", .kind=TCG_TRAINER, .type=6, .rarity=0, .set=14, .set2=255, .dark=0, .holo=0, .flags=0, .origin=14,
@@ -4902,67 +4902,67 @@ const struct TcgCard gTcgCards[TCG_CARD_COUNT + 1] = {
 {.name="",.description="",.effect="NONE",.animation="ATK_ANIM_NONE",.cost={0},.damage=0,.category=TCG_DAMAGE_NORMAL},
 }
 },
-[777] = {.id=777, .name="Arcade Game", .kind=TCG_TRAINER, .type=6, .rarity=2, .set=15, .set2=255, .dark=0, .holo=0, .flags=TCG_CF_GAME_CORNER, .origin=15,
+[777] = {.id=777, .name="Arcade Game", .kind=TCG_TRAINER, .type=6, .rarity=2, .set=15, .set2=255, .dark=0, .holo=0, .flags=TCG_CF_GAME_CORNER|TCG_CF_READY, .origin=15,
 .effect="neo1-83:t",.description="Shuffle your deck, then reveal the top 3 cards of it. If at least 2 of those cards share the same name, put all the ones with that name into your hand and shuffle the rest into your deck. If none of them do, shuffle all 3 into your deck."
 },
 [778] = {.id=778, .name="Ecogym", .kind=TCG_TRAINER, .type=6, .rarity=2, .set=15, .set2=255, .dark=0, .holo=0, .flags=TCG_CF_STADIUM, .origin=15,
 .effect="neo1-84:t",.description="This card stays in play when you play it. Discard this card if another Stadium card comes into play. Whenever an attack, Pokemon Power, or Trainer card discards another player's non-Colorless Energy card from a Pokemon, return that Energy card to its owner's hand. (Energy cards that are discarded when that Pokemon is Knocked Out don't count.)"
 },
-[779] = {.id=779, .name="Energy Charge", .kind=TCG_TRAINER, .type=6, .rarity=2, .set=15, .set2=255, .dark=0, .holo=0, .flags=0, .origin=15,
+[779] = {.id=779, .name="Energy Charge", .kind=TCG_TRAINER, .type=6, .rarity=2, .set=15, .set2=255, .dark=0, .holo=0, .flags=TCG_CF_READY, .origin=15,
 .effect="neo1-85:t",.description="Flip a coin. If heads, shuffle up to 2 Energy cards from your discard pile into your deck."
 },
-[780] = {.id=780, .name="Focus Band", .kind=TCG_TRAINER, .type=6, .rarity=2, .set=15, .set2=255, .dark=0, .holo=0, .flags=TCG_CF_TOOL, .origin=15,
+[780] = {.id=780, .name="Focus Band", .kind=TCG_TRAINER, .type=6, .rarity=2, .set=15, .set2=255, .dark=0, .holo=0, .flags=TCG_CF_TOOL|TCG_CF_READY, .origin=15,
 .effect="neo1-86:t",.description="Attach Focus Band to 1 of your Pokemon that doesn't have a Pokemon Tool attached to it. If the Pokemon Focus Band is attached to would be Knocked Out by your opponent's attack, flip a coin. If heads, that Pokemon is not Knocked Out and its remaining HP become 10 instead. Then, discard Focus Band."
 },
 [781] = {.id=781, .name="Mary", .kind=TCG_TRAINER, .type=6, .rarity=2, .set=15, .set2=255, .dark=0, .holo=0, .flags=0, .origin=15,
 .effect="neo1-87:t",.description="Draw 2 cards. Then, shuffle 2 cards from your hand into your deck."
 },
-[782] = {.id=782, .name="PokeGear", .kind=TCG_TRAINER, .type=6, .rarity=2, .set=15, .set2=255, .dark=0, .holo=0, .flags=0, .origin=15,
+[782] = {.id=782, .name="PokeGear", .kind=TCG_TRAINER, .type=6, .rarity=2, .set=15, .set2=255, .dark=0, .holo=0, .flags=TCG_CF_READY, .origin=15,
 .effect="neo1-88:t",.description="Look at the top 7 cards of your deck. If any of them are Trainer cards, you may show 1 of them to your opponent and put it into your hand. Shuffle your deck afterward. You can't play any more Trainer cards this turn."
 },
-[783] = {.id=783, .name="Super Energy Retrieval", .kind=TCG_TRAINER, .type=6, .rarity=2, .set=15, .set2=255, .dark=0, .holo=0, .flags=0, .origin=15,
+[783] = {.id=783, .name="Super Energy Retrieval", .kind=TCG_TRAINER, .type=6, .rarity=2, .set=15, .set2=255, .dark=0, .holo=0, .flags=TCG_CF_READY, .origin=15, .canon=206,
 .effect="neo1-89:t",.description="Trade 2 of the other cards in your hand for 4 basic Energy cards from your discard pile. If you have fewer than 4 basic Energy cards there, take all of them."
 },
 [784] = {.id=784, .name="Time Capsule", .kind=TCG_TRAINER, .type=6, .rarity=2, .set=15, .set2=255, .dark=0, .holo=0, .flags=0, .origin=15,
 .effect="neo1-90:t",.description="Your opponent may choose 5 Basic Pokemon, Evolution, and/or basic Energy cards in his or her discard pile. (If your opponent doesn't have that many, he or she chooses all or none of them.) If your opponent chooses any cards, he or she shuffles them into his or her deck. Either way, you may do the same, and you can't play any more Trainer cards this turn."
 },
-[785] = {.id=785, .name="Bill's Teleporter", .kind=TCG_TRAINER, .type=6, .rarity=1, .set=15, .set2=255, .dark=0, .holo=0, .flags=0, .origin=15,
+[785] = {.id=785, .name="Bill's Teleporter", .kind=TCG_TRAINER, .type=6, .rarity=1, .set=15, .set2=255, .dark=0, .holo=0, .flags=TCG_CF_READY, .origin=15, .canon=435,
 .effect="neo1-91:t",.description="Flip a coin. If heads, draw 4 cards."
 },
 [786] = {.id=786, .name="Card-Flip Game", .kind=TCG_TRAINER, .type=6, .rarity=1, .set=15, .set2=255, .dark=0, .holo=0, .flags=TCG_CF_GAME_CORNER, .origin=15,
 .effect="neo1-92:t",.description="Choose 1 of your opponent's face-down Prizes. Guess whether it is an Energy card, a Trainer card, or a Pokemon (Basic or Evolution) card. Flip the card face up (and leave it face up). If you guessed right, draw 2 cards."
 },
-[787] = {.id=787, .name="Gold Berry", .kind=TCG_TRAINER, .type=6, .rarity=1, .set=15, .set2=255, .dark=0, .holo=0, .flags=TCG_CF_TOOL, .origin=15,
+[787] = {.id=787, .name="Gold Berry", .kind=TCG_TRAINER, .type=6, .rarity=1, .set=15, .set2=255, .dark=0, .holo=0, .flags=TCG_CF_TOOL|TCG_CF_READY, .origin=15,
 .effect="neo1-93:t",.description="Attach Gold Berry to 1 of your Pokemon that doesn't have a Pokemon Tool attached to it. At any time between turns, if there are at least 4 damage counters on the Pokemon Gold Berry is attached to, you may remove 4 of them and discard Gold Berry. At the start of each turn, if there are at least 4 damage counters on the Pokemon Gold Berry is attached to, remove 4 of them and discard Gold Berry."
 },
-[788] = {.id=788, .name="Miracle Berry", .kind=TCG_TRAINER, .type=6, .rarity=1, .set=15, .set2=255, .dark=0, .holo=0, .flags=TCG_CF_TOOL, .origin=15,
+[788] = {.id=788, .name="Miracle Berry", .kind=TCG_TRAINER, .type=6, .rarity=1, .set=15, .set2=255, .dark=0, .holo=0, .flags=TCG_CF_TOOL|TCG_CF_READY, .origin=15,
 .effect="neo1-94:t",.description="Attach Miracle Berry to 1 of your Pokemon that doesn't have a Pokemon Tool attached to it. At any time between turns, if the Pokemon Miracle Berry is attached to is Asleep, Confused, Paralyzed, or Poisoned, you may remove all those effects from that Pokemon and discard Miracle Berry. At the start of each turn, if the Pokemon Miracle Berry is attached to is Asleep, Confused, Paralyzed, or Poisoned, remove all of those effects from that Pokemon and discard Miracle Berry."
 },
 [789] = {.id=789, .name="New Pokedex", .kind=TCG_TRAINER, .type=6, .rarity=1, .set=15, .set2=255, .dark=0, .holo=0, .flags=0, .origin=15,
 .effect="neo1-95:t",.description="Shuffle your deck. Then, look at up to 5 cards from the top of your deck and rearrange them as you like."
 },
-[790] = {.id=790, .name="Professor Elm", .kind=TCG_TRAINER, .type=6, .rarity=1, .set=15, .set2=255, .dark=0, .holo=0, .flags=0, .origin=15,
+[790] = {.id=790, .name="Professor Elm", .kind=TCG_TRAINER, .type=6, .rarity=1, .set=15, .set2=255, .dark=0, .holo=0, .flags=TCG_CF_READY, .origin=15,
 .effect="neo1-96:t",.description="Shuffle your hand into your deck. Then, draw 7 cards. You can't play any more Trainer cards this turn."
 },
-[791] = {.id=791, .name="Sprout Tower", .kind=TCG_TRAINER, .type=6, .rarity=1, .set=15, .set2=255, .dark=0, .holo=0, .flags=TCG_CF_STADIUM, .origin=15,
+[791] = {.id=791, .name="Sprout Tower", .kind=TCG_TRAINER, .type=6, .rarity=1, .set=15, .set2=255, .dark=0, .holo=0, .flags=TCG_CF_STADIUM|TCG_CF_READY, .origin=15,
 .effect="neo1-97:t",.description="This card stays in play when you play it. Discard this card if another Stadium card comes into play. All damage done by Colorless Pokemon's attacks is reduced by 30 (after applying Weakness and Resistance)."
 },
-[792] = {.id=792, .name="Super Scoop Up", .kind=TCG_TRAINER, .type=6, .rarity=1, .set=15, .set2=255, .dark=0, .holo=0, .flags=0, .origin=15,
+[792] = {.id=792, .name="Super Scoop Up", .kind=TCG_TRAINER, .type=6, .rarity=1, .set=15, .set2=255, .dark=0, .holo=0, .flags=TCG_CF_READY, .origin=15, .canon=425,
 .effect="neo1-98:t",.description="Flip a coin. If heads, return 1 of your Pokemon and all cards attached to it to your hand."
 },
-[793] = {.id=793, .name="Berry", .kind=TCG_TRAINER, .type=6, .rarity=0, .set=15, .set2=255, .dark=0, .holo=0, .flags=TCG_CF_TOOL, .origin=15,
+[793] = {.id=793, .name="Berry", .kind=TCG_TRAINER, .type=6, .rarity=0, .set=15, .set2=255, .dark=0, .holo=0, .flags=TCG_CF_TOOL|TCG_CF_READY, .origin=15,
 .effect="neo1-99:t",.description="Attach Berry to 1 of your Pokemon that doesn't have a Pokemon Tool attached to it. At any time between turns, if there are at least 2 damage counters on the Pokemon Berry is attached to, you may remove 2 of them and discard Berry. At the start of each turn, if there are at least 2 damage counters on the Pokemon Berry is attached to, remove 2 of them and discard Berry."
 },
 [794] = {.id=794, .name="Double Gust", .kind=TCG_TRAINER, .type=6, .rarity=0, .set=15, .set2=255, .dark=0, .holo=0, .flags=0, .origin=15,
 .effect="neo1-100:t",.description="If you have any Benched Pokemon, your opponent chooses 1 of them and switches it with your Active Pokemon. Then, if your opponent has any Benched Pokemon, choose 1 of them and switch it with his or her Active Pokemon."
 },
-[795] = {.id=795, .name="Moo-Moo Milk", .kind=TCG_TRAINER, .type=6, .rarity=0, .set=15, .set2=255, .dark=0, .holo=0, .flags=0, .origin=15,
+[795] = {.id=795, .name="Moo-Moo Milk", .kind=TCG_TRAINER, .type=6, .rarity=0, .set=15, .set2=255, .dark=0, .holo=0, .flags=TCG_CF_READY, .origin=15,
 .effect="neo1-101:t",.description="Choose 1 of your Pokemon. Flip 2 coins. Remove 2 damage counters times the number of heads from that Pokemon. If the Pokemon has fewer damage counters than that, remove all of them."
 },
 [796] = {.id=796, .name="Pokemon March", .kind=TCG_TRAINER, .type=6, .rarity=0, .set=15, .set2=255, .dark=0, .holo=0, .flags=0, .origin=15,
 .effect="neo1-102:t",.description="Your opponent may search his or her deck for 1 Basic Pokemon card and put it onto his or her Bench. Then, you may search your deck for 1 Basic Pokemon card and put it onto your Bench. Then, each player shuffles his or her deck. (A player can't do any of this if his or her Bench is full.)"
 },
-[797] = {.id=797, .name="Super Rod", .kind=TCG_TRAINER, .type=6, .rarity=0, .set=15, .set2=255, .dark=0, .holo=0, .flags=0, .origin=15,
+[797] = {.id=797, .name="Super Rod", .kind=TCG_TRAINER, .type=6, .rarity=0, .set=15, .set2=255, .dark=0, .holo=0, .flags=TCG_CF_READY, .origin=15,
 .effect="neo1-103:t",.description="Flip a coin. If heads, put an Evolution card from your discard pile, if any, into your hand. If tails, put a Basic Pokemon card from your discard pile, if any, into your hand."
 },
 [798] = {.id=798, .name="Darkness Energy", .kind=TCG_ENERGY, .type=7, .rarity=2, .set=15, .set2=255, .dark=0, .holo=0, .flags=TCG_CF_SPECIAL|TCG_CF_READY, .origin=15,
@@ -5471,13 +5471,13 @@ const struct TcgCard gTcgCards[TCG_CARD_COUNT + 1] = {
 [871] = {.id=871, .name="Fossil Egg", .kind=TCG_TRAINER, .type=6, .rarity=1, .set=16, .set2=255, .dark=0, .holo=0, .flags=0, .origin=16,
 .effect="neo2-72:t",.description="Flip a coin. If heads, search your deck for a card that evolves from Mysterious Fossil and put it onto your Bench or put a card that evolves from Mysterious Fossil from your hand onto your Bench. Either way, treat the new card as a Basic Pokemon. If you searched your deck, shuffle it. (You can't play this card if your Bench is full.)"
 },
-[872] = {.id=872, .name="Hyper Devolution Spray", .kind=TCG_TRAINER, .type=6, .rarity=1, .set=16, .set2=255, .dark=0, .holo=0, .flags=0, .origin=16,
+[872] = {.id=872, .name="Hyper Devolution Spray", .kind=TCG_TRAINER, .type=6, .rarity=1, .set=16, .set2=255, .dark=0, .holo=0, .flags=TCG_CF_READY, .origin=16,
 .effect="neo2-73:t",.description="Choose 1 of your evolved Pokemon. Take the highest Stage Evolution card from that Pokemon and put it into your hand. (You can't evolve a Pokemon the turn you devolve it.)"
 },
-[873] = {.id=873, .name="Ruin Wall", .kind=TCG_TRAINER, .type=6, .rarity=1, .set=16, .set2=255, .dark=0, .holo=0, .flags=0, .origin=16,
+[873] = {.id=873, .name="Ruin Wall", .kind=TCG_TRAINER, .type=6, .rarity=1, .set=16, .set2=255, .dark=0, .holo=0, .flags=TCG_CF_READY, .origin=16,
 .effect="neo2-74:t",.description="Search your deck for a card with Unown in its name and put it onto your Bench. Shuffle your deck afterward. (You can't play this card if your Bench is full.)"
 },
-[874] = {.id=874, .name="Energy Ark", .kind=TCG_TRAINER, .type=6, .rarity=0, .set=16, .set2=255, .dark=0, .holo=0, .flags=0, .origin=16,
+[874] = {.id=874, .name="Energy Ark", .kind=TCG_TRAINER, .type=6, .rarity=0, .set=16, .set2=255, .dark=0, .holo=0, .flags=TCG_CF_READY, .origin=16,
 .effect="neo2-75:t",.description="Flip 2 coins. For each heads, search your deck for a Basic Energy card. Show that card to your opponent, then put it into your hand. Shuffle your deck afterward."
 },
 [875] = {.id=875, .name="Ampharos", .kind=TCG_POKEMON, .type=2, .rarity=2, .set=17, .set2=255, .dark=0, .holo=1, .flags=0, .origin=17,
@@ -5893,7 +5893,7 @@ const struct TcgCard gTcgCards[TCG_CARD_COUNT + 1] = {
 {.name="",.description="",.effect="NONE",.animation="ATK_ANIM_NONE",.cost={0},.damage=0,.category=TCG_DAMAGE_NORMAL},
 }
 },
-[934] = {.id=934, .name="Balloon Berry", .kind=TCG_TRAINER, .type=6, .rarity=1, .set=17, .set2=255, .dark=0, .holo=0, .flags=TCG_CF_TOOL, .origin=17,
+[934] = {.id=934, .name="Balloon Berry", .kind=TCG_TRAINER, .type=6, .rarity=1, .set=17, .set2=255, .dark=0, .holo=0, .flags=TCG_CF_TOOL|TCG_CF_READY, .origin=17,
 .effect="neo3-60:t",.description="Attach Balloon Berry to 1 of your Pokemon that doesn't have a Pokemon Tool attached to it. When the Pokemon Balloon Berry is attached to retreats, discard Balloon Berry instead of discarding Energy cards."
 },
 [935] = {.id=935, .name="Healing Field", .kind=TCG_TRAINER, .type=6, .rarity=1, .set=17, .set2=255, .dark=0, .holo=0, .flags=TCG_CF_STADIUM, .origin=17,
@@ -5905,7 +5905,7 @@ const struct TcgCard gTcgCards[TCG_CARD_COUNT + 1] = {
 [937] = {.id=937, .name="Rocket's Hideout", .kind=TCG_TRAINER, .type=6, .rarity=1, .set=17, .set2=255, .dark=0, .holo=0, .flags=TCG_CF_STADIUM, .origin=17,
 .effect="neo3-63:t",.description="This card stays in play when you play it. Discard this card if another Stadium card comes into play. Each Pokemon in play with Dark in its name (even your opponent's) gets +20 HP."
 },
-[938] = {.id=938, .name="Old Rod", .kind=TCG_TRAINER, .type=6, .rarity=0, .set=17, .set2=255, .dark=0, .holo=0, .flags=0, .origin=17,
+[938] = {.id=938, .name="Old Rod", .kind=TCG_TRAINER, .type=6, .rarity=0, .set=17, .set2=255, .dark=0, .holo=0, .flags=TCG_CF_READY, .origin=17,
 .effect="neo3-64:t",.description="Flip 2 coins. If both are heads, put a Baby Pokemon, Basic Pokemon, or Evolution card from your discard pile into your hand. If both are tails, put a Trainer card from your discard pile into your hand."
 },
 [939] = {.id=939, .name="Shining Gyarados", .kind=TCG_POKEMON, .type=3, .rarity=2, .set=17, .set2=255, .dark=0, .holo=1, .flags=TCG_CF_SHINING, .origin=17,
@@ -6555,7 +6555,7 @@ const struct TcgCard gTcgCards[TCG_CARD_COUNT + 1] = {
 {.name="",.description="",.effect="NONE",.animation="ATK_ANIM_NONE",.cost={0},.damage=0,.category=TCG_DAMAGE_NORMAL},
 }
 },
-[1032] = {.id=1032, .name="Broken Ground Gym", .kind=TCG_TRAINER, .type=6, .rarity=2, .set=18, .set2=255, .dark=0, .holo=0, .flags=TCG_CF_STADIUM, .origin=18,
+[1032] = {.id=1032, .name="Broken Ground Gym", .kind=TCG_TRAINER, .type=6, .rarity=2, .set=18, .set2=255, .dark=0, .holo=0, .flags=TCG_CF_STADIUM|TCG_CF_READY, .origin=18,
 .effect="neo4-92:t",.description="This card stays in play when you play it. Discard this card if another Stadium card comes into play. Each player pays Colorless more to retreat a Baby Pokemon or Basic Pokemon."
 },
 [1033] = {.id=1033, .name="EXP.ALL", .kind=TCG_TRAINER, .type=6, .rarity=2, .set=18, .set2=255, .dark=0, .holo=0, .flags=TCG_CF_TOOL, .origin=18,
@@ -6567,13 +6567,13 @@ const struct TcgCard gTcgCards[TCG_CARD_COUNT + 1] = {
 [1035] = {.id=1035, .name="Radio Tower", .kind=TCG_TRAINER, .type=6, .rarity=2, .set=18, .set2=255, .dark=0, .holo=0, .flags=TCG_CF_STADIUM, .origin=18,
 .effect="neo4-95:t",.description="This card stays in play when you play it. Discard this card if another Stadium card comes into play. Once during each player's turn (before attacking), that player may look at the top 2 cards of his or her deck and put them back in the same order."
 },
-[1036] = {.id=1036, .name="Thought Wave Machine", .kind=TCG_TRAINER, .type=6, .rarity=2, .set=18, .set2=255, .dark=0, .holo=0, .flags=TCG_CF_RSM, .origin=18,
+[1036] = {.id=1036, .name="Thought Wave Machine", .kind=TCG_TRAINER, .type=6, .rarity=2, .set=18, .set2=255, .dark=0, .holo=0, .flags=TCG_CF_RSM|TCG_CF_READY, .origin=18,
 .effect="neo4-96:t",.description="Flip a coin until you get tails. For each heads, return an Energy card attached to your opponent's Active Pokemon to your opponent's hand. If the Pokemon has fewer attached Energy cards than that, return all of them to your opponent's hand. Your turn is over now (you don't get to attack)."
 },
-[1037] = {.id=1037, .name="Counterattack Claws", .kind=TCG_TRAINER, .type=6, .rarity=1, .set=18, .set2=255, .dark=0, .holo=0, .flags=TCG_CF_TOOL, .origin=18,
+[1037] = {.id=1037, .name="Counterattack Claws", .kind=TCG_TRAINER, .type=6, .rarity=1, .set=18, .set2=255, .dark=0, .holo=0, .flags=TCG_CF_TOOL|TCG_CF_READY, .origin=18,
 .effect="neo4-97:t",.description="Attach Counterattack Claws to 1 of your Pokemon that doesn't have a Pokemon Tool attached to it. During your opponent's turn, if the Pokemon Counterattack Claws is attached to is your Active Pokemon and an opponent's attack damages it (even if it is Knocked Out), flip a coin. If heads, put 2 damage counters on the Defending Pokemon. Then, discard Counterattack Claws."
 },
-[1038] = {.id=1038, .name="Energy Amplifier", .kind=TCG_TRAINER, .type=6, .rarity=1, .set=18, .set2=255, .dark=0, .holo=0, .flags=0, .origin=18,
+[1038] = {.id=1038, .name="Energy Amplifier", .kind=TCG_TRAINER, .type=6, .rarity=1, .set=18, .set2=255, .dark=0, .holo=0, .flags=TCG_CF_READY, .origin=18,
 .effect="neo4-98:t",.description="Choose an Energy card in your hand, show it to your opponent, and shuffle it into your deck. Then flip a coin. If heads, search your deck for up to 3 basic Energy cards. Show them to your opponent, and put them into your hand. Shuffle your deck afterward."
 },
 [1039] = {.id=1039, .name="Energy Stadium", .kind=TCG_TRAINER, .type=6, .rarity=1, .set=18, .set2=255, .dark=0, .holo=0, .flags=TCG_CF_STADIUM, .origin=18,
@@ -6582,19 +6582,19 @@ const struct TcgCard gTcgCards[TCG_CARD_COUNT + 1] = {
 [1040] = {.id=1040, .name="Lucky Stadium", .kind=TCG_TRAINER, .type=6, .rarity=1, .set=18, .set2=255, .dark=0, .holo=0, .flags=TCG_CF_STADIUM, .origin=18,
 .effect="neo4-100:t",.description="This card stays in play when you play it. Discard this card if another Stadium card comes into play. Once during each player's turn (before attacking), that player may flip a coin. If heads, that player draws a card."
 },
-[1041] = {.id=1041, .name="Magnifier", .kind=TCG_TRAINER, .type=6, .rarity=1, .set=18, .set2=255, .dark=0, .holo=0, .flags=0, .origin=18,
+[1041] = {.id=1041, .name="Magnifier", .kind=TCG_TRAINER, .type=6, .rarity=1, .set=18, .set2=255, .dark=0, .holo=0, .flags=TCG_CF_READY, .origin=18,
 .effect="neo4-101:t",.description="Attach Magnifier to 1 of your Pokemon. At the end of your turn, discard Magnifier. If the Pokemon Magnifier is attached to attacks, don't apply Resistance for that attack."
 },
 [1042] = {.id=1042, .name="Pokemon Personality Test", .kind=TCG_TRAINER, .type=6, .rarity=1, .set=18, .set2=255, .dark=0, .holo=0, .flags=0, .origin=18,
 .effect="neo4-102:t",.description="Put an Evolution card from your hand face down in front of you. Your opponent guesses whether it is a Pokemon card with Light in its name, a Pokemon card with Dark in its name, or neither one. Flip the card over. If your opponent guessed right, he or she draws 3 cards. If your opponent guessed wrong, you draw 3 cards. Either way, return the card to your hand."
 },
-[1043] = {.id=1043, .name="Team Rocket's Evil Deeds", .kind=TCG_TRAINER, .type=6, .rarity=1, .set=18, .set2=255, .dark=0, .holo=0, .flags=0, .origin=18,
+[1043] = {.id=1043, .name="Team Rocket's Evil Deeds", .kind=TCG_TRAINER, .type=6, .rarity=1, .set=18, .set2=255, .dark=0, .holo=0, .flags=TCG_CF_READY, .origin=18,
 .effect="neo4-103:t",.description="Look at your opponent's hand and choose a card there. Your opponent shuffles that card into his or her deck. Then, your opponent may draw up to 2 cards."
 },
-[1044] = {.id=1044, .name="Heal Powder", .kind=TCG_TRAINER, .type=6, .rarity=0, .set=18, .set2=255, .dark=0, .holo=0, .flags=0, .origin=18,
+[1044] = {.id=1044, .name="Heal Powder", .kind=TCG_TRAINER, .type=6, .rarity=0, .set=18, .set2=255, .dark=0, .holo=0, .flags=TCG_CF_READY, .origin=18,
 .effect="neo4-104:t",.description="Flip a coin. If heads, your Active Pokemon is no longer Asleep, Confused, Paralyzed, or Poisoned and remove 2 damage counters from it. If your Active Pokemon has fewer damage counters than that, remove all of them."
 },
-[1045] = {.id=1045, .name="Mail from Bill", .kind=TCG_TRAINER, .type=6, .rarity=0, .set=18, .set2=255, .dark=0, .holo=0, .flags=0, .origin=18,
+[1045] = {.id=1045, .name="Mail from Bill", .kind=TCG_TRAINER, .type=6, .rarity=0, .set=18, .set2=255, .dark=0, .holo=0, .flags=TCG_CF_READY, .origin=18,
 .effect="neo4-105:t",.description="You can't play this card if you have 5 or more cards in your hand (including this one). Draw cards until you have exactly 4 cards in your hand."
 },
 [1046] = {.id=1046, .name="Shining Celebi", .kind=TCG_POKEMON, .type=1, .rarity=2, .set=18, .set2=255, .dark=0, .holo=1, .flags=TCG_CF_SHINING, .origin=18,
@@ -7605,67 +7605,67 @@ const struct TcgCard gTcgCards[TCG_CARD_COUNT + 1] = {
 {.name="",.description="",.effect="NONE",.animation="ATK_ANIM_NONE",.cost={0},.damage=0,.category=TCG_DAMAGE_NORMAL},
 }
 },
-[1190] = {.id=1190, .name="Bill's Maintenance", .kind=TCG_TRAINER, .type=6, .rarity=1, .set=19, .set2=255, .dark=0, .holo=0, .flags=TCG_CF_SUPPORTER, .origin=19,
+[1190] = {.id=1190, .name="Bill's Maintenance", .kind=TCG_TRAINER, .type=6, .rarity=1, .set=19, .set2=255, .dark=0, .holo=0, .flags=TCG_CF_SUPPORTER|TCG_CF_READY, .origin=19,
 .effect="ecard1-137:t",.description="You can play only one Supporter card each turn. When you play this card, put it next to your Active Pokemon. When your turn ends, discard this card. If you have any cards in your hand, shuffle 1 of them into your deck, then draw 3 cards."
 },
-[1191] = {.id=1191, .name="Copycat", .kind=TCG_TRAINER, .type=6, .rarity=1, .set=19, .set2=255, .dark=0, .holo=0, .flags=TCG_CF_SUPPORTER, .origin=19,
+[1191] = {.id=1191, .name="Copycat", .kind=TCG_TRAINER, .type=6, .rarity=1, .set=19, .set2=255, .dark=0, .holo=0, .flags=TCG_CF_SUPPORTER|TCG_CF_READY, .origin=19,
 .effect="ecard1-138:t",.description="You can play only one Supporter card each turn. When you play this card, put it next to your Active Pokemon. When your turn ends, discard this card. Shuffle your hand into your deck. Then, count the number of cards in your opponent's hand and draw that many cards."
 },
-[1192] = {.id=1192, .name="Dual Ball", .kind=TCG_TRAINER, .type=6, .rarity=1, .set=19, .set2=255, .dark=0, .holo=0, .flags=0, .origin=19,
+[1192] = {.id=1192, .name="Dual Ball", .kind=TCG_TRAINER, .type=6, .rarity=1, .set=19, .set2=255, .dark=0, .holo=0, .flags=TCG_CF_READY, .origin=19,
 .effect="ecard1-139:t",.description="Flip 2 coins. For each heads, search your deck for a Basic Pokemon card other than a Baby Pokemon card, show it to your opponent, and put it into your hand. Shuffle your deck afterward."
 },
-[1193] = {.id=1193, .name="Energy Removal 2", .kind=TCG_TRAINER, .type=6, .rarity=1, .set=19, .set2=255, .dark=0, .holo=0, .flags=0, .origin=19,
+[1193] = {.id=1193, .name="Energy Removal 2", .kind=TCG_TRAINER, .type=6, .rarity=1, .set=19, .set2=255, .dark=0, .holo=0, .flags=TCG_CF_READY, .origin=19,
 .effect="ecard1-140:t",.description="Flip a coin. If heads, choose 1 Energy card attached to 1 of your opponent's Pokemon and discard it."
 },
-[1194] = {.id=1194, .name="Energy Restore", .kind=TCG_TRAINER, .type=6, .rarity=1, .set=19, .set2=255, .dark=0, .holo=0, .flags=0, .origin=19,
+[1194] = {.id=1194, .name="Energy Restore", .kind=TCG_TRAINER, .type=6, .rarity=1, .set=19, .set2=255, .dark=0, .holo=0, .flags=TCG_CF_READY, .origin=19,
 .effect="ecard1-141:t",.description="Flip 3 coins. For each heads, put a Basic Energy card from your discard pile into your hand. If you don't have that many basic Energy cards in your discard pile, put all of them into your hand."
 },
-[1195] = {.id=1195, .name="Mary's Impulse", .kind=TCG_TRAINER, .type=6, .rarity=1, .set=19, .set2=255, .dark=0, .holo=0, .flags=TCG_CF_SUPPORTER, .origin=19,
+[1195] = {.id=1195, .name="Mary's Impulse", .kind=TCG_TRAINER, .type=6, .rarity=1, .set=19, .set2=255, .dark=0, .holo=0, .flags=TCG_CF_SUPPORTER|TCG_CF_READY, .origin=19,
 .effect="ecard1-142:t",.description="You can play only one Supporter card each turn. When you play this card, put it next to your Active Pokemon. When your turn ends, discard this card. Flip a coin until you get tails. For each heads, draw 2 cards."
 },
-[1196] = {.id=1196, .name="Master Ball", .kind=TCG_TRAINER, .type=6, .rarity=1, .set=19, .set2=255, .dark=0, .holo=0, .flags=0, .origin=19,
+[1196] = {.id=1196, .name="Master Ball", .kind=TCG_TRAINER, .type=6, .rarity=1, .set=19, .set2=255, .dark=0, .holo=0, .flags=TCG_CF_READY, .origin=19, .canon=437,
 .effect="ecard1-143:t",.description="Look at 7 cards from the top of your deck. You may choose a Basic Pokemon or Evolution card from those cards, show it your opponent, and put it into your hand. Shuffle the rest into your deck."
 },
 [1197] = {.id=1197, .name="Multi Technical Machine 01", .kind=TCG_TRAINER, .type=6, .rarity=1, .set=19, .set2=255, .dark=0, .holo=0, .flags=TCG_CF_TM, .origin=19,
 .effect="ecard1-144:t",.description="Attach this card to 1 of your Pokemon in play. That Pokemon may use this card's attack instead of its own. At the end of your turn, discard Multi Technical Machine 01."
 },
-[1198] = {.id=1198, .name="Pokemon Nurse", .kind=TCG_TRAINER, .type=6, .rarity=1, .set=19, .set2=255, .dark=0, .holo=0, .flags=TCG_CF_SUPPORTER, .origin=19,
+[1198] = {.id=1198, .name="Pokemon Nurse", .kind=TCG_TRAINER, .type=6, .rarity=1, .set=19, .set2=255, .dark=0, .holo=0, .flags=TCG_CF_SUPPORTER|TCG_CF_READY, .origin=19,
 .effect="ecard1-145:t",.description="You can play only one Supporter card each turn. When you play this card, put it next to your Active Pokemon. When your turn ends, discard this card. Remove all damage counters from 1 of your Pokemon. Then discard all Energy cards attached to it, if any."
 },
-[1199] = {.id=1199, .name="Pokemon Reversal", .kind=TCG_TRAINER, .type=6, .rarity=1, .set=19, .set2=255, .dark=0, .holo=0, .flags=0, .origin=19,
+[1199] = {.id=1199, .name="Pokemon Reversal", .kind=TCG_TRAINER, .type=6, .rarity=1, .set=19, .set2=255, .dark=0, .holo=0, .flags=TCG_CF_READY, .origin=19,
 .effect="ecard1-146:t",.description="Choose 1 of your opponent's Benched Pokemon. Flip a coin. If heads, switch that Pokemon with the Defending Pokemon."
 },
-[1200] = {.id=1200, .name="Power Charge", .kind=TCG_TRAINER, .type=6, .rarity=1, .set=19, .set2=255, .dark=0, .holo=0, .flags=0, .origin=19,
+[1200] = {.id=1200, .name="Power Charge", .kind=TCG_TRAINER, .type=6, .rarity=1, .set=19, .set2=255, .dark=0, .holo=0, .flags=TCG_CF_READY, .origin=19,
 .effect="ecard1-147:t",.description="Flip a coin. If heads, shuffle 2 Energy cards from your discard pile into your deck (1 if you have only 1)."
 },
-[1201] = {.id=1201, .name="Professor Elm's Training Method", .kind=TCG_TRAINER, .type=6, .rarity=1, .set=19, .set2=255, .dark=0, .holo=0, .flags=TCG_CF_SUPPORTER, .origin=19,
+[1201] = {.id=1201, .name="Professor Elm's Training Method", .kind=TCG_TRAINER, .type=6, .rarity=1, .set=19, .set2=255, .dark=0, .holo=0, .flags=TCG_CF_SUPPORTER|TCG_CF_READY, .origin=19,
 .effect="ecard1-148:t",.description="You can play only one Supporter card each turn. When you play this card, put it next to your Active Pokemon. When your turn ends, discard this card. Search your deck for an Evolution card, show it to your opponent, and put it into your hand. Shuffle your deck afterward."
 },
-[1202] = {.id=1202, .name="Professor Oak's Research", .kind=TCG_TRAINER, .type=6, .rarity=1, .set=19, .set2=255, .dark=0, .holo=0, .flags=TCG_CF_SUPPORTER, .origin=19,
+[1202] = {.id=1202, .name="Professor Oak's Research", .kind=TCG_TRAINER, .type=6, .rarity=1, .set=19, .set2=255, .dark=0, .holo=0, .flags=TCG_CF_SUPPORTER|TCG_CF_READY, .origin=19,
 .effect="ecard1-149:t",.description="You can play only one Supporter card each turn. When you play this card, put it next to your Active Pokemon. When your turn ends, discard this card. Shuffle your hand into your deck, then draw 5 cards."
 },
-[1203] = {.id=1203, .name="Strength Charm", .kind=TCG_TRAINER, .type=6, .rarity=1, .set=19, .set2=255, .dark=0, .holo=0, .flags=TCG_CF_TOOL, .origin=19,
+[1203] = {.id=1203, .name="Strength Charm", .kind=TCG_TRAINER, .type=6, .rarity=1, .set=19, .set2=255, .dark=0, .holo=0, .flags=TCG_CF_TOOL|TCG_CF_READY, .origin=19,
 .effect="ecard1-150:t",.description="Attach Strength Charm to 1 of your Pokemon that doesn't have a Pokemon Tool attached to it. Whenever an attack from the Pokemon that Strength Charm is attached to does damage (after applying Weakness and Resistance), the attack does 10 more damage. At the end of your turn in which this happens, discard Strength Charm."
 },
-[1204] = {.id=1204, .name="Super Scoop Up", .kind=TCG_TRAINER, .type=6, .rarity=1, .set=19, .set2=255, .dark=0, .holo=0, .flags=0, .origin=19,
+[1204] = {.id=1204, .name="Super Scoop Up", .kind=TCG_TRAINER, .type=6, .rarity=1, .set=19, .set2=255, .dark=0, .holo=0, .flags=TCG_CF_READY, .origin=19, .canon=425,
 .effect="ecard1-151:t",.description="Flip a coin. If heads, return 1 of your Pokemon and all cards attached to it to your hand."
 },
 [1205] = {.id=1205, .name="Warp Point", .kind=TCG_TRAINER, .type=6, .rarity=1, .set=19, .set2=255, .dark=0, .holo=0, .flags=0, .origin=19,
 .effect="ecard1-152:t",.description="Your opponent switches the Defending Pokemon with 1 of his or her Benched Pokemon, if any; then you switch your Active Pokemon with 1 of your Benched Pokemon, if any."
 },
-[1206] = {.id=1206, .name="Energy Search", .kind=TCG_TRAINER, .type=6, .rarity=0, .set=19, .set2=255, .dark=0, .holo=0, .flags=0, .origin=19,
+[1206] = {.id=1206, .name="Energy Search", .kind=TCG_TRAINER, .type=6, .rarity=0, .set=19, .set2=255, .dark=0, .holo=0, .flags=TCG_CF_READY, .origin=19, .canon=207,
 .effect="ecard1-153:t",.description="Search your deck for a basic Energy card, show it to your opponent, and put it into your hand. Shuffle your deck afterward."
 },
-[1207] = {.id=1207, .name="Full Heal", .kind=TCG_TRAINER, .type=6, .rarity=0, .set=19, .set2=255, .dark=0, .holo=0, .flags=0, .origin=19,
+[1207] = {.id=1207, .name="Full Heal", .kind=TCG_TRAINER, .type=6, .rarity=0, .set=19, .set2=255, .dark=0, .holo=0, .flags=TCG_CF_READY, .origin=19, .canon=223,
 .effect="ecard1-154:t",.description="Remove all Special Conditions from your Active Pokemon."
 },
-[1208] = {.id=1208, .name="Moo-Moo Milk", .kind=TCG_TRAINER, .type=6, .rarity=0, .set=19, .set2=255, .dark=0, .holo=0, .flags=0, .origin=19,
+[1208] = {.id=1208, .name="Moo-Moo Milk", .kind=TCG_TRAINER, .type=6, .rarity=0, .set=19, .set2=255, .dark=0, .holo=0, .flags=TCG_CF_READY, .origin=19, .canon=795,
 .effect="ecard1-155:t",.description="Choose 1 of your Pokemon. Flip 2 coins. Remove 2 damage counters times the number of heads from that Pokemon. If the Pokemon has fewer damage counters than that, remove all of them."
 },
-[1209] = {.id=1209, .name="Potion", .kind=TCG_TRAINER, .type=6, .rarity=0, .set=19, .set2=255, .dark=0, .holo=0, .flags=0, .origin=19,
+[1209] = {.id=1209, .name="Potion", .kind=TCG_TRAINER, .type=6, .rarity=0, .set=19, .set2=255, .dark=0, .holo=0, .flags=TCG_CF_READY, .origin=19, .canon=221,
 .effect="ecard1-156:t",.description="Remove 2 damage counters from 1 of your Pokemon (1 if that Pokemon has only 1)."
 },
-[1210] = {.id=1210, .name="Switch", .kind=TCG_TRAINER, .type=6, .rarity=0, .set=19, .set2=255, .dark=0, .holo=0, .flags=0, .origin=19,
+[1210] = {.id=1210, .name="Switch", .kind=TCG_TRAINER, .type=6, .rarity=0, .set=19, .set2=255, .dark=0, .holo=0, .flags=TCG_CF_READY, .origin=19, .canon=210,
 .effect="ecard1-157:t",.description="Switch your Active Pokemon with 1 of your Benched Pokemon."
 },
 [1211] = {.id=1211, .name="Darkness Energy", .kind=TCG_ENERGY, .type=7, .rarity=2, .set=19, .set2=255, .dark=0, .holo=0, .flags=TCG_CF_SPECIAL|TCG_CF_READY, .origin=19,
@@ -8499,7 +8499,7 @@ const struct TcgCard gTcgCards[TCG_CARD_COUNT + 1] = {
 [1331] = {.id=1331, .name="Darkness Cube 01", .kind=TCG_TRAINER, .type=6, .rarity=1, .set=20, .set2=255, .dark=0, .holo=0, .flags=TCG_CF_TM, .origin=20,
 .effect="ecard2-119:t",.description="Attach this card to 1 of your Darkness Pokemon in play. That Pokemon may use this card's attack instead of its own. At the end of your turn, discard Darkness Cube 01."
 },
-[1332] = {.id=1332, .name="Energy Switch", .kind=TCG_TRAINER, .type=6, .rarity=1, .set=20, .set2=255, .dark=0, .holo=0, .flags=0, .origin=20,
+[1332] = {.id=1332, .name="Energy Switch", .kind=TCG_TRAINER, .type=6, .rarity=1, .set=20, .set2=255, .dark=0, .holo=0, .flags=TCG_CF_READY, .origin=20,
 .effect="ecard2-120:t",.description="Move a basic Energy card attached to 1 of your Pokemon to another of your Pokemon."
 },
 [1333] = {.id=1333, .name="Fighting Cube 01", .kind=TCG_TRAINER, .type=6, .rarity=1, .set=20, .set2=255, .dark=0, .holo=0, .flags=TCG_CF_TM, .origin=20,
@@ -8514,10 +8514,10 @@ const struct TcgCard gTcgCards[TCG_CARD_COUNT + 1] = {
 [1336] = {.id=1336, .name="Grass Cube 01", .kind=TCG_TRAINER, .type=6, .rarity=1, .set=20, .set2=255, .dark=0, .holo=0, .flags=TCG_CF_TM, .origin=20,
 .effect="ecard2-124:t",.description="Attach this card to 1 of your Grass Pokemon in play. That Pokemon may use this card's attack instead of its own. At the end of your turn, discard Grass Cube 01."
 },
-[1337] = {.id=1337, .name="Healing Berry", .kind=TCG_TRAINER, .type=6, .rarity=1, .set=20, .set2=255, .dark=0, .holo=0, .flags=TCG_CF_TOOL, .origin=20,
+[1337] = {.id=1337, .name="Healing Berry", .kind=TCG_TRAINER, .type=6, .rarity=1, .set=20, .set2=255, .dark=0, .holo=0, .flags=TCG_CF_TOOL|TCG_CF_READY, .origin=20,
 .effect="ecard2-125:t",.description="Attach Healing Berry to 1 of your Pokemon that doesn't already have a Pokemon Tool card attached to it. If that Pokemon is Knocked Out, discard this card. At the end of any turn, if the Pokemon this card is attached to has 20 HP or less, remove 3 damage counters from that Pokemon and discard this card."
 },
-[1338] = {.id=1338, .name="Juggler", .kind=TCG_TRAINER, .type=6, .rarity=1, .set=20, .set2=255, .dark=0, .holo=0, .flags=TCG_CF_SUPPORTER, .origin=20,
+[1338] = {.id=1338, .name="Juggler", .kind=TCG_TRAINER, .type=6, .rarity=1, .set=20, .set2=255, .dark=0, .holo=0, .flags=TCG_CF_SUPPORTER|TCG_CF_READY, .origin=20,
 .effect="ecard2-126:t",.description="You can play only one Supporter card each turn. When you play this card, put it next to your Active Pokemon. When your turn ends, discard this card. Discard up to 2 basic Energy cards from your hand. If you discarded 1 basic Energy card, draw 3 cards. If you discarded 2 basic Energy cards, draw 5 cards."
 },
 [1339] = {.id=1339, .name="Lightning Cube 01", .kind=TCG_TRAINER, .type=6, .rarity=1, .set=20, .set2=255, .dark=0, .holo=0, .flags=TCG_CF_TM, .origin=20,
@@ -8529,28 +8529,28 @@ const struct TcgCard gTcgCards[TCG_CARD_COUNT + 1] = {
 [1341] = {.id=1341, .name="Metal Cube 01", .kind=TCG_TRAINER, .type=6, .rarity=1, .set=20, .set2=255, .dark=0, .holo=0, .flags=TCG_CF_TM, .origin=20,
 .effect="ecard2-129:t",.description="Attach this card to 1 of your Metal Pokemon in play. That Pokemon may use this card's attack instead of its own. At the end of your turn, discard Metal Cube 01."
 },
-[1342] = {.id=1342, .name="Pokemon Fan Club", .kind=TCG_TRAINER, .type=6, .rarity=1, .set=20, .set2=255, .dark=0, .holo=0, .flags=TCG_CF_SUPPORTER, .origin=20,
+[1342] = {.id=1342, .name="Pokemon Fan Club", .kind=TCG_TRAINER, .type=6, .rarity=1, .set=20, .set2=255, .dark=0, .holo=0, .flags=TCG_CF_SUPPORTER|TCG_CF_READY, .origin=20,
 .effect="ecard2-130:t",.description="You can play only one Supporter card each turn. When you play this card, put it next to your Active Pokemon. When your turn ends, discard this card. Search your deck for up to 2 Baby Pokemon and/or Basic Pokemon cards and put them onto your bench. Shuffle your deck afterward."
 },
-[1343] = {.id=1343, .name="Pokemon Park", .kind=TCG_TRAINER, .type=6, .rarity=1, .set=20, .set2=255, .dark=0, .holo=0, .flags=TCG_CF_STADIUM, .origin=20,
+[1343] = {.id=1343, .name="Pokemon Park", .kind=TCG_TRAINER, .type=6, .rarity=1, .set=20, .set2=255, .dark=0, .holo=0, .flags=TCG_CF_STADIUM|TCG_CF_READY, .origin=20,
 .effect="ecard2-131:t",.description="This card stays in play when you play it. Discard this card if another Stadium card comes into play. Once during each of his or her turns, whenever a player attaches an Energy card from his or her hand to 1 of his or her Benched Pokemon, he or she removes 1 damage counter, if any, from that Pokemon."
 },
 [1344] = {.id=1344, .name="Psychic Cube 01", .kind=TCG_TRAINER, .type=6, .rarity=1, .set=20, .set2=255, .dark=0, .holo=0, .flags=TCG_CF_TM, .origin=20,
 .effect="ecard2-132:t",.description="Attach this card to 1 of your Psychic Pokemon in play. That Pokemon may us this card's attack instead of its own. At the end of your turn, discard Psychic Cube 01."
 },
-[1345] = {.id=1345, .name="Seer", .kind=TCG_TRAINER, .type=6, .rarity=1, .set=20, .set2=255, .dark=0, .holo=0, .flags=TCG_CF_SUPPORTER, .origin=20,
+[1345] = {.id=1345, .name="Seer", .kind=TCG_TRAINER, .type=6, .rarity=1, .set=20, .set2=255, .dark=0, .holo=0, .flags=TCG_CF_SUPPORTER|TCG_CF_READY, .origin=20,
 .effect="ecard2-133:t",.description="You can play only one Supporter card each turn. When you play this card, put it next to your Active Pokemon. When your turn ends, discard this card. Look at the top 6 cards of your deck. Take all Basic Energy cards you find there, show them to your opponent, and then put them into your hand. Shuffle your deck afterward."
 },
-[1346] = {.id=1346, .name="Super Energy Removal 2", .kind=TCG_TRAINER, .type=6, .rarity=1, .set=20, .set2=255, .dark=0, .holo=0, .flags=0, .origin=20,
+[1346] = {.id=1346, .name="Super Energy Removal 2", .kind=TCG_TRAINER, .type=6, .rarity=1, .set=20, .set2=255, .dark=0, .holo=0, .flags=TCG_CF_READY, .origin=20,
 .effect="ecard2-134:t",.description="Flip 2 coins. If both are heads, discard all Energy cards attached to the Defending Pokemon. If both are tails, discard all Energy cards attached to your Active Pokemon. If 1 is heads and 1 is tails, this card does nothing."
 },
 [1347] = {.id=1347, .name="Time Shard", .kind=TCG_TRAINER, .type=6, .rarity=1, .set=20, .set2=255, .dark=0, .holo=0, .flags=TCG_CF_TOOL, .origin=20,
 .effect="ecard2-135:t",.description="Attach Time Shard to 1 of your Pokemon that doesn't already have a Pokemon Tool card attached to it. If that Pokemon is Knocked Out, discard this card. If the Pokemon this card is attached to is Knocked Out by damage from the Defending Pokemon's attack during your opponent's turn, you may return up to 2 basic Energy cards attached to that Pokemon to your hand."
 },
-[1348] = {.id=1348, .name="Town Volunteers", .kind=TCG_TRAINER, .type=6, .rarity=1, .set=20, .set2=255, .dark=0, .holo=0, .flags=TCG_CF_SUPPORTER, .origin=20,
+[1348] = {.id=1348, .name="Town Volunteers", .kind=TCG_TRAINER, .type=6, .rarity=1, .set=20, .set2=255, .dark=0, .holo=0, .flags=TCG_CF_SUPPORTER|TCG_CF_READY, .origin=20,
 .effect="ecard2-136:t",.description="You can play only one Supporter card each turn. When you play this card, put it next to your Active Pokemon. When your turn ends, discard this card. Take 5 Baby Pokemon, Basic Pokemon, Evolution, and/or basic Energy cards from your discard pile and then show them to your opponent. Shuffle them into your deck."
 },
-[1349] = {.id=1349, .name="Traveling Salesman", .kind=TCG_TRAINER, .type=6, .rarity=1, .set=20, .set2=255, .dark=0, .holo=0, .flags=TCG_CF_SUPPORTER, .origin=20,
+[1349] = {.id=1349, .name="Traveling Salesman", .kind=TCG_TRAINER, .type=6, .rarity=1, .set=20, .set2=255, .dark=0, .holo=0, .flags=TCG_CF_SUPPORTER|TCG_CF_READY, .origin=20,
 .effect="ecard2-137:t",.description="You can play only one Supporter card each turn. When you play this card, put it next to your Active Pokemon. When your turn ends, discard this card. Search your deck for up to 2 Technical Machine and/or Pokemon Tool cards, show them to your opponent, and then put them into your hand. Shuffle your deck afterward."
 },
 [1350] = {.id=1350, .name="Undersea Ruins", .kind=TCG_TRAINER, .type=6, .rarity=1, .set=20, .set2=255, .dark=0, .holo=0, .flags=TCG_CF_STADIUM, .origin=20,
@@ -8562,13 +8562,13 @@ const struct TcgCard gTcgCards[TCG_CARD_COUNT + 1] = {
 [1352] = {.id=1352, .name="Water Cube 01", .kind=TCG_TRAINER, .type=6, .rarity=1, .set=20, .set2=255, .dark=0, .holo=0, .flags=TCG_CF_TM, .origin=20,
 .effect="ecard2-140:t",.description="Attach this card to 1 of your Water Pokemon in play. That Pokemon may use this card's attack instead of its own. At the end of your turn, discard Water Cube 01."
 },
-[1353] = {.id=1353, .name="Weakness Guard", .kind=TCG_TRAINER, .type=6, .rarity=1, .set=20, .set2=255, .dark=0, .holo=0, .flags=0, .origin=20,
+[1353] = {.id=1353, .name="Weakness Guard", .kind=TCG_TRAINER, .type=6, .rarity=1, .set=20, .set2=255, .dark=0, .holo=0, .flags=TCG_CF_READY, .origin=20,
 .effect="ecard2-141:t",.description="Attach this card to 1 of your Pokemon. Discard it at the end of your opponent's next turn. As long as this card is attached, this Pokemon has no Weakness."
 },
-[1354] = {.id=1354, .name="Darkness Energy", .kind=TCG_ENERGY, .type=7, .rarity=2, .set=20, .set2=255, .dark=0, .holo=0, .flags=TCG_CF_SPECIAL|TCG_CF_READY, .origin=20,
+[1354] = {.id=1354, .name="Darkness Energy", .kind=TCG_ENERGY, .type=7, .rarity=2, .set=20, .set2=255, .dark=0, .holo=0, .flags=TCG_CF_SPECIAL|TCG_CF_READY, .origin=20, .canon=798,
 .effect="ecard2-142:t",.description="If the Pokemon Darkness Energy is attached to damages the Defending Pokemon (after applying Weakness and Resistance), the attack does 10 more damage to the Defending Pokemon. At the end of every turn, put 1 damage counter on the Pokemon Darkness Energy is attached to, unless it's Darkness or has Dark in its name. Darkness Energy provides Darkness Energy. (Doesn't count as a basic Energy card.)"
 },
-[1355] = {.id=1355, .name="Metal Energy", .kind=TCG_ENERGY, .type=8, .rarity=2, .set=20, .set2=255, .dark=0, .holo=0, .flags=TCG_CF_SPECIAL|TCG_CF_READY, .origin=20,
+[1355] = {.id=1355, .name="Metal Energy", .kind=TCG_ENERGY, .type=8, .rarity=2, .set=20, .set2=255, .dark=0, .holo=0, .flags=TCG_CF_SPECIAL|TCG_CF_READY, .origin=20, .canon=713,
 .effect="ecard2-143:t",.description="Damage done to the Pokemon Metal Energy is attached to is reduced by 10 (after applying Weakness and Resistance). If the Pokemon Metal Energy is attached to isn't Metal, whenever it damages a Pokemon, reduce that damage by 10 (before applying Weakness and Resistance). Metal Energy provides Metal Energy. (Doesn't count as a basic Energy card.)"
 },
 [1356] = {.id=1356, .name="Rainbow Energy", .kind=TCG_ENERGY, .type=6, .rarity=2, .set=20, .set2=255, .dark=0, .holo=0, .flags=TCG_CF_SPECIAL|TCG_CF_READY, .origin=20,
@@ -9657,31 +9657,31 @@ const struct TcgCard gTcgCards[TCG_CARD_COUNT + 1] = {
 [1513] = {.id=1513, .name="Ancient Ruins", .kind=TCG_TRAINER, .type=6, .rarity=1, .set=21, .set2=255, .dark=0, .holo=0, .flags=TCG_CF_STADIUM, .origin=21,
 .effect="ecard3-119:t",.description="This card stays in play when you play it. Discard this card if another Stadium card comes into play. Once during each player's turn (before he or she attacks), if he or she has not played a Supporter card, that player may reveal his or her hand to his or her opponent. If that player reveals his or her hand and there is no Supporter card there, that player draws a card."
 },
-[1514] = {.id=1514, .name="Relic Hunter", .kind=TCG_TRAINER, .type=6, .rarity=1, .set=21, .set2=255, .dark=0, .holo=0, .flags=TCG_CF_SUPPORTER, .origin=21,
+[1514] = {.id=1514, .name="Relic Hunter", .kind=TCG_TRAINER, .type=6, .rarity=1, .set=21, .set2=255, .dark=0, .holo=0, .flags=TCG_CF_SUPPORTER|TCG_CF_READY, .origin=21,
 .effect="ecard3-120:t",.description="You can play only 1 Supporter card each turn. When you play this card, put it next to your Active Pokemon. When your turn ends, discard this card. Search your deck for up to 2 Supporter and/or Stadium cards, show them to your opponent, and put them into your hand. Shuffle your deck afterward."
 },
-[1515] = {.id=1515, .name="Apricorn Maker", .kind=TCG_TRAINER, .type=6, .rarity=1, .set=21, .set2=255, .dark=0, .holo=0, .flags=TCG_CF_SUPPORTER, .origin=21,
+[1515] = {.id=1515, .name="Apricorn Maker", .kind=TCG_TRAINER, .type=6, .rarity=1, .set=21, .set2=255, .dark=0, .holo=0, .flags=TCG_CF_SUPPORTER|TCG_CF_READY, .origin=21,
 .effect="ecard3-121:t",.description="You can play only 1 Supporter card each turn. When you play this card, put it next to your Active Pokemon. When your turn ends, discard this card. Search your deck for up to 2 Trainer cards with Ball in their names, show them to your opponent, and put them into your hand. Shuffle your deck afterward."
 },
-[1516] = {.id=1516, .name="Crystal Shard", .kind=TCG_TRAINER, .type=6, .rarity=1, .set=21, .set2=255, .dark=0, .holo=0, .flags=TCG_CF_TOOL, .origin=21,
+[1516] = {.id=1516, .name="Crystal Shard", .kind=TCG_TRAINER, .type=6, .rarity=1, .set=21, .set2=255, .dark=0, .holo=0, .flags=TCG_CF_TOOL|TCG_CF_READY, .origin=21,
 .effect="ecard3-122:t",.description="Attach Crystal Shard to 1 of your Pokemon that doesn't already have a Pokemon Tool attached to it. If that Pokemon is Knocked Out, discard this card. As long as this card is attached to a Pokemon, that Pokemon's type (color) is Colorless. If that Pokemon attacks, discard this card at the end of the turn."
 },
-[1517] = {.id=1517, .name="Desert Shaman", .kind=TCG_TRAINER, .type=6, .rarity=1, .set=21, .set2=255, .dark=0, .holo=0, .flags=TCG_CF_SUPPORTER, .origin=21,
+[1517] = {.id=1517, .name="Desert Shaman", .kind=TCG_TRAINER, .type=6, .rarity=1, .set=21, .set2=255, .dark=0, .holo=0, .flags=TCG_CF_SUPPORTER|TCG_CF_READY, .origin=21,
 .effect="ecard3-123:t",.description="You can play only 1 Supporter card each turn. When you play this card, put it next to your Active Pokemon. When your turn ends, discard this card. Shuffle your hand into your deck and draw up to 4 cards. Your opponent does the same."
 },
-[1518] = {.id=1518, .name="Fast Ball", .kind=TCG_TRAINER, .type=6, .rarity=1, .set=21, .set2=255, .dark=0, .holo=0, .flags=0, .origin=21,
+[1518] = {.id=1518, .name="Fast Ball", .kind=TCG_TRAINER, .type=6, .rarity=1, .set=21, .set2=255, .dark=0, .holo=0, .flags=TCG_CF_READY, .origin=21,
 .effect="ecard3-124:t",.description="Reveal cards from your deck until you reveal an Evolution card. Show that card to your opponent and put it into your hand. Shuffle the other revealed cards into your deck. (If you don't reveal an Evolution card, shuffle all the revealed cards back into your deck.)"
 },
-[1519] = {.id=1519, .name="Fisherman", .kind=TCG_TRAINER, .type=6, .rarity=1, .set=21, .set2=255, .dark=0, .holo=0, .flags=TCG_CF_SUPPORTER, .origin=21,
+[1519] = {.id=1519, .name="Fisherman", .kind=TCG_TRAINER, .type=6, .rarity=1, .set=21, .set2=255, .dark=0, .holo=0, .flags=TCG_CF_SUPPORTER|TCG_CF_READY, .origin=21,
 .effect="ecard3-125:t",.description="You can play only 1 Supporter card each turn. When you play this card, put it next to your Active Pokemon. When your turn ends, discard this card. Choose 4 basic Energy cards from your discard pile (if there are fewer basic Energy cards than choose, take all of them), show them to your opponent, and put them into your hand."
 },
 [1520] = {.id=1520, .name="Friend Ball", .kind=TCG_TRAINER, .type=6, .rarity=1, .set=21, .set2=255, .dark=0, .holo=0, .flags=0, .origin=21,
 .effect="ecard3-126:t",.description="Choose 1 of your opponent's Pokemon. Search your deck for a Baby Pokemon, Basic Pokemon, or Evolution card of the same type (color), show it to your opponent, and put it into your hand. Shuffle your deck afterward."
 },
-[1521] = {.id=1521, .name="Hyper Potion", .kind=TCG_TRAINER, .type=6, .rarity=1, .set=21, .set2=255, .dark=0, .holo=0, .flags=0, .origin=21,
+[1521] = {.id=1521, .name="Hyper Potion", .kind=TCG_TRAINER, .type=6, .rarity=1, .set=21, .set2=255, .dark=0, .holo=0, .flags=TCG_CF_READY, .origin=21,
 .effect="ecard3-127:t",.description="Choose 1 of your Pokemon. Discard 1 or 2 basic Energy cards attached to that Pokemon. If you discarded 1 Energy card, remove up to 3 damage counters from that Pokemon. If you discarded 2 Energy cards, remove up to 5 damage counters from that Pokemon."
 },
-[1522] = {.id=1522, .name="Lure Ball", .kind=TCG_TRAINER, .type=6, .rarity=1, .set=21, .set2=255, .dark=0, .holo=0, .flags=0, .origin=21,
+[1522] = {.id=1522, .name="Lure Ball", .kind=TCG_TRAINER, .type=6, .rarity=1, .set=21, .set2=255, .dark=0, .holo=0, .flags=TCG_CF_READY, .origin=21,
 .effect="ecard3-128:t",.description="Flip 3 coins. For each heads, choose an Evolution card from your discard pile, show it to your opponent, and put it into your hand."
 },
 [1523] = {.id=1523, .name="Miracle Sphere Alpha", .kind=TCG_TRAINER, .type=6, .rarity=1, .set=21, .set2=255, .dark=0, .holo=0, .flags=TCG_CF_TM, .origin=21,
@@ -9693,7 +9693,7 @@ const struct TcgCard gTcgCards[TCG_CARD_COUNT + 1] = {
 [1525] = {.id=1525, .name="Miracle Sphere Gamma", .kind=TCG_TRAINER, .type=6, .rarity=1, .set=21, .set2=255, .dark=0, .holo=0, .flags=TCG_CF_TM, .origin=21,
 .effect="ecard3-131:t",.description="Attach this card to 1 of your Evolved Grass, Water, or Lightning Pokemon in play. That Pokemon may use this card's attack instead of its own. At the end of your turn, discard Miracle Sphere Gamma."
 },
-[1526] = {.id=1526, .name="Mirage Stadium", .kind=TCG_TRAINER, .type=6, .rarity=1, .set=21, .set2=255, .dark=0, .holo=0, .flags=TCG_CF_STADIUM, .origin=21,
+[1526] = {.id=1526, .name="Mirage Stadium", .kind=TCG_TRAINER, .type=6, .rarity=1, .set=21, .set2=255, .dark=0, .holo=0, .flags=TCG_CF_STADIUM|TCG_CF_READY, .origin=21,
 .effect="ecard3-132:t",.description="This card stays in play when you play it. Discard this card if another Stadium card comes into play. Whenever a player tries to retreat a Pokemon during his or her turn, that player flips a coin. If heads, that player retreats that Pokemon (and discards Energy normally). If tails, that Pokemon can't retreat this turn (the player doesn't discard any Energy)."
 },
 [1527] = {.id=1527, .name="Mystery Plate Alpha", .kind=TCG_TRAINER, .type=6, .rarity=1, .set=21, .set2=255, .dark=0, .holo=0, .flags=TCG_CF_TM, .origin=21,
@@ -9711,7 +9711,7 @@ const struct TcgCard gTcgCards[TCG_CARD_COUNT + 1] = {
 [1531] = {.id=1531, .name="Mystery Zone", .kind=TCG_TRAINER, .type=6, .rarity=1, .set=21, .set2=255, .dark=0, .holo=0, .flags=TCG_CF_STADIUM, .origin=21,
 .effect="ecard3-137:t",.description="This card stays in play when you play it. Discard this card if another Stadium card comes into play. Once during each player's turn (before he or she attacks), if that player has an Evolution card in his or her hand, he or she may search his or her deck for a basic Energy card, show it to his or her opponent, and put it into his or her hand. Then that player chooses an Evolution card from his or her hand, shows it to his or her opponent, and puts it into his or her deck. That player shuffles his or her deck afterward."
 },
-[1532] = {.id=1532, .name="Oracle", .kind=TCG_TRAINER, .type=6, .rarity=1, .set=21, .set2=255, .dark=0, .holo=0, .flags=TCG_CF_SUPPORTER, .origin=21,
+[1532] = {.id=1532, .name="Oracle", .kind=TCG_TRAINER, .type=6, .rarity=1, .set=21, .set2=255, .dark=0, .holo=0, .flags=TCG_CF_SUPPORTER|TCG_CF_READY, .origin=21,
 .effect="ecard3-138:t",.description="You can play only 1 Supporter card each turn. When you play this card, put it next to your Active Pokemon. When your turn ends, discard this card. Choose 2 cards from your deck and shuffle the rest of your deck. Put the chosen cards on top of your deck in any order."
 },
 [1533] = {.id=1533, .name="Star Piece", .kind=TCG_TRAINER, .type=6, .rarity=1, .set=21, .set2=255, .dark=0, .holo=0, .flags=TCG_CF_TOOL, .origin=21,
@@ -10103,7 +10103,7 @@ const struct TcgCard gTcgCards[TCG_CARD_COUNT + 1] = {
 {.name="",.description="",.effect="NONE",.animation="ATK_ANIM_NONE",.cost={0},.damage=0,.category=TCG_DAMAGE_NORMAL},
 }
 },
-[1592] = {.id=1592, .name="Computer Error", .kind=TCG_TRAINER, .type=6, .rarity=3, .set=4, .set2=255, .dark=0, .holo=0, .flags=TCG_CF_RSM, .origin=22,
+[1592] = {.id=1592, .name="Computer Error", .kind=TCG_TRAINER, .type=6, .rarity=3, .set=4, .set2=255, .dark=0, .holo=0, .flags=TCG_CF_RSM|TCG_CF_READY, .origin=22, .canon=430,
 .effect="basep-16:t",.description="You may draw up to 5 cards, then your opponent may draw up to 5 cards. Your turn is over now (you don't get to attack)."
 },
 [1593] = {.id=1593, .name="Dark Persian", .kind=TCG_POKEMON, .type=6, .rarity=3, .set=4, .set2=255, .dark=1, .holo=0, .flags=0, .origin=22,
@@ -10267,10 +10267,10 @@ const struct TcgCard gTcgCards[TCG_CARD_COUNT + 1] = {
 {.name="",.description="",.effect="NONE",.animation="ATK_ANIM_NONE",.cost={0},.damage=0,.category=TCG_DAMAGE_NORMAL},
 }
 },
-[1616] = {.id=1616, .name="Pokemon Center", .kind=TCG_TRAINER, .type=6, .rarity=3, .set=4, .set2=255, .dark=0, .holo=0, .flags=0, .origin=22,
+[1616] = {.id=1616, .name="Pokemon Center", .kind=TCG_TRAINER, .type=6, .rarity=3, .set=4, .set2=255, .dark=0, .holo=0, .flags=TCG_CF_READY, .origin=22, .canon=211,
 .effect="basep-40:t",.description="Remove all damage counters from all of your own Pokemon with damage counters on them, then discard all Energy cards attached to those Pokemon."
 },
-[1617] = {.id=1617, .name="Lucky Stadium", .kind=TCG_TRAINER, .type=6, .rarity=3, .set=4, .set2=255, .dark=0, .holo=0, .flags=TCG_CF_STADIUM, .origin=22,
+[1617] = {.id=1617, .name="Lucky Stadium", .kind=TCG_TRAINER, .type=6, .rarity=3, .set=4, .set2=255, .dark=0, .holo=0, .flags=TCG_CF_STADIUM, .origin=22, .canon=1040,
 .effect="basep-41:t",.description="This card stays in play when you play it. Discard this card if another Stadium card comes into play. Once during each player's turn (before attacking), that player may flip a coin. If heads, that player draws a card."
 },
 [1618] = {.id=1618, .name="Pokemon Tower", .kind=TCG_TRAINER, .type=6, .rarity=3, .set=4, .set2=255, .dark=0, .holo=0, .flags=TCG_CF_STADIUM, .origin=22,
@@ -10528,10 +10528,10 @@ const struct TcgCard gTcgCards[TCG_CARD_COUNT + 1] = {
 {.name="",.description="",.effect="NONE",.animation="ATK_ANIM_NONE",.cost={0},.damage=0,.category=TCG_DAMAGE_NORMAL},
 }
 },
-[1655] = {.id=1655, .name="Tropical Wind", .kind=TCG_TRAINER, .type=6, .rarity=3, .set=4, .set2=255, .dark=0, .holo=0, .flags=0, .origin=23,
+[1655] = {.id=1655, .name="Tropical Wind", .kind=TCG_TRAINER, .type=6, .rarity=3, .set=4, .set2=255, .dark=0, .holo=0, .flags=TCG_CF_READY, .origin=23,
 .effect="np-26:t",.description="Flip a coin. If heads, remove 2 damage counters from each Active Pokemon (remove 1 damage counter if a Pokemon has only 1). If tails, each Active Pokemon is now Asleep."
 },
-[1656] = {.id=1656, .name="Tropical Tidal Wave", .kind=TCG_TRAINER, .type=6, .rarity=3, .set=4, .set2=255, .dark=0, .holo=0, .flags=0, .origin=23,
+[1656] = {.id=1656, .name="Tropical Tidal Wave", .kind=TCG_TRAINER, .type=6, .rarity=3, .set=4, .set2=255, .dark=0, .holo=0, .flags=TCG_CF_READY, .origin=23,
 .effect="np-27:t",.description="Flip a coin. If heads, discard all Trainer cards your opponent has in play. If tails, discard all Trainer (excluding Supporter cards) you have in play."
 },
 [1657] = {.id=1657, .name="Championship Arena", .kind=TCG_TRAINER, .type=6, .rarity=3, .set=4, .set2=255, .dark=0, .holo=0, .flags=TCG_CF_STADIUM, .origin=23,
@@ -10586,7 +10586,7 @@ const struct TcgCard gTcgCards[TCG_CARD_COUNT + 1] = {
 {.name="",.description="",.effect="NONE",.animation="ATK_ANIM_NONE",.cost={0},.damage=0,.category=TCG_DAMAGE_NORMAL},
 }
 },
-[1665] = {.id=1665, .name="Tropical Tidal Wave", .kind=TCG_TRAINER, .type=6, .rarity=3, .set=4, .set2=255, .dark=0, .holo=0, .flags=0, .origin=23,
+[1665] = {.id=1665, .name="Tropical Tidal Wave", .kind=TCG_TRAINER, .type=6, .rarity=3, .set=4, .set2=255, .dark=0, .holo=0, .flags=TCG_CF_READY, .origin=23,
 .effect="np-36:t",.description="Flip a coin. If heads, discard all Trainer cards your opponent has in play. If tails, discard all Trainer cards (excluding Supporter cards) you have in play."
 },
 [1666] = {.id=1666, .name="Kyogre ex", .kind=TCG_POKEMON, .type=3, .rarity=3, .set=4, .set2=255, .dark=0, .holo=0, .flags=TCG_CF_EX|TCG_CF_BODY, .origin=23,

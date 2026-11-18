@@ -130,6 +130,9 @@ unsigned TcgDuel_Type(const struct TcgDuel *g, unsigned player, unsigned slot)
 {
     const struct TcgCard *c = TcgDuel_Field(g, player, slot);
     unsigned shift = g->players[player].field[slot].shift;
+    /* (Crystal Shard: Colorless while attached) */
+    if (c && c->kind == TCG_POKEMON && TcgDuel_AttachedCard(g, player, slot, TCG_CARD_ECARD3_122) >= 0)
+        return TCG_COLORLESS;
     return shift ? shift - 1 : c ? c->type : TCG_COLORLESS;
 }
 
@@ -247,6 +250,18 @@ unsigned TcgDuel_RetreatCost(const struct TcgDuel *g, unsigned player)
     /* Dark Muk's Sticky Goo, the other side's Active: 2 more */
     if (TcgPower_Working(g, player ^ 1, 0) == TCG_POWER_STICKY_GOO)
         cost += 2;
+    if (c && c->kind == TCG_POKEMON)
+    {
+        /* the regional Stadiums: The Rocket's Training Gym 1 more; Broken Ground Gym 1 more for a Basic (or Baby);
+         * Cerulean City Gym 1 less for a Misty Pokemon. Balloon Berry: it pays the whole cost */
+        unsigned stadium = TcgDuel_Stadium(g, NULL);
+        if (TcgDuel_AttachedCard(g, player, 0, TCG_CARD_NEO3_60) >= 0)
+            return 0;
+        if (stadium == TCG_CARD_GYM1_104 || (stadium == TCG_CARD_NEO4_92 && !c->stage))
+            cost++;
+        if (stadium == TCG_CARD_GYM1_108 && strstr(c->name, "Misty") && cost)
+            cost--;
+    }
     return cost > aid ? cost - aid : 0;
 }
 const char *TcgPower_RetreatBlock(const struct TcgDuel *g, unsigned player)

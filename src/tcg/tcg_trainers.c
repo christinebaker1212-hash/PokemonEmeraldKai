@@ -29,12 +29,14 @@ static void Cure(struct TcgFieldCard *f)
     f->noAttack = 0;
     f->effectBy = 0;
     f->guard = f->weaken = f->charged = f->burn = f->shift = 0;
+    f->burned = 0;
 }
 static int Fail(struct TcgDuel *g, const char *message)
 {
     snprintf(g->error, sizeof(g->error), "%s", message);
     return TCG_INVALID;
 }
+#include "tcg_rtrainers.inc"
 int TcgDuel_Trainer(struct TcgDuel *g, const struct TcgAction *a)
 {
     struct TcgPlayer *p = &g->players[g->current], *op = &g->players[g->current ^ 1];
@@ -46,9 +48,18 @@ int TcgDuel_Trainer(struct TcgDuel *g, const struct TcgAction *a)
         return TCG_INVALID;
     played = p->hand[a->hand];
     card = Tcg_Card(p->cards[played]);
-    id = card->id;
     if (card->kind != TCG_TRAINER)
         return Fail(g, "Choose a Trainer card.");
+    /* (a reprint plays as its first printing) */
+    id = Tcg_Canon(card->id);
+    /* The regional sets' kinds: one Supporter a turn, one Stadium of a name in play, one Tool a Pokemon */
+    if ((card->flags & TCG_CF_SUPPORTER) && p->supporterPlayed)
+        return Fail(g, "You can play only one Supporter card each turn.");
+    if ((card->flags & TCG_CF_STADIUM) && TcgDuel_Stadium(g, NULL) == id)
+        return Fail(g, "That Stadium is already in play.");
+    if ((card->flags & TCG_CF_TOOL) &&
+        (a->slot >= TCG_FIELD_SIZE || !p->field[a->slot].stackSize || TcgDuel_Tool(g, g->current, a->slot, NULL)))
+        return Fail(g, "Attach it to one of your Pokemon without a Pokemon Tool.");
     /* The transactional caller restores all piles if any selection is invalid. */
     TcgPile_Remove(p->hand, &p->handSize, a->hand);
     TcgDuel_Event(g, TCG_EV_TRAINER, g->current, a->slot, 0, id, 0);
@@ -714,10 +725,41 @@ int TcgDuel_Trainer(struct TcgDuel *g, const struct TcgAction *a)
         }
         break;
     default:
-        snprintf(g->error, sizeof(g->error), "Trainer effect not yet ported: %s", Tcg_Card(id)->name);
-        return TCG_UNSUPPORTED;
+    {
+        int result = RegionTrainer(g, a, played, id);
+        if (result == RT_PLACED)
+            return TCG_OK;
+        if (result != TCG_OK)
+            return result;
+        break;
     }
-    p->discard[p->discardSize++] = played;
+    }
+    /* Where it goes: a Supporter beside the Active to the turn's end, a Stadium into play (the one there before to its
+     * owner's discard pile), a Tool onto its Pokemon, the rest to the discard pile */
+    if (card->flags & TCG_CF_SUPPORTER)
+    {
+        p->supporterPlayed = 1;
+        p->supporterCard = (uint8_t)(played + 1);
+    }
+    else if (card->flags & TCG_CF_STADIUM)
+    {
+        unsigned who;
+        for (who = 0; who < 2; who++)
+            if (g->players[who].stadium)
+            {
+                struct TcgPlayer *q = &g->players[who];
+                q->discard[q->discardSize++] = (uint8_t)(q->stadium - 1);
+                q->stadium = 0;
+            }
+        p->stadium = (uint8_t)(played + 1);
+    }
+    else if (card->flags & TCG_CF_TOOL)
+    {
+        f = &p->field[a->slot];
+        f->attached[f->attachedSize++] = (uint8_t)played;
+    }
+    else
+        p->discard[p->discardSize++] = played;
     TcgPower_Sanitize(g); /* (Imakuni? on Snorlax) */
     TcgDuel_ResolveKnockouts(g);
     TcgDuel_Log(g, "Player %u plays %s.", g->current + 1, Tcg_Card(id)->name);

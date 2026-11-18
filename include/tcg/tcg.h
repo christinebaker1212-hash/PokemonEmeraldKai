@@ -62,6 +62,8 @@ struct TcgCard
      * Boy games') */
     uint16_t flags;
     uint8_t origin;
+    /* a reprint's first printing (the same name and rules: one handler for all; 0 itself) */
+    uint16_t canon;
 };
 enum
 {
@@ -122,6 +124,8 @@ enum
     TCG_ER_RETRO
 };
 unsigned Tcg_EnergyRule(unsigned id);
+/* A card's first printing with the same rules (TcgCard.canon), else itself */
+unsigned Tcg_Canon(unsigned id);
 unsigned Tcg_EnergyProvides(unsigned id);
 /* Each GB2 booster's cards (0 ends a list) */
 extern const uint16_t gTcgGb2PackCards[TCG_GB2_PACKS][TCG_GB2_PACK_MAX];

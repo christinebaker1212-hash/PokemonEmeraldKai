@@ -10,10 +10,25 @@
 static const struct TcgStep sNoSteps[1] = {{0, 0, 0, 0, 0, NULL}};
 static unsigned CardOf(const struct TcgDuel *g, unsigned who, unsigned physical) { return g->players[who].cards[physical]; }
 static const struct TcgCard *Field(const struct TcgDuel *g, unsigned who, unsigned slot) { return TcgDuel_Field(g, who, slot); }
+static const struct TcgStep *RegionTrainerSteps(unsigned id, int *count);
+static void MenuAdd(struct TcgFlowMenu *m, const char *label, unsigned value, int ok, const char *why);
+const char *TcgFlow_OwnerWord(unsigned owner)
+{
+    static const char *const words[TCG_OWNERS] = {"Brock", "Misty", "Erika", "Lt. Surge", "Sabrina", "Blaine",
+                                                  "Giovanni", "Koga"};
+    return owner < TCG_OWNERS ? words[owner] : "";
+}
+int TcgFlow_StepIsTarget(const struct TcgStep *st)
+{
+    return st->kind == TCG_ST_OPP_SLOT || st->filter == TCG_F_OTHER_MINE ||
+           (st->filter >= TCG_F_OWNER_OTHER && st->filter < TCG_F_OWNER_OTHER + TCG_OWNERS);
+}
 
 /* ------------------------------------------------------------------------------------------------------ steps */
 const struct TcgStep *TcgFlow_TrainerSteps(unsigned id, int *count)
 {
+    /* (a reprint asks as its first printing) */
+    id = Tcg_Canon(id);
 #define STEPS(...)                                                                                                     \
     do                                                                                                                 \
     {                                                                                                                  \
@@ -114,8 +129,7 @@ const struct TcgStep *TcgFlow_TrainerSteps(unsigned id, int *count)
     case TCG_CARD_NIGHTLY_GARBAGE_RUN:
         STEPS({TCG_ST_PICK, TCG_F_GARBAGE, TCG_SRC_MY_DISCARD, 1, 3, "Shuffle up to 3 into your deck."});
     }
-    *count = 0;
-    return sNoSteps;
+    return RegionTrainerSteps(id, count);
 }
 /* A used Pokemon Power's choices: the first Pokemon chosen is action.target, the
  * second action.attack (src/tcg/tcg_powers.c TcgDuel_Power) */
@@ -174,6 +188,7 @@ const struct TcgStep *TcgFlow_PlaySteps(unsigned cardId, int *count)
     *count = 0;
     return sNoSteps;
 }
+#include "tcg_rtrainers_flow.inc"
 #undef STEPS
 /* The prompt for an attack's menu */
 const char *TcgFlow_AttackPrompt(const char *name)
@@ -442,7 +457,23 @@ int TcgFlow_CardMatches(const struct TcgDuel *g, unsigned owner, unsigned physic
         return c->kind == TCG_POKEMON && c->stage && (c->dark || !strncmp(c->name, "Dark ", 5));
     case TCG_F_GARBAGE:
         return c->kind == TCG_POKEMON || (c->kind == TCG_ENERGY && c->id <= 6);
+    case TCG_F_WATER_ENERGY:
+        return c->id == TCG_CARD_WATER_ENERGY;
+    case TCG_F_BASIC_NOT_BABY:
+        return c->kind == TCG_POKEMON && !c->stage && !(c->flags & TCG_CF_BABY);
+    case TCG_F_POKEMON_CARD:
+        return c->kind == TCG_POKEMON;
+    case TCG_F_TM_TOOL:
+        return c->kind == TCG_TRAINER && (c->flags & (TCG_CF_TM | TCG_CF_TOOL));
+    case TCG_F_SUPPORTER_STADIUM:
+        return c->kind == TCG_TRAINER && (c->flags & (TCG_CF_SUPPORTER | TCG_CF_STADIUM));
+    case TCG_F_BALL:
+        return c->kind == TCG_TRAINER && strstr(c->name, "Ball") != NULL;
+    case TCG_F_UNOWN:
+        return c->kind == TCG_POKEMON && strstr(c->name, "Unown") != NULL;
     default:
+        if (filter >= TCG_F_OWNER_CARD && filter < TCG_F_OWNER_CARD + TCG_OWNERS)
+            return c->kind == TCG_POKEMON && strstr(c->name, TcgFlow_OwnerWord((unsigned)filter - TCG_F_OWNER_CARD));
         return 1;
     }
 }
@@ -471,6 +502,21 @@ int TcgFlow_SlotMatches(const struct TcgDuel *g, unsigned me, const struct TcgAc
         return c && TcgFlow_HasEnergy(g, who, slot);
     case TCG_F_EVOLVED:
         return c && f->stackSize >= 2;
+    case TCG_F_NO_TOOL:
+        return c && c->kind == TCG_POKEMON && !TcgDuel_Tool(g, who, slot, NULL);
+    case TCG_F_OTHER_MINE:
+        return c && slot != a->slot;
+    case TCG_F_HAS_BASIC_ENERGY:
+    case TCG_F_DAMAGED_BASIC_ENERGY:
+    {
+        unsigned i;
+        if (!c || (filter == TCG_F_DAMAGED_BASIC_ENERGY && !f->damage))
+            return 0;
+        for (i = 0; i < f->attachedSize; i++)
+            if (p->cards[f->attached[i]] >= 1 && p->cards[f->attached[i]] <= 6)
+                return 1;
+        return 0;
+    }
     case TCG_F_BREEDER_BASIC:
     {
         const struct TcgCard *stage2 = a->selectionCount ? Tcg_Card(CardOf(g, me, a->selections[0])) : NULL;
@@ -525,6 +571,12 @@ int TcgFlow_SlotMatches(const struct TcgDuel *g, unsigned me, const struct TcgAc
     case TCG_F_FOSSIL_EVOLVED:
         return c && f->stackSize > 1 && CardOf(g, who, f->stack[0]) == TCG_CARD_MYSTERIOUS_FOSSIL;
     }
+    /* (a Pokemon with Brock in its name...; another one than the first chosen) */
+    if (filter >= TCG_F_OWNER_SLOT && filter < TCG_F_OWNER_SLOT + TCG_OWNERS)
+        return c && c->kind == TCG_POKEMON && strstr(c->name, TcgFlow_OwnerWord((unsigned)filter - TCG_F_OWNER_SLOT));
+    if (filter >= TCG_F_OWNER_OTHER && filter < TCG_F_OWNER_OTHER + TCG_OWNERS)
+        return c && c->kind == TCG_POKEMON && slot != a->slot &&
+               strstr(c->name, TcgFlow_OwnerWord((unsigned)filter - TCG_F_OWNER_OTHER));
     return 0;
 }
 
@@ -591,6 +643,8 @@ int TcgFlow_HandPlayable(const struct TcgDuel *g, unsigned me, const struct TcgC
         return snprintf(reason, size, "Headache: no Trainer cards this turn."), 0;
     if (c->kind == TCG_TRAINER && p->noSupporters && (c->flags & TCG_CF_SUPPORTER))
         return snprintf(reason, size, "No Supporter cards this turn."), 0;
+    if (c->kind == TCG_TRAINER && c->id > TCG_CARD_GB_COUNT && !RegionTrainerPlayable(g, me, c, reason, size))
+        return 0;
     return 1;
 }
 
@@ -635,7 +689,7 @@ static int InDiscard(const struct TcgDuel *g, unsigned me, int kind, int basicOn
 /* Trainers that take from the deck and can't be played with an empty one (the rules say "Your deck is empty.") */
 int TcgFlow_NeedsDeck(unsigned id)
 {
-    switch (id)
+    switch (Tcg_Canon(id))
     {
     case TCG_CARD_BILL:
     case TCG_CARD_POKEDEX:
@@ -661,7 +715,7 @@ int TcgFlow_TrainerHasUse(const struct TcgDuel *g, unsigned me, unsigned id)
         bench += !p->field[s].stackSize;
     if (TcgFlow_NeedsDeck(id) && !p->deckSize)
         return 0;
-    switch (id)
+    switch (Tcg_Canon(id))
     {
     case TCG_CARD_POTION:
     case TCG_CARD_POKEMON_CENTER:
@@ -798,6 +852,11 @@ static void MenuAdd(struct TcgFlowMenu *m, const char *label, unsigned value, in
     m->count++;
 }
 
+unsigned TcgFlow_TrainerChoices(const struct TcgDuel *g, unsigned me, unsigned cardId, struct TcgFlowMenu *m,
+                                const char **reason)
+{
+    return RegionTrainerChoices(g, me, cardId, m, reason);
+}
 unsigned TcgFlow_PowerChoices(const struct TcgDuel *g, unsigned me, unsigned slot, struct TcgFlowMenu *m,
                               const char **reason)
 {
@@ -954,6 +1013,8 @@ static unsigned AskPick(struct TcgFlow *f, const struct TcgDuel *g, int source, 
         valid += f->pickOk[i] = (uint8_t)TcgFlow_CardMatches(g, owner, f->pick[i], filter);
     if (source == TCG_SRC_OPP_HAND && valid < (unsigned)min)
         min = (int)valid; /* (none of theirs to choose: their hand is only looked at) */
+    if (min == TCG_MIN_ALL)
+        min = (int)(valid < (unsigned)max ? valid : (unsigned)max);
     f->pickCount = (uint8_t)n;
     f->pickOwner = (uint8_t)owner;
     f->pickSource = (uint8_t)source;
@@ -1025,7 +1086,8 @@ static unsigned Next(struct TcgFlow *f, const struct TcgDuel *g)
     if (st->kind == TCG_ST_CHOICE)
     {
         const char *why;
-        if (!TcgFlow_PowerChoices(g, f->me, f->action.slot, &f->menu, &why))
+        if (f->action.type == TCG_PLAY_TRAINER ? !TcgFlow_TrainerChoices(g, f->me, f->flowCard, &f->menu, &why)
+                                               : !TcgFlow_PowerChoices(g, f->me, f->action.slot, &f->menu, &why))
             return Fail(f, why ? why : "There is nothing that can be chosen.");
         f->prompt = st->prompt;
         return f->q = TCG_Q_MENU;
@@ -1195,7 +1257,7 @@ unsigned TcgFlow_Slot(struct TcgFlow *f, const struct TcgDuel *g, unsigned slot)
     case TCG_FLOW_HAND:
         if (f->action.type == TCG_PLAY_TRAINER || f->nsteps)
         {
-            if (f->steps[f->step].kind == TCG_ST_OPP_SLOT)
+            if (TcgFlow_StepIsTarget(&f->steps[f->step]))
                 f->action.target = (uint8_t)slot;
             else
                 f->action.slot = (uint8_t)slot;
