@@ -22,28 +22,6 @@ static int EarlierSlotSteps(const struct TcgStep *steps, int step)
 }
 int TcgFlow_PowerSlotIsTarget(const struct TcgStep *steps, int step) { return !EarlierSlotSteps(steps, step); }
 static void MenuAdd(struct TcgFlowMenu *m, const char *label, unsigned value, int ok, const char *why);
-const char *TcgFlow_OwnerWord(unsigned owner)
-{
-    static const char *const words[TCG_OWNERS] = {"Brock", "Misty", "Erika", "Lt. Surge", "Sabrina", "Blaine",
-                                                  "Giovanni", "Koga"};
-    return owner < TCG_OWNERS ? words[owner] : "";
-}
-int TcgFlow_InNameGroup(const char *name, unsigned group)
-{
-    static const char *const groups[TCG_NAME_GROUPS][5] = {
-        {"Gyarados", "Dark Gyarados", "Shining Gyarados"},
-        {"Tentacool", "Tentacruel", "Misty's Tentacool", "Misty's Tentacruel"},
-        {"Sabrina's Gastly", "Sabrina's Haunter", "Sabrina's Gengar"},
-        {"Omanyte", "Omastar", "Kabuto", "Kabutops"},
-        {"Giovanni's Nidoking"},
-        {"Murkrow"},
-    };
-    unsigned i;
-    for (i = 0; group < TCG_NAME_GROUPS && i < 5 && groups[group][i]; i++)
-        if (!strcmp(name, groups[group][i]))
-            return 1;
-    return 0;
-}
 int TcgFlow_StepIsTarget(const struct TcgStep *st)
 {
     return st->kind == TCG_ST_OPP_SLOT || st->filter == TCG_F_OTHER_MINE ||

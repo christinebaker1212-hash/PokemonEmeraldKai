@@ -1,6 +1,7 @@
 #include "mp_version.h"
 #include "tcg/card_ids.h"
 #include "tcg/duel.h"
+#include "tcg/flow.h"
 #include <stdarg.h>
 #include <stdio.h>
 #include <string.h>
@@ -1448,4 +1449,28 @@ int TcgDuel_Apply(struct TcgDuel *g, const struct TcgAction *action)
     else
         snprintf(g->error, sizeof(g->error), "%s", next.error);
     return result;
+}
+
+/* (flow.h's: the names cards are searched by; here, as every build of the rules links this file) */
+const char *TcgFlow_OwnerWord(unsigned owner)
+{
+    static const char *const words[TCG_OWNERS] = {"Brock", "Misty", "Erika", "Lt. Surge", "Sabrina", "Blaine",
+                                                  "Giovanni", "Koga"};
+    return owner < TCG_OWNERS ? words[owner] : "";
+}
+int TcgFlow_InNameGroup(const char *name, unsigned group)
+{
+    static const char *const groups[TCG_NAME_GROUPS][5] = {
+        {"Gyarados", "Dark Gyarados", "Shining Gyarados"},
+        {"Tentacool", "Tentacruel", "Misty's Tentacool", "Misty's Tentacruel"},
+        {"Sabrina's Gastly", "Sabrina's Haunter", "Sabrina's Gengar"},
+        {"Omanyte", "Omastar", "Kabuto", "Kabutops"},
+        {"Giovanni's Nidoking"},
+        {"Murkrow"},
+    };
+    unsigned i;
+    for (i = 0; group < TCG_NAME_GROUPS && i < 5 && groups[group][i]; i++)
+        if (!strcmp(name, groups[group][i]))
+            return 1;
+    return 0;
 }
