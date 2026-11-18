@@ -468,6 +468,83 @@ static int UsePowers(void)
            used, blocked);
     return 0;
 }
+/* Every finished regional attack built through the flow (the board's and the phone's questions: slots, picks and menus
+ * answered with the first choices, the most cards on even seeds, a menu's choices in turn): the rules must take it */
+static int AttackFlows(void)
+{
+    unsigned id, attack, built = 0, skipped = 0;
+    for (id = TCG_CARD_GB_COUNT + 1; id <= TCG_CARD_COUNT; id++)
+    {
+        const struct TcgCard *c = Tcg_Card(id);
+        if (!c || c->kind != TCG_POKEMON)
+            continue;
+        for (attack = 0; attack < TCG_ATTACKS; attack++)
+        {
+            uint32_t seed;
+            if (!c->attacks[attack].name[0] || c->attacks[attack].category == TCG_POKEMON_POWER)
+                continue;
+            for (seed = 1; seed <= 4; seed++)
+            {
+                struct TcgDuel g;
+                struct TcgFlow f;
+                unsigned q, k, guard = 0;
+                int result;
+                Stage(&g, id, attack, seed);
+                Give(&g, 0, TCG_CARD_GRASS_ENERGY, 0);
+                Give(&g, 0, TCG_CARD_FIRE_ENERGY, 1);
+                Give(&g, 0, TCG_CARD_DIGLETT, 1);
+                if (seed & 1)
+                    g.players[1].field[1].damage = 10;
+                q = TcgFlow_Begin(&f, &g, 0, TCG_FLOW_ATTACK, attack);
+                while (q != TCG_Q_DONE && q != TCG_Q_FAIL && guard++ < 16)
+                {
+                    if (q == TCG_Q_SLOT)
+                    {
+                        for (k = 0; k < TCG_FIELD_SIZE && !(f.slotMask >> k & 1); k++)
+                            ;
+                        q = TcgFlow_Slot(&f, &g, k);
+                    }
+                    else if (q == TCG_Q_PICK)
+                    {
+                        uint8_t chosen[TCG_DECK_SIZE];
+                        unsigned n = 0, want = seed % 2 ? f.pickMin : f.pickMax;
+                        for (k = 0; k < f.pickCount && n < want; k++)
+                            if (f.pickOk[k])
+                                chosen[n++] = f.pick[k];
+                        if (n < f.pickMin)
+                            break;
+                        q = TcgFlow_Pick(&f, &g, chosen, n);
+                    }
+                    else if (q == TCG_Q_MENU)
+                    {
+                        unsigned tries;
+                        for (tries = 0, k = seed % f.menu.count; tries < f.menu.count && !f.menu.ok[k]; tries++)
+                            k = (k + 1) % f.menu.count;
+                        if (!f.menu.ok[k])
+                            break;
+                        q = TcgFlow_Menu(&f, &g, f.menu.value[k]);
+                    }
+                }
+                if (q != TCG_Q_DONE)
+                {
+                    skipped++;
+                    continue;
+                }
+                result = TcgDuel_Apply(&g, &f.action);
+                if (result != TCG_OK)
+                {
+                    printf("FAIL %s's %s (seed %u): the flow's attack was refused: %d %s\n", c->name,
+                           c->attacks[attack].name, seed, result, g.error);
+                    return 1;
+                }
+                assert(TcgDuel_Conserved(&g));
+                built++;
+            }
+        }
+    }
+    printf("PASS finished regional attacks through the flow: %u built and taken, %u not usable there\n", built, skipped);
+    return 0;
+}
 /* Every Stadium a player uses during their turn, used through the flow on a staged board (first choices), twice: once a
  * turn but Celadon / Saffron City Gym; then the duel goes on with the AI */
 static int Relabel(struct TcgDuel *g, unsigned who, unsigned id)
@@ -689,7 +766,7 @@ int main(void)
            steps);
     if (SpecialEnergy() || Babies())
         return 1;
-    if (PlayTrainers() || UsePowers() || UseStadiums())
+    if (PlayTrainers() || UsePowers() || UseStadiums() || AttackFlows())
         return 1;
     /* Decks of them, each type against the others, to the end */
     {

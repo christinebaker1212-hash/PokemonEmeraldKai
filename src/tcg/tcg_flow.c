@@ -332,6 +332,38 @@ static int AttackPickSteps(const struct TcgDuel *g, unsigned me, const struct Tc
         out[n++] = st;
         break;
     }
+    case TCG_APICK_SEARCH:
+    {
+        static const struct
+        {
+            uint8_t kind, filter, source;
+            const char *prompt;
+        } searches[] = {
+            {10, TCG_F_SUPPORTER, TCG_SRC_DECK, "Take which Supporter?"},
+            {11, TCG_F_TM_TOOL, TCG_SRC_DECK, "Take which Technical Machine or Pokemon Tool?"},
+            {12, TCG_F_TRAINER, TCG_SRC_DECK, "Take which Trainer?"},
+            {20, TCG_F_BASIC, TCG_SRC_DECK, "Put which Basic Pokemon onto your Bench?"},
+            {21, TCG_F_BABY, TCG_SRC_DECK, "Put which Baby Pokemon onto your Bench?"},
+            {30, TCG_F_BASIC, TCG_SRC_MY_DISCARD, "Put which Basic Pokemon onto your Bench?"},
+            {40, TCG_F_GARBAGE, TCG_SRC_MY_DISCARD, "Put which card into your hand?"},
+        };
+        unsigned i;
+        for (i = 0; i < sizeof(searches) / sizeof(searches[0]); i++)
+            if (searches[i].kind == count)
+            {
+                struct TcgStep st = {TCG_ST_PICK, searches[i].filter, searches[i].source, 0, 1, searches[i].prompt};
+                out[n++] = st;
+            }
+        break;
+    }
+    case TCG_APICK_HAND_ENERGY:
+    {
+        unsigned kind = count >> 8, max = count & 255;
+        struct TcgStep st = {TCG_ST_PICK, kind == 2 ? TCG_F_GRASS_ENERGY : kind == 1 ? TCG_F_BASIC_ENERGY : TCG_F_ENERGY,
+                             TCG_SRC_HAND, 0, (uint8_t)(max > 60 ? 60 : max), "Attach which Energy from your hand?"};
+        out[n++] = st;
+        break;
+    }
     case TCG_APICK_DISCARD_CARD:
     {
         struct TcgStep st = {TCG_ST_PICK, TCG_F_ANY, count ? TCG_SRC_OPP_DISCARD : TCG_SRC_MY_DISCARD, 0, 1,
@@ -408,11 +440,13 @@ int TcgFlow_AttackSteps(const struct TcgDuel *g, unsigned me, const struct TcgAc
     }
     choice = attack ? TcgDuel_AttackChoice(attack, NULL) : 0;
     ask = attack ? TcgDuel_AttackAsk(attack) : TCG_ASK_NONE;
-    if ((choice == 1 && BenchOn(g, me ^ 1)) || (choice == 2 && BenchOn(g, me)) || choice == 3 || choice == 4)
+    if ((choice == 1 && BenchOn(g, me ^ 1)) || (choice == 2 && BenchOn(g, me)) || choice == 3 || choice == 4 ||
+        (choice == 5 && BenchOn(g, me ^ 1)) || choice == 6)
     {
         const char *words = TcgDuel_AttackTargetPrompt(attack);
-        struct TcgStep st = {choice == 1 || choice == 3 ? TCG_ST_OPP_SLOT : TCG_ST_MY_SLOT,
-                             choice >= 3 ? TCG_F_OCCUPIED : TCG_F_BENCH, 0, 0, 0,
+        struct TcgStep st = {choice == 1 || choice == 3 || choice >= 5 ? TCG_ST_OPP_SLOT : TCG_ST_MY_SLOT,
+                             choice == 6 ? TCG_F_DAMAGED : choice == 5 ? TCG_F_BENCH_CLEAN : choice >= 3 ? TCG_F_OCCUPIED : TCG_F_BENCH,
+                             0, 0, 0,
                              words         ? words
                              : choice == 1 ? "Aim at which of their Benched Pokemon?"
                              : choice == 2 ? "Switch with which of your Benched Pokemon?"
@@ -512,6 +546,12 @@ int TcgFlow_CardMatches(const struct TcgDuel *g, unsigned owner, unsigned physic
         return c->kind == TCG_POKEMON && strstr(c->name, "Unown") != NULL;
     case TCG_F_LIGHTNING_ENERGY:
         return c->id == TCG_CARD_LIGHTNING_ENERGY;
+    case TCG_F_GRASS_ENERGY:
+        return c->id == TCG_CARD_GRASS_ENERGY;
+    case TCG_F_SUPPORTER:
+        return c->kind == TCG_TRAINER && (c->flags & TCG_CF_SUPPORTER);
+    case TCG_F_BABY:
+        return c->kind == TCG_POKEMON && (c->flags & TCG_CF_BABY);
     case TCG_F_OMANYTE_KABUTO:
         return c->kind == TCG_POKEMON && (!strcmp(c->name, "Omanyte") || !strcmp(c->name, "Kabuto"));
     case TCG_F_LATER_STAGE:
@@ -639,6 +679,8 @@ int TcgFlow_SlotMatches(const struct TcgDuel *g, unsigned me, const struct TcgAc
         return c && slot != a->target;
     case TCG_F_WATER_POKEMON:
         return c && c->kind == TCG_POKEMON && TcgDuel_Type(g, who, slot) == TCG_WATER;
+    case TCG_F_BENCH_CLEAN:
+        return c && slot && !f->damage;
     case TCG_F_FIRE_POKEMON:
         return c && c->kind == TCG_POKEMON && TcgDuel_Type(g, who, slot) == TCG_FIRE;
     case TCG_F_HAS_POWER:

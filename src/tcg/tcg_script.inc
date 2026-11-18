@@ -66,7 +66,16 @@
  *             off it per Energy card on it | healtyp:n n off it and each of yours of its type | bshield your Bench
  *             takes no damage from attacks until their next turn ends | spike the basic Energy picked from the deck
  *             onto the one of yours chosen
- * Coins (0):  cpk one per Pokemon in play (both) | Damage (0): mulpk:x x times your Pokemon in play (set) */
+ * Coins (0):  cpk one per Pokemon in play (both) | Damage (0): mulpk:x x times your Pokemon in play (set) |
+ *             addfam:x x per Benched Pokemon of yours of its evolution family
+ * Before (3): dragmay[:1] their chosen Benched one in, if one was chosen (1: only one with no damage counters)
+ * After (1):  weak:n the Defending's attacks on it do 10 / 20 less next turn (TCG_WEAKEN_n) | srchk:K the card picked
+ *             from the deck (K 0 a Supporter, 1 a Technical Machine or Pokemon Tool, 2 a Trainer) into the hand |
+ *             dbench:K the Pokemon picked from the deck (K 0 Baby or Basic, 1 Baby) onto the Bench | disbench the Baby
+ *             or Basic picked from the discard pile onto the Bench | dishand the Pokemon or basic Energy picked from
+ *             the discard pile into the hand | hatt:K,n,t up to n Energy picked from the hand (K 0 any, 1 basic, 2
+ *             Grass) onto it (t 0) / the one of yours chosen (t 1: Grass Pokemon when K is 2) | any1:x,1 (only a
+ *             damaged one) */
 #define SCRIPT_TOKEN 48
 /* Which of the player's Pokemon "it" is: the attacker (0), or a Pokemon whose power runs a script (tcg_powers.c) */
 static unsigned sScriptSelf;
@@ -124,9 +133,9 @@ static int ScriptPhase(const struct ScriptOp *op)
                                          "adds", "addoh", "eret", "dtrdisc", "opt", "cop", "addbd", "addrc",
                                          "addpk", "milladdb", "addop", "adddis",
                                          "mulname", "cde", "coe", "cmbe", "mulmb", "addtypes", "dsxh", "cpk",
-                                         "mulpk"};
+                                         "mulpk", "addfam"};
     unsigned i;
-    if (ScriptIs(op, "drag"))
+    if (ScriptIs(op, "drag") || ScriptIs(op, "dragmay"))
         return 3;
     for (i = 0; i < sizeof(before) / sizeof(before[0]); i++)
         if (ScriptIs(op, before[i]))
@@ -234,6 +243,25 @@ static unsigned ScriptEnergyOf(const struct TcgDuel *g, unsigned who, unsigned s
 {
     return type >= TCG_TYPES ? EnergyCards(g, who, slot) : EnergyOfType(g, who, slot, (unsigned)type);
 }
+/* The Basic an evolution line starts from (its name: for addfam) */
+static const char *ScriptFamily(const struct TcgCard *c)
+{
+    unsigned depth, i;
+    for (depth = 0; c && c->stage && depth < 3; depth++)
+    {
+        const struct TcgCard *from = NULL;
+        for (i = 1; i <= TCG_CARD_COUNT && !from; i++)
+        {
+            const struct TcgCard *k = Tcg_CardAny(i);
+            if (k && k->kind == TCG_POKEMON && k->stage + 1 == c->stage && !strcmp(k->name, c->evolvesFrom))
+                from = k;
+        }
+        if (!from)
+            return c->evolvesFrom;
+        c = from;
+    }
+    return c ? c->name : "";
+}
 static int ScriptRun(struct TcgDuel *g, const char *script, const struct TcgAttack *a, const struct TcgAction *action,
                      unsigned *damage, int after)
 {
@@ -301,6 +329,15 @@ static int ScriptRun(struct TcgDuel *g, const char *script, const struct TcgAtta
                 ScriptFlip(g, n);
             else
                 *damage = (unsigned)x * n;
+        }
+        else if (ScriptIs(&o, "addfam"))
+        {
+            /* (its family: the Basic its evolution line starts from) */
+            const struct TcgCard *it = TcgDuel_Field(g, me, sScriptSelf);
+            unsigned n = 0;
+            for (s = 1; s < TCG_FIELD_SIZE; s++)
+                n += s != sScriptSelf && it && TcgDuel_Field(g, me, s) && ScriptFamily(TcgDuel_Field(g, me, s)) == ScriptFamily(it);
+            *damage += (unsigned)x * n;
         }
         else if (ScriptIs(&o, "mulmb"))
             *damage = (unsigned)x * BenchCount(g, me);
@@ -578,7 +615,7 @@ static int ScriptRun(struct TcgDuel *g, const char *script, const struct TcgAtta
         }
         else if (ScriptIs(&o, "any1"))
         {
-            if (!ValidTarget(g, them, action->target, 0))
+            if (!ValidTarget(g, them, action->target, 0) || (y && !op->field[action->target].damage))
                 return TCG_INVALID;
             if (action->target || !blocked)
                 TcgDuel_EffectDamage(g, them, action->target, x, 0);
@@ -587,6 +624,87 @@ static int ScriptRun(struct TcgDuel *g, const char *script, const struct TcgAtta
         {
             if (BenchCount(g, them) && !blocked)
                 g->switchPending = 1;
+        }
+        else if (ScriptIs(&o, "dragmay"))
+        {
+            unsigned t = action->target;
+            if (t && BenchCount(g, them) && !blocked)
+            {
+                if (!ValidTarget(g, them, t, 1) || (x && op->field[t].damage))
+                    return TCG_INVALID;
+                Switch(g, them, t);
+            }
+        }
+        else if (ScriptIs(&o, "weak"))
+        {
+            if (!blocked && foe->stackSize)
+            {
+                foe->weaken = (uint8_t)x;
+                foe->effectBy = (uint8_t)(self->stack[self->stackSize - 1] + 1);
+            }
+        }
+        else if (ScriptIs(&o, "srchk") || ScriptIs(&o, "dbench") || ScriptIs(&o, "disbench") || ScriptIs(&o, "dishand"))
+        {
+            int fromDeck = ScriptIs(&o, "srchk") || ScriptIs(&o, "dbench");
+            int at = action && action->selectionCount ? Picked(action, 0, fromDeck ? p->deck : p->discard,
+                                                               fromDeck ? p->deckSize : p->discardSize) : -1;
+            if (at >= 0)
+            {
+                uint8_t card = fromDeck ? p->deck[at] : p->discard[at];
+                const struct TcgCard *c = CardAt(g, me, card);
+                int ok = ScriptIs(&o, "srchk")
+                             ? c->kind == TCG_TRAINER && (x == 0 ? (c->flags & TCG_CF_SUPPORTER) != 0
+                                                          : x == 1 ? (c->flags & (TCG_CF_TM | TCG_CF_TOOL)) != 0 : 1)
+                         : ScriptIs(&o, "dishand") ? c->kind == TCG_POKEMON || (c->kind == TCG_ENERGY && c->id <= 6)
+                                                   : c->kind == TCG_POKEMON && !c->stage && (x != 1 || (c->flags & TCG_CF_BABY));
+                if (!ok)
+                    return TCG_INVALID;
+                if (ScriptIs(&o, "srchk") || ScriptIs(&o, "dishand"))
+                {
+                    p->hand[p->handSize++] = TcgPile_Remove(fromDeck ? p->deck : p->discard,
+                                                            fromDeck ? &p->deckSize : &p->discardSize, (unsigned)at);
+                    TcgDuel_Log(g, "Shown: %s.", c->name);
+                }
+                else
+                {
+                    unsigned k;
+                    for (k = 1; k < TCG_FIELD_SIZE && p->field[k].stackSize; k++)
+                        ;
+                    if (k == TCG_FIELD_SIZE)
+                        return TCG_INVALID;
+                    memset(&p->field[k], 0, sizeof(p->field[k]));
+                    p->field[k].stack[p->field[k].stackSize++] = TcgPile_Remove(fromDeck ? p->deck : p->discard,
+                                                                                fromDeck ? &p->deckSize : &p->discardSize, (unsigned)at);
+                    p->field[k].enteredTurn = g->turn;
+                    TcgDuel_Event(g, TCG_EV_PLAY, me, k, 0, c->id, 0);
+                }
+            }
+            if (fromDeck)
+                TcgDuel_Shuffle(g, me);
+        }
+        else if (ScriptIs(&o, "hatt"))
+        {
+            /* the Energy picked from the hand onto it / the one of yours chosen */
+            unsigned to = z ? action->target : sScriptSelf, k;
+            struct TcgFieldCard *t;
+            if (!ValidTarget(g, me, to, 0) || (action->selectionCount > (unsigned)y))
+                return TCG_INVALID;
+            if (z && x == 2 && TcgDuel_Type(g, me, to) != TCG_GRASS)
+                return TCG_INVALID;
+            for (k = 0; k < action->selectionCount; k++)
+            {
+                int at = Picked(action, k, p->hand, p->handSize);
+                const struct TcgCard *c = at >= 0 ? CardAt(g, me, p->hand[at]) : NULL;
+                if (!c || c->kind != TCG_ENERGY || (x >= 1 && c->id > 6) || (x == 2 && c->id != TCG_CARD_GRASS_ENERGY))
+                    return TCG_INVALID;
+            }
+            t = &p->field[to];
+            for (k = 0; k < action->selectionCount; k++)
+            {
+                int at = Picked(action, k, p->hand, p->handSize);
+                t->attached[t->attachedSize++] = TcgPile_Remove(p->hand, &p->handSize, (unsigned)at);
+                TcgDuel_Event(g, TCG_EV_ATTACH, me, to, 0, p->cards[t->attached[t->attachedSize - 1]], 0);
+            }
         }
         else if (ScriptIs(&o, "lure") || ScriptIs(&o, "drag"))
         {
@@ -1531,6 +1649,14 @@ static unsigned ScriptChoice(const char *script, int *required)
                 *required = 1;
             return 1;
         }
+        if (ScriptIs(&o, "dragmay"))
+            return o.arg[0] ? 5 : 1;
+        if (ScriptIs(&o, "hatt") && o.arg[2])
+        {
+            if (required)
+                *required = 1;
+            return 4;
+        }
         if (ScriptIs(&o, "b1"))
             return 1;
         if (ScriptIs(&o, "ssw") || ScriptIs(&o, "eto") || ScriptIs(&o, "m1") || ScriptIs(&o, "srchb") ||
@@ -1544,6 +1670,12 @@ static unsigned ScriptChoice(const char *script, int *required)
         }
         if (ScriptIs(&o, "b1h") || ScriptIs(&o, "b1e") || ScriptIs(&o, "luremay"))
             return 1;
+        if (ScriptIs(&o, "any1") && o.arg[1])
+        {
+            if (required)
+                *required = 1;
+            return 6;
+        }
         if (ScriptIs(&o, "any1") || ScriptIs(&o, "any1h") || ScriptIs(&o, "ectr") || ScriptIs(&o, "dte") ||
             ScriptIs(&o, "any1e") || ScriptIs(&o, "any1c"))
         {
@@ -1584,6 +1716,10 @@ static const char *ScriptPrompt(const char *script)
             return "Hit which of their Benched Pokemon?";
         if (ScriptIs(&o, "luremay"))
             return "Then switch in which of theirs? (B: none)";
+        if (ScriptIs(&o, "dragmay"))
+            return o.arg[0] ? "Bring out which undamaged one of theirs? (B: none)" : "Bring out which of theirs? (B: none)";
+        if (ScriptIs(&o, "hatt"))
+            return "Attach the Energy to which of your Pokemon?";
         if (ScriptIs(&o, "ectr"))
             return "Put counters on which of their Pokemon?";
         if (ScriptIs(&o, "any1") || ScriptIs(&o, "any1h"))
@@ -1608,6 +1744,17 @@ static unsigned ScriptPick(const char *script, unsigned *count)
             return TCG_APICK_TARGET_ENERGY;
         if (ScriptIs(&o, "spike"))
             return TCG_APICK_DECK_ENERGY;
+        if (ScriptIs(&o, "srchk") || ScriptIs(&o, "dbench") || ScriptIs(&o, "disbench") || ScriptIs(&o, "dishand"))
+        {
+            *count = ScriptIs(&o, "srchk") ? 10u + (unsigned)o.arg[0] : ScriptIs(&o, "dbench") ? 20u + (unsigned)o.arg[0]
+                     : ScriptIs(&o, "disbench") ? 30u : 40u;
+            return TCG_APICK_SEARCH;
+        }
+        if (ScriptIs(&o, "hatt"))
+        {
+            *count = (unsigned)o.arg[1] | (unsigned)o.arg[0] << 8;
+            return TCG_APICK_HAND_ENERGY;
+        }
         if (ScriptIs(&o, "bpick"))
         {
             *count = 2;
@@ -1646,6 +1793,14 @@ static const char *ScriptBlock(const struct TcgDuel *g, unsigned player, const c
                 ;
             if (s == TCG_FIELD_SIZE)
                 return "They have no Benched Pokemon.";
+        }
+        if (ScriptIs(&o, "any1") && o.arg[1])
+        {
+            unsigned s;
+            for (s = 0; s < TCG_FIELD_SIZE && !(g->players[player ^ 1].field[s].stackSize && g->players[player ^ 1].field[s].damage); s++)
+                ;
+            if (s == TCG_FIELD_SIZE)
+                return "None of their Pokemon has damage counters.";
         }
         if (ScriptIs(&o, "needsc") && g->players[player].field[0].damage / 10 < (unsigned)o.arg[0])
             return "It needs more damage counters on it.";
@@ -1781,6 +1936,18 @@ static void ScriptAi(const struct TcgDuel *g, struct TcgAction *a, const char *s
         }
         else if (ScriptIs(&o, "any1e") || ScriptIs(&o, "any1c"))
             a->target = 0;
+        else if (ScriptIs(&o, "dragmay"))
+            a->target = 0; /* (the AI leaves the Defending Pokemon there) */
+        else if (ScriptIs(&o, "any1") && o.arg[1])
+        {
+            unsigned s;
+            for (s = 0; s < TCG_FIELD_SIZE; s++)
+                if (g->players[g->current ^ 1].field[s].stackSize && g->players[g->current ^ 1].field[s].damage)
+                {
+                    a->target = (uint8_t)s;
+                    break;
+                }
+        }
         else if (ScriptIs(&o, "spike"))
         {
             /* a basic Energy of the Active's type onto it, else any */

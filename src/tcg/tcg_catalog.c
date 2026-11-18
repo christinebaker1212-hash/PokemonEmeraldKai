@@ -3595,7 +3595,7 @@ const struct TcgCard gTcgCards[TCG_CARD_COUNT + 1] = {
 {.name="",.description="",.effect="NONE",.animation="ATK_ANIM_NONE",.cost={0},.damage=0,.category=TCG_DAMAGE_NORMAL},
 }
 },
-[572] = {.id=572, .name="Erika's Venusaur", .kind=TCG_POKEMON, .type=1, .rarity=2, .set=14, .set2=255, .dark=0, .holo=1, .flags=TCG_CF_OWNER, .origin=14,
+[572] = {.id=572, .name="Erika's Venusaur", .kind=TCG_POKEMON, .type=1, .rarity=2, .set=14, .set2=255, .dark=0, .holo=1, .flags=TCG_CF_OWNER|TCG_CF_READY, .origin=14,
 .hp=90, .stage=2, .species=3, .level=45, .retreat=2, .weakness=0, .resistance=255, .evolvesFrom="Erika's Ivysaur", .description="", .attacks={
 {.name="Growth",.description="Flip a coin. If heads, you may attach up to 2 Grass Energy cards from your hand to Erika's Venusaur.",.effect="gym2-4:a0",.animation="ATK_ANIM_HIT",.cost={0,1,0,0,0,0,0,0,0},.damage=0,.category=TCG_RESIDUAL},
 {.name="Wide Solarbeam",.description="If your opponent has any Benched Pokemon, choose 2 of them (or 1 if he or she only has 1). This attack does 20 damage to each of them. (Don't apply Weakness and Resistance for Benched Pokemon.)",.effect="gym2-4:a1",.animation="ATK_ANIM_HIT",.cost={0,4,0,0,0,0,0,0,0},.damage=20,.category=TCG_DAMAGE_NORMAL},
@@ -3824,7 +3824,7 @@ const struct TcgCard gTcgCards[TCG_CARD_COUNT + 1] = {
 {.name="",.description="",.effect="NONE",.animation="ATK_ANIM_NONE",.cost={0},.damage=0,.category=TCG_DAMAGE_NORMAL},
 }
 },
-[607] = {.id=607, .name="Erika's Bulbasaur", .kind=TCG_POKEMON, .type=1, .rarity=1, .set=14, .set2=255, .dark=0, .holo=0, .flags=TCG_CF_OWNER, .origin=14,
+[607] = {.id=607, .name="Erika's Bulbasaur", .kind=TCG_POKEMON, .type=1, .rarity=1, .set=14, .set2=255, .dark=0, .holo=0, .flags=TCG_CF_OWNER|TCG_CF_READY, .origin=14,
 .hp=50, .stage=0, .species=1, .level=15, .retreat=1, .weakness=0, .resistance=255, .evolvesFrom="", .description="", .attacks={
 {.name="Sleep Seed",.description="The Defending Pokemon is now Asleep.",.effect="gym2-39:a0",.animation="ATK_ANIM_HIT",.cost={0,1,0,0,0,0,0,0,0},.damage=10,.category=TCG_DAMAGE_NORMAL},
 {.name="Errand-Running",.description="Flip a coin. If heads, you may search your deck for a Trainer card. Show it to your opponent and put it into your hand. Shuffle your deck afterward.",.effect="gym2-39:a1",.animation="ATK_ANIM_HIT",.cost={0,2,0,0,0,0,0,0,0},.damage=0,.category=TCG_RESIDUAL},
@@ -4097,7 +4097,7 @@ const struct TcgCard gTcgCards[TCG_CARD_COUNT + 1] = {
 {.name="",.description="",.effect="NONE",.animation="ATK_ANIM_NONE",.cost={0},.damage=0,.category=TCG_DAMAGE_NORMAL},
 }
 },
-[646] = {.id=646, .name="Koga's Grimer", .kind=TCG_POKEMON, .type=1, .rarity=0, .set=14, .set2=255, .dark=0, .holo=0, .flags=TCG_CF_OWNER, .origin=14,
+[646] = {.id=646, .name="Koga's Grimer", .kind=TCG_POKEMON, .type=1, .rarity=0, .set=14, .set2=255, .dark=0, .holo=0, .flags=TCG_CF_OWNER|TCG_CF_READY, .origin=14,
 .hp=50, .stage=0, .species=88, .level=19, .retreat=1, .weakness=5, .resistance=255, .evolvesFrom="", .description="", .attacks={
 {.name="Sludge Grip",.description="If your opponent has any Benched Pokemon, flip a coin. If heads, choose 1 of your opponent's Benched Pokemon and switch it with the Defending Pokemon. The new Defending Pokemon is now Poisoned.",.effect="gym2-78:a0",.animation="ATK_ANIM_HIT",.cost={0,1,0,0,0,0,0,0,0},.damage=0,.category=TCG_RESIDUAL},
 {.name="Sludge Toss",.description="",.effect="NONE",.animation="ATK_ANIM_HIT",.cost={0,1,0,0,0,0,1,0,0},.damage=20,.category=TCG_DAMAGE_NORMAL},
@@ -4867,7 +4867,7 @@ const struct TcgCard gTcgCards[TCG_CARD_COUNT + 1] = {
 {.name="",.description="",.effect="NONE",.animation="ATK_ANIM_NONE",.cost={0},.damage=0,.category=TCG_DAMAGE_NORMAL},
 }
 },
-[772] = {.id=772, .name="Sunkern", .kind=TCG_POKEMON, .type=1, .rarity=0, .set=15, .set2=255, .dark=0, .holo=0, .flags=0, .origin=15,
+[772] = {.id=772, .name="Sunkern", .kind=TCG_POKEMON, .type=1, .rarity=0, .set=15, .set2=255, .dark=0, .holo=0, .flags=TCG_CF_READY, .origin=15,
 .hp=40, .stage=0, .species=191, .level=16, .retreat=2, .weakness=0, .resistance=255, .evolvesFrom="", .description="It may drop out of the sky suddenly. If attacked by a Spearow, it violently shakes its leaves.", .attacks={
 {.name="Growth",.description="Flip a coin. If heads, you may attach up to 2 Grass Energy cards from your hand to Sunkern.",.effect="neo1-78:a0",.animation="ATK_ANIM_HIT",.cost={0,1,0,0,0,0,0,0,0},.damage=0,.category=TCG_RESIDUAL},
 {.name="Mega Drain",.description="Remove a number of damage counters from Sunkern equal to half the damage done to the Defending Pokemon (after applying Weakness and Resistance) (rounded up to the nearest 10). If Sunkern has fewer damage counters than that, remove all of them.",.effect="neo1-78:a1",.animation="ATK_ANIM_HIT",.cost={0,3,0,0,0,0,0,0,0},.damage=30,.category=TCG_DAMAGE_NORMAL},
@@ -6261,7 +6261,7 @@ const struct TcgCard gTcgCards[TCG_CARD_COUNT + 1] = {
 {.name="",.description="",.effect="NONE",.animation="ATK_ANIM_NONE",.cost={0},.damage=0,.category=TCG_DAMAGE_NORMAL},
 }
 },
-[990] = {.id=990, .name="Light Ninetales", .kind=TCG_POKEMON, .type=0, .rarity=1, .set=18, .set2=255, .dark=0, .holo=0, .flags=TCG_CF_LIGHT, .origin=18,
+[990] = {.id=990, .name="Light Ninetales", .kind=TCG_POKEMON, .type=0, .rarity=1, .set=18, .set2=255, .dark=0, .holo=0, .flags=TCG_CF_LIGHT|TCG_CF_READY, .origin=18,
 .hp=90, .stage=1, .species=38, .level=39, .retreat=1, .weakness=3, .resistance=255, .evolvesFrom="Vulpix", .description="It is said that each of its nine tails contains a different magical power.", .attacks={
 {.name="Guiding Flame",.description="Put a Baby Pokemon or a Basic Pokemon card from your discard pile onto your Bench. (You can't use this attack if your Bench is full.)",.effect="neo4-50:a0",.animation="ATK_ANIM_HIT",.cost={1,0,0,0,0,0,0,0,0},.damage=0,.category=TCG_RESIDUAL},
 {.name="Fire Blast",.description="Discard a Fire Energy card attached to Light Ninetales in order to use this attack.",.effect="neo4-50:a1",.animation="ATK_ANIM_HIT",.cost={3,0,0,0,0,0,0,0,0},.damage=50,.category=TCG_DAMAGE_NORMAL},
@@ -6415,7 +6415,7 @@ const struct TcgCard gTcgCards[TCG_CARD_COUNT + 1] = {
 {.name="",.description="",.effect="NONE",.animation="ATK_ANIM_NONE",.cost={0},.damage=0,.category=TCG_DAMAGE_NORMAL},
 }
 },
-[1012] = {.id=1012, .name="Light Sunflora", .kind=TCG_POKEMON, .type=1, .rarity=0, .set=18, .set2=255, .dark=0, .holo=0, .flags=TCG_CF_LIGHT, .origin=18,
+[1012] = {.id=1012, .name="Light Sunflora", .kind=TCG_POKEMON, .type=1, .rarity=0, .set=18, .set2=255, .dark=0, .holo=0, .flags=TCG_CF_LIGHT|TCG_CF_READY, .origin=18,
 .hp=80, .stage=1, .species=192, .level=42, .retreat=1, .weakness=0, .resistance=255, .evolvesFrom="Sunkern", .description="Although it is extremely active during the day, it stops moving entirely as soon as the sun sets.", .attacks={
 {.name="Reflected Sunlight",.description="Attach up to 2 Grass Energy cards from your hand to 1 of your Grass Pokemon.",.effect="neo4-72:a0",.animation="ATK_ANIM_HIT",.cost={0,0,0,0,0,0,2,0,0},.damage=0,.category=TCG_RESIDUAL},
 {.name="Solarbeam",.description="",.effect="NONE",.animation="ATK_ANIM_HIT",.cost={0,3,0,0,0,0,0,0,0},.damage=40,.category=TCG_DAMAGE_NORMAL},
@@ -7891,7 +7891,7 @@ const struct TcgCard gTcgCards[TCG_CARD_COUNT + 1] = {
 {.name="",.description="",.effect="NONE",.animation="ATK_ANIM_NONE",.cost={0},.damage=0,.category=TCG_DAMAGE_NORMAL},
 }
 },
-[1244] = {.id=1244, .name="Scizor", .kind=TCG_POKEMON, .type=8, .rarity=2, .set=20, .set2=255, .dark=0, .holo=0, .flags=TCG_CF_BODY, .origin=20,
+[1244] = {.id=1244, .name="Scizor", .kind=TCG_POKEMON, .type=8, .rarity=2, .set=20, .set2=255, .dark=0, .holo=0, .flags=TCG_CF_BODY|TCG_CF_READY, .origin=20,
 .hp=80, .stage=1, .species=212, .level=0, .retreat=2, .weakness=0, .resistance=255, .evolvesFrom="Scyther", .description="", .attacks={
 {.name="Poison Resistance",.description="Scizor can't be Poisoned.",.effect="ecard2-32:p",.animation="ATK_ANIM_HIT",.cost={0,0,0,0,0,0,0,0,0},.damage=0,.category=TCG_POKEMON_POWER},
 {.name="Snatch",.description="Before doing damage, you may choose 1 of your opponent's Benched Pokemon with no damage counters on it and switch the Defending Pokemon with it.",.effect="ecard2-32:a0",.animation="ATK_ANIM_HIT",.cost={0,0,0,0,0,0,1,0,1},.damage=20,.category=TCG_DAMAGE_NORMAL},
@@ -8122,7 +8122,7 @@ const struct TcgCard gTcgCards[TCG_CARD_COUNT + 1] = {
 {.name="",.description="",.effect="NONE",.animation="ATK_ANIM_NONE",.cost={0},.damage=0,.category=TCG_DAMAGE_NORMAL},
 }
 },
-[1277] = {.id=1277, .name="Weepinbell", .kind=TCG_POKEMON, .type=1, .rarity=1, .set=20, .set2=255, .dark=0, .holo=0, .flags=0, .origin=20,
+[1277] = {.id=1277, .name="Weepinbell", .kind=TCG_POKEMON, .type=1, .rarity=1, .set=20, .set2=255, .dark=0, .holo=0, .flags=TCG_CF_READY, .origin=20,
 .hp=70, .stage=1, .species=70, .level=0, .retreat=1, .weakness=0, .resistance=255, .evolvesFrom="Bellsprout", .description="", .attacks={
 {.name="Growth",.description="Attach up to 2 Grass Energy cards from your hand to Weepinbell.",.effect="ecard2-65:a0",.animation="ATK_ANIM_HIT",.cost={0,0,0,0,0,0,1,0,0},.damage=0,.category=TCG_RESIDUAL},
 {.name="Double Razor Leaf",.description="Flip 2 coins. This attack does 30 damage times the number of heads.",.effect="ecard2-65:a1",.animation="ATK_ANIM_HIT",.cost={0,1,0,0,0,0,1,0,0},.damage=30,.category=TCG_DAMAGE_X},
@@ -8199,7 +8199,7 @@ const struct TcgCard gTcgCards[TCG_CARD_COUNT + 1] = {
 {.name="",.description="",.effect="NONE",.animation="ATK_ANIM_NONE",.cost={0},.damage=0,.category=TCG_DAMAGE_NORMAL},
 }
 },
-[1288] = {.id=1288, .name="Exeggcute", .kind=TCG_POKEMON, .type=1, .rarity=0, .set=20, .set2=255, .dark=0, .holo=0, .flags=0, .origin=20,
+[1288] = {.id=1288, .name="Exeggcute", .kind=TCG_POKEMON, .type=1, .rarity=0, .set=20, .set2=255, .dark=0, .holo=0, .flags=TCG_CF_READY, .origin=20,
 .hp=40, .stage=0, .species=102, .level=0, .retreat=1, .weakness=0, .resistance=255, .evolvesFrom="", .description="", .attacks={
 {.name="Growth Spurt",.description="Attach an Energy card from your hand to Exeggcute.",.effect="ecard2-76:a0",.animation="ATK_ANIM_HIT",.cost={0,0,0,0,0,0,1,0,0},.damage=0,.category=TCG_RESIDUAL},
 {.name="Sleep Powder",.description="The Defending Pokemon is now Asleep.",.effect="ecard2-76:a1",.animation="ATK_ANIM_HIT",.cost={0,1,0,0,0,0,0,0,0},.damage=10,.category=TCG_DAMAGE_NORMAL},
@@ -8423,7 +8423,7 @@ const struct TcgCard gTcgCards[TCG_CARD_COUNT + 1] = {
 {.name="",.description="",.effect="NONE",.animation="ATK_ANIM_NONE",.cost={0},.damage=0,.category=TCG_DAMAGE_NORMAL},
 }
 },
-[1320] = {.id=1320, .name="Slowpoke", .kind=TCG_POKEMON, .type=3, .rarity=0, .set=20, .set2=255, .dark=0, .holo=0, .flags=0, .origin=20,
+[1320] = {.id=1320, .name="Slowpoke", .kind=TCG_POKEMON, .type=3, .rarity=0, .set=20, .set2=255, .dark=0, .holo=0, .flags=TCG_CF_READY, .origin=20,
 .hp=50, .stage=0, .species=79, .level=0, .retreat=1, .weakness=2, .resistance=255, .evolvesFrom="", .description="", .attacks={
 {.name="Fishing Tail",.description="Search your discard pile for a Baby Pokemon, Basic Pokemon, Evolution card, or basic Energy card, show it to your opponent, and then put it into your hand.",.effect="ecard2-108:a0",.animation="ATK_ANIM_HIT",.cost={0,0,0,0,0,0,1,0,0},.damage=0,.category=TCG_RESIDUAL},
 {.name="Bite",.description="",.effect="NONE",.animation="ATK_ANIM_HIT",.cost={0,0,0,0,0,0,2,0,0},.damage=20,.category=TCG_DAMAGE_NORMAL},
@@ -8744,7 +8744,7 @@ const struct TcgCard gTcgCards[TCG_CARD_COUNT + 1] = {
 {.name="",.description="",.effect="NONE",.animation="ATK_ANIM_NONE",.cost={0},.damage=0,.category=TCG_DAMAGE_NORMAL},
 }
 },
-[1383] = {.id=1383, .name="Scizor", .kind=TCG_POKEMON, .type=8, .rarity=2, .set=20, .set2=255, .dark=0, .holo=1, .flags=TCG_CF_BODY, .origin=20,
+[1383] = {.id=1383, .name="Scizor", .kind=TCG_POKEMON, .type=8, .rarity=2, .set=20, .set2=255, .dark=0, .holo=1, .flags=TCG_CF_BODY|TCG_CF_READY, .origin=20,
 .hp=80, .stage=1, .species=212, .level=0, .retreat=2, .weakness=0, .resistance=255, .evolvesFrom="Scyther", .description="", .attacks={
 {.name="Poison Resistance",.description="Scizor can't be Poisoned.",.effect="ecard2-H21:p",.animation="ATK_ANIM_HIT",.cost={0,0,0,0,0,0,0,0,0},.damage=0,.category=TCG_POKEMON_POWER},
 {.name="Snatch",.description="Before doing damage, you may choose 1 of your opponent's Benched Pokemon with no damage counters on it and switch the Defending Pokemon with it.",.effect="ecard2-H21:a0",.animation="ATK_ANIM_HIT",.cost={0,0,0,0,0,0,1,0,1},.damage=20,.category=TCG_DAMAGE_NORMAL},
@@ -9164,7 +9164,7 @@ const struct TcgCard gTcgCards[TCG_CARD_COUNT + 1] = {
 {.name="",.description="",.effect="NONE",.animation="ATK_ANIM_NONE",.cost={0},.damage=0,.category=TCG_DAMAGE_NORMAL},
 }
 },
-[1443] = {.id=1443, .name="Delibird", .kind=TCG_POKEMON, .type=3, .rarity=0, .set=21, .set2=255, .dark=0, .holo=0, .flags=0, .origin=21,
+[1443] = {.id=1443, .name="Delibird", .kind=TCG_POKEMON, .type=3, .rarity=0, .set=21, .set2=255, .dark=0, .holo=0, .flags=TCG_CF_READY, .origin=21,
 .hp=50, .stage=0, .species=225, .level=0, .retreat=1, .weakness=8, .resistance=255, .evolvesFrom="", .description="", .attacks={
 {.name="Limited Delivery",.description="Search your deck for a Technical Machine or Pokemon Tool card, show it to your opponent, and put it into your hand. Shuffle your deck afterward.",.effect="ecard3-49:a0",.animation="ATK_ANIM_HIT",.cost={0,0,0,0,0,0,1,0,0},.damage=0,.category=TCG_RESIDUAL},
 {.name="Kick Away",.description="Your opponent switches the Defending Pokemon with 1 of his or her Benched Pokemon, if any. (Do the damage before switching the Pokemon.)",.effect="ecard3-49:a1",.animation="ATK_ANIM_HIT",.cost={0,0,0,1,0,0,1,0,0},.damage=20,.category=TCG_DAMAGE_NORMAL},
@@ -9241,7 +9241,7 @@ const struct TcgCard gTcgCards[TCG_CARD_COUNT + 1] = {
 {.name="",.description="",.effect="NONE",.animation="ATK_ANIM_NONE",.cost={0},.damage=0,.category=TCG_DAMAGE_NORMAL},
 }
 },
-[1454] = {.id=1454, .name="Golbat", .kind=TCG_POKEMON, .type=1, .rarity=0, .set=21, .set2=255, .dark=0, .holo=0, .flags=0, .origin=21,
+[1454] = {.id=1454, .name="Golbat", .kind=TCG_POKEMON, .type=1, .rarity=0, .set=21, .set2=255, .dark=0, .holo=0, .flags=TCG_CF_READY, .origin=21,
 .hp=70, .stage=1, .species=42, .level=0, .retreat=1, .weakness=5, .resistance=255, .evolvesFrom="Zubat", .description="", .attacks={
 {.name="Poison Sound Wave",.description="Flip a coin. If heads, the Defending Pokemon is now Confused. If tails, the Defending Pokemon is now Poisoned.",.effect="ecard3-60:a0",.animation="ATK_ANIM_HIT",.cost={0,1,0,0,0,0,1,0,0},.damage=0,.category=TCG_RESIDUAL},
 {.name="Strength in Numbers",.description="This attack does 30 damage plus 10 more damage for each Zubat, Golbat, and Crobat on your Bench.",.effect="ecard3-60:a1",.animation="ATK_ANIM_HIT",.cost={0,0,0,0,0,0,3,0,0},.damage=30,.category=TCG_DAMAGE_PLUS},
@@ -9318,7 +9318,7 @@ const struct TcgCard gTcgCards[TCG_CARD_COUNT + 1] = {
 {.name="",.description="",.effect="NONE",.animation="ATK_ANIM_NONE",.cost={0},.damage=0,.category=TCG_DAMAGE_NORMAL},
 }
 },
-[1465] = {.id=1465, .name="Lapras", .kind=TCG_POKEMON, .type=3, .rarity=0, .set=21, .set2=255, .dark=0, .holo=0, .flags=0, .origin=21,
+[1465] = {.id=1465, .name="Lapras", .kind=TCG_POKEMON, .type=3, .rarity=0, .set=21, .set2=255, .dark=0, .holo=0, .flags=TCG_CF_READY, .origin=21,
 .hp=60, .stage=0, .species=131, .level=0, .retreat=2, .weakness=8, .resistance=255, .evolvesFrom="", .description="", .attacks={
 {.name="Assist",.description="Search your deck for a Supporter card, show it to your opponent, and put it into your hand. Shuffle your deck afterward.",.effect="ecard3-71:a0",.animation="ATK_ANIM_HIT",.cost={0,0,0,0,0,0,2,0,0},.damage=0,.category=TCG_RESIDUAL},
 {.name="Hypnoblast",.description="Flip a coin. If heads, the Defending Pokemon is now Asleep.",.effect="ecard3-71:a1",.animation="ATK_ANIM_HIT",.cost={0,0,0,2,0,0,1,0,0},.damage=30,.category=TCG_DAMAGE_NORMAL},
@@ -9374,7 +9374,7 @@ const struct TcgCard gTcgCards[TCG_CARD_COUNT + 1] = {
 {.name="",.description="",.effect="NONE",.animation="ATK_ANIM_NONE",.cost={0},.damage=0,.category=TCG_DAMAGE_NORMAL},
 }
 },
-[1473] = {.id=1473, .name="Murkrow", .kind=TCG_POKEMON, .type=7, .rarity=0, .set=21, .set2=255, .dark=0, .holo=0, .flags=0, .origin=21,
+[1473] = {.id=1473, .name="Murkrow", .kind=TCG_POKEMON, .type=7, .rarity=0, .set=21, .set2=255, .dark=0, .holo=0, .flags=TCG_CF_READY, .origin=21,
 .hp=50, .stage=0, .species=198, .level=0, .retreat=1, .weakness=4, .resistance=5, .evolvesFrom="", .description="", .attacks={
 {.name="Evil Eye",.description="Choose 1 of your opponent's Pokemon. Put a damage counter on that Pokemon.",.effect="ecard3-79:a0",.animation="ATK_ANIM_HIT",.cost={0,0,0,0,0,0,0,1,0},.damage=0,.category=TCG_RESIDUAL},
 {.name="Blindside",.description="Choose 1 of your opponent's Pokemon that has a damage counter on it. This attack does 20 damage to that Pokemon. Don't apply Weakness and Resistance.",.effect="ecard3-79:a1",.animation="ATK_ANIM_HIT",.cost={0,0,0,0,0,0,2,0,0},.damage=0,.category=TCG_RESIDUAL},
@@ -9444,14 +9444,14 @@ const struct TcgCard gTcgCards[TCG_CARD_COUNT + 1] = {
 {.name="",.description="",.effect="NONE",.animation="ATK_ANIM_NONE",.cost={0},.damage=0,.category=TCG_DAMAGE_NORMAL},
 }
 },
-[1483] = {.id=1483, .name="Raticate", .kind=TCG_POKEMON, .type=6, .rarity=0, .set=21, .set2=255, .dark=0, .holo=0, .flags=0, .origin=21,
+[1483] = {.id=1483, .name="Raticate", .kind=TCG_POKEMON, .type=6, .rarity=0, .set=21, .set2=255, .dark=0, .holo=0, .flags=TCG_CF_READY, .origin=21,
 .hp=70, .stage=1, .species=20, .level=0, .retreat=1, .weakness=4, .resistance=255, .evolvesFrom="Rattata", .description="", .attacks={
 {.name="Scratch",.description="",.effect="NONE",.animation="ATK_ANIM_HIT",.cost={0,0,0,0,0,0,1,0,0},.damage=20,.category=TCG_DAMAGE_NORMAL},
 {.name="Continuous Bite",.description="Flip 3 coins. If you get 1 heads, this attack does 10 damage plus 10 more damage. If you get 2 heads, this attack does 10 damage plus 30 more damage. If you get 3 heads, this attack does 10 damage plus 60 more damage.",.effect="ecard3-89:a1",.animation="ATK_ANIM_HIT",.cost={0,0,0,0,0,0,2,0,0},.damage=10,.category=TCG_DAMAGE_PLUS},
 {.name="",.description="",.effect="NONE",.animation="ATK_ANIM_NONE",.cost={0},.damage=0,.category=TCG_DAMAGE_NORMAL},
 }
 },
-[1484] = {.id=1484, .name="Rattata", .kind=TCG_POKEMON, .type=6, .rarity=0, .set=21, .set2=255, .dark=0, .holo=0, .flags=0, .origin=21,
+[1484] = {.id=1484, .name="Rattata", .kind=TCG_POKEMON, .type=6, .rarity=0, .set=21, .set2=255, .dark=0, .holo=0, .flags=TCG_CF_READY, .origin=21,
 .hp=30, .stage=0, .species=19, .level=0, .retreat=1, .weakness=4, .resistance=255, .evolvesFrom="", .description="", .attacks={
 {.name="Call for Friends",.description="Search your deck for a Baby Pokemon or Basic Pokemon card and put it onto your Bench. Shuffle your deck afterward. (You can't use this attack if your Bench is full.)",.effect="ecard3-90:a0",.animation="ATK_ANIM_HIT",.cost={0,0,0,0,0,0,1,0,0},.damage=0,.category=TCG_RESIDUAL},
 {.name="Body Slam",.description="Flip a coin. If heads, the Defending Pokemon is now Paralyzed.",.effect="ecard3-90:a1",.animation="ATK_ANIM_HIT",.cost={0,0,0,0,0,0,1,0,0},.damage=10,.category=TCG_DAMAGE_NORMAL},
@@ -9998,7 +9998,7 @@ const struct TcgCard gTcgCards[TCG_CARD_COUNT + 1] = {
 {.name="",.description="",.effect="NONE",.animation="ATK_ANIM_NONE",.cost={0},.damage=0,.category=TCG_DAMAGE_NORMAL},
 }
 },
-[1577] = {.id=1577, .name="Pikachu", .kind=TCG_POKEMON, .type=2, .rarity=3, .set=4, .set2=255, .dark=0, .holo=0, .flags=0, .origin=22,
+[1577] = {.id=1577, .name="Pikachu", .kind=TCG_POKEMON, .type=2, .rarity=3, .set=4, .set2=255, .dark=0, .holo=0, .flags=TCG_CF_READY, .origin=22,
 .hp=60, .stage=0, .species=25, .level=16, .retreat=1, .weakness=4, .resistance=255, .evolvesFrom="", .description="When several of these Pokemon gather, their electricity could build and cause lightning storms.", .attacks={
 {.name="Growl",.description="If the Defending Pokemon attacks Pikachu during your opponent's next turn, any damage done by the attack is reduced by 10 (after applying Weakness and Resistance). (Benching either Pokemon ends this effect.)",.effect="basep-1:a0",.animation="ATK_ANIM_HIT",.cost={0,0,0,0,0,0,1,0,0},.damage=0,.category=TCG_RESIDUAL},
 {.name="Thundershock",.description="Flip a coin. If heads, the Defending Pokemon is now Paralyzed.",.effect="basep-1:a1",.animation="ATK_ANIM_HIT",.cost={0,0,2,0,0,0,0,0,0},.damage=20,.category=TCG_DAMAGE_NORMAL},
@@ -10232,7 +10232,7 @@ const struct TcgCard gTcgCards[TCG_CARD_COUNT + 1] = {
 {.name="",.description="",.effect="NONE",.animation="ATK_ANIM_NONE",.cost={0},.damage=0,.category=TCG_DAMAGE_NORMAL},
 }
 },
-[1611] = {.id=1611, .name="Pichu", .kind=TCG_POKEMON, .type=2, .rarity=3, .set=4, .set2=255, .dark=0, .holo=0, .flags=TCG_CF_BABY, .origin=22,
+[1611] = {.id=1611, .name="Pichu", .kind=TCG_POKEMON, .type=2, .rarity=3, .set=4, .set2=255, .dark=0, .holo=0, .flags=TCG_CF_BABY|TCG_CF_READY, .origin=22,
 .hp=30, .stage=0, .species=172, .level=4, .retreat=0, .weakness=255, .resistance=255, .evolvesFrom="", .description="It is not yet skilled at storing electricity. It may send out a jolt if amused or startled.", .attacks={
 {.name="Let's Play!",.description="Search your deck for a Baby Pokemon card and put it onto your Bench. Shuffle your deck afterward. (You can't use this attack if your Bench is full.)",.effect="basep-35:a0",.animation="ATK_ANIM_HIT",.cost={0,0,0,0,0,0,1,0,0},.damage=0,.category=TCG_RESIDUAL},
 {.name="",.description="",.effect="NONE",.animation="ATK_ANIM_NONE",.cost={0},.damage=0,.category=TCG_DAMAGE_NORMAL},

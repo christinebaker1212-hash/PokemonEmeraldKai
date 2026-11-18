@@ -369,7 +369,8 @@ int TcgDuel_EffectTouchesDefender(const struct TcgAttack *attack);
 const char *TcgDuel_EffectBlock(const struct TcgDuel *g, unsigned player, const struct TcgAttack *attack);
 /* 0: no choice. 1: the attacker picks one of the opponent's Benched Pokemon
  * (action.target), 2: one of their own Benched (action.target), 3: any of the opponent's Pokemon (0-5),
- * 4: any of their own (0-5). */
+ * 4: any of their own (0-5), 5: one of the opponent's Benched with no damage counters (0: none), 6: any of the
+ * opponent's with damage counters. */
 unsigned TcgDuel_AttackChoice(const struct TcgAttack *attack, int *required);
 /* What to ask for that choice (NULL: the usual words) */
 const char *TcgDuel_AttackTargetPrompt(const struct TcgAttack *attack);
@@ -412,7 +413,11 @@ enum
     TCG_APICK_MOVE_FOE_ENERGY, /* Magnetic Lines: one of the Defending's basic Energy (then target: where it goes) */
     TCG_APICK_DECK_BASIC,     /* a basic Energy from the deck onto the attacker (count: its type, 15 any) */
     TCG_APICK_FIELD_MOVE,     /* a basic Energy on one of yours, then target: another of yours it moves to */
-    TCG_APICK_DISCARD_CARD    /* a card of a discard pile (count 0 yours, 1 theirs) */
+    TCG_APICK_DISCARD_CARD,   /* a card of a discard pile (count 0 yours, 1 theirs) */
+    TCG_APICK_SEARCH,         /* a card from the deck / discard pile: count 10+K a Supporter / TM or Tool / Trainer,
+                               * 20+K a Baby or Basic (Baby) for the Bench, 30 a Baby or Basic in the discard pile
+                               * for the Bench, 40 a Pokemon or basic Energy in the discard pile */
+    TCG_APICK_HAND_ENERGY     /* Energy from the hand: count up to (low byte), kind (TCG_F_ENERGY / BASIC / GRASS) */
 };
 unsigned TcgDuel_AttackPick(const struct TcgAttack *attack, unsigned *count);
 /* (TCG_APICK_FAMILY / _EVOLUTION) Can this card be taken by the attacker's attack? */
