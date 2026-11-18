@@ -80,7 +80,19 @@ Total 1,158 set cards (about 1,100 attacks with effect text, 250 Pokémon Powers
    board mock-up (2026-11-18, waiting for the user): docs/tcg_regions/board_mockup.png, drawn by the board's own code
    (`mp cards mock 2`, tcg_board.c MockUnder / MockOver over a staged duel): the Stadium a plate on the centre line,
    the turn's Supporter face up beside its player's Active, Tools tucked under their Pokemon, a BRN badge, Darkness /
-   Metal orbs.
+   Metal orbs. **Approved and built** (2026-11-18: docs/tcg_regions/board_table.png from a staged duel).
+   **Status (2026-11-18): 666 of 1,227 finished.** Where each part lives:
+   - Attacks: tools/tcg/regions/families.py (regex families + EXACT, one script per wording; ops in
+     src/tcg/tcg_script.inc, listed at its top and in each op's comment).
+   - Trainers: src/tcg/tcg_rtrainers.inc (rules), tcg_rtrainers_flow.inc (steps, playability, menus),
+     tcg_rtrainers_ai.inc (AI); effects.py RTRAINERS lists the first printings handled (reprints follow: TcgCard.canon).
+     Supporters (one a turn), Stadiums (TcgPlayer.stadium), Tools (attached, TcgDuel_Tool) in TcgDuel_Trainer.
+   - Powers: tools/tcg/regions/powers.py (id, used / passive, flags, script) -> include/tcg/region_powers.h and
+     src/tcg/tcg_region_powers.inc (generate_effects.py); rules src/tcg/tcg_rpowers.inc, steps / AI at the ends of
+     tcg_rtrainers_flow.inc / tcg_rtrainers_ai.inc.
+   - Rules: special Energy (Tcg_EnergyRule), Baby (TcgDuel_EvolvesFrom, the coin), Shining / Miracle one a deck, ex 2
+     Prizes, Burned. Still to do: TMs (an attack from an attached card: the attack menu, AI, flow), Crystal Type.
+   - Tests: tools/tcg/test_regions.c (every finished attack, Trainer and used power through the flow, AI duels).
 5. Per region: boosters, shops, NPC decks (built from the region's sets and today's), special trainers with their own
    decks and promos (UNOVA's too), CARD SCALING ratings rerun, the card guide rebuilt.
 6. Retroactive promos: a courier NPC brings each promo whose (newly special) trainer the save's card record shows as
