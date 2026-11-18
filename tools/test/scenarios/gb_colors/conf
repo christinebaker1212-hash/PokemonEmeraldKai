@@ -1,6 +1,6 @@
 # GB OPTIONS > COLORS: RED's DMG draws the field and a battle in the first Game Boy's four greens only, POCKET in its
-# four greys, COLOR in Red's Game Boy Color reds and greens; CRYSTAL's COLOR keeps every 8x8 cell of the field to
-# Game Boy Color rules (check.py); KAI leaves the picture as it is (mp_gbpal.c)
+# four greys, COLOR in Red's Game Boy Color reds and greens; CRYSTAL's COLOR draws the field in the colours of
+# eight background and eight sprite palettes of four (check.py); KAI leaves the picture as it is (mp_gbpal.c)
 MODE=1
 TMO=150
 ENV_A="MOEMON_DEBUG_PARTY=280:15"

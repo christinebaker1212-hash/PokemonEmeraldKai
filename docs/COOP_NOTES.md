@@ -8203,17 +8203,22 @@ the one whose tiles would change least, weighted by how much of the screen it co
 Crystal's own colours for it, normal or shiny (src/mp/mp_gbpal_data.h from tools/moemon_legacy/gbpal_species.py,
 pret/pokecrystal's front.png middle entries and shiny.pal). MP_GbPal_Composite then handles what palette RAM didn't
 draw (full-colour pictures, UI STYLE's windows, overlays): mono and RED's COLOR by a 32K-colour table (a colour within
-a step of a mode colour, as the renderer's blends leave them, snaps to it, the rest by GbLum), CRYSTAL four colours to
-an 8x8 cell (ReduceCell). The frame's top bit is kept on every pixel (screenshots read it as alpha). Over DISPLAY >
+a step of a mode colour, as the renderer's blends leave them, snaps to it, the rest by GbLum), CRYSTAL each to the nearest
+colour palette RAM gave that frame, pixel by pixel (Nearest; never cell by cell: four colours to an 8x8 cell drew
+blocks round sprites, tints and effects, the user 2026-11-18: never again). The frame's top bit is kept on every pixel (screenshots read it as alpha). Over DISPLAY >
 COLOR but not its filters: display.c gMpGbDisplayColor (-1 as chosen, 0 DEFAULT, 1 the GBA profile for GBA), and the
 COLOR row reads "GB OPTIONS". MOEMON_GBPAL_TRACE=1 logs CRYSTAL's palettes and merges every 120 frames. Scenario
 gb_colors (its check.py: DMG / POCKET / COLOR shots hold only their colours, KAI untouched, CRYSTAL's cells).
 
-CRYSTAL's COLORS under the time of day's light (WHITE BG ON: mp_uistyle.c TintBattleScene runs after palette RAM is
-drawn): mp_gbpal.c Allow takes each palette RAM colour as that light leaves it too, and GB OPTIONS > MOVES' own
-Crystal colours (MP_GbPal_AllowColor), so ReduceCell leaves them alone; without it every 8x8 cell where a POKeMON met
-the background was cut to four colours of its own (blocks round the pictures). MOEMON_GBPAL_TRACE=1 logs the cells it
-reduces.
+CRYSTAL's COLORS under a light drawn into the layers (Platinum's time of day in the field, battle weather's tints:
+gMpScenePixel; WHITE BG's light in CRYSTAL's battles: mp_uistyle.c TintBattleScene): mp_gbpal.c Allow takes each palette
+RAM colour as that light leaves it too, and GB OPTIONS > MOVES' own Crystal colours (MP_GbPal_AllowColor), so they're
+kept as they are. The title screen and the intro before it are never recoloured (title_screen.c MP_TitleScreenShown,
+intro.c MP_IntroShown).
+RED's modes (DMG, POCKET, LIGHT, COLOR, GBA), readable at every hour (the user, 2026-11-18): UI STYLE RED draws no time of
+day (mp_daytint.c Wanted: Red had none), and in a battle the background layer's palettes (BG3 only: sBgsOf) and the
+backdrop take the two light shades, a full-colour background picture too (LightPicLine wraps gMpBgPictureLine
+between PreDraw and PostDraw), as Red's battles are on white.
 
 ### GB OPTIONS stage 5: MOVES
 

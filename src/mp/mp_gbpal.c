@@ -60,9 +60,13 @@ u8 MP_GbPal_Setting(void)
 
 static void Choose(void)
 {
+    bool8 MP_TitleScreenShown(void);
+    bool8 MP_IntroShown(void);
     u8 v = MP_GbPal_Setting();
     sKind = KIND_OFF;
     sGba = FALSE;
+    if (MP_TitleScreenShown() || MP_IntroShown())
+        return;   // (the title screen and the intro before it stay as they are: the user, 2026-11-18)
     if (MP_UiStyle_Active() == UISTYLE_RED)
     {
         if (v <= 2)
@@ -240,12 +244,14 @@ static void FourOf(const u16 *pal, const u32 *weight, u8 first, u16 *four, u8 *s
 // each
 static bool8 sGbPalTrace;
 static u32 sWeight[NUM_PALS][16];   // CRYSTAL: the pixels of each colour the background shows (its tiles')
+static u8 sBgsOf[16];               // the background layers each background palette shows on
 static void UsedPalettes(u16 *used)
 {
     u32 bg, i;
     u16 dispcnt = REG_DISPCNT;
     memset(used, 0, NUM_PALS * sizeof(*used));
     memset(sWeight, 0, sizeof(sWeight));
+    memset(sBgsOf, 0, sizeof(sBgsOf));
     for (bg = 0; bg < 4; bg++)
     {
         u16 cnt, hofs, vofs, size;
@@ -256,7 +262,7 @@ static void UsedPalettes(u16 *used)
         if ((cnt & 0x80) || ((dispcnt & 7) == 1 && bg == 2) || ((dispcnt & 7) == 2 && bg >= 2))
         {
             for (i = 0; i < 16; i++)
-                used[i] += 1;   // (256 colours or turned: every palette)
+                used[i] += 1, sBgsOf[i] |= 1 << bg;   // (256 colours or turned: every palette)
             continue;
         }
         hofs = *(u16 *)(REG_ADDR_BG0HOFS + bg * 4) & 0x1FF;
@@ -271,6 +277,7 @@ static void UsedPalettes(u16 *used)
                 const u8 *tile = (const u8 *)(VRAM + ((cnt >> 2) & 3) * 0x4000 + (e & 0x3FF) * 32);
                 u32 *w = sWeight[e >> 12], k;
                 used[e >> 12]++;
+                sBgsOf[e >> 12] |= 1 << bg;
                 for (k = 0; k < 32; k++)   // (colour 0 is see-through)
                     w[tile[k] & 15]++, w[tile[k] >> 4]++;
                 w[0] = 0;
@@ -366,7 +373,13 @@ static bool8 sTintOn;
 static s32 sTintR, sTintG, sTintB;
 static void Allow(u16 c)
 {
+    extern u16 (*gMpScenePixel)(u16 color, int x, int y, bool8 sprite);
     AllowOne(c);
+    if (gMpScenePixel != NULL)   // (the time of day's light, battle weather's tints: drawn into the layers)
+    {
+        AllowOne(gMpScenePixel(c, 0, 0, FALSE));
+        AllowOne(gMpScenePixel(c, 0, 0, TRUE));
+    }
     if (sTintOn)
         AllowOne(((c & 31) * sTintR / 31) | ((((c >> 5) & 31) * sTintG / 31) << 5)
                  | ((((c >> 10) & 31) * sTintB / 31) << 10));
@@ -402,6 +415,33 @@ u16 MP_GbPal_ObjShade(u8 shade, u8 obp)
     return sGrey[shade];
 }
 
+// RED's modes in a battle: a full-colour background picture (SINNOH's / UNOVA's backgrounds, WHITE BG's plain one)
+// drawn in the mode's two light shades, by its brightness, so the POKeMON and the words stand out on it as on Red's
+// white (the user, 2026-11-18: DMG was unreadable)
+extern void (*gMpBgPictureLine)(int line, uint16_t *layer, int32_t x0, int32_t y0, int32_t dx, int32_t dy);
+static void (*sPicLine)(int line, uint16_t *layer, int32_t x0, int32_t y0, int32_t dx, int32_t dy);
+static void LightPicLine(int line, uint16_t *layer, int32_t x0, int32_t y0, int32_t dx, int32_t dy)
+{
+    const u16 *four = sKind == KIND_MONO ? sMono[sMonoIdx] : sRedGbcBg;
+    u8 drawn[240];
+    s32 i;
+    for (i = 0; i < 240; i++)
+        drawn[i] = (layer[i] & 0x8000) != 0;   // (the picture's pixels: where the layer drew, as the picture reads it)
+    sPicLine(line, layer, x0, y0, dx, dy);
+    for (i = 0; i < 240; i++)
+        if (drawn[i])
+            layer[i] = (layer[i] & 0x8000) | four[GbLum(layer[i] & 0x7FFF) >= 16 ? 0 : 1];
+}
+
+static void BattleBackdropLight(void)
+{
+    if (sKind != KIND_CRYSTAL && gMain.inBattle && gMpBgPictureLine != NULL && gMpBgPictureLine != LightPicLine)
+    {
+        sPicLine = gMpBgPictureLine;
+        gMpBgPictureLine = LightPicLine;
+    }
+}
+
 // sdl2.c VDraw, before DrawFrame: palette RAM in the Game Boy's colours
 void MP_GbPal_PreDraw(void)
 {
@@ -424,8 +464,10 @@ void MP_GbPal_PreDraw(void)
             sAllowed[sAllowedList[i] >> 3] = 0;
         sAllowedCount = 0;
         TintNow();
-        UsedPalettes(used);
     }
+    if (sKind == KIND_CRYSTAL || gMain.inBattle)
+        UsedPalettes(used);
+    BattleBackdropLight();
     for (p = 0; p < NUM_PALS; p++)
     {
         const u16 *unf = gPlttBufferUnfaded + p * 16, *cur = sSaved + p * 16;
@@ -451,6 +493,11 @@ void MP_GbPal_PreDraw(void)
             static const u32 sEven[16] = {0};
             FourOf(blank ? cur : unf, p < 16 ? sWeight[p] : sEven, first, four[p], shade);
         }
+        if (sKind != KIND_CRYSTAL && gMain.inBattle && p < 16 && sBgsOf[p] == (1 << 3))
+            for (i = 0; i < 16; i++)
+                shade[i] >>= 1;   // (the battle's background: in the two light shades, as Red's own is white)
+        if (sKind != KIND_CRYSTAL && gMain.inBattle && p == 0)
+            shade[0] = 0;   // (... and the backdrop the lightest)
         for (i = 0; i < 16; i++)
             shade[i] = Faded(shade[i], cur[i], blank ? cur[i] : unf[i]);
         for (i = 0; i < 16; i++)
@@ -482,6 +529,8 @@ void MP_GbPal_PreDraw(void)
 // ... and after it: palette RAM as the game left it
 void MP_GbPal_PostDraw(void)
 {
+    if (gMpBgPictureLine == LightPicLine)
+        gMpBgPictureLine = sPicLine;
     if (sSwapped)
         memcpy((u16 *)PLTT, sSaved, sizeof(sSaved));
     sSwapped = FALSE;
@@ -510,79 +559,51 @@ static void BuildLut(void)
     sLutFor = want;
 }
 
-// Four colours for the colours in one 8x8 cell that palette RAM didn't give (CRYSTAL): by brightness in quarters,
-// each the nearest of them to its quarter's average
-static void ReduceCell(u16 *frame, s32 x0, s32 y0)
+// CRYSTAL: a colour palette RAM didn't give (a blend, a full-colour picture, an effect drawn over the frame) becomes
+// the nearest of the colours it did give this frame, pixel by pixel. Never by 8x8 cells: a cell's four colours of its
+// own drew blocks round every sprite, tint and effect (the user, 2026-11-18: "I don't want to see those palette
+// blocks anywhere ever again")
+static u16 sNear[0x8000];
+static u16 sNearGen[0x8000];
+static u16 sGen;
+static u16 Nearest(u16 c)
 {
-    u16 col[64];
-    u8 n = 0, k, q;
-    s32 x, y, i, j;
-    for (y = y0; y < y0 + 8; y++)
-        for (x = x0; x < x0 + 8; x++)
-        {
-            u16 c = frame[y * 240 + x] & 0x7FFF;
-            if (sAllowed[c >> 3] & (1 << (c & 7)))
-                continue;
-            for (k = 0; k < n && col[k] != c; k++)
-                ;
-            if (k == n)
-                col[n++] = c;
-        }
-    if (n <= 4)
-        return;
-    if (sGbPalTrace)
+    u32 i;
+    s32 best = 0x7FFFFFFF;
+    u16 out = c;
+    if (sNearGen[c] == sGen)
+        return sNear[c];
+    for (i = 0; i < sAllowedCount; i++)
     {
-        char buf[200];
-        s32 o = 0;
-        for (k = 0; k < n && o < 180; k++)
-            o += snprintf(buf + o, sizeof(buf) - o, " %04x", col[k]);
-        MPNet_Log("gbpal cell %d,%d:%s", x0, y0, buf);
+        s32 d = Dist(c, sAllowedList[i]);
+        if (d < best)
+            best = d, out = sAllowedList[i];
     }
-    // sort by brightness
-    for (i = 1; i < n; i++)
-        for (j = i; j > 0 && Lum(col[j]) < Lum(col[j - 1]); j--)
-        {
-            u16 t = col[j];
-            col[j] = col[j - 1], col[j - 1] = t;
-        }
-    {
-        u16 rep[4];
-        for (q = 0; q < 4; q++)
-        {
-            s32 a = q * n / 4, b = (q + 1) * n / 4, r = 0, g = 0, bl = 0, best = 0x7FFFFFFF;
-            u16 mean;
-            for (i = a; i < b; i++)
-                r += col[i] & 31, g += (col[i] >> 5) & 31, bl += (col[i] >> 10) & 31;
-            mean = RGB(r / (b - a), g / (b - a), bl / (b - a));
-            rep[q] = col[a];
-            for (i = a; i < b; i++)
-                if (Dist(col[i], mean) < best)
-                    best = Dist(col[i], mean), rep[q] = col[i];
-        }
-        for (y = y0; y < y0 + 8; y++)
-            for (x = x0; x < x0 + 8; x++)
-            {
-                u16 c = frame[y * 240 + x] & 0x7FFF;
-                if (sAllowed[c >> 3] & (1 << (c & 7)))
-                    continue;
-                for (k = 0; k < n && col[k] != c; k++)
-                    ;
-                frame[y * 240 + x] = rep[k * 4 / n] | (frame[y * 240 + x] & 0x8000);
-            }
-    }
+    sNear[c] = out, sNearGen[c] = sGen;
+    return out;
 }
 
 // sdl2.c VDraw, after everything is drawn over the frame
 void MP_GbPal_Composite(u16 *frame)
 {
-    s32 i, x, y;
+    s32 i;
     if (sKind == KIND_OFF)
         return;
     if (sKind == KIND_CRYSTAL)
     {
-        for (y = 0; y < 160; y += 8)
-            for (x = 0; x < 240; x += 8)
-                ReduceCell(frame, x, y);
+        if (sAllowedCount == 0)
+            return;
+        if (++sGen == 0)
+        {
+            memset(sNearGen, 0, sizeof(sNearGen));
+            sGen = 1;
+        }
+        for (i = 0; i < 240 * 160; i++)
+        {
+            u16 c = frame[i] & 0x7FFF;
+            if (!(sAllowed[c >> 3] & (1 << (c & 7))))
+                frame[i] = Nearest(c) | (frame[i] & 0x8000);
+        }
         return;
     }
     BuildLut();

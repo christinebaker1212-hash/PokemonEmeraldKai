@@ -3435,3 +3435,11 @@ static void SpriteCB_RayquazaOrb(struct Sprite *sprite)
         break;
     }
 }
+
+// Moemon Kai: is the intro (copyright screen, the opening) up (GB OPTIONS > COLORS leaves it as it is: mp_gbpal.c)
+bool8 MP_IntroShown(void)
+{
+    void (*cb)(void) = gMain.callback2;
+    return cb == MainCB2_Intro || cb == MainCB2_EndIntro || cb == CB2_InitCopyrightScreenAfterBootup
+        || cb == CB2_InitCopyrightScreenAfterTitleScreen;
+}

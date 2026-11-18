@@ -25,12 +25,11 @@ for name, allowed in (('dmg_field', DMG), ('dmg_battle', DMG), ('pocket_field', 
 _, kai = colors('kai_field')
 if len(kai) <= 16:
     bad.append('kai_field: only %d colours (KAI should be untouched)' % len(kai))
-# CRYSTAL: few cells over four colours (only where sprites lie over the background, as on a Game Boy Color)
-im, _ = colors('crystal_field')
-px = im.load()
-over = sum(1 for ty in range(20) for tx in range(30)
-           if len(set(px[tx * 8 + x, ty * 8 + y] for x in range(8) for y in range(8))) > 6)
-if over > 30:
-    bad.append('crystal_field: %d cells over six colours' % over)
-print('\n'.join(bad) if bad else 'ok: DMG, POCKET, COLOR in their colours; KAI untouched; CRYSTAL %d busy cells' % over)
+# CRYSTAL: the whole picture in the colours of eight background and eight sprite palettes of four (64 at most; the
+# UI STYLE's own windows add a few), never cut cell by cell
+im, cs = colors('crystal_field')
+over = len(cs)
+if over > 72:
+    bad.append('crystal_field: %d colours (Game Boy Color palettes hold 64)' % over)
+print('\n'.join(bad) if bad else 'ok: DMG, POCKET, COLOR in their colours; KAI untouched; CRYSTAL %d colours' % over)
 sys.exit(1 if bad else 0)

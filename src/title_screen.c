@@ -871,3 +871,11 @@ static void UpdateLegendaryMarkingColor(u8 frameNum)
         LoadPalette(&color, BG_PLTT_ID(14) + 15, sizeof(color));
    }
 }
+
+// Moemon Kai: is the title screen up (GB OPTIONS > COLORS leaves it as it is: mp_gbpal.c)
+bool8 MP_TitleScreenShown(void)
+{
+    void (*cb)(void) = gMain.callback2;
+    return cb == CB2_InitTitleScreen || cb == MainCB2 || cb == CB2_GoToMainMenu || cb == CB2_GoToCopyrightScreen
+        || cb == CB2_GoToClearSaveDataScreen || cb == CB2_GoToResetRtcScreen || cb == CB2_GoToBerryFixScreen;
+}

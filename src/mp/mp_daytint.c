@@ -15,6 +15,7 @@
 #include "mp.h"
 #include "mp_region.h"
 #include "s3d.h"
+#include "mp_uistyle.h"
 
 const char *Updater_ExeFile(const char *name);
 
@@ -55,6 +56,8 @@ static bool8 Wanted(void)
     // (CB2_OverworldBasic: the field drawn under a battle's opening flash and transition, the tint stays on it)
     if ((gMain.callback2 != CB2_Overworld && gMain.callback2 != CB2_OverworldBasic) || gMain.inBattle)
         return FALSE;
+    if (MP_UiStyle_Active() == UISTYLE_RED)
+        return FALSE;   // (Red had no time of day: none is drawn in its style, the user 2026-11-18)
     return IsMapTypeOutdoors(gMapHeader.mapType);
 }
 
