@@ -5697,7 +5697,7 @@ const struct TcgCard gTcgCards[TCG_CARD_COUNT + 1] = {
 {.name="",.description="",.effect="NONE",.animation="ATK_ANIM_NONE",.cost={0},.damage=0,.category=TCG_DAMAGE_NORMAL},
 }
 },
-[906] = {.id=906, .name="Lanturn", .kind=TCG_POKEMON, .type=2, .rarity=1, .set=17, .set2=255, .dark=0, .holo=0, .flags=0, .origin=17,
+[906] = {.id=906, .name="Lanturn", .kind=TCG_POKEMON, .type=2, .rarity=1, .set=17, .set2=255, .dark=0, .holo=0, .flags=TCG_CF_READY, .origin=17,
 .hp=80, .stage=1, .species=171, .level=31, .retreat=2, .weakness=4, .resistance=255, .evolvesFrom="Chinchou", .description="It blinds prey with an intense burst of light, then swallows the immobilized prey in a single gulp.", .attacks={
 {.name="Submerge",.description="Once during your turn (before your attack), you may change Lanturn's type to Water until the end of your turn. This power can't be used if Lanturn is Asleep, Confused, or Paralyzed. If Lanturn becomes Asleep, Confused, or Paralyzed after you have used this power, its type changes back to Lightning.",.effect="neo3-32:p",.animation="ATK_ANIM_HIT",.cost={0,0,0,0,0,0,0,0,0},.damage=0,.category=TCG_POKEMON_POWER},
 {.name="Blinding Light",.description="Flip a coin. If heads, the Defending Pokemon is now Confused.",.effect="neo3-32:a0",.animation="ATK_ANIM_HIT",.cost={0,0,1,0,0,0,2,0,0},.damage=30,.category=TCG_DAMAGE_NORMAL},
@@ -7868,7 +7868,7 @@ const struct TcgCard gTcgCards[TCG_CARD_COUNT + 1] = {
 {.name="",.description="",.effect="NONE",.animation="ATK_ANIM_NONE",.cost={0},.damage=0,.category=TCG_DAMAGE_NORMAL},
 }
 },
-[1240] = {.id=1240, .name="Porygon2", .kind=TCG_POKEMON, .type=6, .rarity=2, .set=20, .set2=255, .dark=0, .holo=0, .flags=0, .origin=20,
+[1240] = {.id=1240, .name="Porygon2", .kind=TCG_POKEMON, .type=6, .rarity=2, .set=20, .set2=255, .dark=0, .holo=0, .flags=TCG_CF_READY, .origin=20,
 .hp=70, .stage=1, .species=233, .level=0, .retreat=1, .weakness=4, .resistance=255, .evolvesFrom="Porygon", .description="", .attacks={
 {.name="Backup",.description="Once during each of your turns (before your attack), if you have 2 or fewer cards in your hand, you may draw cards from your deck until you have 3 cards in your hand. This power can't be used if Porygon2 is affected by a Special Condition.",.effect="ecard2-28:p",.animation="ATK_ANIM_HIT",.cost={0,0,0,0,0,0,0,0,0},.damage=0,.category=TCG_POKEMON_POWER},
 {.name="Hypnotic Ray",.description="The Defending Pokemon is now Asleep.",.effect="ecard2-28:a0",.animation="ATK_ANIM_HIT",.cost={0,0,0,0,0,0,2,0,0},.damage=20,.category=TCG_DAMAGE_NORMAL},
@@ -7903,7 +7903,7 @@ const struct TcgCard gTcgCards[TCG_CARD_COUNT + 1] = {
 {.name="Heavy Metal",.description="Flip a number of coins equal to the amount of Metal Energy attached to Scizor. This attack does 30 damage plus 20 more damage for each heads.",.effect="ecard2-32:a1",.animation="ATK_ANIM_HIT",.cost={0,0,0,0,0,0,3,0,0},.damage=30,.category=TCG_DAMAGE_PLUS},
 }
 },
-[1245] = {.id=1245, .name="Slowbro", .kind=TCG_POKEMON, .type=3, .rarity=2, .set=20, .set2=255, .dark=0, .holo=0, .flags=TCG_CF_BODY, .origin=20,
+[1245] = {.id=1245, .name="Slowbro", .kind=TCG_POKEMON, .type=3, .rarity=2, .set=20, .set2=255, .dark=0, .holo=0, .flags=TCG_CF_BODY|TCG_CF_READY, .origin=20,
 .hp=80, .stage=1, .species=80, .level=0, .retreat=2, .weakness=2, .resistance=255, .evolvesFrom="Slowpoke", .description="", .attacks={
 {.name="Dense Body",.description="Any damage done to Slowbro by attacks from Basic Pokemon (excluding Baby Pokemon) is reduced by 20.",.effect="ecard2-33:p",.animation="ATK_ANIM_HIT",.cost={0,0,0,0,0,0,0,0,0},.damage=0,.category=TCG_POKEMON_POWER},
 {.name="Energy Cannon",.description="This attack does 30 damage plus 10 damage for each Energy attached to Slowbro but not used to pay for this attack's Energy cost. You can't add more than 20 damage in this way.",.effect="ecard2-33:a0",.animation="ATK_ANIM_HIT",.cost={0,0,0,1,0,0,1,0,0},.damage=30,.category=TCG_DAMAGE_PLUS},
@@ -8337,7 +8337,7 @@ const struct TcgCard gTcgCards[TCG_CARD_COUNT + 1] = {
 {.name="",.description="",.effect="NONE",.animation="ATK_ANIM_NONE",.cost={0},.damage=0,.category=TCG_DAMAGE_NORMAL},
 }
 },
-[1307] = {.id=1307, .name="Mr. Mime", .kind=TCG_POKEMON, .type=5, .rarity=0, .set=20, .set2=255, .dark=0, .holo=0, .flags=TCG_CF_BODY, .origin=20,
+[1307] = {.id=1307, .name="Mr. Mime", .kind=TCG_POKEMON, .type=5, .rarity=0, .set=20, .set2=255, .dark=0, .holo=0, .flags=TCG_CF_BODY|TCG_CF_READY, .origin=20,
 .hp=50, .stage=0, .species=122, .level=0, .retreat=1, .weakness=5, .resistance=255, .evolvesFrom="", .description="", .attacks={
 {.name="Energy Barrier",.description="If Mr. Mime would be damaged by an attack, reduce that damage by 10 for each basic Energy card attached to Mr. Mime. The maximum amount of damage that can be reduced by Energy Barrier is 20.",.effect="ecard2-95:p",.animation="ATK_ANIM_HIT",.cost={0,0,0,0,0,0,0,0,0},.damage=0,.category=TCG_POKEMON_POWER},
 {.name="Mind Shock",.description="Don't apply Weakness and Resistance.",.effect="ecard2-95:a0",.animation="ATK_ANIM_HIT",.cost={0,0,0,0,0,1,1,0,0},.damage=20,.category=TCG_DAMAGE_NORMAL},
@@ -9125,7 +9125,7 @@ const struct TcgCard gTcgCards[TCG_CARD_COUNT + 1] = {
 {.name="",.description="",.effect="NONE",.animation="ATK_ANIM_NONE",.cost={0},.damage=0,.category=TCG_DAMAGE_NORMAL},
 }
 },
-[1431] = {.id=1431, .name="Kabuto", .kind=TCG_POKEMON, .type=4, .rarity=1, .set=21, .set2=255, .dark=0, .holo=0, .flags=TCG_CF_BODY, .origin=21,
+[1431] = {.id=1431, .name="Kabuto", .kind=TCG_POKEMON, .type=4, .rarity=1, .set=21, .set2=255, .dark=0, .holo=0, .flags=TCG_CF_BODY|TCG_CF_READY, .origin=21,
 .hp=50, .stage=1, .species=140, .level=0, .retreat=1, .weakness=1, .resistance=255, .evolvesFrom="Mysterious Fossil", .description="", .attacks={
 {.name="Thick Shell",.description="All damage done by attacks to Kabuto from Evolved Pokemon is reduced by 10 (after applying Weakness and Resistance).",.effect="ecard3-37:p",.animation="ATK_ANIM_HIT",.cost={0,0,0,0,0,0,0,0,0},.damage=0,.category=TCG_POKEMON_POWER},
 {.name="Scratch",.description="",.effect="NONE",.animation="ATK_ANIM_HIT",.cost={0,0,0,0,1,0,1,0,0},.damage=30,.category=TCG_DAMAGE_NORMAL},
@@ -9188,7 +9188,7 @@ const struct TcgCard gTcgCards[TCG_CARD_COUNT + 1] = {
 {.name="",.description="",.effect="NONE",.animation="ATK_ANIM_NONE",.cost={0},.damage=0,.category=TCG_DAMAGE_NORMAL},
 }
 },
-[1440] = {.id=1440, .name="Abra", .kind=TCG_POKEMON, .type=5, .rarity=0, .set=21, .set2=255, .dark=0, .holo=0, .flags=TCG_CF_BODY, .origin=21,
+[1440] = {.id=1440, .name="Abra", .kind=TCG_POKEMON, .type=5, .rarity=0, .set=21, .set2=255, .dark=0, .holo=0, .flags=TCG_CF_BODY|TCG_CF_READY, .origin=21,
 .hp=40, .stage=0, .species=63, .level=0, .retreat=1, .weakness=5, .resistance=255, .evolvesFrom="", .description="", .attacks={
 {.name="Psychoflow",.description="As long as there is a Psychic Energy card attached to Abra, its Retreat Cost is 0.",.effect="ecard3-46:p",.animation="ATK_ANIM_HIT",.cost={0,0,0,0,0,0,0,0,0},.damage=0,.category=TCG_POKEMON_POWER},
 {.name="Headbutt",.description="",.effect="NONE",.animation="ATK_ANIM_HIT",.cost={0,0,0,0,0,0,2,0,0},.damage=20,.category=TCG_DAMAGE_NORMAL},
@@ -9237,7 +9237,7 @@ const struct TcgCard gTcgCards[TCG_CARD_COUNT + 1] = {
 {.name="",.description="",.effect="NONE",.animation="ATK_ANIM_NONE",.cost={0},.damage=0,.category=TCG_DAMAGE_NORMAL},
 }
 },
-[1447] = {.id=1447, .name="Dunsparce", .kind=TCG_POKEMON, .type=6, .rarity=0, .set=21, .set2=255, .dark=0, .holo=0, .flags=TCG_CF_BODY, .origin=21,
+[1447] = {.id=1447, .name="Dunsparce", .kind=TCG_POKEMON, .type=6, .rarity=0, .set=21, .set2=255, .dark=0, .holo=0, .flags=TCG_CF_BODY|TCG_CF_READY, .origin=21,
 .hp=40, .stage=0, .species=206, .level=0, .retreat=1, .weakness=4, .resistance=255, .evolvesFrom="", .description="", .attacks={
 {.name="Slippery Skin",.description="As long as the Defending Pokemon is an Evolved Pokemon, Dunsparce's Retreat Cost is 0.",.effect="ecard3-53:p",.animation="ATK_ANIM_HIT",.cost={0,0,0,0,0,0,0,0,0},.damage=0,.category=TCG_POKEMON_POWER},
 {.name="Tail Shake",.description="The Defending Pokemon is now Asleep.",.effect="ecard3-53:a0",.animation="ATK_ANIM_HIT",.cost={0,0,0,0,0,0,1,0,0},.damage=10,.category=TCG_DAMAGE_NORMAL},
@@ -9258,7 +9258,7 @@ const struct TcgCard gTcgCards[TCG_CARD_COUNT + 1] = {
 {.name="",.description="",.effect="NONE",.animation="ATK_ANIM_NONE",.cost={0},.damage=0,.category=TCG_DAMAGE_NORMAL},
 }
 },
-[1450] = {.id=1450, .name="Forretress", .kind=TCG_POKEMON, .type=1, .rarity=0, .set=21, .set2=255, .dark=0, .holo=0, .flags=TCG_CF_BODY, .origin=21,
+[1450] = {.id=1450, .name="Forretress", .kind=TCG_POKEMON, .type=1, .rarity=0, .set=21, .set2=255, .dark=0, .holo=0, .flags=TCG_CF_BODY|TCG_CF_READY, .origin=21,
 .hp=70, .stage=1, .species=205, .level=0, .retreat=2, .weakness=0, .resistance=255, .evolvesFrom="Pineco", .description="", .attacks={
 {.name="Exoskeleton",.description="All damage done by attacks to Forretress is reduced by 10 (after applying Weakness and Resistance).",.effect="ecard3-56:p",.animation="ATK_ANIM_HIT",.cost={0,0,0,0,0,0,0,0,0},.damage=0,.category=TCG_POKEMON_POWER},
 {.name="Shell Rupture",.description="This attack does 10 damage to each of your opponent's Benched Pokemon. (Don't apply Weakness and Resistance for Benched Pokemon.)",.effect="ecard3-56:a0",.animation="ATK_ANIM_HIT",.cost={0,1,0,0,0,0,1,0,0},.damage=0,.category=TCG_RESIDUAL},
@@ -9356,7 +9356,7 @@ const struct TcgCard gTcgCards[TCG_CARD_COUNT + 1] = {
 {.name="",.description="",.effect="NONE",.animation="ATK_ANIM_NONE",.cost={0},.damage=0,.category=TCG_DAMAGE_NORMAL},
 }
 },
-[1464] = {.id=1464, .name="Kakuna", .kind=TCG_POKEMON, .type=1, .rarity=0, .set=21, .set2=255, .dark=0, .holo=0, .flags=TCG_CF_BODY, .origin=21,
+[1464] = {.id=1464, .name="Kakuna", .kind=TCG_POKEMON, .type=1, .rarity=0, .set=21, .set2=255, .dark=0, .holo=0, .flags=TCG_CF_BODY|TCG_CF_READY, .origin=21,
 .hp=70, .stage=1, .species=14, .level=0, .retreat=2, .weakness=0, .resistance=255, .evolvesFrom="Weedle", .description="", .attacks={
 {.name="Exoskeleton",.description="All damage by attacks to Kakuna is reduced by 10 (after applying Weakness and Resistance).",.effect="ecard3-70:p",.animation="ATK_ANIM_HIT",.cost={0,0,0,0,0,0,0,0,0},.damage=0,.category=TCG_POKEMON_POWER},
 {.name="Poisonpowder",.description="The Defending Pokemon is now Poisoned.",.effect="ecard3-70:a0",.animation="ATK_ANIM_HIT",.cost={0,1,0,0,0,0,0,0,0},.damage=0,.category=TCG_RESIDUAL},
@@ -10162,7 +10162,7 @@ const struct TcgCard gTcgCards[TCG_CARD_COUNT + 1] = {
 {.name="",.description="",.effect="NONE",.animation="ATK_ANIM_NONE",.cost={0},.damage=0,.category=TCG_DAMAGE_NORMAL},
 }
 },
-[1589] = {.id=1589, .name="Venusaur", .kind=TCG_POKEMON, .type=1, .rarity=3, .set=4, .set2=255, .dark=0, .holo=0, .flags=0, .origin=22,
+[1589] = {.id=1589, .name="Venusaur", .kind=TCG_POKEMON, .type=1, .rarity=3, .set=4, .set2=255, .dark=0, .holo=0, .flags=TCG_CF_READY, .origin=22,
 .hp=100, .stage=2, .species=3, .level=16, .retreat=2, .weakness=0, .resistance=255, .evolvesFrom="Ivysaur", .description="This plant blooms when it is absorbing solar energy. It stays on the move to seek sunlight.", .attacks={
 {.name="Solar Power",.description="Once during your turn (before your attack), you may use this power. Your Active Pokemon and the Defending Pokemon are no longer Asleep, Confused, Paralyzed, or Poisoned. This power can't be used if Venusaur is Asleep, Confused, or Paralyzed.",.effect="basep-13:p",.animation="ATK_ANIM_HIT",.cost={0,0,0,0,0,0,0,0,0},.damage=0,.category=TCG_POKEMON_POWER},
 {.name="Mega Drain",.description="Remove a number of damage counters from Venusaur equal to half the damage done to the Defending Pokemon (after applying Weakness and Resistance) (rounded up to the nearest 10). If Venusaur has fewer damage counters than that, remove all of them.",.effect="basep-13:a0",.animation="ATK_ANIM_HIT",.cost={0,4,0,0,0,0,0,0,0},.damage=40,.category=TCG_DAMAGE_NORMAL},
@@ -10333,7 +10333,7 @@ const struct TcgCard gTcgCards[TCG_CARD_COUNT + 1] = {
 {.name="",.description="",.effect="NONE",.animation="ATK_ANIM_NONE",.cost={0},.damage=0,.category=TCG_DAMAGE_NORMAL},
 }
 },
-[1614] = {.id=1614, .name="Unown [J]", .kind=TCG_POKEMON, .type=5, .rarity=3, .set=4, .set2=255, .dark=0, .holo=0, .flags=0, .origin=22,
+[1614] = {.id=1614, .name="Unown [J]", .kind=TCG_POKEMON, .type=5, .rarity=3, .set=4, .set2=255, .dark=0, .holo=0, .flags=TCG_CF_READY, .origin=22,
 .hp=40, .stage=0, .species=201, .level=17, .retreat=1, .weakness=5, .resistance=255, .evolvesFrom="", .description="Their shapes look like hieroglyphs on ancient tablets. It is said that the two are somehow related.", .attacks={
 {.name="[Join]",.description="Once during your turn (before your attack), if you have Unown [J], Unown [O], Unown [I], and Unown Dragon on your Bench, you may search your deck for a Basic Pokemon or Evolution card. Show that card to your opponent, then put it into your hand. Shuffle your deck afterward.",.effect="basep-38:p",.animation="ATK_ANIM_HIT",.cost={0,0,0,0,0,0,0,0,0},.damage=0,.category=TCG_POKEMON_POWER},
 {.name="Hidden Power",.description="",.effect="NONE",.animation="ATK_ANIM_HIT",.cost={0,0,0,0,0,1,0,0,0},.damage=10,.category=TCG_DAMAGE_NORMAL},
@@ -10566,7 +10566,7 @@ const struct TcgCard gTcgCards[TCG_CARD_COUNT + 1] = {
 {.name="",.description="",.effect="NONE",.animation="ATK_ANIM_NONE",.cost={0},.damage=0,.category=TCG_DAMAGE_NORMAL},
 }
 },
-[1649] = {.id=1649, .name="Ludicolo", .kind=TCG_POKEMON, .type=3, .rarity=3, .set=4, .set2=255, .dark=0, .holo=0, .flags=TCG_CF_BODY, .origin=23,
+[1649] = {.id=1649, .name="Ludicolo", .kind=TCG_POKEMON, .type=3, .rarity=3, .set=4, .set2=255, .dark=0, .holo=0, .flags=TCG_CF_BODY|TCG_CF_READY, .origin=23,
 .hp=90, .stage=2, .species=272, .level=0, .retreat=2, .weakness=2, .resistance=255, .evolvesFrom="Lombre", .description="", .attacks={
 {.name="Rain Dish",.description="At any time between turns, remove 1 damage counter from Ludicolo.",.effect="np-20:p",.animation="ATK_ANIM_HIT",.cost={0,0,0,0,0,0,0,0,0},.damage=0,.category=TCG_POKEMON_POWER},
 {.name="Fury Swipes",.description="Flip 3 coins. This attack does 30 damage times the number of heads.",.effect="np-20:a0",.animation="ATK_ANIM_HIT",.cost={0,0,0,1,0,0,2,0,0},.damage=30,.category=TCG_DAMAGE_X},
@@ -10580,7 +10580,7 @@ const struct TcgCard gTcgCards[TCG_CARD_COUNT + 1] = {
 {.name="",.description="",.effect="NONE",.animation="ATK_ANIM_NONE",.cost={0},.damage=0,.category=TCG_DAMAGE_NORMAL},
 }
 },
-[1651] = {.id=1651, .name="Beldum", .kind=TCG_POKEMON, .type=8, .rarity=3, .set=4, .set2=255, .dark=0, .holo=0, .flags=0, .origin=23,
+[1651] = {.id=1651, .name="Beldum", .kind=TCG_POKEMON, .type=8, .rarity=3, .set=4, .set2=255, .dark=0, .holo=0, .flags=TCG_CF_READY, .origin=23,
 .hp=50, .stage=0, .species=374, .level=0, .retreat=2, .weakness=0, .resistance=1, .evolvesFrom="", .description="", .attacks={
 {.name="Magnetic Call",.description="Once during your turn (before your attack), you may flip a coin. If heads, search your deck for a Metal Basic Pokemon and put it onto your Bench. Shuffle your deck afterward. This power can't be used if Beldum is affected by a Special Condition.",.effect="np-22:p",.animation="ATK_ANIM_HIT",.cost={0,0,0,0,0,0,0,0,0},.damage=0,.category=TCG_POKEMON_POWER},
 {.name="Metal Charge",.description="Put 1 damage counter on Beldum.",.effect="np-22:a0",.animation="ATK_ANIM_HIT",.cost={0,0,0,0,0,0,1,0,1},.damage=30,.category=TCG_DAMAGE_NORMAL},
@@ -10631,28 +10631,28 @@ const struct TcgCard gTcgCards[TCG_CARD_COUNT + 1] = {
 {.name="",.description="",.effect="NONE",.animation="ATK_ANIM_NONE",.cost={0},.damage=0,.category=TCG_DAMAGE_NORMAL},
 }
 },
-[1660] = {.id=1660, .name="Moltres ex", .kind=TCG_POKEMON, .type=0, .rarity=3, .set=4, .set2=255, .dark=0, .holo=0, .flags=TCG_CF_EX|TCG_CF_BODY, .origin=23,
+[1660] = {.id=1660, .name="Moltres ex", .kind=TCG_POKEMON, .type=0, .rarity=3, .set=4, .set2=255, .dark=0, .holo=0, .flags=TCG_CF_EX|TCG_CF_BODY|TCG_CF_READY, .origin=23,
 .hp=100, .stage=0, .species=146, .level=0, .retreat=2, .weakness=3, .resistance=255, .evolvesFrom="", .description="", .attacks={
 {.name="Synchronized Lift",.description="As long as you have Articuno ex and Zapdos ex in play, the Retreat Cost for Moltres ex is 0.",.effect="np-31:p",.animation="ATK_ANIM_HIT",.cost={0,0,0,0,0,0,0,0,0},.damage=0,.category=TCG_POKEMON_POWER},
 {.name="Flame Gift",.description="You may move a Fire Energy card attached to Moltres ex to 1 of your Pokemon.",.effect="np-31:a0",.animation="ATK_ANIM_HIT",.cost={0,0,0,0,0,0,1,0,0},.damage=10,.category=TCG_DAMAGE_NORMAL},
 {.name="Scorching Wing",.description="Discard all Fire Energy attached to Moltres ex.",.effect="np-31:a1",.animation="ATK_ANIM_HIT",.cost={2,0,0,0,0,0,1,0,0},.damage=90,.category=TCG_DAMAGE_NORMAL},
 }
 },
-[1661] = {.id=1661, .name="Articuno ex", .kind=TCG_POKEMON, .type=3, .rarity=3, .set=4, .set2=255, .dark=0, .holo=0, .flags=TCG_CF_EX|TCG_CF_BODY, .origin=23,
+[1661] = {.id=1661, .name="Articuno ex", .kind=TCG_POKEMON, .type=3, .rarity=3, .set=4, .set2=255, .dark=0, .holo=0, .flags=TCG_CF_EX|TCG_CF_BODY|TCG_CF_READY, .origin=23,
 .hp=100, .stage=0, .species=144, .level=0, .retreat=2, .weakness=8, .resistance=255, .evolvesFrom="", .description="", .attacks={
 {.name="Synchronized Lift",.description="As long as you have Zapdos ex and Moltres ex in play, the Retreat Cost for Articuno ex is 0.",.effect="np-32:p",.animation="ATK_ANIM_HIT",.cost={0,0,0,0,0,0,0,0,0},.damage=0,.category=TCG_POKEMON_POWER},
 {.name="Ice Gift",.description="You may move a Water Energy attached to Articuno ex to 1 of your Pokemon.",.effect="np-32:a0",.animation="ATK_ANIM_HIT",.cost={0,0,0,0,0,0,1,0,0},.damage=10,.category=TCG_DAMAGE_NORMAL},
 {.name="Freezing Wing",.description="Flip a coin. If heads, the Defending Pokemon is now Asleep.",.effect="np-32:a1",.animation="ATK_ANIM_HIT",.cost={0,0,0,2,0,0,1,0,0},.damage=50,.category=TCG_DAMAGE_NORMAL},
 }
 },
-[1662] = {.id=1662, .name="Zapdos ex", .kind=TCG_POKEMON, .type=2, .rarity=3, .set=4, .set2=255, .dark=0, .holo=0, .flags=TCG_CF_EX|TCG_CF_BODY, .origin=23,
+[1662] = {.id=1662, .name="Zapdos ex", .kind=TCG_POKEMON, .type=2, .rarity=3, .set=4, .set2=255, .dark=0, .holo=0, .flags=TCG_CF_EX|TCG_CF_BODY|TCG_CF_READY, .origin=23,
 .hp=100, .stage=0, .species=145, .level=0, .retreat=2, .weakness=2, .resistance=255, .evolvesFrom="", .description="", .attacks={
 {.name="Synchronized Lift",.description="As long as you have Articuno ex and Moltres ex in play, the Retreat Cost for Zapdos ex is 0.",.effect="np-33:p",.animation="ATK_ANIM_HIT",.cost={0,0,0,0,0,0,0,0,0},.damage=0,.category=TCG_POKEMON_POWER},
 {.name="Thunder Gift",.description="You may move a Lightning Energy card attached to Zapdos ex to 1 of your Pokemon.",.effect="np-33:a0",.animation="ATK_ANIM_HIT",.cost={0,0,0,0,0,0,1,0,0},.damage=10,.category=TCG_DAMAGE_NORMAL},
 {.name="Lightning Wing",.description="Does 10 damage to 1 of your Benched Pokemon. (Don't apply Weakness and Resistance for Benched Pokemon.)",.effect="np-33:a1",.animation="ATK_ANIM_HIT",.cost={0,0,2,0,0,0,1,0,0},.damage=60,.category=TCG_DAMAGE_NORMAL},
 }
 },
-[1663] = {.id=1663, .name="Typhlosion", .kind=TCG_POKEMON, .type=0, .rarity=3, .set=4, .set2=255, .dark=0, .holo=0, .flags=TCG_CF_BODY, .origin=23,
+[1663] = {.id=1663, .name="Typhlosion", .kind=TCG_POKEMON, .type=0, .rarity=3, .set=4, .set2=255, .dark=0, .holo=0, .flags=TCG_CF_BODY|TCG_CF_READY, .origin=23,
 .hp=110, .stage=2, .species=157, .level=0, .retreat=1, .weakness=3, .resistance=255, .evolvesFrom="Quilava", .description="", .attacks={
 {.name="Burning Aura",.description="As long as Typhlosion is your Active Pokemon, put 1 damage counter on each Active Pokemon (both yours and your opponent's) between turns.",.effect="np-34:p",.animation="ATK_ANIM_HIT",.cost={0,0,0,0,0,0,0,0,0},.damage=0,.category=TCG_POKEMON_POWER},
 {.name="Flickering Flames",.description="The Defending Pokemon is now Asleep.",.effect="np-34:a0",.animation="ATK_ANIM_HIT",.cost={1,0,0,0,0,0,0,0,0},.damage=20,.category=TCG_DAMAGE_NORMAL},
@@ -10669,21 +10669,21 @@ const struct TcgCard gTcgCards[TCG_CARD_COUNT + 1] = {
 [1665] = {.id=1665, .name="Tropical Tidal Wave", .kind=TCG_TRAINER, .type=6, .rarity=3, .set=4, .set2=255, .dark=0, .holo=0, .flags=TCG_CF_READY, .origin=23,
 .effect="np-36:t",.description="Flip a coin. If heads, discard all Trainer cards your opponent has in play. If tails, discard all Trainer cards (excluding Supporter cards) you have in play."
 },
-[1666] = {.id=1666, .name="Kyogre ex", .kind=TCG_POKEMON, .type=3, .rarity=3, .set=4, .set2=255, .dark=0, .holo=0, .flags=TCG_CF_EX|TCG_CF_BODY, .origin=23,
+[1666] = {.id=1666, .name="Kyogre ex", .kind=TCG_POKEMON, .type=3, .rarity=3, .set=4, .set2=255, .dark=0, .holo=0, .flags=TCG_CF_EX|TCG_CF_BODY|TCG_CF_READY, .origin=23,
 .hp=100, .stage=0, .species=382, .level=0, .retreat=2, .weakness=2, .resistance=255, .evolvesFrom="", .description="", .attacks={
 {.name="Frenzy",.description="As long as your opponent has Groudon, Groudon ex, Rayquaza, or Rayquaza ex in play. Kyogre ex's attacks do 40 more damage to the Defending Pokemon (before applying Weakness and Resistance).",.effect="np-37:p",.animation="ATK_ANIM_HIT",.cost={0,0,0,0,0,0,0,0,0},.damage=0,.category=TCG_POKEMON_POWER},
 {.name="Aqua Supply",.description="You may attach a basic Energy card from your hand to 1 of your Pokemon.",.effect="np-37:a0",.animation="ATK_ANIM_HIT",.cost={0,0,0,1,0,0,1,0,0},.damage=30,.category=TCG_DAMAGE_NORMAL},
 {.name="Tsunami",.description="Does 10 damage to each of your opponent's Benched Pokemon. (Don't apply Weakness and Resistance for Benched Pokemon.)",.effect="np-37:a1",.animation="ATK_ANIM_HIT",.cost={0,0,0,1,0,0,2,0,0},.damage=40,.category=TCG_DAMAGE_NORMAL},
 }
 },
-[1667] = {.id=1667, .name="Groudon ex", .kind=TCG_POKEMON, .type=4, .rarity=3, .set=4, .set2=255, .dark=0, .holo=0, .flags=TCG_CF_EX|TCG_CF_BODY, .origin=23,
+[1667] = {.id=1667, .name="Groudon ex", .kind=TCG_POKEMON, .type=4, .rarity=3, .set=4, .set2=255, .dark=0, .holo=0, .flags=TCG_CF_EX|TCG_CF_BODY|TCG_CF_READY, .origin=23,
 .hp=100, .stage=0, .species=383, .level=0, .retreat=2, .weakness=3, .resistance=255, .evolvesFrom="", .description="", .attacks={
 {.name="Frenzy",.description="As long as your opponent has Kyogre, Kyogre ex, Rayquaza, or Rayquaza ex in play, Groudon ex's attacks do 40 more damage to the Defending Pokemon (before applying Weakness and Resistance).",.effect="np-38:p",.animation="ATK_ANIM_HIT",.cost={0,0,0,0,0,0,0,0,0},.damage=0,.category=TCG_POKEMON_POWER},
 {.name="Mix-Up",.description="Flip a coin. If heads, your opponent discards the top card from his or her deck.",.effect="np-38:a0",.animation="ATK_ANIM_HIT",.cost={0,0,0,0,1,0,1,0,0},.damage=30,.category=TCG_DAMAGE_NORMAL},
 {.name="Earthquake",.description="Does 10 damage to each of your Benched Pokemon. (Don't apply Weakness and Resistance for Benched Pokemon.)",.effect="np-38:a1",.animation="ATK_ANIM_HIT",.cost={0,0,0,0,1,0,2,0,0},.damage=60,.category=TCG_DAMAGE_NORMAL},
 }
 },
-[1668] = {.id=1668, .name="Rayquaza ex", .kind=TCG_POKEMON, .type=6, .rarity=3, .set=4, .set2=255, .dark=0, .holo=0, .flags=TCG_CF_EX|TCG_CF_BODY, .origin=23,
+[1668] = {.id=1668, .name="Rayquaza ex", .kind=TCG_POKEMON, .type=6, .rarity=3, .set=4, .set2=255, .dark=0, .holo=0, .flags=TCG_CF_EX|TCG_CF_BODY|TCG_CF_READY, .origin=23,
 .hp=100, .stage=0, .species=384, .level=0, .retreat=1, .weakness=6, .resistance=3, .evolvesFrom="", .description="", .attacks={
 {.name="Frenzy",.description="As long as your opponent has Kyogre, Kyogre ex, Groudon, or Groudon ex in play, Rayquaza ex's attacks do 40 damage to the Defending Pokemon (before applying Weakness and Resistance).",.effect="np-39:p",.animation="ATK_ANIM_HIT",.cost={0,0,0,0,0,0,0,0,0},.damage=0,.category=TCG_POKEMON_POWER},
 {.name="Dragon Bind",.description="Flip a coin. If heads, the Defending Pokemon is now Paralyzed.",.effect="np-39:a0",.animation="ATK_ANIM_HIT",.cost={0,0,0,0,0,0,2,0,0},.damage=20,.category=TCG_DAMAGE_NORMAL},

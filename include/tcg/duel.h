@@ -545,6 +545,8 @@ unsigned TcgDuel_RetreatCost(const struct TcgDuel *g, unsigned player);
 const char *TcgPower_RetreatBlock(const struct TcgDuel *g, unsigned player);
 void TcgPower_AfterRetreat(struct TcgDuel *g, unsigned player, unsigned benched);
 int TcgPower_AttackBonus(struct TcgDuel *g, int amount);
+/* The regional powers between turns (Rain Dish, Burning Aura) */
+void TcgPower_BetweenTurns(struct TcgDuel *g);
 int TcgPower_Frenzy(const struct TcgDuel *g, unsigned player);
 void TcgPower_KnockedOut(struct TcgDuel *g, unsigned player, unsigned slot);
 int TcgPower_NoTrainers(const struct TcgDuel *g);

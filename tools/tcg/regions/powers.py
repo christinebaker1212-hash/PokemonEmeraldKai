@@ -67,6 +67,14 @@ P('R_WANT', '[Want]', 'put a Trainer card from your discard pile into your hand'
 P('R_GIVE', '[Give]', 'search your deck for a basic Energy card and attach it to 1 of your Pokemon', 'USED',
   'ONCE BENCH', 'c h.spike')
 P('R_LAUGH', '[Laugh]', 'each player shuffles his or her deck', 'USED', 'ONCE ANY', 'c h.shufboth')
+P('R_LOLLING_ABOUT', 'Lolling About', 'Snorlax is now Asleep', 'USED', 'ONCE ACTIVE', 'heal:1 sslp')
+P('R_SOLAR_POWER', 'Solar Power', 'Your Active Pokemon and the Defending Pokemon are no longer', 'USED', 'ONCE',
+  'cure4:0 cure4:1')
+P('R_BACKUP', 'Backup', 'draw cards from your deck until you have 3 cards', 'USED', 'ONCE', 'needhand:2 drawto:3')
+P('R_SUBMERGE', 'Submerge', "change SELF's type to Water", 'USED', 'ONCE', 'shiftto:3')
+P('R_JOIN', '[Join]', 'search your deck for a Basic Pokemon or Evolution card', 'USED', 'ONCE BENCH', 'srchk:3')
+P('R_MAGNETIC_CALL', 'Magnetic Call', 'search your deck for a Metal Basic Pokemon', 'USED', 'ONCE',
+  'needroom c h.dbench:2')
 P('R_QUICKEN', '[Quicken]', 'prevent all effects of attacks, including damage, done to any of your Pokemon with Unown',
   'USED', 'ONCE ANY', 'c h.barunown')
 
@@ -112,6 +120,17 @@ P('R_IMMUNITY', 'Immunity', "Prevent all effects of your opponent's attacks", 'P
 P('R_FLUFF', 'Fluff', 'already has at least 1 damage counter', 'PASSIVE')
 P('R_SUCTION_CUPS', 'Suction Cups', 'whenever the Defending Pokemon retreats', 'PASSIVE')
 P('R_DARK_GAZE', 'Dark Gaze', "can't use Poke-Powers", 'PASSIVE')
+P('R_EXOSKELETON_10', 'Exoskeleton', 'is reduced by 10 (after', 'PASSIVE')
+P('R_THICK_SHELL', 'Thick Shell', 'from Evolved Pokemon is reduced by 10', 'PASSIVE')
+P('R_DENSE_BODY', 'Dense Body', 'from Basic Pokemon (excluding Baby Pokemon) is reduced by 20', 'PASSIVE')
+P('R_ENERGY_BARRIER', 'Energy Barrier', 'for each basic Energy card attached to SELF', 'PASSIVE')
+P('R_PSYCHOFLOW', 'Psychoflow', 'Psychic Energy card attached to SELF, its Retreat Cost is 0', 'PASSIVE')
+P('R_SLIPPERY_SKIN', 'Slippery Skin', 'Defending Pokemon is an Evolved Pokemon', 'PASSIVE')
+P('R_CONDUCTIVE_BODY', 'Conductive Body', 'for each Magnemite on your Bench', 'PASSIVE')
+P('R_SYNCHRONIZED_LIFT', 'Synchronized Lift', 'the Retreat Cost for SELF is 0', 'PASSIVE')
+P('R_RAIN_DISH', 'Rain Dish', 'between turns, remove 1 damage counter', 'PASSIVE')
+P('R_BURNING_AURA', 'Burning Aura', 'put 1 damage counter on each Active Pokemon', 'PASSIVE')
+P('R_FRENZY_EX', 'Frenzy', 'damage to the Defending Pokemon (before applying Weakness', 'PASSIVE')
 P('R_CONDUCTIVITY', 'Conductivity', 'attaches an Energy card from his or her hand', 'PASSIVE')
 # when it's played from the hand (TcgPower_OnPlay)
 P('R_VENOM_SPRAY', 'Venom Spray', 'Paralyzed and Poisoned', 'PASSIVE')

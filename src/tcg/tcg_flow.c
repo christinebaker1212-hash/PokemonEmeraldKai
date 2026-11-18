@@ -361,8 +361,10 @@ static int AttackPickSteps(const struct TcgDuel *g, unsigned me, const struct Tc
             {10, TCG_F_SUPPORTER, TCG_SRC_DECK, "Take which Supporter?"},
             {11, TCG_F_TM_TOOL, TCG_SRC_DECK, "Take which Technical Machine or Pokemon Tool?"},
             {12, TCG_F_TRAINER, TCG_SRC_DECK, "Take which Trainer?"},
+            {13, TCG_F_POKEMON_CARD, TCG_SRC_DECK, "Take which Pokemon card?"},
             {20, TCG_F_BASIC, TCG_SRC_DECK, "Put which Basic Pokemon onto your Bench?"},
             {21, TCG_F_BABY, TCG_SRC_DECK, "Put which Baby Pokemon onto your Bench?"},
+            {22, TCG_F_METAL_BASIC, TCG_SRC_DECK, "If heads, put which Metal Basic Pokemon onto your Bench?"},
             {30, TCG_F_BASIC, TCG_SRC_MY_DISCARD, "Put which Basic Pokemon onto your Bench?"},
             {40, TCG_F_GARBAGE, TCG_SRC_MY_DISCARD, "Put which card into your hand?"},
             {50, TCG_F_BASIC_ENERGY, TCG_SRC_DECK, "Take which basic Energy cards?"},
@@ -611,6 +613,8 @@ int TcgFlow_CardMatches(const struct TcgDuel *g, unsigned owner, unsigned physic
         return c->kind == TCG_TRAINER && (c->flags & TCG_CF_SUPPORTER);
     case TCG_F_BABY:
         return c->kind == TCG_POKEMON && (c->flags & TCG_CF_BABY);
+    case TCG_F_METAL_BASIC:
+        return c->kind == TCG_POKEMON && !c->stage && c->type == TCG_METAL;
     case TCG_F_OMANYTE_KABUTO:
         return c->kind == TCG_POKEMON && (!strcmp(c->name, "Omanyte") || !strcmp(c->name, "Kabuto"));
     case TCG_F_LATER_STAGE:

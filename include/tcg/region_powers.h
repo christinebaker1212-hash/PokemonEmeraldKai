@@ -41,6 +41,12 @@
     X(R_WANT, "[WANT]", 1, 5, "c h.distr") \
     X(R_GIVE, "[GIVE]", 1, 5, "c h.spike") \
     X(R_LAUGH, "[LAUGH]", 1, 9, "c h.shufboth") \
+    X(R_LOLLING_ABOUT, "LOLLING ABOUT", 1, 3, "heal:1 sslp") \
+    X(R_SOLAR_POWER, "SOLAR POWER", 1, 1, "cure4:0 cure4:1") \
+    X(R_BACKUP, "BACKUP", 1, 1, "needhand:2 drawto:3") \
+    X(R_SUBMERGE, "SUBMERGE", 1, 1, "shiftto:3") \
+    X(R_JOIN, "[JOIN]", 1, 5, "srchk:3") \
+    X(R_MAGNETIC_CALL, "MAGNETIC CALL", 1, 1, "needroom c h.dbench:2") \
     X(R_QUICKEN, "[QUICKEN]", 1, 9, "c h.barunown") \
     X(R_ROCK_BODY, "ROCK BODY", 0, 0, NULL) \
     X(R_SHELL_ARMOR, "SHELL ARMOR", 0, 0, NULL) \
@@ -82,6 +88,17 @@
     X(R_FLUFF, "FLUFF", 0, 0, NULL) \
     X(R_SUCTION_CUPS, "SUCTION CUPS", 0, 0, NULL) \
     X(R_DARK_GAZE, "DARK GAZE", 0, 0, NULL) \
+    X(R_EXOSKELETON_10, "EXOSKELETON", 0, 0, NULL) \
+    X(R_THICK_SHELL, "THICK SHELL", 0, 0, NULL) \
+    X(R_DENSE_BODY, "DENSE BODY", 0, 0, NULL) \
+    X(R_ENERGY_BARRIER, "ENERGY BARRIER", 0, 0, NULL) \
+    X(R_PSYCHOFLOW, "PSYCHOFLOW", 0, 0, NULL) \
+    X(R_SLIPPERY_SKIN, "SLIPPERY SKIN", 0, 0, NULL) \
+    X(R_CONDUCTIVE_BODY, "CONDUCTIVE BODY", 0, 0, NULL) \
+    X(R_SYNCHRONIZED_LIFT, "SYNCHRONIZED LIFT", 0, 0, NULL) \
+    X(R_RAIN_DISH, "RAIN DISH", 0, 0, NULL) \
+    X(R_BURNING_AURA, "BURNING AURA", 0, 0, NULL) \
+    X(R_FRENZY_EX, "FRENZY", 0, 0, NULL) \
     X(R_CONDUCTIVITY, "CONDUCTIVITY", 0, 0, NULL) \
     X(R_VENOM_SPRAY, "VENOM SPRAY", 0, 0, NULL) \
     X(R_SOFTBOILED, "SOFTBOILED", 0, 0, NULL) \

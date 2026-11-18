@@ -689,6 +689,7 @@ static void EndTurn(struct TcgDuel *g)
             f->defender--;
     }
     ToolsBetweenTurns(g, 0);
+    TcgPower_BetweenTurns(g); /* (Rain Dish, Burning Aura) */
     /* Darkness Energy: at the end of every turn, a damage counter on a Pokemon that isn't Darkness or Dark */
     for (who = 0; who < 2; who++)
         for (s = 0; s < TCG_FIELD_SIZE; s++)

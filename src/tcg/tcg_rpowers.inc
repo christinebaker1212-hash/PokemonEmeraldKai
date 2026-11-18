@@ -81,6 +81,24 @@ static const char *RegionBlock(const struct TcgDuel *g, unsigned player, unsigne
     }
     switch (power)
     {
+    case TCG_POWER_R_JOIN:
+        /* ([J], [O], [I] are read from its words; the fourth, printed "Unown Dragon" in the card list, is [N]: J-O-I-N) */
+        for (s = 1; s < TCG_FIELD_SIZE; s++)
+            if (TcgDuel_Field(g, player, s) && !strcmp(TcgDuel_Field(g, player, s)->name, "Unown [N]"))
+                break;
+        if (s == TCG_FIELD_SIZE)
+            return "Those Unown aren't all on your Bench.";
+        break;
+    case TCG_POWER_R_BACKUP:
+        if (p->handSize > 2)
+            return "You have more than 2 cards in your hand.";
+        break;
+    case TCG_POWER_R_MAGNETIC_CALL:
+        for (s = 1; s < TCG_FIELD_SIZE && p->field[s].stackSize; s++)
+            ;
+        if (s == TCG_FIELD_SIZE)
+            return "Your Bench is full.";
+        break;
     case TCG_POWER_R_EARTH_RAGE:
     case TCG_POWER_R_FRAGRANCE_TRAP:
     case TCG_POWER_R_FRAGRANCE_TRAP_GYM:
@@ -169,8 +187,28 @@ static int RegionDamage(struct TcgDuel *g, unsigned player, unsigned slot, int a
     {
     case TCG_POWER_R_ROCK_BODY:
     case TCG_POWER_R_SHELL_ARMOR:
+    case TCG_POWER_R_EXOSKELETON_10:
         amount -= 10;
         break;
+    case TCG_POWER_R_THICK_SHELL:
+        if (attacker && attacker->stage)
+            amount -= 10;
+        break;
+    case TCG_POWER_R_DENSE_BODY:
+        if (attacker && !attacker->stage && !(attacker->flags & TCG_CF_BABY))
+            amount -= 20;
+        break;
+    case TCG_POWER_R_ENERGY_BARRIER:
+    {
+        /* 10 less for each basic Energy card on it, 20 at most */
+        const struct TcgFieldCard *f = &g->players[player].field[slot];
+        unsigned i, n = 0;
+        for (i = 0; i < f->attachedSize; i++)
+            n += Tcg_Card(g->players[player].cards[f->attached[i]])->kind == TCG_ENERGY &&
+                 g->players[player].cards[f->attached[i]] <= 6;
+        amount -= 10 * (int)(n > 2 ? 2 : n);
+        break;
+    }
     case TCG_POWER_R_EXOSKELETON:
     case TCG_POWER_R_VASE_BODY:
         amount -= 20;
@@ -223,6 +261,29 @@ static int RegionRetreat(const struct TcgDuel *g, unsigned player)
         if (TcgPower_Working(g, player, s) == TCG_POWER_R_ZOOM && TcgDuel_Field(g, player, 0) &&
             strstr(TcgDuel_Field(g, player, 0)->name, "Unown"))
             return -99;
+    if (power == TCG_POWER_R_PSYCHOFLOW && RpEnergyOn(g, player, 0, TCG_PSYCHIC, 0) >= 0)
+        return -99;
+    if (power == TCG_POWER_R_SLIPPERY_SKIN && g->players[player ^ 1].field[0].stackSize >= 2)
+        return -99;
+    if (power == TCG_POWER_R_SYNCHRONIZED_LIFT && TcgDuel_Field(g, player, 0))
+    {
+        /* (the other two of Articuno ex, Zapdos ex and Moltres ex in play) */
+        static const char *const birds[3] = {"Articuno ex", "Zapdos ex", "Moltres ex"};
+        unsigned b, have = 0;
+        for (b = 0; b < 3; b++)
+            for (s = 0; s < TCG_FIELD_SIZE; s++)
+                if (TcgDuel_Field(g, player, s) && !strcmp(TcgDuel_Field(g, player, s)->name, birds[b]) &&
+                    strcmp(TcgDuel_Field(g, player, 0)->name, birds[b]))
+                {
+                    have++;
+                    break;
+                }
+        if (have == 2)
+            return -99;
+    }
+    if (power == TCG_POWER_R_CONDUCTIVE_BODY)
+        for (s = 1; s < TCG_FIELD_SIZE; s++)
+            delta -= TcgDuel_Field(g, player, s) && !strcmp(TcgDuel_Field(g, player, s)->name, "Magnemite");
     if (power == TCG_POWER_R_LIGHTWEIGHT)
         delta -= (int)TcgDuel_Energy(g, player, 0, TCG_GRASS);
     else if (power == TCG_POWER_R_EXTREME_SPEED)
@@ -517,4 +578,55 @@ static void RegionAfterRetreat(struct TcgDuel *g, unsigned player, unsigned benc
             if (Tcg_Card(p->cards[f->attached[i - 1]])->kind == TCG_ENERGY)
                 p->discard[p->discardSize++] = TcgPile_Remove(f->attached, &f->attachedSize, i - 1);
     }
+}
+/* Between turns (TcgDuel's checkup): Rain Dish, a counter off it; Burning Aura (Active), a counter on each Active */
+void TcgPower_BetweenTurns(struct TcgDuel *g)
+{
+    unsigned who, s;
+    for (who = 0; who < 2; who++)
+        for (s = 0; s < TCG_FIELD_SIZE; s++)
+        {
+            struct TcgFieldCard *f = &g->players[who].field[s];
+            unsigned power = f->stackSize ? TcgPower_Working(g, who, s) : TCG_POWER_NONE;
+            if (power == TCG_POWER_R_RAIN_DISH && f->damage >= 10)
+            {
+                Announce(g, who, s, power);
+                f->damage -= 10;
+                TcgDuel_Event(g, TCG_EV_HEAL, who, s, 10, 0, 0);
+            }
+            if (power == TCG_POWER_R_BURNING_AURA && !s)
+            {
+                unsigned w;
+                Announce(g, who, s, power);
+                for (w = 0; w < 2; w++)
+                    if (g->players[w].field[0].stackSize)
+                        PlainDamage(g, w, 0, 10);
+            }
+        }
+}
+/* The regional attack bonuses before Weakness and Resistance: Frenzy (Kyogre ex, Groudon ex, Rayquaza ex: 40 more while
+ * the opponent has one of the other two, ex or not, in play) */
+static int RegionAttackBonus(struct TcgDuel *g)
+{
+    static const char *const weather[3] = {"Kyogre", "Groudon", "Rayquaza"};
+    const struct TcgCard *it = TcgDuel_Field(g, g->current, 0);
+    unsigned k, s;
+    if (!it || TcgPower_Working(g, g->current, 0) != TCG_POWER_R_FRENZY_EX)
+        return 0;
+    for (k = 0; k < 3; k++)
+    {
+        size_t n = strlen(weather[k]);
+        if (!strncmp(it->name, weather[k], n))
+            continue;
+        for (s = 0; s < TCG_FIELD_SIZE; s++)
+        {
+            const struct TcgCard *c = TcgDuel_Field(g, g->current ^ 1, s);
+            if (c && !strncmp(c->name, weather[k], n) && (!c->name[n] || !strcmp(c->name + n, " ex")))
+            {
+                Announce(g, g->current, 0, TCG_POWER_R_FRENZY_EX);
+                return 40;
+            }
+        }
+    }
+    return 0;
 }

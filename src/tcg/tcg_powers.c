@@ -398,6 +398,7 @@ int TcgPower_AttackBonus(struct TcgDuel *g, int amount)
         Announce(g, me, 0, TCG_POWER_FRENZY);
         bonus += 30;
     }
+    bonus += RegionAttackBonus(g);
     /* GR's Mewtwo's Dark Wave: a Dark Pokemon's attack, heads then heads 20 / tails 10 more */
     if (IsDarkCard(TcgDuel_Field(g, me, 0)))
         for (s = 0; s < TCG_FIELD_SIZE; s++)

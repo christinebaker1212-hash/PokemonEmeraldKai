@@ -96,7 +96,10 @@
  *             next turn (0), while it's your Active (1), and through your next turn (2) | koslp:i it's Knocked Out if
  *             Asleep and it used attack i last turn | dheal:n n counters off the Defending (0 all) | oetype:x x to each
  *             of theirs with Energy of the type chosen (opt:10) | rec doubled by boost:i,0 on that attack
- * Blocks:     needlast:i it used attack i last turn (TcgFieldCard.lastAttack) */
+ * Blocks:     needlast:i it used attack i last turn (TcgFieldCard.lastAttack) | needhand:n n cards in the hand at most
+ * After (1):  cure4:w your Active (0) / the Defending (1) no longer Asleep, Confused, Paralyzed or Poisoned | drawto:n
+ *             draw until n in the hand | shiftto:T its type T for the turn | srchk:3 a Pokemon card | dbench:2 a Metal
+ *             Basic */
 #define SCRIPT_TOKEN 48
 /* Which of the player's Pokemon "it" is: the attacker (0), or a Pokemon whose power runs a script (tcg_powers.c) */
 static unsigned sScriptSelf;
@@ -892,10 +895,13 @@ static int ScriptRun(struct TcgDuel *g, const char *script, const struct TcgAtta
                 uint8_t card = fromDeck ? p->deck[at] : p->discard[at];
                 const struct TcgCard *c = CardAt(g, me, card);
                 int ok = ScriptIs(&o, "srchk")
-                             ? c->kind == TCG_TRAINER && (x == 0 ? (c->flags & TCG_CF_SUPPORTER) != 0
-                                                          : x == 1 ? (c->flags & (TCG_CF_TM | TCG_CF_TOOL)) != 0 : 1)
+                             ? (x == 3 ? c->kind == TCG_POKEMON /* (srchk:3 a Basic Pokemon or Evolution card) */
+                                       : c->kind == TCG_TRAINER &&
+                                             (x == 0 ? (c->flags & TCG_CF_SUPPORTER) != 0
+                                              : x == 1 ? (c->flags & (TCG_CF_TM | TCG_CF_TOOL)) != 0 : 1))
                          : ScriptIs(&o, "dishand") ? c->kind == TCG_POKEMON || (c->kind == TCG_ENERGY && c->id <= 6)
-                                                   : c->kind == TCG_POKEMON && !c->stage && (x != 1 || (c->flags & TCG_CF_BABY));
+                                                   : c->kind == TCG_POKEMON && !c->stage && (x != 1 || (c->flags & TCG_CF_BABY)) &&
+                                                         (x != 2 || c->type == TCG_METAL); /* (dbench:2 a Metal Basic) */
                 if (!ok)
                     return TCG_INVALID;
                 if (ScriptIs(&o, "srchk") || ScriptIs(&o, "dishand"))
@@ -1124,6 +1130,26 @@ static int ScriptRun(struct TcgDuel *g, const char *script, const struct TcgAtta
             TcgDuel_Shuffle(g, me);
         else if (ScriptIs(&o, "healh"))
             Heal(g, me, sScriptSelf, (unsigned)x * 10 * g->scriptHeads);
+        else if (ScriptIs(&o, "cure4"))
+        {
+            /* your Active (0) / the Defending Pokemon (1) no longer Asleep, Confused, Paralyzed or Poisoned */
+            unsigned who = x ? them : me;
+            struct TcgFieldCard *f = &g->players[who].field[0];
+            if (f->stackSize && (!x || !blocked))
+            {
+                f->condition = TCG_HEALTHY;
+                f->poison = 0;
+                TcgDuel_Event(g, TCG_EV_STATUS, who, 0, TCG_HEALTHY, 0, 0);
+            }
+        }
+        else if (ScriptIs(&o, "drawto"))
+        {
+            /* cards drawn until the hand has x */
+            if (p->handSize < (unsigned)x)
+                TcgDuel_Event(g, TCG_EV_DRAW, me, sScriptSelf, TcgDuel_Draw(g, me, (unsigned)x - p->handSize), 0, 0);
+        }
+        else if (ScriptIs(&o, "shiftto"))
+            self->shift = (uint8_t)(x + 1); /* (its type x for the rest of the turn) */
         else if (ScriptIs(&o, "dheal"))
         {
             /* x counters off the Defending Pokemon (0: all of them) */
@@ -1190,7 +1216,7 @@ static int ScriptRun(struct TcgDuel *g, const char *script, const struct TcgAtta
             }
         }
         else if (ScriptIs(&o, "needob") || ScriptIs(&o, "needsc") || ScriptIs(&o, "needeqe") || ScriptIs(&o, "needmb") ||
-                 ScriptIs(&o, "needlast") ||
+                 ScriptIs(&o, "needlast") || ScriptIs(&o, "needhand") ||
                  ScriptIs(&o, "needroom") || ScriptIs(&o, "neede"))
             ; /* (ScriptBlock) */
         else if (ScriptIs(&o, "dpowoff"))
@@ -2618,6 +2644,8 @@ static const char *ScriptBlock(const struct TcgDuel *g, unsigned player, const c
             if (ScriptIs(&o, "needroom") && n == TCG_FIELD_SIZE - 1)
                 return "Your Bench is full.";
         }
+        if (ScriptIs(&o, "needhand") && g->players[player].handSize > (unsigned)o.arg[0])
+            return "You have too many cards in your hand.";
         if (ScriptIs(&o, "needlast") && (g->players[player].field[0].lastAttack != o.arg[0] + 1 ||
                                          g->players[player].field[0].lastAttackTurn + 2 != g->turn))
             return "It didn't use the attack this one needs last turn.";
