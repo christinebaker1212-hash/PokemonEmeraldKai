@@ -104,24 +104,77 @@ jobs:
       # people's sprites, its words, and its scripts converted to this game's (sinnoh/platinum_scripts.inc, which the
       # builds below include), all from pret/pokeplatinum at a pinned commit (nothing of it is in this repository);
       # package.sh ships the packs in sinnoh/. Before the builds: they compile the converted scripts in.
+      - name: Pack keys
+        id: packkey
+        if: steps.ver.outputs.skip != 'true'
+        env:
+          ORRE_DISC_URL: ${{ secrets.ORRE_DISC_URL }}
+          UNOVA_ROM_URL: ${{ secrets.UNOVA_ROM_URL }}
+          PLATINUM_ROM_URL: ${{ secrets.PLATINUM_ROM_URL }}
+        run: |
+          echo "plat=$(printf %s "$PLATINUM_ROM_URL" | sha256sum | cut -c1-16)" >> "$GITHUB_OUTPUT"
+          echo "orre=$(printf %s "$ORRE_DISC_URL" | sha256sum | cut -c1-16)" >> "$GITHUB_OUTPUT"
+          echo "unova=$(printf %s "$UNOVA_ROM_URL" | sha256sum | cut -c1-16)" >> "$GITHUB_OUTPUT"
+          # what the packs are built from, by git's own content hashes (hashFiles also hashed the __pycache__ files the
+          # steps before write into tools/, which carry the checkout's times: the key changed every run, never a hit)
+          echo "orresrc=$(git ls-files -s tools/orre tools/moemon_text src/data/orre_props.h src/fonts.c charmap.txt | sha256sum | cut -c1-40)" >> "$GITHUB_OUTPUT"
+          # SINNOH's: what tools/sinnoh/make_pack.sh and rom_pack.sh read (traced, 2026-11-18): their tools, the decomp's
+          # pinned commit (in fetch_decomp.sh), SINNOH's maps and scripts and C (gen_scripts.py reads them), the
+          # constants they name, and the ROM half's UI STYLE / ball effect builders with the fonts they draw
+          echo "sinnohsrc=$(git ls-files -s tools/sinnoh tools/aveon tools/moemon_text tools/ui_styles tools/moemon_ballfx graphics/aveon graphics/fonts/latin_normal.png graphics/fonts/latin_small.png src/fonts.c charmap.txt src/sinnoh 'data/maps/Sinnoh_*' 'data/scripts/sinnoh_*' include/constants/items.h include/constants/moves.h include/constants/species.h include/constants/sinnoh_gfx.h include/constants/trainers_sinnoh.h | sha256sum | cut -c1-40)" >> "$GITHUB_OUTPUT"
+          echo "unovasrc=$(git ls-files -s tools/unova tools/sinnoh tools/aveon tools/moemon_text tools/ui_styles tools/moemon_ballfx graphics/aveon charmap.txt | sha256sum | cut -c1-40)" >> "$GITHUB_OUTPUT"
+
+
+      # SINNOH's packs are built again only when what makes them changed (the user, 2026-11-18), as ORRE's and UNOVA's:
+      # the whole sinnoh/ folder kept under the key above (the decomp's packs, its converted scripts and DISTORTION
+      # WORLD, and the ROM's pieces with the ROM link's hash). The same inputs make the same bytes (checked: a rebuild
+      # matched the kept files byte for byte).
+      - name: SINNOH's packs from an earlier release
+        id: sinnohcache
+        if: steps.ver.outputs.skip != 'true'
+        uses: actions/cache/restore@v4
+        env:
+          SEGMENT_DOWNLOAD_TIMEOUT_MINS: 3
+        with:
+          path: sinnoh
+          key: sinnoh-packs-${{ steps.packkey.outputs.plat }}-${{ steps.packkey.outputs.sinnohsrc }}
+
       - name: SINNOH packs and scripts
         if: steps.ver.outputs.skip != 'true'
-        run: tools/sinnoh/make_pack.sh "$RUNNER_TEMP/pokeplatinum"
+        run: |
+          if [ "${{ steps.sinnohcache.outputs.cache-hit }}" = "true" ]; then
+            # (the kept scripts and floors newer than the checkout, or make would convert them again without the decomp)
+            touch sinnoh/*
+            ls -la sinnoh
+          else
+            tools/sinnoh/make_pack.sh "$RUNNER_TEMP/pokeplatinum"
+          fi
 
       # SINNOH's pieces the decomp doesn't hold, from the user's Platinum ROM: CANALAVE LIBRARY's TV
       # (tools/sinnoh/rom_pack.sh -> sinnoh/platinum_libtv.bin, shipped by package.sh). Its link is the PLATINUM_ROM_URL
       # secret (never in this repository). Without it the release goes out with the TV's screen held dark.
       - name: SINNOH from the Platinum ROM
-        if: steps.ver.outputs.skip != 'true'
+        id: sinnohrom
+        if: steps.ver.outputs.skip != 'true' && steps.sinnohcache.outputs.cache-hit != 'true'
         env:
           PLATINUM_ROM_URL: ${{ secrets.PLATINUM_ROM_URL }}
         run: |
+          ok=true
           if [ -n "$PLATINUM_ROM_URL" ]; then
-            PLATINUM_WORK="$RUNNER_TEMP/platinum_rom" tools/sinnoh/rom_pack.sh || echo "::warning::the Platinum ROM's pieces didn't build"
+            PLATINUM_WORK="$RUNNER_TEMP/platinum_rom" tools/sinnoh/rom_pack.sh || { echo "::warning::the Platinum ROM's pieces didn't build"; ok=false; }
             rm -rf "$RUNNER_TEMP/platinum_rom"
           else
             echo "::warning::no PLATINUM_ROM_URL secret: the release has no library TV picture"
           fi
+          # (kept only when complete: a failed ROM half is tried again next release)
+          [ "$ok" = true ] && [ -f sinnoh/platinum3d.pak ] && [ -f sinnoh/platinum_scripts.inc ] && echo "built=true" >> "$GITHUB_OUTPUT" || true
+
+      - name: Keep SINNOH's packs
+        if: steps.ver.outputs.skip != 'true' && steps.sinnohrom.outputs.built == 'true'
+        uses: actions/cache/save@v4
+        with:
+          path: sinnoh
+          key: ${{ steps.sinnohcache.outputs.cache-primary-key }}
 
       - name: Linux build
         if: steps.ver.outputs.skip != 'true'
@@ -189,20 +242,6 @@ jobs:
       # of every file their builders read (found by tracing them: tools/orre, tools/unova, tools/sinnoh's readers,
       # tools/aveon, tools/moemon_text, the few headers and pictures below) and of the secret's link (another disc or
       # ROM, another key). The game's build never reads them, so a kept pack is the same file a new build would make.
-      - name: Pack keys
-        id: packkey
-        if: steps.ver.outputs.skip != 'true' && steps.ver.outputs.apponly != 'true'
-        env:
-          ORRE_DISC_URL: ${{ secrets.ORRE_DISC_URL }}
-          UNOVA_ROM_URL: ${{ secrets.UNOVA_ROM_URL }}
-        run: |
-          echo "orre=$(printf %s "$ORRE_DISC_URL" | sha256sum | cut -c1-16)" >> "$GITHUB_OUTPUT"
-          echo "unova=$(printf %s "$UNOVA_ROM_URL" | sha256sum | cut -c1-16)" >> "$GITHUB_OUTPUT"
-          # what the packs are built from, by git's own content hashes (hashFiles also hashed the __pycache__ files the
-          # steps before write into tools/, which carry the checkout's times: the key changed every run, never a hit)
-          echo "orresrc=$(git ls-files -s tools/orre tools/moemon_text src/data/orre_props.h src/fonts.c charmap.txt | sha256sum | cut -c1-40)" >> "$GITHUB_OUTPUT"
-          echo "unovasrc=$(git ls-files -s tools/unova tools/sinnoh tools/aveon tools/moemon_text tools/ui_styles tools/moemon_ballfx graphics/aveon charmap.txt | sha256sum | cut -c1-40)" >> "$GITHUB_OUTPUT"
-
       - name: ORRE's packs from an earlier release
         id: orrecache
         if: steps.ver.outputs.skip != 'true' && steps.ver.outputs.apponly != 'true'
@@ -298,10 +337,16 @@ jobs:
             android/**/*.gradle*
             android/**/gradle-wrapper.properties
 
+      # The app is built and attached only when it would differ from the last one attached (the user, 2026-11-18: it may
+      # lag behind while nothing it uses changed): tools/release/app_key.sh hashes the app's files, the game's C built
+      # into it and the art and tables build_assets.py exported, and update.txt's "app <tag> <key>" line keeps the key of
+      # the release holding the newest APK (carried on unchanged while the app is). The phone offers an update only
+      # from a release with an APK (Updater.java), so a release without one leaves it as it is.
       - name: Companion app (APK)
         if: steps.ver.outputs.skip != 'true'
         continue-on-error: true
         env:
+          GH_TOKEN: ${{ github.token }}
           KEYSTORE_B64: ${{ secrets.MOEMON_APK_KEYSTORE_B64 }}
           MOEMON_APK_STORE_PASSWORD: ${{ secrets.MOEMON_APK_PASSWORD }}
         run: |
@@ -309,16 +354,27 @@ jobs:
             echo "::warning::no MOEMON_APK_KEYSTORE_B64 secret: the release has no app"
             exit 0
           fi
-          echo "$KEYSTORE_B64" | base64 -d > "$RUNNER_TEMP/release.jks"
-          export MOEMON_APK_KEYSTORE="$RUNNER_TEMP/release.jks"
           # (Pillow: the POKéMON cards' pictures go into the app as WebP)
           python3 -c 'import PIL' 2>/dev/null || python3 -m pip install -q --user --break-system-packages pillow \
             || { sudo apt-get update -q && sudo apt-get install -y -q python3-pil; }
           python3 -c 'from PIL import Image, features; assert features.check("webp")'
           python3 android/build_assets.py
-          (cd android && ./gradlew --no-daemon -q assembleRelease) || { echo "::warning::the app didn't build"; exit 0; }
           mkdir -p dist
+          KEY=$(tools/release/app_key.sh)
+          PREV=""
+          if gh release download --pattern update.txt --dir "$RUNNER_TEMP/prev_app" > /dev/null 2>&1; then
+            PREV=$(grep '^app ' "$RUNNER_TEMP/prev_app/update.txt" || true)
+          fi
+          if [ "${{ steps.ver.outputs.apponly }}" != "true" ] && [ -n "$PREV" ] && [ "$(echo "$PREV" | awk '{print $3}')" = "$KEY" ]; then
+            echo "the app is the same as on $(echo "$PREV" | awk '{print $2}'): not built again"
+            echo "$PREV" > dist/app.txt
+            exit 0
+          fi
+          echo "$KEYSTORE_B64" | base64 -d > "$RUNNER_TEMP/release.jks"
+          export MOEMON_APK_KEYSTORE="$RUNNER_TEMP/release.jks"
+          (cd android && ./gradlew --no-daemon -q assembleRelease) || { echo "::warning::the app didn't build"; exit 0; }
           cp android/app/build/outputs/apk/release/app-release.apk dist/MoemonCompanion.apk
+          echo "app ${{ steps.ver.outputs.tag }} $KEY" > dist/app.txt
           ls -la dist/MoemonCompanion.apk
 
       # POKeMON STADIUM's announcer (docs/STADIUM.md "The announcer"): the voices from Pokemon Stadium (USA) 1.0, whose

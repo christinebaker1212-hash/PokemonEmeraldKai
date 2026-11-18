@@ -1931,8 +1931,9 @@ with a message saying so.
 THE PHONE APP (MOEMON COMPANION, ANDROID)
 -----------------------------------------
 Your PC boxes, party, BAG, POKéDEX and where POKéMON live, on your phone.
-1. Download MoemonCompanion.apk from the same release page as the game,
-   on the phone, and open it. Android asks once to allow "Install unknown
+1. Download MoemonCompanion.apk from the newest release that has it (the
+   app only comes with a release when something it uses changed), on the
+   phone, and open it. Android asks once to allow "Install unknown
    apps" for your browser: allow it, then INSTALL.
 2. In the game: OPTIONS > CO-OP > PHONE LINK shows a code.
 3. In the app: SCAN THE CODE (or TYPE THE LETTERS under it). The phone

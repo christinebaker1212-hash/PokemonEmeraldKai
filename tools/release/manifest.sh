@@ -20,6 +20,9 @@ OUT=${1:?usage: manifest.sh OUTDIR}
     # the DANCE machine's songs: a line the release workflow made (songs.txt: "songs <tag> <zip> <bytes> <sha256>
     # <id>", the tag of the release that has the zip: the last one whose songs were different)
     if [ -f "$OUT/songs.txt" ]; then cat "$OUT/songs.txt"; fi
+    # the companion app: "app <tag> <key>", the release holding the newest APK and what it was built from
+    # (tools/release/app_key.sh: the next release builds the app again only when that changes; the game ignores it)
+    if [ -f "$OUT/app.txt" ]; then cat "$OUT/app.txt"; fi
     # (ORRE's packs are in the game's zips: package.sh)
 } > "$OUT/update.txt"
 cat "$OUT/update.txt"

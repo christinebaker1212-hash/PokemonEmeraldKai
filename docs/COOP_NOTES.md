@@ -4465,6 +4465,13 @@ follow_behind, follow_ground.
   pokeplatinum's map header table (include/data/map_headers.h). Textures are shared by content (a temporary model's
   id() is reused once freed, which had two props share a texture), so the pack is the same on every run.
 - The pack is never committed (/sinnoh/ is ignored); the release runs make_pack.sh and package.sh ships it in sinnoh/.
+  Since 2026-11-18 (the user: rebuilt only once anything about SINNOH changes) the release keeps the whole sinnoh/
+  folder in its cache under a key of every file make_pack.sh and rom_pack.sh read (traced with strace: tools/sinnoh,
+  aveon, moemon_text, ui_styles, moemon_ballfx, graphics/aveon, two fonts, src/fonts.c, charmap.txt, src/sinnoh,
+  data/maps/Sinnoh_*, data/scripts/sinnoh_*, five constants headers; the decomp's commit is in fetch_decomp.sh) and of
+  the PLATINUM_ROM_URL link: a hit skips both and touches the files, so make doesn't convert the scripts again without
+  the decomp. A rebuild matched the kept files byte for byte. Add a new input to the key in release.yml "Pack keys".
+  The companion app likewise: built and attached only when tools/release/app_key.sh's key changed (update.txt "app").
   The game reads sinnoh/platinum3d.pak beside it (Updater_ExeFile, as music/) or MOEMON_S3D_PAK. Without it the SINNOH
   maps keep their placeholder layouts (every cell blocked).
 - Maps: tools/sinnoh/gen_maps.py POKEPLATINUM_DIR makes the field engine's maps: every outdoor place of matrix 0 (66:
