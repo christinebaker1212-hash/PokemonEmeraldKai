@@ -28,8 +28,8 @@ static void Deck(uint16_t *cards, unsigned id)
     cards[57] = TCG_CARD_DIGLETT;
     cards[58] = id;
     cards[59] = id;
-    if (Tcg_Card(id) && (Tcg_Card(id)->flags & TCG_CF_SHINING))
-        cards[59] = TCG_CARD_POTION; /* (one Shining Pokemon a deck) */
+    if (Tcg_Card(id) && (Tcg_Card(id)->flags & (TCG_CF_SHINING | TCG_CF_CRYSTAL)))
+        cards[59] = TCG_CARD_POTION; /* (one Shining / Crystal Pokemon a deck) */
 }
 static int Take(struct TcgDuel *g, unsigned who, unsigned id)
 {
@@ -274,7 +274,121 @@ static int ScriptMechanics(void)
     g.players[0].field[0].retreatUntil = (uint16_t)g.turn;
     if (TcgDuel_RetreatCost(&g, 0) != (unsigned)Tcg_Card(TCG_CARD_MACHOP)->retreat + 1)
         return printf("FAIL rt1: Retreat Cost %u\n", TcgDuel_RetreatCost(&g, 0)), 1;
-    printf("PASS script mechanics: Focus Energy's boost next turn (and only then), Retreat Cost + 1\n");
+    /* Crystal Type: Celebi (Skyridge) turns Water with a Water Energy from the hand, for the turn */
+    if (Tcg_Card(TCG_CARD_ECARD3_145))
+    {
+        struct TcgPlayer *p;
+        uint8_t c;
+        Stage(&g, TCG_CARD_ECARD3_145, 0, 9);
+        p = &g.players[0];
+        c = p->deck[--p->deckSize];
+        p->cards[c] = TCG_CARD_WATER_ENERGY;
+        p->hand[p->handSize++] = c;
+        p->energyPlayed = 0;
+        memset(&a, 0, sizeof(a));
+        a.type = TCG_ATTACH;
+        a.hand = (uint8_t)(p->handSize - 1);
+        a.slot = 0;
+        if (TcgDuel_Apply(&g, &a) != TCG_OK)
+            return printf("FAIL attaching to Crystal Celebi: %s\n", g.error), 1;
+        if (TcgDuel_Type(&g, 0, 0) != TCG_WATER)
+            return printf("FAIL Crystal Type: Celebi is type %u after a Water Energy\n", TcgDuel_Type(&g, 0, 0)), 1;
+    }
+    printf("PASS script mechanics: Focus Energy's boost next turn (and only then), Retreat Cost + 1, Crystal Type\n");
+    return 0;
+}
+/* Technical Machines: each finished one attached to a Pokemon it names, its attack used (TCG_ATTACK_TM), then
+ * discarded as the turn ends */
+static int TechnicalMachines(void)
+{
+    static const unsigned energy[TCG_TYPES] = {TCG_CARD_FIRE_ENERGY, TCG_CARD_GRASS_ENERGY, TCG_CARD_LIGHTNING_ENERGY,
+                                               TCG_CARD_WATER_ENERGY, TCG_CARD_FIGHTING_ENERGY, TCG_CARD_PSYCHIC_ENERGY,
+                                               TCG_CARD_WATER_ENERGY, TCG_CARD_NEO1_104, TCG_CARD_NEO1_19};
+    unsigned id, used = 0, tms = 0;
+    for (id = TCG_CARD_GB_COUNT + 1; id <= TCG_CARD_COUNT; id++)
+    {
+        const struct TcgCard *tm = Tcg_Card(id);
+        unsigned holder, t, k;
+        struct TcgDuel g;
+        struct TcgAction a;
+        int ok = 0;
+        if (!tm || !(tm->flags & TCG_CF_TM))
+            continue;
+        tms++;
+        /* (a Stage 1 Pokemon it may go on: every one names a type or none, some only an Evolved one) */
+        for (holder = 1; holder <= TCG_CARD_COUNT && !ok; holder++)
+        {
+            const struct TcgCard *c = Tcg_Card(holder);
+            if (!c || c->kind != TCG_POKEMON || c->stage != 1)
+                continue;
+            Stage(&g, holder, 0, 3 + holder);
+            ok = TcgDuel_TmFits(&g, 0, 0, tm);
+        }
+        if (!ok)
+            return printf("FAIL no Pokemon for %s\n", tm->name), 1;
+        for (t = 0; t < TCG_TYPES; t++)
+            Attach(&g, 0, 0, energy[t], 2);
+        {
+            /* (a card of the deck becomes the Technical Machine, in the hand) */
+            struct TcgPlayer *p = &g.players[0];
+            uint8_t c = p->deck[--p->deckSize];
+            p->cards[c] = (uint16_t)id;
+            p->hand[p->handSize++] = c;
+        }
+        memset(&a, 0, sizeof(a));
+        a.type = TCG_PLAY_TRAINER;
+        a.hand = (uint8_t)(g.players[0].handSize - 1);
+        a.slot = 0;
+        if (TcgDuel_Apply(&g, &a) != TCG_OK)
+            return printf("FAIL attaching %s: %s\n", tm->name, g.error), 1;
+        if (TcgDuel_Tm(&g, 0, 0, NULL) != id || !TcgDuel_CanAttack(&g, 0, TCG_ATTACK_TM))
+            return printf("FAIL %s's attack can't be used once attached\n", tm->name), 1;
+        /* (the attack built as a player builds it: the flow, its first choices) */
+        {
+            struct TcgFlow f;
+            unsigned q = TcgFlow_Begin(&f, &g, 0, TCG_FLOW_ATTACK, TCG_ATTACK_TM), guard = 0;
+            while (q != TCG_Q_DONE && q != TCG_Q_FAIL && guard++ < 16)
+            {
+                if (q == TCG_Q_SLOT)
+                {
+                    for (k = 0; k < TCG_FIELD_SIZE && !(f.slotMask >> k & 1); k++)
+                        ;
+                    q = TcgFlow_Slot(&f, &g, k);
+                }
+                else if (q == TCG_Q_PICK)
+                {
+                    uint8_t chosen[TCG_DECK_SIZE];
+                    unsigned n = 0;
+                    for (k = 0; k < f.pickCount && n < f.pickMin; k++)
+                        if (f.pickOk[k])
+                            chosen[n++] = f.pick[k];
+                    q = TcgFlow_Pick(&f, &g, chosen, n);
+                }
+                else if (q == TCG_Q_MENU)
+                {
+                    for (k = 0; k < f.menu.count && !f.menu.ok[k]; k++)
+                        ;
+                    if (k == f.menu.count)
+                        break;
+                    q = TcgFlow_Menu(&f, &g, f.menu.value[k]);
+                }
+            }
+            if (q != TCG_Q_DONE)
+                return printf("FAIL %s's %s: the flow didn't build it (%u)\n", tm->name, tm->attacks[0].name, q), 1;
+            a = f.action;
+        }
+        if (TcgDuel_Apply(&g, &a) != TCG_OK)
+            return printf("FAIL %s's %s: %s\n", tm->name, tm->attacks[0].name, g.error), 1;
+        used++;
+        if (TcgDuel_Tm(&g, 0, 0, NULL))
+            return printf("FAIL %s stayed attached after the turn\n", tm->name), 1;
+        for (k = 0; k < g.players[0].discardSize && g.players[0].cards[g.players[0].discard[k]] != id; k++)
+            ;
+        if (k == g.players[0].discardSize && g.phase != TCG_FINISHED)
+            return printf("FAIL %s isn't in the discard pile after the turn\n", tm->name), 1;
+    }
+    printf("PASS %u finished Technical Machines: attached, their attacks built through the flow and used, discarded at the end of the turn\n", used);
+    (void)tms;
     return 0;
 }
 static int SpecialEnergy(void)
@@ -812,7 +926,7 @@ int main(void)
     }
     printf("PASS %u finished regional cards: %u attacks used %u times, then %u AI actions after them\n", ready, used, ok,
            steps);
-    if (SpecialEnergy() || ScriptMechanics() || Babies())
+    if (SpecialEnergy() || ScriptMechanics() || TechnicalMachines() || Babies())
         return 1;
     if (PlayTrainers() || UsePowers() || UseStadiums() || AttackFlows())
         return 1;

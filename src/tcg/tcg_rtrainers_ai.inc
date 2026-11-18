@@ -112,6 +112,22 @@ static int RegionTrainerAi(const struct TcgDuel *g, unsigned hand, struct TcgAct
         a->slot = 0;
         return Legal(g, a);
     }
+    /* Technical Machines: on the Active, when it may use the attack this turn and it beats (or replaces) its own */
+    if (card->flags & TCG_CF_TM)
+    {
+        struct TcgDuel next = *g;
+        unsigned k, best = 0;
+        if (!active || TcgDuel_Tm(g, me, 0, NULL) || !TcgDuel_TmFits(g, me, 0, card))
+            return 0;
+        a->slot = 0;
+        if (TcgDuel_Apply(&next, a) != TCG_OK || !TcgDuel_CanAttack(&next, me, TCG_ATTACK_TM) ||
+            !TcgDuel_CanAttackNow(&next, me, TCG_ATTACK_TM))
+            return 0;
+        for (k = 0; k < TCG_ATTACKS; k++)
+            if (TcgDuel_CanAttack(g, me, k) && TcgDuel_CanAttackNow(g, me, k) && active->attacks[k].damage > best)
+                best = active->attacks[k].damage;
+        return !AiCanAttack(g) || card->attacks[0].damage > best || (!card->attacks[0].damage && !best);
+    }
     /* Stadiums: when none is in play (and this one does something for this side) */
     if (card->flags & TCG_CF_STADIUM)
     {

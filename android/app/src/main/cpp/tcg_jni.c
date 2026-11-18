@@ -424,13 +424,25 @@ JNIEXPORT jstring JNICALL FN(options)(JNIEnv *env, jclass cls, jlong h, jint sea
         Add(&b, "}");
     }
     Add(&b, "],\"attacks\":[");
-    for (i = 0; attacker && i < TCG_ATTACKS && attacker->attacks[i].name && attacker->attacks[i].name[0]; i++)
+    /* (each with its index "i": a Technical Machine's attack, TCG_ATTACK_TM, follows the card's own) */
+    for (i = 0, n = 0; attacker && i < TCG_ATTACK_SLOTS; i++)
     {
-        int ok = mine && g->phase == TCG_TURN && TcgFlow_AttackReady(g, me, i, why, sizeof(why));
+        const struct TcgAttack *at = TcgDuel_AttackOf(g, me, i);
+        int ok;
+        if (!at || !at->name || !at->name[0])
+        {
+            if (i < TCG_ATTACKS)
+                i = TCG_ATTACKS - 1; /* (the card's attacks end at the first empty one) */
+            continue;
+        }
+        ok = mine && g->phase == TCG_TURN && TcgFlow_AttackReady(g, me, i, why, sizeof(why));
         if (!mine || g->phase != TCG_TURN)
             snprintf(why, sizeof(why), "%s", !mine ? "It isn't your turn." : "You can't attack now.");
-        Add(&b, "%s{\"ok\":%d,\"power\":%d,\"n\":", i ? "," : "", ok, attacker->attacks[i].category == TCG_POKEMON_POWER);
-        AddStr(&b, attacker->attacks[i].name);
+        Add(&b, "%s{\"i\":%u,\"ok\":%d,\"power\":%d,\"dmg\":%u,\"n\":", n++ ? "," : "", i, ok,
+            at->category == TCG_POKEMON_POWER, at->damage);
+        AddStr(&b, at->name);
+        Add(&b, ",\"txt\":");
+        AddStr(&b, at->description);
         Add(&b, ",\"why\":");
         AddStr(&b, ok ? "" : why);
         Add(&b, "}");
@@ -443,7 +455,7 @@ JNIEXPORT jstring JNICALL FN(options)(JNIEnv *env, jclass cls, jlong h, jint sea
         AddStr(&b, ok ? "" : why);
     }
     Add(&b, "},\"powers\":[");
-    for (s = 0; s < TCG_FIELD_SIZE; s++)
+    for (s = 0, n = 0; s < TCG_FIELD_SIZE; s++)
     {
         const struct TcgCard *c = TcgDuel_Field(g, me, s);
         const char *block;

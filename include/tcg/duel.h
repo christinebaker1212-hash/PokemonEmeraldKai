@@ -346,6 +346,16 @@ int TcgDuel_BoundEffect(const struct TcgDuel *g, unsigned player, unsigned slot)
 unsigned TcgDuel_AttachedRule(const struct TcgDuel *g, unsigned who, unsigned slot, unsigned rule);
 /* Can `evolution` be put on `from`: its Evolution card, or a Basic on its Baby (Pikachu on Pichu) */
 int TcgDuel_EvolvesFrom(const struct TcgCard *evolution, const struct TcgCard *from);
+/* A Technical Machine's attack (the regional sets: TCG_CF_TM): an action's attack TCG_ATTACK_TM is the attack of the
+ * Technical Machine attached to the Active Pokemon, which is discarded at the end of its owner's turn. TcgDuel_AttackOf:
+ * the attack an action's index names for that player's Active (NULL: none there); TcgDuel_Tm: the Technical Machine
+ * attached to that Pokemon (0: none; physical, its card); TcgDuel_TmFits: may it be attached there (its card's words:
+ * "your Darkness Pokemon", "your Evolved Fire, Lightning, or Fighting Pokemon")? */
+#define TCG_ATTACK_TM TCG_ATTACKS
+#define TCG_ATTACK_SLOTS (TCG_ATTACKS + 1)
+const struct TcgAttack *TcgDuel_AttackOf(const struct TcgDuel *g, unsigned player, unsigned attack);
+unsigned TcgDuel_Tm(const struct TcgDuel *g, unsigned who, unsigned slot, unsigned *physical);
+int TcgDuel_TmFits(const struct TcgDuel *g, unsigned who, unsigned slot, const struct TcgCard *tm);
 /* Can't that player's Active retreat for an effect that lasts (an effect script's: stuck)? */
 int TcgDuel_Stuck(const struct TcgDuel *g, unsigned player);
 /* The Stadium in play (Tcg_Canon of its card; 0 none) and whose it is (*owner) */

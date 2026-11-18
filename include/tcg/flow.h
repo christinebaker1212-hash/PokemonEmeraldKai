@@ -104,6 +104,7 @@ enum
     TCG_F_BABY,                 /* a Baby Pokemon card */
     TCG_F_HAS_POWER,            /* (slot) a Pokemon with a Pokemon Power, on the Bench */
     TCG_F_SPECIAL_ENERGY,       /* a Special Energy card */
+    TCG_F_TM_FITS,              /* (slot) a Pokemon the Technical Machine being played may go on (TcgDuel_TmFits) */
     /* "with Brock in its name" and the like (+ TCG_OWNER_*): a Pokemon card; one of yours in play (slot); another
      * one of yours than the first chosen (slot: the action's target) */
     TCG_F_OWNER_CARD = 100,

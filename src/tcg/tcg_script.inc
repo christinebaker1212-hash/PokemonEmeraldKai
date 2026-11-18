@@ -172,6 +172,24 @@ static int ScriptCond(const struct TcgDuel *g, const char *cond)
         return tails > 0; /* (not all heads) */
     if (cond[0] == 'o' && cond[1] >= '0' && cond[1] <= '9')
         return sScriptOption == (unsigned)atoi(cond + 1);
+    /* pg5: their Prizes 5 or more; pzN: exactly N; eXY: it has basic Energy cards of types X and Y */
+    if (!strcmp(cond, "pg5"))
+        return g->players[g->current ^ 1].prizeSize >= 5;
+    if (cond[0] == 'p' && cond[1] == 'z')
+        return g->players[g->current ^ 1].prizeSize == (unsigned)atoi(cond + 2);
+    if (cond[0] == 'e' && cond[1] >= '0' && cond[1] <= '8' && cond[2] >= '0' && cond[2] <= '8' && !cond[3])
+    {
+        const struct TcgPlayer *p = &g->players[g->current];
+        const struct TcgFieldCard *f = &p->field[sScriptSelf];
+        unsigned k, have = 0;
+        for (k = 0; k < f->attachedSize; k++)
+        {
+            const struct TcgCard *c = Tcg_Card(p->cards[f->attached[k]]);
+            if (c && c->kind == TCG_ENERGY && c->id <= 6)
+                have |= 1u << c->type;
+        }
+        return (have >> (cond[1] - '0') & 1) && (have >> (cond[2] - '0') & 1);
+    }
     if (!strcmp(cond, "ddark"))
     {
         const struct TcgCard *d = TcgDuel_Field(g, g->current ^ 1, 0);
@@ -1582,6 +1600,54 @@ static int ScriptRun(struct TcgDuel *g, const char *script, const struct TcgAtta
                     foe->noAttackAll = 1;
             }
         }
+        else if (ScriptIs(&o, "dedeck"))
+        {
+            /* up to x of the Defending's Energy cards (the ones picked, else the first) shuffled into their deck */
+            unsigned k, n = 0;
+            for (k = 0; k < (unsigned)x && !blocked && foe->stackSize; k++)
+            {
+                int at = Picked(action, k, foe->attached, foe->attachedSize);
+                uint8_t list[TCG_DECK_SIZE];
+                unsigned have = Attached(g, them, 0, TCG_ENERGY, list);
+                if (!have)
+                    break;
+                if (at < 0 || CardAt(g, them, foe->attached[at])->kind != TCG_ENERGY)
+                    at = list[0];
+                op->deck[op->deckSize++] = TcgPile_Remove(foe->attached, &foe->attachedSize, (unsigned)at);
+                n++;
+            }
+            if (n)
+            {
+                TcgDuel_Shuffle(g, them);
+                TcgDuel_Event(g, TCG_EV_DECK_CHANGED, them, 0, 0, 0, 0);
+            }
+        }
+        else if (ScriptIs(&o, "odevb"))
+        {
+            /* the chosen Evolved Pokemon of theirs: its top card to the bottom of their deck (devolving it) */
+            struct TcgFieldCard *f = &op->field[action->target];
+            unsigned k;
+            if (!ValidTarget(g, them, action->target, 0) || f->stackSize < 2)
+            {
+                for (k = 0; k < TCG_FIELD_SIZE && op->field[k].stackSize < 2; k++)
+                    ;
+                if (k < TCG_FIELD_SIZE)
+                    return TCG_INVALID;
+            }
+            else if (action->target || !blocked)
+            {
+                for (k = op->deckSize; k > 0; k--)
+                    op->deck[k] = op->deck[k - 1];
+                op->deck[0] = f->stack[--f->stackSize];
+                op->deckSize++;
+                f->condition = TCG_HEALTHY;
+                f->poison = f->burned = 0;
+                f->noAttack = f->noRetreat = f->weaken = f->guard = f->charged = f->effectBy = 0;
+                f->stuck = f->blindAll = f->noAttackAll = 0;
+                TcgDuel_Event(g, TCG_EV_DEVOLVE, them, action->target, 0, op->cards[f->stack[f->stackSize - 1]], 0);
+                TcgDuel_Log(g, "%s devolved.", CardAt(g, them, f->stack[f->stackSize - 1])->name);
+            }
+        }
         else if (ScriptIs(&o, "noconds"))
             self->condImmune = (uint16_t)(g->turn + 1);
         else if (ScriptIs(&o, "rt1"))
@@ -1849,6 +1915,12 @@ static unsigned ScriptChoice(const char *script, int *required)
         }
         if (ScriptIs(&o, "dragmay"))
             return o.arg[0] ? 5 : 1;
+        if (ScriptIs(&o, "odevb"))
+        {
+            if (required)
+                *required = 1;
+            return 7;
+        }
         if (ScriptIs(&o, "hatt") && o.arg[2])
         {
             if (required)
@@ -1934,9 +2006,9 @@ static unsigned ScriptPick(const char *script, unsigned *count)
     {
         if (ScriptIs(&o, "dde"))
             return TCG_APICK_FOE_ENERGY;
-        if (ScriptIs(&o, "ddeh") || ScriptIs(&o, "dspe"))
+        if (ScriptIs(&o, "ddeh") || ScriptIs(&o, "dspe") || ScriptIs(&o, "dedeck"))
         {
-            *count = ScriptIs(&o, "dspe") ? 100 : 2;
+            *count = ScriptIs(&o, "dspe") ? 100 : ScriptIs(&o, "dedeck") ? (unsigned)o.arg[0] : 2;
             return TCG_APICK_FOE_ENERGY;
         }
         if (ScriptIs(&o, "evdeck"))
@@ -2258,6 +2330,16 @@ static void ScriptAi(const struct TcgDuel *g, struct TcgAction *a, const char *s
         }
         else if (ScriptIs(&o, "hdraw"))
             a->selectionCount = 0;
+        else if (ScriptIs(&o, "odevb"))
+        {
+            unsigned s;
+            for (s = 0; s < TCG_FIELD_SIZE; s++)
+                if (g->players[g->current ^ 1].field[s].stackSize >= 2)
+                {
+                    a->target = (uint8_t)s;
+                    break;
+                }
+        }
         else if (ScriptIs(&o, "ohdeck") && o.arg[0] && !o.cond[0])
         {
             /* (their hand is looked at: its first Trainer / Energy card) */

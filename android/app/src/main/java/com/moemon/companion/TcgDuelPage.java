@@ -1199,11 +1199,13 @@ public final class TcgDuelPage extends Page {
                     if (o.optInt("power") == 1) {
                         continue;
                     }
-                    JSONObject ai = info == null || i >= info.length() ? null : info.optJSONObject(i);
-                    String label = o.optString("n") + (ai != null && ai.optInt("dmg") > 0 ? "  " + ai.optInt("dmg") : "");
-                    final int which = i;
+                    // (its index: a Technical Machine's attack comes after the card's own)
+                    final int which = o.optInt("i", i);
+                    JSONObject ai = info == null || which >= info.length() ? null : info.optJSONObject(which);
+                    int dmg = o.has("dmg") ? o.optInt("dmg") : ai == null ? 0 : ai.optInt("dmg");
+                    String label = o.optString("n") + (dmg > 0 ? "  " + dmg : "");
                     buttons.add(new Object[]{label, o.optInt("ok") == 1 && myMove(), (Runnable) () -> begin(Tcg.FLOW_ATTACK, which),
-                            o.optString("why"), ai == null ? null : ai.optString("txt")});
+                            o.optString("why"), o.has("txt") ? o.optString("txt") : ai == null ? null : ai.optString("txt")});
                 }
                 JSONObject r = opts.optJSONObject("retreat");
                 if (r != null) {

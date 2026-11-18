@@ -81,6 +81,8 @@ P('R_SELF_HEALING_LIGHTNING', 'Self-healing', 'Lightning Energy card from your h
 P('R_SELF_HEALING_WATER', 'Self-healing', 'Water Energy card from your hand', 'PASSIVE')
 P('R_POISON_RESISTANCE', 'Poison Resistance', "can't be Poisoned", 'PASSIVE')
 P('R_RARE_METAL', 'Rare Metal', 'provide Metal Energy instead', 'PASSIVE')
+# (the Crystal Pokemon: the types it may become are the ones its words name, read from them: tcg_rpowers.inc)
+P('R_CRYSTAL_TYPE', 'Crystal Type', 'basic Energy card from your hand', 'PASSIVE')
 P('R_HEALING_FIRE', 'Healing Fire', 'remove 1 damage counter from it', 'PASSIVE')
 P('R_DARK_AURA', 'Dark Aura', 'is Darkness Energy instead', 'PASSIVE')
 P('R_PHOTOSYNTHESIS', 'Photosynthesis', 'provide Grass Energy instead', 'PASSIVE', 'ANY')

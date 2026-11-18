@@ -915,6 +915,8 @@ static int RegionTrainer(struct TcgDuel *g, const struct TcgAction *a, unsigned 
     case TCG_CARD_ECARD3_141:
         break;
     default:
+        if (Tcg_Card(id)->flags & TCG_CF_TM)
+            break; /* (a Technical Machine: attached by TcgDuel_Trainer, its attack used as TCG_ATTACK_TM) */
         snprintf(g->error, sizeof(g->error), "Trainer effect not yet ported: %s", Tcg_Card(id)->name);
         return TCG_UNSUPPORTED;
     }

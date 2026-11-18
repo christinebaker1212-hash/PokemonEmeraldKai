@@ -92,7 +92,17 @@ for c in reg:
    costs=','.join(str(a['cost'].get(t,0)) for t in REG_TYPES)
    out.append(f'{{.name={q(a["name"])},.description={q(a["text"])},.effect={q(a["effect"])},.animation="ATK_ANIM_HIT",.cost={{{costs}}},.damage={a["damage"]},.category=TCG_{a["category"]}}},')
   out.append('}')
- else:out.append(f'.effect={q(c["effect"])},.description={q(c["text"])}')
+ else:
+  out.append(f'.effect={q(c["effect"])},.description={q(c["text"])}')
+  # (a Technical Machine's own attack, used by the Pokemon it's attached to)
+  if c.get('attacks'):
+   out.append(',.attacks={')
+   for a in c['attacks']+[None]*(3-len(c['attacks'])):
+    if a is None:
+     out.append('{.name="",.description="",.effect="NONE",.animation="ATK_ANIM_NONE",.cost={0},.damage=0,.category=TCG_DAMAGE_NORMAL},');continue
+    costs=','.join(str(a['cost'].get(t,0)) for t in REG_TYPES)
+    out.append(f'{{.name={q(a["name"])},.description={q(a["text"])},.effect={q(a["effect"])},.animation="ATK_ANIM_HIT",.cost={{{costs}}},.damage={a["damage"]},.category=TCG_{a["category"]}}},')
+   out.append('}')
  out.append('},')
 out+=['};','const struct TcgDeckDefinition gTcgDeckDefinitions[] = {']
 for d in x['decks']:out.append('{'+q(d['name'])+',{'+','.join(map(str,d['cards']))+'}},')

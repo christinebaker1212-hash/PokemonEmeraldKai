@@ -569,6 +569,17 @@ def _(m, d):
 
 # One wording, one script (the cards' words with SELF for the card's name; tcg_script.inc's ops)
 EXACT = {
+    'Before doing damage, discard any Trainer cards attached to the Defending Pokemon.': 'dtrdisc',
+    'Flip a number of coins equal to the number of damage counters on SELF. This attack does 10 damage times the number of heads.': 'csc mulh:10',
+    'Discard all Lightning Energy cards attached to SELF. Then, flip a number of coins equal to the number of Energy cards discarded that way. This attack does 40 damage times the number of heads.': 'ce:2 dse:2,0 mulh:40',
+    "Choose 1 of your opponent's Pokemon. This attack does 20 damage to that Pokemon. Don't apply Weakness or Resistance.": 'zero any1:20',
+    'If the Pokemon using this attack has Fire and Lightning basic Energy cards attached to it, the Defending Pokemon is now Confused. If the Pokemon using this attack has Fire and Fighting basic Energy cards attached to it, this attack does 30 damage plus 10 more damage and remove 3 damage counters from the Pokemon that Miracle Plate SELF is attached to.': 'e02.cnf e04.add:10 e04.heal:3',
+    'If the Pokemon using this attack has Fire and Water basic Energy cards attached to it, this attack does 30 damage plus 10 more damage and the Defending Pokemon is now Burned. If the Pokemon using this attack has Water and Psychic basic Energy cards attached to it, choose an Energy card attached to the Defending Pokemon, if any, and your opponent shuffles that card into his or her deck.': 'e03.add:10 e03.brn e35.dedeck:1',
+    "If the Pokemon using this attack has Grass and Lightning basic Energy cards attached to it, the Defending Pokemon is now Asleep and Poisoned. If the Pokemon using this attack has Water and Lightning basic Energy cards attached to it, this attack does 30 damage plus 10 more damage and lets you put 1 damage counter on each of your opponent's Benched Pokemon.": 'e12.slp e12.psn e32.add:10 e32.bco:1',
+    'If your opponent has 5 or more Prizes, search your deck for a Trainer card, show it to your opponent, and put it into your hand. If your opponent has only 1 Prize, the Defending Pokemon is now Burned, Paralyzed, and Poisoned.': 'pg5.srchk:2 pz1.brn pz1.par pz1.psn',
+    'If your opponent has 5 or more Prizes, draw 3 cards. If your opponent has only 1 Prize, choose 2 Energy cards attached to the Defending Pokemon (1 if there is only 1). Your opponent shuffles those cards into his or her deck.': 'pg5.draw:3 pz1.dedeck:2',
+    "If your opponent has 5 or more Prizes, shuffle your hand into your deck and then draw 6 cards. If your opponent has exactly 2 Prizes, choose 1 of your opponent's Evolved Pokemon. Your opponent puts the top card on that Evolved Pokemon on the bottom of his or her deck. (This counts as devolving that Pokemon.)": 'pg5.handdeck pg5.draw:6 pz2.odevb',
+    'If your opponent has 5 or more Prizes, search your deck for up to 3 basic Energy cards, show them to your opponent, and put them into your hand. Shuffle your deck afterward. If your opponent has exactly 2 Prizes, remove all damage counters from 1 of your Pokemon.': 'pg5.srche:3 pz2.healt',
     'Flip a coin. If tails, shuffle SELF and all cards attached to it into your deck.': 'c t.selfdeck',
     'Flip a coin. If heads, shuffle SELF and all cards attached to it into your deck.': 'c h.selfdeck',
     'Shuffle SELF and all cards attached to it into your deck. Then, your opponent shuffles his or her Active Pokemon and all cards attached to it into his or her deck.': 'odeck selfdeck',

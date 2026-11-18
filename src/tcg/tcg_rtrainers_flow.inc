@@ -131,6 +131,8 @@ static const struct TcgStep *RegionTrainerSteps(unsigned id, int *count)
     }
     if (Tcg_Card(id) && (Tcg_Card(id)->flags & TCG_CF_TOOL))
         STEPS({TCG_ST_MY_SLOT, TCG_F_NO_TOOL, 0, 0, 0, "Attach it to which Pokemon?"});
+    if (Tcg_Card(id) && (Tcg_Card(id)->flags & TCG_CF_TM))
+        STEPS({TCG_ST_MY_SLOT, TCG_F_TM_FITS, 0, 0, 0, "Attach the Technical Machine to which Pokemon?"});
     *count = 0;
     return sNoSteps;
 }

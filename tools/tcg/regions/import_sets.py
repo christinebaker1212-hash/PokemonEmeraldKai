@@ -115,6 +115,9 @@ def main():
                 c['type'] = 'Colorless'
                 c['text'] = plain(' '.join(x.get('rules', [])))
                 c['effect'] = f'{src}:t'
+                if 'TM' in c['flags']:
+                    # (a Technical Machine's own attack: the Pokemon it's attached to may use it)
+                    c['attacks'] = [attack(a, f'{src}:a{k}') for k, a in enumerate(x.get('attacks', []))]
             cards.append(c)
     cards.sort(key=lambda c: c['id'])
     OUT.write_text(json.dumps({'source': 'PokemonTCG/pokemon-tcg-data', 'cards': cards}, indent=1, ensure_ascii=True) + '\n')

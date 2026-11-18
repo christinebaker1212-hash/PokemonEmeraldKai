@@ -44,8 +44,9 @@ public final class TcgCoreTest {
         JSONArray attacks = o.getJSONArray("attacks");
         for (int i = 0; i < attacks.length(); i++) {
             if (attacks.getJSONObject(i).optInt("ok") == 1) {
-                moves.add(new int[]{Tcg.FLOW_ATTACK, i});
-                moves.add(new int[]{Tcg.FLOW_ATTACK, i});   // (attacks more often: duels end)
+                int which = attacks.getJSONObject(i).optInt("i", i);
+                moves.add(new int[]{Tcg.FLOW_ATTACK, which});
+                moves.add(new int[]{Tcg.FLOW_ATTACK, which});   // (attacks more often: duels end)
             }
         }
         if (o.getJSONObject("retreat").optInt("ok") == 1 && rnd.nextInt(4) == 0) {

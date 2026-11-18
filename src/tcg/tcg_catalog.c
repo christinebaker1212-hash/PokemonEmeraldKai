@@ -7626,8 +7626,13 @@ const struct TcgCard gTcgCards[TCG_CARD_COUNT + 1] = {
 [1196] = {.id=1196, .name="Master Ball", .kind=TCG_TRAINER, .type=6, .rarity=1, .set=19, .set2=255, .dark=0, .holo=0, .flags=TCG_CF_READY, .origin=19, .canon=437,
 .effect="ecard1-143:t",.description="Look at 7 cards from the top of your deck. You may choose a Basic Pokemon or Evolution card from those cards, show it your opponent, and put it into your hand. Shuffle the rest into your deck."
 },
-[1197] = {.id=1197, .name="Multi Technical Machine 01", .kind=TCG_TRAINER, .type=6, .rarity=1, .set=19, .set2=255, .dark=0, .holo=0, .flags=TCG_CF_TM, .origin=19,
+[1197] = {.id=1197, .name="Multi Technical Machine 01", .kind=TCG_TRAINER, .type=6, .rarity=1, .set=19, .set2=255, .dark=0, .holo=0, .flags=TCG_CF_TM|TCG_CF_READY, .origin=19,
 .effect="ecard1-144:t",.description="Attach this card to 1 of your Pokemon in play. That Pokemon may use this card's attack instead of its own. At the end of your turn, discard Multi Technical Machine 01."
+,.attacks={
+{.name="Paralyzing Gaze",.description="The Defending Pokemon is now Paralyzed.",.effect="ecard1-144:a0",.animation="ATK_ANIM_HIT",.cost={0,0,0,0,0,0,1,0,0},.damage=0,.category=TCG_RESIDUAL},
+{.name="",.description="",.effect="NONE",.animation="ATK_ANIM_NONE",.cost={0},.damage=0,.category=TCG_DAMAGE_NORMAL},
+{.name="",.description="",.effect="NONE",.animation="ATK_ANIM_NONE",.cost={0},.damage=0,.category=TCG_DAMAGE_NORMAL},
+}
 },
 [1198] = {.id=1198, .name="Pokemon Nurse", .kind=TCG_TRAINER, .type=6, .rarity=1, .set=19, .set2=255, .dark=0, .holo=0, .flags=TCG_CF_SUPPORTER|TCG_CF_READY, .origin=19,
 .effect="ecard1-145:t",.description="You can play only one Supporter card each turn. When you play this card, put it next to your Active Pokemon. When your turn ends, discard this card. Remove all damage counters from 1 of your Pokemon. Then discard all Energy cards attached to it, if any."
@@ -8496,23 +8501,43 @@ const struct TcgCard gTcgCards[TCG_CARD_COUNT + 1] = {
 [1330] = {.id=1330, .name="Apricorn Forest", .kind=TCG_TRAINER, .type=6, .rarity=2, .set=20, .set2=255, .dark=0, .holo=0, .flags=TCG_CF_STADIUM|TCG_CF_READY, .origin=20,
 .effect="ecard2-118:t",.description="This card stays in play when you play it. Discard this card if another Stadium card comes into play. Once during each player's turn (before attacking), if that player's Bench isn't full, that player flips a coin. If heads, that player shows his or her opponent a basic Energy card from his or her hand. Then, that player searches his or her deck for a Basic Pokemon card of the same type (color) as the revealed Energy card and puts it onto his or her Bench. The player shuffles his or her deck afterward."
 },
-[1331] = {.id=1331, .name="Darkness Cube 01", .kind=TCG_TRAINER, .type=6, .rarity=1, .set=20, .set2=255, .dark=0, .holo=0, .flags=TCG_CF_TM, .origin=20,
+[1331] = {.id=1331, .name="Darkness Cube 01", .kind=TCG_TRAINER, .type=6, .rarity=1, .set=20, .set2=255, .dark=0, .holo=0, .flags=TCG_CF_TM|TCG_CF_READY, .origin=20,
 .effect="ecard2-119:t",.description="Attach this card to 1 of your Darkness Pokemon in play. That Pokemon may use this card's attack instead of its own. At the end of your turn, discard Darkness Cube 01."
+,.attacks={
+{.name="Plunder",.description="Before doing damage, discard any Trainer cards attached to the Defending Pokemon.",.effect="ecard2-119:a0",.animation="ATK_ANIM_HIT",.cost={0,0,0,0,0,0,0,1,0},.damage=10,.category=TCG_DAMAGE_NORMAL},
+{.name="",.description="",.effect="NONE",.animation="ATK_ANIM_NONE",.cost={0},.damage=0,.category=TCG_DAMAGE_NORMAL},
+{.name="",.description="",.effect="NONE",.animation="ATK_ANIM_NONE",.cost={0},.damage=0,.category=TCG_DAMAGE_NORMAL},
+}
 },
 [1332] = {.id=1332, .name="Energy Switch", .kind=TCG_TRAINER, .type=6, .rarity=1, .set=20, .set2=255, .dark=0, .holo=0, .flags=TCG_CF_READY, .origin=20,
 .effect="ecard2-120:t",.description="Move a basic Energy card attached to 1 of your Pokemon to another of your Pokemon."
 },
-[1333] = {.id=1333, .name="Fighting Cube 01", .kind=TCG_TRAINER, .type=6, .rarity=1, .set=20, .set2=255, .dark=0, .holo=0, .flags=TCG_CF_TM, .origin=20,
+[1333] = {.id=1333, .name="Fighting Cube 01", .kind=TCG_TRAINER, .type=6, .rarity=1, .set=20, .set2=255, .dark=0, .holo=0, .flags=TCG_CF_TM|TCG_CF_READY, .origin=20,
 .effect="ecard2-121:t",.description="Attach this card to 1 of your Fighting Pokemon in play. That Pokemon my use this card's attack instead of its own. At the end of your turn, discard Fighting Cube 01."
+,.attacks={
+{.name="Violent Rage",.description="Flip a number of coins equal to the number of damage counters on this Pokemon. This attack does 10 damage times the number of heads.",.effect="ecard2-121:a0",.animation="ATK_ANIM_HIT",.cost={0,0,0,0,1,0,0,0,0},.damage=10,.category=TCG_DAMAGE_X},
+{.name="",.description="",.effect="NONE",.animation="ATK_ANIM_NONE",.cost={0},.damage=0,.category=TCG_DAMAGE_NORMAL},
+{.name="",.description="",.effect="NONE",.animation="ATK_ANIM_NONE",.cost={0},.damage=0,.category=TCG_DAMAGE_NORMAL},
+}
 },
-[1334] = {.id=1334, .name="Fire Cube 01", .kind=TCG_TRAINER, .type=6, .rarity=1, .set=20, .set2=255, .dark=0, .holo=0, .flags=TCG_CF_TM, .origin=20,
+[1334] = {.id=1334, .name="Fire Cube 01", .kind=TCG_TRAINER, .type=6, .rarity=1, .set=20, .set2=255, .dark=0, .holo=0, .flags=TCG_CF_TM|TCG_CF_READY, .origin=20,
 .effect="ecard2-122:t",.description="Attach this card to 1 of your Fire Pokemon in play. That Pokemon may use this card's attack instead of its own. At the end of your turn, discard Fire Cube 01."
+,.attacks={
+{.name="Singe",.description="The Defending Pokemon is now Burned.",.effect="ecard2-122:a0",.animation="ATK_ANIM_HIT",.cost={1,0,0,0,0,0,0,0,0},.damage=0,.category=TCG_RESIDUAL},
+{.name="",.description="",.effect="NONE",.animation="ATK_ANIM_NONE",.cost={0},.damage=0,.category=TCG_DAMAGE_NORMAL},
+{.name="",.description="",.effect="NONE",.animation="ATK_ANIM_NONE",.cost={0},.damage=0,.category=TCG_DAMAGE_NORMAL},
+}
 },
 [1335] = {.id=1335, .name="Forest Guardian", .kind=TCG_TRAINER, .type=6, .rarity=1, .set=20, .set2=255, .dark=0, .holo=0, .flags=TCG_CF_SUPPORTER|TCG_CF_READY, .origin=20,
 .effect="ecard2-123:t",.description="You can play only one Supporter card each turn. When you play this card, put it next to your Active Pokemon. When your turn ends, discard this card. Shuffle your deck. Then, look at the top 7 cards of your deck. Choose 1 of those cards and put it into your hand. Shuffle the rest into your deck afterward."
 },
-[1336] = {.id=1336, .name="Grass Cube 01", .kind=TCG_TRAINER, .type=6, .rarity=1, .set=20, .set2=255, .dark=0, .holo=0, .flags=TCG_CF_TM, .origin=20,
+[1336] = {.id=1336, .name="Grass Cube 01", .kind=TCG_TRAINER, .type=6, .rarity=1, .set=20, .set2=255, .dark=0, .holo=0, .flags=TCG_CF_TM|TCG_CF_READY, .origin=20,
 .effect="ecard2-124:t",.description="Attach this card to 1 of your Grass Pokemon in play. That Pokemon may use this card's attack instead of its own. At the end of your turn, discard Grass Cube 01."
+,.attacks={
+{.name="Sleep Poison",.description="The Defending Pokemon is now Asleep and Poisoned.",.effect="ecard2-124:a0",.animation="ATK_ANIM_HIT",.cost={0,1,0,0,0,0,0,0,0},.damage=0,.category=TCG_RESIDUAL},
+{.name="",.description="",.effect="NONE",.animation="ATK_ANIM_NONE",.cost={0},.damage=0,.category=TCG_DAMAGE_NORMAL},
+{.name="",.description="",.effect="NONE",.animation="ATK_ANIM_NONE",.cost={0},.damage=0,.category=TCG_DAMAGE_NORMAL},
+}
 },
 [1337] = {.id=1337, .name="Healing Berry", .kind=TCG_TRAINER, .type=6, .rarity=1, .set=20, .set2=255, .dark=0, .holo=0, .flags=TCG_CF_TOOL|TCG_CF_READY, .origin=20,
 .effect="ecard2-125:t",.description="Attach Healing Berry to 1 of your Pokemon that doesn't already have a Pokemon Tool card attached to it. If that Pokemon is Knocked Out, discard this card. At the end of any turn, if the Pokemon this card is attached to has 20 HP or less, remove 3 damage counters from that Pokemon and discard this card."
@@ -8520,14 +8545,24 @@ const struct TcgCard gTcgCards[TCG_CARD_COUNT + 1] = {
 [1338] = {.id=1338, .name="Juggler", .kind=TCG_TRAINER, .type=6, .rarity=1, .set=20, .set2=255, .dark=0, .holo=0, .flags=TCG_CF_SUPPORTER|TCG_CF_READY, .origin=20,
 .effect="ecard2-126:t",.description="You can play only one Supporter card each turn. When you play this card, put it next to your Active Pokemon. When your turn ends, discard this card. Discard up to 2 basic Energy cards from your hand. If you discarded 1 basic Energy card, draw 3 cards. If you discarded 2 basic Energy cards, draw 5 cards."
 },
-[1339] = {.id=1339, .name="Lightning Cube 01", .kind=TCG_TRAINER, .type=6, .rarity=1, .set=20, .set2=255, .dark=0, .holo=0, .flags=TCG_CF_TM, .origin=20,
+[1339] = {.id=1339, .name="Lightning Cube 01", .kind=TCG_TRAINER, .type=6, .rarity=1, .set=20, .set2=255, .dark=0, .holo=0, .flags=TCG_CF_TM|TCG_CF_READY, .origin=20,
 .effect="ecard2-127:t",.description="Attach this card to 1 of your Lightning Pokemon in play. That Pokemon may use this card's attack instead of its own. At the end of your turn, discard Lightning Cube 01."
+,.attacks={
+{.name="Discharge",.description="Discard all Lightning Energy cards attached to this Pokemon. Then, flip a number of coins equal to the number of Energy cards discarded that way. This attack does 40 damage times the number of heads.",.effect="ecard2-127:a0",.animation="ATK_ANIM_HIT",.cost={0,0,1,0,0,0,0,0,0},.damage=40,.category=TCG_DAMAGE_X},
+{.name="",.description="",.effect="NONE",.animation="ATK_ANIM_NONE",.cost={0},.damage=0,.category=TCG_DAMAGE_NORMAL},
+{.name="",.description="",.effect="NONE",.animation="ATK_ANIM_NONE",.cost={0},.damage=0,.category=TCG_DAMAGE_NORMAL},
+}
 },
 [1340] = {.id=1340, .name="Memory Berry", .kind=TCG_TRAINER, .type=6, .rarity=1, .set=20, .set2=255, .dark=0, .holo=0, .flags=TCG_CF_TOOL, .origin=20,
 .effect="ecard2-128:t",.description="Attach Memory Berry to 1 of your Pokemon that doesn't have a Pokemon Tool attached to it. If that Pokemon is Knocked Out, discard this card. The Pokemon this card is attached to can use any attack from its Basic Pokemon card or any Evolution card from which the Pokemon evolved. (You still have to pay for that attack's Energy cost.) Discard this card at the end of any turn the Pokemon attacks."
 },
-[1341] = {.id=1341, .name="Metal Cube 01", .kind=TCG_TRAINER, .type=6, .rarity=1, .set=20, .set2=255, .dark=0, .holo=0, .flags=TCG_CF_TM, .origin=20,
+[1341] = {.id=1341, .name="Metal Cube 01", .kind=TCG_TRAINER, .type=6, .rarity=1, .set=20, .set2=255, .dark=0, .holo=0, .flags=TCG_CF_TM|TCG_CF_READY, .origin=20,
 .effect="ecard2-129:t",.description="Attach this card to 1 of your Metal Pokemon in play. That Pokemon may use this card's attack instead of its own. At the end of your turn, discard Metal Cube 01."
+,.attacks={
+{.name="Metal Reversal",.description="Before doing damage, you may choose 1 of your opponent's Benched Pokemon and switch it with the Defending Pokemon.",.effect="ecard2-129:a0",.animation="ATK_ANIM_HIT",.cost={0,0,0,0,0,0,0,0,1},.damage=10,.category=TCG_DAMAGE_NORMAL},
+{.name="",.description="",.effect="NONE",.animation="ATK_ANIM_NONE",.cost={0},.damage=0,.category=TCG_DAMAGE_NORMAL},
+{.name="",.description="",.effect="NONE",.animation="ATK_ANIM_NONE",.cost={0},.damage=0,.category=TCG_DAMAGE_NORMAL},
+}
 },
 [1342] = {.id=1342, .name="Pokemon Fan Club", .kind=TCG_TRAINER, .type=6, .rarity=1, .set=20, .set2=255, .dark=0, .holo=0, .flags=TCG_CF_SUPPORTER|TCG_CF_READY, .origin=20,
 .effect="ecard2-130:t",.description="You can play only one Supporter card each turn. When you play this card, put it next to your Active Pokemon. When your turn ends, discard this card. Search your deck for up to 2 Baby Pokemon and/or Basic Pokemon cards and put them onto your bench. Shuffle your deck afterward."
@@ -8535,8 +8570,13 @@ const struct TcgCard gTcgCards[TCG_CARD_COUNT + 1] = {
 [1343] = {.id=1343, .name="Pokemon Park", .kind=TCG_TRAINER, .type=6, .rarity=1, .set=20, .set2=255, .dark=0, .holo=0, .flags=TCG_CF_STADIUM|TCG_CF_READY, .origin=20,
 .effect="ecard2-131:t",.description="This card stays in play when you play it. Discard this card if another Stadium card comes into play. Once during each of his or her turns, whenever a player attaches an Energy card from his or her hand to 1 of his or her Benched Pokemon, he or she removes 1 damage counter, if any, from that Pokemon."
 },
-[1344] = {.id=1344, .name="Psychic Cube 01", .kind=TCG_TRAINER, .type=6, .rarity=1, .set=20, .set2=255, .dark=0, .holo=0, .flags=TCG_CF_TM, .origin=20,
+[1344] = {.id=1344, .name="Psychic Cube 01", .kind=TCG_TRAINER, .type=6, .rarity=1, .set=20, .set2=255, .dark=0, .holo=0, .flags=TCG_CF_TM|TCG_CF_READY, .origin=20,
 .effect="ecard2-132:t",.description="Attach this card to 1 of your Psychic Pokemon in play. That Pokemon may us this card's attack instead of its own. At the end of your turn, discard Psychic Cube 01."
+,.attacks={
+{.name="Psy Confuse",.description="The Defending Pokemon is now Confused.",.effect="ecard2-132:a0",.animation="ATK_ANIM_HIT",.cost={0,0,0,0,0,1,0,0,0},.damage=0,.category=TCG_RESIDUAL},
+{.name="",.description="",.effect="NONE",.animation="ATK_ANIM_NONE",.cost={0},.damage=0,.category=TCG_DAMAGE_NORMAL},
+{.name="",.description="",.effect="NONE",.animation="ATK_ANIM_NONE",.cost={0},.damage=0,.category=TCG_DAMAGE_NORMAL},
+}
 },
 [1345] = {.id=1345, .name="Seer", .kind=TCG_TRAINER, .type=6, .rarity=1, .set=20, .set2=255, .dark=0, .holo=0, .flags=TCG_CF_SUPPORTER|TCG_CF_READY, .origin=20,
 .effect="ecard2-133:t",.description="You can play only one Supporter card each turn. When you play this card, put it next to your Active Pokemon. When your turn ends, discard this card. Look at the top 6 cards of your deck. Take all Basic Energy cards you find there, show them to your opponent, and then put them into your hand. Shuffle your deck afterward."
@@ -8559,8 +8599,13 @@ const struct TcgCard gTcgCards[TCG_CARD_COUNT + 1] = {
 [1351] = {.id=1351, .name="Power Plant", .kind=TCG_TRAINER, .type=6, .rarity=1, .set=20, .set2=255, .dark=0, .holo=0, .flags=TCG_CF_STADIUM|TCG_CF_READY, .origin=20,
 .effect="ecard2-139:t",.description="This card stays in play when you play it. Discard this card if another Stadium card comes into play. Once during each of his or her turns, a player may discard a basic Energy card from his or her hand. If that player does, he or she chooses a basic Energy card from his or her discard pile, shows it to his or her opponent, and then puts it into his or her hand."
 },
-[1352] = {.id=1352, .name="Water Cube 01", .kind=TCG_TRAINER, .type=6, .rarity=1, .set=20, .set2=255, .dark=0, .holo=0, .flags=TCG_CF_TM, .origin=20,
+[1352] = {.id=1352, .name="Water Cube 01", .kind=TCG_TRAINER, .type=6, .rarity=1, .set=20, .set2=255, .dark=0, .holo=0, .flags=TCG_CF_TM|TCG_CF_READY, .origin=20,
 .effect="ecard2-140:t",.description="Attach this card to 1 of your Water Pokemon in play. That Pokemon may use this card's attack instead of its own. At the end of your turn, discard Water Cube 01."
+,.attacks={
+{.name="Splatter",.description="Choose 1 of your opponent's Pokemon. This attack does 20 damage to that Pokemon. Don't apply Weakness or Resistance.",.effect="ecard2-140:a0",.animation="ATK_ANIM_HIT",.cost={0,0,0,1,0,0,0,0,0},.damage=0,.category=TCG_RESIDUAL},
+{.name="",.description="",.effect="NONE",.animation="ATK_ANIM_NONE",.cost={0},.damage=0,.category=TCG_DAMAGE_NORMAL},
+{.name="",.description="",.effect="NONE",.animation="ATK_ANIM_NONE",.cost={0},.damage=0,.category=TCG_DAMAGE_NORMAL},
+}
 },
 [1353] = {.id=1353, .name="Weakness Guard", .kind=TCG_TRAINER, .type=6, .rarity=1, .set=20, .set2=255, .dark=0, .holo=0, .flags=TCG_CF_READY, .origin=20,
 .effect="ecard2-141:t",.description="Attach this card to 1 of your Pokemon. Discard it at the end of your opponent's next turn. As long as this card is attached, this Pokemon has no Weakness."
@@ -8583,21 +8628,21 @@ const struct TcgCard gTcgCards[TCG_CARD_COUNT + 1] = {
 [1359] = {.id=1359, .name="Warp Energy", .kind=TCG_ENERGY, .type=6, .rarity=1, .set=20, .set2=255, .dark=0, .holo=0, .flags=TCG_CF_SPECIAL, .origin=20,
 .effect="ecard2-147:t",.description="Warp Energy provides 1 Colorless Energy. When you attach Warp Energy from your hand to your Active Pokemon, switch your Active Pokemon with 1 of your Benched Pokemon."
 },
-[1360] = {.id=1360, .name="Kingdra", .kind=TCG_POKEMON, .type=6, .rarity=2, .set=20, .set2=255, .dark=0, .holo=1, .flags=TCG_CF_CRYSTAL|TCG_CF_BODY, .origin=20,
+[1360] = {.id=1360, .name="Kingdra", .kind=TCG_POKEMON, .type=6, .rarity=2, .set=20, .set2=255, .dark=0, .holo=1, .flags=TCG_CF_CRYSTAL|TCG_CF_BODY|TCG_CF_READY, .origin=20,
 .hp=110, .stage=2, .species=230, .level=0, .retreat=3, .weakness=2, .resistance=255, .evolvesFrom="Seadra", .description="", .attacks={
 {.name="Crystal Type",.description="Whenever you attach a Water, Lightning, or Psychic basic Energy card from your hand to Kingdra, Kingdra's type (color) becomes the same as that Energy card type until the end of the turn.",.effect="ecard2-148:p",.animation="ATK_ANIM_HIT",.cost={0,0,0,0,0,0,0,0,0},.damage=0,.category=TCG_POKEMON_POWER},
 {.name="Aquabomb",.description="Kingdra does 10 damage to itself. (Don't apply Weakness or Resistance when Kingdra damages itself with this attack.)",.effect="ecard2-148:a0",.animation="ATK_ANIM_HIT",.cost={0,0,1,2,0,0,0,0,0},.damage=40,.category=TCG_DAMAGE_NORMAL},
 {.name="Dual Burn",.description="Flip 2 coins. For each tails, discard 1 Energy card attached to Kingdra.",.effect="ecard2-148:a1",.animation="ATK_ANIM_HIT",.cost={0,0,1,0,0,2,1,0,0},.damage=60,.category=TCG_DAMAGE_NORMAL},
 }
 },
-[1361] = {.id=1361, .name="Lugia", .kind=TCG_POKEMON, .type=6, .rarity=2, .set=20, .set2=255, .dark=0, .holo=1, .flags=TCG_CF_CRYSTAL|TCG_CF_BODY, .origin=20,
+[1361] = {.id=1361, .name="Lugia", .kind=TCG_POKEMON, .type=6, .rarity=2, .set=20, .set2=255, .dark=0, .holo=1, .flags=TCG_CF_CRYSTAL|TCG_CF_BODY|TCG_CF_READY, .origin=20,
 .hp=80, .stage=0, .species=249, .level=0, .retreat=3, .weakness=5, .resistance=255, .evolvesFrom="", .description="", .attacks={
 {.name="Crystal Type",.description="Whenever you attach a Fire, Water, or Psychic basic Energy card from your hand to Lugia, Lugia's type (color) becomes the same as that Energy card type until the end of the turn.",.effect="ecard2-149:p",.animation="ATK_ANIM_HIT",.cost={0,0,0,0,0,0,0,0,0},.damage=0,.category=TCG_POKEMON_POWER},
 {.name="Psychic",.description="This attack does 10 damage times the number of Energy cards attached to the Defending Pokemon.",.effect="ecard2-149:a0",.animation="ATK_ANIM_HIT",.cost={1,0,0,0,0,1,0,0,0},.damage=10,.category=TCG_DAMAGE_X},
 {.name="Steam Blast",.description="Discard an Energy card attached to Lugia.",.effect="ecard2-149:a1",.animation="ATK_ANIM_HIT",.cost={1,0,0,2,0,0,1,0,0},.damage=50,.category=TCG_DAMAGE_NORMAL},
 }
 },
-[1362] = {.id=1362, .name="Nidoking", .kind=TCG_POKEMON, .type=6, .rarity=2, .set=20, .set2=255, .dark=0, .holo=1, .flags=TCG_CF_CRYSTAL|TCG_CF_BODY, .origin=20,
+[1362] = {.id=1362, .name="Nidoking", .kind=TCG_POKEMON, .type=6, .rarity=2, .set=20, .set2=255, .dark=0, .holo=1, .flags=TCG_CF_CRYSTAL|TCG_CF_BODY|TCG_CF_READY, .origin=20,
 .hp=100, .stage=2, .species=34, .level=0, .retreat=3, .weakness=1, .resistance=255, .evolvesFrom="Nidorino", .description="", .attacks={
 {.name="Crystal Type",.description="Whenever you attach a Grass, Lightning, or Fire basic Energy card from your hand to Nidoking, Nidoking's type (color) becomes the same as that Energy card type until the end of the turn.",.effect="ecard2-150:p",.animation="ATK_ANIM_HIT",.cost={0,0,0,0,0,0,0,0,0},.damage=0,.category=TCG_POKEMON_POWER},
 {.name="Poison Horn",.description="The Defending Pokemon is now Poisoned.",.effect="ecard2-150:a0",.animation="ATK_ANIM_HIT",.cost={0,2,0,0,0,0,1,0,0},.damage=20,.category=TCG_DAMAGE_NORMAL},
@@ -9684,29 +9729,64 @@ const struct TcgCard gTcgCards[TCG_CARD_COUNT + 1] = {
 [1522] = {.id=1522, .name="Lure Ball", .kind=TCG_TRAINER, .type=6, .rarity=1, .set=21, .set2=255, .dark=0, .holo=0, .flags=TCG_CF_READY, .origin=21,
 .effect="ecard3-128:t",.description="Flip 3 coins. For each heads, choose an Evolution card from your discard pile, show it to your opponent, and put it into your hand."
 },
-[1523] = {.id=1523, .name="Miracle Sphere Alpha", .kind=TCG_TRAINER, .type=6, .rarity=1, .set=21, .set2=255, .dark=0, .holo=0, .flags=TCG_CF_TM, .origin=21,
+[1523] = {.id=1523, .name="Miracle Sphere Alpha", .kind=TCG_TRAINER, .type=6, .rarity=1, .set=21, .set2=255, .dark=0, .holo=0, .flags=TCG_CF_TM|TCG_CF_READY, .origin=21,
 .effect="ecard3-129:t",.description="Attach this card to 1 of your Evolved Fire, Lightning, or Fighting Pokemon in play. That Pokemon may use this card's attack instead of its own. At the end of your turn, discard Miracle Plate Alpha."
+,.attacks={
+{.name="Fire Force",.description="If the Pokemon using this attack has Fire and Lightning basic Energy cards attached to it, the Defending Pokemon is now Confused. If the Pokemon using this attack has Fire and Fighting basic Energy cards attached to it, this attack does 30 damage plus 10 more damage and remove 3 damage counters from the Pokemon that Miracle Plate Alpha is attached to.",.effect="ecard3-129:a0",.animation="ATK_ANIM_HIT",.cost={1,0,0,0,0,0,2,0,0},.damage=30,.category=TCG_DAMAGE_PLUS},
+{.name="",.description="",.effect="NONE",.animation="ATK_ANIM_NONE",.cost={0},.damage=0,.category=TCG_DAMAGE_NORMAL},
+{.name="",.description="",.effect="NONE",.animation="ATK_ANIM_NONE",.cost={0},.damage=0,.category=TCG_DAMAGE_NORMAL},
+}
 },
-[1524] = {.id=1524, .name="Miracle Sphere Beta", .kind=TCG_TRAINER, .type=6, .rarity=1, .set=21, .set2=255, .dark=0, .holo=0, .flags=TCG_CF_TM, .origin=21,
+[1524] = {.id=1524, .name="Miracle Sphere Beta", .kind=TCG_TRAINER, .type=6, .rarity=1, .set=21, .set2=255, .dark=0, .holo=0, .flags=TCG_CF_TM|TCG_CF_READY, .origin=21,
 .effect="ecard3-130:t",.description="Attach this card to 1 of your Evolved Fire, Water, or Psychic Pokemon in play. That Pokemon may use this card's attack instead of its own. At the end of your turn, discard Miracle Sphere Beta."
+,.attacks={
+{.name="Freezing Force",.description="If the Pokemon using this attack has Fire and Water basic Energy cards attached to it, this attack does 30 damage plus 10 more damage and the Defending Pokemon is now Burned. If the Pokemon using this attack has Water and Psychic basic Energy cards attached to it, choose an Energy card attached to the Defending Pokemon, if any, and your opponent shuffles that card into his or her deck.",.effect="ecard3-130:a0",.animation="ATK_ANIM_HIT",.cost={0,0,0,1,0,0,2,0,0},.damage=30,.category=TCG_DAMAGE_PLUS},
+{.name="",.description="",.effect="NONE",.animation="ATK_ANIM_NONE",.cost={0},.damage=0,.category=TCG_DAMAGE_NORMAL},
+{.name="",.description="",.effect="NONE",.animation="ATK_ANIM_NONE",.cost={0},.damage=0,.category=TCG_DAMAGE_NORMAL},
+}
 },
-[1525] = {.id=1525, .name="Miracle Sphere Gamma", .kind=TCG_TRAINER, .type=6, .rarity=1, .set=21, .set2=255, .dark=0, .holo=0, .flags=TCG_CF_TM, .origin=21,
+[1525] = {.id=1525, .name="Miracle Sphere Gamma", .kind=TCG_TRAINER, .type=6, .rarity=1, .set=21, .set2=255, .dark=0, .holo=0, .flags=TCG_CF_TM|TCG_CF_READY, .origin=21,
 .effect="ecard3-131:t",.description="Attach this card to 1 of your Evolved Grass, Water, or Lightning Pokemon in play. That Pokemon may use this card's attack instead of its own. At the end of your turn, discard Miracle Sphere Gamma."
+,.attacks={
+{.name="Thunder Force",.description="If the Pokemon using this attack has Grass and Lightning basic Energy cards attached to it, the Defending Pokemon is now Asleep and Poisoned. If the Pokemon using this attack has Water and Lightning basic Energy cards attached to it, this attack does 30 damage plus 10 more damage and lets you put 1 damage counter on each of your opponent's Benched Pokemon.",.effect="ecard3-131:a0",.animation="ATK_ANIM_HIT",.cost={0,0,1,0,0,0,2,0,0},.damage=30,.category=TCG_DAMAGE_PLUS},
+{.name="",.description="",.effect="NONE",.animation="ATK_ANIM_NONE",.cost={0},.damage=0,.category=TCG_DAMAGE_NORMAL},
+{.name="",.description="",.effect="NONE",.animation="ATK_ANIM_NONE",.cost={0},.damage=0,.category=TCG_DAMAGE_NORMAL},
+}
 },
 [1526] = {.id=1526, .name="Mirage Stadium", .kind=TCG_TRAINER, .type=6, .rarity=1, .set=21, .set2=255, .dark=0, .holo=0, .flags=TCG_CF_STADIUM|TCG_CF_READY, .origin=21,
 .effect="ecard3-132:t",.description="This card stays in play when you play it. Discard this card if another Stadium card comes into play. Whenever a player tries to retreat a Pokemon during his or her turn, that player flips a coin. If heads, that player retreats that Pokemon (and discards Energy normally). If tails, that Pokemon can't retreat this turn (the player doesn't discard any Energy)."
 },
-[1527] = {.id=1527, .name="Mystery Plate Alpha", .kind=TCG_TRAINER, .type=6, .rarity=1, .set=21, .set2=255, .dark=0, .holo=0, .flags=TCG_CF_TM, .origin=21,
+[1527] = {.id=1527, .name="Mystery Plate Alpha", .kind=TCG_TRAINER, .type=6, .rarity=1, .set=21, .set2=255, .dark=0, .holo=0, .flags=TCG_CF_TM|TCG_CF_READY, .origin=21,
 .effect="ecard3-133:t",.description="Attach this card to 1 of your Pokemon in play. That Pokemon may use this card's attack instead of its own. At the end of your turn, discard Mystery Plate Alpha."
+,.attacks={
+{.name="Desert Burn",.description="If your opponent has 5 or more Prizes, search your deck for a Trainer card, show it to your opponent, and put it into your hand. If your opponent has only 1 Prize, the Defending Pokemon is now Burned, Paralyzed, and Poisoned.",.effect="ecard3-133:a0",.animation="ATK_ANIM_HIT",.cost={0,0,0,0,0,0,1,0,0},.damage=0,.category=TCG_RESIDUAL},
+{.name="",.description="",.effect="NONE",.animation="ATK_ANIM_NONE",.cost={0},.damage=0,.category=TCG_DAMAGE_NORMAL},
+{.name="",.description="",.effect="NONE",.animation="ATK_ANIM_NONE",.cost={0},.damage=0,.category=TCG_DAMAGE_NORMAL},
+}
 },
-[1528] = {.id=1528, .name="Mystery Plate Beta", .kind=TCG_TRAINER, .type=6, .rarity=1, .set=21, .set2=255, .dark=0, .holo=0, .flags=TCG_CF_TM, .origin=21,
+[1528] = {.id=1528, .name="Mystery Plate Beta", .kind=TCG_TRAINER, .type=6, .rarity=1, .set=21, .set2=255, .dark=0, .holo=0, .flags=TCG_CF_TM|TCG_CF_READY, .origin=21,
 .effect="ecard3-134:t",.description="Attach this card to 1 of your Pokemon in play. That Pokemon may use this card's attack instead of its own. At the end of your turn, discard Mystery Plate Beta."
+,.attacks={
+{.name="Stone Crush",.description="If your opponent has 5 or more Prizes, draw 3 cards. If your opponent has only 1 Prize, choose 2 Energy cards attached to the Defending Pokemon (1 if there is only 1). Your opponent shuffles those cards into his or her deck.",.effect="ecard3-134:a0",.animation="ATK_ANIM_HIT",.cost={0,0,0,0,0,0,1,0,0},.damage=0,.category=TCG_RESIDUAL},
+{.name="",.description="",.effect="NONE",.animation="ATK_ANIM_NONE",.cost={0},.damage=0,.category=TCG_DAMAGE_NORMAL},
+{.name="",.description="",.effect="NONE",.animation="ATK_ANIM_NONE",.cost={0},.damage=0,.category=TCG_DAMAGE_NORMAL},
+}
 },
-[1529] = {.id=1529, .name="Mystery Plate Gamma", .kind=TCG_TRAINER, .type=6, .rarity=1, .set=21, .set2=255, .dark=0, .holo=0, .flags=TCG_CF_TM, .origin=21,
+[1529] = {.id=1529, .name="Mystery Plate Gamma", .kind=TCG_TRAINER, .type=6, .rarity=1, .set=21, .set2=255, .dark=0, .holo=0, .flags=TCG_CF_TM|TCG_CF_READY, .origin=21,
 .effect="ecard3-135:t",.description="Attach this card to 1 of your Pokemon in play. That Pokemon may use this card's attack instead of its own. At the end of your turn, discard Mystery Plate Gamma."
+,.attacks={
+{.name="Retro Cave",.description="If your opponent has 5 or more Prizes, shuffle your hand into your deck and then draw 6 cards. If your opponent has exactly 2 Prizes, choose 1 of your opponent's Evolved Pokemon. Your opponent puts the top card on that Evolved Pokemon on the bottom of his or her deck. (This counts as devolving that Pokemon.)",.effect="ecard3-135:a0",.animation="ATK_ANIM_HIT",.cost={0,0,0,0,0,0,1,0,0},.damage=0,.category=TCG_RESIDUAL},
+{.name="",.description="",.effect="NONE",.animation="ATK_ANIM_NONE",.cost={0},.damage=0,.category=TCG_DAMAGE_NORMAL},
+{.name="",.description="",.effect="NONE",.animation="ATK_ANIM_NONE",.cost={0},.damage=0,.category=TCG_DAMAGE_NORMAL},
+}
 },
-[1530] = {.id=1530, .name="Mystery Plate Delta", .kind=TCG_TRAINER, .type=6, .rarity=1, .set=21, .set2=255, .dark=0, .holo=0, .flags=TCG_CF_TM, .origin=21,
+[1530] = {.id=1530, .name="Mystery Plate Delta", .kind=TCG_TRAINER, .type=6, .rarity=1, .set=21, .set2=255, .dark=0, .holo=0, .flags=TCG_CF_TM|TCG_CF_READY, .origin=21,
 .effect="ecard3-136:t",.description="Attach this card to 1 of your Pokemon in play. That Pokemon may use this card's attack instead of its own. At the end of your turn, discard Mystery Plate Delta."
+,.attacks={
+{.name="Healing Oasis",.description="If your opponent has 5 or more Prizes, search your deck for up to 3 basic Energy cards, show them to your opponent, and put them into your hand. Shuffle your deck afterward. If your opponent has exactly 2 Prizes, remove all damage counters from 1 of your Pokemon.",.effect="ecard3-136:a0",.animation="ATK_ANIM_HIT",.cost={0,0,0,0,0,0,1,0,0},.damage=0,.category=TCG_RESIDUAL},
+{.name="",.description="",.effect="NONE",.animation="ATK_ANIM_NONE",.cost={0},.damage=0,.category=TCG_DAMAGE_NORMAL},
+{.name="",.description="",.effect="NONE",.animation="ATK_ANIM_NONE",.cost={0},.damage=0,.category=TCG_DAMAGE_NORMAL},
+}
 },
 [1531] = {.id=1531, .name="Mystery Zone", .kind=TCG_TRAINER, .type=6, .rarity=1, .set=21, .set2=255, .dark=0, .holo=0, .flags=TCG_CF_STADIUM|TCG_CF_READY, .origin=21,
 .effect="ecard3-137:t",.description="This card stays in play when you play it. Discard this card if another Stadium card comes into play. Once during each player's turn (before he or she attacks), if that player has an Evolution card in his or her hand, he or she may search his or her deck for a basic Energy card, show it to his or her opponent, and put it into his or her hand. Then that player chooses an Evolution card from his or her hand, shows it to his or her opponent, and puts it into his or her deck. That player shuffles his or her deck afterward."
@@ -9732,42 +9812,42 @@ const struct TcgCard gTcgCards[TCG_CARD_COUNT + 1] = {
 [1538] = {.id=1538, .name="Retro Energy", .kind=TCG_ENERGY, .type=6, .rarity=1, .set=21, .set2=255, .dark=0, .holo=0, .flags=TCG_CF_SPECIAL, .origin=21,
 .effect="ecard3-144:t",.description="This card provides Colorless Energy. When you play this card from your hand and attach it to 1 of your Evolved Pokemon, you may remove up to 2 damage counters from that Pokemon and discard the top card from it. (This counts as devolving it.)"
 },
-[1539] = {.id=1539, .name="Celebi", .kind=TCG_POKEMON, .type=6, .rarity=2, .set=21, .set2=255, .dark=0, .holo=1, .flags=TCG_CF_CRYSTAL|TCG_CF_BODY, .origin=21,
+[1539] = {.id=1539, .name="Celebi", .kind=TCG_POKEMON, .type=6, .rarity=2, .set=21, .set2=255, .dark=0, .holo=1, .flags=TCG_CF_CRYSTAL|TCG_CF_BODY|TCG_CF_READY, .origin=21,
 .hp=60, .stage=0, .species=251, .level=0, .retreat=1, .weakness=0, .resistance=255, .evolvesFrom="", .description="", .attacks={
 {.name="Crystal Type",.description="Whenever you attach a Grass, Water, or Psychic basic Energy card from your hand to Celebi, Celebi's type (color) becomes the same as that type of Energy until the end of the turn.",.effect="ecard3-145:p",.animation="ATK_ANIM_HIT",.cost={0,0,0,0,0,0,0,0,0},.damage=0,.category=TCG_POKEMON_POWER},
 {.name="Empathic Healing",.description="Remove 2 damage counters from Celebi and each Pokemon that's the same type (color) as Celebi.",.effect="ecard3-145:a0",.animation="ATK_ANIM_HIT",.cost={0,1,0,1,0,0,0,0,0},.damage=0,.category=TCG_RESIDUAL},
 {.name="Mind Bend",.description="Flip a coin. If heads, the Defending Pokemon is now Confused.",.effect="ecard3-145:a1",.animation="ATK_ANIM_HIT",.cost={0,1,0,0,0,1,1,0,0},.damage=20,.category=TCG_DAMAGE_NORMAL},
 }
 },
-[1540] = {.id=1540, .name="Charizard", .kind=TCG_POKEMON, .type=6, .rarity=2, .set=21, .set2=255, .dark=0, .holo=1, .flags=TCG_CF_CRYSTAL|TCG_CF_BODY, .origin=21,
+[1540] = {.id=1540, .name="Charizard", .kind=TCG_POKEMON, .type=6, .rarity=2, .set=21, .set2=255, .dark=0, .holo=1, .flags=TCG_CF_CRYSTAL|TCG_CF_BODY|TCG_CF_READY, .origin=21,
 .hp=110, .stage=2, .species=6, .level=0, .retreat=4, .weakness=3, .resistance=255, .evolvesFrom="Charmeleon", .description="", .attacks={
 {.name="Crystal Type",.description="Whenever you attach a Fire, Lightning, or Fighting basic Energy card from your hand to Charizard, Charizard's type (color) becomes the same as that type of Energy until the end of the turn.",.effect="ecard3-146:p",.animation="ATK_ANIM_HIT",.cost={0,0,0,0,0,0,0,0,0},.damage=0,.category=TCG_POKEMON_POWER},
 {.name="Fireblast",.description="Discard an Energy card attached to Charizard.",.effect="ecard3-146:a0",.animation="ATK_ANIM_HIT",.cost={2,0,0,0,1,0,0,0,0},.damage=40,.category=TCG_DAMAGE_NORMAL},
 {.name="Dragon Tail",.description="Flip 2 coins. This attack does 50 damage times the number of heads.",.effect="ecard3-146:a1",.animation="ATK_ANIM_HIT",.cost={1,0,2,0,0,0,1,0,0},.damage=50,.category=TCG_DAMAGE_X},
 }
 },
-[1541] = {.id=1541, .name="Crobat", .kind=TCG_POKEMON, .type=6, .rarity=2, .set=21, .set2=255, .dark=0, .holo=1, .flags=TCG_CF_CRYSTAL|TCG_CF_BODY, .origin=21,
+[1541] = {.id=1541, .name="Crobat", .kind=TCG_POKEMON, .type=6, .rarity=2, .set=21, .set2=255, .dark=0, .holo=1, .flags=TCG_CF_CRYSTAL|TCG_CF_BODY|TCG_CF_READY, .origin=21,
 .hp=80, .stage=2, .species=169, .level=0, .retreat=0, .weakness=5, .resistance=255, .evolvesFrom="Golbat", .description="", .attacks={
 {.name="Crystal Type",.description="Whenever you attach a Grass, Fire, or Psychic basic Energy card from your hand to Crobat, Crobat's type (color) becomes the same as that type of Energy until the end of the turn.",.effect="ecard3-147:p",.animation="ATK_ANIM_HIT",.cost={0,0,0,0,0,0,0,0,0},.damage=0,.category=TCG_POKEMON_POWER},
 {.name="Poison Flame",.description="Flip a coin. If heads, the Defending Pokemon is now Burned and Poisoned.",.effect="ecard3-147:a0",.animation="ATK_ANIM_HIT",.cost={1,1,0,0,0,0,1,0,0},.damage=20,.category=TCG_DAMAGE_NORMAL},
 {.name="Squared Attack",.description="Flip 4 coins. This attack does 20 damage times the number of heads.",.effect="ecard3-147:a1",.animation="ATK_ANIM_HIT",.cost={0,1,0,0,0,2,0,0,0},.damage=20,.category=TCG_DAMAGE_X},
 }
 },
-[1542] = {.id=1542, .name="Golem", .kind=TCG_POKEMON, .type=6, .rarity=2, .set=21, .set2=255, .dark=0, .holo=1, .flags=TCG_CF_CRYSTAL|TCG_CF_BODY, .origin=21,
+[1542] = {.id=1542, .name="Golem", .kind=TCG_POKEMON, .type=6, .rarity=2, .set=21, .set2=255, .dark=0, .holo=1, .flags=TCG_CF_CRYSTAL|TCG_CF_BODY|TCG_CF_READY, .origin=21,
 .hp=100, .stage=2, .species=76, .level=0, .retreat=4, .weakness=3, .resistance=255, .evolvesFrom="Graveler", .description="", .attacks={
 {.name="Crystal Type",.description="Whenever you attach a Grass, Fire, or Fighting basic Energy card from your hand to Golem, Golem's type (color) becomes the same as that type of Energy until the end of the turn.",.effect="ecard3-148:p",.animation="ATK_ANIM_HIT",.cost={0,0,0,0,0,0,0,0,0},.damage=0,.category=TCG_POKEMON_POWER},
 {.name="Rock Throw",.description="",.effect="NONE",.animation="ATK_ANIM_HIT",.cost={0,0,0,0,2,0,1,0,0},.damage=30,.category=TCG_DAMAGE_NORMAL},
 {.name="Earth Bomb",.description="Golem does 20 damage to itself. This attack also does 10 damage to each Benched Pokemon (yours and your opponent's). (Don't apply Weakness and Resistance for Benched Pokemon.)",.effect="ecard3-148:a1",.animation="ATK_ANIM_HIT",.cost={1,1,0,0,1,0,1,0,0},.damage=50,.category=TCG_DAMAGE_NORMAL},
 }
 },
-[1543] = {.id=1543, .name="Ho-oh", .kind=TCG_POKEMON, .type=6, .rarity=2, .set=21, .set2=255, .dark=0, .holo=1, .flags=TCG_CF_CRYSTAL|TCG_CF_BODY, .origin=21,
+[1543] = {.id=1543, .name="Ho-oh", .kind=TCG_POKEMON, .type=6, .rarity=2, .set=21, .set2=255, .dark=0, .holo=1, .flags=TCG_CF_CRYSTAL|TCG_CF_BODY|TCG_CF_READY, .origin=21,
 .hp=80, .stage=0, .species=250, .level=0, .retreat=3, .weakness=3, .resistance=255, .evolvesFrom="", .description="", .attacks={
 {.name="Crystal Type",.description="Whenever you attach a Fire, Water, or Lightning basic Energy card from your hand to Ho-oh, Ho-oh's type (color) becomes the same as that type of Energy until the end of the turn.",.effect="ecard3-149:p",.animation="ATK_ANIM_HIT",.cost={0,0,0,0,0,0,0,0,0},.damage=0,.category=TCG_POKEMON_POWER},
 {.name="Holy Flame",.description="",.effect="NONE",.animation="ATK_ANIM_HIT",.cost={1,0,1,0,0,0,0,0,0},.damage=20,.category=TCG_DAMAGE_NORMAL},
 {.name="Scalding Steam",.description="Discard an Energy card attached to Ho-oh and flip a coin. If heads, the Defending Pokemon is now Burned.",.effect="ecard3-149:a1",.animation="ATK_ANIM_HIT",.cost={1,0,0,2,0,0,1,0,0},.damage=40,.category=TCG_DAMAGE_NORMAL},
 }
 },
-[1544] = {.id=1544, .name="Kabutops", .kind=TCG_POKEMON, .type=6, .rarity=2, .set=21, .set2=255, .dark=0, .holo=1, .flags=TCG_CF_CRYSTAL|TCG_CF_BODY, .origin=21,
+[1544] = {.id=1544, .name="Kabutops", .kind=TCG_POKEMON, .type=6, .rarity=2, .set=21, .set2=255, .dark=0, .holo=1, .flags=TCG_CF_CRYSTAL|TCG_CF_BODY|TCG_CF_READY, .origin=21,
 .hp=90, .stage=2, .species=141, .level=0, .retreat=3, .weakness=1, .resistance=255, .evolvesFrom="Kabuto", .description="", .attacks={
 {.name="Crystal Type",.description="Whenever you attach a Water, Lightning, or Fighting basic Energy card from your hand to Kabutops, Kabutops's type (color) becomes the same as that type of Energy until the end of the turn.",.effect="ecard3-150:p",.animation="ATK_ANIM_HIT",.cost={0,0,0,0,0,0,0,0,0},.damage=0,.category=TCG_POKEMON_POWER},
 {.name="Draining Cut",.description="Remove a damage counter from Kabutops.",.effect="ecard3-150:a0",.animation="ATK_ANIM_HIT",.cost={0,0,0,1,1,0,1,0,0},.damage=20,.category=TCG_DAMAGE_NORMAL},

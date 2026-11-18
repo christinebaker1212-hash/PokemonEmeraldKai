@@ -98,9 +98,18 @@ int Tcg_DeckValidate(const uint16_t cards[TCG_DECK_SIZE], const uint16_t *owned,
                 same++;
         if (same > 4)
             return Invalid(reason, size, "Only four cards with the same name are allowed.");
-        /* (a Shining Pokemon, Miracle Energy: one of a name) */
+        /* (a Shining Pokemon, Miracle Energy: one of a name; a Crystal Pokemon: one of its name among the Crystal
+         * ones, beside the other printings) */
         if (same > 1 && ((c->flags & TCG_CF_SHINING) || Tcg_EnergyRule(c->id) == TCG_ER_MIRACLE))
             return Invalid(reason, size, "Only one of a Shining Pokemon (or Miracle Energy) is allowed.");
+        if (c->flags & TCG_CF_CRYSTAL)
+        {
+            unsigned crystal = 0;
+            for (j = 0; j <= i; j++)
+                crystal += (gTcgCards[cards[j]].flags & TCG_CF_CRYSTAL) && !strcmp(gTcgCards[cards[j]].name, c->name);
+            if (crystal > 1)
+                return Invalid(reason, size, "Only one of a Crystal Pokemon is allowed.");
+        }
     }
     if (!basic)
         return Invalid(reason, size, "A deck needs at least one Basic Pokemon.");

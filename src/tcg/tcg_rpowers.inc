@@ -196,6 +196,21 @@ void TcgPower_AfterAttach(struct TcgDuel *g, unsigned player, unsigned slot, uns
     struct TcgPlayer *p = &g->players[player];
     struct TcgFieldCard *f = &p->field[slot];
     unsigned power = TcgPower_Working(g, player, slot), id = p->cards[physical], s, who, i;
+    if (power == TCG_POWER_R_CRYSTAL_TYPE && id >= 1 && id <= 6)
+    {
+        /* Crystal Type: a basic Energy of a type its words name makes it that type until the end of the turn (as
+         * Venomoth's Shift does) */
+        static const char *const types[TCG_TYPES] = {"Fire", "Grass", "Lightning", "Water", "Fighting", "Psychic",
+                                                     "Colorless", "Darkness", "Metal"};
+        const struct TcgCard *c = TcgDuel_Field(g, player, slot), *e = Tcg_Card(id);
+        const char *words = c ? c->attacks[0].description : NULL, *end = words ? strstr(words, "basic Energy") : NULL;
+        const char *at = words && e ? strstr(words, types[e->type]) : NULL;
+        if (at && end && at < end)
+        {
+            Announce(g, player, slot, power);
+            f->shift = (uint8_t)(e->type + 1);
+        }
+    }
     if ((power == TCG_POWER_R_PURE_BODY_WATER && id == TCG_CARD_WATER_ENERGY) ||
         (power == TCG_POWER_R_PURE_BODY_FIRE && id == TCG_CARD_FIRE_ENERGY) ||
         (power == TCG_POWER_R_PURE_BODY_LIGHTNING && id == TCG_CARD_LIGHTNING_ENERGY))

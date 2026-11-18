@@ -238,6 +238,8 @@ def build(enum, region, types, owner, promo):
         n = min(n, 4 - names[c['name']])
         if 'SHINING' in c['flags']:
             n = min(n, 1 - sum(k for i, k in counts.items() if 'SHINING' in BY_ID[i]['flags']))
+        if 'CRYSTAL' in c['flags']:
+            n = min(n, 1 - counts[c['id']])   # (one of a Crystal Pokemon)
         if n > 0:
             counts[c['id']] += n
             names[c['name']] += n

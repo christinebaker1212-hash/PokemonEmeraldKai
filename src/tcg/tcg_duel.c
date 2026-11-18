@@ -227,22 +227,77 @@ static int Locked(const struct TcgDuel *g, unsigned player, unsigned attack)
     const struct TcgFieldCard *f = &g->players[player].field[0];
     return f->lockTurn == g->turn && (f->lockAttack == TCG_LOCK_ALL || f->lockAttack == TCG_LOCK_ATTACKS || f->lockAttack == attack + 1);
 }
+unsigned TcgDuel_Tm(const struct TcgDuel *g, unsigned who, unsigned slot, unsigned *physical)
+{
+    const struct TcgPlayer *p = &g->players[who];
+    const struct TcgFieldCard *f = &p->field[slot];
+    unsigned i;
+    for (i = 0; i < f->attachedSize; i++)
+    {
+        const struct TcgCard *c = Tcg_Card(p->cards[f->attached[i]]);
+        if (c && c->kind == TCG_TRAINER && (c->flags & TCG_CF_TM))
+        {
+            if (physical)
+                *physical = f->attached[i];
+            return c->id;
+        }
+    }
+    return 0;
+}
+int TcgDuel_TmFits(const struct TcgDuel *g, unsigned who, unsigned slot, const struct TcgCard *tm)
+{
+    static const char *const types[TCG_TYPES] = {"Fire", "Grass", "Lightning", "Water", "Fighting", "Psychic",
+                                                 "Colorless", "Darkness", "Metal"};
+    const struct TcgCard *c = slot < TCG_FIELD_SIZE ? TcgDuel_Field(g, who, slot) : NULL;
+    const char *words = tm && tm->description ? tm->description : "", *of = strstr(words, "Attach this card to 1 of your ");
+    unsigned t, named = 0, fits = 0;
+    if (!c || c->kind != TCG_POKEMON)
+        return 0;
+    if (!of)
+        return 1;
+    of += strlen("Attach this card to 1 of your ");
+    if (!strncmp(of, "Evolved ", 8))
+    {
+        if (!c->stage && g->players[who].field[slot].stackSize < 2)
+            return 0;
+        of += 8;
+    }
+    /* (the types named before "Pokemon in play") */
+    for (t = 0; t < TCG_TYPES; t++)
+    {
+        const char *at = strstr(of, types[t]), *end = strstr(of, "Pokemon");
+        if (at && end && at < end)
+            named++, fits |= TcgDuel_Type(g, who, slot) == t;
+    }
+    return !named || fits;
+}
+const struct TcgAttack *TcgDuel_AttackOf(const struct TcgDuel *g, unsigned player, unsigned attack)
+{
+    const struct TcgCard *c = TcgDuel_Attacker(g, player), *tm;
+    if (!c || c->kind != TCG_POKEMON)
+        return NULL;
+    if (attack < TCG_ATTACKS)
+        return &c->attacks[attack];
+    if (attack != TCG_ATTACK_TM || !(tm = Tcg_Card(TcgDuel_Tm(g, player, 0, NULL))) || !tm->attacks[0].name ||
+        !tm->attacks[0].name[0])
+        return NULL;
+    return &tm->attacks[0];
+}
 int TcgDuel_CanAttack(const struct TcgDuel *g, unsigned player, unsigned attack)
 {
-    const struct TcgCard *c = TcgDuel_Attacker(g, player);
+    const struct TcgAttack *a = TcgDuel_AttackOf(g, player, attack);
     /* (Amnesia: not the attack chosen, this turn) */
-    return EnergyPaid(g, player, attack) && g->players[player].field[0].disabled != attack + 1 &&
-           !Locked(g, player, attack) && !TcgDuel_EffectBlock(g, player, &c->attacks[attack]);
+    return a && EnergyPaid(g, player, attack) && g->players[player].field[0].disabled != attack + 1 &&
+           !Locked(g, player, attack) && !TcgDuel_EffectBlock(g, player, a);
 }
 int TcgDuel_CanAttackNow(const struct TcgDuel *g, unsigned player, unsigned attack)
 {
-    const struct TcgCard *c = TcgDuel_Attacker(g, player);
+    const struct TcgAttack *a = TcgDuel_AttackOf(g, player, attack);
     const struct TcgFieldCard *f = &g->players[player].field[0];
-    if (!c || attack >= TCG_ATTACKS || c->kind != TCG_POKEMON || f->condition == TCG_PARALYZED || TcgDuel_NoAttack(g, player) ||
-        Locked(g, player, attack))
+    if (!a || f->condition == TCG_PARALYZED || TcgDuel_NoAttack(g, player) || Locked(g, player, attack))
         return 0;
     /* (Big Snore: only while Asleep) */
-    return f->condition != TCG_ASLEEP || TcgDuel_SleepAttack(&c->attacks[attack]);
+    return f->condition != TCG_ASLEEP || TcgDuel_SleepAttack(a);
 }
 static int EnergyPaid(const struct TcgDuel *g, unsigned player, unsigned attack)
 {
@@ -253,9 +308,8 @@ static int EnergyPaid(const struct TcgDuel *g, unsigned player, unsigned attack)
     /* (Rainbow Energy: any one type each) */
     for (i = 0; i < f->attachedSize; i++)
         rainbow += Tcg_EnergyRule(g->players[player].cards[f->attached[i]]) == TCG_ER_RAINBOW;
-    if (!c || attack >= TCG_ATTACKS || c->kind != TCG_POKEMON)
+    if (!c || c->kind != TCG_POKEMON || !(a = TcgDuel_AttackOf(g, player, attack)))
         return 0;
-    a = &c->attacks[attack];
     if (!a->name[0] || a->category == TCG_POKEMON_POWER)
         return 0;
     for (t = 0; t < TCG_TYPES; t++)
@@ -571,6 +625,17 @@ static void EndTurn(struct TcgDuel *g)
         if (p->field[s].charged == 2)
             p->field[s].charged = p->field[s].charge3 = 0;
         p->field[s].fossilBoost = 0;
+        /* (Technical Machines: "at the end of your turn, discard" them) */
+        {
+            unsigned tm;
+            while (TcgDuel_Tm(g, g->current, s, &tm))
+            {
+                unsigned k;
+                for (k = 0; k < p->field[s].attachedSize && p->field[s].attached[k] != tm; k++)
+                    ;
+                p->discard[p->discardSize++] = TcgPile_Remove(p->field[s].attached, &p->field[s].attachedSize, k);
+            }
+        }
     }
     p->noTrainers = p->noSupporters = 0;
     p->turnBuffs = p->stadiumUsed = 0;
@@ -740,10 +805,10 @@ static int Apply(struct TcgDuel *g, const struct TcgAction *a)
         const char *blocked;
         int result, total;
         f = &p->field[0];
-        if (!attacker || !target || attacker->kind != TCG_POKEMON || a->attack >= TCG_ATTACKS ||
+        if (!attacker || !target || attacker->kind != TCG_POKEMON || a->attack > TCG_ATTACK_TM ||
             !EnergyPaid(g, g->current, a->attack))
             return Error(g, "That attack cannot be used with the attached Energy.");
-        attack = &attacker->attacks[a->attack];
+        attack = TcgDuel_AttackOf(g, g->current, a->attack); /* (TCG_ATTACK_TM: its Technical Machine's) */
         if (f->disabled == a->attack + 1)
             return Error(g, "Amnesia: that attack can't be used this turn.");
         if ((blocked = TcgDuel_EffectBlock(g, g->current, attack)))
@@ -791,7 +856,7 @@ static int Apply(struct TcgDuel *g, const struct TcgAction *a)
             EndTurn(g);
             return TCG_OK;
         }
-        if (TcgDuel_MetronomeHeads(&attacker->attacks[a->attack]) && !TcgDuel_Coin(g, g->current))
+        if (TcgDuel_MetronomeHeads(TcgDuel_AttackOf(g, g->current, a->attack)) && !TcgDuel_Coin(g, g->current))
         {
             /* Mini-Metronome: tails, nothing */
             TcgDuel_Log(g, "%s's attack failed.", attacker->name);

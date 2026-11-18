@@ -703,6 +703,8 @@ static int StartEvent(const struct TcgEvent *e, int post)
     {
         unsigned color, se;
         const struct TcgAttack *a = c && e->slot < TCG_ATTACKS ? &c->attacks[e->slot] : NULL;
+        if (c && e->slot == TCG_ATTACK_TM)
+            a = TcgDuel_AttackOf(&B.view, who, e->slot); /* (its Technical Machine's, while it's there) */
         if (!a)
             return 0;
         se = AttackSe(a->animation, c->type, &color);
@@ -2139,7 +2141,7 @@ static void OpenFieldMenu(void)
         int any = 0;
         unsigned i;
         char why[80] = "";
-        for (i = 0; i < TCG_ATTACKS; i++)
+        for (i = 0; i < TCG_ATTACK_SLOTS; i++)
             if (AttackReady(i, why, sizeof(why)))
                 any = 1;
         if (!CanAct())
@@ -2320,7 +2322,7 @@ static void Choose(struct TcgAction *out, int *result, unsigned *card)
             /* (the first one ready) */
             char reason[80];
             int k;
-            for (k = TCG_ATTACKS - 1; k >= 0; k--)
+            for (k = TCG_ATTACK_SLOTS - 1; k >= 0; k--)
                 if (AttackReady((unsigned)k, reason, sizeof(reason)))
                     B.attackCursor = k;
         }
@@ -2733,9 +2735,11 @@ int TcgBoard_Step(unsigned pressed, unsigned held, struct TcgAction *out, unsign
         if (pressed & (KEY_UP | KEY_DOWN))
         {
             const struct TcgCard *c = TcgDuel_Attacker(&B.view, 0);
-            int step = (pressed & KEY_UP) ? TCG_ATTACKS - 1 : 1, k = (B.attackCursor + step) % TCG_ATTACKS;
-            while (c && k != B.attackCursor && !c->attacks[k].name[0])
-                k = (k + step) % TCG_ATTACKS;
+            /* (a Technical Machine's attack is a fourth row while one is attached) */
+            int step = (pressed & KEY_UP) ? TCG_ATTACK_SLOTS - 1 : 1, k = (B.attackCursor + step) % TCG_ATTACK_SLOTS;
+            while (c && k != B.attackCursor &&
+                   (!TcgDuel_AttackOf(&B.view, 0, (unsigned)k) || !TcgDuel_AttackOf(&B.view, 0, (unsigned)k)->name[0]))
+                k = (k + step) % TCG_ATTACK_SLOTS;
             if (c && k != B.attackCursor)
             {
                 B.attackCursor = k;
@@ -2763,11 +2767,10 @@ int TcgBoard_Step(unsigned pressed, unsigned held, struct TcgAction *out, unsign
                 TcgBoard_Reject(reason);
             else
             {
-                const struct TcgCard *c = TcgDuel_Attacker(&B.view, 0);
                 memset(&B.action, 0, sizeof(B.action));
                 B.action.type = TCG_ATTACK;
                 B.action.attack = (uint8_t)B.attackCursor;
-                AttackSteps(&c->attacks[B.attackCursor]);
+                AttackSteps(TcgDuel_AttackOf(&B.view, 0, (unsigned)B.attackCursor));
                 if (B.nsteps)
                 {
                     /* Spark, Lure, Teleport, Amnesia, Metronome...: the attack's choices first */
@@ -3781,17 +3784,17 @@ static void DrawAttacks(void)
     int i, rows = 0, row = 0, top;
     if (!c)
         return;
-    for (i = 0; i < TCG_ATTACKS; i++)
-        rows += c->attacks[i].name[0] != 0;
-    /* (a third attack: the window grows upward, the description stays at the bottom) */
+    for (i = 0; i < TCG_ATTACK_SLOTS; i++)
+        rows += TcgDuel_AttackOf(&B.view, 0, (unsigned)i) && TcgDuel_AttackOf(&B.view, 0, (unsigned)i)->name[0] != 0;
+    /* (a third attack, or a Technical Machine's: the window grows upward, the description stays at the bottom) */
     top = rows > 2 ? 98 - 15 * (rows - 2) : 98;
     G_Window(0, top, 240, 160 - top);
-    for (i = 0; i < TCG_ATTACKS; i++)
+    for (i = 0; i < TCG_ATTACK_SLOTS; i++)
     {
-        const struct TcgAttack *a = &c->attacks[i];
+        const struct TcgAttack *a = TcgDuel_AttackOf(&B.view, 0, (unsigned)i);
         char reason[80], dmg[16];
         int y = top + 6 + row * 15, x = 16, t, ready;
-        if (!a->name[0])
+        if (!a || !a->name[0])
             continue;
         row++;
         ready = AttackReady(i, reason, sizeof(reason)) || a->category == TCG_POKEMON_POWER;
@@ -3824,9 +3827,11 @@ static void DrawAttacks(void)
         }
     }
     {
-        const struct TcgAttack *a = &c->attacks[B.attackCursor];
+        const struct TcgAttack *a = TcgDuel_AttackOf(&B.view, 0, (unsigned)B.attackCursor);
         char reason[80];
         G_FillA(8, 134, 224, 1, 0xd0d0c8, 255);
+        if (!a)
+            return;
         if (!AttackReady(B.attackCursor, reason, sizeof(reason)))
             G_Text(10, 136, 0xc04040, G_NO_SHADOW, reason, 220, TF_NARROW);
         else

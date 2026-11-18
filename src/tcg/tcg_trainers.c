@@ -61,6 +61,8 @@ int TcgDuel_Trainer(struct TcgDuel *g, const struct TcgAction *a)
     if ((card->flags & TCG_CF_TOOL) &&
         (a->slot >= TCG_FIELD_SIZE || !p->field[a->slot].stackSize || TcgDuel_Tool(g, g->current, a->slot, NULL)))
         return Fail(g, "Attach it to one of your Pokemon without a Pokemon Tool.");
+    if ((card->flags & TCG_CF_TM) && (a->slot >= TCG_FIELD_SIZE || !TcgDuel_TmFits(g, g->current, a->slot, card)))
+        return Fail(g, "Attach it to one of your Pokemon it names.");
     /* The transactional caller restores all piles if any selection is invalid. */
     TcgPile_Remove(p->hand, &p->handSize, a->hand);
     TcgDuel_Event(g, TCG_EV_TRAINER, g->current, a->slot, 0, id, 0);
@@ -754,7 +756,7 @@ int TcgDuel_Trainer(struct TcgDuel *g, const struct TcgAction *a)
             }
         p->stadium = (uint8_t)(played + 1);
     }
-    else if (card->flags & TCG_CF_TOOL)
+    else if (card->flags & (TCG_CF_TOOL | TCG_CF_TM))
     {
         f = &p->field[a->slot];
         f->attached[f->attachedSize++] = (uint8_t)played;

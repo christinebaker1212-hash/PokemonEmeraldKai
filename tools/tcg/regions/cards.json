@@ -29633,7 +29633,19 @@
    "kind": "trainer",
    "type": "Colorless",
    "text": "Attach this card to 1 of your Pokemon in play. That Pokemon may use this card's attack instead of its own. At the end of your turn, discard Multi Technical Machine 01.",
-   "effect": "ecard1-144:t"
+   "effect": "ecard1-144:t",
+   "attacks": [
+    {
+     "name": "Paralyzing Gaze",
+     "cost": {
+      "Colorless": 1
+     },
+     "damage": 0,
+     "category": "RESIDUAL",
+     "text": "The Defending Pokemon is now Paralyzed.",
+     "effect": "ecard1-144:a0"
+    }
+   ]
   },
   {
    "id": 1198,
@@ -34995,7 +35007,19 @@
    "kind": "trainer",
    "type": "Colorless",
    "text": "Attach this card to 1 of your Darkness Pokemon in play. That Pokemon may use this card's attack instead of its own. At the end of your turn, discard Darkness Cube 01.",
-   "effect": "ecard2-119:t"
+   "effect": "ecard2-119:t",
+   "attacks": [
+    {
+     "name": "Plunder",
+     "cost": {
+      "Darkness": 1
+     },
+     "damage": 10,
+     "category": "DAMAGE_NORMAL",
+     "text": "Before doing damage, discard any Trainer cards attached to the Defending Pokemon.",
+     "effect": "ecard2-119:a0"
+    }
+   ]
   },
   {
    "id": 1332,
@@ -35029,7 +35053,19 @@
    "kind": "trainer",
    "type": "Colorless",
    "text": "Attach this card to 1 of your Fighting Pokemon in play. That Pokemon my use this card's attack instead of its own. At the end of your turn, discard Fighting Cube 01.",
-   "effect": "ecard2-121:t"
+   "effect": "ecard2-121:t",
+   "attacks": [
+    {
+     "name": "Violent Rage",
+     "cost": {
+      "Fighting": 1
+     },
+     "damage": 10,
+     "category": "DAMAGE_X",
+     "text": "Flip a number of coins equal to the number of damage counters on this Pokemon. This attack does 10 damage times the number of heads.",
+     "effect": "ecard2-121:a0"
+    }
+   ]
   },
   {
    "id": 1334,
@@ -35047,7 +35083,19 @@
    "kind": "trainer",
    "type": "Colorless",
    "text": "Attach this card to 1 of your Fire Pokemon in play. That Pokemon may use this card's attack instead of its own. At the end of your turn, discard Fire Cube 01.",
-   "effect": "ecard2-122:t"
+   "effect": "ecard2-122:t",
+   "attacks": [
+    {
+     "name": "Singe",
+     "cost": {
+      "Fire": 1
+     },
+     "damage": 0,
+     "category": "RESIDUAL",
+     "text": "The Defending Pokemon is now Burned.",
+     "effect": "ecard2-122:a0"
+    }
+   ]
   },
   {
    "id": 1335,
@@ -35083,7 +35131,19 @@
    "kind": "trainer",
    "type": "Colorless",
    "text": "Attach this card to 1 of your Grass Pokemon in play. That Pokemon may use this card's attack instead of its own. At the end of your turn, discard Grass Cube 01.",
-   "effect": "ecard2-124:t"
+   "effect": "ecard2-124:t",
+   "attacks": [
+    {
+     "name": "Sleep Poison",
+     "cost": {
+      "Grass": 1
+     },
+     "damage": 0,
+     "category": "RESIDUAL",
+     "text": "The Defending Pokemon is now Asleep and Poisoned.",
+     "effect": "ecard2-124:a0"
+    }
+   ]
   },
   {
    "id": 1337,
@@ -35137,7 +35197,19 @@
    "kind": "trainer",
    "type": "Colorless",
    "text": "Attach this card to 1 of your Lightning Pokemon in play. That Pokemon may use this card's attack instead of its own. At the end of your turn, discard Lightning Cube 01.",
-   "effect": "ecard2-127:t"
+   "effect": "ecard2-127:t",
+   "attacks": [
+    {
+     "name": "Discharge",
+     "cost": {
+      "Lightning": 1
+     },
+     "damage": 40,
+     "category": "DAMAGE_X",
+     "text": "Discard all Lightning Energy cards attached to this Pokemon. Then, flip a number of coins equal to the number of Energy cards discarded that way. This attack does 40 damage times the number of heads.",
+     "effect": "ecard2-127:a0"
+    }
+   ]
   },
   {
    "id": 1340,
@@ -35173,7 +35245,19 @@
    "kind": "trainer",
    "type": "Colorless",
    "text": "Attach this card to 1 of your Metal Pokemon in play. That Pokemon may use this card's attack instead of its own. At the end of your turn, discard Metal Cube 01.",
-   "effect": "ecard2-129:t"
+   "effect": "ecard2-129:t",
+   "attacks": [
+    {
+     "name": "Metal Reversal",
+     "cost": {
+      "Metal": 1
+     },
+     "damage": 10,
+     "category": "DAMAGE_NORMAL",
+     "text": "Before doing damage, you may choose 1 of your opponent's Benched Pokemon and switch it with the Defending Pokemon.",
+     "effect": "ecard2-129:a0"
+    }
+   ]
   },
   {
    "id": 1342,
@@ -35227,7 +35311,19 @@
    "kind": "trainer",
    "type": "Colorless",
    "text": "Attach this card to 1 of your Psychic Pokemon in play. That Pokemon may us this card's attack instead of its own. At the end of your turn, discard Psychic Cube 01.",
-   "effect": "ecard2-132:t"
+   "effect": "ecard2-132:t",
+   "attacks": [
+    {
+     "name": "Psy Confuse",
+     "cost": {
+      "Psychic": 1
+     },
+     "damage": 0,
+     "category": "RESIDUAL",
+     "text": "The Defending Pokemon is now Confused.",
+     "effect": "ecard2-132:a0"
+    }
+   ]
   },
   {
    "id": 1345,
@@ -35369,7 +35465,19 @@
    "kind": "trainer",
    "type": "Colorless",
    "text": "Attach this card to 1 of your Water Pokemon in play. That Pokemon may use this card's attack instead of its own. At the end of your turn, discard Water Cube 01.",
-   "effect": "ecard2-140:t"
+   "effect": "ecard2-140:t",
+   "attacks": [
+    {
+     "name": "Splatter",
+     "cost": {
+      "Water": 1
+     },
+     "damage": 0,
+     "category": "RESIDUAL",
+     "text": "Choose 1 of your opponent's Pokemon. This attack does 20 damage to that Pokemon. Don't apply Weakness or Resistance.",
+     "effect": "ecard2-140:a0"
+    }
+   ]
   },
   {
    "id": 1353,
@@ -42469,7 +42577,20 @@
    "kind": "trainer",
    "type": "Colorless",
    "text": "Attach this card to 1 of your Evolved Fire, Lightning, or Fighting Pokemon in play. That Pokemon may use this card's attack instead of its own. At the end of your turn, discard Miracle Plate Alpha.",
-   "effect": "ecard3-129:t"
+   "effect": "ecard3-129:t",
+   "attacks": [
+    {
+     "name": "Fire Force",
+     "cost": {
+      "Fire": 1,
+      "Colorless": 2
+     },
+     "damage": 30,
+     "category": "DAMAGE_PLUS",
+     "text": "If the Pokemon using this attack has Fire and Lightning basic Energy cards attached to it, the Defending Pokemon is now Confused. If the Pokemon using this attack has Fire and Fighting basic Energy cards attached to it, this attack does 30 damage plus 10 more damage and remove 3 damage counters from the Pokemon that Miracle Plate Alpha is attached to.",
+     "effect": "ecard3-129:a0"
+    }
+   ]
   },
   {
    "id": 1524,
@@ -42487,7 +42608,20 @@
    "kind": "trainer",
    "type": "Colorless",
    "text": "Attach this card to 1 of your Evolved Fire, Water, or Psychic Pokemon in play. That Pokemon may use this card's attack instead of its own. At the end of your turn, discard Miracle Sphere Beta.",
-   "effect": "ecard3-130:t"
+   "effect": "ecard3-130:t",
+   "attacks": [
+    {
+     "name": "Freezing Force",
+     "cost": {
+      "Water": 1,
+      "Colorless": 2
+     },
+     "damage": 30,
+     "category": "DAMAGE_PLUS",
+     "text": "If the Pokemon using this attack has Fire and Water basic Energy cards attached to it, this attack does 30 damage plus 10 more damage and the Defending Pokemon is now Burned. If the Pokemon using this attack has Water and Psychic basic Energy cards attached to it, choose an Energy card attached to the Defending Pokemon, if any, and your opponent shuffles that card into his or her deck.",
+     "effect": "ecard3-130:a0"
+    }
+   ]
   },
   {
    "id": 1525,
@@ -42505,7 +42639,20 @@
    "kind": "trainer",
    "type": "Colorless",
    "text": "Attach this card to 1 of your Evolved Grass, Water, or Lightning Pokemon in play. That Pokemon may use this card's attack instead of its own. At the end of your turn, discard Miracle Sphere Gamma.",
-   "effect": "ecard3-131:t"
+   "effect": "ecard3-131:t",
+   "attacks": [
+    {
+     "name": "Thunder Force",
+     "cost": {
+      "Lightning": 1,
+      "Colorless": 2
+     },
+     "damage": 30,
+     "category": "DAMAGE_PLUS",
+     "text": "If the Pokemon using this attack has Grass and Lightning basic Energy cards attached to it, the Defending Pokemon is now Asleep and Poisoned. If the Pokemon using this attack has Water and Lightning basic Energy cards attached to it, this attack does 30 damage plus 10 more damage and lets you put 1 damage counter on each of your opponent's Benched Pokemon.",
+     "effect": "ecard3-131:a0"
+    }
+   ]
   },
   {
    "id": 1526,
@@ -42541,7 +42688,19 @@
    "kind": "trainer",
    "type": "Colorless",
    "text": "Attach this card to 1 of your Pokemon in play. That Pokemon may use this card's attack instead of its own. At the end of your turn, discard Mystery Plate Alpha.",
-   "effect": "ecard3-133:t"
+   "effect": "ecard3-133:t",
+   "attacks": [
+    {
+     "name": "Desert Burn",
+     "cost": {
+      "Colorless": 1
+     },
+     "damage": 0,
+     "category": "RESIDUAL",
+     "text": "If your opponent has 5 or more Prizes, search your deck for a Trainer card, show it to your opponent, and put it into your hand. If your opponent has only 1 Prize, the Defending Pokemon is now Burned, Paralyzed, and Poisoned.",
+     "effect": "ecard3-133:a0"
+    }
+   ]
   },
   {
    "id": 1528,
@@ -42559,7 +42718,19 @@
    "kind": "trainer",
    "type": "Colorless",
    "text": "Attach this card to 1 of your Pokemon in play. That Pokemon may use this card's attack instead of its own. At the end of your turn, discard Mystery Plate Beta.",
-   "effect": "ecard3-134:t"
+   "effect": "ecard3-134:t",
+   "attacks": [
+    {
+     "name": "Stone Crush",
+     "cost": {
+      "Colorless": 1
+     },
+     "damage": 0,
+     "category": "RESIDUAL",
+     "text": "If your opponent has 5 or more Prizes, draw 3 cards. If your opponent has only 1 Prize, choose 2 Energy cards attached to the Defending Pokemon (1 if there is only 1). Your opponent shuffles those cards into his or her deck.",
+     "effect": "ecard3-134:a0"
+    }
+   ]
   },
   {
    "id": 1529,
@@ -42577,7 +42748,19 @@
    "kind": "trainer",
    "type": "Colorless",
    "text": "Attach this card to 1 of your Pokemon in play. That Pokemon may use this card's attack instead of its own. At the end of your turn, discard Mystery Plate Gamma.",
-   "effect": "ecard3-135:t"
+   "effect": "ecard3-135:t",
+   "attacks": [
+    {
+     "name": "Retro Cave",
+     "cost": {
+      "Colorless": 1
+     },
+     "damage": 0,
+     "category": "RESIDUAL",
+     "text": "If your opponent has 5 or more Prizes, shuffle your hand into your deck and then draw 6 cards. If your opponent has exactly 2 Prizes, choose 1 of your opponent's Evolved Pokemon. Your opponent puts the top card on that Evolved Pokemon on the bottom of his or her deck. (This counts as devolving that Pokemon.)",
+     "effect": "ecard3-135:a0"
+    }
+   ]
   },
   {
    "id": 1530,
@@ -42595,7 +42778,19 @@
    "kind": "trainer",
    "type": "Colorless",
    "text": "Attach this card to 1 of your Pokemon in play. That Pokemon may use this card's attack instead of its own. At the end of your turn, discard Mystery Plate Delta.",
-   "effect": "ecard3-136:t"
+   "effect": "ecard3-136:t",
+   "attacks": [
+    {
+     "name": "Healing Oasis",
+     "cost": {
+      "Colorless": 1
+     },
+     "damage": 0,
+     "category": "RESIDUAL",
+     "text": "If your opponent has 5 or more Prizes, search your deck for up to 3 basic Energy cards, show them to your opponent, and put them into your hand. Shuffle your deck afterward. If your opponent has exactly 2 Prizes, remove all damage counters from 1 of your Pokemon.",
+     "effect": "ecard3-136:a0"
+    }
+   ]
   },
   {
    "id": 1531,

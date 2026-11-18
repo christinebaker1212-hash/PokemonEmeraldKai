@@ -240,6 +240,15 @@ static int BenchOn(const struct TcgDuel *g, unsigned who)
 }
 
 /* The cards an attack's player picks (TcgDuel_AttackPick; the 2026-11-18 audit: never picked for them) */
+/* (has that player an Evolved Pokemon in play?) */
+static int EvolvedOn(const struct TcgDuel *g, unsigned who)
+{
+    unsigned s;
+    for (s = 0; s < TCG_FIELD_SIZE; s++)
+        if (g->players[who].field[s].stackSize >= 2)
+            return 1;
+    return 0;
+}
 static int AttackPickSteps(const struct TcgDuel *g, unsigned me, const struct TcgAction *a, const struct TcgAttack *attack,
                            struct TcgStep out[4], int n)
 {
@@ -461,11 +470,12 @@ int TcgFlow_AttackSteps(const struct TcgDuel *g, unsigned me, const struct TcgAc
     choice = attack ? TcgDuel_AttackChoice(attack, NULL) : 0;
     ask = attack ? TcgDuel_AttackAsk(attack) : TCG_ASK_NONE;
     if ((choice == 1 && BenchOn(g, me ^ 1)) || (choice == 2 && BenchOn(g, me)) || choice == 3 || choice == 4 ||
-        (choice == 5 && BenchOn(g, me ^ 1)) || choice == 6)
+        (choice == 5 && BenchOn(g, me ^ 1)) || choice == 6 || (choice == 7 && EvolvedOn(g, me ^ 1)))
     {
         const char *words = TcgDuel_AttackTargetPrompt(attack);
         struct TcgStep st = {choice == 1 || choice == 3 || choice >= 5 ? TCG_ST_OPP_SLOT : TCG_ST_MY_SLOT,
-                             choice == 6 ? TCG_F_DAMAGED : choice == 5 ? TCG_F_BENCH_CLEAN : choice >= 3 ? TCG_F_OCCUPIED : TCG_F_BENCH,
+                             choice == 7   ? TCG_F_EVOLVED
+                             : choice == 6 ? TCG_F_DAMAGED : choice == 5 ? TCG_F_BENCH_CLEAN : choice >= 3 ? TCG_F_OCCUPIED : TCG_F_BENCH,
                              0, 0, 0,
                              words         ? words
                              : choice == 1 ? "Aim at which of their Benched Pokemon?"
@@ -632,6 +642,8 @@ int TcgFlow_SlotMatches(const struct TcgDuel *g, unsigned me, const struct TcgAc
         return c && f->stackSize >= 2;
     case TCG_F_NO_TOOL:
         return c && c->kind == TCG_POKEMON && !TcgDuel_Tool(g, who, slot, NULL);
+    case TCG_F_TM_FITS:
+        return TcgDuel_TmFits(g, who, slot, Tcg_Card(flowCard));
     case TCG_F_OTHER_MINE:
         return c && slot != a->slot;
     case TCG_F_SAME_TYPE_PICK:
@@ -914,17 +926,18 @@ int TcgFlow_AttackReady(const struct TcgDuel *g, unsigned me, unsigned attack, c
 {
     const struct TcgCard *c = TcgDuel_Attacker(g, me), *active = Field(g, me, 0);
     const struct TcgFieldCard *f = &g->players[me].field[0];
-    if (!c || c->kind != TCG_POKEMON || attack >= TCG_ATTACKS || !c->attacks[attack].name[0])
+    const struct TcgAttack *at = TcgDuel_AttackOf(g, me, attack); /* (TCG_ATTACK_TM: its Technical Machine's) */
+    if (!c || c->kind != TCG_POKEMON || !at || !at->name[0])
         return snprintf(reason, size, "No attack."), 0;
-    if (c->attacks[attack].category == TCG_POKEMON_POWER)
+    if (at->category == TCG_POKEMON_POWER)
         return snprintf(reason, size, "This is a Pokemon Power."), 0;
-    if (!TcgDuel_EffectSupported(c->attacks[attack].effect))
+    if (!TcgDuel_EffectSupported(at->effect))
         return snprintf(reason, size, "This attack's effect isn't ready yet."), 0;
-    if (TcgDuel_EffectBlock(g, me, &c->attacks[attack]))
-        return snprintf(reason, size, "%s", TcgDuel_EffectBlock(g, me, &c->attacks[attack])), 0;
+    if (TcgDuel_EffectBlock(g, me, at))
+        return snprintf(reason, size, "%s", TcgDuel_EffectBlock(g, me, at)), 0;
     if (!TcgDuel_CanAttack(g, me, attack))
         return snprintf(reason, size, "Not enough Energy attached."), 0;
-    if (f->condition == TCG_ASLEEP && !TcgDuel_SleepAttack(&c->attacks[attack]))
+    if (f->condition == TCG_ASLEEP && !TcgDuel_SleepAttack(at))
         return snprintf(reason, size, "%s is Asleep.", active->name), 0;
     if (f->condition == TCG_PARALYZED)
         return snprintf(reason, size, "%s is Paralyzed.", active->name), 0;
@@ -1207,7 +1220,7 @@ static unsigned AskPick(struct TcgFlow *f, const struct TcgDuel *g, int source, 
 
 static unsigned AttackMenu(struct TcgFlow *f, const struct TcgDuel *g)
 {
-    const struct TcgAttack *a = &TcgDuel_Attacker(g, f->me)->attacks[f->action.attack];
+    const struct TcgAttack *a = TcgDuel_AttackOf(g, f->me, f->action.attack);
     const char *labels[TCG_MAX_OPTIONS];
     uint8_t ok[TCG_MAX_OPTIONS];
     unsigned n, i;
@@ -1365,14 +1378,14 @@ unsigned TcgFlow_Begin(struct TcgFlow *f, const struct TcgDuel *g, unsigned me, 
     }
     case TCG_FLOW_ATTACK:
     {
-        const struct TcgCard *c = TcgDuel_Attacker(g, f->me);
-        if (g->phase != TCG_TURN || index >= TCG_ATTACKS)
+        if (g->phase != TCG_TURN || index > TCG_ATTACK_TM)
             return Fail(f, "You can't attack now.");
         if (!TcgFlow_AttackReady(g, f->me, index, reason, sizeof(reason)))
             return Fail(f, reason);
         f->action.type = TCG_ATTACK;
         f->action.attack = (uint8_t)index;
-        f->nsteps = TcgFlow_AttackSteps(g, f->me, &f->action, &c->attacks[index], 0, f->attackSteps, f->attackPrompt);
+        f->nsteps = TcgFlow_AttackSteps(g, f->me, &f->action, TcgDuel_AttackOf(g, f->me, index), 0, f->attackSteps,
+                                        f->attackPrompt);
         f->steps = f->attackSteps;
         return Next(f, g);
     }
@@ -1552,7 +1565,7 @@ unsigned TcgFlow_Menu(struct TcgFlow *f, const struct TcgDuel *g, unsigned value
     if (st->kind == TCG_ST_ATTACK_OPTION)
     {
         /* The pick decides what comes next (Metronome's copied attack, Prophecy's deck, the side to devolve) */
-        const struct TcgAttack *a = &TcgDuel_Attacker(g, f->me)->attacks[f->action.attack];
+        const struct TcgAttack *a = TcgDuel_AttackOf(g, f->me, f->action.attack);
         if (TcgDuel_IsMetronome(a) && !f->action.copy)
         {
             f->action.copy = (uint8_t)(value + 1);

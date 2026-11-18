@@ -16,7 +16,7 @@ POWERS = {}
 TRAINERS = {}
 # rules: TcgCard flags (import_sets.py) the engine plays; DARK_ENERGY / METAL_ENERGY: Darkness / Metal costs payable
 RULES = {'OWNER', 'DARK', 'LIGHT', 'DARK_ENERGY', 'METAL_ENERGY', 'SPECIAL', 'SUPPORTER', 'STADIUM', 'TOOL', 'RSM', 'BABY', 'SHINING', 'EX',
-         'GAME_CORNER'}
+         'GAME_CORNER', 'TM', 'CRYSTAL'}
 # special Energy whose rules the engine plays (Tcg_EnergyRule, src/tcg/tcg_collection.c)
 for _label, _rule in (('neo1-19', 'METAL'), ('neo1-104', 'DARKNESS'), ('neo1-105', 'RECYCLE'), ('ecard1-158', 'DARKNESS'),
                       ('ecard1-159', 'METAL_LATE'), ('ecard2-142', 'DARKNESS'), ('ecard2-143', 'METAL'),
@@ -49,8 +49,8 @@ def _trainers():
         if c['kind'] != 'trainer':
             continue
         head = first.setdefault((c['name'], c['text']), c['src'])
-        if c['name'] in gb or head in RTRAINERS:
-            TRAINERS[c['effect']] = 'C'
+        if c['name'] in gb or head in RTRAINERS or 'TM' in c['flags']:
+            TRAINERS[c['effect']] = 'C'   # (a Technical Machine: attached by its kind; its attack is checked as any)
 
 
 _trainers()
@@ -88,7 +88,7 @@ def ready(card):
     if any(f not in RULES for f in card['flags'] if f not in ('DARK', 'LIGHT')):
         return False
     if card['kind'] != 'pokemon':
-        return card['effect'] in TRAINERS
+        return card['effect'] in TRAINERS and all(not a['text'] or a['effect'] in ATTACKS for a in card.get('attacks', []))
     for a in card['attacks']:
         if a['text'] and a['effect'] not in ATTACKS:
             return False

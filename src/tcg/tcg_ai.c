@@ -463,7 +463,8 @@ static unsigned ExpectedDamage(const struct TcgDuel *g, const struct TcgCard *c,
 {
     const struct TcgCard *foe = TcgDuel_Field(g, g->current ^ 1, 0);
     const struct TcgFieldCard *f = &g->players[g->current ^ 1].field[0];
-    unsigned damage = c->attacks[attack].damage, left;
+    const struct TcgAttack *move = TcgDuel_AttackOf(g, g->current, attack); /* (TCG_ATTACK_TM too) */
+    unsigned damage = move ? move->damage : 0, left;
     if (!foe)
         return damage;
     if (damage && foe->weakness == c->type)
@@ -476,8 +477,8 @@ static unsigned ExpectedDamage(const struct TcgDuel *g, const struct TcgCard *c,
     {
         /* Effects (status, coins) give a non-damaging attack some value; what it costs its user (attacks.asm): the
          * Energy it discards and the damage it does to itself, worth it only for a Knock Out */
-        const char *d = c->attacks[attack].description;
-        int score = (int)damage * 4 + (strcmp(c->attacks[attack].effect, "NONE") ? 3 : 0) + 1;
+        const char *d = move ? move->description : NULL;
+        int score = (int)damage * 4 + (move && strcmp(move->effect, "NONE") ? 3 : 0) + 1;
         if (d && strstr(d, "Discard") && strstr(d, "Energy") && strstr(d, "attached to"))
             score -= 30;
         if (d && (strstr(d, "damage to itself") || strstr(d, "damage to itself.")))
@@ -1195,11 +1196,13 @@ static int Act(const struct TcgDuel *g, struct TcgAction *a)
     if (g->phase == TCG_TURN && RegionStadiumAi(g, a) && Legal(g, a))
         return 1;
     memset(a, 0, sizeof(*a));
-    for (attack = 0; attack < TCG_ATTACKS; attack++)
+    for (attack = 0; attack < TCG_ATTACK_SLOTS; attack++)
     {
         const struct TcgCard *c = TcgDuel_Attacker(g, g->current);
+        const struct TcgAttack *move = TcgDuel_AttackOf(g, g->current, attack);
         unsigned score;
-        if (!c || !TcgDuel_CanAttack(g, g->current, attack) || !TcgDuel_CanAttackNow(g, g->current, attack) || !TcgDuel_EffectSupported(c->attacks[attack].effect))
+        if (!c || !move || !TcgDuel_CanAttack(g, g->current, attack) || !TcgDuel_CanAttackNow(g, g->current, attack) ||
+            !TcgDuel_EffectSupported(move->effect))
             continue;
         score = ExpectedDamage(g, c, attack);
         if (bestAttack == TCG_NONE || score > bestScore)
@@ -1216,7 +1219,7 @@ static int Act(const struct TcgDuel *g, struct TcgAction *a)
     if (bestAttack != TCG_NONE && TcgDuel_CanAttackNow(g, g->current, bestAttack))
     {
         int required;
-        unsigned choice = TcgDuel_AttackChoice(&TcgDuel_Attacker(g, g->current)->attacks[bestAttack], &required);
+        unsigned choice = TcgDuel_AttackChoice(TcgDuel_AttackOf(g, g->current, bestAttack), &required);
         a->type = TCG_ATTACK;
         a->attack = bestAttack;
         if (choice == 1)
@@ -1240,7 +1243,7 @@ static int Act(const struct TcgDuel *g, struct TcgAction *a)
         else if (choice == 2)
             a->target = BestPokemon(g, g->current);
         TcgDuel_AiAttackChoices(g, a); /* (Amnesia, Metronome, Conversion...) */
-        if (TcgDuel_IsMetronome(&TcgDuel_Attacker(g, g->current)->attacks[bestAttack]) && a->copy)
+        if (TcgDuel_IsMetronome(TcgDuel_AttackOf(g, g->current, bestAttack)) && a->copy)
         {
             /* the copied attack's own Bench pick */
             const struct TcgAttack *copy = TcgDuel_MetronomeAttack(g, g->current, a->copy);

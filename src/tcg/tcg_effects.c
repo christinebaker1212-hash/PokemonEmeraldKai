@@ -803,7 +803,7 @@ unsigned TcgDuel_Resistance(const struct TcgDuel *g, unsigned player, unsigned s
 void TcgDuel_AiAttackChoices(const struct TcgDuel *g, struct TcgAction *a)
 {
     const struct TcgCard *self = TcgDuel_Attacker(g, g->current), *foe = TcgDuel_Field(g, g->current ^ 1, 0);
-    const struct TcgAttack *attack = self && a->attack < TCG_ATTACKS ? &self->attacks[a->attack] : NULL;
+    const struct TcgAttack *attack = self ? TcgDuel_AttackOf(g, g->current, a->attack) : NULL;
     const struct Effect *e = attack ? Effect(attack->effect) : NULL;
     const struct TcgPlayer *p = &g->players[g->current];
     unsigned i, s;
