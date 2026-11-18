@@ -376,6 +376,7 @@ static int AttackPickSteps(const struct TcgDuel *g, unsigned me, const struct Tc
             {58, TCG_F_EVOLVES_FROM_ACTIVE, TCG_SRC_HAND, "Evolve it into which card from your hand?"},
             {80, TCG_F_SAME_NAME_BASIC, TCG_SRC_DECK, "Put which onto your Bench?"},
             {81, TCG_F_BASIC, TCG_SRC_OPP_HAND, "Put which of theirs onto their Bench?"},
+            {82, TCG_F_BASIC, TCG_SRC_OPP_DISCARD, "Put which of theirs onto their Bench?"},
         };
         unsigned i;
         /* (count: the kind, and in the next byte how many may be picked: 1 if not given) */
@@ -442,6 +443,15 @@ static int AttackPickSteps(const struct TcgDuel *g, unsigned me, const struct Tc
         {
             struct TcgStep st = {TCG_ST_PICK, TCG_F_FIRE_ENERGY, TCG_SRC_MY_FIELD_ATTACHED, a->option, a->option,
                                  a->option == 1 ? "Discard which Fire Energy card?" : "Discard which Fire Energy cards?"};
+            out[n++] = st;
+        }
+        break;
+    case TCG_APICK_FIELD_ENERGY:
+        if (a->option)
+        {
+            struct TcgStep st = {TCG_ST_PICK, (uint8_t)(count == TCG_FIRE ? TCG_F_FIRE_ENERGY : TCG_F_ENERGY),
+                                 TCG_SRC_MY_FIELD_ATTACHED, a->option, a->option,
+                                 a->option == 1 ? "Discard which Energy card?" : "Discard which Energy cards?"};
             out[n++] = st;
         }
         break;

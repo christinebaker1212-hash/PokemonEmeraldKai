@@ -81,7 +81,8 @@ enum
     TCG_GUARD_UNDER_30,      /* Harden: 20 or less is prevented */
     TCG_GUARD_DOUBLE,        /* Double-Edged Pincers: damage to it is doubled */
     TCG_GUARD_BLINK,         /* Blink: a coin, heads prevents the damage */
-    TCG_GUARD_REDUCE_10_LATE /* Expand: 10 less after Weakness and Resistance */
+    TCG_GUARD_REDUCE_10_LATE, /* Expand: 10 less after Weakness and Resistance */
+    TCG_GUARD_30_OR_MORE      /* Pulse Guard: 30 or more (after Weakness and Resistance) is prevented */
 };
 enum
 {
@@ -442,7 +443,9 @@ enum
     TCG_APICK_SEARCH,         /* a card from the deck / discard pile: count 10+K a Supporter / TM or Tool / Trainer,
                                * 20+K a Baby or Basic (Baby) for the Bench, 30 a Baby or Basic in the discard pile
                                * for the Bench, 40 a Pokemon or basic Energy in the discard pile */
-    TCG_APICK_HAND_ENERGY     /* Energy from the hand: count up to (low byte), kind (TCG_F_ENERGY / BASIC / GRASS) */
+    TCG_APICK_HAND_ENERGY,    /* Energy from the hand: count up to (low byte), kind (TCG_F_ENERGY / BASIC / GRASS) */
+    TCG_APICK_FIELD_ENERGY    /* as Burning Fire: the option's number of Energy cards of type count (15 any) from any of
+                               * your Pokemon */
 };
 unsigned TcgDuel_AttackPick(const struct TcgAttack *attack, unsigned *count);
 /* (TCG_APICK_FAMILY / _EVOLUTION) Can this card be taken by the attacker's attack? */

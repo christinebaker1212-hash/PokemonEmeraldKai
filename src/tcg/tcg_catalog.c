@@ -5985,7 +5985,7 @@ const struct TcgCard gTcgCards[TCG_CARD_COUNT + 1] = {
 {.name="",.description="",.effect="NONE",.animation="ATK_ANIM_NONE",.cost={0},.damage=0,.category=TCG_DAMAGE_NORMAL},
 }
 },
-[950] = {.id=950, .name="Dark Typhlosion", .kind=TCG_POKEMON, .type=0, .rarity=2, .set=18, .set2=255, .dark=1, .holo=1, .flags=0, .origin=18,
+[950] = {.id=950, .name="Dark Typhlosion", .kind=TCG_POKEMON, .type=0, .rarity=2, .set=18, .set2=255, .dark=1, .holo=1, .flags=TCG_CF_READY, .origin=18,
 .hp=80, .stage=2, .species=157, .level=43, .retreat=1, .weakness=3, .resistance=255, .evolvesFrom="Dark Quilava", .description="When it's in combat, the air around it shimmers and warps from the intense heat it produces.", .attacks={
 {.name="Claw Swipe",.description="",.effect="NONE",.animation="ATK_ANIM_HIT",.cost={0,0,0,0,0,0,1,0,0},.damage=20,.category=TCG_DAMAGE_NORMAL},
 {.name="Rushing Flames",.description="You may discard any number of Fire Energy cards attached to your Pokemon. Flip a coin for each Fire Energy card discarded in this way. This attack does 40 damage times the number of heads.",.effect="neo4-10:a1",.animation="ATK_ANIM_HIT",.cost={1,0,0,0,0,0,0,0,0},.damage=40,.category=TCG_DAMAGE_X},
@@ -6044,7 +6044,7 @@ const struct TcgCard gTcgCards[TCG_CARD_COUNT + 1] = {
 {.name="",.description="",.effect="NONE",.animation="ATK_ANIM_NONE",.cost={0},.damage=0,.category=TCG_DAMAGE_NORMAL},
 }
 },
-[959] = {.id=959, .name="Dark Omastar", .kind=TCG_POKEMON, .type=3, .rarity=2, .set=18, .set2=255, .dark=1, .holo=0, .flags=0, .origin=18,
+[959] = {.id=959, .name="Dark Omastar", .kind=TCG_POKEMON, .type=3, .rarity=2, .set=18, .set2=255, .dark=1, .holo=0, .flags=TCG_CF_READY, .origin=18,
 .hp=70, .stage=2, .species=139, .level=33, .retreat=2, .weakness=1, .resistance=255, .evolvesFrom="Dark Omanyte", .description="Nothing can escape once wrapped in its tentacles, which it uses for self-defense as well as to catch food.", .attacks={
 {.name="Prehistoric Water",.description="If your opponent has any evolved Pokemon in play, choose 1 of them and flip a coin. If heads, your opponent takes the highest Stage Evolution card on that Pokemon and shuffles it into his or her deck.",.effect="neo4-19:a0",.animation="ATK_ANIM_HIT",.cost={0,0,0,1,0,0,0,0,0},.damage=0,.category=TCG_RESIDUAL},
 {.name="Dark Tentacle",.description="During your opponent's next turn, the Defending Pokemon can't evolve except from effects of attacks or Pokemon Powers. (Benching that Pokemon ends this effect.)",.effect="neo4-19:a1",.animation="ATK_ANIM_HIT",.cost={0,0,0,1,0,0,1,0,0},.damage=30,.category=TCG_DAMAGE_NORMAL},
@@ -6079,7 +6079,7 @@ const struct TcgCard gTcgCards[TCG_CARD_COUNT + 1] = {
 {.name="",.description="",.effect="NONE",.animation="ATK_ANIM_NONE",.cost={0},.damage=0,.category=TCG_DAMAGE_NORMAL},
 }
 },
-[964] = {.id=964, .name="Light Ledian", .kind=TCG_POKEMON, .type=1, .rarity=2, .set=18, .set2=255, .dark=0, .holo=0, .flags=TCG_CF_LIGHT, .origin=18,
+[964] = {.id=964, .name="Light Ledian", .kind=TCG_POKEMON, .type=1, .rarity=2, .set=18, .set2=255, .dark=0, .holo=0, .flags=TCG_CF_LIGHT|TCG_CF_READY, .origin=18,
 .hp=70, .stage=1, .species=166, .level=37, .retreat=0, .weakness=0, .resistance=4, .evolvesFrom="Ledyba", .description="The number of spots on its back increase or decrease depending on the number of stars visible in the night sky.", .attacks={
 {.name="Flash Touch",.description="If you have any Benched Pokemon, switch 1 of them with Light Ledian. As long as that Pokemon is your Active Pokemon, it can't become Asleep, Confused, Paralyzed, or Poisoned. (All other effects of attacks, Pokemon Powers, and Trainer cards still happen.)",.effect="neo4-24:a0",.animation="ATK_ANIM_HIT",.cost={0,1,0,0,0,0,0,0,0},.damage=0,.category=TCG_RESIDUAL},
 {.name="Comet Punch",.description="Flip 4 coins. This attack does 20 damage times the number of heads.",.effect="neo4-24:a1",.animation="ATK_ANIM_HIT",.cost={0,1,0,0,0,0,2,0,0},.damage=20,.category=TCG_DAMAGE_X},
@@ -6163,7 +6163,7 @@ const struct TcgCard gTcgCards[TCG_CARD_COUNT + 1] = {
 {.name="",.description="",.effect="NONE",.animation="ATK_ANIM_NONE",.cost={0},.damage=0,.category=TCG_DAMAGE_NORMAL},
 }
 },
-[976] = {.id=976, .name="Dark Haunter", .kind=TCG_POKEMON, .type=5, .rarity=1, .set=18, .set2=255, .dark=1, .holo=0, .flags=0, .origin=18,
+[976] = {.id=976, .name="Dark Haunter", .kind=TCG_POKEMON, .type=5, .rarity=1, .set=18, .set2=255, .dark=1, .holo=0, .flags=TCG_CF_READY, .origin=18,
 .hp=50, .stage=1, .species=93, .level=18, .retreat=0, .weakness=255, .resistance=4, .evolvesFrom="Gastly", .description="It silently hunts its prey in dark rooms.", .attacks={
 {.name="Call Back",.description="Put a Baby Pokemon or Basic Pokemon card from your opponent's discard pile onto his or her Bench. Put 1 damage counter on that Pokemon. (You can't use this attack if your Bench is full.)",.effect="neo4-36:a0",.animation="ATK_ANIM_HIT",.cost={0,0,0,0,0,1,0,0,0},.damage=0,.category=TCG_RESIDUAL},
 {.name="Surround",.description="Flip a coin. If heads, the Defending Pokemon is now Asleep. If tails, the Defending Pokemon can't retreat during your opponent's next turn.",.effect="neo4-36:a1",.animation="ATK_ANIM_HIT",.cost={0,0,0,0,0,2,0,0,0},.damage=20,.category=TCG_DAMAGE_NORMAL},
@@ -6177,7 +6177,7 @@ const struct TcgCard gTcgCards[TCG_CARD_COUNT + 1] = {
 {.name="",.description="",.effect="NONE",.animation="ATK_ANIM_NONE",.cost={0},.damage=0,.category=TCG_DAMAGE_NORMAL},
 }
 },
-[978] = {.id=978, .name="Dark Pupitar", .kind=TCG_POKEMON, .type=4, .rarity=1, .set=18, .set2=255, .dark=1, .holo=0, .flags=0, .origin=18,
+[978] = {.id=978, .name="Dark Pupitar", .kind=TCG_POKEMON, .type=4, .rarity=1, .set=18, .set2=255, .dark=1, .holo=0, .flags=TCG_CF_READY, .origin=18,
 .hp=60, .stage=1, .species=247, .level=26, .retreat=1, .weakness=1, .resistance=2, .evolvesFrom="Larvitar", .description="It is encased within a hard shell, yet retains a great deal of mobility-a dangerous combination.", .attacks={
 {.name="Rock Tackle",.description="Dark Pupitar does 10 damage to itself. Dark Pupitar can't use this attack during your next turn.",.effect="neo4-38:a0",.animation="ATK_ANIM_HIT",.cost={0,0,0,0,2,0,0,0,0},.damage=40,.category=TCG_DAMAGE_NORMAL},
 {.name="Explosive Evolution",.description="Flip a coin. If heads, this attack does 10 damage to each of your opponent's Pokemon. Don't apply Weakness and Resistance. Then, search your deck for an Evolution card named Dark Tyranitar and put it on Dark Pupitar. (This counts as evolving Dark Pupitar.) Shuffle your deck afterward.",.effect="neo4-38:a1",.animation="ATK_ANIM_HIT",.cost={0,0,0,0,0,0,3,0,0},.damage=0,.category=TCG_RESIDUAL},
@@ -6247,7 +6247,7 @@ const struct TcgCard gTcgCards[TCG_CARD_COUNT + 1] = {
 {.name="",.description="",.effect="NONE",.animation="ATK_ANIM_NONE",.cost={0},.damage=0,.category=TCG_DAMAGE_NORMAL},
 }
 },
-[988] = {.id=988, .name="Light Jolteon", .kind=TCG_POKEMON, .type=2, .rarity=1, .set=18, .set2=255, .dark=0, .holo=0, .flags=TCG_CF_LIGHT, .origin=18,
+[988] = {.id=988, .name="Light Jolteon", .kind=TCG_POKEMON, .type=2, .rarity=1, .set=18, .set2=255, .dark=0, .holo=0, .flags=TCG_CF_LIGHT|TCG_CF_READY, .origin=18,
 .hp=70, .stage=1, .species=135, .level=31, .retreat=0, .weakness=4, .resistance=255, .evolvesFrom="Eevee", .description="It can collect the ambient electrical energy in its cells and expel it in massive bursts.", .attacks={
 {.name="Pulse Guard",.description="During your opponent's next turn, whenever 30 or more damage is done to Light Jolteon (after applying Weakness and Resistance), prevent that damage. (Any other effects of attacks still happen.)",.effect="neo4-48:a0",.animation="ATK_ANIM_HIT",.cost={0,0,1,0,0,0,0,0,0},.damage=0,.category=TCG_RESIDUAL},
 {.name="Thunder Needle",.description="Flip 3 coins. This attack does 20 damage times the number of heads. If you get 2 or more heads, the Defending Pokemon is now Paralyzed.",.effect="neo4-48:a1",.animation="ATK_ANIM_HIT",.cost={0,0,2,0,0,0,1,0,0},.damage=20,.category=TCG_DAMAGE_X},
@@ -7756,7 +7756,7 @@ const struct TcgCard gTcgCards[TCG_CARD_COUNT + 1] = {
 {.name="",.description="",.effect="NONE",.animation="ATK_ANIM_NONE",.cost={0},.damage=0,.category=TCG_DAMAGE_NORMAL},
 }
 },
-[1224] = {.id=1224, .name="Exeggutor", .kind=TCG_POKEMON, .type=1, .rarity=2, .set=20, .set2=255, .dark=0, .holo=0, .flags=0, .origin=20,
+[1224] = {.id=1224, .name="Exeggutor", .kind=TCG_POKEMON, .type=1, .rarity=2, .set=20, .set2=255, .dark=0, .holo=0, .flags=TCG_CF_READY, .origin=20,
 .hp=80, .stage=1, .species=103, .level=0, .retreat=1, .weakness=0, .resistance=255, .evolvesFrom="Exeggcute", .description="", .attacks={
 {.name="Super Eggsplosion",.description="Discard any number of Energy cards attached to any of your Pokemon. Flip a number of coins equal to the number of Energy cards discarded this way. This attack does 40 damage times the number of heads.",.effect="ecard2-12:a0",.animation="ATK_ANIM_HIT",.cost={0,0,0,0,0,0,1,0,0},.damage=40,.category=TCG_DAMAGE_X},
 {.name="Called Shot",.description="Choose 1 of your opponent's Benched Pokemon. This attack does 10 damage times the amount of Grass Energy attached to Exeggutor. (Don't apply Weakness or Resistance for Benched Pokemon.)",.effect="ecard2-12:a1",.animation="ATK_ANIM_HIT",.cost={0,1,0,0,0,0,0,0,0},.damage=0,.category=TCG_RESIDUAL},
@@ -8712,7 +8712,7 @@ const struct TcgCard gTcgCards[TCG_CARD_COUNT + 1] = {
 {.name="",.description="",.effect="NONE",.animation="ATK_ANIM_NONE",.cost={0},.damage=0,.category=TCG_DAMAGE_NORMAL},
 }
 },
-[1372] = {.id=1372, .name="Exeggutor", .kind=TCG_POKEMON, .type=1, .rarity=2, .set=20, .set2=255, .dark=0, .holo=1, .flags=0, .origin=20,
+[1372] = {.id=1372, .name="Exeggutor", .kind=TCG_POKEMON, .type=1, .rarity=2, .set=20, .set2=255, .dark=0, .holo=1, .flags=TCG_CF_READY, .origin=20,
 .hp=80, .stage=1, .species=103, .level=0, .retreat=1, .weakness=0, .resistance=255, .evolvesFrom="Exeggcute", .description="", .attacks={
 {.name="Super Eggsplosion",.description="Discard any number of Energy cards attached to any of your Pokemon. Flip a number of coins equal to the number of Energy cards discarded this way. This attack does 40 damage times the number of heads.",.effect="ecard2-H10:a0",.animation="ATK_ANIM_HIT",.cost={0,0,0,0,0,0,1,0,0},.damage=40,.category=TCG_DAMAGE_X},
 {.name="Called Shot",.description="Choose 1 of your opponent's Benched Pokemon. This attack does 10 damage times the amount of Grass Energy attached to Exeggutor. (Don't apply Weakness or Resistance for Benched Pokemon.)",.effect="ecard2-H10:a1",.animation="ATK_ANIM_HIT",.cost={0,1,0,0,0,0,0,0,0},.damage=0,.category=TCG_RESIDUAL},
@@ -9006,7 +9006,7 @@ const struct TcgCard gTcgCards[TCG_CARD_COUNT + 1] = {
 {.name="",.description="",.effect="NONE",.animation="ATK_ANIM_NONE",.cost={0},.damage=0,.category=TCG_DAMAGE_NORMAL},
 }
 },
-[1414] = {.id=1414, .name="Magneton", .kind=TCG_POKEMON, .type=8, .rarity=2, .set=21, .set2=255, .dark=0, .holo=0, .flags=0, .origin=21,
+[1414] = {.id=1414, .name="Magneton", .kind=TCG_POKEMON, .type=8, .rarity=2, .set=21, .set2=255, .dark=0, .holo=0, .flags=TCG_CF_READY, .origin=21,
 .hp=70, .stage=1, .species=82, .level=0, .retreat=2, .weakness=0, .resistance=1, .evolvesFrom="Magnemite", .description="", .attacks={
 {.name="Bounce Off",.description="If Magneton and the Defending Pokemon don't have the same number of Energy cards attached to them, the player controlling the Active Pokemon with the fewest number of Energy cards attached to it switches 1 of his or her Benched Pokemon with his or her Active Pokemon.",.effect="ecard3-20:a0",.animation="ATK_ANIM_HIT",.cost={0,0,0,0,0,0,2,0,0},.damage=20,.category=TCG_DAMAGE_NORMAL},
 {.name="Magnetic Wave",.description="This attack does 30 damage plus 10 damage times the number of your Benched Pokemon minus the number of your opponent's Benched Pokemon. (For example, if your opponent has 1 Benched Pokemon and you have 3, this attack will do 30 damage plus 20 more damage.)",.effect="ecard3-20:a1",.animation="ATK_ANIM_HIT",.cost={0,0,0,0,0,0,1,0,2},.damage=30,.category=TCG_DAMAGE_PLUS},
@@ -9398,7 +9398,7 @@ const struct TcgCard gTcgCards[TCG_CARD_COUNT + 1] = {
 {.name="",.description="",.effect="NONE",.animation="ATK_ANIM_NONE",.cost={0},.damage=0,.category=TCG_DAMAGE_NORMAL},
 }
 },
-[1470] = {.id=1470, .name="Magnemite", .kind=TCG_POKEMON, .type=2, .rarity=0, .set=21, .set2=255, .dark=0, .holo=0, .flags=0, .origin=21,
+[1470] = {.id=1470, .name="Magnemite", .kind=TCG_POKEMON, .type=2, .rarity=0, .set=21, .set2=255, .dark=0, .holo=0, .flags=TCG_CF_READY, .origin=21,
 .hp=40, .stage=0, .species=81, .level=0, .retreat=1, .weakness=4, .resistance=255, .evolvesFrom="", .description="", .attacks={
 {.name="Thunder Wave",.description="Flip a coin. If heads, the Defending Pokemon is now Paralyzed.",.effect="ecard3-76:a0",.animation="ATK_ANIM_HIT",.cost={0,0,0,0,0,0,1,0,0},.damage=0,.category=TCG_RESIDUAL},
 {.name="Magnetic Lines",.description="If the Defending Pokemon has any basic Energy cards attached to it, flip a coin. If heads, choose 1 of those Energy cards and move it to 1 of your opponent's Benched Pokemon. If your opponent has no Benched Pokemon, ignore this effect.",.effect="ecard3-76:a1",.animation="ATK_ANIM_HIT",.cost={0,0,1,0,0,0,0,0,0},.damage=10,.category=TCG_DAMAGE_NORMAL},
@@ -9433,7 +9433,7 @@ const struct TcgCard gTcgCards[TCG_CARD_COUNT + 1] = {
 {.name="",.description="",.effect="NONE",.animation="ATK_ANIM_NONE",.cost={0},.damage=0,.category=TCG_DAMAGE_NORMAL},
 }
 },
-[1475] = {.id=1475, .name="Nidoran F", .kind=TCG_POKEMON, .type=1, .rarity=0, .set=21, .set2=255, .dark=0, .holo=0, .flags=0, .origin=21,
+[1475] = {.id=1475, .name="Nidoran F", .kind=TCG_POKEMON, .type=1, .rarity=0, .set=21, .set2=255, .dark=0, .holo=0, .flags=TCG_CF_READY, .origin=21,
 .hp=50, .stage=0, .species=29, .level=0, .retreat=1, .weakness=5, .resistance=255, .evolvesFrom="", .description="", .attacks={
 {.name="Call for Family",.description="Search your deck for a Basic Pokemon card named Nidoran F or Nidoran M and put it onto your Bench. Shuffle your deck afterward. (You can't use this attack if your Bench is full.)",.effect="ecard3-81:a0",.animation="ATK_ANIM_HIT",.cost={0,0,0,0,0,0,1,0,0},.damage=0,.category=TCG_RESIDUAL},
 {.name="Scratch",.description="",.effect="NONE",.animation="ATK_ANIM_HIT",.cost={0,1,0,0,0,0,0,0,0},.damage=10,.category=TCG_DAMAGE_NORMAL},
@@ -9980,7 +9980,7 @@ const struct TcgCard gTcgCards[TCG_CARD_COUNT + 1] = {
 {.name="",.description="",.effect="NONE",.animation="ATK_ANIM_NONE",.cost={0},.damage=0,.category=TCG_DAMAGE_NORMAL},
 }
 },
-[1563] = {.id=1563, .name="Magneton", .kind=TCG_POKEMON, .type=8, .rarity=2, .set=21, .set2=255, .dark=0, .holo=1, .flags=0, .origin=21,
+[1563] = {.id=1563, .name="Magneton", .kind=TCG_POKEMON, .type=8, .rarity=2, .set=21, .set2=255, .dark=0, .holo=1, .flags=TCG_CF_READY, .origin=21,
 .hp=70, .stage=1, .species=82, .level=0, .retreat=2, .weakness=0, .resistance=1, .evolvesFrom="Magnemite", .description="", .attacks={
 {.name="Bounce Off",.description="If Magneton and the Defending Pokemon don't have the same number of Energy cards attached to them, the player controlling the Active Pokemon with the fewest number of Energy cards attached to it switches 1 of his or her Benched Pokemon with his or her Active Pokemon.",.effect="ecard3-H19:a0",.animation="ATK_ANIM_HIT",.cost={0,0,0,0,0,0,2,0,0},.damage=20,.category=TCG_DAMAGE_NORMAL},
 {.name="Magnetic Wave",.description="This attack does 30 damage plus 10 damage times the number of your Benched Pokemon minus the number of your opponent's Benched Pokemon. (For example, if your opponent has 1 Benched Pokemon and you have 3, this attack will do 30 damage plus 20 more damage.)",.effect="ecard3-H19:a1",.animation="ATK_ANIM_HIT",.cost={0,0,0,0,0,0,1,0,2},.damage=30,.category=TCG_DAMAGE_PLUS},
@@ -10127,14 +10127,14 @@ const struct TcgCard gTcgCards[TCG_CARD_COUNT + 1] = {
 {.name="",.description="",.effect="NONE",.animation="ATK_ANIM_NONE",.cost={0},.damage=0,.category=TCG_DAMAGE_NORMAL},
 }
 },
-[1584] = {.id=1584, .name="Mew", .kind=TCG_POKEMON, .type=5, .rarity=3, .set=4, .set2=255, .dark=0, .holo=0, .flags=0, .origin=22,
+[1584] = {.id=1584, .name="Mew", .kind=TCG_POKEMON, .type=5, .rarity=3, .set=4, .set2=255, .dark=0, .holo=0, .flags=TCG_CF_READY, .origin=22,
 .hp=50, .stage=0, .species=151, .level=23, .retreat=1, .weakness=5, .resistance=255, .evolvesFrom="", .description="So rare that it is still said to be a mirage by many experts. Only a few people have seen it worldwide.", .attacks={
 {.name="Psywave",.description="Does 10 damage times the number of Energy cards attached to the Defending Pokemon.",.effect="basep-8:a0",.animation="ATK_ANIM_HIT",.cost={0,0,0,0,0,1,0,0,0},.damage=10,.category=TCG_DAMAGE_X},
 {.name="Devolution Beam",.description="Choose an evolved Pokemon (your own or your opponent's). Return the highest Stage Evolution card on that Pokemon to its player's hand. That Pokemon is no longer Asleep, Confused, Paralyzed, or Poisoned, or anything else that might be the result of an attack (just as if you had evolved it).",.effect="basep-8:a1",.animation="ATK_ANIM_HIT",.cost={0,0,0,0,0,2,0,0,0},.damage=0,.category=TCG_RESIDUAL},
 {.name="",.description="",.effect="NONE",.animation="ATK_ANIM_NONE",.cost={0},.damage=0,.category=TCG_DAMAGE_NORMAL},
 }
 },
-[1585] = {.id=1585, .name="Mew", .kind=TCG_POKEMON, .type=5, .rarity=3, .set=4, .set2=255, .dark=0, .holo=0, .flags=0, .origin=22,
+[1585] = {.id=1585, .name="Mew", .kind=TCG_POKEMON, .type=5, .rarity=3, .set=4, .set2=255, .dark=0, .holo=0, .flags=TCG_CF_READY, .origin=22,
 .hp=50, .stage=0, .species=151, .level=51, .retreat=1, .weakness=5, .resistance=255, .evolvesFrom="", .description="So rare that it is still said to be a mirage by many experts. Only a few people have seen it worldwide.", .attacks={
 {.name="Psywave",.description="Does 10 damage times the number of Energy cards attached to the Defending Pokemon.",.effect="basep-9:a0",.animation="ATK_ANIM_HIT",.cost={0,0,0,0,0,1,0,0,0},.damage=10,.category=TCG_DAMAGE_X},
 {.name="Devolution Beam",.description="Choose an evolved Pokemon (your own or your opponent's). Return the highest Stage Evolution card on that Pokemon to its player's hand. That Pokemon is no longer Asleep, Confused, Paralyzed, or Poisoned, or anything else that might be the result of an attack (just as if you had evolved it).",.effect="basep-9:a1",.animation="ATK_ANIM_HIT",.cost={0,0,0,0,0,2,0,0,0},.damage=0,.category=TCG_RESIDUAL},
@@ -10214,7 +10214,7 @@ const struct TcgCard gTcgCards[TCG_CARD_COUNT + 1] = {
 {.name="",.description="",.effect="NONE",.animation="ATK_ANIM_NONE",.cost={0},.damage=0,.category=TCG_DAMAGE_NORMAL},
 }
 },
-[1597] = {.id=1597, .name="Moltres", .kind=TCG_POKEMON, .type=0, .rarity=3, .set=4, .set2=255, .dark=0, .holo=0, .flags=0, .origin=22,
+[1597] = {.id=1597, .name="Moltres", .kind=TCG_POKEMON, .type=0, .rarity=3, .set=4, .set2=255, .dark=0, .holo=0, .flags=TCG_CF_READY, .origin=22,
 .hp=70, .stage=0, .species=146, .level=33, .retreat=1, .weakness=255, .resistance=4, .evolvesFrom="", .description="The flames on this legendary Pokemon's wings burn so brightly that they can make night seem like day.", .attacks={
 {.name="Hyper Flame",.description="Flip a coin. If heads, discard 1 Fire Energy card attached to Moltres. If tails, discard all Energy cards attached to Moltres. If you can't discard Energy cards, this attack does nothing.",.effect="basep-21:a0",.animation="ATK_ANIM_HIT",.cost={3,0,0,0,0,0,0,0,0},.damage=60,.category=TCG_DAMAGE_NORMAL},
 {.name="",.description="",.effect="NONE",.animation="ATK_ANIM_NONE",.cost={0},.damage=0,.category=TCG_DAMAGE_NORMAL},
@@ -10235,7 +10235,7 @@ const struct TcgCard gTcgCards[TCG_CARD_COUNT + 1] = {
 {.name="",.description="",.effect="NONE",.animation="ATK_ANIM_NONE",.cost={0},.damage=0,.category=TCG_DAMAGE_NORMAL},
 }
 },
-[1600] = {.id=1600, .name="_____'s Pikachu", .kind=TCG_POKEMON, .type=2, .rarity=3, .set=4, .set2=255, .dark=0, .holo=0, .flags=TCG_CF_OWNER, .origin=22,
+[1600] = {.id=1600, .name="_____'s Pikachu", .kind=TCG_POKEMON, .type=2, .rarity=3, .set=4, .set2=255, .dark=0, .holo=0, .flags=TCG_CF_OWNER|TCG_CF_READY, .origin=22,
 .hp=50, .stage=0, .species=25, .level=17, .retreat=1, .weakness=4, .resistance=255, .evolvesFrom="", .description="Your Birthdate: ______________________________", .attacks={
 {.name="Birthday Surprise",.description="If it's not your birthday, this attack does 30 damage. If it is your birthday, flip a coin. If heads, this attack does 30 damage plus 50 more damage; if tails, this attack does 30 damage.",.effect="basep-24:a0",.animation="ATK_ANIM_HIT",.cost={0,0,2,0,0,0,0,0,0},.damage=30,.category=TCG_DAMAGE_PLUS},
 {.name="",.description="",.effect="NONE",.animation="ATK_ANIM_NONE",.cost={0},.damage=0,.category=TCG_DAMAGE_NORMAL},
@@ -10363,7 +10363,7 @@ const struct TcgCard gTcgCards[TCG_CARD_COUNT + 1] = {
 {.name="",.description="",.effect="NONE",.animation="ATK_ANIM_NONE",.cost={0},.damage=0,.category=TCG_DAMAGE_NORMAL},
 }
 },
-[1620] = {.id=1620, .name="Magmar", .kind=TCG_POKEMON, .type=0, .rarity=3, .set=4, .set2=255, .dark=0, .holo=0, .flags=0, .origin=22,
+[1620] = {.id=1620, .name="Magmar", .kind=TCG_POKEMON, .type=0, .rarity=3, .set=4, .set2=255, .dark=0, .holo=0, .flags=TCG_CF_READY, .origin=22,
 .hp=60, .stage=0, .species=126, .level=27, .retreat=2, .weakness=3, .resistance=255, .evolvesFrom="", .description="Its body always burns with an orange glow that enables it to hide perfectly among flames.", .attacks={
 {.name="Burning Fire",.description="When you use this attack, you may discard any number of Fire Energy cards attached to your Pokemon in play. This attack does 10 damage plus 10 more damage for each Fire Energy card you discarded in this way.",.effect="basep-44:a0",.animation="ATK_ANIM_HIT",.cost={1,0,0,0,0,0,0,0,0},.damage=10,.category=TCG_DAMAGE_PLUS},
 {.name="Magma Punch",.description="",.effect="NONE",.animation="ATK_ANIM_HIT",.cost={2,0,0,0,0,0,1,0,0},.damage=40,.category=TCG_DAMAGE_NORMAL},
@@ -10594,7 +10594,7 @@ const struct TcgCard gTcgCards[TCG_CARD_COUNT + 1] = {
 {.name="",.description="",.effect="NONE",.animation="ATK_ANIM_NONE",.cost={0},.damage=0,.category=TCG_DAMAGE_NORMAL},
 }
 },
-[1653] = {.id=1653, .name="Chimecho", .kind=TCG_POKEMON, .type=5, .rarity=3, .set=4, .set2=255, .dark=0, .holo=0, .flags=0, .origin=23,
+[1653] = {.id=1653, .name="Chimecho", .kind=TCG_POKEMON, .type=5, .rarity=3, .set=4, .set2=255, .dark=0, .holo=0, .flags=TCG_CF_READY, .origin=23,
 .hp=70, .stage=0, .species=358, .level=0, .retreat=1, .weakness=5, .resistance=255, .evolvesFrom="", .description="", .attacks={
 {.name="Resonate",.description="Your opponent switches each Defending Pokemon with his or her Benched Pokemon. If your opponent has only 1 Benched Pokemon, you choose the Defending Pokemon to switch.",.effect="np-24:a0",.animation="ATK_ANIM_HIT",.cost={0,0,0,0,0,0,1,0,0},.damage=0,.category=TCG_RESIDUAL},
 {.name="Healing Sound",.description="Remove 3 damage counters from each of your Active Pokemon. Each Defending Pokemon is now Asleep.",.effect="np-24:a1",.animation="ATK_ANIM_HIT",.cost={0,0,0,0,0,0,2,0,0},.damage=0,.category=TCG_RESIDUAL},

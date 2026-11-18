@@ -431,6 +431,7 @@ static void ClearCondition(struct TcgFieldCard *f)
     f->lockTurn = f->lockAttack = f->mirrorShell = f->charge3 = f->fossilBoost = 0;
     f->stuck = f->stuckBy = f->blindAll = f->noAttackAll = 0;
     f->noEvolveUntil = 0;
+    f->condImmune = 0;
 }
 /* What the opponent's last attack did to it (Mirror Move) */
 static void ClearMirror(struct TcgFieldCard *f)
@@ -998,6 +999,11 @@ static int Apply(struct TcgDuel *g, const struct TcgAction *a)
             }
             else if (foe->guard == TCG_GUARD_REDUCE_10_LATE)
                 total -= 10;
+            else if (foe->guard == TCG_GUARD_30_OR_MORE && total >= 30)
+            {
+                TcgDuel_Event(g, TCG_EV_NO_DAMAGE, g->current ^ 1, 0, 0, 0, 0);
+                total = 0;
+            }
             /* (Growl and the like: only against the Pokemon that used it) */
             if (f->weaken == TCG_WEAKEN_10 && TcgDuel_BoundEffect(g, g->current, 0))
                 total -= 10;
