@@ -199,7 +199,24 @@ enum
     TCG_CHOICE_TEXTURE_WEAK,     /* Texture Magic: the Defending Pokemon's Weakness's new type (9 as it is) */
     TCG_CHOICE_PURE_BODY,        /* Pure Body: which Energy card of the Pokemon in slot choiceData is discarded */
     TCG_CHOICE_CHAIN_REACTION,   /* Chain Reaction: a card from the deck that evolves from the Eevee in slot choiceData */
-    TCG_CHOICE_ARENA             /* Championship Arena: the cards discarded down to 7 in the hand */
+    TCG_CHOICE_ARENA,            /* Championship Arena: the cards discarded down to 7 in the hand */
+    TCG_CHOICE_CHAOS_FROM_SIDE,  /* Chaos Move: whose Pokemon a damage counter comes off (0 yours, 1 theirs)... */
+    TCG_CHOICE_CHAOS_FROM_MINE,  /* ...which (choiceData: side << 3 | slot)... */
+    TCG_CHOICE_CHAOS_FROM_THEIRS,
+    TCG_CHOICE_CHAOS_TO_SIDE,    /* ...whose it goes on... */
+    TCG_CHOICE_CHAOS_TO_MINE,    /* ...and which */
+    TCG_CHOICE_CHAOS_TO_THEIRS,
+    TCG_CHOICE_FLOW_A,           /* Magnetic Flow: one of theirs with Energy and an Energy card of it (choiceData)... */
+    TCG_CHOICE_FLOW_B,           /* ...another of theirs and one of its: the two switched */
+    TCG_CHOICE_INVIGORATE_SIDE,  /* Invigorate: whose discard pile (0 yours, 1 theirs)... */
+    TCG_CHOICE_INVIGORATE_MINE,  /* ...the Basic Pokemon picked onto that Bench, half its HP in damage counters */
+    TCG_CHOICE_INVIGORATE_THEIRS,
+    TCG_CHOICE_WISH_ASK,         /* Misty's Wish, the other player: YES lets the Prize (choiceData) be switched... */
+    TCG_CHOICE_WISH_SWAP,        /* ...with the hand card picked */
+    TCG_CHOICE_EEVEE_EVOLVE,     /* Energy Evolution: an Eevee evolution of the Energy's type (choiceData: type << 4 | slot) */
+    TCG_CHOICE_SPORE,            /* Evolutionary Spore: a Hoppip or Skiploom and its evolution (choiceData: slots done) */
+    TCG_CHOICE_RETURN_MON,       /* Fairy Power: one of yours (with its cards) into the hand; DONE ends it */
+    TCG_CHOICE_DISCARD2          /* No Removal Gym: 2 cards from the hand discarded */
 };
 /* Pokemon Powers (src/tcg/tcg_powers.c), by the card's power. */
 enum TcgPowerId
@@ -326,6 +343,9 @@ struct TcgPlayer
     uint16_t attachmentExpires[TCG_DECK_SIZE];
     /* Energy Converter: this turn the basic Energy card convCard - 1 (attached) is of type convType */
     uint8_t convCard, convType;
+    /* Tickling Machine: this player's hand set aside face down until the end of their turn asideUntil */
+    uint8_t aside[TCG_DECK_SIZE], asideSize;
+    uint16_t asideUntil;
 };
 /* Presentation events: what happened, in order, so the duel screen can show
  * it (coin flips, damage, Knock Outs...). They never carry a hidden card id:

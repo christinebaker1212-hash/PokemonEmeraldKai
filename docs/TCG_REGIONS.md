@@ -81,7 +81,7 @@ Total 1,158 set cards (about 1,100 attacks with effect text, 250 Pokémon Powers
    (`mp cards mock 2`, tcg_board.c MockUnder / MockOver over a staged duel): the Stadium a plate on the centre line,
    the turn's Supporter face up beside its player's Active, Tools tucked under their Pokemon, a BRN badge, Darkness /
    Metal orbs. **Approved and built** (2026-11-18: docs/tcg_regions/board_table.png from a staged duel).
-   **Status (2026-11-18): 1,182 of 1,227 finished.** Where each part lives:
+   **Status (2026-11-18): 1,194 of 1,227 finished.** Where each part lives:
    - Attacks: tools/tcg/regions/families.py (regex families + EXACT, one script per wording; ops in
      src/tcg/tcg_script.inc, listed at its top and in each op's comment).
    - Trainers: src/tcg/tcg_rtrainers.inc (rules), tcg_rtrainers_flow.inc (steps, playability, menus),
@@ -109,6 +109,12 @@ Total 1,158 set cards (about 1,100 attacks with effect text, 250 Pokémon Powers
      TCG_BUFF_ION, Energy Converter's TcgPlayer.convCard / convType, Miraculous Wind: TcgPower_WindBlows, also in
      TcgDuel_AttachedRule and the cost check); Miracle Energy counts as 2 of any type, only on Shining or Light
      Pokemon, discarded as the turn ends.
+   - Choices between the two players' sides (Chaos Move, Invigorate): a YOURS / THEIRS menu first, then the slot or pick
+     on that side; Misty's Wish asks the other player, then its own player; Fairy Power a menu of your Pokemon and DONE.
+     Pure Body (every printing: Suicune, Entei, Raikou) is the player's pick of the Energy discarded. Mind Games (a
+     Trainer the rules accept, then a coin: tcg_duel.c, TCG_PLAY_TRAINER); Tickling Machine sets the hand aside
+     (TcgPlayer.aside, back as their next turn ends; counted by TcgDuel_Conserved); No Removal Gym's 2 cards a choice
+     after the Energy Removal plays.
    - Looks ([Observe], [Search], [Tell], Investigate, Cunning): TCG_EV_PEEK events naming the cards (flags: the
      card's place from the top of a deck), shown only to the player looking (script ops peek / showhand). Markers that
      stay while a Pokemon is in play: TcgFieldCard.markers (TCG_MARK_ROD Lightning Rod, TCG_MARK_CHAR Char counters:

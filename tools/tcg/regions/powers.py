@@ -104,6 +104,10 @@ P('R_ION_COATING', 'Ion Coating', 'All Lightning Energy attached to your Active 
   'ONCE', 'ion')
 P('R_ENERGY_CONVERTER', 'Energy Converter', 'Treat that Energy card as that type until the end of your turn', 'USED',
   'ONCE', 'conv')
+P('R_CHAOS_MOVE', 'Chaos Move', "move 1 damage counter from 1 Pokemon (yours or your opponent's)", 'USED', 'ONCE',
+  'askch:33,1')
+P('R_MAGNETIC_FLOW', 'Magnetic Flow', 'Choose 1 of the Energy cards attached to each of those Pokemon and switch them',
+  'USED', 'ONCE ACTIVE', 'c h.askch:39,1')
 P('R_SCAVENGER_HUNT', 'Scavenger Hunt', 'put 2 cards from your hand into your deck', 'USED', 'ONCE', 'scav')
 P('R_SPATIAL_DISTORTION', 'Spatial Distortion', 'choose a Stadium card from your discard pile and put it into play',
   'USED', 'ONCE', 'c h.stadis')
@@ -135,6 +139,8 @@ P('R_HEAVYWEIGHT', 'Heavyweight', 'Grass Energy attached', 'PASSIVE')
 P('R_ANTI_LIGHTNING', 'Anti-Lightning', "can't attach Lightning", 'PASSIVE')
 P('R_WATER_IMMUNITY', 'Water Immunity', "can't attach Water", 'PASSIVE')
 P('R_FIRE_IMMUNITY', 'Fire Immunity', "can't attach Fire", 'PASSIVE')
+P('R_MIND_GAMES', 'Mind Games', 'Whenever your opponent plays a Trainer card, you may flip a coin', 'PASSIVE')
+P('R_ENERGY_EVOLUTION', 'Energy Evolution', 'that is the same type as the Energy card you attached', 'PASSIVE')
 P('R_PURE_BODY_WATER', 'Pure Body', 'To attach a Water Energy', 'PASSIVE')
 P('R_PURE_BODY_FIRE', 'Pure Body', 'To attach a Fire Energy', 'PASSIVE')
 P('R_PURE_BODY_LIGHTNING', 'Pure Body', 'To attach a Lightning Energy', 'PASSIVE')
@@ -222,7 +228,7 @@ P('R_FLAME_VAPOR', 'Flame Vapor', 'discard an Energy card attached to the Defend
 # (played from the hand: tcg_rpowers.inc RegionOnPlay)
 P('R_FIRE_BOOST', 'Fire Boost', 'search your deck for up to 4 Fire Energy cards', 'PASSIVE')
 P('R_MIRACULOUS_WIND', 'Miraculous Wind', 'each Special Energy card provides Colorless Energy instead', 'PASSIVE')
-P('R_PURE_BODY_WATER', 'Pure Body', 'Whenever you attach a Water Energy card from your hand to', 'PASSIVE')
+P('R_PURE_BODY_WATER', 'Pure Body', 'Whenever you attach a Water Energy card from your hand to', 'PASSIVE')  # (np-30)
 P('R_CHAIN_REACTION', 'Chain Reaction', 'This power can only be used when a Pokemon evolves', 'PASSIVE')
 P('R_HYDROELECTRIC', 'Hydroelectric Power', 'You may make Floodlight do 10 more damage', 'PASSIVE')
 P('R_CALL_THE_BOSS', 'Call the Boss', 'the Trainer card named Giovanni', 'PASSIVE')

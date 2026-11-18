@@ -982,6 +982,25 @@ static int RegionTrainer(struct TcgDuel *g, const struct TcgAction *a, unsigned 
             TcgDuel_Shuffle(g, me);
         break;
     }
+    case TCG_CARD_GYM2_108: /* Misty's Wish: one of your Prizes looked at; they're asked (tcg_choice.inc) */
+        if (!p->prizeSize)
+            return Fail(g, "You have no Prizes left.");
+        g->choiceData = p->prizes[Tcg_RandomBelow(&g->rng, p->prizeSize)];
+        TcgDuel_Event(g, TCG_EV_PEEK, me, 0, TCG_PEEK_MY_PRIZE, p->cards[g->choiceData], 0);
+        TcgDuel_AskChoice(g, me ^ 1, TCG_CHOICE_WISH_ASK, id, 0);
+        break;
+    case TCG_CARD_GYM1_119: /* Tickling Machine: heads, their hand set aside until the end of their next turn; tails,
+                             * your turn ends */
+        if (TcgDuel_Coin(g, me))
+        {
+            while (op->handSize)
+                op->aside[op->asideSize++] = op->hand[--op->handSize];
+            op->asideUntil = (uint16_t)(g->turn + 1);
+            TcgDuel_Event(g, TCG_EV_DECK_CHANGED, me ^ 1, 0, 0, 0, 0);
+        }
+        else
+            g->turnOver = 1;
+        break;
     case TCG_CARD_NEO1_92: /* Card-Flip Game: one of their face-down Prizes guessed at (tcg_choice.inc) */
         if (!op->prizeSize)
             return Fail(g, "They have no Prizes left.");
@@ -1017,6 +1036,7 @@ static int RegionTrainer(struct TcgDuel *g, const struct TcgAction *a, unsigned 
     case TCG_CARD_ECARD2_131: /* Pokemon Park */
     case TCG_CARD_ECARD3_132: /* Mirage Stadium */
     case TCG_CARD_NP_28:      /* Championship Arena (tcg_duel.c EndTurn) */
+    case TCG_CARD_GYM1_103:   /* No Removal Gym (tcg_duel.c, TCG_PLAY_TRAINER) */
     /* (and the ones used during a turn: RegionStadiumUse) */
     case TCG_CARD_GYM1_107: case TCG_CARD_GYM2_114: case TCG_CARD_GYM2_122: case TCG_CARD_NEO3_61:
     case TCG_CARD_NEO4_95: case TCG_CARD_NEO4_99: case TCG_CARD_NEO4_100: case TCG_CARD_ECARD2_118:

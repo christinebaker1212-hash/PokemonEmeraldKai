@@ -699,6 +699,12 @@ int TcgFlow_PickMatches(const struct TcgDuel *g, unsigned me, const struct TcgAc
                                                               : Field(g, me, s) && TcgFlow_InNameGroup(Field(g, me, s)->name, 6);
         return 0;
     }
+    if (filter == TCG_F_EEVEE_TYPE)
+    {
+        const struct TcgCard *c = Tcg_Card(CardOf(g, owner, physical));
+        return c && (g->choiceData & 15) < TCG_FIELD_SIZE && c->type == g->choiceData >> 4 &&
+               TcgDuel_EvolvesFrom(c, Field(g, me, g->choiceData & 15));
+    }
     if (filter == TCG_F_EVOLVES_FROM_DATA)
         return g->choiceData < TCG_FIELD_SIZE &&
                TcgDuel_EvolvesFrom(Tcg_Card(CardOf(g, owner, physical)), Field(g, me, g->choiceData));
@@ -832,6 +838,8 @@ int TcgFlow_SlotMatches(const struct TcgDuel *g, unsigned me, const struct TcgAc
         return c && slot != a->target;
     case TCG_F_WATER_POKEMON:
         return c && c->kind == TCG_POKEMON && TcgDuel_Type(g, who, slot) == TCG_WATER;
+    case TCG_F_SPORE_SLOT:
+        return c && (!strcmp(c->name, "Hoppip") || !strcmp(c->name, "Skiploom")) && !(g->choiceData & (1u << slot));
     case TCG_F_SHINING_LIGHT:
         return c && c->kind == TCG_POKEMON && (c->flags & (TCG_CF_SHINING | TCG_CF_LIGHT));
     case TCG_F_LIGHTNING_POKEMON:
@@ -1182,6 +1190,53 @@ unsigned TcgFlow_TrainerChoices(const struct TcgDuel *g, unsigned me, unsigned c
         MenuAdd(m, "2 OF YOUR PRIZES", TCG_PEEK_MY_PRIZE, mine->prizeSize != 0, "You have no Prizes left.");
         return m->count;
     }
+    if (g->phase == TCG_CHOICE && (g->choiceKind == TCG_CHOICE_CHAOS_FROM_SIDE || g->choiceKind == TCG_CHOICE_CHAOS_TO_SIDE ||
+                                   g->choiceKind == TCG_CHOICE_INVIGORATE_SIDE))
+    {
+        unsigned w = g->choicePlayer, k2, s2, okMine = 0, okTheirs = 0;
+        memset(m, 0, sizeof(*m));
+        *reason = NULL;
+        for (k2 = 0; k2 < 2; k2++)
+            for (s2 = 0; s2 < TCG_FIELD_SIZE; s2++)
+            {
+                const struct TcgFieldCard *f2 = &g->players[w ^ k2].field[s2];
+                int ok = g->choiceKind == TCG_CHOICE_CHAOS_FROM_SIDE ? f2->stackSize && f2->damage
+                         : g->choiceKind == TCG_CHOICE_CHAOS_TO_SIDE
+                             ? f2->stackSize && !(k2 == (g->choiceData >> 3 & 1u) && s2 == (g->choiceData & 7u))
+                             : 0;
+                if (k2) okTheirs |= ok; else okMine |= ok;
+            }
+        if (g->choiceKind == TCG_CHOICE_INVIGORATE_SIDE)
+        {
+            for (k2 = 0; k2 < 2; k2++)
+            {
+                const struct TcgPlayer *q2 = &g->players[w ^ k2];
+                unsigned bench = 0, basic = 0;
+                for (s2 = 1; s2 < TCG_FIELD_SIZE; s2++)
+                    bench += q2->field[s2].stackSize != 0;
+                for (s2 = 0; s2 < q2->discardSize; s2++)
+                    basic |= Tcg_Card(q2->cards[q2->discard[s2]])->kind == TCG_POKEMON && !Tcg_Card(q2->cards[q2->discard[s2]])->stage;
+                if (k2) okTheirs = basic && bench < TCG_FIELD_SIZE - 1; else okMine = basic && bench < TCG_FIELD_SIZE - 1;
+            }
+            MenuAdd(m, "YOUR DISCARD PILE", 0, okMine, "No Basic Pokemon there, or your Bench is full.");
+            MenuAdd(m, "THEIR DISCARD PILE", 1, okTheirs, "No Basic Pokemon there, or their Bench is full.");
+            return m->count;
+        }
+        MenuAdd(m, "YOUR POKEMON", 0, okMine, "None of yours can be chosen.");
+        MenuAdd(m, "THEIR POKEMON", 1, okTheirs, "None of theirs can be chosen.");
+        return m->count;
+    }
+    if (g->phase == TCG_CHOICE && g->choiceKind == TCG_CHOICE_RETURN_MON)
+    {
+        unsigned s2;
+        memset(m, 0, sizeof(*m));
+        *reason = NULL;
+        MenuAdd(m, "DONE", 7, 1, NULL);
+        for (s2 = 0; s2 < TCG_FIELD_SIZE; s2++)
+            if (Field(g, g->choicePlayer, s2))
+                MenuAdd(m, Field(g, g->choicePlayer, s2)->name, s2, 1, NULL);
+        return m->count;
+    }
     if (g->phase == TCG_CHOICE && g->choiceKind == TCG_CHOICE_TREATY)
     {
         memset(m, 0, sizeof(*m));
@@ -1192,7 +1247,7 @@ unsigned TcgFlow_TrainerChoices(const struct TcgDuel *g, unsigned me, unsigned c
     }
     if (Tcg_EnergyRule(cardId) == TCG_ER_RETRO ||
         (g->phase == TCG_CHOICE && (g->choiceKind == TCG_CHOICE_REDRAW4 || g->choiceKind == TCG_CHOICE_SHUFFLE_THEIRS ||
-                                    g->choiceKind == TCG_CHOICE_IMPOSTOR)))
+                                    g->choiceKind == TCG_CHOICE_IMPOSTOR || g->choiceKind == TCG_CHOICE_WISH_ASK)))
     {
         /* (Retro Energy: "you may") */
         memset(m, 0, sizeof(*m));

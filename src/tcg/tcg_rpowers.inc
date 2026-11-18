@@ -268,6 +268,14 @@ static const char *RegionBlock(const struct TcgDuel *g, unsigned player, unsigne
         if (!op->handSize)
             return "Their hand is empty.";
         break;
+    case TCG_POWER_R_CHAOS_MOVE:
+        if (op->prizeSize > 3)
+            return "Your opponent has more than 3 Prizes.";
+        for (i = 0; i < TCG_FIELD_SIZE && !p->field[i].damage && !op->field[i].damage; i++)
+            ;
+        if (i == TCG_FIELD_SIZE)
+            return "No Pokemon in play has damage counters.";
+        break;
     case TCG_POWER_R_SCAVENGER_HUNT:
         if (p->handSize < 2)
             return "You need 2 cards in your hand.";
@@ -419,8 +427,11 @@ int TcgPower_AttachBlock(const struct TcgDuel *g, unsigned player, unsigned slot
     const struct TcgCard *c = Tcg_Card(energy);
     if (!c || c->kind != TCG_ENERGY)
         return 0;
-    if (power == TCG_POWER_R_PURE_BODY_WATER && c->type == TCG_WATER && !g->players[player].field[slot].attachedSize)
-        return 1;   /* (Suicune's Pure Body: no Water Energy from the hand while it has no Energy) */
+    if (((power == TCG_POWER_R_PURE_BODY_WATER && c->type == TCG_WATER) ||
+         (power == TCG_POWER_R_PURE_BODY_FIRE && c->type == TCG_FIRE) ||
+         (power == TCG_POWER_R_PURE_BODY_LIGHTNING && c->type == TCG_LIGHTNING)) &&
+        !g->players[player].field[slot].attachedSize)
+        return 1;   /* (Pure Body: an Energy of its type only while it has an Energy card to discard) */
     return (power == TCG_POWER_R_ANTI_LIGHTNING && energy == TCG_CARD_LIGHTNING_ENERGY) ||
            (power == TCG_POWER_R_WATER_IMMUNITY && energy == TCG_CARD_WATER_ENERGY) ||
            (power == TCG_POWER_R_FIRE_IMMUNITY && energy == TCG_CARD_FIRE_ENERGY);
@@ -430,10 +441,24 @@ void TcgPower_AfterAttach(struct TcgDuel *g, unsigned player, unsigned slot, uns
 {
     struct TcgPlayer *p = &g->players[player];
     struct TcgFieldCard *f = &p->field[slot];
-    unsigned power = TcgPower_Working(g, player, slot), id = p->cards[physical], s, who, i;
-    if (power == TCG_POWER_R_PURE_BODY_WATER && Tcg_Card(id)->kind == TCG_ENERGY && Tcg_Card(id)->type == TCG_WATER)
+    unsigned power = TcgPower_Working(g, player, slot), id = p->cards[physical], s, who;
+    if (power == TCG_POWER_R_ENERGY_EVOLUTION && Tcg_Card(id)->kind == TCG_ENERGY)
     {
-        /* Suicune's Pure Body: an Energy card of its discarded, the player's pick (tcg_choice.inc) */
+        /* Eevee's Energy Evolution: a coin; heads, an evolution of the Energy's type from the deck (tcg_choice.inc) */
+        Announce(g, player, slot, power);
+        if (TcgDuel_Coin(g, player))
+        {
+            g->choiceData = (uint8_t)(Tcg_Card(id)->type << 4 | slot);
+            TcgDuel_AskChoice(g, player, TCG_CHOICE_EEVEE_EVOLVE, TcgDuel_Field(g, player, slot)->id, 1);
+        }
+        return;
+    }
+    if (Tcg_Card(id)->kind == TCG_ENERGY &&
+        ((power == TCG_POWER_R_PURE_BODY_WATER && Tcg_Card(id)->type == TCG_WATER) ||
+         (power == TCG_POWER_R_PURE_BODY_FIRE && Tcg_Card(id)->type == TCG_FIRE) ||
+         (power == TCG_POWER_R_PURE_BODY_LIGHTNING && Tcg_Card(id)->type == TCG_LIGHTNING)))
+    {
+        /* Pure Body (Suicune, Entei, Raikou): an Energy card of its discarded, the player's pick (tcg_choice.inc) */
         Announce(g, player, slot, power);
         g->choiceData = (uint8_t)slot;
         TcgDuel_AskChoice(g, player, TCG_CHOICE_PURE_BODY, TcgDuel_Field(g, player, slot)->id, 1);
@@ -453,19 +478,6 @@ void TcgPower_AfterAttach(struct TcgDuel *g, unsigned player, unsigned slot, uns
             Announce(g, player, slot, power);
             f->shift = (uint8_t)(e->type + 1);
         }
-    }
-    if ((power == TCG_POWER_R_PURE_BODY_WATER && id == TCG_CARD_WATER_ENERGY) ||
-        (power == TCG_POWER_R_PURE_BODY_FIRE && id == TCG_CARD_FIRE_ENERGY) ||
-        (power == TCG_POWER_R_PURE_BODY_LIGHTNING && id == TCG_CARD_LIGHTNING_ENERGY))
-    {
-        /* an Energy card already on it is discarded (the oldest) */
-        for (i = 0; i < f->attachedSize; i++)
-            if (f->attached[i] != physical && Tcg_Card(p->cards[f->attached[i]])->kind == TCG_ENERGY)
-            {
-                Announce(g, player, slot, power);
-                p->discard[p->discardSize++] = TcgPile_Remove(f->attached, &f->attachedSize, i);
-                break;
-            }
     }
     if ((power == TCG_POWER_R_SELF_HEALING_FIRE && id == TCG_CARD_FIRE_ENERGY) ||
         (power == TCG_POWER_R_SELF_HEALING_LIGHTNING && id == TCG_CARD_LIGHTNING_ENERGY) ||

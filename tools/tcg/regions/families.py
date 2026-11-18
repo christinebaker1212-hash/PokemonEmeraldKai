@@ -569,6 +569,9 @@ def _(m, d):
 
 # One wording, one script (the cards' words with SELF for the card's name; tcg_script.inc's ops)
 EXACT = {
+    "Choose 1 Basic Pokemon in any player's discard pile. Put it onto that player's Bench. Put a number of damage counters on that Pokemon equal to half its HP (rounded down to the nearest 10). (You can't put a Pokemon on a Bench that's full.)": 'askch:41,1',
+    'Choose any number of your Hoppips and Skiplooms. Then, for each Pokemon you chose in this way, you may search your deck for a card that evolves from that Pokemon and attach it to that Pokemon. (This counts as evolving those Pokemon.) Shuffle your deck afterward.': 'ask0:47',
+    'Flip a coin. If heads, you may return any number of your Pokemon in play and all cards attached to them to your hand.': 'c h.askch:48,1',
     "Flip a coin. If heads, choose a basic Energy card attached to 1 of your opponent's Pokemon and attach it to another of your opponent's Pokemon of your choice.": 'c h.askch:21,1',
     "Flip a coin. If heads, choose 1 of either player's Evolved Pokemon, remove the highest stage Evolution card from that Pokemon, and put it into that player's hand.": ('DEVOLUTION_BEAM', 1, 0),
     'Move 2 Water Energy cards attached to SELF to 1 or 2 of your Benched Pokemon. (You may put both on the same Pokemon or 1 each on 2 different Pokemon.) If you have no Benched Pokemon, ignore this effect.': 'askn:23,2',

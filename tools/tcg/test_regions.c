@@ -1258,6 +1258,160 @@ static int MoreRules(void)
     printf("PASS more rules: Texture Magic, Card-Flip Game, Championship Arena, Pure Body, Scavenger Hunt\n");
     return 0;
 }
+static void Choose(struct TcgDuel *g, unsigned target, int pick)
+{
+    struct TcgAction a;
+    memset(&a, 0, sizeof(a));
+    a.type = TCG_CHOOSE;
+    a.target = (uint8_t)target;
+    if (pick >= 0)
+        a.selections[0] = (uint8_t)pick, a.selectionCount = 1;
+    if (TcgDuel_Apply(g, &a) != TCG_OK)
+        printf("(choose %u: %s)\n", target, g->error);
+}
+static int PlayHeld(struct TcgDuel *g, unsigned id)
+{
+    struct TcgAction a;
+    int c = Relabel(g, 0, id);
+    g->players[0].hand[g->players[0].handSize++] = (uint8_t)c;
+    memset(&a, 0, sizeof(a));
+    a.type = TCG_PLAY_TRAINER;
+    a.hand = (uint8_t)(g->players[0].handSize - 1);
+    return TcgDuel_Apply(g, &a);
+}
+/* Chaos Move, Magnetic Flow, Invigorate, Misty's Wish, Mind Games, Tickling Machine, Fairy Power */
+static int EvenMoreRules(void)
+{
+    struct TcgDuel g;
+    struct TcgAction a;
+    unsigned seed, k, n;
+    int c;
+    if (!Tcg_Card(TCG_CARD_ECARD1_13) || !Tcg_Card(TCG_CARD_ECARD2_22) || !Tcg_Card(TCG_CARD_GYM2_56) ||
+        !Tcg_Card(TCG_CARD_GYM2_108) || !Tcg_Card(TCG_CARD_NEO1_14) || !Tcg_Card(TCG_CARD_GYM1_119) ||
+        !Tcg_Card(TCG_CARD_GYM1_3))
+        return printf("FAIL even more rules: a card isn't finished\n"), 1;
+    /* Chaos Move: a counter off their Benched Machop onto their Active */
+    Stage(&g, TCG_CARD_ECARD1_13, 1, 1);
+    g.players[0].field[0].poison = 0;
+    while (g.players[1].prizeSize > 3)
+        g.players[1].deck[g.players[1].deckSize++] = g.players[1].prizes[--g.players[1].prizeSize];
+    while (g.players[1].prizeSize < 3)
+        g.players[1].prizes[g.players[1].prizeSize++] = g.players[1].deck[--g.players[1].deckSize];
+    g.players[1].field[1].damage = 20;
+    k = g.players[1].field[0].damage;
+    memset(&a, 0, sizeof(a));
+    a.type = TCG_USE_POWER;
+    if (TcgDuel_Apply(&g, &a) != TCG_OK || g.choiceKind != TCG_CHOICE_CHAOS_FROM_SIDE)
+        return printf("FAIL Chaos Move: %s\n", g.error), 1;
+    Choose(&g, 1, -1), Choose(&g, 1, -1), Choose(&g, 1, -1), Choose(&g, 0, -1);
+    if (g.players[1].field[1].damage != 10 || g.players[1].field[0].damage != k + 10 || g.phase == TCG_CHOICE)
+        return printf("FAIL Chaos Move's counter (%u, %u)\n", g.players[1].field[1].damage, g.players[1].field[0].damage), 1;
+    /* Magnetic Flow (heads): an Energy of their Active and of their Diglett switched */
+    for (seed = 1; seed < 40; seed++)
+    {
+        Stage(&g, TCG_CARD_ECARD2_22, 1, seed);
+        g.players[0].field[0].poison = 0;
+        memset(&a, 0, sizeof(a));
+        a.type = TCG_USE_POWER;
+        if (TcgDuel_Apply(&g, &a) != TCG_OK)
+            return printf("FAIL Magnetic Flow: %s\n", g.error), 1;
+        if (g.phase == TCG_CHOICE)
+            break;
+    }
+    if (g.choiceKind != TCG_CHOICE_FLOW_A)
+        return printf("FAIL Magnetic Flow: no choice\n"), 1;
+    {
+        uint8_t first = g.players[1].field[0].attached[g.players[1].field[0].attachedSize - 1], second = g.players[1].field[2].attached[0];
+        Choose(&g, 0, first);
+        Choose(&g, 2, second);
+        if (g.players[1].field[2].attached[0] != first || g.phase == TCG_CHOICE)
+            return printf("FAIL Magnetic Flow's switch\n"), 1;
+    }
+    /* Invigorate: a Diglett from their discard pile onto their Bench, half its HP in counters */
+    Stage(&g, TCG_CARD_GYM2_56, 0, 1);
+    for (k = 0; k < g.players[1].deckSize && g.players[1].cards[g.players[1].deck[k]] != TCG_CARD_DIGLETT; k++)
+        ;
+    g.players[1].discard[g.players[1].discardSize++] = TcgPile_Remove(g.players[1].deck, &g.players[1].deckSize, k);
+    memset(&a, 0, sizeof(a));
+    a.type = TCG_ATTACK;
+    if (TcgDuel_Apply(&g, &a) != TCG_OK || g.choiceKind != TCG_CHOICE_INVIGORATE_SIDE)
+        return printf("FAIL Invigorate: %s\n", g.error), 1;
+    Choose(&g, 1, -1);
+    Choose(&g, 0, g.players[1].discard[g.players[1].discardSize - 1]);
+    if (!g.players[1].field[3].stackSize || g.players[1].field[3].damage != Tcg_Card(TCG_CARD_DIGLETT)->hp / 2 / 10 * 10)
+        return printf("FAIL Invigorate's Diglett\n"), 1;
+    /* Misty's Wish: they accept; a hand card switched with the Prize looked at */
+    Stage(&g, TCG_CARD_MACHOP, 0, 1);
+    while (g.players[0].prizeSize < 2)
+        g.players[0].prizes[g.players[0].prizeSize++] = g.players[0].deck[--g.players[0].deckSize];
+    g.players[0].hand[g.players[0].handSize++] = g.players[0].deck[--g.players[0].deckSize];
+    if (PlayHeld(&g, TCG_CARD_GYM2_108) != TCG_OK || g.choiceKind != TCG_CHOICE_WISH_ASK || g.choicePlayer != 1)
+        return printf("FAIL Misty's Wish: %s\n", g.error), 1;
+    Choose(&g, 1, -1);
+    if (g.choiceKind != TCG_CHOICE_WISH_SWAP || g.choicePlayer != 0)
+        return printf("FAIL Misty's Wish: not asked to switch\n"), 1;
+    n = g.players[0].hand[0];
+    Choose(&g, 0, (int)n);
+    for (k = 0; k < g.players[0].prizeSize && g.players[0].prizes[k] != n; k++)
+        ;
+    if (k == g.players[0].prizeSize)
+        return printf("FAIL Misty's Wish's switch\n"), 1;
+    /* Mind Games: their Slowking; heads, the Trainer does nothing and goes on top of the deck */
+    for (seed = 1; seed < 40; seed++)
+    {
+        Stage(&g, TCG_CARD_MACHOP, 0, seed);
+        c = Relabel(&g, 1, TCG_CARD_NEO1_14);
+        if (c < 0)
+            return printf("FAIL Mind Games: no card to make a Slowking of\n"), 1;
+        g.players[1].field[3].stack[g.players[1].field[3].stackSize++] = (uint8_t)c;
+        if (PlayHeld(&g, TCG_CARD_GYM1_112) != TCG_OK)
+            return printf("FAIL Mind Games: %s\n", g.error), 1;
+        if (g.phase != TCG_CHOICE)
+            break;
+    }
+    if (Tcg_Card(g.players[0].cards[g.players[0].deck[g.players[0].deckSize - 1]])->id != TCG_CARD_GYM1_112)
+        return printf("FAIL Mind Games: the Trainer isn't on top of the deck\n"), 1;
+    /* Tickling Machine (heads): their hand set aside until the end of their next turn */
+    for (seed = 1; seed < 40; seed++)
+    {
+        Stage(&g, TCG_CARD_MACHOP, 0, seed);
+        for (k = 0; k < 3; k++)
+            g.players[1].hand[g.players[1].handSize++] = g.players[1].deck[--g.players[1].deckSize];
+        n = g.players[1].handSize;
+        if (PlayHeld(&g, TCG_CARD_GYM1_119) != TCG_OK)
+            return printf("FAIL Tickling Machine: %s\n", g.error), 1;
+        if (g.players[1].asideSize)
+            break;
+    }
+    if (g.players[1].asideSize != n || g.players[1].handSize)
+        return printf("FAIL Tickling Machine: %u set aside\n", g.players[1].asideSize), 1;
+    memset(&a, 0, sizeof(a));
+    a.type = TCG_PASS;
+    TcgDuel_Apply(&g, &a);
+    TcgDuel_Apply(&g, &a);
+    if (g.players[1].asideSize || g.players[1].handSize < n)
+        return printf("FAIL Tickling Machine: the hand didn't come back (%u, %u)\n", g.players[1].asideSize, g.players[1].handSize), 1;
+    /* Fairy Power (heads): the Benched Machop back to the hand, then DONE */
+    for (seed = 1; seed < 40; seed++)
+    {
+        Stage(&g, TCG_CARD_GYM1_3, 0, seed);
+        memset(&a, 0, sizeof(a));
+        a.type = TCG_ATTACK;
+        if (TcgDuel_Apply(&g, &a) != TCG_OK)
+            return printf("FAIL Fairy Power: %s\n", g.error), 1;
+        if (g.phase == TCG_CHOICE)
+            break;
+    }
+    n = g.players[0].handSize;
+    Choose(&g, 1, -1);
+    if (g.players[0].field[1].stackSize || g.players[0].handSize != n + 1 || g.choiceKind != TCG_CHOICE_RETURN_MON)
+        return printf("FAIL Fairy Power's return\n"), 1;
+    Choose(&g, 7, -1);
+    if (g.phase == TCG_CHOICE)
+        return printf("FAIL Fairy Power: DONE didn't end it\n"), 1;
+    printf("PASS even more rules: Chaos Move, Magnetic Flow, Invigorate, Misty's Wish, Mind Games, Tickling Machine, Fairy Power\n");
+    return 0;
+}
 static int Choices(void)
 {
     struct TcgDuel g;
@@ -2173,7 +2327,7 @@ int main(void)
     }
     printf("PASS %u finished regional cards: %u attacks used %u times, then %u AI actions after them\n", ready, used, ok,
            steps);
-    if (SpecialEnergy() || EcardEnergy() || ScriptMechanics() || Anchors() || Guards() || MovePowers() || LookPowers() || SwitchesAndFire() || BorrowedAttacks() || Copies() || PowersOfFour() || Choices() || Peeks() || MoreChoices() || MoreRules() || TechnicalMachines() || Babies())
+    if (SpecialEnergy() || EcardEnergy() || ScriptMechanics() || Anchors() || Guards() || MovePowers() || LookPowers() || SwitchesAndFire() || BorrowedAttacks() || Copies() || PowersOfFour() || Choices() || Peeks() || MoreChoices() || MoreRules() || EvenMoreRules() || TechnicalMachines() || Babies())
         return 1;
     if (PlayTrainers() || UsePowers() || UseStadiums() || AttackFlows())
         return 1;

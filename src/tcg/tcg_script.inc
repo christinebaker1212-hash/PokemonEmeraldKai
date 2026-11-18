@@ -115,6 +115,7 @@
  *             named as it | ddeh:n one of the Defending's Energy per heads, up to n picked | lockon Lock-on
  * After (1):  rodset a Lightning Rod marker on the chosen one of theirs | rodhit:x x to each of theirs with one (Weakness
  *             and Resistance) | char Quilava's Char counter (a coin) | color the type chosen (opt:10) as a Coloring counter
+ * After (1):  ask0:K your TCG_CHOICE_K, choiceData 0 first
  * After (1):  askn:K,n your TCG_CHOICE_K n times (0: once per heads) | blast every Lightning Energy card on it
  *             discarded, that many damage counters on their Bench as you choose
  * Powers (1): scav Scavenger Hunt | stadis Spatial Distortion | Conditions: pw its Pokemon Power works
@@ -1151,6 +1152,13 @@ static int ScriptRun(struct TcgDuel *g, const char *script, const struct TcgAtta
                     TcgDuel_Event(g, TCG_EV_DRAW, me, 0, TcgDuel_Draw(g, me, k), 0, 0);
                 }
             }
+        }
+        else if (ScriptIs(&o, "ask0"))
+        {
+            /* ask0:K your choice TCG_CHOICE_K with choiceData 0 (Evolutionary Spore: none chosen yet) */
+            const struct TcgCard *it = TcgDuel_Field(g, me, sScriptSelf);
+            g->choiceData = 0;
+            TcgDuel_AskChoice(g, me, (unsigned)x, it ? it->id : 0, 1);
         }
         else if (ScriptIs(&o, "askn"))
         {

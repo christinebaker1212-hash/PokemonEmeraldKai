@@ -169,6 +169,10 @@ static int RegionTrainerPlayable(const struct TcgDuel *g, unsigned me, const str
         if (!bench)
             return snprintf(reason, size, "Your Bench is full."), 0;
         break;
+    case TCG_CARD_GYM2_108:
+        if (!p->prizeSize)
+            return snprintf(reason, size, "You have no Prizes left."), 0;
+        break;
     case TCG_CARD_NEO1_92:
     case TCG_CARD_NEO4_94:
         if (!g->players[me ^ 1].prizeSize)
@@ -371,6 +375,43 @@ const struct TcgStep *TcgFlow_ChoiceSteps(const struct TcgDuel *g, int *count)
     case TCG_CHOICE_ATTACH_LIGHTNING:
         STEPS({TCG_ST_MY_SLOT, TCG_F_LIGHTNING_POKEMON, 0, 0, 0, "Attach a Lightning Energy to which? (or none: then B)"},
               {TCG_ST_PICK, TCG_F_LIGHTNING_ENERGY, TCG_SRC_DECK, 0, 1, "Which Lightning Energy from your deck?"});
+    case TCG_CHOICE_CHAOS_FROM_SIDE:
+        STEPS({TCG_ST_CHOICE, 0, 0, 0, 0, "Chaos Move: a damage counter off whose Pokemon?"});
+    case TCG_CHOICE_CHAOS_FROM_MINE:
+        STEPS({TCG_ST_MY_SLOT, TCG_F_DAMAGED, 0, 0, 0, "Off which of yours?"});
+    case TCG_CHOICE_CHAOS_FROM_THEIRS:
+        STEPS({TCG_ST_OPP_SLOT, TCG_F_DAMAGED, 0, 0, 0, "Off which of theirs?"});
+    case TCG_CHOICE_CHAOS_TO_SIDE:
+        STEPS({TCG_ST_CHOICE, 0, 0, 0, 0, "Onto whose Pokemon?"});
+    case TCG_CHOICE_CHAOS_TO_MINE:
+        STEPS({TCG_ST_MY_SLOT, TCG_F_OCCUPIED, 0, 0, 0, "Onto which of yours?"});
+    case TCG_CHOICE_CHAOS_TO_THEIRS:
+        STEPS({TCG_ST_OPP_SLOT, TCG_F_OCCUPIED, 0, 0, 0, "Onto which of theirs?"});
+    case TCG_CHOICE_FLOW_A:
+        STEPS({TCG_ST_OPP_SLOT, TCG_F_HAS_ENERGY, 0, 0, 0, "Magnetic Flow: which of theirs first?"},
+              {TCG_ST_PICK, TCG_F_ENERGY, TCG_SRC_OPP_ATTACHED, 1, 1, "Which of its Energy cards?"});
+    case TCG_CHOICE_FLOW_B:
+        STEPS({TCG_ST_OPP_SLOT, TCG_F_HAS_ENERGY, 0, 0, 0, "Switch it with which other of theirs?"},
+              {TCG_ST_PICK, TCG_F_ENERGY, TCG_SRC_OPP_ATTACHED, 1, 1, "With which of its Energy cards?"});
+    case TCG_CHOICE_INVIGORATE_SIDE:
+        STEPS({TCG_ST_CHOICE, 0, 0, 0, 0, "A Basic Pokemon from whose discard pile?"});
+    case TCG_CHOICE_INVIGORATE_MINE:
+        STEPS({TCG_ST_PICK, TCG_F_BASIC, TCG_SRC_MY_DISCARD, 1, 1, "Put which onto your Bench?"});
+    case TCG_CHOICE_INVIGORATE_THEIRS:
+        STEPS({TCG_ST_PICK, TCG_F_BASIC, TCG_SRC_OPP_DISCARD, 1, 1, "Put which onto their Bench?"});
+    case TCG_CHOICE_WISH_ASK:
+        STEPS({TCG_ST_CHOICE, 0, 0, 0, 0, "Misty's Wish: let them switch a Prize with a card from their hand?"});
+    case TCG_CHOICE_WISH_SWAP:
+        STEPS({TCG_ST_PICK, TCG_F_ANY, TCG_SRC_HAND, 1, 1, "Switch the Prize with which card from your hand?"});
+    case TCG_CHOICE_EEVEE_EVOLVE:
+        STEPS({TCG_ST_PICK, TCG_F_EEVEE_TYPE, TCG_SRC_DECK, 0, 1, "Energy Evolution: evolve Eevee into which? (none: B)"});
+    case TCG_CHOICE_SPORE:
+        STEPS({TCG_ST_MY_SLOT, TCG_F_SPORE_SLOT, 0, 0, 0, "Evolve which Hoppip or Skiploom? (then none: B ends it)"},
+              {TCG_ST_PICK, TCG_F_EVOLVES_FROM_TARGET, TCG_SRC_DECK, 0, 1, "Into which card from your deck?"});
+    case TCG_CHOICE_RETURN_MON:
+        STEPS({TCG_ST_CHOICE, 0, 0, 0, 0, "Return which of your Pokemon to your hand?"});
+    case TCG_CHOICE_DISCARD2:
+        STEPS({TCG_ST_PICK, TCG_F_ANY, TCG_SRC_HAND, 2, 2, "No Removal Gym: discard which 2 cards?"});
     case TCG_CHOICE_CARD_FLIP:
         STEPS({TCG_ST_CHOICE, 0, 0, 0, 0, "Guess: is their Prize an Energy, a Trainer or a Pokemon?"});
     case TCG_CHOICE_IMPOSTOR:

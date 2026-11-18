@@ -2846,7 +2846,7 @@ const struct TcgCard gTcgCards[TCG_CARD_COUNT + 1] = {
 {.name="",.description="",.effect="NONE",.animation="ATK_ANIM_NONE",.cost={0},.damage=0,.category=TCG_DAMAGE_NORMAL},
 }
 },
-[445] = {.id=445, .name="Erika's Clefable", .kind=TCG_POKEMON, .type=6, .rarity=2, .set=13, .set2=255, .dark=0, .holo=1, .flags=TCG_CF_OWNER, .origin=13,
+[445] = {.id=445, .name="Erika's Clefable", .kind=TCG_POKEMON, .type=6, .rarity=2, .set=13, .set2=255, .dark=0, .holo=1, .flags=TCG_CF_OWNER|TCG_CF_READY, .origin=13,
 .hp=70, .stage=1, .species=36, .level=35, .retreat=2, .weakness=4, .resistance=5, .evolvesFrom="Erika's Clefairy", .description="", .attacks={
 {.name="Fairy Power",.description="Flip a coin. If heads, you may return any number of your Pokemon in play and all cards attached to them to your hand.",.effect="gym1-3:a0",.animation="ATK_ANIM_HIT",.cost={0,0,0,0,0,0,1,0,0},.damage=0,.category=TCG_RESIDUAL},
 {.name="Moon Impact",.description="",.effect="NONE",.animation="ATK_ANIM_HIT",.cost={0,0,0,0,0,0,3,0,0},.damage=30,.category=TCG_DAMAGE_NORMAL},
@@ -3502,7 +3502,7 @@ const struct TcgCard gTcgCards[TCG_CARD_COUNT + 1] = {
 [544] = {.id=544, .name="Misty", .kind=TCG_TRAINER, .type=6, .rarity=2, .set=13, .set2=255, .dark=0, .holo=0, .flags=TCG_CF_READY, .origin=13, .canon=460,
 .effect="gym1-102:t",.description="Discard 2 of the other cards in your hand in order to play this card. If this turn's attack does damage to the Defending Pokemon (after applying Weakness and Resistance), and if the attacking Pokemon has Misty in its name, the attack does 20 more damage to the Defending Pokemon."
 },
-[545] = {.id=545, .name="No Removal Gym", .kind=TCG_TRAINER, .type=6, .rarity=2, .set=13, .set2=255, .dark=0, .holo=0, .flags=TCG_CF_STADIUM, .origin=13,
+[545] = {.id=545, .name="No Removal Gym", .kind=TCG_TRAINER, .type=6, .rarity=2, .set=13, .set2=255, .dark=0, .holo=0, .flags=TCG_CF_STADIUM|TCG_CF_READY, .origin=13,
 .effect="gym1-103:t",.description="This card stays in play when you play it. Discard this card if another Stadium card comes into play. A player must discard 2 cards from his or her hand in order to play an Energy Removal or Super Energy Removal card."
 },
 [546] = {.id=546, .name="The Rocket's Training Gym", .kind=TCG_TRAINER, .type=6, .rarity=2, .set=13, .set2=255, .dark=0, .holo=0, .flags=TCG_CF_STADIUM|TCG_CF_READY, .origin=13,
@@ -3550,7 +3550,7 @@ const struct TcgCard gTcgCards[TCG_CARD_COUNT + 1] = {
 [560] = {.id=560, .name="Secret Mission", .kind=TCG_TRAINER, .type=6, .rarity=1, .set=13, .set2=255, .dark=0, .holo=0, .flags=TCG_CF_READY, .origin=13,
 .effect="gym1-118:t",.description="Look at your opponent's hand. Then, you may discard as many other cards as you want from your hand and draw that many cards."
 },
-[561] = {.id=561, .name="Tickling Machine", .kind=TCG_TRAINER, .type=6, .rarity=1, .set=13, .set2=255, .dark=0, .holo=0, .flags=TCG_CF_RSM, .origin=13,
+[561] = {.id=561, .name="Tickling Machine", .kind=TCG_TRAINER, .type=6, .rarity=1, .set=13, .set2=255, .dark=0, .holo=0, .flags=TCG_CF_RSM|TCG_CF_READY, .origin=13,
 .effect="gym1-119:t",.description="Flip a coin. If heads, your opponent sets aside all the cards in his or her hand face down. Nobody may look at those cards. At the end of your opponent's next turn, your opponent puts those cards back into his or her hand. If tails, your turn ends immediately (you can't attack this turn)."
 },
 [562] = {.id=562, .name="Vermilion City Gym", .kind=TCG_TRAINER, .type=6, .rarity=1, .set=13, .set2=255, .dark=0, .holo=0, .flags=TCG_CF_STADIUM, .origin=13,
@@ -3943,7 +3943,7 @@ const struct TcgCard gTcgCards[TCG_CARD_COUNT + 1] = {
 {.name="",.description="",.effect="NONE",.animation="ATK_ANIM_NONE",.cost={0},.damage=0,.category=TCG_DAMAGE_NORMAL},
 }
 },
-[624] = {.id=624, .name="Sabrina's Hypno", .kind=TCG_POKEMON, .type=5, .rarity=1, .set=14, .set2=255, .dark=0, .holo=0, .flags=TCG_CF_OWNER, .origin=14,
+[624] = {.id=624, .name="Sabrina's Hypno", .kind=TCG_POKEMON, .type=5, .rarity=1, .set=14, .set2=255, .dark=0, .holo=0, .flags=TCG_CF_OWNER|TCG_CF_READY, .origin=14,
 .hp=70, .stage=1, .species=97, .level=31, .retreat=2, .weakness=5, .resistance=255, .evolvesFrom="Sabrina's Drowzee", .description="", .attacks={
 {.name="Invigorate",.description="Choose 1 Basic Pokemon in any player's discard pile. Put it onto that player's Bench. Put a number of damage counters on that Pokemon equal to half its HP (rounded down to the nearest 10). (You can't put a Pokemon on a Bench that's full.)",.effect="gym2-56:a0",.animation="ATK_ANIM_HIT",.cost={0,0,0,0,0,1,0,0,0},.damage=0,.category=TCG_RESIDUAL},
 {.name="Pendulum Curse",.description="Flip a number of coins equal to the number of damage counters on the Defending Pokemon. This attack does 20 damage times the number of heads.",.effect="gym2-56:a1",.animation="ATK_ANIM_HIT",.cost={0,0,0,0,0,2,0,0,0},.damage=20,.category=TCG_DAMAGE_X},
@@ -4275,7 +4275,7 @@ const struct TcgCard gTcgCards[TCG_CARD_COUNT + 1] = {
 [675] = {.id=675, .name="Lt. Surge's Secret Plan", .kind=TCG_TRAINER, .type=6, .rarity=2, .set=14, .set2=255, .dark=0, .holo=0, .flags=0, .origin=14,
 .effect="gym2-107:t",.description="Put 1 card from your hand face down onto your Bench. (You can't play this card if your Bench is full.) Treat that card as a Basic Pokemon as long as it's face down. Flip the card if either player needs to know what it is in order to use an attack, a Pokemon Power, or a Trainer card. Flip the card if it ever uses an attack or Pokemon Power, evolves, retreats, is damaged by an attack, or is otherwise affected by an attack. At any time during your turn, you may flip the card over. When you flip that card over, if it isn't a Basic Pokemon, discard it and all cards attached to it."
 },
-[676] = {.id=676, .name="Misty's Wish", .kind=TCG_TRAINER, .type=6, .rarity=2, .set=14, .set2=255, .dark=0, .holo=0, .flags=0, .origin=14,
+[676] = {.id=676, .name="Misty's Wish", .kind=TCG_TRAINER, .type=6, .rarity=2, .set=14, .set2=255, .dark=0, .holo=0, .flags=TCG_CF_READY, .origin=14,
 .effect="gym2-108:t",.description="Look at 1 of your Prize cards. Then, ask your opponent if you may switch that card with 1 of the cards in your hand. If your opponent accepts and if you have any other cards in your hand, switch those cards. If your opponent declines, return the Prize card face down and draw a card."
 },
 [677] = {.id=677, .name="Resistance Gym", .kind=TCG_TRAINER, .type=6, .rarity=2, .set=14, .set2=255, .dark=0, .holo=0, .flags=TCG_CF_STADIUM|TCG_CF_READY, .origin=14,
@@ -4423,7 +4423,7 @@ const struct TcgCard gTcgCards[TCG_CARD_COUNT + 1] = {
 {.name="",.description="",.effect="NONE",.animation="ATK_ANIM_NONE",.cost={0},.damage=0,.category=TCG_DAMAGE_NORMAL},
 }
 },
-[708] = {.id=708, .name="Slowking", .kind=TCG_POKEMON, .type=5, .rarity=2, .set=15, .set2=255, .dark=0, .holo=1, .flags=0, .origin=15,
+[708] = {.id=708, .name="Slowking", .kind=TCG_POKEMON, .type=5, .rarity=2, .set=15, .set2=255, .dark=0, .holo=1, .flags=TCG_CF_READY, .origin=15,
 .hp=80, .stage=1, .species=199, .level=39, .retreat=3, .weakness=5, .resistance=255, .evolvesFrom="Slowpoke", .description="When its head was bitten, toxins entered Slowpoke's head and unlocked an extraordinary power.", .attacks={
 {.name="Mind Games",.description="Whenever your opponent plays a Trainer card, you may flip a coin. If heads, that card does nothing. Put it on top of your opponent's deck. This power can't be used if Slowking is Asleep, Confused, or Paralyzed.",.effect="neo1-14:p",.animation="ATK_ANIM_HIT",.cost={0,0,0,0,0,0,0,0,0},.damage=0,.category=TCG_POKEMON_POWER},
 {.name="Mind Blast",.description="Flip a coin. If heads, this attack does 20 damage plus 10 more damage and the Defending Pokemon is now Confused. If tails, this attack does 20 damage.",.effect="neo1-14:a0",.animation="ATK_ANIM_HIT",.cost={0,0,0,0,0,3,0,0,0},.damage=20,.category=TCG_DAMAGE_PLUS},
@@ -5230,7 +5230,7 @@ const struct TcgCard gTcgCards[TCG_CARD_COUNT + 1] = {
 {.name="",.description="",.effect="NONE",.animation="ATK_ANIM_NONE",.cost={0},.damage=0,.category=TCG_DAMAGE_NORMAL},
 }
 },
-[837] = {.id=837, .name="Eevee", .kind=TCG_POKEMON, .type=6, .rarity=1, .set=16, .set2=255, .dark=0, .holo=0, .flags=0, .origin=16,
+[837] = {.id=837, .name="Eevee", .kind=TCG_POKEMON, .type=6, .rarity=1, .set=16, .set2=255, .dark=0, .holo=0, .flags=TCG_CF_READY, .origin=16,
 .hp=50, .stage=0, .species=133, .level=14, .retreat=1, .weakness=4, .resistance=5, .evolvesFrom="", .description="Its irregularly configured DNA is affected by its surroundings. It evolves if its environment changes.", .attacks={
 {.name="Energy Evolution",.description="Whenever you attach an Energy card to Eevee, flip a coin. If heads, search your deck for a card that evolves from Eevee that is the same type as the Energy card you attached to Eevee. Attach that card to Eevee. This counts as evolving Eevee. Shuffle your deck afterward. This power can't be used if Eevee is Asleep, Confused, or Paralyzed.",.effect="neo2-38:p",.animation="ATK_ANIM_HIT",.cost={0,0,0,0,0,0,0,0,0},.damage=0,.category=TCG_POKEMON_POWER},
 {.name="Smash Kick",.description="",.effect="NONE",.animation="ATK_ANIM_HIT",.cost={0,0,0,0,0,0,1,0,0},.damage=10,.category=TCG_DAMAGE_NORMAL},
@@ -5536,7 +5536,7 @@ const struct TcgCard gTcgCards[TCG_CARD_COUNT + 1] = {
 {.name="",.description="",.effect="NONE",.animation="ATK_ANIM_NONE",.cost={0},.damage=0,.category=TCG_DAMAGE_NORMAL},
 }
 },
-[883] = {.id=883, .name="Jumpluff", .kind=TCG_POKEMON, .type=1, .rarity=2, .set=17, .set2=255, .dark=0, .holo=1, .flags=0, .origin=17,
+[883] = {.id=883, .name="Jumpluff", .kind=TCG_POKEMON, .type=1, .rarity=2, .set=17, .set2=255, .dark=0, .holo=1, .flags=TCG_CF_READY, .origin=17,
 .hp=70, .stage=2, .species=189, .level=37, .retreat=0, .weakness=0, .resistance=4, .evolvesFrom="Skiploom", .description="Drifts on seasonal winds and spreads its cotton-like spores all over the world to make more offspring.", .attacks={
 {.name="Evolutionary Spore",.description="Choose any number of your Hoppips and Skiplooms. Then, for each Pokemon you chose in this way, you may search your deck for a card that evolves from that Pokemon and attach it to that Pokemon. (This counts as evolving those Pokemon.) Shuffle your deck afterward.",.effect="neo3-9:a0",.animation="ATK_ANIM_HIT",.cost={0,1,0,0,0,0,0,0,0},.damage=0,.category=TCG_RESIDUAL},
 {.name="Solarbeam",.description="",.effect="NONE",.animation="ATK_ANIM_HIT",.cost={0,1,0,0,0,0,0,0,0},.damage=30,.category=TCG_DAMAGE_NORMAL},
@@ -6737,7 +6737,7 @@ const struct TcgCard gTcgCards[TCG_CARD_COUNT + 1] = {
 {.name="",.description="",.effect="NONE",.animation="ATK_ANIM_NONE",.cost={0},.damage=0,.category=TCG_DAMAGE_NORMAL},
 }
 },
-[1066] = {.id=1066, .name="Gengar", .kind=TCG_POKEMON, .type=5, .rarity=2, .set=19, .set2=255, .dark=0, .holo=1, .flags=0, .origin=19,
+[1066] = {.id=1066, .name="Gengar", .kind=TCG_POKEMON, .type=5, .rarity=2, .set=19, .set2=255, .dark=0, .holo=1, .flags=TCG_CF_READY, .origin=19,
 .hp=90, .stage=2, .species=94, .level=0, .retreat=1, .weakness=7, .resistance=4, .evolvesFrom="Haunter", .description="", .attacks={
 {.name="Chaos Move",.description="Once during your turn (before your attack), if your opponent has 3 or fewer Prizes, you may move 1 damage counter from 1 Pokemon (yours or your opponent's) to another (even if it would Knock Out the other Pokemon). This power can't be used if Gengar is affected by a Special Condition.",.effect="ecard1-13:p",.animation="ATK_ANIM_HIT",.cost={0,0,0,0,0,0,0,0,0},.damage=0,.category=TCG_POKEMON_POWER},
 {.name="Hide in Shadows",.description="Switch Gengar with 1 of your Benched Pokemon, if any.",.effect="ecard1-13:a0",.animation="ATK_ANIM_HIT",.cost={0,0,0,0,0,2,1,0,0},.damage=40,.category=TCG_DAMAGE_NORMAL},
@@ -6982,7 +6982,7 @@ const struct TcgCard gTcgCards[TCG_CARD_COUNT + 1] = {
 {.name="",.description="",.effect="NONE",.animation="ATK_ANIM_NONE",.cost={0},.damage=0,.category=TCG_DAMAGE_NORMAL},
 }
 },
-[1101] = {.id=1101, .name="Gengar", .kind=TCG_POKEMON, .type=5, .rarity=2, .set=19, .set2=255, .dark=0, .holo=0, .flags=0, .origin=19,
+[1101] = {.id=1101, .name="Gengar", .kind=TCG_POKEMON, .type=5, .rarity=2, .set=19, .set2=255, .dark=0, .holo=0, .flags=TCG_CF_READY, .origin=19,
 .hp=90, .stage=2, .species=94, .level=0, .retreat=1, .weakness=7, .resistance=4, .evolvesFrom="Haunter", .description="", .attacks={
 {.name="Chaos Move",.description="Once during your turn (before your attack), if your opponent has 3 or fewer Prizes, you may move 1 damage counter from 1 Pokemon (yours or your opponent's) to another (even if it would Knock Out the other Pokemon). This power can't be used if Gengar is affected by a Special Condition.",.effect="ecard1-48:p",.animation="ATK_ANIM_HIT",.cost={0,0,0,0,0,0,0,0,0},.damage=0,.category=TCG_POKEMON_POWER},
 {.name="Hide in Shadows",.description="Switch Gengar with 1 of your Benched Pokemon, if any.",.effect="ecard1-48:a0",.animation="ATK_ANIM_HIT",.cost={0,0,0,0,0,2,1,0,0},.damage=40,.category=TCG_DAMAGE_NORMAL},
@@ -7826,7 +7826,7 @@ const struct TcgCard gTcgCards[TCG_CARD_COUNT + 1] = {
 {.name="",.description="",.effect="NONE",.animation="ATK_ANIM_NONE",.cost={0},.damage=0,.category=TCG_DAMAGE_NORMAL},
 }
 },
-[1234] = {.id=1234, .name="Magneton", .kind=TCG_POKEMON, .type=8, .rarity=2, .set=20, .set2=255, .dark=0, .holo=0, .flags=0, .origin=20,
+[1234] = {.id=1234, .name="Magneton", .kind=TCG_POKEMON, .type=8, .rarity=2, .set=20, .set2=255, .dark=0, .holo=0, .flags=TCG_CF_READY, .origin=20,
 .hp=70, .stage=1, .species=82, .level=0, .retreat=2, .weakness=0, .resistance=1, .evolvesFrom="Magnemite", .description="", .attacks={
 {.name="Magnetic Flow",.description="Once during your turn (before your attack), if Magneton is your Active Pokemon, you may flip a coin. If heads, choose 2 of your opponent's Pokemon that have Energy cards attached to them. Choose 1 of the Energy cards attached to each of those Pokemon and switch them between the Pokemon. This power can't be used if Magneton is affected by a Special Condition.",.effect="ecard2-22:p",.animation="ATK_ANIM_HIT",.cost={0,0,0,0,0,0,0,0,0},.damage=0,.category=TCG_POKEMON_POWER},
 {.name="Steel Wave",.description="This attack does 10 damage to each of your opponent's Benched Pokemon that are the same type (color) as the Defending Pokemon. (Don't apply Weakness and Resistance for Benched Pokemon.)",.effect="ecard2-22:a0",.animation="ATK_ANIM_HIT",.cost={0,0,0,0,0,0,3,0,0},.damage=30,.category=TCG_DAMAGE_NORMAL},
@@ -8754,7 +8754,7 @@ const struct TcgCard gTcgCards[TCG_CARD_COUNT + 1] = {
 {.name="",.description="",.effect="NONE",.animation="ATK_ANIM_NONE",.cost={0},.damage=0,.category=TCG_DAMAGE_NORMAL},
 }
 },
-[1378] = {.id=1378, .name="Magneton", .kind=TCG_POKEMON, .type=8, .rarity=2, .set=20, .set2=255, .dark=0, .holo=1, .flags=0, .origin=20,
+[1378] = {.id=1378, .name="Magneton", .kind=TCG_POKEMON, .type=8, .rarity=2, .set=20, .set2=255, .dark=0, .holo=1, .flags=TCG_CF_READY, .origin=20,
 .hp=70, .stage=1, .species=82, .level=0, .retreat=2, .weakness=0, .resistance=1, .evolvesFrom="Magnemite", .description="", .attacks={
 {.name="Magnetic Flow",.description="Once during your turn (before your attack), if Magneton is your Active Pokemon, you may flip a coin. If heads, choose 2 of your opponent's Pokemon that have Energy cards attached to them. Choose 1 of the Energy cards attached to each of those Pokemon and switch them between the Pokemon. This power can't be used if Magneton is affected by a Special Condition.",.effect="ecard2-H16:p",.animation="ATK_ANIM_HIT",.cost={0,0,0,0,0,0,0,0,0},.damage=0,.category=TCG_POKEMON_POWER},
 {.name="Steel Wave",.description="This attack does 10 damage to each of your opponent's Benched Pokemon that are the same type (color) as the Defending Pokemon. (Don't apply Weakness and Resistance for Benched Pokemon.)",.effect="ecard2-H16:a0",.animation="ATK_ANIM_HIT",.cost={0,0,0,0,0,0,3,0,0},.damage=30,.category=TCG_DAMAGE_NORMAL},

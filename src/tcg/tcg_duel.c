@@ -4,6 +4,7 @@
 #include "tcg/flow.h"
 #include <stdarg.h>
 #include <stdio.h>
+#include <stdlib.h>
 #include <string.h>
 
 void TcgDuel_Log(struct TcgDuel *g, const char *format, ...)
@@ -842,7 +843,14 @@ static void EndTurn(struct TcgDuel *g)
     }
     p->noTrainers = p->noSupporters = 0;
     p->turnBuffs = p->stadiumUsed = 0;
-    p->convCard = 0;   /* (Energy Converter: until the end of the turn) */
+    p->convCard = 0;
+    if (p->asideSize && p->asideUntil <= g->turn)
+    {
+        /* (Tickling Machine: the hand set aside comes back at the end of this player's turn) */
+        while (p->asideSize)
+            p->hand[p->handSize++] = p->aside[--p->asideSize];
+        p->asideUntil = 0;
+    }   /* (Energy Converter: until the end of the turn) */
     /* (the turn's Supporter goes to the discard pile as the turn ends) */
     if (p->supporterCard)
     {
@@ -958,7 +966,7 @@ static int Apply(struct TcgDuel *g, const struct TcgAction *a)
         if (g->phase == TCG_CHOICE)
             return TCG_OK; /* (the next stage of it) */
         TcgDuel_ResolveKnockouts(g);
-        if (g->choiceEndTurn && g->phase == TCG_TURN)
+        if (g->choiceEndTurn && (g->phase == TCG_TURN || g->phase == TCG_PROMOTION))
         {
             g->choiceEndTurn = 0;
             EndTurn(g);
@@ -1574,8 +1582,50 @@ static int Apply(struct TcgDuel *g, const struct TcgAction *a)
             return Error(g, "You can't play Supporter cards this turn.");
         if (TcgPower_NoTrainers(g))
             return Error(g, "Dark Vileplume's Hay Fever: no Trainer cards can be played.");
+        if (TcgDuel_Stadium(g, NULL) == TCG_CARD_GYM1_103 &&
+            (Tcg_Canon(c->id) == TCG_CARD_ENERGY_REMOVAL || Tcg_Canon(c->id) == TCG_CARD_SUPER_ENERGY_REMOVAL) &&
+            p->handSize < 3)
+            return Error(g, "No Removal Gym: discard 2 other cards from your hand to play it.");
         {
+            unsigned s2;
+            for (s2 = 0; s2 < TCG_FIELD_SIZE; s2++)
+                if (TcgPower_Working(g, g->current ^ 1, s2) == TCG_POWER_R_MIND_GAMES)
+                    break;
+            if (s2 < TCG_FIELD_SIZE)
+            {
+                /* Slowking's Mind Games: a Trainer that would play: a coin; heads, it does nothing and goes on top
+                 * of the deck */
+                struct TcgDuel *test = malloc(sizeof(*test));
+                int ok = 0;
+                if (test)
+                {
+                    *test = *g;
+                    ok = TcgDuel_Trainer(test, a) == TCG_OK;
+                    free(test);
+                }
+                if (ok)
+                {
+                    TcgDuel_Event(g, TCG_EV_POWER, g->current ^ 1, s2, TCG_POWER_R_MIND_GAMES,
+                                  TcgDuel_Field(g, g->current ^ 1, s2)->id, 0);
+                    if (TcgDuel_Coin(g, g->current ^ 1))
+                    {
+                        if (c->flags & TCG_CF_SUPPORTER)
+                            p->supporterPlayed = 1;
+                        TcgDuel_Event(g, TCG_EV_TRAINER, g->current, 0, 0, c->id, 0);
+                        p->deck[p->deckSize++] = TcgPile_Remove(p->hand, &p->handSize, a->hand);
+                        TcgDuel_Log(g, "Mind Games: %s does nothing and goes on top of the deck.", c->name);
+                        TcgDuel_Event(g, TCG_EV_DECK_CHANGED, g->current, 0, 0, 0, 0);
+                        return TCG_OK;
+                    }
+                }
+            }
+        }
+        {
+            int noRemoval = TcgDuel_Stadium(g, NULL) == TCG_CARD_GYM1_103 &&
+                            (Tcg_Canon(c->id) == TCG_CARD_ENERGY_REMOVAL || Tcg_Canon(c->id) == TCG_CARD_SUPER_ENERGY_REMOVAL);
             int result = TcgDuel_Trainer(g, a);
+            if (result == TCG_OK && noRemoval && g->phase == TCG_TURN)
+                TcgDuel_AskChoice(g, g->current, TCG_CHOICE_DISCARD2, TCG_CARD_GYM1_103, 1);
             if (result == TCG_OK && g->turnOver)
             {
                 /* Computer Error: the turn is over */
@@ -1777,6 +1827,8 @@ int TcgDuel_Conserved(const struct TcgDuel *g)
             CHECK_CARD(p->discard[i]);
         for (i = 0; i < p->prizeSize; i++)
             CHECK_CARD(p->prizes[i]);
+        for (i = 0; i < p->asideSize && i < 60; i++)
+            CHECK_CARD(p->aside[i]);
         if (p->stadium)
             CHECK_CARD(p->stadium - 1u);
         if (p->supporterCard)
