@@ -8,7 +8,7 @@
 #include <string.h>
 int main(void)
 {
-    unsigned d, s, promos = 0;
+    unsigned d, s, promos = 0, hoenn = 0;
     char reason[128];
     assert(gTcgSpecialDeckCount == TCG_SPECIAL_COUNT);
     for (d = 0; d < gTcgSpecialDeckCount; d++)
@@ -51,9 +51,10 @@ int main(void)
             for (e = 0; e < d; e++)
                 assert(gTcgSpecialPromos[e] != gTcgSpecialPromos[d]); /* each promo has one holder */
             promos++;
+            hoenn += d < TCG_SPECIAL_HOENN_COUNT;
         }
-    assert(promos == 15);
-    printf("PASS %u special decks: legal, %u promo holders, every one plays to the end against each starter\n",
-           gTcgSpecialDeckCount, promos);
+    assert(hoenn == 15); /* (HOENN's; the regional ones each hold a Black Star promo of their region's era) */
+    printf("PASS %u special decks: legal, %u promo holders (%u of them HOENN's), every one plays to the end against each "
+           "starter\n", gTcgSpecialDeckCount, promos, hoenn);
     return 0;
 }
