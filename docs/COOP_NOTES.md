@@ -8161,11 +8161,15 @@ timeline in RED, Crystal's in CRYSTAL). Colours: RED in the Game Boy's greys (sR
 reds). CRYSTAL in Crystal's own BallColors palette for its balls (sGscBallColors, battle_anims.pal's six). Any other ball
 gets a palette of that kind from its sprite (BallPaletteFromSprite: the colour its first frame shows most, with a
 lighter or darker one of the same hue; mostly grey balls such as LUXURY take GRAY). Art comes through
-mp_ballstyle.c MP_BallStyle_ItemArt, because ItemIdToBallId only knows Hoenn's balls. Timing: the throw is fitted to
-KAI's own (sKaiThrowFrames: 234 / 293 / 352 / 411 frames for 0-3 shakes, 703 caught, the same for every ball and ANIM
-SPEED). A longer timeline is spread over that time, a shorter one rests on its last frame, so a friend who sees
-KAI's throw never waits. Measured with MOEMON_ANIMLEN (battle_anim.c: "anim length: KIND ID FRAMES" for every
-animation); `mp forceshakes N` rigs a throw. Scenario gb_ball_throws.
+mp_ballstyle.c MP_BallStyle_ItemArt, because ItemIdToBallId only knows Hoenn's balls. Timing (the user, 2026-11-18:
+fitting it to KAI's left the ball still for a while before the fanfare and the words): the throw plays at its game's
+own pace, as the GENESIS / EPOCH BALLS do (2 shakes 451 frames, a catch 464), and the battle goes on when it ends.
+The way of throwing is the thrower's, on every game: MP_GbThrowStyle (1 RED, 2 CRYSTAL, 0 KAI) rides in the item
+choice's byte 3 (BtlController_EmitOneReturnValue) to the engine (battle_main.c gMpThrowStyle by battler), then in the
+throw's case id bits 5-6 (BtlController_EmitBallThrowAnim; MP_PROTOCOL_VERSION 86); each controller takes it off with
+BtlController_BallCase into gMpThrowStyleShown, which GbThrow reads, so a friend on KAI sees CRYSTAL's throw and both
+wait the same. Measured with MOEMON_ANIMLEN (battle_anim.c: "anim length: KIND ID FRAMES" for every animation);
+`mp forceshakes N` rigs a throw. Scenarios gb_ball_throws, gb_ball_coop.
 
 ### GB OPTIONS stage 3: TRANSITIONS
 
@@ -8217,8 +8221,8 @@ kept as they are. The title screen and the intro before it are never recoloured 
 intro.c MP_IntroShown).
 RED's modes (DMG, POCKET, LIGHT, COLOR, GBA), readable at every hour (the user, 2026-11-18): UI STYLE RED draws no time of
 day (mp_daytint.c Wanted: Red had none), and in a battle the background layer's palettes (BG3 only: sBgsOf) and the
-backdrop take the two light shades, a full-colour background picture too (LightPicLine wraps gMpBgPictureLine
-between PreDraw and PostDraw), as Red's battles are on white.
+backdrop take the lightest shade, a full-colour background picture too (LightPicLine wraps gMpBgPictureLine
+between PreDraw and PostDraw): Red's own battle background, the colour of its text box.
 
 ### GB OPTIONS stage 5: MOVES
 

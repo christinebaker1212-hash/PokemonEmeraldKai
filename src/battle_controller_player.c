@@ -3328,6 +3328,7 @@ static void PlayerHandlePaletteFade(void)
 
 static void PlayerHandleSuccessBallThrowAnim(void)
 {
+    gMpThrowStyleShown = MP_GbThrowStyle();   // Moemon Kai: this player's own throw
     gBattleSpritesDataPtr->animationData->ballThrowCaseId = BALL_3_SHAKES_SUCCESS;
     gDoingBattleAnim = TRUE;
     InitAndLaunchSpecialAnimation(gActiveBattler, gActiveBattler, (gMpCoopWild || (gBattleTypeFlags & BATTLE_TYPE_TRAINER)) ? gBattlerTarget : GetBattlerAtPosition(B_POSITION_OPPONENT_LEFT), B_ANIM_BALL_THROW); // Moemon Co-op; Moemon Kai: a snag flies at the one it's for
@@ -3336,7 +3337,7 @@ static void PlayerHandleSuccessBallThrowAnim(void)
 
 static void PlayerHandleBallThrowAnim(void)
 {
-    u8 ballThrowCaseId = gBattleBufferA[gActiveBattler][1];
+    u8 ballThrowCaseId = BtlController_BallCase(gBattleBufferA[gActiveBattler][1]);   // Moemon Kai: and the thrower's way
 
     if ((ballThrowCaseId == BALL_3_SHAKES_SUCCESS || ballThrowCaseId == BALL_MP_CRITICAL) && gMpCoopWild)
         MP_Coop_NoteOwnCatch(gBattlerTarget);   // Moemon Co-op: kept if the battle is called off

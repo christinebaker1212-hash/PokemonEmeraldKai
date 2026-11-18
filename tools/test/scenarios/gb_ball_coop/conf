@@ -1,0 +1,12 @@
+# GB OPTIONS > BALL THROWS online: ALICE (UI STYLE CRYSTAL) throws a GREAT BALL in a co-op wild battle; her way of
+# throwing goes with the ball, so BOB (UI STYLE KAI) sees Crystal's throw too, at its own pace, whatever his settings
+MODE=2
+WARP=0,16,12,11
+WARP_B=0,16,14,11
+TMO=200
+ENV_A="MOEMON_DEBUG_PARTY=280:40"
+ENV_B="MOEMON_DEBUG_PARTY=280:40"
+EXPECT_A=("legacy anim: EPOCH timeline 9 (case 4)" "co-op wild: caught species" "co-op: battle over")
+EXPECT_B=("legacy anim: EPOCH timeline 9 (case 4)" "co-op: battle over")
+UNEXPECT_A=("(GB OPTIONS, fitted)")
+UNEXPECT_B=("(GB OPTIONS, fitted)")

@@ -416,8 +416,8 @@ u16 MP_GbPal_ObjShade(u8 shade, u8 obp)
 }
 
 // RED's modes in a battle: a full-colour background picture (SINNOH's / UNOVA's backgrounds, WHITE BG's plain one)
-// drawn in the mode's two light shades, by its brightness, so the POKeMON and the words stand out on it as on Red's
-// white (the user, 2026-11-18: DMG was unreadable)
+// drawn in the mode's lightest shade, Red's own battle background (the user, 2026-11-18: DMG was unreadable; "the
+// battle background should be the same color as the background in Red")
 extern void (*gMpBgPictureLine)(int line, uint16_t *layer, int32_t x0, int32_t y0, int32_t dx, int32_t dy);
 static void (*sPicLine)(int line, uint16_t *layer, int32_t x0, int32_t y0, int32_t dx, int32_t dy);
 static void LightPicLine(int line, uint16_t *layer, int32_t x0, int32_t y0, int32_t dx, int32_t dy)
@@ -430,7 +430,7 @@ static void LightPicLine(int line, uint16_t *layer, int32_t x0, int32_t y0, int3
     sPicLine(line, layer, x0, y0, dx, dy);
     for (i = 0; i < 240; i++)
         if (drawn[i])
-            layer[i] = (layer[i] & 0x8000) | four[GbLum(layer[i] & 0x7FFF) >= 16 ? 0 : 1];
+            layer[i] = (layer[i] & 0x8000) | four[0];
 }
 
 static void BattleBackdropLight(void)
@@ -495,7 +495,7 @@ void MP_GbPal_PreDraw(void)
         }
         if (sKind != KIND_CRYSTAL && gMain.inBattle && p < 16 && sBgsOf[p] == (1 << 3))
             for (i = 0; i < 16; i++)
-                shade[i] >>= 1;   // (the battle's background: in the two light shades, as Red's own is white)
+                shade[i] = 0;   // (the battle's background: the lightest shade, as Red's own battles are on white)
         if (sKind != KIND_CRYSTAL && gMain.inBattle && p == 0)
             shade[0] = 0;   // (... and the backdrop the lightest)
         for (i = 0; i < 16; i++)

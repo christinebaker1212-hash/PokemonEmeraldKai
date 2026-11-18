@@ -881,6 +881,15 @@ extern u8 gMpCoopItemTargetSlot;
 extern u8 gMpCoopItemMove;   // a PP item's move in co-op battles (bits 10-11 of the item's action)
 extern u8 gMpCoopBallTarget;   // co-op wild: the battler a ball was aimed at (0xFF = none)
 #define MP_BALL_TARGET_FLAG 0x8000   // item | flag | (battler << 12): a ball with its chosen target
+// GB OPTIONS > BALL THROWS: the way a ball is thrown is the thrower's (1 RED's, 2 CRYSTAL's, 0 KAI's): it rides in the
+// item choice's byte 3 (BtlController_EmitOneReturnValue) to the battle's engine (gMpThrowStyle by battler), then in
+// the throw's case id bits 5-6 (BtlController_EmitBallThrowAnim) to every game, which shows it whatever its own
+// settings (gMpThrowStyleShown: mp_legacy_anim.c)
+#define MP_THROW_STYLE_SHIFT 5
+extern u8 gMpThrowStyle[];   // (by battler: MAX_BATTLERS_COUNT)
+extern u8 gMpThrowStyleShown;
+u8 MP_GbThrowStyle(void);
+u8 BtlController_BallCase(u8 raw);
 void MP_Coop_RefundBall(u8 thrower, u16 item);
 void MP_Emote_KeepBubbleFor(u8 playerId, const u8 *text);
 void MP_Emote_ClearBubbleFor(u8 playerId);

@@ -4978,6 +4978,7 @@ static void HandleTurnActionSelectionState(void)
                     else
                     {
                         gLastUsedItem = (gBattleBufferB[gActiveBattler][1] | (gBattleBufferB[gActiveBattler][2] << 8));
+                        gMpThrowStyle[gActiveBattler] = gBattleBufferB[gActiveBattler][3] & 3;   // Moemon Kai: the thrower's way
                         gBattleCommunication[gActiveBattler]++;
                     }
                     break;

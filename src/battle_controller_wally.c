@@ -1,4 +1,5 @@
 #include "global.h"
+#include "mp.h"
 #include "battle.h"
 #include "battle_anim.h"
 #include "battle_controllers.h"
@@ -1087,6 +1088,7 @@ static void WallyHandlePaletteFade(void)
 
 static void WallyHandleSuccessBallThrowAnim(void)
 {
+    gMpThrowStyleShown = MP_GbThrowStyle();   // Moemon Kai: this player's own throw
     gBattleSpritesDataPtr->animationData->ballThrowCaseId = BALL_3_SHAKES_SUCCESS;
     gDoingBattleAnim = TRUE;
     InitAndLaunchSpecialAnimation(gActiveBattler, gActiveBattler, GetBattlerAtPosition(B_POSITION_OPPONENT_LEFT), B_ANIM_BALL_THROW_WITH_TRAINER);
@@ -1095,7 +1097,7 @@ static void WallyHandleSuccessBallThrowAnim(void)
 
 static void WallyHandleBallThrowAnim(void)
 {
-    u8 ballThrowCaseId = gBattleBufferA[gActiveBattler][1];
+    u8 ballThrowCaseId = BtlController_BallCase(gBattleBufferA[gActiveBattler][1]);   // Moemon Kai: and the thrower's way
 
     gBattleSpritesDataPtr->animationData->ballThrowCaseId = ballThrowCaseId;
     gDoingBattleAnim = TRUE;

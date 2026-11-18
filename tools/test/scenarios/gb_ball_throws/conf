@@ -1,7 +1,8 @@
 # GB OPTIONS > BALL THROWS: with UI STYLE CRYSTAL a GREAT BALL is thrown Crystal's way (mp_legacy_anim.c, the
-# EPOCH BALL's engine, in Crystal's blue), fitted to KAI's own time: 2 shakes take 352 frames, a catch 703, as
-# KAI's throws do (MOEMON_ANIMLEN; mp forceshakes rigs the outcome)
+# EPOCH BALL's engine, in Crystal's blue), at its own pace as the EPOCH BALL's: 2 shakes take 451 frames, a catch 464
+# (MOEMON_ANIMLEN; mp forceshakes rigs the outcome)
 MODE=1
 TMO=150
 ENV_A="MOEMON_DEBUG_PARTY=280:15 MOEMON_ANIMLEN=1"
-EXPECT_A=("legacy anim: EPOCH timeline 7 (case 2), b0 -> b1 (GB OPTIONS, fitted)" "anim length: s 3 352" "legacy anim: EPOCH timeline 9 (case 4), b0 -> b1 (GB OPTIONS, fitted)" "anim length: s 3 703")
+EXPECT_A=("legacy anim: EPOCH timeline 7 (case 2), b0 -> b1" "anim length: s 3 451" "legacy anim: EPOCH timeline 9 (case 4), b0 -> b1" "anim length: s 3 464")
+UNEXPECT_A=("(GB OPTIONS, fitted)")

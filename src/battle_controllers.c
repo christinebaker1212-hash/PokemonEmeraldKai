@@ -1433,10 +1433,20 @@ static void UNUSED BtlController_EmitSuccessBallThrowAnim(u8 bufferId)
     PrepareBufferDataTransfer(bufferId, sBattleBuffersTransferData, 4);
 }
 
+// Moemon Kai: GB OPTIONS > BALL THROWS, the thrower's way of throwing (include/mp.h MP_THROW_STYLE_SHIFT)
+u8 gMpThrowStyle[MAX_BATTLERS_COUNT];
+u8 gMpThrowStyleShown;
+
+u8 BtlController_BallCase(u8 raw)
+{
+    gMpThrowStyleShown = (raw >> MP_THROW_STYLE_SHIFT) & 3;
+    return raw & ((1 << MP_THROW_STYLE_SHIFT) - 1);
+}
+
 void BtlController_EmitBallThrowAnim(u8 bufferId, u8 caseId)
 {
     sBattleBuffersTransferData[0] = CONTROLLER_BALLTHROWANIM;
-    sBattleBuffersTransferData[1] = caseId;
+    sBattleBuffersTransferData[1] = caseId | (gActiveBattler < MAX_BATTLERS_COUNT ? (gMpThrowStyle[gActiveBattler] & 3) << MP_THROW_STYLE_SHIFT : 0);
     PrepareBufferDataTransfer(bufferId, sBattleBuffersTransferData, 2);
 }
 
@@ -1749,7 +1759,7 @@ void BtlController_EmitOneReturnValue(u8 bufferId, u16 ret)
     sBattleBuffersTransferData[0] = CONTROLLER_ONERETURNVALUE;
     sBattleBuffersTransferData[1] = ret;
     sBattleBuffersTransferData[2] = (ret & 0xFF00) >> 8;
-    sBattleBuffersTransferData[3] = 0;
+    sBattleBuffersTransferData[3] = MP_GbThrowStyle();   // Moemon Kai: a ball's way of throwing, this player's
     PrepareBufferDataTransfer(bufferId, sBattleBuffersTransferData, 4);
 }
 

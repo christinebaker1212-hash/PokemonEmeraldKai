@@ -71,10 +71,6 @@ static const struct { u16 item; u8 pal; } sGscBallColors[] = {
     {ITEM_HEAVY_BALL, GSC_GRAY}, {ITEM_LEVEL_BALL, GSC_BROWN}, {ITEM_LURE_BALL, GSC_BLUE}, {ITEM_FAST_BALL, GSC_BLUE},
     {ITEM_FRIEND_BALL, GSC_YELLOW}, {ITEM_MOON_BALL, GSC_GRAY}, {ITEM_LOVE_BALL, GSC_RED},
 };
-// GB OPTIONS > BALL THROWS: how long KAI's own throw takes for each outcome (0-3 shakes, caught; frames of the
-// special animation, the same for every ball and ANIM SPEED: measured with MOEMON_ANIMLEN), which the Game Boy's
-// is fitted to, so a friend seeing KAI's throw is never waited for or kept waiting
-static const u16 sKaiThrowFrames[BALL_3_SHAKES_SUCCESS + 1] = {234, 293, 352, 411, 703};
 // Once the catch is done, Red on the Super Game Boy (pokered SetPal_Battle / BlkPacket_Battle) colors the screen by area,
 // sprites too: the HP bars' palettes (PAL_GREENBAR / YELLOWBAR / REDBAR) and each Pokémon's own
 // palette over its picture. So the caught ball, resting in the foe's picture, takes its colors.
@@ -253,9 +249,17 @@ static const u16 *RedAreaPalette(s32 gx, s32 gy)
 
 // Special_BallThrow: 1 for a GENESIS / EPOCH BALL that isn't blocked (they play their own throw)
 // GB OPTIONS > BALL THROWS: RED / CRYSTAL showing, every ball thrown its game's way
+u8 MP_GbThrowStyle(void)
+{
+    if (MP_Gb_On(MP_GB_KAI_BALLS))
+        return 0;
+    return MP_UiStyle_Active() == UISTYLE_RED ? 1 : MP_UiStyle_Active() == UISTYLE_CRYSTAL ? 2 : 0;
+}
+
+// ... this throw's: the thrower's (gMpThrowStyleShown, set as the throw reaches this game), whatever this player's own
 static bool8 GbThrow(void)
 {
-    return (MP_UiStyle_Active() == UISTYLE_RED || MP_UiStyle_Active() == UISTYLE_CRYSTAL) && !MP_Gb_On(MP_GB_KAI_BALLS);
+    return gMpThrowStyleShown != 0;
 }
 
 // A ball Crystal didn't have, thrown Crystal's way: a palette of Crystal's kind (white, a light and a dark of the
@@ -437,10 +441,10 @@ void AnimTask_MpLegacyBallThrow(u8 taskId)
     sAnim.elapsed = 0;
     if (sAnim.game == MP_SPECIAL_NONE)
     {
-        // GB OPTIONS > BALL THROWS: another ball, thrown the way the style's own game throws, fitted to KAI's time
-        sAnim.game = MP_UiStyle_Active() == UISTYLE_RED ? MP_SPECIAL_GENESIS : MP_SPECIAL_EPOCH;
-        if (caseId <= BALL_3_SHAKES_SUCCESS)
-            sAnim.fit = sKaiThrowFrames[caseId] - LEGACY_THROW_OUTSIDE;
+        // GB OPTIONS > BALL THROWS: another ball, thrown the way the thrower's style's game throws, at that game's own
+        // pace as the GENESIS / EPOCH BALLS are (the shakes, the click, the fanfare and the words together: the
+        // user, 2026-11-18), every player seeing the thrower's way
+        sAnim.game = gMpThrowStyleShown == 1 ? MP_SPECIAL_GENESIS : MP_SPECIAL_EPOCH;
         sAnim.redShades = sRedGrays;
     }
     else

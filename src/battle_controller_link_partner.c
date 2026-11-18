@@ -1240,7 +1240,7 @@ static void LinkPartnerHandleSuccessBallThrowAnim(void)
 static void LinkPartnerHandleBallThrowAnim(void)
 {
     if (gMpCoopWild)
-        LinkPartnerThrowBall(gBattleBufferA[gActiveBattler][1]);
+        LinkPartnerThrowBall(BtlController_BallCase(gBattleBufferA[gActiveBattler][1]));   // Moemon Kai: the thrower's way
     else
         LinkPartnerBufferExecCompleted();
 }
