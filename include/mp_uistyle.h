@@ -129,6 +129,7 @@ struct MpSummaryWords
 };
 void MP_Summary_Words(struct MpSummaryWords *w);
 const u8 *MP_Summary_BallLine(u8 k, u8 *x, u8 *y);
+u8 MP_Summary_BallState(const u8 **effect);
 u8 MP_Options_RowView(u8 row, const u8 **label, const u8 **names, u8 *cur, u8 *buf, u8 *lbuf);   // (NAMES: 8)
 
 // the renderer (gba_easy_draw.c): BG0's pixels a style draws in place of, this frame (y0 <= line < y1, x0 <= x < x1)

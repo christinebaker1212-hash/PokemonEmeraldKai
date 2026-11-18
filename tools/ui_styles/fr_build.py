@@ -795,20 +795,51 @@ class FRPack:
             self.text(row, '-', 164, 0, ink, cond=U.R_EMPTY)
             self.text(row, 'CANCEL', 164, 4, ink, cond=U.R_CANCEL)
             p.spec(row)
-        # the POKé BALL and the JOURNAL: FireRed's window under the header (the page's lines where KAI prints them
-        # in its box; the POKéMON named in the window's free corner, or over the JOURNAL's rows)
-        for k in (4, 5):
+        # the POKé BALL (as approved, 2026-11-18): the INFO page with its tags BALL / COLOR / DECOR / EFFECT (the
+        # second and last rows untagged), the memo the BALL MEMO: "Current ball" (or KAI's question / note), the
+        # buttons, the ball at its right
+        sp = U.Spec('sum.4')
+        g = ground(4, overlay=['page_info.bin'])
+        self.ball_page_ground(g)
+        self.img(sp, 'fr.sum.ball', g)
+        common(sp, 4)
+        ED, ASK, IDLE = U.SB_EDIT, U.SB_ASK, U.SB_IDLE
+        for y, fld, no in ((21, U.F_BALL, 0), (35, U.F_BALLSUB, 0), (50, U.F_BALLCOLOR, U.SB_NOCOLOR),
+                           (65, U.F_BALLDECOR, U.SB_NODECOR), (80, U.F_BALLFX, 0)):
+            self.text(sp, '{%d}' % fld, 167, y, ink, w=238 - 167, b=self.fs + 1, unless=no)
+            if no:   # (a ball that takes no colour or decoration: FireRed's dash for a value that isn't there)
+                self.text(sp, '---', 167, y, ink, cond=no)
+        sp.add(U.OP_ICON, x=218, y=125, a=4)
+        for c in (IDLE, ED):
+            self.text(sp, '{%d}' % U.F_BALLSUB, 12, 114, ink, cond=c, w=190, b=self.fs + 1)
+        keys = {}
+        for name, parts in (('idle', [(12, 'A', 'CHANGE BALL', 130), (12, 'SELECT', None, 144)]),
+                            ('edit', [(12, 'UPDOWN', 'PICK', 130), (None, 'LEFTRIGHT', 'CHANGE', 130),
+                                      (12, 'A', 'OK', 144), (None, 'B', 'CANCEL', 144)])):
+            im = Image.new('RGBA', (240, 160), (0, 0, 0, 0))
+            x = 12
+            for x0, key, word, ky in parts:
+                x = x0 if x0 is not None else x + 8
+                x = st.key(im, x, ky, key) + 3
+                if word:
+                    x = st.text(im, x, ky - 2, word, *ink)
+                else:
+                    keys['fx'] = x
+            keys[name] = p.image('fr.sum.ballkeys.' + name, im)
+        sp.add(U.OP_IMG, x=0, y=0, a=keys['idle'], cond=IDLE)
+        self.text(sp, 'EFFECT: {%d}' % U.F_BALLFX, keys['fx'], 142, ink, cond=IDLE, w=226 - keys['fx'],
+                  b=self.fs + 1)
+        sp.add(U.OP_IMG, x=0, y=0, a=keys['edit'], cond=ED)
+        self.text(sp, '{%d}' % U.F_BALLHELP0, 12, 114, ink, unless=IDLE | ED, w=190, b=self.fs + 1)
+        self.text(sp, '{%d}' % U.F_BALLHELP1, 12, 128, ink, unless=IDLE | ED, w=190, b=self.fs + 1)
+        p.spec(sp)
+        # the JOURNAL: FireRed's window under the header (the POKéMON named over its rows)
+        for k in (5,):
             sp = U.Spec('sum.%d' % k)
             g = ground(k)
             st.frame(g, (0, 16, 240, 160))
             self.img(sp, 'fr.sum.win%d' % k, g)
-            if k == 4:
-                common(sp, k, pic=False, row=None)
-                self.text(sp, '{%d}' % U.F_NAME, 216, 26, F.STD, align=1)
-                self.text(sp, '♂', 219, 26, F.MALE, cond=U.C_MALE)
-                self.text(sp, '♀', 219, 26, F.FEMALE, cond=U.C_FEMALE)
-                sp.add(U.OP_LIST, x=12, y=24, h=0, n=1)
-            else:
+            if True:
                 common(sp, k, pic=False, row=(12, 24, F.STD, F.MALE, F.FEMALE))
                 sp.add(U.OP_MSG, x=12, y=40, a=3, h=14, n=7, w=216, e=self.fs + 1, font=self.fn, ink=F.STD[0],
                        shadow=F.STD[1])
@@ -819,6 +850,47 @@ class FRPack:
                 row.add(U.OP_FILL, x=0, y=0, w=220, h=14, ink=(232, 240, 255), a=255, cond=U.R_NEW)
             self.text(row, '{%d}' % U.F_NAME, 2 if k == 5 else 0, -1 if k == 5 else 0, F.STD, w=216, b=self.fs + 1)
             p.spec(row)
+
+    def ball_page_ground(self, g):
+        """the INFO page's ground made the POKé BALL page's: its six tags (No, NAME, TYPE, OT, IDNo, ITEM) BALL, none,
+        COLOR, DECOR, EFFECT, none (a tag's word box sized to its word, as FireRed's; an untagged row the stripes
+        under it), the memo's tab BALL MEMO"""
+        st = self.st
+        src = g.copy()
+        cream, pill = (255, 246, 238), (123, 131, 148)
+        runs, y = [], 16
+        while y < 112:
+            if src.getpixel((225, y))[:3] == cream:
+                y1 = y
+                while src.getpixel((225, y1))[:3] == cream:
+                    y1 += 1
+                runs.append((y, y1))
+                y = y1
+            y += 1
+        assert len(runs) == 6, runs
+        for tag, (y0, y1) in zip(['BALL', None, 'COLOR', 'DECOR', 'EFFECT', None], runs):
+            prow = [yy for yy in range(y0 - 3, y1 + 3) if src.getpixel((126, yy))[:3] == pill]
+            top = min(yy for yy in range(y0 - 4, y1 + 3) if src.getpixel((140, yy))[:3] == pill)
+            for yy in range(top, prow[-1] + 1) if tag else range(y0 - 4, y1 + 4):
+                c = src.getpixel((123, yy))[:3]
+                for x in range(125 if tag else 123, 162):
+                    if tag is None and src.getpixel((x, yy))[:3] == cream:
+                        continue
+                    g.putpixel((x, yy), ((pill if yy in prow else c) if tag else c) + (255,))
+            if tag:
+                w = st.measure(tag, 's')
+                g.paste(pill + (255,), (144 - w // 2 - 2, top, 144 + (w + 1) // 2 + 2, prow[-1] + 1))
+                st.text(g, 144, top - 2, tag, (255, 255, 255), pill, align='c', font='s')
+        # the memo's tab: its word box retitled
+        prow = [yy for yy in range(98, 114) if src.getpixel((8, yy))[:3] == pill]
+        if prow:
+            top = min(yy for yy in range(96, 114) if src.getpixel((40, yy))[:3] == pill)
+            xs = [x for x in range(4, 120) if src.getpixel((x, top))[:3] == pill]
+            for yy in range(top, prow[-1] + 1):
+                for x in range(xs[0], xs[-1] + 1):
+                    if src.getpixel((x, yy))[:3] in ((255, 255, 255), (98, 106, 123)):
+                        g.putpixel((x, yy), pill + (255,))
+            st.text(g, (xs[0] + xs[-1]) // 2 + 1, top - 2, 'BALL MEMO', (255, 255, 255), pill, align='c', font='s')
 
     def make(self):
         self.fonts()

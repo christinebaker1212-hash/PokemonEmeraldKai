@@ -1,0 +1,94 @@
+pressuntil A field 5000
+mp additem 3 3
+wait 4
+mp uistyle red
+wait 4
+mp summary
+waitfor summary 300
+wait 40
+press RIGHT 1
+wait 30
+press RIGHT 1
+wait 30
+press RIGHT 1
+wait 30
+press RIGHT 1
+wait 30
+wait 20
+shot red_idle
+press A 1
+wait 30
+press RIGHT 1
+wait 30
+shot red_edit
+press A 1
+wait 30
+shot red_ask
+press B 1
+wait 30
+press B 1
+wait 30
+press B 1
+pressuntil B field 600
+wait 20
+mp uistyle crystal
+wait 4
+mp summary
+waitfor summary 300
+wait 40
+press RIGHT 1
+wait 30
+press RIGHT 1
+wait 30
+press RIGHT 1
+wait 30
+press RIGHT 1
+wait 30
+wait 20
+shot crystal_idle
+press A 1
+wait 30
+press RIGHT 1
+wait 30
+shot crystal_edit
+press A 1
+wait 30
+shot crystal_ask
+press B 1
+wait 30
+press B 1
+wait 30
+press B 1
+pressuntil B field 600
+wait 20
+mp uistyle firered
+wait 4
+mp summary
+waitfor summary 300
+wait 40
+press RIGHT 1
+wait 30
+press RIGHT 1
+wait 30
+press RIGHT 1
+wait 30
+press RIGHT 1
+wait 30
+wait 20
+shot firered_idle
+press A 1
+wait 30
+press RIGHT 1
+wait 30
+shot firered_edit
+press A 1
+wait 30
+shot firered_ask
+press B 1
+wait 30
+press B 1
+wait 30
+press B 1
+pressuntil B field 600
+wait 20
+quit

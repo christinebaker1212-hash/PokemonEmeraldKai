@@ -1,0 +1,7 @@
+# The summary's POKé BALL page in RED, CRYSTAL and FIRERED, laid out in each style's own INFO page (approved
+# 2026-11-18): its prompts, a GREAT BALL being chosen (no colour or decoration: FIRERED's dashes), and KAI's question
+# in the style's message box (RED / CRYSTAL) or the BALL MEMO (FIRERED). Look at the shots.
+MODE=1
+TMO=200
+ENV_A="MOEMON_DEBUG_PARTY=280:30"
+UNEXPECT_A=("[crash]" "TIMEOUT")

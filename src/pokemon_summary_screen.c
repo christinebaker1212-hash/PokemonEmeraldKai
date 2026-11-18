@@ -5652,6 +5652,26 @@ bool8 MP_Summary_View(struct MpSummaryView *v)
     return TRUE;
 }
 
+// the POKé BALL page's state for a UI STYLE that lays the page out itself: 0 its prompts (A, SELECT), 1 a ball being
+// chosen, 2 asked to use one, 3 a note or no changing; EFFECT the POKéMON's ball effect's name
+u8 MP_Summary_BallState(const u8 **effect)
+{
+    static u8 sFx[24];
+    struct MpBallFx fx;
+    char name[24];
+    MP_BallFx_OfMon(&sMonSummaryScreen->currentMon, &fx);
+    MP_BallFx_EffectName(&fx, name, sizeof(name));
+    MP_AsciiToGame(sFx, name, sizeof(sFx) - 1);
+    *effect = sFx;
+    if (sMpBall.confirming)
+        return 2;
+    if (sMpBall.editing)
+        return 1;
+    if (sMpBall.note || !MpBall_CanEdit())
+        return 3;
+    return 0;
+}
+
 // the POKé BALL page's line K as it was printed (its place in the page's box)
 const u8 *MP_Summary_BallLine(u8 k, u8 *x, u8 *y)
 {

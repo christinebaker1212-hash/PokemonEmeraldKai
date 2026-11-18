@@ -809,17 +809,75 @@ class GBPack:
                 self.text(row, '{%d}/{%d}' % (U.F_PP, U.F_MAXPP), (ppcol + 8) * 8, 8, align=1,
                           unless=U.R_EMPTY | U.R_CANCEL)
             p.spec(row)
-        # the POKé BALL and the JOURNAL: the whole screen
-        for k in (4, 5):
+        # the POKé BALL (as approved, 2026-11-18): the INFO page's top, the ball's words in the page's own boxes
+        # (RED: BALL / COLOR / DECOR in the window, EFFECT and the buttons in the line box, the ball where RENAME
+        # was; CRYSTAL: the ball and the buttons in the left column, the words in the right), a message box for
+        # KAI's question (use a ball?) and its notes
+        g, sp = new(4)
+        top(4, g, sp)
+        narrow = self.font7 + 1
+        ED, ASK, IDLE = U.SB_EDIT, U.SB_ASK, U.SB_IDLE
+        if red:
+            sp.add(U.OP_ICON, x=184, y=32, a=4)
+            at(sp, 21, 5, 'A', cond=IDLE)
+            at(sp, 22, 6, ':BALL', cond=IDLE)
+            st.window(g, (0, 9 * 8, 19 * 8, 160))
+            st.at(g, 1, 10, 'BALL/')
+            at(sp, 2, 11, '{%d}' % U.F_BALL, w=16 * 8, alt=narrow)
+            at(sp, 2, 12, '{%d}' % U.F_BALLSUB, w=16 * 8, alt=narrow)
+            st.at(g, 1, 14, 'COLOR/')
+            at(sp, 2, 15, '{%d}' % U.F_BALLCOLOR, w=16 * 8, alt=narrow)
+            st.at(g, 1, 17, 'DECOR/')
+            at(sp, 2, 18, '{%d}' % U.F_BALLDECOR, w=16 * 8, alt=narrow)
+            at(sp, 20, 10, 'EFFECT/', unless=ED)
+            at(sp, 21, 11, '{%d}' % U.F_BALLFX, w=8 * 8, alt=narrow, unless=ED)
+            at(sp, 20, 14, 'SELECT', cond=IDLE)
+            at(sp, 21, 15, ':EFFECT', cond=IDLE)
+            at(sp, 20, 10, '▲▼:PICK', cond=ED)
+            at(sp, 20, 12, '◀▶:', cond=ED)
+            at(sp, 21, 13, 'CHANGE', cond=ED)
+            at(sp, 20, 15, 'A:OK', cond=ED)
+            at(sp, 20, 17, 'B:CANCEL', cond=ED)
+            st.line_box(g, 29, 10, 19, 19)
+        else:
+            for row in range(8, 20):
+                st.tile_at(g, stiles[0x31], 9, row)
+            sp.add(U.OP_ICON, x=36, y=88, a=4)
+            # (the left column the ball and its EFFECT; the right the ball's words, the buttons at its foot where
+            # INFO's SELECT:RENAME is)
+            st.at(g, 0, 14, 'EFFECT/')
+            at(sp, 1, 15, '{%d}' % U.F_BALLFX, w=8 * 8, alt=narrow)
+            st.at(g, 10, 9, 'BALL/')
+            at(sp, 11, 10, '{%d}' % U.F_BALL, w=19 * 8, alt=narrow)
+            at(sp, 11, 11, '{%d}' % U.F_BALLSUB, w=19 * 8, alt=narrow)
+            st.at(g, 10, 12, 'COLOR/')
+            at(sp, 11, 13, '{%d}' % U.F_BALLCOLOR, w=19 * 8, alt=narrow)
+            st.at(g, 10, 14, 'DECOR/')
+            at(sp, 11, 15, '{%d}' % U.F_BALLDECOR, w=19 * 8, alt=narrow)
+            at(sp, 10, 17, 'A:BALL', cond=IDLE)
+            at(sp, 30, 17, 'SELECT:EFFECT', cond=IDLE, align=1)
+            at(sp, 10, 17, '▲▼:PICK', cond=ED)
+            at(sp, 30, 17, '◀▶:CHANGE', cond=ED, align=1)
+            at(sp, 10, 18, 'A:OK', cond=ED)
+            at(sp, 30, 18, 'B:CANCEL', cond=ED, align=1)
+        # (KAI's question and notes: the games' message box over the page's foot)
+        box = Image.new('RGBA', (240, 160), (0, 0, 0, 0))
+        st.window(box, (0, 14 * 8, 240, 160), 'message')
+        box = box.crop((0, 14 * 8, 240, 160))
+        boxk = p.image('%s.sum4.box' % self.kind, box)
+        for cond, unless in ((ASK, 0), (0, IDLE | ED | ASK)):
+            sp.add(U.OP_IMG, x=0, y=14 * 8, a=boxk, cond=cond, unless=unless)
+            at(sp, 1, 16, '{%d}' % U.F_BALLHELP0, w=28 * 8, alt=narrow, cond=cond, unless=unless)
+            at(sp, 1, 18, '{%d}' % U.F_BALLHELP1, w=28 * 8, alt=narrow, cond=cond, unless=unless)
+        done(sp, g, 4)
+        # the JOURNAL: the whole screen
+        for k in (5,):
             g = Image.new('RGBA', (240, 160), paper + (255,))
             sp = U.Spec('sum.%d' % k)
             st.window(g, (0, 8, 240, 160))
             at(sp, 0, 0, '{%d}' % U.F_PAGETITLE)
             st.at(g, 27, 0, '%d/6' % (k + 1))
-            if k == 4:
-                at(sp, 13, 0, '{%d}' % U.F_NAME)   # (on the title's row: the page's lines take the box to its foot)
-                sp.add(U.OP_LIST, x=8, y=16, h=0, n=1)
-            else:
+            if True:
                 at(sp, 1, 2, '{%d}' % U.F_NAME)
                 # (a blank row between lines as the games' own text has them; a page that needs more rows than that
                 # gives them all, eight pixels apart)

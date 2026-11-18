@@ -139,6 +139,13 @@ enum { OP_IMG = 1, OP_TEXT, OP_BAR, OP_FILL, OP_MSG, OP_LONG, OP_BACKING, OP_IMG
                        // 7 nothing)
 #define F_PAGETITLE 160
 #define F_CREATURES 161   // (val) 1 when the game says POKéMON (OPTIONS > CREATURES), 0 MOéMON
+#define F_BALL 162        // the POKé BALL page's words, for a style that lays it out itself: the ball (with < > while
+#define F_BALLSUB 163     // it's chosen), "Current ball" / "In bag: N", COLOR's and DECOR's values, the effect's name,
+#define F_BALLCOLOR 164   // the page's two help lines as KAI prints them (asked to use a ball, a note)
+#define F_BALLDECOR 165
+#define F_BALLFX 166
+#define F_BALLHELP0 167
+#define F_BALLHELP1 168
 #define C_LV3 (1u << 0)
 #define C_MALE (1u << 1)
 #define C_FEMALE (1u << 2)
@@ -179,6 +186,11 @@ enum { OP_IMG = 1, OP_TEXT, OP_BAR, OP_FILL, OP_MSG, OP_LONG, OP_BACKING, OP_IMG
 #define SM_RENAME (1u << 29)   // ... SELECT renames it
 #define SM_CLEAREV (1u << 30)  // ... START clears its EVs (the EV view)
 #define SM_EGG (1u << 31)
+#define SB_EDIT (1u << 20)     // the POKé BALL page (its own meanings of SM_EV / SM_IV / SM_CLEAREV): a ball being chosen,
+#define SB_ASK (1u << 21)      // ... asked to use one, ... its prompts (A changes the ball, SELECT the effect)
+#define SB_IDLE (1u << 30)
+#define SB_NOCOLOR (1u << 10)  // ... a ball that takes no colour, no decoration (the SKILLS page's nature bits)
+#define SB_NODECOR (1u << 11)
 #define R_NEW (1u << 27)       // a summary move row: the move to learn
 #define R_CANCEL (1u << 28)    // ... CANCEL (choosing a move)
 #define R_EMPTY (1u << 29)     // ... no move
@@ -976,6 +988,14 @@ static const u8 *CodeWord(u8 c, u8 arg)
     return NULL;
 }
 
+// a button written as its letters with a word straight after it ({A}OK): a space between them, as the icon had
+// its own room ("A OK", never "AOK")
+static bool8 KeyGap(u8 c, const u8 *s, int i, int n)
+{
+    return c == CHAR_KEYPAD_ICON && i < n && s[i] != EOS && s[i] != CHAR_SPACE && s[i] != CHAR_NEWLINE
+        && s[i] != CHAR_KEYPAD_ICON && s[i] != CHAR_COLON;
+}
+
 // one line of S (up to a new line or its end; N bytes at most): its width in F
 static int Width(const struct UiFont *f, const u8 *s, int n)
 {
@@ -994,6 +1014,8 @@ static int Width(const struct UiFont *f, const u8 *s, int n)
             const u8 *k = CodeWord(c, s[i++]);
             while (*k != EOS)
                 w += f->g[*k++].adv;
+            if (KeyGap(c, s, i, n))
+                w += f->g[CHAR_SPACE].adv;
             continue;
         }
         if (c == PLACEHOLDER_BEGIN || c == CHAR_DYNAMIC || c == CHAR_KEYPAD_ICON || c == CHAR_EXTRA_SYMBOL)
@@ -1071,6 +1093,8 @@ static int Line(struct Surf *s, const struct UiFont *f, const u8 *str, int n, in
                 Glyph(s, f, *k, x, y, ink, shadow, outline, clipY);
                 x += f->g[*k++].adv;
             }
+            if (KeyGap(c, str, i, n))
+                x += f->g[CHAR_SPACE].adv;
             continue;
         }
         if (c == PLACEHOLDER_BEGIN || c == CHAR_DYNAMIC || c == CHAR_KEYPAD_ICON || c == CHAR_EXTRA_SYMBOL)
@@ -3054,6 +3078,47 @@ static void SummaryScreen(struct UiPack *p, u16 *frame)
         if (v.statusSprite < MAX_SPRITES && gSprites[v.statusSprite].inUse && !gSprites[v.statusSprite].invisible)
             d.flags |= C_STATUS | (1u << (3 + StatusOf(status)));
     }
+    if (v.page == 4)
+    {
+        // (the POKé BALL page's words by where KAI prints them: a style lays them out in its own page)
+        static const u8 sNotFor[] = _("Not for this ball");   // (pokemon_summary_screen.c MpBall_Draw's words)
+        const u8 *fx = NULL;
+        u8 state = MP_Summary_BallState(&fx), help = 0;
+        d.flags &= ~(SM_EV | SM_IV | SM_CLEAREV | SM_CHOOSING | SM_LEARN | (0x3FFu << 10));
+        d.flags |= state == 0 ? SB_IDLE : state == 1 ? SB_EDIT : state == 2 ? SB_ASK : 0;
+        d.str[F_BALLFX] = fx;
+        for (i = 0; i < v.ballBox; i++)
+        {
+            u8 x, y;
+            const u8 *t = MP_Summary_BallLine(i, &x, &y);
+            if (t == NULL)
+                break;
+            if (y < 9)
+                d.str[F_BALL] = t;
+            else if (y < 33)
+                d.str[F_BALLSUB] = t;
+            else if (y < 60)
+            {
+                if (x >= 40)
+                {
+                    d.str[F_BALLCOLOR] = t;
+                    if (StringCompare(t, sNotFor) == 0)
+                        d.flags |= SB_NOCOLOR;
+                }
+            }
+            else if (y < 90)
+            {
+                if (x >= 40)
+                {
+                    d.str[F_BALLDECOR] = t;
+                    if (StringCompare(t, sNotFor) == 0)
+                        d.flags |= SB_NODECOR;
+                }
+            }
+            else if (help < 2)
+                d.str[F_BALLHELP0 + help++] = t;
+        }
+    }
     if (v.page == 5 && v.mon)
     {
         // (every sentence of the JOURNAL, a line each, laid out in the style's own box and turned a page at a time
@@ -3210,7 +3275,8 @@ static void SummaryScreen(struct UiPack *p, u16 *frame)
         RedrawSprite(frame, s, icon[wi][0] - (s->x + s->x2), icon[wi][1] - (s->y + s->y2));
     }
     // (the POKé BALL page's ball where the style's box puts the page's lines)
-    if (v.ballIcon < MAX_SPRITES && list && gSprites[v.ballIcon].inUse && !gSprites[v.ballIcon].invisible)
+    if (v.ballIcon < MAX_SPRITES && (list || icon[4][0] >= 0) && gSprites[v.ballIcon].inUse
+     && !gSprites[v.ballIcon].invisible)
     {
         // (where the page's ICON 4 says, its middle there; else Kai's place from the box's corner)
         struct Sprite *b = &gSprites[v.ballIcon];

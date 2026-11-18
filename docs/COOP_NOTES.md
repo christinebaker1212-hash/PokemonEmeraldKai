@@ -8306,3 +8306,17 @@ games' own tiles ($E1 / $E2), the level mark the battle font's, POKéBLOCK's fiv
 game's UP_ARROW / RIGHT_ARROW codes, and the d-pad's icons ({UPDOWN}, {LEFTRIGHT}, {DPAD_UP}...) are written with them
 in every style (mp_uistyle.c KeypadWord). Only kana are left as ?. FIRERED's builder pictures draw any code by FireRed's
 own font (fr.py code()).
+
+### The POKé BALL page in RED / CRYSTAL / FIRERED (1.204.4)
+Approved mock-up: docs/ui_styles/mockups/pokeball_page_gb_fr.png. The page is built on each style's INFO page (gb_build.py
+summary "the POKé BALL", fr_build.py summary + ball_page_ground) instead of Kai's lines in a plain box. mp_uistyle.c
+SummaryScreen hands the page's words over as fields, sorted by where pokemon_summary_screen.c MpBall_Draw prints them:
+F_BALL (y 1), F_BALLSUB (y 17), F_BALLCOLOR / F_BALLDECOR (x 52 at y 41 / 81), F_BALLHELP0/1 (the help lines), F_BALLFX
+(MP_Summary_BallState's effect name), and flags SB_IDLE (A / SELECT prompts), SB_EDIT (choosing a ball), SB_ASK (use a
+ball?), none (a note, or can't change it), SB_NOCOLOR / SB_NODECOR ("Not for this ball": FIRERED shows ---). These reuse
+SKILLS-only bits (SM_EV / SM_IV / SM_CLEAREV, the nature bits), cleared on page 4. The ball sprite goes to the spec's
+ICON 4. RED: BALL / COLOR / DECOR in the window, EFFECT and the buttons in the line box, the ball where RENAME is; CRYSTAL:
+the ball and EFFECT in the left column, the words and buttons on the right; both put KAI's question and notes in a message
+box over the foot. FIRERED: tags BALL / - / COLOR / DECOR / EFFECT / -, the memo BALL MEMO with the buttons as FireRed's
+keypad icons. PLATINUM / BLACK keep Kai's lines (OP_LIST "sum.4.row"). A button written as letters ({A}OK) gets a space
+before a word that follows it (mp_uistyle.c KeyGap). Scenario ui_style_ballpage.

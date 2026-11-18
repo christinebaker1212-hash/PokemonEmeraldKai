@@ -64,7 +64,7 @@ F_PP, F_MAXPP, F_TYPE = 32, 33, 34
 F_TEXT0 = 40           # a captured window's words (the battle's message, its prompt...): F_TEXT0 + window
 
 
-EXTRA_CODES = {'◀': 0x7B, '▼': 0x7A}   # (characters the game's charset has no letter for, at its LEFT_ARROW and
+EXTRA_CODES = {'◀': 0x7B, '▼': 0x7A, '▲': 0x79}   # (characters the game's charset has no letter for, at its LEFT_ARROW and
 #                                        DOWN_ARROW codes; a style's font draws them)
 
 
@@ -158,6 +158,10 @@ SNAP = -1                                 # (render()'s DATA: the picture OP_SNA
 F_STAT0, F_IV0, F_EV0, F_TYPE1, F_TYPE2 = 107, 112, 118, 124, 125
 F_POWER, F_ACC, F_APPEAL, F_JAM, F_RIBBONS, F_PAGENO, F_JPAGE, F_CTYPE, F_PROMPT, F_PAGETITLE = range(151, 161)
 F_CREATURES = 161       # (val) 1 when the game says POKéMON (OPTIONS > CREATURES), 0 MOéMON
+# the POKé BALL page's words (the ball, "Current ball" / "In bag: N", COLOR's, DECOR's, the effect, KAI's two help lines)
+F_BALL, F_BALLSUB, F_BALLCOLOR, F_BALLDECOR, F_BALLFX, F_BALLHELP0, F_BALLHELP1 = range(162, 169)
+SB_EDIT, SB_ASK, SB_IDLE = 1 << 20, 1 << 21, 1 << 30   # (the POKé BALL page) a ball being chosen, asked, its prompts
+SB_NOCOLOR, SB_NODECOR = 1 << 10, 1 << 11             # ... a ball that takes no colour, no decoration
 SM_EV, SM_IV, SM_CHOOSING = 1 << 20, 1 << 21, 1 << 23
 SM_LEARN, SM_TWOTYPES, SM_MEMOPLAIN, SM_RENAME, SM_CLEAREV, SM_EGG = (1 << 26, 1 << 27, 1 << 28, 1 << 29, 1 << 30,
                                                                       1 << 31)
