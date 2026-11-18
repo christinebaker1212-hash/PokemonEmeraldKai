@@ -231,6 +231,17 @@ static const struct TcgStep *RegionPowerSteps(unsigned power, int *count)
     case TCG_POWER_R_ENERGY_JUMP:
         STEPS({TCG_ST_PICK, TCG_F_ENERGY, TCG_SRC_MY_FIELD_ATTACHED, 1, 1, "Move which Energy?"},
               {TCG_ST_MY_SLOT, TCG_F_OTHER_HOLDER, 0, 0, 0, "Move it to which Pokemon?"});
+    case TCG_POWER_R_HAPPY_HEALING:
+        STEPS({TCG_ST_MY_SLOT, TCG_F_BENCH, 0, 0, 0, "Heal which Benched Pokemon? (a coin)"});
+    case TCG_POWER_R_FIRE_RECHARGE:
+        STEPS({TCG_ST_MY_SLOT, TCG_F_FIRE_POKEMON, 0, 0, 0, "If heads, attach a Fire Energy to which Fire Pokemon?"});
+    case TCG_POWER_R_MOONLIGHT:
+        STEPS({TCG_ST_PICK, TCG_F_ANY, TCG_SRC_HAND, 1, 1, "Put which card back on your deck?"},
+              {TCG_ST_PICK, TCG_F_BASIC_ENERGY, TCG_SRC_DECK, 0, 1, "Take which basic Energy?"});
+    case TCG_POWER_R_GAZE:
+        STEPS({TCG_ST_OPP_SLOT, TCG_F_HAS_POWER, 0, 0, 0, "Stop which of their Benched Pokemon's power?"});
+    case TCG_POWER_R_DOWNPOUR:
+        STEPS({TCG_ST_PICK, TCG_F_WATER_ENERGY, TCG_SRC_HAND, 1, 1, "Discard which Water Energy?"});
     case TCG_POWER_R_ENERGY_CONNECT:
         STEPS({TCG_ST_PICK, TCG_F_BASIC_ENERGY, TCG_SRC_MY_BENCH_ATTACHED, 1, 1, "Move which basic Energy to your Active?"});
     }

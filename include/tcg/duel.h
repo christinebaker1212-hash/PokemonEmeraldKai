@@ -353,7 +353,8 @@ enum
 {
     TCG_BUFF_MISTY = 1, /* Misty: 20 more from a Pokemon with Misty in its name */
     TCG_BUFF_KOGA = 2,  /* Koga: a Koga Pokemon's damage Poisons */
-    TCG_BUFF_PARK = 4   /* Pokemon Park healed this turn */
+    TCG_BUFF_PARK = 4,  /* Pokemon Park healed this turn */
+    TCG_BUFF_TAILWIND = 8 /* Tailwind: the Active's Retreat Cost is 0 this turn */
 };
 /* That card (Tcg_Canon) attached to that Pokemon: its card, else -1 */
 int TcgDuel_AttachedCard(const struct TcgDuel *g, unsigned who, unsigned slot, unsigned canon);
@@ -410,7 +411,8 @@ enum
     TCG_APICK_FIELD_FIRE,     /* Burning Fire: the option's number of Fire Energy cards from any of your Pokemon */
     TCG_APICK_MOVE_FOE_ENERGY, /* Magnetic Lines: one of the Defending's basic Energy (then target: where it goes) */
     TCG_APICK_DECK_BASIC,     /* a basic Energy from the deck onto the attacker (count: its type, 15 any) */
-    TCG_APICK_FIELD_MOVE      /* a basic Energy on one of yours, then target: another of yours it moves to */
+    TCG_APICK_FIELD_MOVE,     /* a basic Energy on one of yours, then target: another of yours it moves to */
+    TCG_APICK_DISCARD_CARD    /* a card of a discard pile (count 0 yours, 1 theirs) */
 };
 unsigned TcgDuel_AttackPick(const struct TcgAttack *attack, unsigned *count);
 /* (TCG_APICK_FAMILY / _EVOLUTION) Can this card be taken by the attacker's attack? */

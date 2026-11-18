@@ -320,7 +320,7 @@ unsigned TcgDuel_RetreatCost(const struct TcgDuel *g, unsigned player)
         /* the regional Stadiums: The Rocket's Training Gym 1 more; Broken Ground Gym 1 more for a Basic (or Baby);
          * Cerulean City Gym 1 less for a Misty Pokemon. Balloon Berry: it pays the whole cost */
         unsigned stadium = TcgDuel_Stadium(g, NULL);
-        if (TcgDuel_AttachedCard(g, player, 0, TCG_CARD_NEO3_60) >= 0)
+        if (TcgDuel_AttachedCard(g, player, 0, TCG_CARD_NEO3_60) >= 0 || (g->players[player].turnBuffs & TCG_BUFF_TAILWIND))
             return 0;
         if (stadium == TCG_CARD_GYM1_104 || (stadium == TCG_CARD_NEO4_92 && !c->stage))
             cost++;
@@ -1238,6 +1238,9 @@ void TcgPower_Sanitize(struct TcgDuel *g)
                 f->condition = TCG_HEALTHY;
                 f->poison = 0;
             }
+            /* (Poison Resistance) */
+            if (c && f->poison && TcgPower_Working(g, who, s) == TCG_POWER_R_POISON_RESISTANCE)
+                f->poison = 0;
         }
 }
 void TcgPower_StrikesBack(struct TcgDuel *g, const uint16_t before[TCG_FIELD_SIZE], unsigned activeCondition)

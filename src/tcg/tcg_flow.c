@@ -332,6 +332,13 @@ static int AttackPickSteps(const struct TcgDuel *g, unsigned me, const struct Tc
         out[n++] = st;
         break;
     }
+    case TCG_APICK_DISCARD_CARD:
+    {
+        struct TcgStep st = {TCG_ST_PICK, TCG_F_ANY, count ? TCG_SRC_OPP_DISCARD : TCG_SRC_MY_DISCARD, 0, 1,
+                             "If heads, put which card on top of the deck?"};
+        out[n++] = st;
+        break;
+    }
     case TCG_APICK_FIELD_MOVE:
     {
         /* (only when there's a basic Energy and somewhere else for it) */
@@ -632,6 +639,10 @@ int TcgFlow_SlotMatches(const struct TcgDuel *g, unsigned me, const struct TcgAc
         return c && slot != a->target;
     case TCG_F_WATER_POKEMON:
         return c && c->kind == TCG_POKEMON && TcgDuel_Type(g, who, slot) == TCG_WATER;
+    case TCG_F_FIRE_POKEMON:
+        return c && c->kind == TCG_POKEMON && TcgDuel_Type(g, who, slot) == TCG_FIRE;
+    case TCG_F_HAS_POWER:
+        return c && slot && TcgPower_Id(c) != TCG_POWER_NONE;
     case TCG_F_ROOM_OTHER:
         return c && slot != a->target && f->damage + 10u < (c->kind == TCG_TRAINER ? 10u : c->hp);
     case TCG_F_DAMAGED_OTHER:

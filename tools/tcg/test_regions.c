@@ -6,6 +6,7 @@
 #include "tcg/flow.h"
 #include <assert.h>
 #include <stdio.h>
+#include <stdlib.h>
 #include <string.h>
 static void Deck(uint16_t *cards, unsigned id)
 {
@@ -27,6 +28,8 @@ static void Deck(uint16_t *cards, unsigned id)
     cards[57] = TCG_CARD_DIGLETT;
     cards[58] = id;
     cards[59] = id;
+    if (Tcg_Card(id) && (Tcg_Card(id)->flags & TCG_CF_SHINING))
+        cards[59] = TCG_CARD_POTION; /* (one Shining Pokemon a deck) */
 }
 static int Take(struct TcgDuel *g, unsigned who, unsigned id)
 {
@@ -63,7 +66,11 @@ static void Stage(struct TcgDuel *g, unsigned id, unsigned attack, uint32_t seed
     unsigned t, who;
     Deck(a, id);
     Deck(b, TCG_CARD_DIGLETT);
-    assert(TcgDuel_Init(g, a, b, seed, 6));
+    if (!TcgDuel_Init(g, a, b, seed, 6))
+    {
+        printf("FAIL a deck with two of %s (%u) was refused\n", Tcg_Card(id) ? Tcg_Card(id)->name : "?", id);
+        exit(1);
+    }
     for (who = 0; who < 2; who++)
     {
         while (g->players[who].handSize)

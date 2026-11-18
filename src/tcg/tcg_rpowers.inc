@@ -197,7 +197,8 @@ void TcgPower_AfterAttach(struct TcgDuel *g, unsigned player, unsigned slot, uns
     struct TcgFieldCard *f = &p->field[slot];
     unsigned power = TcgPower_Working(g, player, slot), id = p->cards[physical], s, who, i;
     if ((power == TCG_POWER_R_PURE_BODY_WATER && id == TCG_CARD_WATER_ENERGY) ||
-        (power == TCG_POWER_R_PURE_BODY_FIRE && id == TCG_CARD_FIRE_ENERGY))
+        (power == TCG_POWER_R_PURE_BODY_FIRE && id == TCG_CARD_FIRE_ENERGY) ||
+        (power == TCG_POWER_R_PURE_BODY_LIGHTNING && id == TCG_CARD_LIGHTNING_ENERGY))
     {
         /* an Energy card already on it is discarded (the oldest) */
         for (i = 0; i < f->attachedSize; i++)
@@ -209,7 +210,8 @@ void TcgPower_AfterAttach(struct TcgDuel *g, unsigned player, unsigned slot, uns
             }
     }
     if ((power == TCG_POWER_R_SELF_HEALING_FIRE && id == TCG_CARD_FIRE_ENERGY) ||
-        (power == TCG_POWER_R_SELF_HEALING_LIGHTNING && id == TCG_CARD_LIGHTNING_ENERGY))
+        (power == TCG_POWER_R_SELF_HEALING_LIGHTNING && id == TCG_CARD_LIGHTNING_ENERGY) ||
+        (power == TCG_POWER_R_SELF_HEALING_WATER && id == TCG_CARD_WATER_ENERGY))
     {
         if (f->condition || f->poison || f->burned)
         {
@@ -244,6 +246,8 @@ unsigned TcgPower_EnergyType(const struct TcgDuel *g, unsigned player, unsigned 
         return TCG_DARKNESS;
     if (power == TCG_POWER_R_PHOTOSYNTHESIS)
         return TCG_GRASS;
+    if (power == TCG_POWER_R_RARE_METAL && type < TCG_COLORLESS)
+        return TCG_METAL;
     if (type == TCG_GRASS && amount && *amount == 1)
     {
         const struct TcgCard *c = TcgDuel_Field(g, player, slot);
