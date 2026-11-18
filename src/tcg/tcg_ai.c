@@ -1144,7 +1144,8 @@ static int Act(const struct TcgDuel *g, struct TcgAction *a)
                 if (!c || c->kind != TCG_POKEMON || !EnergyHelps(g, g->current, s, energy))
                     continue;
                 if ((Tcg_EnergyRule(energy->id) == TCG_ER_BOOST && g->players[g->current].field[s].stackSize < 2) ||
-                    TcgPower_AttachBlock(g, g->current, s, energy->id))
+                    TcgPower_AttachBlock(g, g->current, s, energy->id) ||
+                    (!s && g->players[g->current].noAttachActive >= g->turn))
                     continue;
                 score = s == 0 ? 40 : 0;
                 /* (Darkness Energy hurts a Pokemon that isn't Dark; Metal Energy weakens one that isn't Metal) */

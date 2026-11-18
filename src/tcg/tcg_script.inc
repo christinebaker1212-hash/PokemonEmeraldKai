@@ -173,6 +173,11 @@ static int ScriptCond(const struct TcgDuel *g, const char *cond)
     if (cond[0] == 'o' && cond[1] >= '0' && cond[1] <= '9')
         return sScriptOption == (unsigned)atoi(cond + 1);
     /* pg5: their Prizes 5 or more; pzN: exactly N; eXY: it has basic Energy cards of types X and Y */
+    if (!strcmp(cond, "dhp50"))
+    {
+        const struct TcgCard *d = TcgDuel_Field(g, g->current ^ 1, 0);
+        return d && d->kind == TCG_POKEMON && d->hp <= 50;
+    }
     if (!strcmp(cond, "pg5"))
         return g->players[g->current ^ 1].prizeSize >= 5;
     if (cond[0] == 'p' && cond[1] == 'z')
@@ -1792,6 +1797,32 @@ static int ScriptRun(struct TcgDuel *g, const char *script, const struct TcgAtta
                 for (k = t->attachedSize; k > 0; k--)
                     if (CardAt(g, me, t->attached[k - 1])->kind == TCG_ENERGY)
                         p->discard[p->discardSize++] = TcgPile_Remove(t->attached, &t->attachedSize, k - 1);
+            }
+        }
+        else if (ScriptIs(&o, "noatt"))
+        {
+            if (!blocked)
+                op->noAttachActive = (uint16_t)(g->turn + 1);
+        }
+        else if (ScriptIs(&o, "noevo"))
+        {
+            if (!blocked && foe->stackSize)
+                foe->noEvolveUntil = (uint16_t)(g->turn + 1);
+        }
+        else if (ScriptIs(&o, "deall"))
+        {
+            /* an Energy card of each of theirs that has any discarded (a Special one first) */
+            for (s = 0; s < TCG_FIELD_SIZE; s++)
+            {
+                struct TcgFieldCard *t = &op->field[s];
+                uint8_t list[TCG_DECK_SIZE];
+                unsigned have = t->stackSize && (s || !blocked) ? Attached(g, them, s, TCG_ENERGY, list) : 0, k, pick;
+                if (!have)
+                    continue;
+                for (k = 0, pick = list[0]; k < have; k++)
+                    if (CardAt(g, them, t->attached[list[k]])->id > 6)
+                        pick = list[k];
+                op->discard[op->discardSize++] = TcgPile_Remove(t->attached, &t->attachedSize, pick);
             }
         }
         else if (ScriptIs(&o, "noconds"))

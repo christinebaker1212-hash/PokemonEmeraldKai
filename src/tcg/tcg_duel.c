@@ -429,6 +429,7 @@ static void ClearCondition(struct TcgFieldCard *f)
     f->disabled = f->destinyBond = f->weakAs = f->resistAs = 0;
     f->lockTurn = f->lockAttack = f->mirrorShell = f->charge3 = f->fossilBoost = 0;
     f->stuck = f->stuckBy = f->blindAll = f->noAttackAll = 0;
+    f->noEvolveUntil = 0;
 }
 /* What the opponent's last attack did to it (Mirror Move) */
 static void ClearMirror(struct TcgFieldCard *f)
@@ -519,7 +520,8 @@ int TcgDuel_CanEvolveNow(const struct TcgDuel *g, unsigned who, unsigned slot)
 {
     const struct TcgPlayer *p = &g->players[who];
     const struct TcgFieldCard *f = &p->field[slot];
-    return f->stackSize && ((p->turnsTaken >= 2 && f->enteredTurn != g->turn) || f->freeEvolve == g->turn + 1u);
+    return f->stackSize && f->noEvolveUntil < g->turn &&
+           ((p->turnsTaken >= 2 && f->enteredTurn != g->turn) || f->freeEvolve == g->turn + 1u);
 }
 int TcgDuel_LaterStage(const struct TcgCard *evolution, const struct TcgCard *from)
 {
@@ -1323,6 +1325,8 @@ static int Apply(struct TcgDuel *g, const struct TcgAction *a)
             return Error(g, "Boost Energy can be attached only to an Evolved Pokemon.");
         if (TcgPower_AttachBlock(g, g->current, s, c->id))
             return Error(g, "That Energy can't be attached to this Pokemon (its power).");
+        if (!s && p->noAttachActive >= g->turn)
+            return Error(g, "No Energy can be attached to your Active Pokemon this turn.");
         /* (Boost Energy: discarded at the end of the turn) */
         if (Tcg_EnergyRule(c->id) == TCG_ER_BOOST)
             p->attachmentExpires[p->hand[a->hand]] = g->turn;

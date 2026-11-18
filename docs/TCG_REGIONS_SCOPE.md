@@ -5,23 +5,23 @@ plays (tools/tcg/regions/effects.py); only finished cards appear in the game.
 
 | Set | Cards | Finished |
 |---|---|---|
-| gym1 | 126 | 104 |
-| gym2 | 126 | 96 |
+| gym1 | 126 | 105 |
+| gym2 | 126 | 98 |
 | neo1 | 105 | 88 |
 | neo2 | 75 | 51 |
 | neo3 | 66 | 33 |
 | neo4 | 113 | 72 |
 | ecard1 | 159 | 146 |
 | ecard2 | 182 | 157 |
-| ecard3 | 182 | 147 |
+| ecard3 | 182 | 149 |
 | basep | 53 | 34 |
 | np | 40 | 27 |
-| **all** | 1227 | 955 |
+| **all** | 1227 | 960 |
 
 ## Rules the engine doesn't play yet (cards needing each)
 
 
-## Wordings to translate (251; the most cards first)
+## Wordings to translate (246; the most cards first)
 
 - 3 x POWER: Entei (neo3-17): As long as Entei is your Active Pokemon, Entei and Energy cards attached to it aren't affected by effects from Trainer cards other than Stadium cards. As long as this Power is active, discard any Trainer cards attached to E
 - 2 x attack: Koga's Beedrill (gym2-9): Flip a coin. If tails, this attack does nothing. Either way, you can't use this attack again as long as Koga's Beedrill stays in play (even putting Koga's Beedrill on the Bench won't let you use it again).
@@ -44,7 +44,6 @@ plays (tools/tcg/regions/effects.py); only finished cards appear in the game.
 - 2 x POWER: Tentacruel (ecard2-38): Once during your turn (before your attack), as long as the number of Energy cards attached to the Defending Pokemon is less than the number of Energy cards attached to your Active Pokemon, you may choose an Energy ca
 - 2 x POWER: Togetic (ecard2-39): Once during your turn (before your attack), discard a basic Energy card attached to 1 of your Pokemon. Then, choose a basic Energy card from your discard pile and attach it to that Pokemon. This power can't be used if T
 - 2 x POWER: Umbreon (ecard2-41): As long as Umbreon is your Active Pokemon and has a Darkness Energy attached to it, once during your turn (before your attack), you may look at your opponent's hand. Choose from it a number of cards up to the number of 
-- 2 x attack: Dewgong (ecard3-7): Flip a coin. If heads, your opponent can't attach Energy cards from his or her hand to his or her Active Pokemon during his or her next turn.
 - 2 x POWER: Gengar (ecard3-10): When you play Gengar from your hand to evolve your Active Pokemon, you may put a Basic Pokemon (excluding Baby Pokemon) from your discard pile onto your Bench. Then, flip 3 coins. For each heads, choose a basic Energy ca
 - 2 x BODY: Kabutops (ecard3-14): As long as Kabutops is your Active Pokemon, neither player can play Basic Pokemon or Evolution cards from his or her hand to evolve Benched Pokemon.
 - 2 x POWER: Magcargo (ecard3-18): When you play Magcargo from your hand to evolve your Active Pokemon, you may discard the top 3 cards of your deck and and then shuffle 3 basic Energy cards from your discard pile into your deck. If you do, your opponen
@@ -65,7 +64,6 @@ plays (tools/tcg/regions/effects.py); only finished cards appear in the game.
 - 1 x attack: Rocket's Scyther (gym1-13): Whenever Rocket's Scyther is attacked, your opponent flips a coin. If tails, that attack does no damage to Rocket's Scyther. (Any other effects of the attack still happen.) This effect lasts until Rocket's Scythe
 - 1 x attack: Misty's Tentacool (gym1-32): Search your deck for any number of Pokemon named Tentacool, Tentacruel, Misty's Tentacool, and/or Misty's Tentacruel. Show those cards to your opponent, then put them into your hand. Shuffle your deck afterward.
 - 1 x attack: Misty's Psyduck (gym1-54): Flip a coin. If heads, you may search your deck for a Basic Pokemon with Misty in its name and put it onto your Bench. (You can't use this attack if your Bench is full.) Shuffle your deck afterward.
-- 1 x attack: Misty's Tentacool (gym1-57): Flip a coin. If heads, your opponent can't attach Energy cards to the Defending Pokemon during his or her next turn.
 - 1 x attack: Sabrina's Haunter (gym1-58): Flip a number of coins equal to the total number of Sabrina's Gastlys, Sabrina's Haunters, and Sabrina's Gengars you have in play. This attack does 30 damage times the number of heads.
 - 1 x attack: Brock's Geodude (gym1-66): Flip a coin. If heads, you may search your deck for a Basic Pokemon card with Brock in its name and put it onto your Bench. Shuffle your deck afterward. (You can't use this attack if your Bench is full.)
 - 1 x attack: Sabrina's Mr. Mime (gym1-94): Choose up to 3 cards from your hand and put them on top of your deck. Then search your deck for that many basic Energy cards. Show those cards to your opponent, then put them into your hand. Shuffle your deck a
@@ -80,9 +78,7 @@ plays (tools/tcg/regions/effects.py); only finished cards appear in the game.
 - 1 x TRAINER: Narrow Gym (gym1-124): This card stays in play when you play it. Discard this card if another Stadium card comes into play. No player may have more than 4 Pokemon on his or her Bench. When this card is played, if a player has 5 Pokemon on h
 - 1 x attack: Blaine's Charizard (gym2-2): Discard all Fire Energy cards attached to Blaine's Charizard. If all Energy cards attached to Blaine's Charizard provide 2 Fire Energy, discard all of them. This attack does 20 damage plus 20 more damage for eac
 - 1 x POWER: Brock's Ninetales (gym2-3): Once during your turn (before your attack), you may attach an Evolution card from your hand to Brock's Ninetales. (This doesn't count as evolving Brock's Ninetales.) Treat Brock's Ninetales as if it were that Pok
-- 1 x attack: Giovanni's Nidoking (gym2-7): If the Defending Pokemon's maximum HP is 50 or less, it can't attack Giovanni's Nidoking during your opponent's next turn. (Benching or evolving either Pokemon ends this effect.)
 - 1 x attack: Koga's Ditto (gym2-10): Flip a coin. If heads, Koga's Ditto's maximum HP is now 80 and Koga's Ditto's Pound attack's base damage is 30 instead of 10. (Benching Koga's Ditto ends this effect.)
-- 1 x attack: Misty's Golduck (gym2-12): Flip a coin. If heads, choose 1 Energy card attached to each of your opponent's Pokemon that has any Energy cards and discard those Energy cards.
 - 1 x POWER: Misty's Gyarados (gym2-13): Whenever Misty's Gyarados attacks, flip 2 coins. If both of them are tails, that attack does nothing. Instead, shuffle Misty's Gyarados and all cards attached to it into your deck. (This power works even if Misty
 - 1 x POWER: Sabrina's Alakazam (gym2-16): Sabrina's Alakazam always has a copy of every attack your Psychic Pokemon in play have (including their Energy costs and anything else required in order to use those attacks, such as discarding Energy cards). T
 - 1 x attack: Brock's Dugtrio (gym2-22): This attack can't be used unless Brock's Dugtrio used its Lie Low attack last turn.
@@ -186,7 +182,6 @@ plays (tools/tcg/regions/effects.py); only finished cards appear in the game.
 - 1 x attack: Dark Magcargo (neo4-18): You may discard a Fire Energy card attached to Dark Magcargo when you use this attack. If you do and if your opponent has any Benched Pokemon, choose 1 of them and this attack does 20 damage to it. (Don't apply Weak
 - 1 x POWER: Dark Magcargo (neo4-18): As long as Dark Magcargo is your Active Pokemon, whenever a player puts a Baby Pokemon or Basic Pokemon onto his or her Bench from his or her hand, this power does 10 damage to that Pokemon. (Don't apply Weakness an
 - 1 x attack: Dark Omastar (neo4-19): If your opponent has any evolved Pokemon in play, choose 1 of them and flip a coin. If heads, your opponent takes the highest Stage Evolution card on that Pokemon and shuffles it into his or her deck.
-- 1 x attack: Dark Omastar (neo4-19): During your opponent's next turn, the Defending Pokemon can't evolve except from effects of attacks or Pokemon Powers. (Benching that Pokemon ends this effect.)
 - 1 x POWER: Dark Slowking (neo4-20): Once during your turn (before your attack), you may flip a coin. If heads, look at the top card of your opponent's deck. Then, you may have your opponent shuffle his or her deck. This power can't be used if Dark Slo
 - 1 x attack: Dark Ursaring (neo4-21): Look at your opponent's hand. If he or she has any Baby Pokemon and/or Basic Pokemon there, you may put any number of them onto your opponent's Bench (as long as there's room). Then, your opponent looks at your hand
 - 1 x attack: Light Lanturn (neo4-23): Flip a coin. If heads, each player may choose a card from his or her discard pile and put it into his or her hand.

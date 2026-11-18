@@ -569,6 +569,11 @@ def _(m, d):
 
 # One wording, one script (the cards' words with SELF for the card's name; tcg_script.inc's ops)
 EXACT = {
+    "Flip a coin. If heads, your opponent can't attach Energy cards from his or her hand to his or her Active Pokemon during his or her next turn.": 'c h.noatt',
+    "Flip a coin. If heads, your opponent can't attach Energy cards to the Defending Pokemon during his or her next turn.": 'c h.noatt',
+    "If the Defending Pokemon's maximum HP is 50 or less, it can't attack SELF during your opponent's next turn.": 'dhp50.noat',
+    "During your opponent's next turn, the Defending Pokemon can't evolve except from effects of attacks or Pokemon Powers. (Benching that Pokemon ends this effect.)": 'noevo',
+    "Flip a coin. If heads, choose 1 Energy card attached to each of your opponent's Pokemon that has any Energy cards and discard those Energy cards.": 'c h.deall',
     # (Metronome's own effect row: extra 1 a coin first, 2 the copied attack's Energy paid by its own)
     "Choose 1 of the Defending Pokemon's attacks. Copy copies that attack. This attack does nothing if SELF doesn't have the Energy necessary to use that attack. (You must still do anything else required in order to use that attack.)": ('METRONOME', 0, 2),
     "Flip a coin. If heads, choose 1 of the Defending Pokemon's attacks. Mini-Metronome copies that attack except for its Energy cost. (You must still do anything else required in order to use that attack.) (No matter what type the Defending Pokemon is, SELF is still Colorless.) SELF performs that attack.": ('METRONOME', 0, 1),

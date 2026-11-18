@@ -61,6 +61,8 @@ struct TcgFieldCard
      * top card that did it, is its opponent's Active); blindAll: whenever it attacks, a coin, tails the attack does
      * nothing; noAttackAll: it can't attack */
     uint8_t stuck, stuckBy, blindAll, noAttackAll;
+    /* (effect scripts) noEvolveUntil: it can't be evolved from the hand through that turn */
+    uint16_t noEvolveUntil;
 };
 enum
 {
@@ -221,6 +223,8 @@ struct TcgPlayer
     uint8_t deckSize, handSize, discardSize, prizeSize;
     struct TcgFieldCard field[TCG_FIELD_SIZE];
     uint8_t energyPlayed, confusionRetreatFailed, setupDone, retreated, noTrainers;
+    /* (effect scripts) noAttachActive: no Energy from the hand onto the Active through that turn */
+    uint16_t noAttachActive;
     uint16_t turnsTaken;
     /* noSupporters: no Supporter this turn (Ruins of Alph's attacks...); supporterPlayed: a Supporter played this
      * turn (one a turn; shown beside the Active until the turn ends: supporterCard, its card + 1); stadium: the

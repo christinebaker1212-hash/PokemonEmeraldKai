@@ -3204,7 +3204,7 @@ const struct TcgCard gTcgCards[TCG_CARD_COUNT + 1] = {
 {.name="",.description="",.effect="NONE",.animation="ATK_ANIM_NONE",.cost={0},.damage=0,.category=TCG_DAMAGE_NORMAL},
 }
 },
-[499] = {.id=499, .name="Misty's Tentacool", .kind=TCG_POKEMON, .type=3, .rarity=1, .set=13, .set2=255, .dark=0, .holo=0, .flags=TCG_CF_OWNER, .origin=13,
+[499] = {.id=499, .name="Misty's Tentacool", .kind=TCG_POKEMON, .type=3, .rarity=1, .set=13, .set2=255, .dark=0, .holo=0, .flags=TCG_CF_OWNER|TCG_CF_READY, .origin=13,
 .hp=50, .stage=0, .species=72, .level=16, .retreat=1, .weakness=2, .resistance=255, .evolvesFrom="", .description="", .attacks={
 {.name="Crystal Beam",.description="Flip a coin. If heads, your opponent can't attach Energy cards to the Defending Pokemon during his or her next turn.",.effect="gym1-57:a0",.animation="ATK_ANIM_HIT",.cost={0,0,0,1,0,0,1,0,0},.damage=20,.category=TCG_DAMAGE_NORMAL},
 {.name="",.description="",.effect="NONE",.animation="ATK_ANIM_NONE",.cost={0},.damage=0,.category=TCG_DAMAGE_NORMAL},
@@ -3616,7 +3616,7 @@ const struct TcgCard gTcgCards[TCG_CARD_COUNT + 1] = {
 {.name="",.description="",.effect="NONE",.animation="ATK_ANIM_NONE",.cost={0},.damage=0,.category=TCG_DAMAGE_NORMAL},
 }
 },
-[575] = {.id=575, .name="Giovanni's Nidoking", .kind=TCG_POKEMON, .type=1, .rarity=2, .set=14, .set2=255, .dark=0, .holo=1, .flags=TCG_CF_OWNER, .origin=14,
+[575] = {.id=575, .name="Giovanni's Nidoking", .kind=TCG_POKEMON, .type=1, .rarity=2, .set=14, .set2=255, .dark=0, .holo=1, .flags=TCG_CF_OWNER|TCG_CF_READY, .origin=14,
 .hp=120, .stage=2, .species=34, .level=58, .retreat=3, .weakness=5, .resistance=255, .evolvesFrom="Giovanni's Nidorino", .description="", .attacks={
 {.name="Intimidate",.description="If the Defending Pokemon's maximum HP is 50 or less, it can't attack Giovanni's Nidoking during your opponent's next turn. (Benching or evolving either Pokemon ends this effect.)",.effect="gym2-7:a0",.animation="ATK_ANIM_HIT",.cost={0,1,0,0,0,0,0,0,0},.damage=0,.category=TCG_RESIDUAL},
 {.name="Tumbling Attack",.description="Flip a coin. If heads, this attack does 40 damage plus 30 more damage; if tails, this attack does 40 damage.",.effect="gym2-7:a1",.animation="ATK_ANIM_HIT",.cost={0,3,0,0,0,0,1,0,0},.damage=40,.category=TCG_DAMAGE_PLUS},
@@ -3651,7 +3651,7 @@ const struct TcgCard gTcgCards[TCG_CARD_COUNT + 1] = {
 {.name="",.description="",.effect="NONE",.animation="ATK_ANIM_NONE",.cost={0},.damage=0,.category=TCG_DAMAGE_NORMAL},
 }
 },
-[580] = {.id=580, .name="Misty's Golduck", .kind=TCG_POKEMON, .type=3, .rarity=2, .set=14, .set2=255, .dark=0, .holo=1, .flags=TCG_CF_OWNER, .origin=14,
+[580] = {.id=580, .name="Misty's Golduck", .kind=TCG_POKEMON, .type=3, .rarity=2, .set=14, .set2=255, .dark=0, .holo=1, .flags=TCG_CF_OWNER|TCG_CF_READY, .origin=14,
 .hp=70, .stage=1, .species=55, .level=32, .retreat=1, .weakness=1, .resistance=255, .evolvesFrom="Misty's Psyduck", .description="", .attacks={
 {.name="Electro Beam",.description="Flip a coin. If tails, discard all Energy cards attached to Misty's Golduck.",.effect="gym2-12:a0",.animation="ATK_ANIM_HIT",.cost={0,0,0,1,0,0,1,0,0},.damage=40,.category=TCG_DAMAGE_NORMAL},
 {.name="Super Removal",.description="Flip a coin. If heads, choose 1 Energy card attached to each of your opponent's Pokemon that has any Energy cards and discard those Energy cards.",.effect="gym2-12:a1",.animation="ATK_ANIM_HIT",.cost={0,0,0,0,0,1,1,0,0},.damage=0,.category=TCG_RESIDUAL},
@@ -8915,7 +8915,7 @@ const struct TcgCard gTcgCards[TCG_CARD_COUNT + 1] = {
 {.name="",.description="",.effect="NONE",.animation="ATK_ANIM_NONE",.cost={0},.damage=0,.category=TCG_DAMAGE_NORMAL},
 }
 },
-[1401] = {.id=1401, .name="Dewgong", .kind=TCG_POKEMON, .type=3, .rarity=2, .set=21, .set2=255, .dark=0, .holo=0, .flags=0, .origin=21,
+[1401] = {.id=1401, .name="Dewgong", .kind=TCG_POKEMON, .type=3, .rarity=2, .set=21, .set2=255, .dark=0, .holo=0, .flags=TCG_CF_READY, .origin=21,
 .hp=80, .stage=1, .species=87, .level=0, .retreat=2, .weakness=8, .resistance=255, .evolvesFrom="Seel", .description="", .attacks={
 {.name="Freeze Lock",.description="Flip a coin. If heads, your opponent can't attach Energy cards from his or her hand to his or her Active Pokemon during his or her next turn.",.effect="ecard3-7:a0",.animation="ATK_ANIM_HIT",.cost={0,0,0,1,0,0,1,0,0},.damage=20,.category=TCG_DAMAGE_NORMAL},
 {.name="Crushing Ice",.description="This attack does 40 damage plus 10 more damage for each Colorless Energy in the Defending Pokemon's Retreat Cost. Damage is calculated using the Defending Pokemon's Retreat Cost after applying effects to the Retreat Cost.",.effect="ecard3-7:a1",.animation="ATK_ANIM_HIT",.cost={0,0,0,2,0,0,2,0,0},.damage=40,.category=TCG_DAMAGE_PLUS},
@@ -9889,7 +9889,7 @@ const struct TcgCard gTcgCards[TCG_CARD_COUNT + 1] = {
 {.name="",.description="",.effect="NONE",.animation="ATK_ANIM_NONE",.cost={0},.damage=0,.category=TCG_DAMAGE_NORMAL},
 }
 },
-[1550] = {.id=1550, .name="Dewgong", .kind=TCG_POKEMON, .type=3, .rarity=2, .set=21, .set2=255, .dark=0, .holo=1, .flags=0, .origin=21,
+[1550] = {.id=1550, .name="Dewgong", .kind=TCG_POKEMON, .type=3, .rarity=2, .set=21, .set2=255, .dark=0, .holo=1, .flags=TCG_CF_READY, .origin=21,
 .hp=80, .stage=1, .species=87, .level=0, .retreat=2, .weakness=8, .resistance=255, .evolvesFrom="Seel", .description="", .attacks={
 {.name="Freeze Lock",.description="Flip a coin. If heads, your opponent can't attach Energy cards from his or her hand to his or her Active Pokemon during his or her next turn.",.effect="ecard3-H6:a0",.animation="ATK_ANIM_HIT",.cost={0,0,0,1,0,0,1,0,0},.damage=20,.category=TCG_DAMAGE_NORMAL},
 {.name="Crushing Ice",.description="This attack does 40 damage plus 10 more damage for each Colorless Energy in the Defending Pokemon's Retreat Cost. Damage is calculated using the Defending Pokemon's Retreat Cost after applying effects to the Retreat Cost.",.effect="ecard3-H6:a1",.animation="ATK_ANIM_HIT",.cost={0,0,0,2,0,0,2,0,0},.damage=40,.category=TCG_DAMAGE_PLUS},

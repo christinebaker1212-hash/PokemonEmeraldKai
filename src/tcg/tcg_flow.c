@@ -709,7 +709,8 @@ int TcgFlow_SlotMatches(const struct TcgDuel *g, unsigned me, const struct TcgAc
         return !c && slot;
     case TCG_F_ANY_POKEMON:
         /* (an Energy card its power refuses: Anti-Lightning...) */
-        return c && c->kind == TCG_POKEMON && !TcgPower_AttachBlock(g, who, slot, flowCard);
+        return c && c->kind == TCG_POKEMON && !TcgPower_AttachBlock(g, who, slot, flowCard) &&
+               (slot || Tcg_Card(flowCard)->kind != TCG_ENERGY || p->noAttachActive < g->turn);
     case TCG_F_HAS_GRASS:
     {
         unsigned i;
