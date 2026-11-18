@@ -205,6 +205,8 @@ unsigned TcgDuel_Type(const struct TcgDuel *g, unsigned player, unsigned slot)
     /* (Crystal Shard: Colorless while attached) */
     if (c && c->kind == TCG_POKEMON && TcgDuel_AttachedCard(g, player, slot, TCG_CARD_ECARD3_122) >= 0)
         return TCG_COLORLESS;
+    if (!shift)
+        shift = g->players[player].field[slot].colorType; /* (Smeargle's Coloring counter) */
     return shift ? shift - 1 : c ? c->type : TCG_COLORLESS;
 }
 

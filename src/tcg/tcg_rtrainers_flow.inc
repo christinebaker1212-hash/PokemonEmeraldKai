@@ -338,6 +338,16 @@ const struct TcgStep *TcgFlow_ChoiceSteps(const struct TcgDuel *g, int *count)
         STEPS({TCG_ST_CHOICE, 0, 0, 0, 0, "Guess: Light in its name, Dark, or neither?"});
     case TCG_CHOICE_BENCH_THEIRS:
         STEPS({TCG_ST_PICK, TCG_F_BASIC, TCG_SRC_OPP_HAND, 0, 5, "Put which of their Basic Pokemon onto their Bench?"});
+    case TCG_CHOICE_HEAL_MINE:
+        STEPS({TCG_ST_MY_SLOT, TCG_F_DAMAGED, 0, 0, 0, "Remove 2 damage counters from which of yours?"});
+    case TCG_CHOICE_HEAL_THEIRS:
+        STEPS({TCG_ST_OPP_SLOT, TCG_F_DAMAGED, 0, 0, 0, "Remove 2 damage counters from which of theirs?"});
+    case TCG_CHOICE_SHUFFLE_THEIRS:
+        STEPS({TCG_ST_CHOICE, 0, 0, 0, 0, "Have them shuffle their deck?"});
+    case TCG_CHOICE_PEEK_ZONE:
+        STEPS({TCG_ST_CHOICE, 0, 0, 0, 0, "Look at which cards?"});
+    case TCG_CHOICE_TREATY:
+        STEPS({TCG_ST_CHOICE, 0, 0, 0, 0, "Lt. Surge's Treaty: which do you choose?"});
     }
     *count = 0;
     return sNoSteps;

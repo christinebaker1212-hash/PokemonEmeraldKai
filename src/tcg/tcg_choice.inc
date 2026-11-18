@@ -77,8 +77,44 @@ static int ChoiceHasAny(const struct TcgDuel *g, unsigned player, unsigned kind)
                 return 1;
         return 0;
     }
+    case TCG_CHOICE_SHUFFLE_THEIRS:
+        return g->players[player ^ 1].deckSize != 0;
+    case TCG_CHOICE_HEAL_MINE:
+    case TCG_CHOICE_HEAL_THEIRS:
+    {
+        const struct TcgPlayer *q = &g->players[kind == TCG_CHOICE_HEAL_MINE ? player : player ^ 1];
+        for (k = 0; k < TCG_FIELD_SIZE; k++)
+            if (q->field[k].stackSize && q->field[k].damage)
+                return 1;
+        return 0;
+    }
+    case TCG_CHOICE_PEEK_ZONE:
+        return p->deckSize || p->prizeSize || g->players[player ^ 1].deckSize || g->players[player ^ 1].prizeSize;
     }
     return 1;
+}
+/* The cards a Noctowl-style look shows (zone TCG_PEEK_*: the top 2 of that deck, or 2 of those Prizes) */
+static void ChoicePeek(struct TcgDuel *g, unsigned who, unsigned zone, unsigned most)
+{
+    unsigned k;
+    if (zone == TCG_PEEK_MY_DECK || zone == TCG_PEEK_THEIR_DECK)
+    {
+        unsigned q = zone == TCG_PEEK_MY_DECK ? who : who ^ 1;
+        const struct TcgPlayer *d = &g->players[q];
+        for (k = 0; k < most && k < d->deckSize; k++)
+            TcgDuel_Event(g, TCG_EV_PEEK, who, 0, zone, d->cards[d->deck[d->deckSize - 1 - k]], k + 1);
+    }
+    else if (zone == TCG_PEEK_MY_PRIZE || zone == TCG_PEEK_THEIR_PRIZE)
+    {
+        /* (face down in no order: any of them, side by side; not always the same ones) */
+        unsigned q = zone == TCG_PEEK_MY_PRIZE ? who : who ^ 1, from;
+        const struct TcgPlayer *d = &g->players[q];
+        if (!d->prizeSize)
+            return;
+        from = most < d->prizeSize ? Tcg_RandomBelow(&g->rng, d->prizeSize) : 0;
+        for (k = 0; k < most && k < d->prizeSize; k++)
+            TcgDuel_Event(g, TCG_EV_PEEK, who, 0, zone, d->cards[d->prizes[(from + k) % d->prizeSize]], 0);
+    }
 }
 /* What a passed-over stage still does: Flipper Stroke's shuffle ("Either way, each player shuffles") */
 static void ChoiceSkipped(struct TcgDuel *g, unsigned player, unsigned kind)
@@ -308,6 +344,62 @@ int TcgDuel_Choose(struct TcgDuel *g, const struct TcgAction *a)
         }
         break;
     }
+    case TCG_CHOICE_HEAL_MINE:
+    case TCG_CHOICE_HEAL_THEIRS:
+    {
+        /* 2 damage counters (1 if it has only 1) off the damaged one chosen, the chooser's or the other player's */
+        unsigned q = g->choiceKind == TCG_CHOICE_HEAL_MINE ? who : who ^ 1;
+        struct TcgFieldCard *f = a->target < TCG_FIELD_SIZE ? &g->players[q].field[a->target] : NULL;
+        if (!f || !f->stackSize || !f->damage)
+            return ChoiceFail(g, "Choose a Pokemon with damage counters.");
+        Heal(g, q, a->target, 20);
+        break;
+    }
+    case TCG_CHOICE_SHUFFLE_THEIRS:
+        /* YES (1): the other player shuffles their deck */
+        if (a->target > 1)
+            return ChoiceFail(g, "Choose YES or NO.");
+        if (a->target)
+        {
+            TcgDuel_Shuffle(g, who ^ 1);
+            TcgDuel_Event(g, TCG_EV_DECK_CHANGED, who ^ 1, 0, 0, 0, 0);
+        }
+        break;
+    case TCG_CHOICE_PEEK_ZONE:
+    {
+        /* the zone chosen (TCG_PEEK_*, not a hand): its top 2 / 2 of its Prizes shown to the chooser */
+        const struct TcgPlayer *q;
+        if (a->target == TCG_PEEK_THEIR_HAND || a->target > TCG_PEEK_THEIR_PRIZE)
+            return ChoiceFail(g, "Choose a deck or the Prizes.");
+        q = &g->players[a->target == TCG_PEEK_MY_DECK || a->target == TCG_PEEK_MY_PRIZE ? who : who ^ 1];
+        if (!(a->target == TCG_PEEK_MY_DECK || a->target == TCG_PEEK_THEIR_DECK ? q->deckSize : q->prizeSize))
+            return ChoiceFail(g, "There's no card there to look at.");
+        ChoicePeek(g, who, a->target, 2);
+        break;
+    }
+    case TCG_CHOICE_TREATY:
+    {
+        /* Lt. Surge's Treaty, the other player's choice: 0 each player takes a Prize (face down: any one), 1 the
+         * Treaty's player draws a card */
+        unsigned q;
+        if (a->target > 1)
+            return ChoiceFail(g, "Choose one of the two.");
+        if (a->target)
+            TcgDuel_Event(g, TCG_EV_DRAW, who ^ 1, 0, TcgDuel_Draw(g, who ^ 1, 1), 0, 0);
+        else
+            for (q = 0; q < 2; q++)
+            {
+                struct TcgPlayer *t = &g->players[q];
+                if (!t->prizeSize)
+                    continue;
+                t->hand[t->handSize++] = t->prizes[--t->prizeSize];
+                TcgDuel_Event(g, TCG_EV_PRIZE, q, 0, t->prizeSize, 0, 0);
+            }
+        ChoiceEnd(g, TCG_CHOICE_TREATY);
+        if (!a->target)
+            TcgDuel_ResolveKnockouts(g); /* (a last Prize taken wins; both at once: sudden death) */
+        return TCG_OK;
+    }
     default:
         return ChoiceFail(g, "There is nothing to choose.");
     }
@@ -393,6 +485,39 @@ void TcgDuel_AiChoose(const struct TcgDuel *g, struct TcgAction *a)
         break;
     case TCG_CHOICE_BENCH_THEIRS:
         break; /* (none of theirs onto their Bench) */
+    case TCG_CHOICE_HEAL_MINE:
+    case TCG_CHOICE_HEAL_THEIRS:
+    {
+        /* (yours: the most damaged; theirs: the least damaged, the counters that matter least) */
+        unsigned q = g->choiceKind == TCG_CHOICE_HEAL_MINE ? who : who ^ 1, s, best = TCG_NONE;
+        const struct TcgPlayer *t = &g->players[q];
+        for (s = 0; s < TCG_FIELD_SIZE; s++)
+            if (t->field[s].stackSize && t->field[s].damage &&
+                (best == TCG_NONE || (g->choiceKind == TCG_CHOICE_HEAL_MINE ? t->field[s].damage > t->field[best].damage
+                                                                            : t->field[s].damage < t->field[best].damage)))
+                best = s;
+        a->target = (uint8_t)(best == TCG_NONE ? 0 : best);
+        break;
+    }
+    case TCG_CHOICE_SHUFFLE_THEIRS:
+    {
+        /* (the card they'll draw: shuffled away when it's a Trainer or an Evolution card, the useful ones) */
+        const struct TcgPlayer *q = &g->players[who ^ 1];
+        const struct TcgCard *top = q->deckSize ? CardAt(g, who ^ 1, q->deck[q->deckSize - 1]) : NULL;
+        a->target = top && (top->kind == TCG_TRAINER || (top->kind == TCG_POKEMON && top->stage));
+        break;
+    }
+    case TCG_CHOICE_PEEK_ZONE:
+        /* (their deck: what they'll draw next) */
+        a->target = g->players[who ^ 1].deckSize ? TCG_PEEK_THEIR_DECK : p->deckSize ? TCG_PEEK_MY_DECK
+                    : g->players[who ^ 1].prizeSize ? TCG_PEEK_THEIR_PRIZE : TCG_PEEK_MY_PRIZE;
+        break;
+    case TCG_CHOICE_TREATY:
+    {
+        /* (the chooser is the Treaty's opponent: Prizes for both when they're ahead or level, else the draw) */
+        a->target = g->players[who].prizeSize > g->players[who ^ 1].prizeSize;
+        break;
+    }
     case TCG_CHOICE_HAND_TO_TOP:
     {
         /* an Energy card back if there are 2 or more, else the last card */

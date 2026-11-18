@@ -83,6 +83,13 @@ struct TcgFieldCard
     uint8_t stuck, stuckBy, blindAll, noAttackAll;
     /* (effect scripts) noEvolveUntil: it can't be evolved from the hand through that turn */
     uint16_t noEvolveUntil;
+    /* (effect scripts) markers on it while it's in play (TCG_MARK_*); colorType: a Coloring counter's type + 1 */
+    uint8_t markers, colorType;
+};
+enum
+{
+    TCG_MARK_ROD = 1, /* Electabuzz's Lightning Rod marker */
+    TCG_MARK_CHAR = 2 /* Quilava's Char counter: a coin after every turn, tails 2 damage counters */
 };
 enum
 {
@@ -175,7 +182,12 @@ enum
     TCG_CHOICE_MOVE_ENERGY,      /* Energy Kick: which of your other Pokemon the Energy choiceData goes to */
     TCG_CHOICE_GUESS_KIND,       /* Blaine's Quiz #2: Energy, Trainer or Pokemon (the card choiceData) */
     TCG_CHOICE_GUESS_LIGHT,      /* Pokemon Personality Test: Light, Dark or neither (the card choiceData) */
-    TCG_CHOICE_BENCH_THEIRS      /* Provoke: Basic Pokemon of the other player's hand onto their Bench */
+    TCG_CHOICE_BENCH_THEIRS,     /* Provoke: Basic Pokemon of the other player's hand onto their Bench */
+    TCG_CHOICE_SHUFFLE_THEIRS,   /* Dark Slowking: YES has the other player shuffle their deck */
+    TCG_CHOICE_PEEK_ZONE,        /* Noctowl: the top 2 of a deck or up to 2 Prizes of either player (TCG_PEEK_*) */
+    TCG_CHOICE_TREATY,           /* Lt. Surge's Treaty: 0 everyone takes a Prize, 1 the other player draws a card */
+    TCG_CHOICE_HEAL_MINE,        /* Sweet Scent: 2 damage counters off the one of yours chosen */
+    TCG_CHOICE_HEAL_THEIRS       /* Sweet Scent: 2 damage counters off the one of theirs chosen */
 };
 /* Pokemon Powers (src/tcg/tcg_powers.c), by the card's power. */
 enum TcgPowerId

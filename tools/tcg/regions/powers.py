@@ -95,6 +95,11 @@ P('R_TERRAFORMING', 'Terraforming', 'look at the top 4 cards of your deck and re
 P('R_STRANGE_TENTACLES', 'Strange Tentacles', "in your opponent's discard pile and attach it to the Defending", 'USED',
   'ONCE', 'oattd')
 P('R_DARK_MOON', 'Dark Moon', 'up to the number of Darkness Energy attached to SELF', 'USED', 'ONCE ACTIVE', 'ohshuf')
+P('R_OBSERVE', '[Observe]', "look at 5 cards from the top of your opponent's deck", 'USED', 'ONCE', 'peek:1,5')
+P('R_SEARCH_PRIZE', '[Search]', 'look at 1 of your Prize cards', 'USED', 'ONCE ANY', 'peek:3,1')
+P('R_TELL', '[Tell]', "look at your opponent's hand and show your hand", 'USED', 'ONCE ANY', 'c h.peek:2 h.showhand')
+P('R_INVESTIGATE', 'Investigate', "look at the top 2 cards of any player's deck", 'USED', 'ONCE', 'askch:17,1')
+P('R_CUNNING', 'Cunning', "look at the top card of your opponent's deck", 'USED', 'ONCE', 'c h.peek:1,1 h.askch:16,1')
 P('R_JOIN', '[Join]', 'search your deck for a Basic Pokemon or Evolution card', 'USED', 'ONCE BENCH', 'srchk:3')
 P('R_MAGNETIC_CALL', 'Magnetic Call', 'search your deck for a Metal Basic Pokemon', 'USED', 'ONCE',
   'needroom c h.dbench:2')

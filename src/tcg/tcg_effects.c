@@ -1412,6 +1412,7 @@ static void Evolve(struct TcgDuel *g, unsigned who, unsigned slot, unsigned deck
     TcgDuel_Log(g, "Evolved into %s.", CardAt(g, who, f->stack[f->stackSize - 1])->name);
     TcgPower_OnPlay(g, who, slot);
 }
+static void ChoicePeek(struct TcgDuel *g, unsigned who, unsigned zone, unsigned most); /* (tcg_choice.inc) */
 #include "tcg_script.inc"
 int TcgDuel_RunPowerScript(struct TcgDuel *g, unsigned slot, const char *script, const struct TcgAction *action)
 {

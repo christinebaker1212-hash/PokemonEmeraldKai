@@ -1138,7 +1138,28 @@ unsigned TcgFlow_TrainerChoices(const struct TcgDuel *g, unsigned me, unsigned c
             m->label[i] = g->choiceKind == TCG_CHOICE_GUESS_KIND ? kinds[i] : lights[i], m->value[i] = (uint8_t)i, m->ok[i] = 1;
         return m->count = 3;
     }
-    if (Tcg_EnergyRule(cardId) == TCG_ER_RETRO || (g->phase == TCG_CHOICE && g->choiceKind == TCG_CHOICE_REDRAW4))
+    if (g->phase == TCG_CHOICE && g->choiceKind == TCG_CHOICE_PEEK_ZONE)
+    {
+        /* (Noctowl: which deck's top 2, or whose Prizes) */
+        const struct TcgPlayer *mine = &g->players[g->choicePlayer], *them = &g->players[g->choicePlayer ^ 1];
+        memset(m, 0, sizeof(*m));
+        *reason = NULL;
+        MenuAdd(m, "TOP 2 OF THEIR DECK", TCG_PEEK_THEIR_DECK, them->deckSize != 0, "Their deck is empty.");
+        MenuAdd(m, "TOP 2 OF YOUR DECK", TCG_PEEK_MY_DECK, mine->deckSize != 0, "Your deck is empty.");
+        MenuAdd(m, "2 OF THEIR PRIZES", TCG_PEEK_THEIR_PRIZE, them->prizeSize != 0, "They have no Prizes left.");
+        MenuAdd(m, "2 OF YOUR PRIZES", TCG_PEEK_MY_PRIZE, mine->prizeSize != 0, "You have no Prizes left.");
+        return m->count;
+    }
+    if (g->phase == TCG_CHOICE && g->choiceKind == TCG_CHOICE_TREATY)
+    {
+        memset(m, 0, sizeof(*m));
+        *reason = NULL;
+        MenuAdd(m, "EVERYONE TAKES A PRIZE", 0, 1, NULL);
+        MenuAdd(m, "THEY DRAW A CARD", 1, 1, NULL);
+        return m->count;
+    }
+    if (Tcg_EnergyRule(cardId) == TCG_ER_RETRO ||
+        (g->phase == TCG_CHOICE && (g->choiceKind == TCG_CHOICE_REDRAW4 || g->choiceKind == TCG_CHOICE_SHUFFLE_THEIRS)))
     {
         /* (Retro Energy: "you may") */
         memset(m, 0, sizeof(*m));

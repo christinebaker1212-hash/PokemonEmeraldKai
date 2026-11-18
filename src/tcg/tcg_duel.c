@@ -856,6 +856,15 @@ static void EndTurn(struct TcgDuel *g)
                 TcgDuel_Event(g, TCG_EV_DAMAGE, who, s, 10 * n, 0, 0);
             }
         }
+    /* Char counters (Quilava): a coin after every turn, tails 2 damage counters */
+    for (who = 0; who < 2; who++)
+        for (s = 0; s < TCG_FIELD_SIZE; s++)
+            if (g->players[who].field[s].stackSize && (g->players[who].field[s].markers & TCG_MARK_CHAR) &&
+                !TcgDuel_Coin(g, who))
+            {
+                g->players[who].field[s].damage += 20;
+                TcgDuel_Event(g, TCG_EV_DAMAGE, who, s, 20, 0, TCG_DMG_POISON);
+            }
     for (who = 0; who < 2; who++)
     {
         struct TcgPlayer *q = &g->players[who];

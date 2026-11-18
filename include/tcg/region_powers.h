@@ -59,6 +59,11 @@
     X(R_TERRAFORMING, "TERRAFORMING", 1, 1, "order:4") \
     X(R_STRANGE_TENTACLES, "STRANGE TENTACLES", 1, 1, "oattd") \
     X(R_DARK_MOON, "DARK MOON", 1, 3, "ohshuf") \
+    X(R_OBSERVE, "[OBSERVE]", 1, 1, "peek:1,5") \
+    X(R_SEARCH_PRIZE, "[SEARCH]", 1, 9, "peek:3,1") \
+    X(R_TELL, "[TELL]", 1, 9, "c h.peek:2 h.showhand") \
+    X(R_INVESTIGATE, "INVESTIGATE", 1, 1, "askch:17,1") \
+    X(R_CUNNING, "CUNNING", 1, 1, "c h.peek:1,1 h.askch:16,1") \
     X(R_JOIN, "[JOIN]", 1, 5, "srchk:3") \
     X(R_MAGNETIC_CALL, "MAGNETIC CALL", 1, 1, "needroom c h.dbench:2") \
     X(R_GOOD_NEIGHBOR, "GOOD NEIGHBOR", 1, 5, "c h.healact:2") \

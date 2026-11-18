@@ -871,7 +871,11 @@ static int StartEvent(const struct TcgEvent *e, int post)
                 f->value = e->card;
                 f->player = 0;
                 f->color = 1; /* (back where it came from, not to the discard pile) */
-                snprintf(f->text, sizeof(f->text), "%s", mine[e->value]);
+                if (e->flags > 1 && e->value <= TCG_PEEK_THEIR_DECK)
+                    snprintf(f->text, sizeof(f->text), "CARD %u OF %s DECK", (unsigned)e->flags,
+                             e->value == TCG_PEEK_MY_DECK ? "YOUR" : "THEIR");
+                else
+                    snprintf(f->text, sizeof(f->text), "%s", mine[e->value]);
             }
             PlaySE(SE_RG_CARD_FLIP);
             return fast ? 52 : 88;
@@ -3340,6 +3344,10 @@ static int Substatus(int x, int y, unsigned who, unsigned slot, int right, int d
         labels[n] = "x2", colors[n++] = 0xc89010;
     if (f->burned && n < 6)
         labels[n] = "BRN", colors[n++] = 0xd85020;
+    if ((f->markers & TCG_MARK_CHAR) && n < 6)
+        labels[n] = "CHAR", colors[n++] = 0xd85020;
+    if ((f->markers & TCG_MARK_ROD) && n < 6)
+        labels[n] = "ROD", colors[n++] = 0xc8a010;
     for (i = 0; i < n; i++)
         w += G_Measure(labels[i], TF_NARROW) + 5;
     if (!draw)

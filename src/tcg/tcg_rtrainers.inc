@@ -649,6 +649,9 @@ static int RegionTrainer(struct TcgDuel *g, const struct TcgAction *a, unsigned 
         TcgDuel_AskChoice(g, me ^ 1, id == TCG_CARD_GYM2_111 ? TCG_CHOICE_GUESS_KIND : TCG_CHOICE_GUESS_LIGHT, id, 0);
         break;
     }
+    case TCG_CARD_GYM1_112: /* Lt. Surge's Treaty: their choice (tcg_choice.inc) */
+        TcgDuel_AskChoice(g, me ^ 1, TCG_CHOICE_TREATY, id, 0);
+        break;
     case TCG_CARD_NEO1_90: /* Time Capsule: their choice, then yours (tcg_choice.inc) */
         TcgDuel_AskChoice(g, me ^ 1, TCG_CHOICE_TIME_CAPSULE, TCG_CARD_NEO1_90, 0);
         break;

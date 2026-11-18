@@ -112,7 +112,13 @@
  *             the Energy picked in their discard pile onto the Defending Pokemon | ohshuf Dark Moon
  * After (1):  boh:x x per heads to each of their Benched | oswitch they switch their Active with a Benched one of their
  *             choice (TcgDuel_OpponentSwitch) | gmove:T Baton Pass | mime Sleight of Hand | srchk:4 a Pokemon card not
- *             named as it | ddeh:n one of the Defending's Energy per heads, up to n picked | lockon Lock-on */
+ *             named as it | ddeh:n one of the Defending's Energy per heads, up to n picked | lockon Lock-on
+ * After (1):  rodset a Lightning Rod marker on the chosen one of theirs | rodhit:x x to each of theirs with one (Weakness
+ *             and Resistance) | char Quilava's Char counter (a coin) | color the type chosen (opt:10) as a Coloring counter
+ * Options (0): opt:12 how many damage counters (the most on one of theirs) | After (1): helph that many off the chosen
+ *             one of theirs (at most what it has), a card drawn for each
+ * After (1):  peek:Z,n the top n of a deck / n Prizes / their hand (0: all) shown to you (TCG_PEEK_Z) | showhand your
+ *             hand shown to them */
 #define SCRIPT_TOKEN 48
 /* Which of the player's Pokemon "it" is: the attacker (0), or a Pokemon whose power runs a script (tcg_powers.c) */
 static unsigned sScriptSelf;
@@ -1124,6 +1130,69 @@ static int ScriptRun(struct TcgDuel *g, const char *script, const struct TcgAtta
             /* a choice for a player (TCG_CHOICE_x): the opponent first, then you (askch:x,1: only you) */
             const struct TcgCard *it = TcgDuel_Field(g, me, sScriptSelf);
             TcgDuel_AskChoice(g, o.arg[1] ? me : them, (unsigned)x, it ? it->id : 0, o.arg[1] ? 1 : 0);
+        }
+        else if (ScriptIs(&o, "helph"))
+        {
+            /* Helping Hand: the counters chosen (opt:12, as many as it has at most) off the chosen one of theirs, a
+             * card drawn for each */
+            unsigned t = action ? action->target : TCG_NONE, k;
+            if (t < TCG_FIELD_SIZE && op->field[t].stackSize)
+            {
+                k = sScriptOption < op->field[t].damage / 10u ? sScriptOption : op->field[t].damage / 10u;
+                if (k)
+                {
+                    Heal(g, them, t, k * 10);
+                    TcgDuel_Event(g, TCG_EV_DRAW, me, 0, TcgDuel_Draw(g, me, k), 0, 0);
+                }
+            }
+        }
+        else if (ScriptIs(&o, "rodset"))
+        {
+            /* a Lightning Rod marker on the chosen one of theirs */
+            if (action && action->target < TCG_FIELD_SIZE && op->field[action->target].stackSize &&
+                (action->target || !blocked))
+                op->field[action->target].markers |= TCG_MARK_ROD;
+        }
+        else if (ScriptIs(&o, "rodhit"))
+        {
+            /* x to each of theirs with a Lightning Rod marker, Weakness and Resistance applied */
+            for (s = 0; s < TCG_FIELD_SIZE; s++)
+                if (op->field[s].stackSize && (op->field[s].markers & TCG_MARK_ROD) && (s || !blocked))
+                    HitSlot(g, them, s, x, 1);
+        }
+        else if (ScriptIs(&o, "char"))
+        {
+            /* Char: no Char counter on the Defending Pokemon, a coin; heads, one on it */
+            if (foe->stackSize && !blocked && !(foe->markers & TCG_MARK_CHAR) && TcgDuel_Coin(g, me))
+                foe->markers |= TCG_MARK_CHAR;
+        }
+        else if (ScriptIs(&o, "color"))
+        {
+            /* a Coloring counter of the type chosen (opt:10) on the Defending Pokemon: that type while in play */
+            static const uint8_t types[] = {TCG_GRASS, TCG_FIRE, TCG_WATER, TCG_LIGHTNING, TCG_FIGHTING, TCG_PSYCHIC,
+                                            TCG_DARKNESS, TCG_METAL};
+            if (foe->stackSize && !blocked)
+                foe->colorType = (uint8_t)(types[sScriptOption < sizeof(types) ? sScriptOption : 0] + 1);
+        }
+        else if (ScriptIs(&o, "peek"))
+        {
+            /* peek:Z,n the top n of a deck / n Prizes / a hand (n 0: all of it) shown to you (zone TCG_PEEK_*) */
+            unsigned zone = (unsigned)x, most = o.arg[1] ? (unsigned)o.arg[1] : 60u;
+            if (zone == TCG_PEEK_THEIR_HAND)
+            {
+                unsigned k;
+                for (k = 0; k < op->handSize && k < most; k++)
+                    TcgDuel_Event(g, TCG_EV_PEEK, me, sScriptSelf, zone, op->cards[op->hand[k]], 0);
+            }
+            else
+                ChoicePeek(g, me, zone, most);
+        }
+        else if (ScriptIs(&o, "showhand"))
+        {
+            /* your hand shown to the other player */
+            unsigned k;
+            for (k = 0; k < p->handSize; k++)
+                TcgDuel_Event(g, TCG_EV_PEEK, them, 0, TCG_PEEK_THEIR_HAND, p->cards[p->hand[k]], 0);
         }
         else if (ScriptIs(&o, "lockon"))
         {
@@ -2778,7 +2847,7 @@ static unsigned ScriptChoice(const char *script, int *required)
             return 6;
         }
         if (ScriptIs(&o, "any1") || ScriptIs(&o, "any1h") || ScriptIs(&o, "ectr") || ScriptIs(&o, "dte") ||
-            ScriptIs(&o, "any1e") || ScriptIs(&o, "any1c"))
+            ScriptIs(&o, "any1e") || ScriptIs(&o, "any1c") || ScriptIs(&o, "rodset") || ScriptIs(&o, "helph"))
         {
             if (required)
                 *required = 1;
@@ -3041,6 +3110,13 @@ static unsigned ScriptOptions(const struct TcgDuel *g, unsigned player, const ch
             }
             return i;
         }
+        case 12: /* how many damage counters (up to the most on one of theirs) */
+            for (i = n = 0; i < TCG_FIELD_SIZE; i++)
+                if (g->players[player ^ 1].field[i].stackSize && g->players[player ^ 1].field[i].damage / 10 > n)
+                    n = g->players[player ^ 1].field[i].damage / 10;
+            for (i = 0; i <= n && i < TCG_MAX_OPTIONS; i++)
+                labels[i] = counts[i], ok[i] = 1;
+            return i;
         case 10: /* an Energy type other than Colorless */
         {
             static const char *const types[] = {"GRASS", "FIRE", "WATER", "LIGHTNING", "FIGHTING", "PSYCHIC", "DARKNESS",

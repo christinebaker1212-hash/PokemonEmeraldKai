@@ -3529,7 +3529,7 @@ const struct TcgCard gTcgCards[TCG_CARD_COUNT + 1] = {
 [553] = {.id=553, .name="Good Manners", .kind=TCG_TRAINER, .type=6, .rarity=1, .set=13, .set2=255, .dark=0, .holo=0, .flags=TCG_CF_READY, .origin=13,
 .effect="gym1-111:t",.description="In order to play this card, you can't have any Basic Pokemon cards in your hand. Show your hand to your opponent, then search your deck for a Basic Pokemon card, show it to your opponent, and put it into your hand. Shuffle your deck afterward."
 },
-[554] = {.id=554, .name="Lt. Surge's Treaty", .kind=TCG_TRAINER, .type=6, .rarity=1, .set=13, .set2=255, .dark=0, .holo=0, .flags=0, .origin=13,
+[554] = {.id=554, .name="Lt. Surge's Treaty", .kind=TCG_TRAINER, .type=6, .rarity=1, .set=13, .set2=255, .dark=0, .holo=0, .flags=TCG_CF_READY, .origin=13,
 .effect="gym1-112:t",.description="Your opponent chooses 1 of the following: everyone chooses 1 of his or her own Prizes and put it into his or her hand, or you draw a card."
 },
 [555] = {.id=555, .name="Minion of Team Rocket", .kind=TCG_TRAINER, .type=6, .rarity=1, .set=13, .set2=255, .dark=0, .holo=0, .flags=TCG_CF_READY, .origin=13,
@@ -3950,7 +3950,7 @@ const struct TcgCard gTcgCards[TCG_CARD_COUNT + 1] = {
 {.name="",.description="",.effect="NONE",.animation="ATK_ANIM_NONE",.cost={0},.damage=0,.category=TCG_DAMAGE_NORMAL},
 }
 },
-[625] = {.id=625, .name="Sabrina's Jynx", .kind=TCG_POKEMON, .type=5, .rarity=1, .set=14, .set2=255, .dark=0, .holo=0, .flags=TCG_CF_OWNER, .origin=14,
+[625] = {.id=625, .name="Sabrina's Jynx", .kind=TCG_POKEMON, .type=5, .rarity=1, .set=14, .set2=255, .dark=0, .holo=0, .flags=TCG_CF_OWNER|TCG_CF_READY, .origin=14,
 .hp=60, .stage=0, .species=124, .level=21, .retreat=1, .weakness=5, .resistance=255, .evolvesFrom="", .description="", .attacks={
 {.name="Helping Hand",.description="Choose 1 of your opponent's Pokemon. Remove any number of damage counters from that Pokemon, then draw that many cards.",.effect="gym2-57:a0",.animation="ATK_ANIM_HIT",.cost={0,0,0,0,0,1,0,0,0},.damage=0,.category=TCG_RESIDUAL},
 {.name="Hug",.description="Flip a coin. If heads, the Defending Pokemon can't retreat during your opponent's next turn.",.effect="gym2-57:a1",.animation="ATK_ANIM_HIT",.cost={0,0,0,0,0,1,1,0,0},.damage=20,.category=TCG_DAMAGE_NORMAL},
@@ -4524,7 +4524,7 @@ const struct TcgCard gTcgCards[TCG_CARD_COUNT + 1] = {
 {.name="",.description="",.effect="NONE",.animation="ATK_ANIM_NONE",.cost={0},.damage=0,.category=TCG_DAMAGE_NORMAL},
 }
 },
-[723] = {.id=723, .name="Bayleef", .kind=TCG_POKEMON, .type=1, .rarity=1, .set=15, .set2=255, .dark=0, .holo=0, .flags=0, .origin=15,
+[723] = {.id=723, .name="Bayleef", .kind=TCG_POKEMON, .type=1, .rarity=1, .set=15, .set2=255, .dark=0, .holo=0, .flags=TCG_CF_READY, .origin=15,
 .hp=80, .stage=1, .species=153, .level=39, .retreat=2, .weakness=0, .resistance=255, .evolvesFrom="Chikorita", .description="The scent of spices comes from around its neck. Somehow, sniffing it makes you want to fight.", .attacks={
 {.name="Sweet Scent",.description="Flip a coin. If heads and if any of your Pokemon have any damage counters on them, then remove 2 damage counters from 1 of them (or 1 if it only has 1). If tails and if any of your opponent's Pokemon have any damage counters on them, choose 1 of them and remove 2 damage counters from it (or 1 if it only has 1).",.effect="neo1-29:a0",.animation="ATK_ANIM_HIT",.cost={0,1,0,0,0,0,0,0,0},.damage=0,.category=TCG_RESIDUAL},
 {.name="Double Razor Leaf",.description="Flip 2 coins. This attack does 40 damage times the number of heads.",.effect="neo1-29:a1",.animation="ATK_ANIM_HIT",.cost={0,3,0,0,0,0,0,0,0},.damage=40,.category=TCG_DAMAGE_X},
@@ -4650,7 +4650,7 @@ const struct TcgCard gTcgCards[TCG_CARD_COUNT + 1] = {
 {.name="",.description="",.effect="NONE",.animation="ATK_ANIM_NONE",.cost={0},.damage=0,.category=TCG_DAMAGE_NORMAL},
 }
 },
-[741] = {.id=741, .name="Quilava", .kind=TCG_POKEMON, .type=0, .rarity=1, .set=15, .set2=255, .dark=0, .holo=0, .flags=0, .origin=15,
+[741] = {.id=741, .name="Quilava", .kind=TCG_POKEMON, .type=0, .rarity=1, .set=15, .set2=255, .dark=0, .holo=0, .flags=TCG_CF_READY, .origin=15,
 .hp=70, .stage=1, .species=156, .level=35, .retreat=1, .weakness=3, .resistance=255, .evolvesFrom="Cyndaquil", .description="Be careful if it turns its back during battle. It means that it will attack with the fire on its back.", .attacks={
 {.name="Smokescreen",.description="If the Defending Pokemon tries to attack during your opponent's next turn, your opponent flips a coin. If tails, that attack does nothing.",.effect="neo1-47:a0",.animation="ATK_ANIM_HIT",.cost={2,0,0,0,0,0,0,0,0},.damage=20,.category=TCG_DAMAGE_NORMAL},
 {.name="Char",.description="If the Defending Pokemon doesn't have a Char counter on it, flip a coin. If heads, put a Char counter on it. A Char counter requires your opponent to flip a coin after every turn. If tails, put 2 damage counters on the Pokemon with that Char counter. (Char counters stay on the Pokemon as long as it's in play.)",.effect="neo1-47:a1",.animation="ATK_ANIM_HIT",.cost={3,0,0,0,0,0,0,0,0},.damage=30,.category=TCG_DAMAGE_NORMAL},
@@ -5447,7 +5447,7 @@ const struct TcgCard gTcgCards[TCG_CARD_COUNT + 1] = {
 {.name="",.description="",.effect="NONE",.animation="ATK_ANIM_NONE",.cost={0},.damage=0,.category=TCG_DAMAGE_NORMAL},
 }
 },
-[868] = {.id=868, .name="Unown [O]", .kind=TCG_POKEMON, .type=5, .rarity=0, .set=16, .set2=255, .dark=0, .holo=0, .flags=0, .origin=16,
+[868] = {.id=868, .name="Unown [O]", .kind=TCG_POKEMON, .type=5, .rarity=0, .set=16, .set2=255, .dark=0, .holo=0, .flags=TCG_CF_READY, .origin=16,
 .hp=40, .stage=0, .species=201, .level=14, .retreat=1, .weakness=5, .resistance=255, .evolvesFrom="", .description="Their shapes look like hieroglyphs on ancient tablets. It is said that the two are somehow related.", .attacks={
 {.name="[Observe]",.description="Once during your turn (before your attack), you may look at 5 cards from the top of your opponent's deck and put them back in the same order.",.effect="neo2-69:p",.animation="ATK_ANIM_HIT",.cost={0,0,0,0,0,0,0,0,0},.damage=0,.category=TCG_POKEMON_POWER},
 {.name="Hidden Power",.description="",.effect="NONE",.animation="ATK_ANIM_HIT",.cost={0,0,0,0,0,1,0,0,0},.damage=10,.category=TCG_DAMAGE_NORMAL},
@@ -6051,7 +6051,7 @@ const struct TcgCard gTcgCards[TCG_CARD_COUNT + 1] = {
 {.name="",.description="",.effect="NONE",.animation="ATK_ANIM_NONE",.cost={0},.damage=0,.category=TCG_DAMAGE_NORMAL},
 }
 },
-[960] = {.id=960, .name="Dark Slowking", .kind=TCG_POKEMON, .type=5, .rarity=2, .set=18, .set2=255, .dark=1, .holo=0, .flags=0, .origin=18,
+[960] = {.id=960, .name="Dark Slowking", .kind=TCG_POKEMON, .type=5, .rarity=2, .set=18, .set2=255, .dark=1, .holo=0, .flags=TCG_CF_READY, .origin=18,
 .hp=60, .stage=1, .species=199, .level=27, .retreat=2, .weakness=5, .resistance=255, .evolvesFrom="Slowpoke", .description="Each time it yawns, the Shellder on its head releases an enzyme that makes it grow even smarter.", .attacks={
 {.name="Cunning",.description="Once during your turn (before your attack), you may flip a coin. If heads, look at the top card of your opponent's deck. Then, you may have your opponent shuffle his or her deck. This power can't be used if Dark Slowking is Asleep, Confused, or Paralyzed.",.effect="neo4-20:p",.animation="ATK_ANIM_HIT",.cost={0,0,0,0,0,0,0,0,0},.damage=0,.category=TCG_POKEMON_POWER},
 {.name="Mind Shock",.description="Don't apply Weakness or Resistance for this attack.",.effect="neo4-20:a0",.animation="ATK_ANIM_HIT",.cost={0,0,0,0,0,2,0,0,0},.damage=30,.category=TCG_DAMAGE_NORMAL},
@@ -6520,14 +6520,14 @@ const struct TcgCard gTcgCards[TCG_CARD_COUNT + 1] = {
 {.name="",.description="",.effect="NONE",.animation="ATK_ANIM_NONE",.cost={0},.damage=0,.category=TCG_DAMAGE_NORMAL},
 }
 },
-[1027] = {.id=1027, .name="Unown [S]", .kind=TCG_POKEMON, .type=5, .rarity=0, .set=18, .set2=255, .dark=0, .holo=0, .flags=0, .origin=18,
+[1027] = {.id=1027, .name="Unown [S]", .kind=TCG_POKEMON, .type=5, .rarity=0, .set=18, .set2=255, .dark=0, .holo=0, .flags=TCG_CF_READY, .origin=18,
 .hp=50, .stage=0, .species=201, .level=19, .retreat=1, .weakness=5, .resistance=255, .evolvesFrom="", .description="It is believed that the variety of types of this Pokemon were created by evolutionary adaptation, as each possesses a different ability.", .attacks={
 {.name="[Search]",.description="Once during your turn (before your attack), you may look at 1 of your Prize cards. Return that Prize card face down. This power can be used even if Unown [S] is Asleep, Confused, or Paralyzed.",.effect="neo4-87:p",.animation="ATK_ANIM_HIT",.cost={0,0,0,0,0,0,0,0,0},.damage=0,.category=TCG_POKEMON_POWER},
 {.name="Hidden Power",.description="",.effect="NONE",.animation="ATK_ANIM_HIT",.cost={0,0,0,0,0,1,1,0,0},.damage=20,.category=TCG_DAMAGE_NORMAL},
 {.name="",.description="",.effect="NONE",.animation="ATK_ANIM_NONE",.cost={0},.damage=0,.category=TCG_DAMAGE_NORMAL},
 }
 },
-[1028] = {.id=1028, .name="Unown [T]", .kind=TCG_POKEMON, .type=5, .rarity=0, .set=18, .set2=255, .dark=0, .holo=0, .flags=0, .origin=18,
+[1028] = {.id=1028, .name="Unown [T]", .kind=TCG_POKEMON, .type=5, .rarity=0, .set=18, .set2=255, .dark=0, .holo=0, .flags=TCG_CF_READY, .origin=18,
 .hp=40, .stage=0, .species=201, .level=12, .retreat=1, .weakness=5, .resistance=255, .evolvesFrom="", .description="It is believed that the variety of types of this Pokemon were created by evolutionary adaptation, as each possesses a different ability.", .attacks={
 {.name="[Tell]",.description="Once during your turn (before your attack), you may flip a coin. If heads, look at your opponent's hand and show your hand to your opponent. This power can be used even if Unown [T] is Asleep, Confused, or Paralyzed.",.effect="neo4-88:p",.animation="ATK_ANIM_HIT",.cost={0,0,0,0,0,0,0,0,0},.damage=0,.category=TCG_POKEMON_POWER},
 {.name="Hidden Power",.description="",.effect="NONE",.animation="ATK_ANIM_HIT",.cost={0,0,0,0,0,1,1,0,0},.damage=20,.category=TCG_DAMAGE_NORMAL},
@@ -9146,7 +9146,7 @@ const struct TcgCard gTcgCards[TCG_CARD_COUNT + 1] = {
 {.name="",.description="",.effect="NONE",.animation="ATK_ANIM_NONE",.cost={0},.damage=0,.category=TCG_DAMAGE_NORMAL},
 }
 },
-[1434] = {.id=1434, .name="Noctowl", .kind=TCG_POKEMON, .type=6, .rarity=1, .set=21, .set2=255, .dark=0, .holo=0, .flags=0, .origin=21,
+[1434] = {.id=1434, .name="Noctowl", .kind=TCG_POKEMON, .type=6, .rarity=1, .set=21, .set2=255, .dark=0, .holo=0, .flags=TCG_CF_READY, .origin=21,
 .hp=70, .stage=1, .species=164, .level=0, .retreat=0, .weakness=2, .resistance=4, .evolvesFrom="Hoothoot", .description="", .attacks={
 {.name="Investigate",.description="Once during your turn (before your attack), you may look at the top 2 cards of any player's deck or at up to 2 of any player's Prizes. Put any cards you looked at back in the same order. This power can't be used if Noctowl is affected by a Special Condition.",.effect="ecard3-40:p",.animation="ATK_ANIM_HIT",.cost={0,0,0,0,0,0,0,0,0},.damage=0,.category=TCG_POKEMON_POWER},
 {.name="Triple Smash",.description="Flip 3 coins. This attack does 10 damage plus 10 more damage for each heads.",.effect="ecard3-40:a0",.animation="ATK_ANIM_HIT",.cost={0,0,0,0,0,0,2,0,0},.damage=10,.category=TCG_DAMAGE_PLUS},
@@ -10291,7 +10291,7 @@ const struct TcgCard gTcgCards[TCG_CARD_COUNT + 1] = {
 {.name="",.description="",.effect="NONE",.animation="ATK_ANIM_NONE",.cost={0},.damage=0,.category=TCG_DAMAGE_NORMAL},
 }
 },
-[1608] = {.id=1608, .name="Smeargle", .kind=TCG_POKEMON, .type=6, .rarity=3, .set=4, .set2=255, .dark=0, .holo=0, .flags=0, .origin=22,
+[1608] = {.id=1608, .name="Smeargle", .kind=TCG_POKEMON, .type=6, .rarity=3, .set=4, .set2=255, .dark=0, .holo=0, .flags=TCG_CF_READY, .origin=22,
 .hp=40, .stage=0, .species=235, .level=21, .retreat=1, .weakness=4, .resistance=5, .evolvesFrom="", .description="Once it becomes an adult, it has a tendency to let its comrades plant footprints on its back.", .attacks={
 {.name="Paint",.description="Flip a coin. If heads, choose a type (other than Colorless) and put a Coloring counter on the Defending Pokemon. That Pokemon is now the type you chose. If it already had a Coloring counter, remove the old one. If tails, this attack does nothing.",.effect="basep-32:a0",.animation="ATK_ANIM_HIT",.cost={0,0,0,0,0,0,1,0,0},.damage=0,.category=TCG_RESIDUAL},
 {.name="",.description="",.effect="NONE",.animation="ATK_ANIM_NONE",.cost={0},.damage=0,.category=TCG_DAMAGE_NORMAL},
@@ -10377,7 +10377,7 @@ const struct TcgCard gTcgCards[TCG_CARD_COUNT + 1] = {
 {.name="",.description="",.effect="NONE",.animation="ATK_ANIM_NONE",.cost={0},.damage=0,.category=TCG_DAMAGE_NORMAL},
 }
 },
-[1622] = {.id=1622, .name="Electabuzz", .kind=TCG_POKEMON, .type=2, .rarity=3, .set=4, .set2=255, .dark=0, .holo=0, .flags=0, .origin=22,
+[1622] = {.id=1622, .name="Electabuzz", .kind=TCG_POKEMON, .type=2, .rarity=3, .set=4, .set2=255, .dark=0, .holo=0, .flags=TCG_CF_READY, .origin=22,
 .hp=60, .stage=0, .species=125, .level=22, .retreat=1, .weakness=4, .resistance=255, .evolvesFrom="", .description="Normally found near power plants, it can wander away and cause major blackouts in cities.", .attacks={
 {.name="Lightning Rod",.description="Choose 1 of your opponent's Pokemon and put a Lightning Rod marker on it. (A Pokemon can have only 1 Lightning Rod marker on it at a time.)",.effect="basep-46:a0",.animation="ATK_ANIM_HIT",.cost={0,0,1,0,0,0,0,0,0},.damage=0,.category=TCG_RESIDUAL},
 {.name="Lightning Bolt",.description="This attack does 20 damage to any Pokemon with a Lightning Rod marker on it. Apply Weakness and Resistance.",.effect="basep-46:a1",.animation="ATK_ANIM_HIT",.cost={0,0,2,0,0,0,0,0,0},.damage=10,.category=TCG_DAMAGE_NORMAL},

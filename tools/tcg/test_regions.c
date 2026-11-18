@@ -931,6 +931,101 @@ static int PowersOfFour(void)
 }
 /* A choice in the middle of an effect: Light Venomoth's (their pick, then yours, then the turn ends), through the
  * flow as the board and the phone ask it; Special Delivery's */
+static unsigned PeekCount(const struct TcgDuel *g, unsigned who)
+{
+    unsigned k, n = 0;
+    for (k = 0; k < TCG_EVENT_RING; k++)
+        n += g->events[k].type == TCG_EV_PEEK && g->events[k].player == who;
+    return n;
+}
+static int Peeks(void)
+{
+    struct TcgDuel g;
+    struct TcgAction a;
+    unsigned hand, prizes;
+    int c;
+    if (!Tcg_Card(TCG_CARD_NEO2_69) || !Tcg_Card(TCG_CARD_ECARD3_40) || !Tcg_Card(TCG_CARD_GYM1_112))
+        return printf("FAIL peeks: a card isn't finished\n"), 1;
+    /* [Observe]: their top 5 shown, in order, nothing moved */
+    Stage(&g, TCG_CARD_NEO2_69, 0, 1);
+    g.players[0].field[0].poison = 0;
+    memset(g.events, 0, sizeof(g.events));
+    memset(&a, 0, sizeof(a));
+    a.type = TCG_USE_POWER;
+    {
+        uint8_t top = g.players[1].deck[g.players[1].deckSize - 1];
+        if (TcgDuel_Apply(&g, &a) != TCG_OK || PeekCount(&g, 0) != 5 || g.players[1].deck[g.players[1].deckSize - 1] != top)
+            return printf("FAIL [Observe]: %s (%u looked at)\n", g.error, PeekCount(&g, 0)), 1;
+    }
+    /* Investigate: a choice of what to look at, 2 of their Prizes */
+    Stage(&g, TCG_CARD_ECARD3_40, 0, 1);
+    g.players[0].field[0].poison = 0;
+    memset(&a, 0, sizeof(a));
+    a.type = TCG_USE_POWER;
+    if (TcgDuel_Apply(&g, &a) != TCG_OK || g.phase != TCG_CHOICE || g.choicePlayer != 0 || g.choiceKind != TCG_CHOICE_PEEK_ZONE)
+        return printf("FAIL Investigate: %s\n", g.error), 1;
+    memset(g.events, 0, sizeof(g.events));
+    memset(&a, 0, sizeof(a));
+    a.type = TCG_CHOOSE;
+    a.target = TCG_PEEK_THEIR_PRIZE;
+    if (TcgDuel_Apply(&g, &a) != TCG_OK || PeekCount(&g, 0) != 2 || g.phase != TCG_TURN)
+        return printf("FAIL Investigate's look: %s (%u)\n", g.error, PeekCount(&g, 0)), 1;
+    /* Lt. Surge's Treaty: they choose; everyone takes a Prize, or you draw */
+    Stage(&g, TCG_CARD_MACHOP, 0, 1);
+    c = Relabel(&g, 0, TCG_CARD_GYM1_112);
+    g.players[0].hand[g.players[0].handSize++] = (uint8_t)c;
+    memset(&a, 0, sizeof(a));
+    a.type = TCG_PLAY_TRAINER;
+    a.hand = (uint8_t)(g.players[0].handSize - 1);
+    if (TcgDuel_Apply(&g, &a) != TCG_OK || g.phase != TCG_CHOICE || g.choicePlayer != 1)
+        return printf("FAIL Lt. Surge's Treaty: %s\n", g.error), 1;
+    hand = g.players[1].handSize, prizes = g.players[0].prizeSize;
+    memset(&a, 0, sizeof(a));
+    a.type = TCG_CHOOSE;
+    a.target = 0;
+    if (TcgDuel_Apply(&g, &a) != TCG_OK || g.players[1].handSize != hand + 1 || g.players[0].prizeSize != prizes - 1 ||
+        g.phase != TCG_TURN)
+        return printf("FAIL Lt. Surge's Treaty's Prizes: %s\n", g.error), 1;
+    /* Lightning Rod: the marker on the chosen one of theirs; Lightning Bolt: 20 to it besides */
+    if (Tcg_Card(TCG_CARD_BASEP_46))
+    {
+        Stage(&g, TCG_CARD_BASEP_46, 0, 1);
+        memset(&a, 0, sizeof(a));
+        a.type = TCG_ATTACK;
+        a.target = 1;
+        if (TcgDuel_Apply(&g, &a) != TCG_OK || !(g.players[1].field[1].markers & TCG_MARK_ROD))
+            return printf("FAIL Lightning Rod: %s\n", g.error), 1;
+        Stage(&g, TCG_CARD_BASEP_46, 1, 1);
+        g.players[1].field[1].markers = TCG_MARK_ROD;
+        hand = g.players[1].field[1].damage;
+        memset(&a, 0, sizeof(a));
+        a.type = TCG_ATTACK;
+        a.attack = 1;
+        if (TcgDuel_Apply(&g, &a) != TCG_OK || g.players[1].field[1].damage != hand + 20)
+            return printf("FAIL Lightning Bolt: %s (%u -> %u)\n", g.error, hand, g.players[1].field[1].damage), 1;
+    }
+    /* Sweet Scent: heads one of yours, tails one of theirs, 2 counters off */
+    if (Tcg_Card(TCG_CARD_NEO1_29))
+    {
+        unsigned q;
+        Stage(&g, TCG_CARD_NEO1_29, 0, 1);
+        g.players[0].field[1].damage = 30;
+        g.players[1].field[1].damage = 30;
+        memset(&a, 0, sizeof(a));
+        a.type = TCG_ATTACK;
+        if (TcgDuel_Apply(&g, &a) != TCG_OK || g.phase != TCG_CHOICE || g.choicePlayer != 0 ||
+            (g.choiceKind != TCG_CHOICE_HEAL_MINE && g.choiceKind != TCG_CHOICE_HEAL_THEIRS))
+            return printf("FAIL Sweet Scent: %s (phase %u)\n", g.error, g.phase), 1;
+        q = g.choiceKind == TCG_CHOICE_HEAL_MINE ? 0 : 1;
+        memset(&a, 0, sizeof(a));
+        a.type = TCG_CHOOSE;
+        a.target = 1;
+        if (TcgDuel_Apply(&g, &a) != TCG_OK || g.players[q].field[1].damage != 10)
+            return printf("FAIL Sweet Scent's heal: %s\n", g.error), 1;
+    }
+    printf("PASS peeks: [Observe], Investigate's choice, Lt. Surge's Treaty, Lightning Rod, Sweet Scent\n");
+    return 0;
+}
 static int Choices(void)
 {
     struct TcgDuel g;
@@ -1846,7 +1941,7 @@ int main(void)
     }
     printf("PASS %u finished regional cards: %u attacks used %u times, then %u AI actions after them\n", ready, used, ok,
            steps);
-    if (SpecialEnergy() || EcardEnergy() || ScriptMechanics() || Anchors() || Guards() || MovePowers() || LookPowers() || SwitchesAndFire() || BorrowedAttacks() || Copies() || PowersOfFour() || Choices() || TechnicalMachines() || Babies())
+    if (SpecialEnergy() || EcardEnergy() || ScriptMechanics() || Anchors() || Guards() || MovePowers() || LookPowers() || SwitchesAndFire() || BorrowedAttacks() || Copies() || PowersOfFour() || Choices() || Peeks() || TechnicalMachines() || Babies())
         return 1;
     if (PlayTrainers() || UsePowers() || UseStadiums() || AttackFlows())
         return 1;

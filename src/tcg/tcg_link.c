@@ -148,6 +148,7 @@ uint32_t TcgLink_Hash(const struct TcgDuel *g)
             H(f->mirrorNoRetreat | f->mirrorEffect << 8 | f->mirrorArg << 16 | (uint32_t)f->mirrorWeak << 24);
             H(f->burn);
             H(f->shift);
+            H(f->markers | f->colorType << 8);
             for (k = 0; k < f->stackSize; k++)
                 H(f->stack[k]);
             for (k = 0; k < f->attachedSize; k++)

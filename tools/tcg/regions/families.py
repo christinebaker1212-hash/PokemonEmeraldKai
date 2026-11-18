@@ -569,6 +569,12 @@ def _(m, d):
 
 # One wording, one script (the cards' words with SELF for the card's name; tcg_script.inc's ops)
 EXACT = {
+    "Choose 1 of your opponent's Pokemon. Remove any number of damage counters from that Pokemon, then draw that many cards.": 'opt:12 helph',
+    "Flip a coin. If heads and if any of your Pokemon have any damage counters on them, then remove 2 damage counters from 1 of them (or 1 if it only has 1). If tails and if any of your opponent's Pokemon have any damage counters on them, choose 1 of them and remove 2 damage counters from it (or 1 if it only has 1).": 'c h.askch:19,1 t.askch:20,1',
+    "Choose 1 of your opponent's Pokemon and put a Lightning Rod marker on it. (A Pokemon can have only 1 Lightning Rod marker on it at a time.)": 'rodset',
+    'This attack does 20 damage to any Pokemon with a Lightning Rod marker on it. Apply Weakness and Resistance.': 'rodhit:20',
+    "If the Defending Pokemon doesn't have a Char counter on it, flip a coin. If heads, put a Char counter on it. A Char counter requires your opponent to flip a coin after every turn. If tails, put 2 damage counters on the Pokemon with that Char counter. (Char counters stay on the Pokemon as long as it's in play.)": 'char',
+    'Flip a coin. If heads, choose a type (other than Colorless) and put a Coloring counter on the Defending Pokemon. That Pokemon is now the type you chose. If it already had a Coloring counter, remove the old one. If tails, this attack does nothing.': 'opt:10 c h.color',
     'Your opponent looks at the top 3 cards of his or her deck. If any of them are basic Energy cards, he or she may show any number of them to you and put them into his or her hand. You do the same. Either way, each player shuffles his or her deck.': 'askch:7',
     'Your opponent may choose 1 of his or her Pokemon and search his or her deck for a card that evolves from that Pokemon. Your opponent attaches that card to that Pokemon. This counts as evolving that Pokemon. Either way, you may do the same, and then each player who searched shuffles his or her deck.': 'askch:8',
     'Flip a coin. If heads, this attack does 20 damage. If tails and if your opponent has any Benched Pokemon, he or she chooses 1 of them and this attack does 20 damage to it.': 'c h.add:20 t.askch:11',
