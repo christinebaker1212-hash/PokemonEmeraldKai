@@ -105,11 +105,19 @@ static const u8 sText_CrystalCaught[] = _("Gotcha! {B_OPPONENT_MON1_NAME}\nwas c
 
 // Red's / Crystal's SFX_CAUGHT_MON, played with the caught message (mp_legacy_sound.c;
 // the ids are mp_legacy_sfx.h's LEGACY_SFX_RED_CAUGHT_MON / LEGACY_SFX_GSC_CAUGHT_MON)
-void MP_LegacyBall_PlayCaughtJingle(void)
+// (any ball thrown the Game Boy way, GB OPTIONS > BALL THROWS: the thrower's style's game's jingle, as with these balls,
+// the user 2026-11-18: the caught music played but not the fanfare). TRUE when one plays
+bool8 MP_LegacyBall_PlayCaughtJingle(void)
 {
     u8 kind = MP_LegacyBall_Kind(gLastUsedItem);
+    if (!kind && gMpThrowStyleShown)
+        kind = gMpThrowStyleShown == 1 ? MP_SPECIAL_GENESIS : MP_SPECIAL_EPOCH;
     if (kind)
+    {
         MP_LegacySfx_Play(kind == MP_SPECIAL_GENESIS ? 3 : 9, 0);
+        MPNet_Log("legacy ball: %s's catch jingle", kind == MP_SPECIAL_GENESIS ? "Red" : "Crystal");
+    }
+    return kind != 0;
 }
 
 // The text for stringId when the last ball was a GENESIS / EPOCH BALL (NULL: the usual one)

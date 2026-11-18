@@ -8168,7 +8168,9 @@ The way of throwing is the thrower's, on every game: MP_GbThrowStyle (1 RED, 2 C
 choice's byte 3 (BtlController_EmitOneReturnValue) to the engine (battle_main.c gMpThrowStyle by battler), then in the
 throw's case id bits 5-6 (BtlController_EmitBallThrowAnim; MP_PROTOCOL_VERSION 86); each controller takes it off with
 BtlController_BallCase into gMpThrowStyleShown, which GbThrow reads, so a friend on KAI sees CRYSTAL's throw and both
-wait the same. Measured with MOEMON_ANIMLEN (battle_anim.c: "anim length: KIND ID FRAMES" for every animation);
+wait the same. A catch plays that game's own jingle with the "Gotcha!" words, as the GENESIS / EPOCH BALLS do
+(mp_legacy_balls.c MP_LegacyBall_PlayCaughtJingle by gMpThrowStyleShown; KAI's fanfare comes from KAI's throw, which
+the Game Boy's replaces: without it only the caught song played). Measured with MOEMON_ANIMLEN (battle_anim.c: "anim length: KIND ID FRAMES" for every animation);
 `mp forceshakes N` rigs a throw. Scenarios gb_ball_throws, gb_ball_coop.
 
 ### GB OPTIONS stage 3: TRANSITIONS
@@ -8222,7 +8224,9 @@ intro.c MP_IntroShown).
 RED's modes (DMG, POCKET, LIGHT, COLOR, GBA), readable at every hour (the user, 2026-11-18): UI STYLE RED draws no time of
 day (mp_daytint.c Wanted: Red had none), and in a battle the background layer's palettes (BG3 only: sBgsOf) and the
 backdrop take the lightest shade, a full-colour background picture too (LightPicLine wraps gMpBgPictureLine
-between PreDraw and PostDraw): Red's own battle background, the colour of its text box.
+between PreDraw and PostDraw): Red's own battle background, the colour of its text box. With COLORS on (RED or CRYSTAL)
+a battle's background is always the game's own, as WHITE BG ON draws it, CRYSTAL's white in its time of day's light
+(mp_battlepic.c PlainBackground / MP_BattlePic_SceneTint check MP_GbPal_Active).
 
 ### GB OPTIONS stage 5: MOVES
 

@@ -2615,21 +2615,19 @@ void BufferStringBattle(u16 stringID)
         bool8 MP_CatchJingle_GoesOn(u8 target);
         bool8 goesOn = MP_CatchJingle_GoesOn(gBattlerTarget);
         bool8 legacy = MP_LegacyBall_String(stringID) != NULL;
+        // its own game's catch jingle, with the message (sound_caught_mon): a GENESIS / EPOCH BALL's, or Red's /
+        // Crystal's for any ball thrown their way (GB OPTIONS > BALL THROWS)
+        bool8 ownJingle = MP_LegacyBall_PlayCaughtJingle();
         // Moemon Co-op: a GENESIS / EPOCH BALL catch says it like Red / Crystal
-        if (legacy)
+        if (legacy && !goesOn)
         {
-            // its own game's catch jingle, with the message (sound_caught_mon)
-            MP_LegacyBall_PlayCaughtJingle();
-            if (!goesOn)
-            {
-                stringPtr = MP_LegacyBall_String(stringID);
-                break;
-            }
+            stringPtr = MP_LegacyBall_String(stringID);
+            break;
         }
         if (goesOn)
         {
             void MP_CatchJingle_Start(bool8 ownJingle);
-            MP_CatchJingle_Start(legacy);
+            MP_CatchJingle_Start(ownJingle);
             if (!gMpCoopWild)   // (the co-op battle names it in its own script: VARIOUS_MP_COOP_OTHER_OUT)
                 PREPARE_MON_NICK_BUFFER(gBattleTextBuff1, gBattlerTarget, gBattlerPartyIndexes[gBattlerTarget]);
             stringPtr = gMpCoopWild ? sText_MpCoopGotchaGoOn : sText_MpGotchaFoeGoOn;

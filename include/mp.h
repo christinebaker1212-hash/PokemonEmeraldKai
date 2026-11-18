@@ -1036,7 +1036,7 @@ u8 MP_LegacyBall_Kind(u16 item);   // MP_SPECIAL_GENESIS / MP_SPECIAL_EPOCH, or 
 bool8 MP_LegacyBall_ResolveThrow(u16 item, u8 target, u8 *caseId);
 const u8 *MP_LegacyBall_String(u16 stringId);
 void MP_LegacyBall_RigRandom(const u8 *bytes, u8 count);
-void MP_LegacyBall_PlayCaughtJingle(void);
+bool8 MP_LegacyBall_PlayCaughtJingle(void);   // (TRUE when one plays: also any ball thrown the Game Boy way)
 // mp_legacy_anim.c / mp_legacy_sound.c: their throws (Red's / Crystal's own animation, art and sounds)
 void MP_LegacyAnim_Composite(u16 *frame);
 void MP_LegacyAnim_ClearKept(u8 battler);

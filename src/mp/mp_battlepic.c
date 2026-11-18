@@ -103,10 +103,14 @@ static void Line(int line, u16 *layer, s32 x0, s32 y0, s32 dx, s32 dy)
 // RED's and CRYSTAL's battles with WHITE BG ON (the user, 2026-11-16): the whole background a plain colour, as the
 // Game Boy's were: RED's white, CRYSTAL's the white of its own palettes at that time of day (pokecrystal
 // gfx/tilesets/bg_tiles.pal: MORN 4-9, DAY 10-17, NITE 18-3), every region's scene and Kai's alike
+// GB OPTIONS > COLORS on: the battle's background is always the game's own (RED's white, CRYSTAL's white at that time
+// of day), as WHITE BG ON draws it (the user, 2026-11-18: "Crystal's battle background should match Crystal's too")
+bool8 MP_GbPal_Active(void);
+
 static bool8 PlainBackground(u16 *color)
 {
     u8 style = MP_UiStyle_Active();
-    if ((style != UISTYLE_RED && style != UISTYLE_CRYSTAL) || gMpConfig.uiNoWhiteBg)
+    if ((style != UISTYLE_RED && style != UISTYLE_CRYSTAL) || (gMpConfig.uiNoWhiteBg && !MP_GbPal_Active()))
         return FALSE;
     *color = RGB(31, 31, 31);   // (CRYSTAL's light of the time of day goes over the whole scene: MP_BattlePic_SceneTint)
     return TRUE;
@@ -117,7 +121,7 @@ static bool8 PlainBackground(u16 *color)
 bool8 MP_BattlePic_SceneTint(u16 *tint)
 {
     u8 hour;
-    if (MP_UiStyle_Active() != UISTYLE_CRYSTAL || gMpConfig.uiNoWhiteBg)
+    if (MP_UiStyle_Active() != UISTYLE_CRYSTAL || (gMpConfig.uiNoWhiteBg && !MP_GbPal_Active()))
         return FALSE;
     RtcCalcLocalTime();
     hour = gLocalTime.hours;
