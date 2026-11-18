@@ -135,6 +135,7 @@ enum
 };
 void G_SetArtMode(unsigned mode);
 int G_HasPrinted(unsigned id);
+int G_EcardDesign(unsigned id); /* Aquapolis / Skyridge: the e-Card design (its own face and cut) */
 void G_CardArtRect(unsigned id, int w, int h, int *ax, int *ay, int *aw, int *ah);
 /* OPTIONS > DISPLAY > CARD BACKS (gMpConfig.cardBack). */
 enum

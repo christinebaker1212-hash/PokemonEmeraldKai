@@ -121,6 +121,22 @@ Total 1,158 set cards (about 1,100 attacks with effect text, 250 Pokémon Powers
      draws samples), built in by tcg_art_data.c; tcg_gfx.c PrintedEntry reads ids past 442 from it (the back stays
      printed.bin's), CleanArtCorners fills the e-Card windows' rounded corners. The phone: android/build_assets.py
      joins it after printed.bin into one tcg_cards.bin (joined_packs), so CardPack.java reads ids past 442 unchanged.
+   - The e-Card design (Aquapolis, Skyridge; the user, 2026-11-18): their own face and their own cut. CUT: their
+     window is one printed template, measured over all 364 of their cards' yellow frames (build_art.py AQUA: a
+     POKEMON's 30-288 x 48-198 of the stored 300 x 412, a Trainer's 28-269 x 68-207, a special Energy's 32-290 x
+     40-266), laid on each scan where its frame matches best (aqua_fit, within 4 pixels) and kept whole (no inset).
+     CONVERSION: tcg_gfx.c AquaArt cuts the illustration out with the window's own shape as transparency (sAquaTop /
+     sAquaBottom: the rounded left corners; AQUA_TAB_*: a POKEMON's stage tab; frame yellow within 2 pixels of the
+     edge dropped), never colour-smeared; FULL CARD still shows the whole scan. FACE: EcardFace, the card's sprite at
+     every size (gold sparkle border, the e-Reader dot strip down the left, the name bar in the type's colour, the
+     window open to the right border over the gold, the gold swoosh, the attacks on the type's colour, the e mark; a
+     Trainer's grey band and stone text, a special Energy's slate), its window in the printed proportions
+     (EcardArtRect, also the foil's), so none of the picture is cropped. G_EcardDesign(id) says which cards.
+     Expedition keeps the WotC-era face and its own cut.
+   - CARD ART: GAME BOY: the regional sets' cards were never on the Game Boy (graphics/tcg/original.bin holds the 442),
+     so GAME BOY shows their printed illustration in the frame (Scan; it used to leave their windows empty).
+     A look at the faces without a duel: MOEMON_TCG_FACESHEET=out.ppm MOEMON_TCG_FACESHEET_IDS=ids
+     MOEMON_TCG_FACESHEET_MODE=G_ART_* (drawn the first time the card screens draw: a `rendershot` in a duel).
    - Special trainers: tools/tcg/regions/specials.py (67: JOHTO 16, KANTO 15, SINNOH 16, UNOVA 20; decks from their
      region's finished cards, a promo each) -> gen_special_decks.py -> include/tcg/region_specials.h, tcg_decks.c;
      tcg_field.c sQzSpecials in the same order (people by their sprite: UNOVA's by Black's object code); rated against

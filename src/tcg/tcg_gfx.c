@@ -1155,6 +1155,8 @@ struct Source
     int w, h;
     uint32_t *px;
     int artX, artY, artW, artH; /* where the illustration is (the whole picture for the Game Boy's) */
+    uint32_t *art;              /* (the e-Card design's: the illustration alone, artW x artH, outside its window's
+                                 * shape see-through; px stays the whole card for FULL CARD) */
 };
 #define SOURCES 48
 static struct Source sSource[SOURCES];
@@ -1245,6 +1247,70 @@ static void CleanArtCorners(struct Source *s, int R)
             }
     }
 }
+/* Moemon Kai: Aquapolis and Skyridge, the e-Card design (docs/TCG_REGIONS.md "The e-Card design"). Their window is
+ * one printed template (tools/tcg/regions/build_art.py AQUA, its rectangle cut whole from each scan): rounded left
+ * corners, the picture running to the right border, a POKEMON's stage tab over its top right. sAquaTop / sAquaBottom:
+ * how far in (stored pixels, 300 wide) the picture starts on the window's rows from the top down / the bottom up;
+ * AQUA_TAB_*: the stage tab. Measured over all their cards' yellow frames. */
+static const uint8_t sAquaTop[] = {44, 40, 36, 33, 31, 29, 27, 26, 24, 22, 20, 18, 17, 15, 14, 13, 12, 11,
+                                   10, 9,  8,  7,  6,  6,  5,  4,  4,  3,  3,  2,  2,  2,  1,  1};
+static const uint8_t sAquaBottom[] = {45, 37, 32, 29, 27, 24, 23, 21, 19, 18, 16, 15, 14, 13, 12, 11, 10, 9, 9,
+                                      8,  7,  7,  6,  5,  5,  4,  4,  3,  3,  3,  2,  2,  2,  1,  1,  1,  1};
+#define AQUA_TAB_ROWS 3
+#define AQUA_TAB_WIDTH 68
+int G_EcardDesign(unsigned id)
+{
+    const struct TcgCard *c = id > TCG_CARD_GB_COUNT ? Tcg_Card(id) : NULL;
+    return c && (c->origin == TCG_ORIGIN_AQUAPOLIS || c->origin == TCG_ORIGIN_SKYRIDGE);
+}
+/* Is (x, y) of an e-Card window of w x h inside its shape (scale: the stored scan's width / 300; tab: a POKEMON's
+ * stage tab) */
+static int AquaInside(int x, int y, int w, int h, float scale, int tab)
+{
+    int top = (int)(y / scale), bottom = (int)((h - 1 - y) / scale), in = 0;
+    if (top < (int)ARRAY_COUNT(sAquaTop))
+        in = sAquaTop[top];
+    if (bottom < (int)ARRAY_COUNT(sAquaBottom) && sAquaBottom[bottom] > in)
+        in = sAquaBottom[bottom];
+    if (x < (int)(in * scale + 0.5f))
+        return 0;
+    return !(tab && top < AQUA_TAB_ROWS && x >= w - (int)(AQUA_TAB_WIDTH * scale + 0.5f));
+}
+/* The e-Card design's illustration: its window cut out, the corners and the tab see-through, and any of the gold
+ * frame still at its edge (a scan a pixel off the template, a special Energy's rounded corners) too */
+static void AquaArt(struct Source *s, int shaped, int tab)
+{
+    int x, y, edge = 2;
+    float scale = s->w / 300.0f;
+    s->art = malloc((size_t)s->artW * s->artH * 4);
+    if (!s->art)
+        return;
+    for (y = 0; y < s->artH; y++)
+        for (x = 0; x < s->artW; x++)
+        {
+            uint32_t p = s->px[(s->artY + y) * s->w + s->artX + x];
+            int in = !shaped || AquaInside(x, y, s->artW, s->artH, scale, tab);
+            /* (near the edge: inside the shape by fewer than `edge` pixels on any side) */
+            int near = x < edge || y < edge || x >= s->artW - edge || y >= s->artH - edge ||
+                       (shaped && (!AquaInside(x - edge, y, s->artW, s->artH, scale, tab) ||
+                                   !AquaInside(x, y - edge, s->artW, s->artH, scale, tab) ||
+                                   !AquaInside(x, y + edge, s->artW, s->artH, scale, tab) ||
+                                   !AquaInside(x + edge, y, s->artW, s->artH, scale, tab)));
+            s->art[y * s->artW + x] = in && !(near && BorderYellow(p)) ? p : 0;
+        }
+}
+/* A source's illustration to draw from: the e-Card design's own cut-out, else the picture itself */
+static const struct Source *ArtView(const struct Source *s, struct Source *view)
+{
+    if (!s->art)
+        return s;
+    *view = *s;
+    view->px = s->art;
+    view->w = s->artW, view->h = s->artH;
+    view->artX = view->artY = 0;
+    view->art = NULL;
+    return view;
+}
 /* Decodes the Game Boy illustration (kind 0) or the printed card (kind 1; id 0 = the back). */
 static int LoadSource(struct Source *s, unsigned id, unsigned kind)
 {
@@ -1269,6 +1335,13 @@ static int LoadSource(struct Source *s, unsigned id, unsigned kind)
             s->artX = 0, s->artY = 0, s->artW = s->w, s->artH = s->h;
         else if (id >= 229 && id <= 442)
             CleanArtCorners(s, 8);
+        else if (G_EcardDesign(id))
+        {
+            /* (Aquapolis / Skyridge: their window's own shape; a special Energy's is square, its corners' gold
+             * dropped) */
+            const struct TcgCard *c = Tcg_Card(id);
+            AquaArt(s, c->kind != TCG_ENERGY, c->kind == TCG_POKEMON);
+        }
         else if (id > TCG_CARD_GB_COUNT)   /* (the regional sets' windows: the e-Card ones round more) */
             CleanArtCorners(s, 24);
     }
@@ -1294,10 +1367,12 @@ static struct Source *Source(unsigned id, unsigned kind)
         }
     s = &sSource[best];
     free(s->px);
+    free(s->art);
     memset(s, 0, sizeof(*s));
     if (!LoadSource(s, id, kind))
     {
         free(s->px);
+        free(s->art);
         memset(s, 0, sizeof(*s));
         return NULL;
     }
@@ -1327,12 +1402,202 @@ void G_SetBackMode(unsigned mode)
     sBackMode = mode;
     ForgetFaces();
 }
-/* The printed card, unless CARD ART is GAME BOY or the card was only ever on the Game Boy. */
+/* The printed card, unless CARD ART is GAME BOY or the card was only ever on the Game Boy. (The regional sets'
+ * cards were never on the Game Boy: GAME BOY shows their printed illustration in the frame.) */
 static struct Source *Scan(unsigned id)
 {
-    if (sArtMode == G_ART_GAME_BOY || !G_HasPrinted(id))
+    if ((sArtMode == G_ART_GAME_BOY && id <= TCG_CARD_GB_COUNT) || !G_HasPrinted(id))
         return NULL;
     return Source(id, 1);
+}
+/* The e-Card design (Aquapolis, Skyridge): where the window is on a face of w x h, in the printed card's proportions
+ * (build_art.py AQUA: a POKEMON's 259 x 151 from (30, 48) of 300 x 412, a Trainer's 242 x 140 from (28, 68), a special
+ * Energy's 259 x 227 from (32, 40)), so the whole cut-out illustration fits it, none of it cropped */
+static void EcardArtRect(const struct TcgCard *c, int w, int h, int *ax, int *ay, int *aw, int *ah)
+{
+    int b = w >= 40 ? 3 : w >= 26 ? 2 : 1, left = (w * 30 + 150) / 300, right = w - b;
+    if (left < b + 1)
+        left = b + 1;
+    if (c->kind == TCG_TRAINER)
+    {
+        right = (w * 270 + 150) / 300;
+        *ay = (h * 68 + 206) / 412;
+        *aw = right - left;
+        *ah = (*aw * 140 + 121) / 242;
+    }
+    else if (c->kind == TCG_ENERGY)
+    {
+        left = (w * 32 + 150) / 300 > b + 1 ? (w * 32 + 150) / 300 : b + 1;
+        *ay = (h * 40 + 206) / 412;
+        *aw = right - left;
+        *ah = (*aw * 227 + 129) / 259;
+    }
+    else
+    {
+        *ay = (h * 48 + 206) / 412;
+        *aw = right - left;
+        *ah = (*aw * 151 + 129) / 259;
+    }
+    if (*ay < b + 2)
+        *ay = b + 2;
+    *ax = left;
+}
+static void ArtInto(const struct Source *art, struct GSurface *s, int x, int y, int w, int h);
+/* The e-Card design's face: the gold border with its fine sparkle and the e-Reader's dot strip down the left, the
+ * name bar in the type's colour, the window open to the right border with its rounded left corners (the cut-out
+ * illustration's own shape over the gold), the gold swoosh under it, the text on the type's colour (a Trainer's on
+ * pale stone, a special Energy's on slate) and the e-Card mark in the corner. */
+static void EcardFace(struct GSurface *s, const struct TcgCard *c, struct Source *art)
+{
+    int w = s->w, h = s->h, b = w >= 40 ? 3 : w >= 26 ? 2 : 1, big = w >= 26, ax, ay, aw, ah, x, y, i;
+    int radius = big ? 2 : 1, step = w >= 40 ? 6 : big ? 5 : 4;
+    unsigned type = c->kind == TCG_TRAINER ? G_TYPE_TRAINER : c->type, base = G_TypeColor(type, 0),
+             light = G_TypeColor(type, 1), dark = G_TypeColor(type, 2);
+    EcardArtRect(c, w, h, &ax, &ay, &aw, &ah);
+    /* The gold border, sparkling as printed */
+    S_RoundFill(s, 0, 0, w, h, radius, ARGB(0xf8c828, 255));
+    for (y = 1; y < h - 1; y++)
+        for (x = 1; x < w - 1; x++)
+            if ((unsigned)(x * 7 + y * 13 + (x * y) % 5) % 11 == 0)
+                S_Blend(s, x, y, 0xfff8c8, 120);
+    S_Fill(s, 1, 1, w - 2, 1, ARGB(0xfff0a0, 255));
+    S_RoundFrame(s, 0, 0, w, h, radius, ARGB(0x684808, 255));
+    /* The e-Reader's dot strip in the left border */
+    if (ax - b >= 3)
+    {
+        int sx = b + (ax - b) / 2 - (w >= 40 ? 1 : 0);
+        for (y = b + 2; y < h - b - 3; y += 2)
+            S_Fill(s, sx, y, (y / 2) % 3 ? 1 + (w >= 40) : 1, 1, ARGB(0xa07818, 255));
+    }
+    if (c->kind == TCG_ENERGY)
+    {
+        /* ENERGY across the top, the type's pill at the right; the symbol's picture; the rules on slate */
+        if (big)
+        {
+            S_Fill(s, b + 1, b + 1, (w - 2 * b) * 2 / 5, w >= 40 ? 2 : 1, ARGB(0xffffff, 255));
+            S_RoundFill(s, w - b - (w >= 40 ? 13 : 8), b + 1, w >= 40 ? 11 : 6, w >= 40 ? 4 : 3, 1, ARGB(0xf8f4e8, 255));
+            S_Fill(s, w - b - (w >= 40 ? 8 : 5), b + 2, w >= 40 ? 2 : 1, w >= 40 ? 2 : 1, ARGB(dark, 255));
+        }
+        if (art)
+            ArtInto(art, s, ax, ay, aw, ah);
+        else
+            S_Fill(s, ax, ay, aw, ah, ARGB(light, 255));
+        if (big)
+            S_Frame(s, ax - 1, ay - 1, aw + 2, ah + 2, ARGB(0x283038, 200));
+        y = ay + ah + 1;
+        for (i = y; i < h - b - 1; i++)
+            S_Fill(s, ax - 1, i, w - b - ax + 1, 1, ARGB(G_Mix(0x5a6878, 0x343c48, (float)(i - y) / (h - b - y)), 255));
+        for (i = 0, y += 2; big && y + 1 < h - b - 2 && i < 4; i++, y += step - 1)
+            S_Fill(s, ax + 1, y, (w - b - ax - 3) * (i == 0 ? 2 : 5) / 6, 1, ARGB(0xd0d8e0, i == 0 ? 255 : 170));
+        return;
+    }
+    if (c->kind == TCG_TRAINER)
+    {
+        /* TRAINER on its grey band and the kind's tab, the name on stone, the rules on pale stone, the dot strip
+         * down the right of the text */
+        int band = b + (ay - b) * 9 / 20;
+        S_Fill(s, b, b, w - 2 * b, band - b, ARGB(0x707070, 255));
+        if (big)
+        {
+            S_Fill(s, b + 1, b + 1, (w - 2 * b) / 3, w >= 40 ? 2 : 1, ARGB(0xffffff, 255));
+            S_Fill(s, w - b - (w - 2 * b) / 3, b, (w - 2 * b) / 3, band - b, ARGB(0xf0d060, 255));
+        }
+        S_RoundFill(s, ax - 1, band + 1, w - b - ax + 1, ay - band - 2, 1, ARGB(0xc8c0a8, 255));
+        if (big)
+            S_Fill(s, ax + (w - b - ax) / 3, band + 1 + (ay - band - 2) / 2, (w - b - ax) / 2, 1, ARGB(0x403830, 255));
+        if (art)
+            ArtInto(art, s, ax, ay, aw, ah);
+        else
+            S_Fill(s, ax, ay, aw, ah, ARGB(0xd8d0c0, 255));
+        y = ay + ah + 2;
+        S_RoundFill(s, ax - 1, y, w - b - ax + 1, h - b - 1 - y, 1, ARGB(0xece6d4, 255));
+        for (i = 0, y += 2; y + 1 < h - b - 3 && i < 4; i++, y += step)
+            S_Fill(s, ax + 1, y, (w - b - ax - 4) * (i == 3 ? 3 : 5) / 6, 1, ARGB(0x807868, 200));
+        for (y = ay + ah + 3; big && y < h - b - 4; y += 2)
+            S_Px(s, w - b - 2, y, ARGB(0xa07818, 255));
+        return;
+    }
+    /* The name bar, the type's colour lighter at the top, round at its right end */
+    {
+        int y0 = b + (ay - b) / 5, y1 = ay - 1 - (w >= 40);
+        for (y = y0; y < y1; y++)
+            S_Fill(s, ax - (big ? 2 : 1), y, w - b - ax + (big ? 2 : 1) - (y == y0 || y == y1 - 1), 1,
+                   ARGB(G_Mix(light, base, (float)(y - y0) / (y1 - y0 > 1 ? y1 - y0 - 1 : 1)), 255));
+        if (big)
+        {
+            S_Fill(s, ax, y0 + (y1 - y0) / 2, (w - b - ax) / 2, 1, ARGB(G_Mix(dark, 0, 0.3f), 255));   /* name */
+            S_Fill(s, w - b - (w >= 40 ? 7 : 4), y0 + 1, w >= 40 ? 4 : 2, y1 - y0 - 2 > 1 ? y1 - y0 - 2 : 1,
+                   ARGB(0xd02020, 230));   /* HP */
+        }
+        if (c->stage && big)
+            S_Fill(s, b + 1, b, (w - 2 * b) / 4, 1, ARGB(0x585040, 255));   /* the STAGE line over it */
+    }
+    /* The window: the cut-out illustration over the gold (its rounded corners and the stage tab show the gold) */
+    if (art)
+        ArtInto(art, s, ax, ay, aw, ah);
+    else
+        S_RoundFill(s, ax, ay, aw, ah, 2, ARGB(G_Mix(light, 0xffffff, 0.5f), 255));
+    /* The gold swoosh under it, rising to the right */
+    y = ay + ah;
+    for (x = ax + aw / 8; x < w - b; x++)
+    {
+        int lift = (x - ax) * (big ? 2 : 1) / (aw > 0 ? aw : 1);
+        S_Px(s, x, y + 1 - lift, ARGB(0xfff0a0, 255));
+        if (big)
+            S_Px(s, x, y + 2 - lift, ARGB(0xd8a020, 255));
+    }
+    /* The attacks on the type's colour */
+    {
+        int top = y + (big ? 3 : 2), bottom = h - b - (w >= 40 ? 7 : big ? 5 : 3);
+        for (i = top; i < h - b - 1; i++)
+            S_Fill(s, ax - 1, i, w - b - ax + 1, 1, ARGB(G_Mix(G_Mix(light, 0xffffff, 0.25f), base, (float)(i - top) / (h - b - top)), 255));
+        for (i = 0, y = top + 1; i < TCG_ATTACKS && y + 2 < bottom; i++)
+        {
+            int k, cost = 0;
+            const struct TcgAttack *a = &c->attacks[i];
+            if (!a->name[0])
+                continue;
+            x = ax + 1;
+            for (k = 0; k < TCG_TYPES; k++)
+                cost += a->cost[k];
+            for (k = 0; k < TCG_TYPES && cost; k++)
+            {
+                unsigned n = a->cost[k];
+                while (n-- && x < ax + aw / 3)
+                {
+                    S_Fill(s, x, y, big ? 2 : 1, big ? 2 : 1, ARGB(G_TypeColor(k, 2), 255));
+                    x += big ? 3 : 2;
+                }
+            }
+            S_Fill(s, x + 1, y + (big ? 1 : 0), w - b - x - (big ? 6 : 3), 1, ARGB(G_Mix(dark, 0, 0.35f), 200));
+            y += step;
+        }
+        /* weakness, resistance, retreat cost on the pale strip at the bottom; the e-Card mark */
+        if (w >= 18)
+        {
+            int dot = w >= 40 ? 3 : big ? 2 : 1, gap = dot + 1, k, slots[2];
+            unsigned types[2] = {c->weakness, c->resistance};
+            S_Fill(s, ax - 1, bottom - 1, w - b - ax + 1, h - b - bottom, ARGB(G_Mix(light, 0xffffff, 0.55f), 255));
+            slots[0] = ax + 1, slots[1] = ax + (w - b - ax) / 2 - dot;
+            for (k = 0; k < 2; k++)
+            {
+                if (types[k] < TCG_TYPES)
+                    S_Fill(s, slots[k], bottom, dot, dot, ARGB(G_TypeColor(types[k], 2), 255));
+                else
+                    S_Fill(s, slots[k], bottom + dot / 2, big ? 3 : 2, 1, ARGB(0x707070, 160));
+            }
+            if (!c->retreat)
+                S_Fill(s, w - b - 2 - (big ? 3 : 2), bottom + dot / 2, big ? 3 : 2, 1, ARGB(0x707070, 160));
+            for (k = 0; k < c->retreat && k < 4; k++)
+                S_Fill(s, w - b - 2 - dot - k * gap, bottom, dot, dot, ARGB(G_TypeColor(TCG_COLORLESS, 2), 255));
+        }
+    }
+    if (w >= 40)
+    {
+        /* (the little "e" in the bottom left corner) */
+        S_Ring(s, b + 2.5f, h - b - 2.5f, 2.0f, 1.0f, ARGB(0x2858a8, 255));
+        S_Px(s, b + 2, h - b - 3, ARGB(0x2858a8, 255));
+    }
 }
 /* Where a card's illustration is on its face of w x h (as G_CardTexture draws it), for the foil over it */
 void G_CardArtRect(unsigned id, int w, int h, int *ax, int *ay, int *aw, int *ah)
@@ -1356,7 +1621,12 @@ void G_CardArtRect(unsigned id, int w, int h, int *ax, int *ay, int *aw, int *ah
         *ay = (h - *ah) / 2;
         return;
     }
-    *ah = c && c->kind == TCG_TRAINER && sArtMode == G_ART_PRINTED_ART && Scan(id) ? (*aw * 5 + 4) / 9 : (*aw * 3 + 2) / 4;
+    if (c && G_EcardDesign(id))
+    {
+        EcardArtRect(c, w, h, ax, ay, aw, ah);
+        return;
+    }
+    *ah = c && c->kind == TCG_TRAINER && sArtMode != G_ART_FULL_CARD && Scan(id) ? (*aw * 5 + 4) / 9 : (*aw * 3 + 2) / 4;
     *ay = b + (w >= 40 ? 6 : w >= 26 ? 3 : 2) + 1;
 }
 int G_HasPrinted(unsigned id)
@@ -1405,6 +1675,9 @@ static void Resample(const struct Source *src, float sx, float sy, float sw, flo
 /* A card's illustration into a box, cut to the box's shape around its middle. */
 static void ArtInto(const struct Source *art, struct GSurface *s, int x, int y, int w, int h)
 {
+    struct Source view;
+    art = ArtView(art, &view);
+    {
     float sx = (float)art->artX, sy = (float)art->artY, sw = (float)art->artW, sh = (float)art->artH;
     if (sw * h > sh * w)
     {
@@ -1419,6 +1692,7 @@ static void ArtInto(const struct Source *art, struct GSurface *s, int x, int y, 
         sh -= cut;
     }
     Resample(art, sx, sy, sw, sh, s, x, y, w, h);
+    }
 }
 static void Back(struct GSurface *s)
 {
@@ -1459,9 +1733,14 @@ static void Face(struct GSurface *s, const struct TcgCard *c)
     int w = s->w, h = s->h, b = w >= 40 ? 3 : w >= 26 ? 2 : 1, i, artW, artH, artX, artY, textY;
     unsigned type = c->kind == TCG_TRAINER ? G_TYPE_TRAINER : c->type, base = G_TypeColor(type, 0), light = G_TypeColor(type, 1),
              dark = G_TypeColor(type, 2);
-    struct Source *printed = sArtMode == G_ART_PRINTED_ART ? Scan(c->id) : NULL;
+    struct Source *printed = sArtMode != G_ART_FULL_CARD ? Scan(c->id) : NULL;
     struct Source *art = printed ? printed : Source(c->id, 0);
     int radius = w >= 26 ? 2 : 1;
+    if (G_EcardDesign(c->id))
+    {
+        EcardFace(s, c, art);
+        return;
+    }
     /* Yellow border, as printed. */
     S_RoundFill(s, 0, 0, w, h, radius, ARGB(0xf0c838, 255));
     S_Fill(s, 1, 1, w - 2, 1, ARGB(0xf8e888, 255));
@@ -1699,14 +1978,16 @@ SDL_Texture *G_ArtTexture(unsigned id, int *w, int *h, int *scan)
         s = Source(id, 0);
     if (!s)
         return NULL;
-    if (sArt.scan && sArtMode == G_ART_PRINTED_ART)
+    if (sArt.scan && sArtMode != G_ART_FULL_CARD)
     {
         int y;
+        struct Source view;
+        const struct Source *v = ArtView(s, &view);
         surface = G_SurfaceNew(s->artW, s->artH);
         if (!surface.px)
             return NULL;
         for (y = 0; y < s->artH; y++)
-            memcpy(surface.px + (size_t)y * s->artW, s->px + (size_t)(s->artY + y) * s->w + s->artX,
+            memcpy(surface.px + (size_t)y * s->artW, v->px + (size_t)(v->artY + y) * v->w + v->artX,
                    (size_t)s->artW * 4);
         sArt.texture = G_SurfaceTexture(&surface);
         G_SurfaceFree(&surface);
@@ -1745,12 +2026,103 @@ static void ForgetFaces(void)
         SDL_DestroyTexture(sArt.texture);
     memset(&sArt, 0, sizeof(sArt));
 }
+/* (a look at the card faces without a duel: MOEMON_TCG_FACESHEET=out.ppm draws each card in MOEMON_TCG_FACESHEET_IDS
+ * (ids, commas) at every size the game builds, in CARD ART MOEMON_TCG_FACESHEET_MODE (G_ART_*), then each card's
+ * big picture, into a PPM on magenta) */
+static void FaceSheet(void)
+{
+    static int done;
+    const char *path = getenv("MOEMON_TCG_FACESHEET"), *ids = getenv("MOEMON_TCG_FACESHEET_IDS"), *mode;
+    unsigned list[64], n = 0, i, k;
+    int W, H = 0, x;
+    struct GSurface sheet;
+    FILE *f;
+    if (done || !path || !ids)
+        return;
+    done = 1;
+    fprintf(stderr, "[tcg] face sheet: %s\n", path);
+    mode = getenv("MOEMON_TCG_FACESHEET_MODE");
+    sArtMode = mode ? (unsigned)atoi(mode) % G_ART_COUNT : G_ART_PRINTED_ART;
+    while (*ids && n < ARRAY_COUNT(list))
+    {
+        list[n++] = (unsigned)strtoul(ids, (char **)&ids, 10);
+        while (*ids == ',')
+            ids++;
+    }
+    W = 0;
+    for (k = 0; k < 6; k++)
+        W += (int)sSizes[k][0] + 4;
+    W += 260 + 4;
+    sheet = G_SurfaceNew(W, (int)n * 164);
+    if (!sheet.px)
+        return;
+    for (i = 0; i < (unsigned)(W * (int)n * 164); i++)
+        sheet.px[i] = 0xffff00ff;
+    for (i = 0; i < n; i++)
+    {
+        struct Source *art;
+        x = 0;
+        for (k = 6; k-- > 0;)
+        {
+            struct GSurface face = G_SurfaceNew(sSizes[k][0], sSizes[k][1]);
+            const struct TcgCard *c = Tcg_Card(list[i]);
+            struct Source *scan = sArtMode == G_ART_FULL_CARD ? Scan(list[i]) : NULL;
+            int fx, fy;
+            if (!face.px || !c)
+                continue;
+            if (scan)
+                ScanFace(&face, scan);
+            else
+                Face(&face, c);
+            for (fy = 0; fy < face.h; fy++)
+                for (fx = 0; fx < face.w; fx++)
+                {
+                    uint32_t p = face.px[fy * face.w + fx];
+                    if (p >> 24)
+                        sheet.px[(i * 164 + 2 + fy) * W + x + fx] = p | 0xff000000;
+                }
+            x += face.w + 4;
+            G_SurfaceFree(&face);
+        }
+        art = Scan(list[i]);
+        if (!art)
+            art = Source(list[i], 0);
+        if (art)
+        {
+            struct Source view;
+            const struct Source *v = ArtView(art, &view);
+            int aw = v->artW, ah = v->artH, sx, sy;
+            float scale = aw > 256 || ah > 160 ? (aw * 160 > ah * 256 ? 256.0f / aw : 160.0f / ah) : 1.0f;
+            for (sy = 0; sy < (int)(ah * scale); sy++)
+                for (sx = 0; sx < (int)(aw * scale); sx++)
+                {
+                    uint32_t p = v->px[(v->artY + (int)(sy / scale)) * v->w + v->artX + (int)(sx / scale)];
+                    if (p >> 24)
+                        sheet.px[(i * 164 + 2 + sy) * W + x + sx] = p | 0xff000000;
+                }
+        }
+    }
+    H = (int)n * 164;
+    f = fopen(path, "wb");
+    if (f)
+    {
+        fprintf(f, "P6\n%d %d\n255\n", W, H);
+        for (i = 0; i < (unsigned)(W * H); i++)
+        {
+            unsigned char rgb[3] = {(unsigned char)(sheet.px[i] >> 16), (unsigned char)(sheet.px[i] >> 8), (unsigned char)sheet.px[i]};
+            fwrite(rgb, 1, 3, f);
+        }
+        fclose(f);
+    }
+    G_SurfaceFree(&sheet);
+}
 void G_Begin(SDL_Renderer *r)
 {
     if (sR && sR != r)
         G_Destroy();
     sR = r;
     LoadFonts();
+    FaceSheet();
 }
 void G_Destroy(void)
 {

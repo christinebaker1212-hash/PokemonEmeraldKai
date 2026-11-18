@@ -12,6 +12,12 @@ The illustration's rectangle (CARD ART's PRINTED ART mode): LAYOUTS below gives 
 card's own window frame is found near it (refine: the strongest straight line near each edge). --check draws them
 on a sheet of samples.
 
+Aquapolis and Skyridge (the e-Card design, 'aqua') are cut another way: their window is one printed template (rounded
+left corners, the picture running to the right border, the stage tab over its top right), measured once over all
+their cards (AQUA below, stored pixels) and laid on each scan where its yellow frame matches best (aqua_fit). The
+whole window is kept (no inset): tcg_gfx.c masks its corners and tab as transparency (sAquaCorner), so none of the
+picture is lost and none of the frame shows.
+
 regional.bin: "TCGP", u32 count (ids 443 on: entry k is card 443 + k), then per card u32 offset, u32 size (0 = no
 picture), u16 x, y, w, h (the illustration, in the stored picture's pixels), then an empty entry where printed.bin
 has the card back (the layout android/build_assets.py's webp_pack reads; printed.bin's back is used).
@@ -30,7 +36,11 @@ INSET = 6
 # Wizards of the Coast sets: base promos, GYM, NEO; the e-Card sets: Expedition, Aquapolis, Skyridge; the Nintendo
 # promos printed in the EX era). Each card's own edges are then found near these (Refine).
 ERA = {'basep': 'wotc', 'gym1': 'wotc', 'gym2': 'wotc', 'neo1': 'wotc', 'neo2': 'wotc', 'neo3': 'wotc', 'neo4': 'wotc',
-       'ecard1': 'ecard', 'ecard2': 'ecard', 'ecard3': 'ecard', 'np': 'ex'}
+       'ecard1': 'ecard', 'ecard2': 'aqua', 'ecard3': 'aqua', 'np': 'ex'}
+# Aquapolis / Skyridge: the template window in stored pixels (300x412): left, top, right, bottom (inclusive), measured
+# from the yellow frame over all their cards of that kind (tcg_gfx.c sAquaCorner holds its corners' shape)
+AQUA = {'pokemon': (30, 48, 288, 198), 'trainer': (28, 68, 269, 207), 'energy': (32, 40, 290, 266)}
+AQUA_SHIFT = 4   # how far (stored pixels) a scan's frame may sit from the template's
 LAYOUTS = {
     'pokemon/wotc': (62, 92, 546, 433),
     'trainer/wotc': (54, 186, 554, 459),
@@ -87,6 +97,62 @@ def layout_key(c):
     return f"{kind}/{ERA.get(c['set'], 'wotc')}"
 
 
+def border_yellow(a):
+    """the printed cards' yellow border (tcg_gfx.c BorderYellow)"""
+    import numpy as np
+    r, g, b = (a[..., i].astype(np.int32) for i in range(3))
+    return (r > 140) & (g > 100) & (b * 100 < g * 62) & (r - b > 70)
+
+
+_aqua_frames = {}
+
+
+def aqua_frame(kind):
+    """the template's yellow frame for that kind: how often each pixel is border yellow over all Aquapolis /
+    Skyridge cards of that kind"""
+    import numpy as np
+    if kind not in _aqua_frames:
+        acc, n = np.zeros((STORE_H, STORE_W)), 0
+        for c in cards():
+            if ERA.get(c['set']) == 'aqua' and layout_key(c).split('/')[0] == kind and cached(c).exists():
+                acc += border_yellow(np.asarray(Image.open(cached(c)).convert('RGB')))
+                n += 1
+        _aqua_frames[kind] = acc / max(n, 1) > 0.5
+    return _aqua_frames[kind]
+
+
+def aqua_fit(c):
+    """an Aquapolis / Skyridge card's window: the template's, moved to where the card's own yellow frame matches the
+    template's best (within AQUA_SHIFT), in scan pixels"""
+    import numpy as np
+    kind = layout_key(c).split('/')[0]
+    l, t, r, b = AQUA[kind]
+    frame = aqua_frame(kind)
+    mine = border_yellow(np.asarray(Image.open(cached(c)).convert('RGB')))
+    # (the band round the window: its frame, where the template is sure)
+    y0, y1, x0, x1 = t - 12, b + 12, l - 12, r + 2
+    best, shift = -1, (0, 0)
+    for dy in range(-AQUA_SHIFT, AQUA_SHIFT + 1):
+        for dx in range(-AQUA_SHIFT, AQUA_SHIFT + 1):
+            a = frame[y0:y1, x0:x1]
+            m = mine[y0 + dy:y1 + dy, x0 + dx:x1 + dx]
+            score = int((a == m).sum()) - abs(dx) - abs(dy)
+            if score > best:
+                best, shift = score, (dx, dy)
+    dx, dy = shift
+    sx, sy = SCAN_W / STORE_W, SCAN_H / STORE_H
+    return (l + dx) * sx, (t + dy) * sy, (r + 1 + dx) * sx, (b + 1 + dy) * sy
+
+
+def window(c):
+    """the illustration's rectangle in scan pixels, as built in: the WotC / EX layouts refined and inset, the
+    Aquapolis / Skyridge template whole"""
+    if ERA.get(c['set']) == 'aqua':
+        return aqua_fit(c)
+    l, t, r, b = refine(c)
+    return l + INSET, t + INSET, r - INSET, b - INSET
+
+
 def refine(c):
     """the card's own window: each edge of its layout's rectangle moved to the strongest straight line within
     SEARCH pixels (the window's frame), measured on the stored scan"""
@@ -125,10 +191,9 @@ def check(out):
     sheet = Image.new('RGB', (W * 10, H * ((len(picks) + 9) // 10)), 'white')
     for i, c in enumerate(picks):
         im = Image.open(cached(c)).convert('RGB')
-        l, t, r, b = refine(c)
+        l, t, r, b = window(c)
         f = STORE_W / SCAN_W
-        ImageDraw.Draw(im).rectangle(((l + INSET) * f, (t + INSET) * f, (r - INSET) * f, (b - INSET) * f),
-                                     outline=(255, 0, 255), width=2)
+        ImageDraw.Draw(im).rectangle((l * f, t * f, r * f - 1, b * f - 1), outline=(255, 0, 255), width=1)
         sheet.paste(im, ((i % 10) * W, (i // 10) * H))
     sheet.save(out)
 
@@ -149,8 +214,7 @@ def build():
                 missing.append(c['src'])
             continue
         data = cached(c).read_bytes()
-        l, t, r, b = refine(c)
-        l, t, r, b = l + INSET, t + INSET, r - INSET, b - INSET
+        l, t, r, b = window(c)
         x, y = round(l * sx), round(t * sy)
         w, h = round(r * sx) - x, round(b * sy) - y
         table.append(struct.pack('<IIHHHH', offset, len(data), x, y, w, h))
