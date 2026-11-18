@@ -2959,7 +2959,7 @@ const struct TcgCard gTcgCards[TCG_CARD_COUNT + 1] = {
 {.name="",.description="",.effect="NONE",.animation="ATK_ANIM_NONE",.cost={0},.damage=0,.category=TCG_DAMAGE_NORMAL},
 }
 },
-[464] = {.id=464, .name="Brock's Rhyhorn", .kind=TCG_POKEMON, .type=4, .rarity=2, .set=13, .set2=255, .dark=0, .holo=0, .flags=TCG_CF_OWNER, .origin=13,
+[464] = {.id=464, .name="Brock's Rhyhorn", .kind=TCG_POKEMON, .type=4, .rarity=2, .set=13, .set2=255, .dark=0, .holo=0, .flags=TCG_CF_OWNER|TCG_CF_READY, .origin=13,
 .hp=60, .stage=0, .species=111, .level=25, .retreat=2, .weakness=1, .resistance=2, .evolvesFrom="", .description="", .attacks={
 {.name="Horn Toss",.description="If your opponent has any Benched Pokemon, he or she chooses 1 of them and switches it with the Defending Pokemon. (Do the damage before switching the Pokemon.)",.effect="gym1-22:a0",.animation="ATK_ANIM_HIT",.cost={0,0,0,0,0,0,2,0,0},.damage=20,.category=TCG_DAMAGE_NORMAL},
 {.name="Take Down",.description="Brock's Rhyhorn does 10 damage to itself.",.effect="gym1-22:a1",.animation="ATK_ANIM_HIT",.cost={0,0,0,0,2,0,1,0,0},.damage=40,.category=TCG_DAMAGE_NORMAL},
@@ -3001,7 +3001,7 @@ const struct TcgCard gTcgCards[TCG_CARD_COUNT + 1] = {
 {.name="",.description="",.effect="NONE",.animation="ATK_ANIM_NONE",.cost={0},.damage=0,.category=TCG_DAMAGE_NORMAL},
 }
 },
-[470] = {.id=470, .name="Lt. Surge's Raichu", .kind=TCG_POKEMON, .type=2, .rarity=2, .set=13, .set2=255, .dark=0, .holo=0, .flags=TCG_CF_OWNER, .origin=13,
+[470] = {.id=470, .name="Lt. Surge's Raichu", .kind=TCG_POKEMON, .type=2, .rarity=2, .set=13, .set2=255, .dark=0, .holo=0, .flags=TCG_CF_OWNER|TCG_CF_READY, .origin=13,
 .hp=70, .stage=1, .species=26, .level=32, .retreat=2, .weakness=4, .resistance=255, .evolvesFrom="Lt. Surge's Pikachu", .description="", .attacks={
 {.name="Mega Punch",.description="",.effect="NONE",.animation="ATK_ANIM_HIT",.cost={0,0,2,0,0,0,0,0,0},.damage=30,.category=TCG_DAMAGE_NORMAL},
 {.name="Thunderbolt",.description="Discard all Energy cards attached to Lt. Surge's Raichu in order to use this attack.",.effect="gym1-28:a1",.animation="ATK_ANIM_HIT",.cost={0,0,4,0,0,0,0,0,0},.damage=100,.category=TCG_DAMAGE_NORMAL},
@@ -3015,7 +3015,7 @@ const struct TcgCard gTcgCards[TCG_CARD_COUNT + 1] = {
 {.name="",.description="",.effect="NONE",.animation="ATK_ANIM_NONE",.cost={0},.damage=0,.category=TCG_DAMAGE_NORMAL},
 }
 },
-[472] = {.id=472, .name="Misty's Goldeen", .kind=TCG_POKEMON, .type=3, .rarity=2, .set=13, .set2=255, .dark=0, .holo=0, .flags=TCG_CF_OWNER, .origin=13,
+[472] = {.id=472, .name="Misty's Goldeen", .kind=TCG_POKEMON, .type=3, .rarity=2, .set=13, .set2=255, .dark=0, .holo=0, .flags=TCG_CF_OWNER|TCG_CF_READY, .origin=13,
 .hp=30, .stage=0, .species=118, .level=8, .retreat=0, .weakness=2, .resistance=255, .evolvesFrom="", .description="", .attacks={
 {.name="Horn Hazard",.description="Flip a coin. If tails, this attack does nothing.",.effect="gym1-30:a0",.animation="ATK_ANIM_HIT",.cost={0,0,0,1,0,0,0,0,0},.damage=30,.category=TCG_DAMAGE_NORMAL},
 {.name="",.description="",.effect="NONE",.animation="ATK_ANIM_NONE",.cost={0},.damage=0,.category=TCG_DAMAGE_NORMAL},
@@ -3050,7 +3050,7 @@ const struct TcgCard gTcgCards[TCG_CARD_COUNT + 1] = {
 {.name="",.description="",.effect="NONE",.animation="ATK_ANIM_NONE",.cost={0},.damage=0,.category=TCG_DAMAGE_NORMAL},
 }
 },
-[477] = {.id=477, .name="Blaine's Growlithe", .kind=TCG_POKEMON, .type=0, .rarity=1, .set=13, .set2=255, .dark=0, .holo=0, .flags=TCG_CF_OWNER, .origin=13,
+[477] = {.id=477, .name="Blaine's Growlithe", .kind=TCG_POKEMON, .type=0, .rarity=1, .set=13, .set2=255, .dark=0, .holo=0, .flags=TCG_CF_OWNER|TCG_CF_READY, .origin=13,
 .hp=50, .stage=0, .species=58, .level=17, .retreat=1, .weakness=3, .resistance=255, .evolvesFrom="", .description="", .attacks={
 {.name="Shake",.description="If your opponent has any Benched Pokemon, he or she chooses 1 of them and switches it with the Defending Pokemon. (Do the damage before switching the Pokemon.)",.effect="gym1-35:a0",.animation="ATK_ANIM_HIT",.cost={0,0,0,0,0,0,1,0,0},.damage=10,.category=TCG_DAMAGE_NORMAL},
 {.name="Fire Tackle",.description="Blaine's Growlithe does 10 damage to itself.",.effect="gym1-35:a1",.animation="ATK_ANIM_HIT",.cost={1,0,0,0,0,0,1,0,0},.damage=30,.category=TCG_DAMAGE_NORMAL},
@@ -3162,7 +3162,7 @@ const struct TcgCard gTcgCards[TCG_CARD_COUNT + 1] = {
 {.name="",.description="",.effect="NONE",.animation="ATK_ANIM_NONE",.cost={0},.damage=0,.category=TCG_DAMAGE_NORMAL},
 }
 },
-[493] = {.id=493, .name="Lt. Surge's Raticate", .kind=TCG_POKEMON, .type=6, .rarity=1, .set=13, .set2=255, .dark=0, .holo=0, .flags=TCG_CF_OWNER, .origin=13,
+[493] = {.id=493, .name="Lt. Surge's Raticate", .kind=TCG_POKEMON, .type=6, .rarity=1, .set=13, .set2=255, .dark=0, .holo=0, .flags=TCG_CF_OWNER|TCG_CF_READY, .origin=13,
 .hp=70, .stage=1, .species=20, .level=32, .retreat=1, .weakness=4, .resistance=5, .evolvesFrom="Lt. Surge's Rattata", .description="", .attacks={
 {.name="Super Fang",.description="Does damage to the Defending Pokemon equal to half the Defending Pokemon's remaining HP (rounded up to the nearest 10).",.effect="gym1-51:a0",.animation="ATK_ANIM_HIT",.cost={0,0,0,0,0,0,1,0,0},.damage=0,.category=TCG_RESIDUAL},
 {.name="",.description="",.effect="NONE",.animation="ATK_ANIM_NONE",.cost={0},.damage=0,.category=TCG_DAMAGE_NORMAL},
@@ -3246,7 +3246,7 @@ const struct TcgCard gTcgCards[TCG_CARD_COUNT + 1] = {
 {.name="",.description="",.effect="NONE",.animation="ATK_ANIM_NONE",.cost={0},.damage=0,.category=TCG_DAMAGE_NORMAL},
 }
 },
-[505] = {.id=505, .name="Blaine's Ponyta", .kind=TCG_POKEMON, .type=0, .rarity=0, .set=13, .set2=255, .dark=0, .holo=0, .flags=TCG_CF_OWNER, .origin=13,
+[505] = {.id=505, .name="Blaine's Ponyta", .kind=TCG_POKEMON, .type=0, .rarity=0, .set=13, .set2=255, .dark=0, .holo=0, .flags=TCG_CF_OWNER|TCG_CF_READY, .origin=13,
 .hp=40, .stage=0, .species=77, .level=11, .retreat=0, .weakness=3, .resistance=255, .evolvesFrom="", .description="", .attacks={
 {.name="Agility",.description="Flip a coin. If heads, during your opponent's next turn, prevent all effects of attacks, including damage, done to Blaine's Ponyta.",.effect="gym1-63:a0",.animation="ATK_ANIM_HIT",.cost={1,0,0,0,0,0,1,0,0},.damage=20,.category=TCG_DAMAGE_NORMAL},
 {.name="",.description="",.effect="NONE",.animation="ATK_ANIM_NONE",.cost={0},.damage=0,.category=TCG_DAMAGE_NORMAL},
@@ -3274,7 +3274,7 @@ const struct TcgCard gTcgCards[TCG_CARD_COUNT + 1] = {
 {.name="",.description="",.effect="NONE",.animation="ATK_ANIM_NONE",.cost={0},.damage=0,.category=TCG_DAMAGE_NORMAL},
 }
 },
-[509] = {.id=509, .name="Brock's Mankey", .kind=TCG_POKEMON, .type=4, .rarity=0, .set=13, .set2=255, .dark=0, .holo=0, .flags=TCG_CF_OWNER, .origin=13,
+[509] = {.id=509, .name="Brock's Mankey", .kind=TCG_POKEMON, .type=4, .rarity=0, .set=13, .set2=255, .dark=0, .holo=0, .flags=TCG_CF_OWNER|TCG_CF_READY, .origin=13,
 .hp=40, .stage=0, .species=56, .level=10, .retreat=0, .weakness=5, .resistance=255, .evolvesFrom="", .description="", .attacks={
 {.name="Taunt",.description="If your opponent has any Benched Pokemon, choose 1 of them and switch it with the Defending Pokemon.",.effect="gym1-67:a0",.animation="ATK_ANIM_HIT",.cost={0,0,0,0,0,0,1,0,0},.damage=0,.category=TCG_RESIDUAL},
 {.name="Light Kick",.description="",.effect="NONE",.animation="ATK_ANIM_HIT",.cost={0,0,0,0,1,0,0,0,0},.damage=10,.category=TCG_DAMAGE_NORMAL},
@@ -3288,7 +3288,7 @@ const struct TcgCard gTcgCards[TCG_CARD_COUNT + 1] = {
 {.name="",.description="",.effect="NONE",.animation="ATK_ANIM_NONE",.cost={0},.damage=0,.category=TCG_DAMAGE_NORMAL},
 }
 },
-[511] = {.id=511, .name="Brock's Onix", .kind=TCG_POKEMON, .type=4, .rarity=0, .set=13, .set2=255, .dark=0, .holo=0, .flags=TCG_CF_OWNER, .origin=13,
+[511] = {.id=511, .name="Brock's Onix", .kind=TCG_POKEMON, .type=4, .rarity=0, .set=13, .set2=255, .dark=0, .holo=0, .flags=TCG_CF_OWNER|TCG_CF_READY, .origin=13,
 .hp=100, .stage=0, .species=95, .level=41, .retreat=3, .weakness=1, .resistance=255, .evolvesFrom="", .description="", .attacks={
 {.name="Bellow",.description="Flip a coin. If heads, the Defending Pokemon is now Paralyzed.",.effect="gym1-69:a0",.animation="ATK_ANIM_HIT",.cost={0,0,0,0,0,0,1,0,0},.damage=0,.category=TCG_RESIDUAL},
 {.name="Rock Throw",.description="",.effect="NONE",.animation="ATK_ANIM_HIT",.cost={0,0,0,0,2,0,1,0,0},.damage=30,.category=TCG_DAMAGE_NORMAL},
@@ -3302,7 +3302,7 @@ const struct TcgCard gTcgCards[TCG_CARD_COUNT + 1] = {
 {.name="",.description="",.effect="NONE",.animation="ATK_ANIM_NONE",.cost={0},.damage=0,.category=TCG_DAMAGE_NORMAL},
 }
 },
-[513] = {.id=513, .name="Brock's Sandshrew", .kind=TCG_POKEMON, .type=4, .rarity=0, .set=13, .set2=255, .dark=0, .holo=0, .flags=TCG_CF_OWNER, .origin=13,
+[513] = {.id=513, .name="Brock's Sandshrew", .kind=TCG_POKEMON, .type=4, .rarity=0, .set=13, .set2=255, .dark=0, .holo=0, .flags=TCG_CF_OWNER|TCG_CF_READY, .origin=13,
 .hp=40, .stage=0, .species=27, .level=13, .retreat=1, .weakness=1, .resistance=2, .evolvesFrom="", .description="", .attacks={
 {.name="Defense Curl",.description="Flip a coin. If heads, prevent all damage done to Brock's Sandshrew during your opponent's next turn. (Any other effects of attacks still happen.)",.effect="gym1-71:a0",.animation="ATK_ANIM_HIT",.cost={0,0,0,0,0,0,1,0,0},.damage=0,.category=TCG_RESIDUAL},
 {.name="Rolling Attack",.description="",.effect="NONE",.animation="ATK_ANIM_HIT",.cost={0,0,0,0,1,0,1,0,0},.damage=20,.category=TCG_DAMAGE_NORMAL},
@@ -3323,28 +3323,28 @@ const struct TcgCard gTcgCards[TCG_CARD_COUNT + 1] = {
 {.name="",.description="",.effect="NONE",.animation="ATK_ANIM_NONE",.cost={0},.damage=0,.category=TCG_DAMAGE_NORMAL},
 }
 },
-[516] = {.id=516, .name="Brock's Zubat", .kind=TCG_POKEMON, .type=1, .rarity=0, .set=13, .set2=255, .dark=0, .holo=0, .flags=TCG_CF_OWNER, .origin=13,
+[516] = {.id=516, .name="Brock's Zubat", .kind=TCG_POKEMON, .type=1, .rarity=0, .set=13, .set2=255, .dark=0, .holo=0, .flags=TCG_CF_OWNER|TCG_CF_READY, .origin=13,
 .hp=40, .stage=0, .species=41, .level=11, .retreat=0, .weakness=5, .resistance=4, .evolvesFrom="", .description="", .attacks={
 {.name="Wing Attack",.description="",.effect="NONE",.animation="ATK_ANIM_HIT",.cost={0,0,0,0,0,0,1,0,0},.damage=10,.category=TCG_DAMAGE_NORMAL},
 {.name="Poison Fang",.description="Flip a coin. If heads, the Defending Pokemon is now Poisoned.",.effect="gym1-74:a1",.animation="ATK_ANIM_HIT",.cost={0,1,0,0,0,0,1,0,0},.damage=20,.category=TCG_DAMAGE_NORMAL},
 {.name="",.description="",.effect="NONE",.animation="ATK_ANIM_NONE",.cost={0},.damage=0,.category=TCG_DAMAGE_NORMAL},
 }
 },
-[517] = {.id=517, .name="Erika's Bellsprout", .kind=TCG_POKEMON, .type=1, .rarity=0, .set=13, .set2=255, .dark=0, .holo=0, .flags=TCG_CF_OWNER, .origin=13,
+[517] = {.id=517, .name="Erika's Bellsprout", .kind=TCG_POKEMON, .type=1, .rarity=0, .set=13, .set2=255, .dark=0, .holo=0, .flags=TCG_CF_OWNER|TCG_CF_READY, .origin=13,
 .hp=40, .stage=0, .species=69, .level=12, .retreat=1, .weakness=0, .resistance=255, .evolvesFrom="", .description="", .attacks={
 {.name="Poison Vine",.description="Flip a coin. If heads, the Defending Pokemon is now Poisoned.",.effect="gym1-75:a0",.animation="ATK_ANIM_HIT",.cost={0,1,0,0,0,0,0,0,0},.damage=10,.category=TCG_DAMAGE_NORMAL},
 {.name="Vine Whip",.description="",.effect="NONE",.animation="ATK_ANIM_HIT",.cost={0,2,0,0,0,0,0,0,0},.damage=30,.category=TCG_DAMAGE_NORMAL},
 {.name="",.description="",.effect="NONE",.animation="ATK_ANIM_NONE",.cost={0},.damage=0,.category=TCG_DAMAGE_NORMAL},
 }
 },
-[518] = {.id=518, .name="Erika's Bellsprout", .kind=TCG_POKEMON, .type=1, .rarity=0, .set=13, .set2=255, .dark=0, .holo=0, .flags=TCG_CF_OWNER, .origin=13,
+[518] = {.id=518, .name="Erika's Bellsprout", .kind=TCG_POKEMON, .type=1, .rarity=0, .set=13, .set2=255, .dark=0, .holo=0, .flags=TCG_CF_OWNER|TCG_CF_READY, .origin=13,
 .hp=50, .stage=0, .species=69, .level=15, .retreat=1, .weakness=0, .resistance=255, .evolvesFrom="", .description="", .attacks={
 {.name="Careless Tackle",.description="Erika's Bellsprout does 10 damage to itself.",.effect="gym1-76:a0",.animation="ATK_ANIM_HIT",.cost={0,0,0,0,0,0,1,0,0},.damage=20,.category=TCG_DAMAGE_NORMAL},
 {.name="",.description="",.effect="NONE",.animation="ATK_ANIM_NONE",.cost={0},.damage=0,.category=TCG_DAMAGE_NORMAL},
 {.name="",.description="",.effect="NONE",.animation="ATK_ANIM_NONE",.cost={0},.damage=0,.category=TCG_DAMAGE_NORMAL},
 }
 },
-[519] = {.id=519, .name="Erika's Exeggcute", .kind=TCG_POKEMON, .type=1, .rarity=0, .set=13, .set2=255, .dark=0, .holo=0, .flags=TCG_CF_OWNER, .origin=13,
+[519] = {.id=519, .name="Erika's Exeggcute", .kind=TCG_POKEMON, .type=1, .rarity=0, .set=13, .set2=255, .dark=0, .holo=0, .flags=TCG_CF_OWNER|TCG_CF_READY, .origin=13,
 .hp=40, .stage=0, .species=102, .level=12, .retreat=1, .weakness=0, .resistance=255, .evolvesFrom="", .description="", .attacks={
 {.name="Eggsplosion",.description="Flip a number of coins equal to the number of Energy attached to Erika's Exeggcute. This attack does 10 damage times the number of heads.",.effect="gym1-77:a0",.animation="ATK_ANIM_HIT",.cost={0,0,0,0,0,0,1,0,0},.damage=10,.category=TCG_DAMAGE_X},
 {.name="Psychic",.description="Does 10 damage plus 10 more damage for each Energy card attached to the Defending Pokemon.",.effect="gym1-77:a1",.animation="ATK_ANIM_HIT",.cost={0,0,0,0,0,1,1,0,0},.damage=10,.category=TCG_DAMAGE_PLUS},
@@ -3365,7 +3365,7 @@ const struct TcgCard gTcgCards[TCG_CARD_COUNT + 1] = {
 {.name="",.description="",.effect="NONE",.animation="ATK_ANIM_NONE",.cost={0},.damage=0,.category=TCG_DAMAGE_NORMAL},
 }
 },
-[522] = {.id=522, .name="Lt. Surge's Magnemite", .kind=TCG_POKEMON, .type=2, .rarity=0, .set=13, .set2=255, .dark=0, .holo=0, .flags=TCG_CF_OWNER, .origin=13,
+[522] = {.id=522, .name="Lt. Surge's Magnemite", .kind=TCG_POKEMON, .type=2, .rarity=0, .set=13, .set2=255, .dark=0, .holo=0, .flags=TCG_CF_OWNER|TCG_CF_READY, .origin=13,
 .hp=40, .stage=0, .species=81, .level=12, .retreat=1, .weakness=4, .resistance=255, .evolvesFrom="", .description="", .attacks={
 {.name="Thundershock",.description="Flip a coin. If heads, the Defending Pokemon is now Paralyzed.",.effect="gym1-80:a0",.animation="ATK_ANIM_HIT",.cost={0,0,1,0,0,0,0,0,0},.damage=10,.category=TCG_DAMAGE_NORMAL},
 {.name="Tackle",.description="",.effect="NONE",.animation="ATK_ANIM_HIT",.cost={0,0,0,0,0,0,2,0,0},.damage=20,.category=TCG_DAMAGE_NORMAL},
@@ -3386,7 +3386,7 @@ const struct TcgCard gTcgCards[TCG_CARD_COUNT + 1] = {
 {.name="",.description="",.effect="NONE",.animation="ATK_ANIM_NONE",.cost={0},.damage=0,.category=TCG_DAMAGE_NORMAL},
 }
 },
-[525] = {.id=525, .name="Lt. Surge's Spearow", .kind=TCG_POKEMON, .type=6, .rarity=0, .set=13, .set2=255, .dark=0, .holo=0, .flags=TCG_CF_OWNER, .origin=13,
+[525] = {.id=525, .name="Lt. Surge's Spearow", .kind=TCG_POKEMON, .type=6, .rarity=0, .set=13, .set2=255, .dark=0, .holo=0, .flags=TCG_CF_OWNER|TCG_CF_READY, .origin=13,
 .hp=50, .stage=0, .species=21, .level=17, .retreat=0, .weakness=2, .resistance=4, .evolvesFrom="", .description="", .attacks={
 {.name="Whirlwind",.description="If your opponent has any Benched Pokemon, he or she chooses 1 of them and switches it with the Defending Pokemon. (Do the damage before switching the Pokemon.)",.effect="gym1-83:a0",.animation="ATK_ANIM_HIT",.cost={0,0,0,0,0,0,1,0,0},.damage=10,.category=TCG_DAMAGE_NORMAL},
 {.name="Razor Wind",.description="Flip a coin. If tails, this attack does nothing.",.effect="gym1-83:a1",.animation="ATK_ANIM_HIT",.cost={0,0,0,0,0,0,2,0,0},.damage=40,.category=TCG_DAMAGE_NORMAL},
@@ -3407,7 +3407,7 @@ const struct TcgCard gTcgCards[TCG_CARD_COUNT + 1] = {
 {.name="",.description="",.effect="NONE",.animation="ATK_ANIM_NONE",.cost={0},.damage=0,.category=TCG_DAMAGE_NORMAL},
 }
 },
-[528] = {.id=528, .name="Misty's Horsea", .kind=TCG_POKEMON, .type=3, .rarity=0, .set=13, .set2=255, .dark=0, .holo=0, .flags=TCG_CF_OWNER, .origin=13,
+[528] = {.id=528, .name="Misty's Horsea", .kind=TCG_POKEMON, .type=3, .rarity=0, .set=13, .set2=255, .dark=0, .holo=0, .flags=TCG_CF_OWNER|TCG_CF_READY, .origin=13,
 .hp=40, .stage=0, .species=116, .level=10, .retreat=0, .weakness=2, .resistance=255, .evolvesFrom="", .description="", .attacks={
 {.name="Tackle",.description="",.effect="NONE",.animation="ATK_ANIM_HIT",.cost={0,0,0,1,0,0,0,0,0},.damage=10,.category=TCG_DAMAGE_NORMAL},
 {.name="Smokescreen",.description="If the Defending Pokemon tries to attack during your opponent's next turn, your opponent flips a coin. If tails, that attack does nothing.",.effect="gym1-86:a1",.animation="ATK_ANIM_HIT",.cost={0,0,0,2,0,0,0,0,0},.damage=20,.category=TCG_DAMAGE_NORMAL},
@@ -3428,14 +3428,14 @@ const struct TcgCard gTcgCards[TCG_CARD_COUNT + 1] = {
 {.name="",.description="",.effect="NONE",.animation="ATK_ANIM_NONE",.cost={0},.damage=0,.category=TCG_DAMAGE_NORMAL},
 }
 },
-[531] = {.id=531, .name="Misty's Shellder", .kind=TCG_POKEMON, .type=3, .rarity=0, .set=13, .set2=255, .dark=0, .holo=0, .flags=TCG_CF_OWNER, .origin=13,
+[531] = {.id=531, .name="Misty's Shellder", .kind=TCG_POKEMON, .type=3, .rarity=0, .set=13, .set2=255, .dark=0, .holo=0, .flags=TCG_CF_OWNER|TCG_CF_READY, .origin=13,
 .hp=40, .stage=0, .species=90, .level=10, .retreat=1, .weakness=2, .resistance=255, .evolvesFrom="", .description="", .attacks={
 {.name="Tackle",.description="",.effect="NONE",.animation="ATK_ANIM_HIT",.cost={0,0,0,0,0,0,1,0,0},.damage=10,.category=TCG_DAMAGE_NORMAL},
 {.name="Clamp",.description="Flip a coin. If heads, the Defending Pokemon is now Paralyzed. If tails, this attack does nothing (not even damage).",.effect="gym1-89:a1",.animation="ATK_ANIM_HIT",.cost={0,0,0,1,0,0,1,0,0},.damage=20,.category=TCG_DAMAGE_NORMAL},
 {.name="",.description="",.effect="NONE",.animation="ATK_ANIM_NONE",.cost={0},.damage=0,.category=TCG_DAMAGE_NORMAL},
 }
 },
-[532] = {.id=532, .name="Misty's Staryu", .kind=TCG_POKEMON, .type=3, .rarity=0, .set=13, .set2=255, .dark=0, .holo=0, .flags=TCG_CF_OWNER, .origin=13,
+[532] = {.id=532, .name="Misty's Staryu", .kind=TCG_POKEMON, .type=3, .rarity=0, .set=13, .set2=255, .dark=0, .holo=0, .flags=TCG_CF_OWNER|TCG_CF_READY, .origin=13,
 .hp=50, .stage=0, .species=120, .level=20, .retreat=1, .weakness=2, .resistance=255, .evolvesFrom="", .description="", .attacks={
 {.name="Swift",.description="This attack's damage isn't affected by Weakness, Resistance, Pokemon Powers, or any other effects on the Defending Pokemon.",.effect="gym1-90:a0",.animation="ATK_ANIM_HIT",.cost={0,0,0,1,0,0,1,0,0},.damage=20,.category=TCG_DAMAGE_NORMAL},
 {.name="",.description="",.effect="NONE",.animation="ATK_ANIM_NONE",.cost={0},.damage=0,.category=TCG_DAMAGE_NORMAL},
@@ -3449,7 +3449,7 @@ const struct TcgCard gTcgCards[TCG_CARD_COUNT + 1] = {
 {.name="",.description="",.effect="NONE",.animation="ATK_ANIM_NONE",.cost={0},.damage=0,.category=TCG_DAMAGE_NORMAL},
 }
 },
-[534] = {.id=534, .name="Sabrina's Drowzee", .kind=TCG_POKEMON, .type=5, .rarity=0, .set=13, .set2=255, .dark=0, .holo=0, .flags=TCG_CF_OWNER, .origin=13,
+[534] = {.id=534, .name="Sabrina's Drowzee", .kind=TCG_POKEMON, .type=5, .rarity=0, .set=13, .set2=255, .dark=0, .holo=0, .flags=TCG_CF_OWNER|TCG_CF_READY, .origin=13,
 .hp=50, .stage=0, .species=96, .level=15, .retreat=1, .weakness=5, .resistance=255, .evolvesFrom="", .description="", .attacks={
 {.name="Suggestion",.description="Flip a coin. If heads, the Defending Pokemon can't attack during your opponent's next turn.",.effect="gym1-92:a0",.animation="ATK_ANIM_HIT",.cost={0,0,0,0,0,1,0,0,0},.damage=0,.category=TCG_RESIDUAL},
 {.name="Headbutt",.description="",.effect="NONE",.animation="ATK_ANIM_HIT",.cost={0,0,0,0,0,0,2,0,0},.damage=20,.category=TCG_DAMAGE_NORMAL},
@@ -3775,7 +3775,7 @@ const struct TcgCard gTcgCards[TCG_CARD_COUNT + 1] = {
 {.name="",.description="",.effect="NONE",.animation="ATK_ANIM_NONE",.cost={0},.damage=0,.category=TCG_DAMAGE_NORMAL},
 }
 },
-[600] = {.id=600, .name="Blaine's Dodrio", .kind=TCG_POKEMON, .type=6, .rarity=1, .set=14, .set2=255, .dark=0, .holo=0, .flags=TCG_CF_OWNER, .origin=14,
+[600] = {.id=600, .name="Blaine's Dodrio", .kind=TCG_POKEMON, .type=6, .rarity=1, .set=14, .set2=255, .dark=0, .holo=0, .flags=TCG_CF_OWNER|TCG_CF_READY, .origin=14,
 .hp=70, .stage=1, .species=85, .level=26, .retreat=1, .weakness=2, .resistance=4, .evolvesFrom="Blaine's Doduo", .description="", .attacks={
 {.name="Mega Peck",.description="Flip a coin. If tails, this attack does nothing.",.effect="gym2-32:a0",.animation="ATK_ANIM_HIT",.cost={0,0,0,0,0,0,2,0,0},.damage=50,.category=TCG_DAMAGE_NORMAL},
 {.name="",.description="",.effect="NONE",.animation="ATK_ANIM_NONE",.cost={0},.damage=0,.category=TCG_DAMAGE_NORMAL},
@@ -3803,7 +3803,7 @@ const struct TcgCard gTcgCards[TCG_CARD_COUNT + 1] = {
 {.name="",.description="",.effect="NONE",.animation="ATK_ANIM_NONE",.cost={0},.damage=0,.category=TCG_DAMAGE_NORMAL},
 }
 },
-[604] = {.id=604, .name="Brock's Sandslash", .kind=TCG_POKEMON, .type=4, .rarity=1, .set=14, .set2=255, .dark=0, .holo=0, .flags=TCG_CF_OWNER, .origin=14,
+[604] = {.id=604, .name="Brock's Sandslash", .kind=TCG_POKEMON, .type=4, .rarity=1, .set=14, .set2=255, .dark=0, .holo=0, .flags=TCG_CF_OWNER|TCG_CF_READY, .origin=14,
 .hp=70, .stage=1, .species=28, .level=34, .retreat=1, .weakness=1, .resistance=2, .evolvesFrom="Brock's Sandshrew", .description="", .attacks={
 {.name="Swift",.description="This attack's damage isn't affected by Weakness, Resistance, Pokemon Powers, or any other effects on the Defending Pokemon.",.effect="gym2-36:a0",.animation="ATK_ANIM_HIT",.cost={0,0,0,0,1,0,1,0,0},.damage=20,.category=TCG_DAMAGE_NORMAL},
 {.name="Needle Ball",.description="Flip a coin. If heads, the Defending Pokemon is now Poisoned.",.effect="gym2-36:a1",.animation="ATK_ANIM_HIT",.cost={0,0,0,0,2,0,0,0,0},.damage=30,.category=TCG_DAMAGE_NORMAL},
@@ -3873,7 +3873,7 @@ const struct TcgCard gTcgCards[TCG_CARD_COUNT + 1] = {
 {.name="",.description="",.effect="NONE",.animation="ATK_ANIM_NONE",.cost={0},.damage=0,.category=TCG_DAMAGE_NORMAL},
 }
 },
-[614] = {.id=614, .name="Koga's Golbat", .kind=TCG_POKEMON, .type=1, .rarity=1, .set=14, .set2=255, .dark=0, .holo=0, .flags=TCG_CF_OWNER, .origin=14,
+[614] = {.id=614, .name="Koga's Golbat", .kind=TCG_POKEMON, .type=1, .rarity=1, .set=14, .set2=255, .dark=0, .holo=0, .flags=TCG_CF_OWNER|TCG_CF_READY, .origin=14,
 .hp=60, .stage=1, .species=42, .level=28, .retreat=0, .weakness=5, .resistance=4, .evolvesFrom="Koga's Zubat", .description="", .attacks={
 {.name="Bite",.description="",.effect="NONE",.animation="ATK_ANIM_HIT",.cost={0,0,0,0,0,0,2,0,0},.damage=20,.category=TCG_DAMAGE_NORMAL},
 {.name="Sonic Scream",.description="Flip a coin. If heads, the Defending Pokemon is now Confused.",.effect="gym2-46:a1",.animation="ATK_ANIM_HIT",.cost={0,3,0,0,0,0,0,0,0},.damage=30,.category=TCG_DAMAGE_NORMAL},
@@ -3929,7 +3929,7 @@ const struct TcgCard gTcgCards[TCG_CARD_COUNT + 1] = {
 {.name="",.description="",.effect="NONE",.animation="ATK_ANIM_NONE",.cost={0},.damage=0,.category=TCG_DAMAGE_NORMAL},
 }
 },
-[622] = {.id=622, .name="Misty's Dewgong", .kind=TCG_POKEMON, .type=3, .rarity=1, .set=14, .set2=255, .dark=0, .holo=0, .flags=TCG_CF_OWNER, .origin=14,
+[622] = {.id=622, .name="Misty's Dewgong", .kind=TCG_POKEMON, .type=3, .rarity=1, .set=14, .set2=255, .dark=0, .holo=0, .flags=TCG_CF_OWNER|TCG_CF_READY, .origin=14,
 .hp=80, .stage=1, .species=87, .level=40, .retreat=2, .weakness=2, .resistance=255, .evolvesFrom="Misty's Seel", .description="", .attacks={
 {.name="Ice Throw",.description="If the Defending Pokemon is Fighting, this attack's base damage is doubled.",.effect="gym2-54:a0",.animation="ATK_ANIM_HIT",.cost={0,0,0,2,0,0,0,0,0},.damage=20,.category=TCG_DAMAGE_NORMAL},
 {.name="Take Down",.description="Misty's Dewgong does 20 damage to itself.",.effect="gym2-54:a1",.animation="ATK_ANIM_HIT",.cost={0,0,0,1,0,0,3,0,0},.damage=60,.category=TCG_DAMAGE_NORMAL},
@@ -3978,14 +3978,14 @@ const struct TcgCard gTcgCards[TCG_CARD_COUNT + 1] = {
 {.name="",.description="",.effect="NONE",.animation="ATK_ANIM_NONE",.cost={0},.damage=0,.category=TCG_DAMAGE_NORMAL},
 }
 },
-[629] = {.id=629, .name="Blaine's Doduo", .kind=TCG_POKEMON, .type=6, .rarity=0, .set=14, .set2=255, .dark=0, .holo=0, .flags=TCG_CF_OWNER, .origin=14,
+[629] = {.id=629, .name="Blaine's Doduo", .kind=TCG_POKEMON, .type=6, .rarity=0, .set=14, .set2=255, .dark=0, .holo=0, .flags=TCG_CF_OWNER|TCG_CF_READY, .origin=14,
 .hp=50, .stage=0, .species=84, .level=17, .retreat=0, .weakness=2, .resistance=4, .evolvesFrom="", .description="", .attacks={
 {.name="Wild Kick",.description="Flip a coin. If tails, this attack does nothing.",.effect="gym2-61:a0",.animation="ATK_ANIM_HIT",.cost={0,0,0,0,0,0,1,0,0},.damage=20,.category=TCG_DAMAGE_NORMAL},
 {.name="Retaliate",.description="Does 10 damage times the number of damage counters on Blaine's Doduo.",.effect="gym2-61:a1",.animation="ATK_ANIM_HIT",.cost={0,0,0,0,0,0,2,0,0},.damage=10,.category=TCG_DAMAGE_X},
 {.name="",.description="",.effect="NONE",.animation="ATK_ANIM_NONE",.cost={0},.damage=0,.category=TCG_DAMAGE_NORMAL},
 }
 },
-[630] = {.id=630, .name="Blaine's Growlithe", .kind=TCG_POKEMON, .type=0, .rarity=0, .set=14, .set2=255, .dark=0, .holo=0, .flags=TCG_CF_OWNER, .origin=14,
+[630] = {.id=630, .name="Blaine's Growlithe", .kind=TCG_POKEMON, .type=0, .rarity=0, .set=14, .set2=255, .dark=0, .holo=0, .flags=TCG_CF_OWNER|TCG_CF_READY, .origin=14,
 .hp=60, .stage=0, .species=58, .level=20, .retreat=1, .weakness=3, .resistance=255, .evolvesFrom="", .description="", .attacks={
 {.name="Stoke",.description="Search your deck for a Fire Energy card and attach it to Blaine's Growlithe. Shuffle your deck afterward.",.effect="gym2-62:a0",.animation="ATK_ANIM_HIT",.cost={1,0,0,0,0,0,0,0,0},.damage=0,.category=TCG_RESIDUAL},
 {.name="Body Slam",.description="Flip a coin. If heads, the Defending Pokemon is now Paralyzed.",.effect="gym2-62:a1",.animation="ATK_ANIM_HIT",.cost={1,0,0,0,0,0,2,0,0},.damage=20,.category=TCG_DAMAGE_NORMAL},
@@ -4020,7 +4020,7 @@ const struct TcgCard gTcgCards[TCG_CARD_COUNT + 1] = {
 {.name="",.description="",.effect="NONE",.animation="ATK_ANIM_NONE",.cost={0},.damage=0,.category=TCG_DAMAGE_NORMAL},
 }
 },
-[635] = {.id=635, .name="Brock's Diglett", .kind=TCG_POKEMON, .type=4, .rarity=0, .set=14, .set2=255, .dark=0, .holo=0, .flags=TCG_CF_OWNER, .origin=14,
+[635] = {.id=635, .name="Brock's Diglett", .kind=TCG_POKEMON, .type=4, .rarity=0, .set=14, .set2=255, .dark=0, .holo=0, .flags=TCG_CF_OWNER|TCG_CF_READY, .origin=14,
 .hp=40, .stage=0, .species=50, .level=13, .retreat=1, .weakness=1, .resistance=2, .evolvesFrom="", .description="", .attacks={
 {.name="Surprise Attack",.description="Flip a coin. If tails, this attack does nothing.",.effect="gym2-67:a0",.animation="ATK_ANIM_HIT",.cost={0,0,0,0,1,0,0,0,0},.damage=20,.category=TCG_DAMAGE_NORMAL},
 {.name="Tremor",.description="Does 10 damage to each of your own Benched Pokemon. (Don't apply Weakness and Resistance for Benched Pokemon.)",.effect="gym2-67:a1",.animation="ATK_ANIM_HIT",.cost={0,0,0,0,1,0,1,0,0},.damage=40,.category=TCG_DAMAGE_NORMAL},
@@ -4069,14 +4069,14 @@ const struct TcgCard gTcgCards[TCG_CARD_COUNT + 1] = {
 {.name="",.description="",.effect="NONE",.animation="ATK_ANIM_NONE",.cost={0},.damage=0,.category=TCG_DAMAGE_NORMAL},
 }
 },
-[642] = {.id=642, .name="Giovanni's Meowth", .kind=TCG_POKEMON, .type=6, .rarity=0, .set=14, .set2=255, .dark=0, .holo=0, .flags=TCG_CF_OWNER, .origin=14,
+[642] = {.id=642, .name="Giovanni's Meowth", .kind=TCG_POKEMON, .type=6, .rarity=0, .set=14, .set2=255, .dark=0, .holo=0, .flags=TCG_CF_OWNER|TCG_CF_READY, .origin=14,
 .hp=50, .stage=0, .species=52, .level=17, .retreat=2, .weakness=4, .resistance=5, .evolvesFrom="", .description="", .attacks={
 {.name="Cat Fleas",.description="Flip a coin. If heads, the Defending Pokemon is now Confused.",.effect="gym2-74:a0",.animation="ATK_ANIM_HIT",.cost={0,0,0,0,0,0,1,0,0},.damage=0,.category=TCG_RESIDUAL},
 {.name="Cat Kick",.description="",.effect="NONE",.animation="ATK_ANIM_HIT",.cost={0,0,0,0,0,0,3,0,0},.damage=30,.category=TCG_DAMAGE_NORMAL},
 {.name="",.description="",.effect="NONE",.animation="ATK_ANIM_NONE",.cost={0},.damage=0,.category=TCG_DAMAGE_NORMAL},
 }
 },
-[643] = {.id=643, .name="Giovanni's Nidoran F", .kind=TCG_POKEMON, .type=1, .rarity=0, .set=14, .set2=255, .dark=0, .holo=0, .flags=TCG_CF_OWNER, .origin=14,
+[643] = {.id=643, .name="Giovanni's Nidoran F", .kind=TCG_POKEMON, .type=1, .rarity=0, .set=14, .set2=255, .dark=0, .holo=0, .flags=TCG_CF_OWNER|TCG_CF_READY, .origin=14,
 .hp=50, .stage=0, .species=29, .level=11, .retreat=1, .weakness=5, .resistance=255, .evolvesFrom="", .description="", .attacks={
 {.name="Horn Thrust",.description="Flip a coin. If tails, this attack does nothing.",.effect="gym2-75:a0",.animation="ATK_ANIM_HIT",.cost={0,1,0,0,0,0,0,0,0},.damage=20,.category=TCG_DAMAGE_NORMAL},
 {.name="Double-edge",.description="Giovanni's Nidoran F does 20 damage to itself.",.effect="gym2-75:a1",.animation="ATK_ANIM_HIT",.cost={0,0,0,0,0,0,2,0,0},.damage=30,.category=TCG_DAMAGE_NORMAL},
@@ -4111,7 +4111,7 @@ const struct TcgCard gTcgCards[TCG_CARD_COUNT + 1] = {
 {.name="",.description="",.effect="NONE",.animation="ATK_ANIM_NONE",.cost={0},.damage=0,.category=TCG_DAMAGE_NORMAL},
 }
 },
-[648] = {.id=648, .name="Koga's Pidgey", .kind=TCG_POKEMON, .type=6, .rarity=0, .set=14, .set2=255, .dark=0, .holo=0, .flags=TCG_CF_OWNER, .origin=14,
+[648] = {.id=648, .name="Koga's Pidgey", .kind=TCG_POKEMON, .type=6, .rarity=0, .set=14, .set2=255, .dark=0, .holo=0, .flags=TCG_CF_OWNER|TCG_CF_READY, .origin=14,
 .hp=50, .stage=0, .species=16, .level=15, .retreat=1, .weakness=2, .resistance=4, .evolvesFrom="", .description="", .attacks={
 {.name="Peck",.description="",.effect="NONE",.animation="ATK_ANIM_HIT",.cost={0,0,0,0,0,0,1,0,0},.damage=10,.category=TCG_DAMAGE_NORMAL},
 {.name="Sand-attack",.description="If the Defending Pokemon tries to attack during your opponent's next turn, your opponent flips a coin. If tails, that attack does nothing.",.effect="gym2-80:a1",.animation="ATK_ANIM_HIT",.cost={0,0,0,0,0,0,3,0,0},.damage=20,.category=TCG_DAMAGE_NORMAL},
@@ -4125,7 +4125,7 @@ const struct TcgCard gTcgCards[TCG_CARD_COUNT + 1] = {
 {.name="",.description="",.effect="NONE",.animation="ATK_ANIM_NONE",.cost={0},.damage=0,.category=TCG_DAMAGE_NORMAL},
 }
 },
-[650] = {.id=650, .name="Koga's Weedle", .kind=TCG_POKEMON, .type=1, .rarity=0, .set=14, .set2=255, .dark=0, .holo=0, .flags=TCG_CF_OWNER, .origin=14,
+[650] = {.id=650, .name="Koga's Weedle", .kind=TCG_POKEMON, .type=1, .rarity=0, .set=14, .set2=255, .dark=0, .holo=0, .flags=TCG_CF_OWNER|TCG_CF_READY, .origin=14,
 .hp=40, .stage=0, .species=13, .level=13, .retreat=1, .weakness=0, .resistance=255, .evolvesFrom="", .description="", .attacks={
 {.name="Sting",.description="",.effect="NONE",.animation="ATK_ANIM_HIT",.cost={0,0,0,0,0,0,1,0,0},.damage=10,.category=TCG_DAMAGE_NORMAL},
 {.name="Sharp Stinger",.description="Flip a coin. If heads, the Defending Pokemon is now Poisoned; if tails, the Defending Pokemon is now Paralyzed.",.effect="gym2-82:a1",.animation="ATK_ANIM_HIT",.cost={0,1,0,0,0,0,1,0,0},.damage=10,.category=TCG_DAMAGE_NORMAL},
@@ -4153,7 +4153,7 @@ const struct TcgCard gTcgCards[TCG_CARD_COUNT + 1] = {
 {.name="",.description="",.effect="NONE",.animation="ATK_ANIM_NONE",.cost={0},.damage=0,.category=TCG_DAMAGE_NORMAL},
 }
 },
-[654] = {.id=654, .name="Lt. Surge's Voltorb", .kind=TCG_POKEMON, .type=2, .rarity=0, .set=14, .set2=255, .dark=0, .holo=0, .flags=TCG_CF_OWNER, .origin=14,
+[654] = {.id=654, .name="Lt. Surge's Voltorb", .kind=TCG_POKEMON, .type=2, .rarity=0, .set=14, .set2=255, .dark=0, .holo=0, .flags=TCG_CF_OWNER|TCG_CF_READY, .origin=14,
 .hp=50, .stage=0, .species=100, .level=15, .retreat=1, .weakness=4, .resistance=255, .evolvesFrom="", .description="", .attacks={
 {.name="Bouncing Ball",.description="Flip a coin. If tails, Lt. Surge's Voltorb does 10 damage to itself.",.effect="gym2-86:a0",.animation="ATK_ANIM_HIT",.cost={0,0,1,0,0,0,1,0,0},.damage=30,.category=TCG_DAMAGE_NORMAL},
 {.name="",.description="",.effect="NONE",.animation="ATK_ANIM_NONE",.cost={0},.damage=0,.category=TCG_DAMAGE_NORMAL},
@@ -4167,7 +4167,7 @@ const struct TcgCard gTcgCards[TCG_CARD_COUNT + 1] = {
 {.name="",.description="",.effect="NONE",.animation="ATK_ANIM_NONE",.cost={0},.damage=0,.category=TCG_DAMAGE_NORMAL},
 }
 },
-[656] = {.id=656, .name="Misty's Magikarp", .kind=TCG_POKEMON, .type=3, .rarity=0, .set=14, .set2=255, .dark=0, .holo=0, .flags=TCG_CF_OWNER, .origin=14,
+[656] = {.id=656, .name="Misty's Magikarp", .kind=TCG_POKEMON, .type=3, .rarity=0, .set=14, .set2=255, .dark=0, .holo=0, .flags=TCG_CF_OWNER|TCG_CF_READY, .origin=14,
 .hp=30, .stage=0, .species=129, .level=5, .retreat=1, .weakness=2, .resistance=255, .evolvesFrom="", .description="", .attacks={
 {.name="Play Dead",.description="Flip a coin. If heads, during your opponent's next turn, prevent all effects of attacks, including damage, done to Misty's Magikarp.",.effect="gym2-88:a0",.animation="ATK_ANIM_HIT",.cost={0,0,0,0,0,0,1,0,0},.damage=0,.category=TCG_RESIDUAL},
 {.name="Leap",.description="",.effect="NONE",.animation="ATK_ANIM_HIT",.cost={0,0,0,0,0,0,1,0,0},.damage=10,.category=TCG_DAMAGE_NORMAL},
@@ -4552,7 +4552,7 @@ const struct TcgCard gTcgCards[TCG_CARD_COUNT + 1] = {
 {.name="",.description="",.effect="NONE",.animation="ATK_ANIM_NONE",.cost={0},.damage=0,.category=TCG_DAMAGE_NORMAL},
 }
 },
-[727] = {.id=727, .name="Electabuzz", .kind=TCG_POKEMON, .type=2, .rarity=1, .set=15, .set2=255, .dark=0, .holo=0, .flags=0, .origin=15,
+[727] = {.id=727, .name="Electabuzz", .kind=TCG_POKEMON, .type=2, .rarity=1, .set=15, .set2=255, .dark=0, .holo=0, .flags=TCG_CF_READY, .origin=15,
 .hp=70, .stage=0, .species=125, .level=38, .retreat=1, .weakness=4, .resistance=255, .evolvesFrom="", .description="Electricity runs across the surface of its body. In darkness, its entire body glows a whitish-blue.", .attacks={
 {.name="Punch",.description="",.effect="NONE",.animation="ATK_ANIM_HIT",.cost={0,0,0,0,0,0,2,0,0},.damage=20,.category=TCG_DAMAGE_NORMAL},
 {.name="Swift",.description="This attack's damage isn't affected by Weakness, Resistance, Pokemon Powers, or any other effects on the Defending Pokemon.",.effect="neo1-33:a1",.animation="ATK_ANIM_HIT",.cost={0,0,3,0,0,0,0,0,0},.damage=30,.category=TCG_DAMAGE_NORMAL},
@@ -4636,7 +4636,7 @@ const struct TcgCard gTcgCards[TCG_CARD_COUNT + 1] = {
 {.name="",.description="",.effect="NONE",.animation="ATK_ANIM_NONE",.cost={0},.damage=0,.category=TCG_DAMAGE_NORMAL},
 }
 },
-[739] = {.id=739, .name="Quagsire", .kind=TCG_POKEMON, .type=3, .rarity=1, .set=15, .set2=255, .dark=0, .holo=0, .flags=0, .origin=15,
+[739] = {.id=739, .name="Quagsire", .kind=TCG_POKEMON, .type=3, .rarity=1, .set=15, .set2=255, .dark=0, .holo=0, .flags=TCG_CF_READY, .origin=15,
 .hp=70, .stage=1, .species=195, .level=33, .retreat=2, .weakness=1, .resistance=2, .evolvesFrom="Wooper", .description="Due to its relaxed and carefree attitude, it often bumps its head on boulders and boat hulls as it swims.", .attacks={
 {.name="Surf",.description="",.effect="NONE",.animation="ATK_ANIM_HIT",.cost={0,0,0,2,0,0,0,0,0},.damage=30,.category=TCG_DAMAGE_NORMAL},
 {.name="Earthquake",.description="Does 10 damage to each of your own Benched Pokemon. (Don't apply Weakness and Resistance for Benched Pokemon.)",.effect="neo1-45:a1",.animation="ATK_ANIM_HIT",.cost={0,0,0,0,2,0,2,0,0},.damage=60,.category=TCG_DAMAGE_NORMAL},
@@ -4664,21 +4664,21 @@ const struct TcgCard gTcgCards[TCG_CARD_COUNT + 1] = {
 {.name="",.description="",.effect="NONE",.animation="ATK_ANIM_NONE",.cost={0},.damage=0,.category=TCG_DAMAGE_NORMAL},
 }
 },
-[743] = {.id=743, .name="Skiploom", .kind=TCG_POKEMON, .type=1, .rarity=1, .set=15, .set2=255, .dark=0, .holo=0, .flags=0, .origin=15,
+[743] = {.id=743, .name="Skiploom", .kind=TCG_POKEMON, .type=1, .rarity=1, .set=15, .set2=255, .dark=0, .holo=0, .flags=TCG_CF_READY, .origin=15,
 .hp=60, .stage=1, .species=188, .level=28, .retreat=0, .weakness=0, .resistance=4, .evolvesFrom="Hoppip", .description="The bloom on top of its head opens and closes as the temperature fluctuates up and down.", .attacks={
 {.name="Poisonpowder",.description="The Defending Pokemon is now Poisoned.",.effect="neo1-49:a0",.animation="ATK_ANIM_HIT",.cost={0,1,0,0,0,0,0,0,0},.damage=10,.category=TCG_DAMAGE_NORMAL},
 {.name="Stun Spore",.description="Flip a coin. If heads, the Defending Pokemon is now Paralyzed.",.effect="neo1-49:a1",.animation="ATK_ANIM_HIT",.cost={0,1,0,0,0,0,0,0,0},.damage=10,.category=TCG_DAMAGE_NORMAL},
 {.name="",.description="",.effect="NONE",.animation="ATK_ANIM_NONE",.cost={0},.damage=0,.category=TCG_DAMAGE_NORMAL},
 }
 },
-[744] = {.id=744, .name="Sunflora", .kind=TCG_POKEMON, .type=1, .rarity=1, .set=15, .set2=255, .dark=0, .holo=0, .flags=0, .origin=15,
+[744] = {.id=744, .name="Sunflora", .kind=TCG_POKEMON, .type=1, .rarity=1, .set=15, .set2=255, .dark=0, .holo=0, .flags=TCG_CF_READY, .origin=15,
 .hp=70, .stage=1, .species=192, .level=36, .retreat=1, .weakness=0, .resistance=255, .evolvesFrom="Sunkern", .description="It converts sunlight into energy. In the darkness after sunset, it closes its petals and becomes still.", .attacks={
 {.name="Petal Dance",.description="Flip 3 coins. This attack does 30 damage times the number of heads. Sunflora is now Confused (after doing damage).",.effect="neo1-50:a0",.animation="ATK_ANIM_HIT",.cost={0,3,0,0,0,0,0,0,0},.damage=30,.category=TCG_DAMAGE_X},
 {.name="",.description="",.effect="NONE",.animation="ATK_ANIM_NONE",.cost={0},.damage=0,.category=TCG_DAMAGE_NORMAL},
 {.name="",.description="",.effect="NONE",.animation="ATK_ANIM_NONE",.cost={0},.damage=0,.category=TCG_DAMAGE_NORMAL},
 }
 },
-[745] = {.id=745, .name="Togepi", .kind=TCG_POKEMON, .type=6, .rarity=1, .set=15, .set2=255, .dark=0, .holo=0, .flags=0, .origin=15,
+[745] = {.id=745, .name="Togepi", .kind=TCG_POKEMON, .type=6, .rarity=1, .set=15, .set2=255, .dark=0, .holo=0, .flags=TCG_CF_READY, .origin=15,
 .hp=40, .stage=0, .species=175, .level=14, .retreat=1, .weakness=255, .resistance=5, .evolvesFrom="", .description="A proverb claims that happiness will come to anyone who can make a sleeping Togepi stand up.", .attacks={
 {.name="Poison Barb",.description="The Defending Pokemon is now Poisoned.",.effect="neo1-51:a0",.animation="ATK_ANIM_HIT",.cost={0,0,0,0,0,0,2,0,0},.damage=10,.category=TCG_DAMAGE_NORMAL},
 {.name="",.description="",.effect="NONE",.animation="ATK_ANIM_NONE",.cost={0},.damage=0,.category=TCG_DAMAGE_NORMAL},
@@ -4706,14 +4706,14 @@ const struct TcgCard gTcgCards[TCG_CARD_COUNT + 1] = {
 {.name="",.description="",.effect="NONE",.animation="ATK_ANIM_NONE",.cost={0},.damage=0,.category=TCG_DAMAGE_NORMAL},
 }
 },
-[749] = {.id=749, .name="Chinchou", .kind=TCG_POKEMON, .type=2, .rarity=0, .set=15, .set2=255, .dark=0, .holo=0, .flags=0, .origin=15,
+[749] = {.id=749, .name="Chinchou", .kind=TCG_POKEMON, .type=2, .rarity=0, .set=15, .set2=255, .dark=0, .holo=0, .flags=TCG_CF_READY, .origin=15,
 .hp=50, .stage=0, .species=170, .level=12, .retreat=1, .weakness=4, .resistance=255, .evolvesFrom="", .description="It shoots positive and negative electricity between the tips of its two antennae and zaps its enemies.", .attacks={
 {.name="Supersonic",.description="Flip a coin. If heads, the Defending Pokemon is now Confused.",.effect="neo1-55:a0",.animation="ATK_ANIM_HIT",.cost={0,0,1,0,0,0,0,0,0},.damage=0,.category=TCG_RESIDUAL},
 {.name="Flail",.description="Does 10 damage times the number of damage counters on Chinchou.",.effect="neo1-55:a1",.animation="ATK_ANIM_HIT",.cost={0,0,0,1,0,0,0,0,0},.damage=10,.category=TCG_DAMAGE_X},
 {.name="",.description="",.effect="NONE",.animation="ATK_ANIM_NONE",.cost={0},.damage=0,.category=TCG_DAMAGE_NORMAL},
 }
 },
-[750] = {.id=750, .name="Cyndaquil", .kind=TCG_POKEMON, .type=0, .rarity=0, .set=15, .set2=255, .dark=0, .holo=0, .flags=0, .origin=15,
+[750] = {.id=750, .name="Cyndaquil", .kind=TCG_POKEMON, .type=0, .rarity=0, .set=15, .set2=255, .dark=0, .holo=0, .flags=TCG_CF_READY, .origin=15,
 .hp=40, .stage=0, .species=155, .level=14, .retreat=1, .weakness=3, .resistance=255, .evolvesFrom="", .description="It usually stays hunched over. If it is angry or surprised, it shoots flames out of its back.", .attacks={
 {.name="Leer",.description="Flip a coin. If heads, the Defending Pokemon can't attack Cyndaquil during your opponent's next turn. (Benching or evolving either Pokemon ends this effect.)",.effect="neo1-56:a0",.animation="ATK_ANIM_HIT",.cost={0,0,0,0,0,0,1,0,0},.damage=0,.category=TCG_RESIDUAL},
 {.name="Swift",.description="This attack's damage isn't affected by Weakness, Resistance, Pokemon Powers, or any other effects on the Defending Pokemon.",.effect="neo1-56:a1",.animation="ATK_ANIM_HIT",.cost={1,0,0,0,0,0,1,0,0},.damage=20,.category=TCG_DAMAGE_NORMAL},
@@ -4727,28 +4727,28 @@ const struct TcgCard gTcgCards[TCG_CARD_COUNT + 1] = {
 {.name="",.description="",.effect="NONE",.animation="ATK_ANIM_NONE",.cost={0},.damage=0,.category=TCG_DAMAGE_NORMAL},
 }
 },
-[752] = {.id=752, .name="Girafarig", .kind=TCG_POKEMON, .type=5, .rarity=0, .set=15, .set2=255, .dark=0, .holo=0, .flags=0, .origin=15,
+[752] = {.id=752, .name="Girafarig", .kind=TCG_POKEMON, .type=5, .rarity=0, .set=15, .set2=255, .dark=0, .holo=0, .flags=TCG_CF_READY, .origin=15,
 .hp=60, .stage=0, .species=203, .level=20, .retreat=1, .weakness=255, .resistance=255, .evolvesFrom="", .description="Its tail has a small brain of its own. Beware! If you get close, it may react to your scent and bite.", .attacks={
 {.name="Agility",.description="Flip a coin. If heads, during your opponent's next turn, prevent all effects of attacks, including damage, done to Girafarig.",.effect="neo1-58:a0",.animation="ATK_ANIM_HIT",.cost={0,0,0,0,0,0,2,0,0},.damage=10,.category=TCG_DAMAGE_NORMAL},
 {.name="Psybeam",.description="Flip a coin. If heads, the Defending Pokemon is now Confused.",.effect="neo1-58:a1",.animation="ATK_ANIM_HIT",.cost={0,0,0,0,0,2,0,0,0},.damage=20,.category=TCG_DAMAGE_NORMAL},
 {.name="",.description="",.effect="NONE",.animation="ATK_ANIM_NONE",.cost={0},.damage=0,.category=TCG_DAMAGE_NORMAL},
 }
 },
-[753] = {.id=753, .name="Gligar", .kind=TCG_POKEMON, .type=4, .rarity=0, .set=15, .set2=255, .dark=0, .holo=0, .flags=0, .origin=15,
+[753] = {.id=753, .name="Gligar", .kind=TCG_POKEMON, .type=4, .rarity=0, .set=15, .set2=255, .dark=0, .holo=0, .flags=TCG_CF_READY, .origin=15,
 .hp=60, .stage=0, .species=207, .level=31, .retreat=0, .weakness=1, .resistance=4, .evolvesFrom="", .description="It flies straight at its target's face, then clamps down on the startled victim to inject poison.", .attacks={
 {.name="Poison Sting",.description="Flip a coin. If heads, the Defending Pokemon is now Poisoned.",.effect="neo1-59:a0",.animation="ATK_ANIM_HIT",.cost={0,0,0,0,1,0,0,0,0},.damage=10,.category=TCG_DAMAGE_NORMAL},
 {.name="Slash",.description="",.effect="NONE",.animation="ATK_ANIM_HIT",.cost={0,0,0,0,0,0,2,0,0},.damage=20,.category=TCG_DAMAGE_NORMAL},
 {.name="",.description="",.effect="NONE",.animation="ATK_ANIM_NONE",.cost={0},.damage=0,.category=TCG_DAMAGE_NORMAL},
 }
 },
-[754] = {.id=754, .name="Hoothoot", .kind=TCG_POKEMON, .type=6, .rarity=0, .set=15, .set2=255, .dark=0, .holo=0, .flags=0, .origin=15,
+[754] = {.id=754, .name="Hoothoot", .kind=TCG_POKEMON, .type=6, .rarity=0, .set=15, .set2=255, .dark=0, .holo=0, .flags=TCG_CF_READY, .origin=15,
 .hp=50, .stage=0, .species=163, .level=17, .retreat=1, .weakness=2, .resistance=4, .evolvesFrom="", .description="It always stands on one foot. It changes feet so fast that the movement can rarely be seen.", .attacks={
 {.name="Hypnosis",.description="The Defending Pokemon is now Asleep.",.effect="neo1-60:a0",.animation="ATK_ANIM_HIT",.cost={0,0,0,0,0,0,1,0,0},.damage=0,.category=TCG_RESIDUAL},
 {.name="Peck",.description="",.effect="NONE",.animation="ATK_ANIM_HIT",.cost={0,0,0,0,0,0,2,0,0},.damage=20,.category=TCG_DAMAGE_NORMAL},
 {.name="",.description="",.effect="NONE",.animation="ATK_ANIM_NONE",.cost={0},.damage=0,.category=TCG_DAMAGE_NORMAL},
 }
 },
-[755] = {.id=755, .name="Hoppip", .kind=TCG_POKEMON, .type=1, .rarity=0, .set=15, .set2=255, .dark=0, .holo=0, .flags=0, .origin=15,
+[755] = {.id=755, .name="Hoppip", .kind=TCG_POKEMON, .type=1, .rarity=0, .set=15, .set2=255, .dark=0, .holo=0, .flags=TCG_CF_READY, .origin=15,
 .hp=50, .stage=0, .species=187, .level=21, .retreat=0, .weakness=0, .resistance=4, .evolvesFrom="", .description="To keep from being blown away by the wind, they gather in clusters. They do enjoy gentle breezes, though.", .attacks={
 {.name="Hop",.description="",.effect="NONE",.animation="ATK_ANIM_HIT",.cost={0,0,0,0,0,0,1,0,0},.damage=10,.category=TCG_DAMAGE_NORMAL},
 {.name="Sprout",.description="Search your deck for a Basic Pokemon named Hoppip and put it onto your Bench. Shuffle your deck afterward. (You can't use this attack if your Bench is full.)",.effect="neo1-61:a1",.animation="ATK_ANIM_HIT",.cost={0,1,0,0,0,0,0,0,0},.damage=0,.category=TCG_RESIDUAL},
@@ -4769,7 +4769,7 @@ const struct TcgCard gTcgCards[TCG_CARD_COUNT + 1] = {
 {.name="",.description="",.effect="NONE",.animation="ATK_ANIM_NONE",.cost={0},.damage=0,.category=TCG_DAMAGE_NORMAL},
 }
 },
-[758] = {.id=758, .name="Mantine", .kind=TCG_POKEMON, .type=3, .rarity=0, .set=15, .set2=255, .dark=0, .holo=0, .flags=0, .origin=15,
+[758] = {.id=758, .name="Mantine", .kind=TCG_POKEMON, .type=3, .rarity=0, .set=15, .set2=255, .dark=0, .holo=0, .flags=TCG_CF_READY, .origin=15,
 .hp=60, .stage=0, .species=226, .level=31, .retreat=1, .weakness=2, .resistance=4, .evolvesFrom="", .description="Swimming freely in open seas, it may fly out of the water and over the waves if it builds up enough speed.", .attacks={
 {.name="Undulate",.description="Flip a coin. If heads, during your opponent's next turn, prevent all effects of attacks, including damage, done to Mantine.",.effect="neo1-64:a0",.animation="ATK_ANIM_HIT",.cost={0,0,0,2,0,0,0,0,0},.damage=20,.category=TCG_DAMAGE_NORMAL},
 {.name="",.description="",.effect="NONE",.animation="ATK_ANIM_NONE",.cost={0},.damage=0,.category=TCG_DAMAGE_NORMAL},
@@ -4783,21 +4783,21 @@ const struct TcgCard gTcgCards[TCG_CARD_COUNT + 1] = {
 {.name="",.description="",.effect="NONE",.animation="ATK_ANIM_NONE",.cost={0},.damage=0,.category=TCG_DAMAGE_NORMAL},
 }
 },
-[760] = {.id=760, .name="Marill", .kind=TCG_POKEMON, .type=3, .rarity=0, .set=15, .set2=255, .dark=0, .holo=0, .flags=0, .origin=15,
+[760] = {.id=760, .name="Marill", .kind=TCG_POKEMON, .type=3, .rarity=0, .set=15, .set2=255, .dark=0, .holo=0, .flags=TCG_CF_READY, .origin=15,
 .hp=40, .stage=0, .species=183, .level=9, .retreat=1, .weakness=2, .resistance=255, .evolvesFrom="", .description="The end of its tail serves as a buoy that keeps it from drowning, even in a vicious current.", .attacks={
 {.name="Defense Curl",.description="Flip a coin. If heads, prevent all damage done to Marill during your opponent's next turn. (Any other effects of attacks still happen.)",.effect="neo1-66:a0",.animation="ATK_ANIM_HIT",.cost={0,0,0,0,0,0,1,0,0},.damage=0,.category=TCG_RESIDUAL},
 {.name="Bubble Bomb",.description="Flip a coin. If heads, the Defending Pokemon is now Paralyzed. If tails, Marill does 10 damage to itself.",.effect="neo1-66:a1",.animation="ATK_ANIM_HIT",.cost={0,0,0,2,0,0,0,0,0},.damage=30,.category=TCG_DAMAGE_NORMAL},
 {.name="",.description="",.effect="NONE",.animation="ATK_ANIM_NONE",.cost={0},.damage=0,.category=TCG_DAMAGE_NORMAL},
 }
 },
-[761] = {.id=761, .name="Natu", .kind=TCG_POKEMON, .type=5, .rarity=0, .set=15, .set2=255, .dark=0, .holo=0, .flags=0, .origin=15,
+[761] = {.id=761, .name="Natu", .kind=TCG_POKEMON, .type=5, .rarity=0, .set=15, .set2=255, .dark=0, .holo=0, .flags=TCG_CF_READY, .origin=15,
 .hp=30, .stage=0, .species=177, .level=10, .retreat=0, .weakness=5, .resistance=4, .evolvesFrom="", .description="Because its wings aren't yet fully grown, it has to hop to get around. It is always staring at something.", .attacks={
 {.name="Peck",.description="",.effect="NONE",.animation="ATK_ANIM_HIT",.cost={0,0,0,0,0,0,1,0,0},.damage=10,.category=TCG_DAMAGE_NORMAL},
 {.name="Telekinesis",.description="Choose 1 of your opponent's Pokemon. This attack does 20 damage to that Pokemon. Don't apply Weakness and Resistance for this attack. (Any other effects that would happen after applying Weakness and Resistance still happen.)",.effect="neo1-67:a1",.animation="ATK_ANIM_HIT",.cost={0,0,0,0,0,2,0,0,0},.damage=0,.category=TCG_RESIDUAL},
 {.name="",.description="",.effect="NONE",.animation="ATK_ANIM_NONE",.cost={0},.damage=0,.category=TCG_DAMAGE_NORMAL},
 }
 },
-[762] = {.id=762, .name="Oddish", .kind=TCG_POKEMON, .type=1, .rarity=0, .set=15, .set2=255, .dark=0, .holo=0, .flags=0, .origin=15,
+[762] = {.id=762, .name="Oddish", .kind=TCG_POKEMON, .type=1, .rarity=0, .set=15, .set2=255, .dark=0, .holo=0, .flags=TCG_CF_READY, .origin=15,
 .hp=40, .stage=0, .species=43, .level=7, .retreat=1, .weakness=0, .resistance=255, .evolvesFrom="", .description="Awakened by moonlight, it roams actively at night. In the day it stays quietly underground.", .attacks={
 {.name="Hide",.description="Flip a coin. If heads, during your opponent's next turn, prevent all effects of attacks, including damage, done to Oddish.",.effect="neo1-68:a0",.animation="ATK_ANIM_HIT",.cost={0,0,0,0,0,0,1,0,0},.damage=0,.category=TCG_RESIDUAL},
 {.name="Absorb",.description="Remove a number of damage counters from Oddish equal to half the damage done to the Defending Pokemon (after applying Weakness and Resistance) (rounded up to the nearest 10). If Oddish has fewer damage counters than that, remove all of them.",.effect="neo1-68:a1",.animation="ATK_ANIM_HIT",.cost={0,2,0,0,0,0,0,0,0},.damage=20,.category=TCG_DAMAGE_NORMAL},
@@ -4825,7 +4825,7 @@ const struct TcgCard gTcgCards[TCG_CARD_COUNT + 1] = {
 {.name="",.description="",.effect="NONE",.animation="ATK_ANIM_NONE",.cost={0},.damage=0,.category=TCG_DAMAGE_NORMAL},
 }
 },
-[766] = {.id=766, .name="Shuckle", .kind=TCG_POKEMON, .type=1, .rarity=0, .set=15, .set2=255, .dark=0, .holo=0, .flags=0, .origin=15,
+[766] = {.id=766, .name="Shuckle", .kind=TCG_POKEMON, .type=1, .rarity=0, .set=15, .set2=255, .dark=0, .holo=0, .flags=TCG_CF_READY, .origin=15,
 .hp=50, .stage=0, .species=213, .level=32, .retreat=1, .weakness=0, .resistance=255, .evolvesFrom="", .description="The Berries it stores in its vaselike shell decompose and become a gooey liquid.", .attacks={
 {.name="Withdraw",.description="Flip a coin. If heads, prevent all damage done to Shuckle during your opponent's next turn. (Any other effects of attacks still happen.)",.effect="neo1-72:a0",.animation="ATK_ANIM_HIT",.cost={0,1,0,0,0,0,0,0,0},.damage=0,.category=TCG_RESIDUAL},
 {.name="Wrap",.description="Flip a coin. If heads, the Defending Pokemon is now Paralyzed.",.effect="neo1-72:a1",.animation="ATK_ANIM_HIT",.cost={0,2,0,0,0,0,0,0,0},.damage=20,.category=TCG_DAMAGE_NORMAL},
@@ -4860,7 +4860,7 @@ const struct TcgCard gTcgCards[TCG_CARD_COUNT + 1] = {
 {.name="",.description="",.effect="NONE",.animation="ATK_ANIM_NONE",.cost={0},.damage=0,.category=TCG_DAMAGE_NORMAL},
 }
 },
-[771] = {.id=771, .name="Sudowoodo", .kind=TCG_POKEMON, .type=4, .rarity=0, .set=15, .set2=255, .dark=0, .holo=0, .flags=0, .origin=15,
+[771] = {.id=771, .name="Sudowoodo", .kind=TCG_POKEMON, .type=4, .rarity=0, .set=15, .set2=255, .dark=0, .holo=0, .flags=TCG_CF_READY, .origin=15,
 .hp=60, .stage=0, .species=185, .level=29, .retreat=3, .weakness=3, .resistance=255, .evolvesFrom="", .description="Although it always pretends to be a tree, its composition appears to be closer to a rock than a plant.", .attacks={
 {.name="Flail",.description="Does 10 damage times the number of damage counters on Sudowoodo.",.effect="neo1-77:a0",.animation="ATK_ANIM_HIT",.cost={0,0,0,0,1,0,0,0,0},.damage=10,.category=TCG_DAMAGE_X},
 {.name="Rock Throw",.description="",.effect="NONE",.animation="ATK_ANIM_HIT",.cost={0,0,0,0,1,0,1,0,0},.damage=30,.category=TCG_DAMAGE_NORMAL},
@@ -4874,14 +4874,14 @@ const struct TcgCard gTcgCards[TCG_CARD_COUNT + 1] = {
 {.name="",.description="",.effect="NONE",.animation="ATK_ANIM_NONE",.cost={0},.damage=0,.category=TCG_DAMAGE_NORMAL},
 }
 },
-[773] = {.id=773, .name="Swinub", .kind=TCG_POKEMON, .type=3, .rarity=0, .set=15, .set2=255, .dark=0, .holo=0, .flags=0, .origin=15,
+[773] = {.id=773, .name="Swinub", .kind=TCG_POKEMON, .type=3, .rarity=0, .set=15, .set2=255, .dark=0, .holo=0, .flags=TCG_CF_READY, .origin=15,
 .hp=40, .stage=0, .species=220, .level=8, .retreat=1, .weakness=1, .resistance=2, .evolvesFrom="", .description="It rubs its snout on the ground to find and dig up food. It sometimes discovers hot springs.", .attacks={
 {.name="Powder Snow",.description="The Defending Pokemon is now Asleep.",.effect="neo1-79:a0",.animation="ATK_ANIM_HIT",.cost={0,0,0,1,0,0,0,0,0},.damage=10,.category=TCG_DAMAGE_NORMAL},
 {.name="",.description="",.effect="NONE",.animation="ATK_ANIM_NONE",.cost={0},.damage=0,.category=TCG_DAMAGE_NORMAL},
 {.name="",.description="",.effect="NONE",.animation="ATK_ANIM_NONE",.cost={0},.damage=0,.category=TCG_DAMAGE_NORMAL},
 }
 },
-[774] = {.id=774, .name="Totodile", .kind=TCG_POKEMON, .type=3, .rarity=0, .set=15, .set2=255, .dark=0, .holo=0, .flags=0, .origin=15,
+[774] = {.id=774, .name="Totodile", .kind=TCG_POKEMON, .type=3, .rarity=0, .set=15, .set2=255, .dark=0, .holo=0, .flags=TCG_CF_READY, .origin=15,
 .hp=40, .stage=0, .species=158, .level=13, .retreat=1, .weakness=1, .resistance=255, .evolvesFrom="", .description="It is small but rough and tough. It won't hesitate to take a bite out of anything that moves.", .attacks={
 {.name="Bite",.description="",.effect="NONE",.animation="ATK_ANIM_HIT",.cost={0,0,0,0,0,0,1,0,0},.damage=10,.category=TCG_DAMAGE_NORMAL},
 {.name="Rage",.description="Does 10 damage plus 10 more damage for each damage counter on Totodile.",.effect="neo1-80:a1",.animation="ATK_ANIM_HIT",.cost={0,0,0,1,0,0,1,0,0},.damage=10,.category=TCG_DAMAGE_PLUS},
@@ -5027,7 +5027,7 @@ const struct TcgCard gTcgCards[TCG_CARD_COUNT + 1] = {
 {.name="",.description="",.effect="NONE",.animation="ATK_ANIM_NONE",.cost={0},.damage=0,.category=TCG_DAMAGE_NORMAL},
 }
 },
-[808] = {.id=808, .name="Poliwrath", .kind=TCG_POKEMON, .type=4, .rarity=2, .set=16, .set2=255, .dark=0, .holo=1, .flags=0, .origin=16,
+[808] = {.id=808, .name="Poliwrath", .kind=TCG_POKEMON, .type=4, .rarity=2, .set=16, .set2=255, .dark=0, .holo=1, .flags=TCG_CF_READY, .origin=16,
 .hp=90, .stage=2, .species=62, .level=45, .retreat=2, .weakness=5, .resistance=255, .evolvesFrom="Poliwhirl", .description="Although an energetic, skilled swimmer that uses all of its muscles, it lives on dry land.", .attacks={
 {.name="Corkscrew Punch",.description="",.effect="NONE",.animation="ATK_ANIM_HIT",.cost={0,0,0,0,1,0,1,0,0},.damage=30,.category=TCG_DAMAGE_NORMAL},
 {.name="Submission",.description="Poliwrath does 20 damage to itself.",.effect="neo2-9:a1",.animation="ATK_ANIM_HIT",.cost={0,0,0,0,2,0,2,0,0},.damage=70,.category=TCG_DAMAGE_NORMAL},
@@ -5160,7 +5160,7 @@ const struct TcgCard gTcgCards[TCG_CARD_COUNT + 1] = {
 {.name="",.description="",.effect="NONE",.animation="ATK_ANIM_NONE",.cost={0},.damage=0,.category=TCG_DAMAGE_NORMAL},
 }
 },
-[827] = {.id=827, .name="Poliwrath", .kind=TCG_POKEMON, .type=4, .rarity=2, .set=16, .set2=255, .dark=0, .holo=0, .flags=0, .origin=16,
+[827] = {.id=827, .name="Poliwrath", .kind=TCG_POKEMON, .type=4, .rarity=2, .set=16, .set2=255, .dark=0, .holo=0, .flags=TCG_CF_READY, .origin=16,
 .hp=90, .stage=2, .species=62, .level=45, .retreat=2, .weakness=5, .resistance=255, .evolvesFrom="Poliwhirl", .description="Although an energetic, skilled swimmer that uses all of its muscles, it lives on dry land.", .attacks={
 {.name="Corkscrew Punch",.description="",.effect="NONE",.animation="ATK_ANIM_HIT",.cost={0,0,0,0,1,0,1,0,0},.damage=30,.category=TCG_DAMAGE_NORMAL},
 {.name="Submission",.description="Poliwrath does 20 damage to itself.",.effect="neo2-28:a1",.animation="ATK_ANIM_HIT",.cost={0,0,0,0,2,0,2,0,0},.damage=70,.category=TCG_DAMAGE_NORMAL},
@@ -5335,14 +5335,14 @@ const struct TcgCard gTcgCards[TCG_CARD_COUNT + 1] = {
 {.name="",.description="",.effect="NONE",.animation="ATK_ANIM_NONE",.cost={0},.damage=0,.category=TCG_DAMAGE_NORMAL},
 }
 },
-[852] = {.id=852, .name="Caterpie", .kind=TCG_POKEMON, .type=1, .rarity=0, .set=16, .set2=255, .dark=0, .holo=0, .flags=0, .origin=16,
+[852] = {.id=852, .name="Caterpie", .kind=TCG_POKEMON, .type=1, .rarity=0, .set=16, .set2=255, .dark=0, .holo=0, .flags=TCG_CF_READY, .origin=16,
 .hp=50, .stage=0, .species=10, .level=16, .retreat=1, .weakness=0, .resistance=255, .evolvesFrom="", .description="For protection, it releases a horrible stench from the antennae on its head to drive away enemies.", .attacks={
 {.name="Spin Tackle",.description="Caterpie does 10 damage to itself.",.effect="neo2-53:a0",.animation="ATK_ANIM_HIT",.cost={0,0,0,0,0,0,1,0,0},.damage=20,.category=TCG_DAMAGE_NORMAL},
 {.name="",.description="",.effect="NONE",.animation="ATK_ANIM_NONE",.cost={0},.damage=0,.category=TCG_DAMAGE_NORMAL},
 {.name="",.description="",.effect="NONE",.animation="ATK_ANIM_NONE",.cost={0},.damage=0,.category=TCG_DAMAGE_NORMAL},
 }
 },
-[853] = {.id=853, .name="Dunsparce", .kind=TCG_POKEMON, .type=6, .rarity=0, .set=16, .set2=255, .dark=0, .holo=0, .flags=0, .origin=16,
+[853] = {.id=853, .name="Dunsparce", .kind=TCG_POKEMON, .type=6, .rarity=0, .set=16, .set2=255, .dark=0, .holo=0, .flags=TCG_CF_READY, .origin=16,
 .hp=30, .stage=0, .species=206, .level=9, .retreat=0, .weakness=4, .resistance=5, .evolvesFrom="", .description="When spotted, this Pokemon escapes backward by furiously boring into the ground with its tail.", .attacks={
 {.name="Glare",.description="Flip a coin. If heads, the Defending Pokemon is now Paralyzed.",.effect="neo2-54:a0",.animation="ATK_ANIM_HIT",.cost={0,0,0,0,0,0,1,0,0},.damage=10,.category=TCG_DAMAGE_NORMAL},
 {.name="",.description="",.effect="NONE",.animation="ATK_ANIM_NONE",.cost={0},.damage=0,.category=TCG_DAMAGE_NORMAL},
@@ -5370,7 +5370,7 @@ const struct TcgCard gTcgCards[TCG_CARD_COUNT + 1] = {
 {.name="",.description="",.effect="NONE",.animation="ATK_ANIM_NONE",.cost={0},.damage=0,.category=TCG_DAMAGE_NORMAL},
 }
 },
-[857] = {.id=857, .name="Mareep", .kind=TCG_POKEMON, .type=2, .rarity=0, .set=16, .set2=255, .dark=0, .holo=0, .flags=0, .origin=16,
+[857] = {.id=857, .name="Mareep", .kind=TCG_POKEMON, .type=2, .rarity=0, .set=16, .set2=255, .dark=0, .holo=0, .flags=TCG_CF_READY, .origin=16,
 .hp=50, .stage=0, .species=179, .level=18, .retreat=1, .weakness=4, .resistance=255, .evolvesFrom="", .description="Its fleece grows continually. In the summer, the fleece is fully shed, but it grows back in a week.", .attacks={
 {.name="Thunder Jolt",.description="Flip a coin. If tails, Mareep does 10 damage to itself.",.effect="neo2-58:a0",.animation="ATK_ANIM_HIT",.cost={0,0,1,0,0,0,1,0,0},.damage=30,.category=TCG_DAMAGE_NORMAL},
 {.name="",.description="",.effect="NONE",.animation="ATK_ANIM_NONE",.cost={0},.damage=0,.category=TCG_DAMAGE_NORMAL},
@@ -5398,7 +5398,7 @@ const struct TcgCard gTcgCards[TCG_CARD_COUNT + 1] = {
 {.name="",.description="",.effect="NONE",.animation="ATK_ANIM_NONE",.cost={0},.damage=0,.category=TCG_DAMAGE_NORMAL},
 }
 },
-[861] = {.id=861, .name="Poliwag", .kind=TCG_POKEMON, .type=3, .rarity=0, .set=16, .set2=255, .dark=0, .holo=0, .flags=0, .origin=16,
+[861] = {.id=861, .name="Poliwag", .kind=TCG_POKEMON, .type=3, .rarity=0, .set=16, .set2=255, .dark=0, .holo=0, .flags=TCG_CF_READY, .origin=16,
 .hp=40, .stage=0, .species=60, .level=14, .retreat=1, .weakness=1, .resistance=255, .evolvesFrom="", .description="Because it is inept at walking on its newly grown legs, it always swims around in water.", .attacks={
 {.name="Rollout",.description="",.effect="NONE",.animation="ATK_ANIM_HIT",.cost={0,0,0,0,0,0,1,0,0},.damage=10,.category=TCG_DAMAGE_NORMAL},
 {.name="Hypnosis",.description="The Defending Pokemon is now Asleep.",.effect="neo2-62:a1",.animation="ATK_ANIM_HIT",.cost={0,0,0,1,0,0,0,0,0},.damage=0,.category=TCG_RESIDUAL},
@@ -5412,7 +5412,7 @@ const struct TcgCard gTcgCards[TCG_CARD_COUNT + 1] = {
 {.name="",.description="",.effect="NONE",.animation="ATK_ANIM_NONE",.cost={0},.damage=0,.category=TCG_DAMAGE_NORMAL},
 }
 },
-[863] = {.id=863, .name="Spinarak", .kind=TCG_POKEMON, .type=1, .rarity=0, .set=16, .set2=255, .dark=0, .holo=0, .flags=0, .origin=16,
+[863] = {.id=863, .name="Spinarak", .kind=TCG_POKEMON, .type=1, .rarity=0, .set=16, .set2=255, .dark=0, .holo=0, .flags=TCG_CF_READY, .origin=16,
 .hp=50, .stage=0, .species=167, .level=19, .retreat=1, .weakness=0, .resistance=255, .evolvesFrom="", .description="It spins a web using fine \u2013 but durable \u2013 thread. It then waits patiently for prey to be trapped.", .attacks={
 {.name="Poison Sting",.description="Flip a coin. If heads, the Defending Pokemon is now Poisoned.",.effect="neo2-64:a0",.animation="ATK_ANIM_HIT",.cost={0,1,0,0,0,0,1,0,0},.damage=20,.category=TCG_DAMAGE_NORMAL},
 {.name="",.description="",.effect="NONE",.animation="ATK_ANIM_NONE",.cost={0},.damage=0,.category=TCG_DAMAGE_NORMAL},
@@ -5802,14 +5802,14 @@ const struct TcgCard gTcgCards[TCG_CARD_COUNT + 1] = {
 {.name="",.description="",.effect="NONE",.animation="ATK_ANIM_NONE",.cost={0},.damage=0,.category=TCG_DAMAGE_NORMAL},
 }
 },
-[921] = {.id=921, .name="Paras", .kind=TCG_POKEMON, .type=1, .rarity=0, .set=17, .set2=255, .dark=0, .holo=0, .flags=0, .origin=17,
+[921] = {.id=921, .name="Paras", .kind=TCG_POKEMON, .type=1, .rarity=0, .set=17, .set2=255, .dark=0, .holo=0, .flags=TCG_CF_READY, .origin=17,
 .hp=40, .stage=0, .species=46, .level=10, .retreat=1, .weakness=0, .resistance=255, .evolvesFrom="", .description="It is doused with mushroom spores when it is born. As its body grows, mushrooms sprout from its back.", .attacks={
 {.name="Sleep Spore",.description="Flip a coin. If heads, the Defending Pokemon is now Asleep.",.effect="neo3-47:a0",.animation="ATK_ANIM_HIT",.cost={0,1,0,0,0,0,0,0,0},.damage=10,.category=TCG_DAMAGE_NORMAL},
 {.name="Scratch",.description="",.effect="NONE",.animation="ATK_ANIM_HIT",.cost={0,0,0,0,0,0,2,0,0},.damage=20,.category=TCG_DAMAGE_NORMAL},
 {.name="",.description="",.effect="NONE",.animation="ATK_ANIM_NONE",.cost={0},.damage=0,.category=TCG_DAMAGE_NORMAL},
 }
 },
-[922] = {.id=922, .name="Quagsire", .kind=TCG_POKEMON, .type=3, .rarity=0, .set=17, .set2=255, .dark=0, .holo=0, .flags=0, .origin=17,
+[922] = {.id=922, .name="Quagsire", .kind=TCG_POKEMON, .type=3, .rarity=0, .set=17, .set2=255, .dark=0, .holo=0, .flags=TCG_CF_READY, .origin=17,
 .hp=70, .stage=1, .species=195, .level=35, .retreat=2, .weakness=1, .resistance=2, .evolvesFrom="Wooper", .description="Due to its relaxed and carefree attitude, it often bumps its head on boulders and boat hulls as it swims.", .attacks={
 {.name="Mud Slap",.description="",.effect="NONE",.animation="ATK_ANIM_HIT",.cost={0,0,0,0,2,0,0,0,0},.damage=30,.category=TCG_DAMAGE_NORMAL},
 {.name="Whirlpool",.description="If the Defending Pokemon has any Energy cards attached to it, choose 1 of them and discard it.",.effect="neo3-48:a1",.animation="ATK_ANIM_HIT",.cost={0,0,0,2,0,0,2,0,0},.damage=40,.category=TCG_DAMAGE_NORMAL},
@@ -5837,7 +5837,7 @@ const struct TcgCard gTcgCards[TCG_CARD_COUNT + 1] = {
 {.name="",.description="",.effect="NONE",.animation="ATK_ANIM_NONE",.cost={0},.damage=0,.category=TCG_DAMAGE_NORMAL},
 }
 },
-[926] = {.id=926, .name="Skiploom", .kind=TCG_POKEMON, .type=1, .rarity=0, .set=17, .set2=255, .dark=0, .holo=0, .flags=0, .origin=17,
+[926] = {.id=926, .name="Skiploom", .kind=TCG_POKEMON, .type=1, .rarity=0, .set=17, .set2=255, .dark=0, .holo=0, .flags=TCG_CF_READY, .origin=17,
 .hp=60, .stage=1, .species=188, .level=29, .retreat=0, .weakness=0, .resistance=4, .evolvesFrom="Hoppip", .description="It spreads its petals to absorb sunlight. It also floats in the air to get closer to the sun.", .attacks={
 {.name="Hop",.description="",.effect="NONE",.animation="ATK_ANIM_HIT",.cost={0,0,0,0,0,0,1,0,0},.damage=20,.category=TCG_DAMAGE_NORMAL},
 {.name="Mysterious Powder",.description="Flip a coin. If heads, the Defending Pokemon is now Confused.",.effect="neo3-52:a1",.animation="ATK_ANIM_HIT",.cost={0,1,0,0,0,0,0,0,0},.damage=10,.category=TCG_DAMAGE_NORMAL},
@@ -5865,14 +5865,14 @@ const struct TcgCard gTcgCards[TCG_CARD_COUNT + 1] = {
 {.name="",.description="",.effect="NONE",.animation="ATK_ANIM_NONE",.cost={0},.damage=0,.category=TCG_DAMAGE_NORMAL},
 }
 },
-[930] = {.id=930, .name="Staryu", .kind=TCG_POKEMON, .type=3, .rarity=0, .set=17, .set2=255, .dark=0, .holo=0, .flags=0, .origin=17,
+[930] = {.id=930, .name="Staryu", .kind=TCG_POKEMON, .type=3, .rarity=0, .set=17, .set2=255, .dark=0, .holo=0, .flags=TCG_CF_READY, .origin=17,
 .hp=40, .stage=0, .species=120, .level=13, .retreat=1, .weakness=2, .resistance=255, .evolvesFrom="", .description="At night, the center of its body slowly flickers with the same rhythm as a human heartbeat.", .attacks={
 {.name="Tackle",.description="",.effect="NONE",.animation="ATK_ANIM_HIT",.cost={0,0,0,0,0,0,1,0,0},.damage=10,.category=TCG_DAMAGE_NORMAL},
 {.name="Bubblebeam",.description="Flip a coin. If heads, the Defending Pokemon is now Paralyzed.",.effect="neo3-56:a1",.animation="ATK_ANIM_HIT",.cost={0,0,0,1,0,0,0,0,0},.damage=10,.category=TCG_DAMAGE_NORMAL},
 {.name="",.description="",.effect="NONE",.animation="ATK_ANIM_NONE",.cost={0},.damage=0,.category=TCG_DAMAGE_NORMAL},
 }
 },
-[931] = {.id=931, .name="Swinub", .kind=TCG_POKEMON, .type=4, .rarity=0, .set=17, .set2=255, .dark=0, .holo=0, .flags=0, .origin=17,
+[931] = {.id=931, .name="Swinub", .kind=TCG_POKEMON, .type=4, .rarity=0, .set=17, .set2=255, .dark=0, .holo=0, .flags=TCG_CF_READY, .origin=17,
 .hp=40, .stage=0, .species=220, .level=10, .retreat=1, .weakness=1, .resistance=2, .evolvesFrom="", .description="If it smells something enticing, it dashes headlong off to find the source of the aroma.", .attacks={
 {.name="Tackle",.description="",.effect="NONE",.animation="ATK_ANIM_HIT",.cost={0,0,0,0,0,0,1,0,0},.damage=10,.category=TCG_DAMAGE_NORMAL},
 {.name="Take Down",.description="Swinub does 10 damage to itself.",.effect="neo3-57:a1",.animation="ATK_ANIM_HIT",.cost={0,0,0,0,1,0,1,0,0},.damage=30,.category=TCG_DAMAGE_NORMAL},
@@ -5886,7 +5886,7 @@ const struct TcgCard gTcgCards[TCG_CARD_COUNT + 1] = {
 {.name="",.description="",.effect="NONE",.animation="ATK_ANIM_NONE",.cost={0},.damage=0,.category=TCG_DAMAGE_NORMAL},
 }
 },
-[933] = {.id=933, .name="Zubat", .kind=TCG_POKEMON, .type=1, .rarity=0, .set=17, .set2=255, .dark=0, .holo=0, .flags=0, .origin=17,
+[933] = {.id=933, .name="Zubat", .kind=TCG_POKEMON, .type=1, .rarity=0, .set=17, .set2=255, .dark=0, .holo=0, .flags=TCG_CF_READY, .origin=17,
 .hp=40, .stage=0, .species=41, .level=13, .retreat=0, .weakness=5, .resistance=4, .evolvesFrom="", .description="While flying, it constantly emits ultrasonic waves from its mouth to check its surroundings.", .attacks={
 {.name="Bite",.description="",.effect="NONE",.animation="ATK_ANIM_HIT",.cost={0,0,0,0,0,0,1,0,0},.damage=10,.category=TCG_DAMAGE_NORMAL},
 {.name="Poison Spray",.description="The Defending Pokemon is now Poisoned.",.effect="neo3-59:a1",.animation="ATK_ANIM_HIT",.cost={0,1,0,0,0,0,0,0,0},.damage=0,.category=TCG_RESIDUAL},
@@ -6219,7 +6219,7 @@ const struct TcgCard gTcgCards[TCG_CARD_COUNT + 1] = {
 {.name="",.description="",.effect="NONE",.animation="ATK_ANIM_NONE",.cost={0},.damage=0,.category=TCG_DAMAGE_NORMAL},
 }
 },
-[984] = {.id=984, .name="Jigglypuff", .kind=TCG_POKEMON, .type=6, .rarity=1, .set=18, .set2=255, .dark=0, .holo=0, .flags=0, .origin=18,
+[984] = {.id=984, .name="Jigglypuff", .kind=TCG_POKEMON, .type=6, .rarity=1, .set=18, .set2=255, .dark=0, .holo=0, .flags=TCG_CF_READY, .origin=18,
 .hp=50, .stage=0, .species=39, .level=11, .retreat=1, .weakness=4, .resistance=5, .evolvesFrom="", .description="If puffs its body up like a balloon and sings a lullaby that makes all who hear it fall into a deep sleep.", .attacks={
 {.name="Expand",.description="All damage done to Jigglypuff during your opponent's next turn is reduced by 10 (after applying Weakness and Resistance).",.effect="neo4-44:a0",.animation="ATK_ANIM_HIT",.cost={0,0,0,0,0,0,2,0,0},.damage=10,.category=TCG_DAMAGE_NORMAL},
 {.name="",.description="",.effect="NONE",.animation="ATK_ANIM_NONE",.cost={0},.damage=0,.category=TCG_DAMAGE_NORMAL},
@@ -6296,7 +6296,7 @@ const struct TcgCard gTcgCards[TCG_CARD_COUNT + 1] = {
 {.name="",.description="",.effect="NONE",.animation="ATK_ANIM_NONE",.cost={0},.damage=0,.category=TCG_DAMAGE_NORMAL},
 }
 },
-[995] = {.id=995, .name="Scyther", .kind=TCG_POKEMON, .type=1, .rarity=1, .set=18, .set2=255, .dark=0, .holo=0, .flags=0, .origin=18,
+[995] = {.id=995, .name="Scyther", .kind=TCG_POKEMON, .type=1, .rarity=1, .set=18, .set2=255, .dark=0, .holo=0, .flags=TCG_CF_READY, .origin=18,
 .hp=60, .stage=0, .species=123, .level=21, .retreat=1, .weakness=0, .resistance=4, .evolvesFrom="", .description="It moves so fast as to be invisible to the naked eye. Even when standing still, its camouflage prevents it from being seen.", .attacks={
 {.name="Agility",.description="Flip a coin. If heads, during your opponent's next turn, prevent all effects of attacks, including damage, done to Scyther.",.effect="neo4-55:a0",.animation="ATK_ANIM_HIT",.cost={0,1,0,0,0,0,1,0,0},.damage=10,.category=TCG_DAMAGE_NORMAL},
 {.name="Sharp Sickle",.description="",.effect="NONE",.animation="ATK_ANIM_HIT",.cost={0,3,0,0,0,0,0,0,0},.damage=40,.category=TCG_DAMAGE_NORMAL},
@@ -6338,7 +6338,7 @@ const struct TcgCard gTcgCards[TCG_CARD_COUNT + 1] = {
 {.name="",.description="",.effect="NONE",.animation="ATK_ANIM_NONE",.cost={0},.damage=0,.category=TCG_DAMAGE_NORMAL},
 }
 },
-[1001] = {.id=1001, .name="Cyndaquil", .kind=TCG_POKEMON, .type=0, .rarity=0, .set=18, .set2=255, .dark=0, .holo=0, .flags=0, .origin=18,
+[1001] = {.id=1001, .name="Cyndaquil", .kind=TCG_POKEMON, .type=0, .rarity=0, .set=18, .set2=255, .dark=0, .holo=0, .flags=TCG_CF_READY, .origin=18,
 .hp=40, .stage=0, .species=155, .level=15, .retreat=1, .weakness=3, .resistance=255, .evolvesFrom="", .description="It is very meek and constantly crouches in a defensive posture. When threatened, it protects itself with the flame on its back.", .attacks={
 {.name="Smokescreen",.description="If the Defending Pokemon tries to attack during your opponent's next turn, your opponent flips a coin. If tails, that attack does nothing.",.effect="neo4-61:a0",.animation="ATK_ANIM_HIT",.cost={1,0,0,0,0,0,0,0,0},.damage=10,.category=TCG_DAMAGE_NORMAL},
 {.name="",.description="",.effect="NONE",.animation="ATK_ANIM_NONE",.cost={0},.damage=0,.category=TCG_DAMAGE_NORMAL},
@@ -6359,14 +6359,14 @@ const struct TcgCard gTcgCards[TCG_CARD_COUNT + 1] = {
 {.name="",.description="",.effect="NONE",.animation="ATK_ANIM_NONE",.cost={0},.damage=0,.category=TCG_DAMAGE_NORMAL},
 }
 },
-[1004] = {.id=1004, .name="Exeggcute", .kind=TCG_POKEMON, .type=5, .rarity=0, .set=18, .set2=255, .dark=0, .holo=0, .flags=0, .origin=18,
+[1004] = {.id=1004, .name="Exeggcute", .kind=TCG_POKEMON, .type=5, .rarity=0, .set=18, .set2=255, .dark=0, .holo=0, .flags=TCG_CF_READY, .origin=18,
 .hp=40, .stage=0, .species=102, .level=12, .retreat=1, .weakness=5, .resistance=255, .evolvesFrom="", .description="Its shell is very durable, allowing it to survive even if the shell becomes cracked.", .attacks={
 {.name="Sleep Powder",.description="The Defending Pokemon is now Asleep.",.effect="neo4-64:a0",.animation="ATK_ANIM_HIT",.cost={0,1,0,0,0,0,0,0,0},.damage=10,.category=TCG_DAMAGE_NORMAL},
 {.name="Psyshock",.description="Flip a coin. If heads, the Defending Pokemon is now Paralyzed.",.effect="neo4-64:a1",.animation="ATK_ANIM_HIT",.cost={0,0,0,0,0,1,0,0,0},.damage=10,.category=TCG_DAMAGE_NORMAL},
 {.name="",.description="",.effect="NONE",.animation="ATK_ANIM_NONE",.cost={0},.damage=0,.category=TCG_DAMAGE_NORMAL},
 }
 },
-[1005] = {.id=1005, .name="Gastly", .kind=TCG_POKEMON, .type=5, .rarity=0, .set=18, .set2=255, .dark=0, .holo=0, .flags=0, .origin=18,
+[1005] = {.id=1005, .name="Gastly", .kind=TCG_POKEMON, .type=5, .rarity=0, .set=18, .set2=255, .dark=0, .holo=0, .flags=TCG_CF_READY, .origin=18,
 .hp=40, .stage=0, .species=92, .level=12, .retreat=0, .weakness=255, .resistance=4, .evolvesFrom="", .description="Its gas-like body allows it to enter almost anywhere, but it is vulnerable to high winds.", .attacks={
 {.name="Nightmare",.description="The Defending Pokemon is now Asleep.",.effect="neo4-65:a0",.animation="ATK_ANIM_HIT",.cost={0,0,0,0,0,1,0,0,0},.damage=10,.category=TCG_DAMAGE_NORMAL},
 {.name="",.description="",.effect="NONE",.animation="ATK_ANIM_NONE",.cost={0},.damage=0,.category=TCG_DAMAGE_NORMAL},
@@ -6408,7 +6408,7 @@ const struct TcgCard gTcgCards[TCG_CARD_COUNT + 1] = {
 {.name="",.description="",.effect="NONE",.animation="ATK_ANIM_NONE",.cost={0},.damage=0,.category=TCG_DAMAGE_NORMAL},
 }
 },
-[1011] = {.id=1011, .name="Ledyba", .kind=TCG_POKEMON, .type=1, .rarity=0, .set=18, .set2=255, .dark=0, .holo=0, .flags=0, .origin=18,
+[1011] = {.id=1011, .name="Ledyba", .kind=TCG_POKEMON, .type=1, .rarity=0, .set=18, .set2=255, .dark=0, .holo=0, .flags=TCG_CF_READY, .origin=18,
 .hp=40, .stage=0, .species=165, .level=18, .retreat=0, .weakness=0, .resistance=4, .evolvesFrom="", .description="Sensitive to cold, Ledyba gather in groups to share warmth when the temperature drops.", .attacks={
 {.name="Swift",.description="This attack's damage isn't affected by Weakness, Resistance, Pokemon Powers, or any other effects on the Defending Pokemon.",.effect="neo4-71:a0",.animation="ATK_ANIM_HIT",.cost={0,1,0,0,0,0,1,0,0},.damage=20,.category=TCG_DAMAGE_NORMAL},
 {.name="",.description="",.effect="NONE",.animation="ATK_ANIM_NONE",.cost={0},.damage=0,.category=TCG_DAMAGE_NORMAL},
@@ -6478,7 +6478,7 @@ const struct TcgCard gTcgCards[TCG_CARD_COUNT + 1] = {
 {.name="",.description="",.effect="NONE",.animation="ATK_ANIM_NONE",.cost={0},.damage=0,.category=TCG_DAMAGE_NORMAL},
 }
 },
-[1021] = {.id=1021, .name="Seel", .kind=TCG_POKEMON, .type=3, .rarity=0, .set=18, .set2=255, .dark=0, .holo=0, .flags=0, .origin=18,
+[1021] = {.id=1021, .name="Seel", .kind=TCG_POKEMON, .type=3, .rarity=0, .set=18, .set2=255, .dark=0, .holo=0, .flags=TCG_CF_READY, .origin=18,
 .hp=50, .stage=0, .species=86, .level=11, .retreat=1, .weakness=2, .resistance=255, .evolvesFrom="", .description="Although clumsy on land, it moves easily through the arctic waters it calls home.", .attacks={
 {.name="Take Down",.description="Seel does 10 damage to itself.",.effect="neo4-81:a0",.animation="ATK_ANIM_HIT",.cost={0,0,0,1,0,0,1,0,0},.damage=30,.category=TCG_DAMAGE_NORMAL},
 {.name="",.description="",.effect="NONE",.animation="ATK_ANIM_NONE",.cost={0},.damage=0,.category=TCG_DAMAGE_NORMAL},
@@ -6499,7 +6499,7 @@ const struct TcgCard gTcgCards[TCG_CARD_COUNT + 1] = {
 {.name="",.description="",.effect="NONE",.animation="ATK_ANIM_NONE",.cost={0},.damage=0,.category=TCG_DAMAGE_NORMAL},
 }
 },
-[1024] = {.id=1024, .name="Swinub", .kind=TCG_POKEMON, .type=3, .rarity=0, .set=18, .set2=255, .dark=0, .holo=0, .flags=0, .origin=18,
+[1024] = {.id=1024, .name="Swinub", .kind=TCG_POKEMON, .type=3, .rarity=0, .set=18, .set2=255, .dark=0, .holo=0, .flags=TCG_CF_READY, .origin=18,
 .hp=50, .stage=0, .species=220, .level=13, .retreat=1, .weakness=1, .resistance=2, .evolvesFrom="", .description="It moves with its sensitive nose pressed to the ground, always searching for food.", .attacks={
 {.name="Generate Cold",.description="Flip a coin. If heads, the Defending Pokemon is now Paralyzed.",.effect="neo4-84:a0",.animation="ATK_ANIM_HIT",.cost={0,0,0,1,0,0,1,0,0},.damage=20,.category=TCG_DAMAGE_NORMAL},
 {.name="",.description="",.effect="NONE",.animation="ATK_ANIM_NONE",.cost={0},.damage=0,.category=TCG_DAMAGE_NORMAL},
@@ -6541,14 +6541,14 @@ const struct TcgCard gTcgCards[TCG_CARD_COUNT + 1] = {
 {.name="",.description="",.effect="NONE",.animation="ATK_ANIM_NONE",.cost={0},.damage=0,.category=TCG_DAMAGE_NORMAL},
 }
 },
-[1030] = {.id=1030, .name="Venonat", .kind=TCG_POKEMON, .type=1, .rarity=0, .set=18, .set2=255, .dark=0, .holo=0, .flags=0, .origin=18,
+[1030] = {.id=1030, .name="Venonat", .kind=TCG_POKEMON, .type=1, .rarity=0, .set=18, .set2=255, .dark=0, .holo=0, .flags=TCG_CF_READY, .origin=18,
 .hp=40, .stage=0, .species=48, .level=11, .retreat=1, .weakness=0, .resistance=255, .evolvesFrom="", .description="It possesses a type of radar, which it can use to find the insects it eats for food, even in pitch darkness.", .attacks={
 {.name="Gnaw",.description="",.effect="NONE",.animation="ATK_ANIM_HIT",.cost={0,0,0,0,0,0,1,0,0},.damage=10,.category=TCG_DAMAGE_NORMAL},
 {.name="Poisonpowder",.description="The Defending Pokemon is now Poisoned.",.effect="neo4-90:a1",.animation="ATK_ANIM_HIT",.cost={0,1,0,0,0,0,1,0,0},.damage=10,.category=TCG_DAMAGE_NORMAL},
 {.name="",.description="",.effect="NONE",.animation="ATK_ANIM_NONE",.cost={0},.damage=0,.category=TCG_DAMAGE_NORMAL},
 }
 },
-[1031] = {.id=1031, .name="Vulpix", .kind=TCG_POKEMON, .type=0, .rarity=0, .set=18, .set2=255, .dark=0, .holo=0, .flags=0, .origin=18,
+[1031] = {.id=1031, .name="Vulpix", .kind=TCG_POKEMON, .type=0, .rarity=0, .set=18, .set2=255, .dark=0, .holo=0, .flags=TCG_CF_READY, .origin=18,
 .hp=50, .stage=0, .species=37, .level=15, .retreat=1, .weakness=3, .resistance=255, .evolvesFrom="", .description="As it grows older, its white tail changes colors and splits into six different tails. Its body radiates a faint warmth.", .attacks={
 {.name="Ember",.description="Discard 1 Fire Energy card attached to Vulpix in order to use this attack.",.effect="neo4-91:a0",.animation="ATK_ANIM_HIT",.cost={1,0,0,0,0,0,1,0,0},.damage=30,.category=TCG_DAMAGE_NORMAL},
 {.name="",.description="",.effect="NONE",.animation="ATK_ANIM_NONE",.cost={0},.damage=0,.category=TCG_DAMAGE_NORMAL},
@@ -6751,7 +6751,7 @@ const struct TcgCard gTcgCards[TCG_CARD_COUNT + 1] = {
 {.name="",.description="",.effect="NONE",.animation="ATK_ANIM_NONE",.cost={0},.damage=0,.category=TCG_DAMAGE_NORMAL},
 }
 },
-[1068] = {.id=1068, .name="Kingler", .kind=TCG_POKEMON, .type=3, .rarity=2, .set=19, .set2=255, .dark=0, .holo=1, .flags=0, .origin=19,
+[1068] = {.id=1068, .name="Kingler", .kind=TCG_POKEMON, .type=3, .rarity=2, .set=19, .set2=255, .dark=0, .holo=1, .flags=TCG_CF_READY, .origin=19,
 .hp=80, .stage=1, .species=99, .level=0, .retreat=2, .weakness=2, .resistance=255, .evolvesFrom="Krabby", .description="", .attacks={
 {.name="Bubble",.description="Flip a coin. If heads, the Defending Pokemon is now Paralyzed.",.effect="ecard1-15:a0",.animation="ATK_ANIM_HIT",.cost={0,0,0,1,0,0,0,0,0},.damage=10,.category=TCG_DAMAGE_NORMAL},
 {.name="Giant Claw",.description="Flip a coin. If tails, this attack does nothing.",.effect="ecard1-15:a1",.animation="ATK_ANIM_HIT",.cost={0,0,0,2,0,0,1,0,0},.damage=70,.category=TCG_DAMAGE_NORMAL},
@@ -6996,7 +6996,7 @@ const struct TcgCard gTcgCards[TCG_CARD_COUNT + 1] = {
 {.name="",.description="",.effect="NONE",.animation="ATK_ANIM_NONE",.cost={0},.damage=0,.category=TCG_DAMAGE_NORMAL},
 }
 },
-[1103] = {.id=1103, .name="Kingler", .kind=TCG_POKEMON, .type=3, .rarity=2, .set=19, .set2=255, .dark=0, .holo=0, .flags=0, .origin=19,
+[1103] = {.id=1103, .name="Kingler", .kind=TCG_POKEMON, .type=3, .rarity=2, .set=19, .set2=255, .dark=0, .holo=0, .flags=TCG_CF_READY, .origin=19,
 .hp=80, .stage=1, .species=99, .level=0, .retreat=2, .weakness=2, .resistance=255, .evolvesFrom="Krabby", .description="", .attacks={
 {.name="Bubble",.description="Flip a coin. If heads, the Defending Pokemon is now Paralyzed.",.effect="ecard1-50:a0",.animation="ATK_ANIM_HIT",.cost={0,0,0,1,0,0,0,0,0},.damage=10,.category=TCG_DAMAGE_NORMAL},
 {.name="Giant Claw",.description="Flip a coin. If tails, this attack does nothing.",.effect="ecard1-50:a1",.animation="ATK_ANIM_HIT",.cost={0,0,0,2,0,0,1,0,0},.damage=70,.category=TCG_DAMAGE_NORMAL},
@@ -7017,7 +7017,7 @@ const struct TcgCard gTcgCards[TCG_CARD_COUNT + 1] = {
 {.name="",.description="",.effect="NONE",.animation="ATK_ANIM_NONE",.cost={0},.damage=0,.category=TCG_DAMAGE_NORMAL},
 }
 },
-[1106] = {.id=1106, .name="Meganium", .kind=TCG_POKEMON, .type=1, .rarity=2, .set=19, .set2=255, .dark=0, .holo=0, .flags=0, .origin=19,
+[1106] = {.id=1106, .name="Meganium", .kind=TCG_POKEMON, .type=1, .rarity=2, .set=19, .set2=255, .dark=0, .holo=0, .flags=TCG_CF_READY, .origin=19,
 .hp=100, .stage=2, .species=154, .level=0, .retreat=3, .weakness=0, .resistance=3, .evolvesFrom="Bayleef", .description="", .attacks={
 {.name="Sleep Powder",.description="The Defending Pokemon is now Asleep.",.effect="ecard1-53:a0",.animation="ATK_ANIM_HIT",.cost={0,1,0,0,0,0,0,0,0},.damage=20,.category=TCG_DAMAGE_NORMAL},
 {.name="Solarbeam",.description="",.effect="NONE",.animation="ATK_ANIM_HIT",.cost={0,2,0,0,0,0,1,0,0},.damage=50,.category=TCG_DAMAGE_NORMAL},
@@ -7143,7 +7143,7 @@ const struct TcgCard gTcgCards[TCG_CARD_COUNT + 1] = {
 {.name="",.description="",.effect="NONE",.animation="ATK_ANIM_NONE",.cost={0},.damage=0,.category=TCG_DAMAGE_NORMAL},
 }
 },
-[1124] = {.id=1124, .name="Bayleef", .kind=TCG_POKEMON, .type=1, .rarity=1, .set=19, .set2=255, .dark=0, .holo=0, .flags=0, .origin=19,
+[1124] = {.id=1124, .name="Bayleef", .kind=TCG_POKEMON, .type=1, .rarity=1, .set=19, .set2=255, .dark=0, .holo=0, .flags=TCG_CF_READY, .origin=19,
 .hp=70, .stage=1, .species=153, .level=0, .retreat=1, .weakness=0, .resistance=3, .evolvesFrom="Chikorita", .description="", .attacks={
 {.name="Mysterious Powder",.description="Flip a coin. If heads, the Defending Pokemon is now Confused.",.effect="ecard1-71:a0",.animation="ATK_ANIM_HIT",.cost={0,0,0,0,0,0,1,0,0},.damage=0,.category=TCG_RESIDUAL},
 {.name="Razor Leaf",.description="",.effect="NONE",.animation="ATK_ANIM_HIT",.cost={0,1,0,0,0,0,1,0,0},.damage=30,.category=TCG_DAMAGE_NORMAL},
@@ -7164,14 +7164,14 @@ const struct TcgCard gTcgCards[TCG_CARD_COUNT + 1] = {
 {.name="",.description="",.effect="NONE",.animation="ATK_ANIM_NONE",.cost={0},.damage=0,.category=TCG_DAMAGE_NORMAL},
 }
 },
-[1127] = {.id=1127, .name="Croconaw", .kind=TCG_POKEMON, .type=3, .rarity=1, .set=19, .set2=255, .dark=0, .holo=0, .flags=0, .origin=19,
+[1127] = {.id=1127, .name="Croconaw", .kind=TCG_POKEMON, .type=3, .rarity=1, .set=19, .set2=255, .dark=0, .holo=0, .flags=TCG_CF_READY, .origin=19,
 .hp=80, .stage=1, .species=159, .level=0, .retreat=1, .weakness=2, .resistance=255, .evolvesFrom="Totodile", .description="", .attacks={
 {.name="Tackle",.description="",.effect="NONE",.animation="ATK_ANIM_HIT",.cost={0,0,0,0,0,0,2,0,0},.damage=20,.category=TCG_DAMAGE_NORMAL},
 {.name="Take Down",.description="Croconaw does 10 damage to itself.",.effect="ecard1-74:a1",.animation="ATK_ANIM_HIT",.cost={0,0,0,0,0,0,3,0,0},.damage=40,.category=TCG_DAMAGE_NORMAL},
 {.name="",.description="",.effect="NONE",.animation="ATK_ANIM_NONE",.cost={0},.damage=0,.category=TCG_DAMAGE_NORMAL},
 }
 },
-[1128] = {.id=1128, .name="Dragonair", .kind=TCG_POKEMON, .type=6, .rarity=1, .set=19, .set2=255, .dark=0, .holo=0, .flags=0, .origin=19,
+[1128] = {.id=1128, .name="Dragonair", .kind=TCG_POKEMON, .type=6, .rarity=1, .set=19, .set2=255, .dark=0, .holo=0, .flags=TCG_CF_READY, .origin=19,
 .hp=70, .stage=1, .species=148, .level=0, .retreat=2, .weakness=255, .resistance=255, .evolvesFrom="Dratini", .description="", .attacks={
 {.name="Spiral Wave",.description="Flip a coin until you get tails. This attack does 20 damage times the number of heads.",.effect="ecard1-75:a0",.animation="ATK_ANIM_HIT",.cost={0,0,1,1,0,0,0,0,0},.damage=20,.category=TCG_DAMAGE_X},
 {.name="",.description="",.effect="NONE",.animation="ATK_ANIM_NONE",.cost={0},.damage=0,.category=TCG_DAMAGE_NORMAL},
@@ -7185,14 +7185,14 @@ const struct TcgCard gTcgCards[TCG_CARD_COUNT + 1] = {
 {.name="",.description="",.effect="NONE",.animation="ATK_ANIM_NONE",.cost={0},.damage=0,.category=TCG_DAMAGE_NORMAL},
 }
 },
-[1130] = {.id=1130, .name="Flaaffy", .kind=TCG_POKEMON, .type=2, .rarity=1, .set=19, .set2=255, .dark=0, .holo=0, .flags=0, .origin=19,
+[1130] = {.id=1130, .name="Flaaffy", .kind=TCG_POKEMON, .type=2, .rarity=1, .set=19, .set2=255, .dark=0, .holo=0, .flags=TCG_CF_READY, .origin=19,
 .hp=80, .stage=1, .species=180, .level=0, .retreat=1, .weakness=4, .resistance=255, .evolvesFrom="Mareep", .description="", .attacks={
 {.name="Headbutt",.description="",.effect="NONE",.animation="ATK_ANIM_HIT",.cost={0,0,0,0,0,0,2,0,0},.damage=20,.category=TCG_DAMAGE_NORMAL},
 {.name="Thunder Jolt",.description="Flip a coin. If tails, Flaaffy does 20 damage to itself.",.effect="ecard1-77:a1",.animation="ATK_ANIM_HIT",.cost={0,0,2,0,0,0,1,0,0},.damage=50,.category=TCG_DAMAGE_NORMAL},
 {.name="",.description="",.effect="NONE",.animation="ATK_ANIM_NONE",.cost={0},.damage=0,.category=TCG_DAMAGE_NORMAL},
 }
 },
-[1131] = {.id=1131, .name="Gloom", .kind=TCG_POKEMON, .type=1, .rarity=1, .set=19, .set2=255, .dark=0, .holo=0, .flags=0, .origin=19,
+[1131] = {.id=1131, .name="Gloom", .kind=TCG_POKEMON, .type=1, .rarity=1, .set=19, .set2=255, .dark=0, .holo=0, .flags=TCG_CF_READY, .origin=19,
 .hp=70, .stage=1, .species=44, .level=0, .retreat=1, .weakness=5, .resistance=255, .evolvesFrom="Oddish", .description="", .attacks={
 {.name="Razor Leaf",.description="",.effect="NONE",.animation="ATK_ANIM_HIT",.cost={0,1,0,0,0,0,1,0,0},.damage=20,.category=TCG_DAMAGE_NORMAL},
 {.name="Foul Odor",.description="Both the Defending Pokemon and Gloom are now Confused (after doing damage).",.effect="ecard1-78:a1",.animation="ATK_ANIM_HIT",.cost={0,1,0,0,0,0,2,0,0},.damage=30,.category=TCG_DAMAGE_NORMAL},
@@ -7220,14 +7220,14 @@ const struct TcgCard gTcgCards[TCG_CARD_COUNT + 1] = {
 {.name="",.description="",.effect="NONE",.animation="ATK_ANIM_NONE",.cost={0},.damage=0,.category=TCG_DAMAGE_NORMAL},
 }
 },
-[1135] = {.id=1135, .name="Ivysaur", .kind=TCG_POKEMON, .type=1, .rarity=1, .set=19, .set2=255, .dark=0, .holo=0, .flags=0, .origin=19,
+[1135] = {.id=1135, .name="Ivysaur", .kind=TCG_POKEMON, .type=1, .rarity=1, .set=19, .set2=255, .dark=0, .holo=0, .flags=TCG_CF_READY, .origin=19,
 .hp=80, .stage=1, .species=2, .level=0, .retreat=1, .weakness=0, .resistance=255, .evolvesFrom="Bulbasaur", .description="", .attacks={
 {.name="Sleep Seed",.description="The Defending Pokemon is now Asleep.",.effect="ecard1-82:a0",.animation="ATK_ANIM_HIT",.cost={0,1,0,0,0,0,1,0,0},.damage=20,.category=TCG_DAMAGE_NORMAL},
 {.name="Vine Whip",.description="",.effect="NONE",.animation="ATK_ANIM_HIT",.cost={0,1,0,0,0,0,2,0,0},.damage=40,.category=TCG_DAMAGE_NORMAL},
 {.name="",.description="",.effect="NONE",.animation="ATK_ANIM_NONE",.cost={0},.damage=0,.category=TCG_DAMAGE_NORMAL},
 }
 },
-[1136] = {.id=1136, .name="Jynx", .kind=TCG_POKEMON, .type=3, .rarity=1, .set=19, .set2=255, .dark=0, .holo=0, .flags=0, .origin=19,
+[1136] = {.id=1136, .name="Jynx", .kind=TCG_POKEMON, .type=3, .rarity=1, .set=19, .set2=255, .dark=0, .holo=0, .flags=TCG_CF_READY, .origin=19,
 .hp=60, .stage=0, .species=124, .level=0, .retreat=1, .weakness=8, .resistance=255, .evolvesFrom="", .description="", .attacks={
 {.name="Ice Punch",.description="Flip a coin. If heads, the Defending Pokemon is now Paralyzed.",.effect="ecard1-83:a0",.animation="ATK_ANIM_HIT",.cost={0,0,0,1,0,0,1,0,0},.damage=10,.category=TCG_DAMAGE_NORMAL},
 {.name="Powder Snow",.description="The Defending Pokemon is now Asleep.",.effect="ecard1-83:a1",.animation="ATK_ANIM_HIT",.cost={0,0,0,1,0,0,2,0,0},.damage=20,.category=TCG_DAMAGE_NORMAL},
@@ -7269,7 +7269,7 @@ const struct TcgCard gTcgCards[TCG_CARD_COUNT + 1] = {
 {.name="",.description="",.effect="NONE",.animation="ATK_ANIM_NONE",.cost={0},.damage=0,.category=TCG_DAMAGE_NORMAL},
 }
 },
-[1142] = {.id=1142, .name="Poliwhirl", .kind=TCG_POKEMON, .type=3, .rarity=1, .set=19, .set2=255, .dark=0, .holo=0, .flags=0, .origin=19,
+[1142] = {.id=1142, .name="Poliwhirl", .kind=TCG_POKEMON, .type=3, .rarity=1, .set=19, .set2=255, .dark=0, .holo=0, .flags=TCG_CF_READY, .origin=19,
 .hp=70, .stage=1, .species=61, .level=0, .retreat=1, .weakness=2, .resistance=255, .evolvesFrom="Poliwag", .description="", .attacks={
 {.name="Punch",.description="",.effect="NONE",.animation="ATK_ANIM_HIT",.cost={0,0,0,0,0,0,2,0,0},.damage=20,.category=TCG_DAMAGE_NORMAL},
 {.name="Bubblebeam",.description="Flip a coin. If heads, the Defending Pokemon is now Paralyzed.",.effect="ecard1-89:a1",.animation="ATK_ANIM_HIT",.cost={0,0,0,1,0,0,2,0,0},.damage=30,.category=TCG_DAMAGE_NORMAL},
@@ -7297,28 +7297,28 @@ const struct TcgCard gTcgCards[TCG_CARD_COUNT + 1] = {
 {.name="",.description="",.effect="NONE",.animation="ATK_ANIM_NONE",.cost={0},.damage=0,.category=TCG_DAMAGE_NORMAL},
 }
 },
-[1146] = {.id=1146, .name="Abra", .kind=TCG_POKEMON, .type=5, .rarity=0, .set=19, .set2=255, .dark=0, .holo=0, .flags=0, .origin=19,
+[1146] = {.id=1146, .name="Abra", .kind=TCG_POKEMON, .type=5, .rarity=0, .set=19, .set2=255, .dark=0, .holo=0, .flags=TCG_CF_READY, .origin=19,
 .hp=40, .stage=0, .species=63, .level=0, .retreat=1, .weakness=5, .resistance=255, .evolvesFrom="", .description="", .attacks={
 {.name="Scratch",.description="",.effect="NONE",.animation="ATK_ANIM_HIT",.cost={0,0,0,0,0,0,1,0,0},.damage=10,.category=TCG_DAMAGE_NORMAL},
 {.name="Confuse Ray",.description="Flip a coin. If heads, the Defending Pokemon is now Confused.",.effect="ecard1-93:a1",.animation="ATK_ANIM_HIT",.cost={0,0,0,0,0,1,0,0,0},.damage=0,.category=TCG_RESIDUAL},
 {.name="",.description="",.effect="NONE",.animation="ATK_ANIM_NONE",.cost={0},.damage=0,.category=TCG_DAMAGE_NORMAL},
 }
 },
-[1147] = {.id=1147, .name="Bulbasaur", .kind=TCG_POKEMON, .type=1, .rarity=0, .set=19, .set2=255, .dark=0, .holo=0, .flags=0, .origin=19,
+[1147] = {.id=1147, .name="Bulbasaur", .kind=TCG_POKEMON, .type=1, .rarity=0, .set=19, .set2=255, .dark=0, .holo=0, .flags=TCG_CF_READY, .origin=19,
 .hp=50, .stage=0, .species=1, .level=0, .retreat=1, .weakness=0, .resistance=255, .evolvesFrom="", .description="", .attacks={
 {.name="Tackle",.description="",.effect="NONE",.animation="ATK_ANIM_HIT",.cost={0,0,0,0,0,0,1,0,0},.damage=10,.category=TCG_DAMAGE_NORMAL},
 {.name="Poison Seed",.description="Flip a coin. If heads, the Defending Pokemon is now Poisoned.",.effect="ecard1-94:a1",.animation="ATK_ANIM_HIT",.cost={0,1,0,0,0,0,1,0,0},.damage=10,.category=TCG_DAMAGE_NORMAL},
 {.name="",.description="",.effect="NONE",.animation="ATK_ANIM_NONE",.cost={0},.damage=0,.category=TCG_DAMAGE_NORMAL},
 }
 },
-[1148] = {.id=1148, .name="Bulbasaur", .kind=TCG_POKEMON, .type=1, .rarity=0, .set=19, .set2=255, .dark=0, .holo=0, .flags=0, .origin=19,
+[1148] = {.id=1148, .name="Bulbasaur", .kind=TCG_POKEMON, .type=1, .rarity=0, .set=19, .set2=255, .dark=0, .holo=0, .flags=TCG_CF_READY, .origin=19,
 .hp=40, .stage=0, .species=1, .level=0, .retreat=1, .weakness=0, .resistance=255, .evolvesFrom="", .description="", .attacks={
 {.name="Sleep Seed",.description="The Defending Pokemon is now Asleep.",.effect="ecard1-95:a0",.animation="ATK_ANIM_HIT",.cost={0,0,0,0,0,0,1,0,0},.damage=0,.category=TCG_RESIDUAL},
 {.name="Vine Whip",.description="",.effect="NONE",.animation="ATK_ANIM_HIT",.cost={0,1,0,0,0,0,1,0,0},.damage=20,.category=TCG_DAMAGE_NORMAL},
 {.name="",.description="",.effect="NONE",.animation="ATK_ANIM_NONE",.cost={0},.damage=0,.category=TCG_DAMAGE_NORMAL},
 }
 },
-[1149] = {.id=1149, .name="Caterpie", .kind=TCG_POKEMON, .type=1, .rarity=0, .set=19, .set2=255, .dark=0, .holo=0, .flags=0, .origin=19,
+[1149] = {.id=1149, .name="Caterpie", .kind=TCG_POKEMON, .type=1, .rarity=0, .set=19, .set2=255, .dark=0, .holo=0, .flags=TCG_CF_READY, .origin=19,
 .hp=40, .stage=0, .species=10, .level=0, .retreat=1, .weakness=0, .resistance=255, .evolvesFrom="", .description="", .attacks={
 {.name="Headbutt",.description="",.effect="NONE",.animation="ATK_ANIM_HIT",.cost={0,0,0,0,0,0,1,0,0},.damage=10,.category=TCG_DAMAGE_NORMAL},
 {.name="Entagling Thread",.description="Flip a coin. If heads, the Defending Pokemon is now Paralyzed.",.effect="ecard1-96:a1",.animation="ATK_ANIM_HIT",.cost={0,0,0,0,0,0,2,0,0},.damage=10,.category=TCG_DAMAGE_NORMAL},
@@ -7346,14 +7346,14 @@ const struct TcgCard gTcgCards[TCG_CARD_COUNT + 1] = {
 {.name="",.description="",.effect="NONE",.animation="ATK_ANIM_NONE",.cost={0},.damage=0,.category=TCG_DAMAGE_NORMAL},
 }
 },
-[1153] = {.id=1153, .name="Chikorita", .kind=TCG_POKEMON, .type=1, .rarity=0, .set=19, .set2=255, .dark=0, .holo=0, .flags=0, .origin=19,
+[1153] = {.id=1153, .name="Chikorita", .kind=TCG_POKEMON, .type=1, .rarity=0, .set=19, .set2=255, .dark=0, .holo=0, .flags=TCG_CF_READY, .origin=19,
 .hp=50, .stage=0, .species=152, .level=0, .retreat=1, .weakness=0, .resistance=3, .evolvesFrom="", .description="", .attacks={
 {.name="Razor Leaf",.description="",.effect="NONE",.animation="ATK_ANIM_HIT",.cost={0,1,0,0,0,0,0,0,0},.damage=10,.category=TCG_DAMAGE_NORMAL},
 {.name="Sleep Powder",.description="The Defending Pokemon is now Asleep.",.effect="ecard1-100:a1",.animation="ATK_ANIM_HIT",.cost={0,0,0,0,0,0,2,0,0},.damage=10,.category=TCG_DAMAGE_NORMAL},
 {.name="",.description="",.effect="NONE",.animation="ATK_ANIM_NONE",.cost={0},.damage=0,.category=TCG_DAMAGE_NORMAL},
 }
 },
-[1154] = {.id=1154, .name="Clefairy", .kind=TCG_POKEMON, .type=6, .rarity=0, .set=19, .set2=255, .dark=0, .holo=0, .flags=0, .origin=19,
+[1154] = {.id=1154, .name="Clefairy", .kind=TCG_POKEMON, .type=6, .rarity=0, .set=19, .set2=255, .dark=0, .holo=0, .flags=TCG_CF_READY, .origin=19,
 .hp=50, .stage=0, .species=35, .level=0, .retreat=1, .weakness=4, .resistance=255, .evolvesFrom="", .description="", .attacks={
 {.name="Shining Fingers",.description="The Defending Pokemon is now Asleep.",.effect="ecard1-101:a0",.animation="ATK_ANIM_HIT",.cost={0,0,0,0,0,0,1,0,0},.damage=0,.category=TCG_RESIDUAL},
 {.name="Slap",.description="",.effect="NONE",.animation="ATK_ANIM_HIT",.cost={0,0,0,0,0,0,1,0,0},.damage=10,.category=TCG_DAMAGE_NORMAL},
@@ -7367,7 +7367,7 @@ const struct TcgCard gTcgCards[TCG_CARD_COUNT + 1] = {
 {.name="",.description="",.effect="NONE",.animation="ATK_ANIM_NONE",.cost={0},.damage=0,.category=TCG_DAMAGE_NORMAL},
 }
 },
-[1156] = {.id=1156, .name="Cubone", .kind=TCG_POKEMON, .type=4, .rarity=0, .set=19, .set2=255, .dark=0, .holo=0, .flags=0, .origin=19,
+[1156] = {.id=1156, .name="Cubone", .kind=TCG_POKEMON, .type=4, .rarity=0, .set=19, .set2=255, .dark=0, .holo=0, .flags=TCG_CF_READY, .origin=19,
 .hp=40, .stage=0, .species=104, .level=0, .retreat=1, .weakness=1, .resistance=2, .evolvesFrom="", .description="", .attacks={
 {.name="Beat",.description="",.effect="NONE",.animation="ATK_ANIM_HIT",.cost={0,0,0,0,0,0,1,0,0},.damage=10,.category=TCG_DAMAGE_NORMAL},
 {.name="Bone Smash",.description="Flip a coin. If tails, this attack does nothing.",.effect="ecard1-103:a1",.animation="ATK_ANIM_HIT",.cost={0,0,0,0,1,0,1,0,0},.damage=30,.category=TCG_DAMAGE_NORMAL},
@@ -7395,21 +7395,21 @@ const struct TcgCard gTcgCards[TCG_CARD_COUNT + 1] = {
 {.name="",.description="",.effect="NONE",.animation="ATK_ANIM_NONE",.cost={0},.damage=0,.category=TCG_DAMAGE_NORMAL},
 }
 },
-[1160] = {.id=1160, .name="Dratini", .kind=TCG_POKEMON, .type=6, .rarity=0, .set=19, .set2=255, .dark=0, .holo=0, .flags=0, .origin=19,
+[1160] = {.id=1160, .name="Dratini", .kind=TCG_POKEMON, .type=6, .rarity=0, .set=19, .set2=255, .dark=0, .holo=0, .flags=TCG_CF_READY, .origin=19,
 .hp=40, .stage=0, .species=147, .level=0, .retreat=1, .weakness=255, .resistance=255, .evolvesFrom="", .description="", .attacks={
 {.name="Dragon Smash",.description="Flip a coin. If tails, this attack does nothing.",.effect="ecard1-107:a0",.animation="ATK_ANIM_HIT",.cost={0,0,1,1,0,0,0,0,0},.damage=40,.category=TCG_DAMAGE_NORMAL},
 {.name="",.description="",.effect="NONE",.animation="ATK_ANIM_NONE",.cost={0},.damage=0,.category=TCG_DAMAGE_NORMAL},
 {.name="",.description="",.effect="NONE",.animation="ATK_ANIM_NONE",.cost={0},.damage=0,.category=TCG_DAMAGE_NORMAL},
 }
 },
-[1161] = {.id=1161, .name="Ekans", .kind=TCG_POKEMON, .type=1, .rarity=0, .set=19, .set2=255, .dark=0, .holo=0, .flags=0, .origin=19,
+[1161] = {.id=1161, .name="Ekans", .kind=TCG_POKEMON, .type=1, .rarity=0, .set=19, .set2=255, .dark=0, .holo=0, .flags=TCG_CF_READY, .origin=19,
 .hp=50, .stage=0, .species=23, .level=0, .retreat=1, .weakness=5, .resistance=255, .evolvesFrom="", .description="", .attacks={
 {.name="Poison Sting",.description="Flip a coin. If heads, the Defending Pokemon is now Poisoned.",.effect="ecard1-108:a0",.animation="ATK_ANIM_HIT",.cost={0,1,0,0,0,0,0,0,0},.damage=10,.category=TCG_DAMAGE_NORMAL},
 {.name="",.description="",.effect="NONE",.animation="ATK_ANIM_NONE",.cost={0},.damage=0,.category=TCG_DAMAGE_NORMAL},
 {.name="",.description="",.effect="NONE",.animation="ATK_ANIM_NONE",.cost={0},.damage=0,.category=TCG_DAMAGE_NORMAL},
 }
 },
-[1162] = {.id=1162, .name="Gastly", .kind=TCG_POKEMON, .type=5, .rarity=0, .set=19, .set2=255, .dark=0, .holo=0, .flags=0, .origin=19,
+[1162] = {.id=1162, .name="Gastly", .kind=TCG_POKEMON, .type=5, .rarity=0, .set=19, .set2=255, .dark=0, .holo=0, .flags=TCG_CF_READY, .origin=19,
 .hp=40, .stage=0, .species=92, .level=0, .retreat=1, .weakness=7, .resistance=4, .evolvesFrom="", .description="", .attacks={
 {.name="Bad Dream",.description="Flip a coin. If heads, the Defending Pokemon is now Asleep. If tails, the Defending Pokemon is now Confused.",.effect="ecard1-109:a0",.animation="ATK_ANIM_HIT",.cost={0,0,0,0,0,1,0,0,0},.damage=0,.category=TCG_RESIDUAL},
 {.name="",.description="",.effect="NONE",.animation="ATK_ANIM_NONE",.cost={0},.damage=0,.category=TCG_DAMAGE_NORMAL},
@@ -7430,7 +7430,7 @@ const struct TcgCard gTcgCards[TCG_CARD_COUNT + 1] = {
 {.name="",.description="",.effect="NONE",.animation="ATK_ANIM_NONE",.cost={0},.damage=0,.category=TCG_DAMAGE_NORMAL},
 }
 },
-[1165] = {.id=1165, .name="Hoppip", .kind=TCG_POKEMON, .type=1, .rarity=0, .set=19, .set2=255, .dark=0, .holo=0, .flags=0, .origin=19,
+[1165] = {.id=1165, .name="Hoppip", .kind=TCG_POKEMON, .type=1, .rarity=0, .set=19, .set2=255, .dark=0, .holo=0, .flags=TCG_CF_READY, .origin=19,
 .hp=40, .stage=0, .species=187, .level=0, .retreat=1, .weakness=0, .resistance=3, .evolvesFrom="", .description="", .attacks={
 {.name="Sleep Powder",.description="The Defending Pokemon is now Asleep.",.effect="ecard1-112:a0",.animation="ATK_ANIM_HIT",.cost={0,1,0,0,0,0,0,0,0},.damage=10,.category=TCG_DAMAGE_NORMAL},
 {.name="",.description="",.effect="NONE",.animation="ATK_ANIM_NONE",.cost={0},.damage=0,.category=TCG_DAMAGE_NORMAL},
@@ -7444,7 +7444,7 @@ const struct TcgCard gTcgCards[TCG_CARD_COUNT + 1] = {
 {.name="",.description="",.effect="NONE",.animation="ATK_ANIM_NONE",.cost={0},.damage=0,.category=TCG_DAMAGE_NORMAL},
 }
 },
-[1167] = {.id=1167, .name="Koffing", .kind=TCG_POKEMON, .type=1, .rarity=0, .set=19, .set2=255, .dark=0, .holo=0, .flags=0, .origin=19,
+[1167] = {.id=1167, .name="Koffing", .kind=TCG_POKEMON, .type=1, .rarity=0, .set=19, .set2=255, .dark=0, .holo=0, .flags=TCG_CF_READY, .origin=19,
 .hp=50, .stage=0, .species=109, .level=0, .retreat=1, .weakness=5, .resistance=255, .evolvesFrom="", .description="", .attacks={
 {.name="Ram",.description="",.effect="NONE",.animation="ATK_ANIM_HIT",.cost={0,0,0,0,0,0,1,0,0},.damage=10,.category=TCG_DAMAGE_NORMAL},
 {.name="Confusion Gas",.description="Flip a coin. If heads, the Defending Pokemon is now Confused.",.effect="ecard1-114:a1",.animation="ATK_ANIM_HIT",.cost={0,1,0,0,0,0,0,0,0},.damage=0,.category=TCG_RESIDUAL},
@@ -7479,14 +7479,14 @@ const struct TcgCard gTcgCards[TCG_CARD_COUNT + 1] = {
 {.name="",.description="",.effect="NONE",.animation="ATK_ANIM_NONE",.cost={0},.damage=0,.category=TCG_DAMAGE_NORMAL},
 }
 },
-[1172] = {.id=1172, .name="Mareep", .kind=TCG_POKEMON, .type=2, .rarity=0, .set=19, .set2=255, .dark=0, .holo=0, .flags=0, .origin=19,
+[1172] = {.id=1172, .name="Mareep", .kind=TCG_POKEMON, .type=2, .rarity=0, .set=19, .set2=255, .dark=0, .holo=0, .flags=TCG_CF_READY, .origin=19,
 .hp=40, .stage=0, .species=179, .level=0, .retreat=1, .weakness=4, .resistance=255, .evolvesFrom="", .description="", .attacks={
 {.name="Thundershock",.description="Flip a coin. If heads, the Defending Pokemon is now Paralyzed.",.effect="ecard1-119:a0",.animation="ATK_ANIM_HIT",.cost={0,0,1,0,0,0,0,0,0},.damage=10,.category=TCG_DAMAGE_NORMAL},
 {.name="",.description="",.effect="NONE",.animation="ATK_ANIM_NONE",.cost={0},.damage=0,.category=TCG_DAMAGE_NORMAL},
 {.name="",.description="",.effect="NONE",.animation="ATK_ANIM_NONE",.cost={0},.damage=0,.category=TCG_DAMAGE_NORMAL},
 }
 },
-[1173] = {.id=1173, .name="Marill", .kind=TCG_POKEMON, .type=3, .rarity=0, .set=19, .set2=255, .dark=0, .holo=0, .flags=0, .origin=19,
+[1173] = {.id=1173, .name="Marill", .kind=TCG_POKEMON, .type=3, .rarity=0, .set=19, .set2=255, .dark=0, .holo=0, .flags=TCG_CF_READY, .origin=19,
 .hp=40, .stage=0, .species=183, .level=0, .retreat=1, .weakness=2, .resistance=255, .evolvesFrom="", .description="", .attacks={
 {.name="Bubble",.description="Flip a coin. If heads, the Defending Pokemon is now Paralyzed.",.effect="ecard1-120:a0",.animation="ATK_ANIM_HIT",.cost={0,0,0,1,0,0,0,0,0},.damage=10,.category=TCG_DAMAGE_NORMAL},
 {.name="Tail Slap",.description="",.effect="NONE",.animation="ATK_ANIM_HIT",.cost={0,0,0,0,0,0,2,0,0},.damage=20,.category=TCG_DAMAGE_NORMAL},
@@ -7500,7 +7500,7 @@ const struct TcgCard gTcgCards[TCG_CARD_COUNT + 1] = {
 {.name="",.description="",.effect="NONE",.animation="ATK_ANIM_NONE",.cost={0},.damage=0,.category=TCG_DAMAGE_NORMAL},
 }
 },
-[1175] = {.id=1175, .name="Oddish", .kind=TCG_POKEMON, .type=1, .rarity=0, .set=19, .set2=255, .dark=0, .holo=0, .flags=0, .origin=19,
+[1175] = {.id=1175, .name="Oddish", .kind=TCG_POKEMON, .type=1, .rarity=0, .set=19, .set2=255, .dark=0, .holo=0, .flags=TCG_CF_READY, .origin=19,
 .hp=50, .stage=0, .species=43, .level=0, .retreat=1, .weakness=5, .resistance=255, .evolvesFrom="", .description="", .attacks={
 {.name="Tackle",.description="",.effect="NONE",.animation="ATK_ANIM_HIT",.cost={0,0,0,0,0,0,1,0,0},.damage=10,.category=TCG_DAMAGE_NORMAL},
 {.name="Sleep Seed",.description="The Defending Pokemon is now Asleep.",.effect="ecard1-122:a1",.animation="ATK_ANIM_HIT",.cost={0,1,0,0,0,0,1,0,0},.damage=10,.category=TCG_DAMAGE_NORMAL},
@@ -7514,7 +7514,7 @@ const struct TcgCard gTcgCards[TCG_CARD_COUNT + 1] = {
 {.name="",.description="",.effect="NONE",.animation="ATK_ANIM_NONE",.cost={0},.damage=0,.category=TCG_DAMAGE_NORMAL},
 }
 },
-[1177] = {.id=1177, .name="Pikachu", .kind=TCG_POKEMON, .type=2, .rarity=0, .set=19, .set2=255, .dark=0, .holo=0, .flags=0, .origin=19,
+[1177] = {.id=1177, .name="Pikachu", .kind=TCG_POKEMON, .type=2, .rarity=0, .set=19, .set2=255, .dark=0, .holo=0, .flags=TCG_CF_READY, .origin=19,
 .hp=50, .stage=0, .species=25, .level=0, .retreat=1, .weakness=4, .resistance=255, .evolvesFrom="", .description="", .attacks={
 {.name="Lightning Tail",.description="Flip a coin. If heads, the Defending Pokemon is now Paralyzed.",.effect="ecard1-124:a0",.animation="ATK_ANIM_HIT",.cost={0,0,0,0,0,0,1,0,0},.damage=0,.category=TCG_RESIDUAL},
 {.name="Tackle",.description="",.effect="NONE",.animation="ATK_ANIM_HIT",.cost={0,0,1,0,0,0,1,0,0},.damage=20,.category=TCG_DAMAGE_NORMAL},
@@ -7535,28 +7535,28 @@ const struct TcgCard gTcgCards[TCG_CARD_COUNT + 1] = {
 {.name="",.description="",.effect="NONE",.animation="ATK_ANIM_NONE",.cost={0},.damage=0,.category=TCG_DAMAGE_NORMAL},
 }
 },
-[1180] = {.id=1180, .name="Qwilfish", .kind=TCG_POKEMON, .type=3, .rarity=0, .set=19, .set2=255, .dark=0, .holo=0, .flags=0, .origin=19,
+[1180] = {.id=1180, .name="Qwilfish", .kind=TCG_POKEMON, .type=3, .rarity=0, .set=19, .set2=255, .dark=0, .holo=0, .flags=TCG_CF_READY, .origin=19,
 .hp=60, .stage=0, .species=211, .level=0, .retreat=1, .weakness=2, .resistance=255, .evolvesFrom="", .description="", .attacks={
 {.name="Stun Needle",.description="Flip a coin. If heads, the Defending Pokemon is now Paralyzed.",.effect="ecard1-127:a0",.animation="ATK_ANIM_HIT",.cost={0,0,0,2,0,0,0,0,0},.damage=20,.category=TCG_DAMAGE_NORMAL},
 {.name="",.description="",.effect="NONE",.animation="ATK_ANIM_NONE",.cost={0},.damage=0,.category=TCG_DAMAGE_NORMAL},
 {.name="",.description="",.effect="NONE",.animation="ATK_ANIM_NONE",.cost={0},.damage=0,.category=TCG_DAMAGE_NORMAL},
 }
 },
-[1181] = {.id=1181, .name="Rattata", .kind=TCG_POKEMON, .type=6, .rarity=0, .set=19, .set2=255, .dark=0, .holo=0, .flags=0, .origin=19,
+[1181] = {.id=1181, .name="Rattata", .kind=TCG_POKEMON, .type=6, .rarity=0, .set=19, .set2=255, .dark=0, .holo=0, .flags=TCG_CF_READY, .origin=19,
 .hp=30, .stage=0, .species=19, .level=0, .retreat=1, .weakness=4, .resistance=255, .evolvesFrom="", .description="", .attacks={
 {.name="Quick Attack",.description="Flip a coin. If heads, this attack does 10 damage plus 20 more damage.",.effect="ecard1-128:a0",.animation="ATK_ANIM_HIT",.cost={0,0,0,0,0,0,1,0,0},.damage=10,.category=TCG_DAMAGE_PLUS},
 {.name="",.description="",.effect="NONE",.animation="ATK_ANIM_NONE",.cost={0},.damage=0,.category=TCG_DAMAGE_NORMAL},
 {.name="",.description="",.effect="NONE",.animation="ATK_ANIM_NONE",.cost={0},.damage=0,.category=TCG_DAMAGE_NORMAL},
 }
 },
-[1182] = {.id=1182, .name="Shellder", .kind=TCG_POKEMON, .type=3, .rarity=0, .set=19, .set2=255, .dark=0, .holo=0, .flags=0, .origin=19,
+[1182] = {.id=1182, .name="Shellder", .kind=TCG_POKEMON, .type=3, .rarity=0, .set=19, .set2=255, .dark=0, .holo=0, .flags=TCG_CF_READY, .origin=19,
 .hp=50, .stage=0, .species=90, .level=0, .retreat=1, .weakness=2, .resistance=255, .evolvesFrom="", .description="", .attacks={
 {.name="Irongrip",.description="",.effect="NONE",.animation="ATK_ANIM_HIT",.cost={0,0,0,1,0,0,0,0,0},.damage=10,.category=TCG_DAMAGE_NORMAL},
 {.name="Lick",.description="Flip a coin. If heads, the Defending Pokemon is now Paralyzed.",.effect="ecard1-129:a1",.animation="ATK_ANIM_HIT",.cost={0,0,0,0,0,0,2,0,0},.damage=10,.category=TCG_DAMAGE_NORMAL},
 {.name="",.description="",.effect="NONE",.animation="ATK_ANIM_NONE",.cost={0},.damage=0,.category=TCG_DAMAGE_NORMAL},
 }
 },
-[1183] = {.id=1183, .name="Spearow", .kind=TCG_POKEMON, .type=6, .rarity=0, .set=19, .set2=255, .dark=0, .holo=0, .flags=0, .origin=19,
+[1183] = {.id=1183, .name="Spearow", .kind=TCG_POKEMON, .type=6, .rarity=0, .set=19, .set2=255, .dark=0, .holo=0, .flags=TCG_CF_READY, .origin=19,
 .hp=40, .stage=0, .species=21, .level=0, .retreat=1, .weakness=2, .resistance=4, .evolvesFrom="", .description="", .attacks={
 {.name="Razor Wind",.description="Flip a coin. If tails, this attack does nothing.",.effect="ecard1-130:a0",.animation="ATK_ANIM_HIT",.cost={0,0,0,0,0,0,1,0,0},.damage=20,.category=TCG_DAMAGE_NORMAL},
 {.name="",.description="",.effect="NONE",.animation="ATK_ANIM_NONE",.cost={0},.damage=0,.category=TCG_DAMAGE_NORMAL},
@@ -7570,14 +7570,14 @@ const struct TcgCard gTcgCards[TCG_CARD_COUNT + 1] = {
 {.name="",.description="",.effect="NONE",.animation="ATK_ANIM_NONE",.cost={0},.damage=0,.category=TCG_DAMAGE_NORMAL},
 }
 },
-[1185] = {.id=1185, .name="Squirtle", .kind=TCG_POKEMON, .type=3, .rarity=0, .set=19, .set2=255, .dark=0, .holo=0, .flags=0, .origin=19,
+[1185] = {.id=1185, .name="Squirtle", .kind=TCG_POKEMON, .type=3, .rarity=0, .set=19, .set2=255, .dark=0, .holo=0, .flags=TCG_CF_READY, .origin=19,
 .hp=40, .stage=0, .species=7, .level=0, .retreat=1, .weakness=2, .resistance=255, .evolvesFrom="", .description="", .attacks={
 {.name="Headbutt",.description="",.effect="NONE",.animation="ATK_ANIM_HIT",.cost={0,0,0,0,0,0,1,0,0},.damage=10,.category=TCG_DAMAGE_NORMAL},
 {.name="Bubblebeam",.description="Flip a coin. If heads, the Defending Pokemon is now Paralyzed.",.effect="ecard1-132:a1",.animation="ATK_ANIM_HIT",.cost={0,0,0,2,0,0,0,0,0},.damage=20,.category=TCG_DAMAGE_NORMAL},
 {.name="",.description="",.effect="NONE",.animation="ATK_ANIM_NONE",.cost={0},.damage=0,.category=TCG_DAMAGE_NORMAL},
 }
 },
-[1186] = {.id=1186, .name="Tauros", .kind=TCG_POKEMON, .type=6, .rarity=0, .set=19, .set2=255, .dark=0, .holo=0, .flags=0, .origin=19,
+[1186] = {.id=1186, .name="Tauros", .kind=TCG_POKEMON, .type=6, .rarity=0, .set=19, .set2=255, .dark=0, .holo=0, .flags=TCG_CF_READY, .origin=19,
 .hp=70, .stage=0, .species=128, .level=0, .retreat=2, .weakness=4, .resistance=255, .evolvesFrom="", .description="", .attacks={
 {.name="Horn Hazard",.description="Flip a coin. If tails, this attack does nothing.",.effect="ecard1-133:a0",.animation="ATK_ANIM_HIT",.cost={0,0,0,0,0,0,2,0,0},.damage=30,.category=TCG_DAMAGE_NORMAL},
 {.name="Take Down",.description="Tauros does 20 damage to itself.",.effect="ecard1-133:a1",.animation="ATK_ANIM_HIT",.cost={0,0,0,0,0,0,2,0,0},.damage=30,.category=TCG_DAMAGE_NORMAL},
@@ -7591,14 +7591,14 @@ const struct TcgCard gTcgCards[TCG_CARD_COUNT + 1] = {
 {.name="",.description="",.effect="NONE",.animation="ATK_ANIM_NONE",.cost={0},.damage=0,.category=TCG_DAMAGE_NORMAL},
 }
 },
-[1188] = {.id=1188, .name="Totodile", .kind=TCG_POKEMON, .type=3, .rarity=0, .set=19, .set2=255, .dark=0, .holo=0, .flags=0, .origin=19,
+[1188] = {.id=1188, .name="Totodile", .kind=TCG_POKEMON, .type=3, .rarity=0, .set=19, .set2=255, .dark=0, .holo=0, .flags=TCG_CF_READY, .origin=19,
 .hp=50, .stage=0, .species=158, .level=0, .retreat=1, .weakness=2, .resistance=255, .evolvesFrom="", .description="", .attacks={
 {.name="Paralyzing Gaze",.description="Flip a coin. If heads, the Defending Pokemon is now Paralyzed.",.effect="ecard1-135:a0",.animation="ATK_ANIM_HIT",.cost={0,0,0,0,0,0,1,0,0},.damage=0,.category=TCG_RESIDUAL},
 {.name="Bite",.description="",.effect="NONE",.animation="ATK_ANIM_HIT",.cost={0,0,0,1,0,0,1,0,0},.damage=20,.category=TCG_DAMAGE_NORMAL},
 {.name="",.description="",.effect="NONE",.animation="ATK_ANIM_NONE",.cost={0},.damage=0,.category=TCG_DAMAGE_NORMAL},
 }
 },
-[1189] = {.id=1189, .name="Vulpix", .kind=TCG_POKEMON, .type=0, .rarity=0, .set=19, .set2=255, .dark=0, .holo=0, .flags=0, .origin=19,
+[1189] = {.id=1189, .name="Vulpix", .kind=TCG_POKEMON, .type=0, .rarity=0, .set=19, .set2=255, .dark=0, .holo=0, .flags=TCG_CF_READY, .origin=19,
 .hp=50, .stage=0, .species=37, .level=0, .retreat=1, .weakness=3, .resistance=255, .evolvesFrom="", .description="", .attacks={
 {.name="Tail Shake",.description="The Defending Pokemon is now Asleep.",.effect="ecard1-136:a0",.animation="ATK_ANIM_HIT",.cost={0,0,0,0,0,0,1,0,0},.damage=0,.category=TCG_RESIDUAL},
 {.name="Flare",.description="",.effect="NONE",.animation="ATK_ANIM_HIT",.cost={1,0,0,0,0,0,1,0,0},.damage=20,.category=TCG_DAMAGE_NORMAL},
@@ -7982,7 +7982,7 @@ const struct TcgCard gTcgCards[TCG_CARD_COUNT + 1] = {
 {.name="Lightning Storm",.description="Flip a coin. If tails, put 2 damage counters on Zapdos.",.effect="ecard2-44:a1",.animation="ATK_ANIM_HIT",.cost={0,0,2,0,0,0,2,0,0},.damage=60,.category=TCG_DAMAGE_NORMAL},
 }
 },
-[1257] = {.id=1257, .name="Bellsprout", .kind=TCG_POKEMON, .type=1, .rarity=1, .set=20, .set2=255, .dark=0, .holo=0, .flags=0, .origin=20,
+[1257] = {.id=1257, .name="Bellsprout", .kind=TCG_POKEMON, .type=1, .rarity=1, .set=20, .set2=255, .dark=0, .holo=0, .flags=TCG_CF_READY, .origin=20,
 .hp=50, .stage=0, .species=69, .level=0, .retreat=1, .weakness=0, .resistance=255, .evolvesFrom="", .description="", .attacks={
 {.name="Blot",.description="Remove 1 damage counter from Bellsprout.",.effect="ecard2-45:a0",.animation="ATK_ANIM_HIT",.cost={0,1,0,0,0,0,1,0,0},.damage=20,.category=TCG_DAMAGE_NORMAL},
 {.name="",.description="",.effect="NONE",.animation="ATK_ANIM_NONE",.cost={0},.damage=0,.category=TCG_DAMAGE_NORMAL},
@@ -8017,7 +8017,7 @@ const struct TcgCard gTcgCards[TCG_CARD_COUNT + 1] = {
 {.name="",.description="",.effect="NONE",.animation="ATK_ANIM_NONE",.cost={0},.damage=0,.category=TCG_DAMAGE_NORMAL},
 }
 },
-[1262] = {.id=1262, .name="Golduck", .kind=TCG_POKEMON, .type=3, .rarity=1, .set=20, .set2=255, .dark=0, .holo=0, .flags=0, .origin=20,
+[1262] = {.id=1262, .name="Golduck", .kind=TCG_POKEMON, .type=3, .rarity=1, .set=20, .set2=255, .dark=0, .holo=0, .flags=TCG_CF_READY, .origin=20,
 .hp=70, .stage=1, .species=55, .level=0, .retreat=1, .weakness=2, .resistance=255, .evolvesFrom="Psyduck", .description="", .attacks={
 {.name="Slash",.description="",.effect="NONE",.animation="ATK_ANIM_HIT",.cost={0,0,0,0,0,0,2,0,0},.damage=20,.category=TCG_DAMAGE_NORMAL},
 {.name="Distortion Beam",.description="Flip a coin. If heads, the Defending Pokemon is now Asleep. If tails, the Defending Pokemon is now Confused.",.effect="ecard2-50:a1",.animation="ATK_ANIM_HIT",.cost={0,0,0,0,0,1,2,0,0},.damage=30,.category=TCG_DAMAGE_NORMAL},
@@ -8038,7 +8038,7 @@ const struct TcgCard gTcgCards[TCG_CARD_COUNT + 1] = {
 {.name="",.description="",.effect="NONE",.animation="ATK_ANIM_NONE",.cost={0},.damage=0,.category=TCG_DAMAGE_NORMAL},
 }
 },
-[1265] = {.id=1265, .name="Marill", .kind=TCG_POKEMON, .type=3, .rarity=1, .set=20, .set2=255, .dark=0, .holo=0, .flags=0, .origin=20,
+[1265] = {.id=1265, .name="Marill", .kind=TCG_POKEMON, .type=3, .rarity=1, .set=20, .set2=255, .dark=0, .holo=0, .flags=TCG_CF_READY, .origin=20,
 .hp=50, .stage=0, .species=183, .level=0, .retreat=1, .weakness=2, .resistance=255, .evolvesFrom="", .description="", .attacks={
 {.name="Headbutt",.description="",.effect="NONE",.animation="ATK_ANIM_HIT",.cost={0,0,0,0,0,0,1,0,0},.damage=10,.category=TCG_DAMAGE_NORMAL},
 {.name="Sleepy Ball",.description="The Defending Pokemon is now Asleep.",.effect="ecard2-53:a1",.animation="ATK_ANIM_HIT",.cost={0,0,0,1,0,0,1,0,0},.damage=10,.category=TCG_DAMAGE_NORMAL},
@@ -8052,7 +8052,7 @@ const struct TcgCard gTcgCards[TCG_CARD_COUNT + 1] = {
 {.name="",.description="",.effect="NONE",.animation="ATK_ANIM_NONE",.cost={0},.damage=0,.category=TCG_DAMAGE_NORMAL},
 }
 },
-[1267] = {.id=1267, .name="Nidorino", .kind=TCG_POKEMON, .type=1, .rarity=1, .set=20, .set2=255, .dark=0, .holo=0, .flags=0, .origin=20,
+[1267] = {.id=1267, .name="Nidorino", .kind=TCG_POKEMON, .type=1, .rarity=1, .set=20, .set2=255, .dark=0, .holo=0, .flags=TCG_CF_READY, .origin=20,
 .hp=70, .stage=1, .species=33, .level=0, .retreat=1, .weakness=5, .resistance=255, .evolvesFrom="Nidoran M", .description="", .attacks={
 {.name="Poison Horn",.description="Flip a coin. If heads, the Defending Pokemon is now Poisoned.",.effect="ecard2-55:a0",.animation="ATK_ANIM_HIT",.cost={0,1,0,0,0,0,0,0,0},.damage=10,.category=TCG_DAMAGE_NORMAL},
 {.name="Take Down",.description="Nidorino does 10 damage to itself.",.effect="ecard2-55:a1",.animation="ATK_ANIM_HIT",.cost={0,0,0,0,0,0,3,0,0},.damage=40,.category=TCG_DAMAGE_NORMAL},
@@ -8115,7 +8115,7 @@ const struct TcgCard gTcgCards[TCG_CARD_COUNT + 1] = {
 {.name="",.description="",.effect="NONE",.animation="ATK_ANIM_NONE",.cost={0},.damage=0,.category=TCG_DAMAGE_NORMAL},
 }
 },
-[1276] = {.id=1276, .name="Voltorb", .kind=TCG_POKEMON, .type=2, .rarity=1, .set=20, .set2=255, .dark=0, .holo=0, .flags=0, .origin=20,
+[1276] = {.id=1276, .name="Voltorb", .kind=TCG_POKEMON, .type=2, .rarity=1, .set=20, .set2=255, .dark=0, .holo=0, .flags=TCG_CF_READY, .origin=20,
 .hp=50, .stage=0, .species=100, .level=0, .retreat=1, .weakness=4, .resistance=255, .evolvesFrom="", .description="", .attacks={
 {.name="Rollout",.description="",.effect="NONE",.animation="ATK_ANIM_HIT",.cost={0,0,0,0,0,0,1,0,0},.damage=10,.category=TCG_DAMAGE_NORMAL},
 {.name="Thundershock",.description="Flip a coin. If heads, the Defending Pokemon is now Paralyzed.",.effect="ecard2-64:a1",.animation="ATK_ANIM_HIT",.cost={0,0,1,0,0,0,1,0,0},.damage=20,.category=TCG_DAMAGE_NORMAL},
@@ -8143,28 +8143,28 @@ const struct TcgCard gTcgCards[TCG_CARD_COUNT + 1] = {
 {.name="",.description="",.effect="NONE",.animation="ATK_ANIM_NONE",.cost={0},.damage=0,.category=TCG_DAMAGE_NORMAL},
 }
 },
-[1280] = {.id=1280, .name="Bellsprout", .kind=TCG_POKEMON, .type=1, .rarity=0, .set=20, .set2=255, .dark=0, .holo=0, .flags=0, .origin=20,
+[1280] = {.id=1280, .name="Bellsprout", .kind=TCG_POKEMON, .type=1, .rarity=0, .set=20, .set2=255, .dark=0, .holo=0, .flags=TCG_CF_READY, .origin=20,
 .hp=40, .stage=0, .species=69, .level=0, .retreat=1, .weakness=5, .resistance=255, .evolvesFrom="", .description="", .attacks={
 {.name="Poison Vine",.description="Flip a coin. If heads, the Defending Pokemon is now Poisoned.",.effect="ecard2-68:a0",.animation="ATK_ANIM_HIT",.cost={0,0,0,0,0,0,1,0,0},.damage=0,.category=TCG_RESIDUAL},
 {.name="Sharp Leaf",.description="Flip a coin. If heads, this attack does 10 damage plus 10 more damage.",.effect="ecard2-68:a1",.animation="ATK_ANIM_HIT",.cost={0,1,0,0,0,0,0,0,0},.damage=10,.category=TCG_DAMAGE_PLUS},
 {.name="",.description="",.effect="NONE",.animation="ATK_ANIM_NONE",.cost={0},.damage=0,.category=TCG_DAMAGE_NORMAL},
 }
 },
-[1281] = {.id=1281, .name="Chansey", .kind=TCG_POKEMON, .type=6, .rarity=0, .set=20, .set2=255, .dark=0, .holo=0, .flags=0, .origin=20,
+[1281] = {.id=1281, .name="Chansey", .kind=TCG_POKEMON, .type=6, .rarity=0, .set=20, .set2=255, .dark=0, .holo=0, .flags=TCG_CF_READY, .origin=20,
 .hp=100, .stage=0, .species=113, .level=0, .retreat=2, .weakness=4, .resistance=255, .evolvesFrom="", .description="", .attacks={
 {.name="Rollout",.description="",.effect="NONE",.animation="ATK_ANIM_HIT",.cost={0,0,0,0,0,0,1,0,0},.damage=10,.category=TCG_DAMAGE_NORMAL},
 {.name="Double-edge",.description="Chansey does 40 damage to itself.",.effect="ecard2-69:a1",.animation="ATK_ANIM_HIT",.cost={0,0,0,0,0,0,3,0,0},.damage=40,.category=TCG_DAMAGE_NORMAL},
 {.name="",.description="",.effect="NONE",.animation="ATK_ANIM_NONE",.cost={0},.damage=0,.category=TCG_DAMAGE_NORMAL},
 }
 },
-[1282] = {.id=1282, .name="Chinchou", .kind=TCG_POKEMON, .type=3, .rarity=0, .set=20, .set2=255, .dark=0, .holo=0, .flags=0, .origin=20,
+[1282] = {.id=1282, .name="Chinchou", .kind=TCG_POKEMON, .type=3, .rarity=0, .set=20, .set2=255, .dark=0, .holo=0, .flags=TCG_CF_READY, .origin=20,
 .hp=50, .stage=0, .species=170, .level=0, .retreat=1, .weakness=1, .resistance=255, .evolvesFrom="", .description="", .attacks={
 {.name="Float",.description="Flip a coin. If heads, during your opponent's next turn, prevent all effects of attacks, including damage, done to Chinchou.",.effect="ecard2-70:a0",.animation="ATK_ANIM_HIT",.cost={0,0,0,0,0,0,1,0,0},.damage=0,.category=TCG_RESIDUAL},
 {.name="Headbutt",.description="",.effect="NONE",.animation="ATK_ANIM_HIT",.cost={0,0,0,0,0,0,2,0,0},.damage=20,.category=TCG_DAMAGE_NORMAL},
 {.name="",.description="",.effect="NONE",.animation="ATK_ANIM_NONE",.cost={0},.damage=0,.category=TCG_DAMAGE_NORMAL},
 }
 },
-[1283] = {.id=1283, .name="Chinchou", .kind=TCG_POKEMON, .type=2, .rarity=0, .set=20, .set2=255, .dark=0, .holo=0, .flags=0, .origin=20,
+[1283] = {.id=1283, .name="Chinchou", .kind=TCG_POKEMON, .type=2, .rarity=0, .set=20, .set2=255, .dark=0, .holo=0, .flags=TCG_CF_READY, .origin=20,
 .hp=50, .stage=0, .species=170, .level=0, .retreat=1, .weakness=4, .resistance=255, .evolvesFrom="", .description="", .attacks={
 {.name="Jolt",.description="Flip a coin. If heads, the Defending Pokemon is now Paralyzed.",.effect="ecard2-71:a0",.animation="ATK_ANIM_HIT",.cost={0,0,0,0,0,0,1,0,0},.damage=0,.category=TCG_RESIDUAL},
 {.name="Confuse Ray",.description="Flip a coin. If heads, the Defending Pokemon is now Confused.",.effect="ecard2-71:a1",.animation="ATK_ANIM_HIT",.cost={0,0,1,0,0,0,1,0,0},.damage=10,.category=TCG_DAMAGE_NORMAL},
@@ -8178,7 +8178,7 @@ const struct TcgCard gTcgCards[TCG_CARD_COUNT + 1] = {
 {.name="",.description="",.effect="NONE",.animation="ATK_ANIM_NONE",.cost={0},.damage=0,.category=TCG_DAMAGE_NORMAL},
 }
 },
-[1285] = {.id=1285, .name="Doduo", .kind=TCG_POKEMON, .type=6, .rarity=0, .set=20, .set2=255, .dark=0, .holo=0, .flags=0, .origin=20,
+[1285] = {.id=1285, .name="Doduo", .kind=TCG_POKEMON, .type=6, .rarity=0, .set=20, .set2=255, .dark=0, .holo=0, .flags=TCG_CF_READY, .origin=20,
 .hp=40, .stage=0, .species=84, .level=0, .retreat=1, .weakness=2, .resistance=4, .evolvesFrom="", .description="", .attacks={
 {.name="Super Speed",.description="Flip a coin. If heads, during your opponent's next turn, prevent all effects of attacks, including damage, done to Doduo.",.effect="ecard2-73:a0",.animation="ATK_ANIM_HIT",.cost={0,0,0,0,0,0,1,0,0},.damage=0,.category=TCG_RESIDUAL},
 {.name="Rear Kick",.description="",.effect="NONE",.animation="ATK_ANIM_HIT",.cost={0,0,0,0,0,0,2,0,0},.damage=20,.category=TCG_DAMAGE_NORMAL},
@@ -8213,14 +8213,14 @@ const struct TcgCard gTcgCards[TCG_CARD_COUNT + 1] = {
 {.name="",.description="",.effect="NONE",.animation="ATK_ANIM_NONE",.cost={0},.damage=0,.category=TCG_DAMAGE_NORMAL},
 }
 },
-[1290] = {.id=1290, .name="Goldeen", .kind=TCG_POKEMON, .type=3, .rarity=0, .set=20, .set2=255, .dark=0, .holo=0, .flags=0, .origin=20,
+[1290] = {.id=1290, .name="Goldeen", .kind=TCG_POKEMON, .type=3, .rarity=0, .set=20, .set2=255, .dark=0, .holo=0, .flags=TCG_CF_READY, .origin=20,
 .hp=40, .stage=0, .species=118, .level=0, .retreat=1, .weakness=2, .resistance=255, .evolvesFrom="", .description="", .attacks={
 {.name="Knock Away",.description="Flip a coin. If heads, this attack does 10 damage plus 10 more damage.",.effect="ecard2-78:a0",.animation="ATK_ANIM_HIT",.cost={0,0,0,0,0,0,1,0,0},.damage=10,.category=TCG_DAMAGE_PLUS},
 {.name="",.description="",.effect="NONE",.animation="ATK_ANIM_NONE",.cost={0},.damage=0,.category=TCG_DAMAGE_NORMAL},
 {.name="",.description="",.effect="NONE",.animation="ATK_ANIM_NONE",.cost={0},.damage=0,.category=TCG_DAMAGE_NORMAL},
 }
 },
-[1291] = {.id=1291, .name="Grimer", .kind=TCG_POKEMON, .type=1, .rarity=0, .set=20, .set2=255, .dark=0, .holo=0, .flags=0, .origin=20,
+[1291] = {.id=1291, .name="Grimer", .kind=TCG_POKEMON, .type=1, .rarity=0, .set=20, .set2=255, .dark=0, .holo=0, .flags=TCG_CF_READY, .origin=20,
 .hp=50, .stage=0, .species=88, .level=0, .retreat=1, .weakness=5, .resistance=255, .evolvesFrom="", .description="", .attacks={
 {.name="Poison Sludge",.description="Flip a coin. If heads, the Defending Pokemon is now Poisoned.",.effect="ecard2-79:a0",.animation="ATK_ANIM_HIT",.cost={0,0,0,0,0,0,1,0,0},.damage=0,.category=TCG_RESIDUAL},
 {.name="",.description="",.effect="NONE",.animation="ATK_ANIM_NONE",.cost={0},.damage=0,.category=TCG_DAMAGE_NORMAL},
@@ -8255,7 +8255,7 @@ const struct TcgCard gTcgCards[TCG_CARD_COUNT + 1] = {
 {.name="",.description="",.effect="NONE",.animation="ATK_ANIM_NONE",.cost={0},.damage=0,.category=TCG_DAMAGE_NORMAL},
 }
 },
-[1296] = {.id=1296, .name="Horsea", .kind=TCG_POKEMON, .type=3, .rarity=0, .set=20, .set2=255, .dark=0, .holo=0, .flags=0, .origin=20,
+[1296] = {.id=1296, .name="Horsea", .kind=TCG_POKEMON, .type=3, .rarity=0, .set=20, .set2=255, .dark=0, .holo=0, .flags=TCG_CF_READY, .origin=20,
 .hp=40, .stage=0, .species=116, .level=0, .retreat=1, .weakness=2, .resistance=255, .evolvesFrom="", .description="", .attacks={
 {.name="Bubble",.description="Flip a coin. If heads, the Defending Pokemon is now Paralyzed.",.effect="ecard2-84:a0",.animation="ATK_ANIM_HIT",.cost={0,0,0,1,0,0,0,0,0},.damage=10,.category=TCG_DAMAGE_NORMAL},
 {.name="",.description="",.effect="NONE",.animation="ATK_ANIM_NONE",.cost={0},.damage=0,.category=TCG_DAMAGE_NORMAL},
@@ -8325,7 +8325,7 @@ const struct TcgCard gTcgCards[TCG_CARD_COUNT + 1] = {
 {.name="",.description="",.effect="NONE",.animation="ATK_ANIM_NONE",.cost={0},.damage=0,.category=TCG_DAMAGE_NORMAL},
 }
 },
-[1306] = {.id=1306, .name="Miltank", .kind=TCG_POKEMON, .type=6, .rarity=0, .set=20, .set2=255, .dark=0, .holo=0, .flags=0, .origin=20,
+[1306] = {.id=1306, .name="Miltank", .kind=TCG_POKEMON, .type=6, .rarity=0, .set=20, .set2=255, .dark=0, .holo=0, .flags=TCG_CF_READY, .origin=20,
 .hp=60, .stage=0, .species=241, .level=0, .retreat=1, .weakness=4, .resistance=255, .evolvesFrom="", .description="", .attacks={
 {.name="Tackle",.description="",.effect="NONE",.animation="ATK_ANIM_HIT",.cost={0,0,0,0,0,0,2,0,0},.damage=20,.category=TCG_DAMAGE_NORMAL},
 {.name="Continuous Tumble",.description="Flip a coin until you get tails. This attack does 20 damage times the number of heads.",.effect="ecard2-94:a1",.animation="ATK_ANIM_HIT",.cost={0,0,0,0,0,0,2,0,0},.damage=20,.category=TCG_DAMAGE_X},
@@ -8339,14 +8339,14 @@ const struct TcgCard gTcgCards[TCG_CARD_COUNT + 1] = {
 {.name="",.description="",.effect="NONE",.animation="ATK_ANIM_NONE",.cost={0},.damage=0,.category=TCG_DAMAGE_NORMAL},
 }
 },
-[1308] = {.id=1308, .name="Nidoran M", .kind=TCG_POKEMON, .type=1, .rarity=0, .set=20, .set2=255, .dark=0, .holo=0, .flags=0, .origin=20,
+[1308] = {.id=1308, .name="Nidoran M", .kind=TCG_POKEMON, .type=1, .rarity=0, .set=20, .set2=255, .dark=0, .holo=0, .flags=TCG_CF_READY, .origin=20,
 .hp=50, .stage=0, .species=32, .level=0, .retreat=1, .weakness=5, .resistance=255, .evolvesFrom="", .description="", .attacks={
 {.name="Poison Horn",.description="Flip a coin. If heads, the Defending Pokemon is now Poisoned.",.effect="ecard2-96:a0",.animation="ATK_ANIM_HIT",.cost={0,1,0,0,0,0,0,0,0},.damage=0,.category=TCG_RESIDUAL},
 {.name="Scratch",.description="",.effect="NONE",.animation="ATK_ANIM_HIT",.cost={0,0,0,0,0,0,2,0,0},.damage=20,.category=TCG_DAMAGE_NORMAL},
 {.name="",.description="",.effect="NONE",.animation="ATK_ANIM_NONE",.cost={0},.damage=0,.category=TCG_DAMAGE_NORMAL},
 }
 },
-[1309] = {.id=1309, .name="Oddish", .kind=TCG_POKEMON, .type=1, .rarity=0, .set=20, .set2=255, .dark=0, .holo=0, .flags=0, .origin=20,
+[1309] = {.id=1309, .name="Oddish", .kind=TCG_POKEMON, .type=1, .rarity=0, .set=20, .set2=255, .dark=0, .holo=0, .flags=TCG_CF_READY, .origin=20,
 .hp=50, .stage=0, .species=43, .level=0, .retreat=1, .weakness=0, .resistance=255, .evolvesFrom="", .description="", .attacks={
 {.name="Stun Spore",.description="Flip a coin. If heads, the Defending Pokemon is now Paralyzed.",.effect="ecard2-97:a0",.animation="ATK_ANIM_HIT",.cost={0,1,0,0,0,0,0,0,0},.damage=0,.category=TCG_RESIDUAL},
 {.name="Ram",.description="",.effect="NONE",.animation="ATK_ANIM_HIT",.cost={0,0,0,0,0,0,2,0,0},.damage=20,.category=TCG_DAMAGE_NORMAL},
@@ -8486,7 +8486,7 @@ const struct TcgCard gTcgCards[TCG_CARD_COUNT + 1] = {
 {.name="",.description="",.effect="NONE",.animation="ATK_ANIM_NONE",.cost={0},.damage=0,.category=TCG_DAMAGE_NORMAL},
 }
 },
-[1329] = {.id=1329, .name="Wooper", .kind=TCG_POKEMON, .type=3, .rarity=0, .set=20, .set2=255, .dark=0, .holo=0, .flags=0, .origin=20,
+[1329] = {.id=1329, .name="Wooper", .kind=TCG_POKEMON, .type=3, .rarity=0, .set=20, .set2=255, .dark=0, .holo=0, .flags=TCG_CF_READY, .origin=20,
 .hp=40, .stage=0, .species=194, .level=0, .retreat=1, .weakness=2, .resistance=255, .evolvesFrom="", .description="", .attacks={
 {.name="Bubble",.description="Flip a coin. If heads, the Defending Pokemon is now Paralyzed.",.effect="ecard2-117:a0",.animation="ATK_ANIM_HIT",.cost={0,0,0,1,0,0,0,0,0},.damage=10,.category=TCG_DAMAGE_NORMAL},
 {.name="Wave Splash",.description="",.effect="NONE",.animation="ATK_ANIM_HIT",.cost={0,0,0,1,0,0,1,0,0},.damage=20,.category=TCG_DAMAGE_NORMAL},
@@ -9024,7 +9024,7 @@ const struct TcgCard gTcgCards[TCG_CARD_COUNT + 1] = {
 {.name="",.description="",.effect="NONE",.animation="ATK_ANIM_NONE",.cost={0},.damage=0,.category=TCG_DAMAGE_NORMAL},
 }
 },
-[1423] = {.id=1423, .name="Rhydon", .kind=TCG_POKEMON, .type=4, .rarity=2, .set=21, .set2=255, .dark=0, .holo=0, .flags=0, .origin=21,
+[1423] = {.id=1423, .name="Rhydon", .kind=TCG_POKEMON, .type=4, .rarity=2, .set=21, .set2=255, .dark=0, .holo=0, .flags=TCG_CF_READY, .origin=21,
 .hp=90, .stage=1, .species=112, .level=0, .retreat=2, .weakness=1, .resistance=2, .evolvesFrom="Rhyhorn", .description="", .attacks={
 {.name="Stomp",.description="Flip a coin. If heads, this attack does 30 damage plus 20 more damage.",.effect="ecard3-29:a0",.animation="ATK_ANIM_HIT",.cost={0,0,0,0,1,0,2,0,0},.damage=30,.category=TCG_DAMAGE_PLUS},
 {.name="Giant Tail",.description="Flip a coin. If tails, this attack does nothing.",.effect="ecard3-29:a1",.animation="ATK_ANIM_HIT",.cost={0,0,0,0,2,0,3,0,0},.damage=100,.category=TCG_DAMAGE_NORMAL},
@@ -9199,14 +9199,14 @@ const struct TcgCard gTcgCards[TCG_CARD_COUNT + 1] = {
 {.name="",.description="",.effect="NONE",.animation="ATK_ANIM_NONE",.cost={0},.damage=0,.category=TCG_DAMAGE_NORMAL},
 }
 },
-[1448] = {.id=1448, .name="Eevee", .kind=TCG_POKEMON, .type=6, .rarity=0, .set=21, .set2=255, .dark=0, .holo=0, .flags=0, .origin=21,
+[1448] = {.id=1448, .name="Eevee", .kind=TCG_POKEMON, .type=6, .rarity=0, .set=21, .set2=255, .dark=0, .holo=0, .flags=TCG_CF_READY, .origin=21,
 .hp=50, .stage=0, .species=133, .level=0, .retreat=1, .weakness=4, .resistance=255, .evolvesFrom="", .description="", .attacks={
 {.name="Smash Kick",.description="",.effect="NONE",.animation="ATK_ANIM_HIT",.cost={0,0,0,0,0,0,1,0,0},.damage=10,.category=TCG_DAMAGE_NORMAL},
 {.name="Take Down",.description="Eevee does 10 damage to itself.",.effect="ecard3-54:a1",.animation="ATK_ANIM_HIT",.cost={0,0,0,0,0,0,2,0,0},.damage=30,.category=TCG_DAMAGE_NORMAL},
 {.name="",.description="",.effect="NONE",.animation="ATK_ANIM_NONE",.cost={0},.damage=0,.category=TCG_DAMAGE_NORMAL},
 }
 },
-[1449] = {.id=1449, .name="Farfetch'd", .kind=TCG_POKEMON, .type=6, .rarity=0, .set=21, .set2=255, .dark=0, .holo=0, .flags=0, .origin=21,
+[1449] = {.id=1449, .name="Farfetch'd", .kind=TCG_POKEMON, .type=6, .rarity=0, .set=21, .set2=255, .dark=0, .holo=0, .flags=TCG_CF_READY, .origin=21,
 .hp=50, .stage=0, .species=83, .level=0, .retreat=1, .weakness=2, .resistance=4, .evolvesFrom="", .description="", .attacks={
 {.name="Whirlwind",.description="Your opponent switches the Defending Pokemon with 1 of his or her Benched Pokemon.",.effect="ecard3-55:a0",.animation="ATK_ANIM_HIT",.cost={0,0,0,0,0,0,1,0,0},.damage=0,.category=TCG_RESIDUAL},
 {.name="Leek Rush",.description="Flip a coin until you get tails. This attack does 10 damage times the number of heads.",.effect="ecard3-55:a1",.animation="ATK_ANIM_HIT",.cost={0,0,0,0,0,0,1,0,0},.damage=10,.category=TCG_DAMAGE_X},
@@ -9276,7 +9276,7 @@ const struct TcgCard gTcgCards[TCG_CARD_COUNT + 1] = {
 {.name="",.description="",.effect="NONE",.animation="ATK_ANIM_NONE",.cost={0},.damage=0,.category=TCG_DAMAGE_NORMAL},
 }
 },
-[1459] = {.id=1459, .name="Hoothoot", .kind=TCG_POKEMON, .type=6, .rarity=0, .set=21, .set2=255, .dark=0, .holo=0, .flags=0, .origin=21,
+[1459] = {.id=1459, .name="Hoothoot", .kind=TCG_POKEMON, .type=6, .rarity=0, .set=21, .set2=255, .dark=0, .holo=0, .flags=TCG_CF_READY, .origin=21,
 .hp=40, .stage=0, .species=163, .level=0, .retreat=1, .weakness=2, .resistance=4, .evolvesFrom="", .description="", .attacks={
 {.name="Hypnosis",.description="The Defending Pokemon is now Asleep.",.effect="ecard3-65:a0",.animation="ATK_ANIM_HIT",.cost={0,0,0,0,0,0,1,0,0},.damage=0,.category=TCG_RESIDUAL},
 {.name="Eerie Light",.description="Flip a coin. If heads, the Defending Pokemon is now Confused.",.effect="ecard3-65:a1",.animation="ATK_ANIM_HIT",.cost={0,0,0,0,0,0,1,0,0},.damage=0,.category=TCG_RESIDUAL},
@@ -9297,7 +9297,7 @@ const struct TcgCard gTcgCards[TCG_CARD_COUNT + 1] = {
 {.name="",.description="",.effect="NONE",.animation="ATK_ANIM_NONE",.cost={0},.damage=0,.category=TCG_DAMAGE_NORMAL},
 }
 },
-[1462] = {.id=1462, .name="Jigglypuff", .kind=TCG_POKEMON, .type=6, .rarity=0, .set=21, .set2=255, .dark=0, .holo=0, .flags=0, .origin=21,
+[1462] = {.id=1462, .name="Jigglypuff", .kind=TCG_POKEMON, .type=6, .rarity=0, .set=21, .set2=255, .dark=0, .holo=0, .flags=TCG_CF_READY, .origin=21,
 .hp=50, .stage=0, .species=39, .level=0, .retreat=1, .weakness=4, .resistance=255, .evolvesFrom="", .description="", .attacks={
 {.name="Nap",.description="Remove 1 damage counter from Jigglypuff.",.effect="ecard3-68:a0",.animation="ATK_ANIM_HIT",.cost={0,0,0,0,0,0,1,0,0},.damage=0,.category=TCG_RESIDUAL},
 {.name="Lullaby",.description="The Defending Pokemon is now Asleep.",.effect="ecard3-68:a1",.animation="ATK_ANIM_HIT",.cost={0,0,0,0,0,0,2,0,0},.damage=10,.category=TCG_DAMAGE_NORMAL},
@@ -9395,14 +9395,14 @@ const struct TcgCard gTcgCards[TCG_CARD_COUNT + 1] = {
 {.name="",.description="",.effect="NONE",.animation="ATK_ANIM_NONE",.cost={0},.damage=0,.category=TCG_DAMAGE_NORMAL},
 }
 },
-[1476] = {.id=1476, .name="Nidoran F", .kind=TCG_POKEMON, .type=1, .rarity=0, .set=21, .set2=255, .dark=0, .holo=0, .flags=0, .origin=21,
+[1476] = {.id=1476, .name="Nidoran F", .kind=TCG_POKEMON, .type=1, .rarity=0, .set=21, .set2=255, .dark=0, .holo=0, .flags=TCG_CF_READY, .origin=21,
 .hp=50, .stage=0, .species=29, .level=0, .retreat=1, .weakness=5, .resistance=255, .evolvesFrom="", .description="", .attacks={
 {.name="Poison Sting",.description="The Defending Pokemon is now Poisoned.",.effect="ecard3-82:a0",.animation="ATK_ANIM_HIT",.cost={0,0,0,0,0,0,2,0,0},.damage=10,.category=TCG_DAMAGE_NORMAL},
 {.name="",.description="",.effect="NONE",.animation="ATK_ANIM_NONE",.cost={0},.damage=0,.category=TCG_DAMAGE_NORMAL},
 {.name="",.description="",.effect="NONE",.animation="ATK_ANIM_NONE",.cost={0},.damage=0,.category=TCG_DAMAGE_NORMAL},
 }
 },
-[1477] = {.id=1477, .name="Nidorina", .kind=TCG_POKEMON, .type=1, .rarity=0, .set=21, .set2=255, .dark=0, .holo=0, .flags=0, .origin=21,
+[1477] = {.id=1477, .name="Nidorina", .kind=TCG_POKEMON, .type=1, .rarity=0, .set=21, .set2=255, .dark=0, .holo=0, .flags=TCG_CF_READY, .origin=21,
 .hp=80, .stage=1, .species=30, .level=0, .retreat=2, .weakness=5, .resistance=255, .evolvesFrom="Nidoran F", .description="", .attacks={
 {.name="Tackle",.description="",.effect="NONE",.animation="ATK_ANIM_HIT",.cost={0,0,0,0,0,0,2,0,0},.damage=20,.category=TCG_DAMAGE_NORMAL},
 {.name="Poison Claws",.description="Flip a coin. If heads, the Defending Pokemon is now Poisoned.",.effect="ecard3-83:a1",.animation="ATK_ANIM_HIT",.cost={0,1,0,0,0,0,2,0,0},.damage=30,.category=TCG_DAMAGE_NORMAL},
@@ -9416,14 +9416,14 @@ const struct TcgCard gTcgCards[TCG_CARD_COUNT + 1] = {
 {.name="",.description="",.effect="NONE",.animation="ATK_ANIM_NONE",.cost={0},.damage=0,.category=TCG_DAMAGE_NORMAL},
 }
 },
-[1479] = {.id=1479, .name="Pineco", .kind=TCG_POKEMON, .type=1, .rarity=0, .set=21, .set2=255, .dark=0, .holo=0, .flags=0, .origin=21,
+[1479] = {.id=1479, .name="Pineco", .kind=TCG_POKEMON, .type=1, .rarity=0, .set=21, .set2=255, .dark=0, .holo=0, .flags=TCG_CF_READY, .origin=21,
 .hp=40, .stage=0, .species=204, .level=0, .retreat=1, .weakness=0, .resistance=255, .evolvesFrom="", .description="", .attacks={
 {.name="Surprise Attack",.description="Flip a coin. If tails, this attack does nothing.",.effect="ecard3-85:a0",.animation="ATK_ANIM_HIT",.cost={0,0,0,0,0,0,1,0,0},.damage=20,.category=TCG_DAMAGE_NORMAL},
 {.name="",.description="",.effect="NONE",.animation="ATK_ANIM_NONE",.cost={0},.damage=0,.category=TCG_DAMAGE_NORMAL},
 {.name="",.description="",.effect="NONE",.animation="ATK_ANIM_NONE",.cost={0},.damage=0,.category=TCG_DAMAGE_NORMAL},
 }
 },
-[1480] = {.id=1480, .name="Pineco", .kind=TCG_POKEMON, .type=1, .rarity=0, .set=21, .set2=255, .dark=0, .holo=0, .flags=0, .origin=21,
+[1480] = {.id=1480, .name="Pineco", .kind=TCG_POKEMON, .type=1, .rarity=0, .set=21, .set2=255, .dark=0, .holo=0, .flags=TCG_CF_READY, .origin=21,
 .hp=50, .stage=0, .species=204, .level=0, .retreat=1, .weakness=0, .resistance=255, .evolvesFrom="", .description="", .attacks={
 {.name="Double-edge",.description="Pineco does 10 damage to itself.",.effect="ecard3-86:a0",.animation="ATK_ANIM_HIT",.cost={0,1,0,0,0,0,1,0,0},.damage=30,.category=TCG_DAMAGE_NORMAL},
 {.name="",.description="",.effect="NONE",.animation="ATK_ANIM_NONE",.cost={0},.damage=0,.category=TCG_DAMAGE_NORMAL},
@@ -9479,7 +9479,7 @@ const struct TcgCard gTcgCards[TCG_CARD_COUNT + 1] = {
 {.name="",.description="",.effect="NONE",.animation="ATK_ANIM_NONE",.cost={0},.damage=0,.category=TCG_DAMAGE_NORMAL},
 }
 },
-[1488] = {.id=1488, .name="Seel", .kind=TCG_POKEMON, .type=3, .rarity=0, .set=21, .set2=255, .dark=0, .holo=0, .flags=0, .origin=21,
+[1488] = {.id=1488, .name="Seel", .kind=TCG_POKEMON, .type=3, .rarity=0, .set=21, .set2=255, .dark=0, .holo=0, .flags=TCG_CF_READY, .origin=21,
 .hp=50, .stage=0, .species=86, .level=0, .retreat=1, .weakness=2, .resistance=255, .evolvesFrom="", .description="", .attacks={
 {.name="Cold Breath",.description="Flip a coin. If heads, the Defending Pokemon is now Asleep.",.effect="ecard3-94:a0",.animation="ATK_ANIM_HIT",.cost={0,0,0,1,0,0,0,0,0},.damage=10,.category=TCG_DAMAGE_NORMAL},
 {.name="",.description="",.effect="NONE",.animation="ATK_ANIM_NONE",.cost={0},.damage=0,.category=TCG_DAMAGE_NORMAL},
@@ -9549,14 +9549,14 @@ const struct TcgCard gTcgCards[TCG_CARD_COUNT + 1] = {
 {.name="",.description="",.effect="NONE",.animation="ATK_ANIM_NONE",.cost={0},.damage=0,.category=TCG_DAMAGE_NORMAL},
 }
 },
-[1498] = {.id=1498, .name="Staryu", .kind=TCG_POKEMON, .type=3, .rarity=0, .set=21, .set2=255, .dark=0, .holo=0, .flags=0, .origin=21,
+[1498] = {.id=1498, .name="Staryu", .kind=TCG_POKEMON, .type=3, .rarity=0, .set=21, .set2=255, .dark=0, .holo=0, .flags=TCG_CF_READY, .origin=21,
 .hp=50, .stage=0, .species=120, .level=0, .retreat=1, .weakness=2, .resistance=255, .evolvesFrom="", .description="", .attacks={
 {.name="Slap",.description="",.effect="NONE",.animation="ATK_ANIM_HIT",.cost={0,0,0,0,0,0,1,0,0},.damage=10,.category=TCG_DAMAGE_NORMAL},
 {.name="Confuse Ray",.description="Flip a coin. If heads, the Defending Pokemon is now Confused.",.effect="ecard3-104:a1",.animation="ATK_ANIM_HIT",.cost={0,0,0,1,0,0,1,0,0},.damage=10,.category=TCG_DAMAGE_NORMAL},
 {.name="",.description="",.effect="NONE",.animation="ATK_ANIM_NONE",.cost={0},.damage=0,.category=TCG_DAMAGE_NORMAL},
 }
 },
-[1499] = {.id=1499, .name="Sunflora", .kind=TCG_POKEMON, .type=1, .rarity=0, .set=21, .set2=255, .dark=0, .holo=0, .flags=0, .origin=21,
+[1499] = {.id=1499, .name="Sunflora", .kind=TCG_POKEMON, .type=1, .rarity=0, .set=21, .set2=255, .dark=0, .holo=0, .flags=TCG_CF_READY, .origin=21,
 .hp=70, .stage=1, .species=192, .level=0, .retreat=1, .weakness=0, .resistance=3, .evolvesFrom="Sunkern", .description="", .attacks={
 {.name="Energy Plant",.description="Search your deck for a basic Energy card and attach it to 1 of your Pokemon. Shuffle your deck afterward.",.effect="ecard3-105:a0",.animation="ATK_ANIM_HIT",.cost={0,1,0,0,0,0,1,0,0},.damage=0,.category=TCG_RESIDUAL},
 {.name="Trip Over",.description="Flip a coin. If heads, this attack does 30 damage plus 30 more damage.",.effect="ecard3-105:a1",.animation="ATK_ANIM_HIT",.cost={0,1,0,0,0,0,2,0,0},.damage=30,.category=TCG_DAMAGE_PLUS},
@@ -9612,7 +9612,7 @@ const struct TcgCard gTcgCards[TCG_CARD_COUNT + 1] = {
 {.name="",.description="",.effect="NONE",.animation="ATK_ANIM_NONE",.cost={0},.damage=0,.category=TCG_DAMAGE_NORMAL},
 }
 },
-[1507] = {.id=1507, .name="Voltorb", .kind=TCG_POKEMON, .type=2, .rarity=0, .set=21, .set2=255, .dark=0, .holo=0, .flags=0, .origin=21,
+[1507] = {.id=1507, .name="Voltorb", .kind=TCG_POKEMON, .type=2, .rarity=0, .set=21, .set2=255, .dark=0, .holo=0, .flags=TCG_CF_READY, .origin=21,
 .hp=50, .stage=0, .species=100, .level=0, .retreat=1, .weakness=4, .resistance=255, .evolvesFrom="", .description="", .attacks={
 {.name="Magnetic Pull",.description="If your opponent has any Benched Pokemon, choose 1 of them and switch it with the Defending Pokemon.",.effect="ecard3-113:a0",.animation="ATK_ANIM_HIT",.cost={0,0,1,0,0,0,0,0,0},.damage=0,.category=TCG_RESIDUAL},
 {.name="Spin Tackle",.description="Voltorb does 10 damage to itself.",.effect="ecard3-113:a1",.animation="ATK_ANIM_HIT",.cost={0,0,1,0,0,0,1,0,0},.damage=30,.category=TCG_DAMAGE_NORMAL},
@@ -9626,7 +9626,7 @@ const struct TcgCard gTcgCards[TCG_CARD_COUNT + 1] = {
 {.name="",.description="",.effect="NONE",.animation="ATK_ANIM_NONE",.cost={0},.damage=0,.category=TCG_DAMAGE_NORMAL},
 }
 },
-[1509] = {.id=1509, .name="Weedle", .kind=TCG_POKEMON, .type=1, .rarity=0, .set=21, .set2=255, .dark=0, .holo=0, .flags=0, .origin=21,
+[1509] = {.id=1509, .name="Weedle", .kind=TCG_POKEMON, .type=1, .rarity=0, .set=21, .set2=255, .dark=0, .holo=0, .flags=TCG_CF_READY, .origin=21,
 .hp=50, .stage=0, .species=13, .level=0, .retreat=1, .weakness=0, .resistance=255, .evolvesFrom="", .description="", .attacks={
 {.name="Entangling Thread",.description="Flip a coin. If heads, the Defending Pokemon is now Paralyzed.",.effect="ecard3-115:a0",.animation="ATK_ANIM_HIT",.cost={0,0,0,0,0,0,1,0,0},.damage=0,.category=TCG_RESIDUAL},
 {.name="Poison Horn",.description="Flip a coin. If heads, the Defending Pokemon is now Poisoned.",.effect="ecard3-115:a1",.animation="ATK_ANIM_HIT",.cost={0,1,0,0,0,0,0,0,0},.damage=0,.category=TCG_RESIDUAL},
@@ -9647,7 +9647,7 @@ const struct TcgCard gTcgCards[TCG_CARD_COUNT + 1] = {
 {.name="",.description="",.effect="NONE",.animation="ATK_ANIM_NONE",.cost={0},.damage=0,.category=TCG_DAMAGE_NORMAL},
 }
 },
-[1512] = {.id=1512, .name="Zubat", .kind=TCG_POKEMON, .type=1, .rarity=0, .set=21, .set2=255, .dark=0, .holo=0, .flags=0, .origin=21,
+[1512] = {.id=1512, .name="Zubat", .kind=TCG_POKEMON, .type=1, .rarity=0, .set=21, .set2=255, .dark=0, .holo=0, .flags=TCG_CF_READY, .origin=21,
 .hp=50, .stage=0, .species=41, .level=0, .retreat=1, .weakness=5, .resistance=255, .evolvesFrom="", .description="", .attacks={
 {.name="Wing Attack",.description="",.effect="NONE",.animation="ATK_ANIM_HIT",.cost={0,0,0,0,0,0,1,0,0},.damage=10,.category=TCG_DAMAGE_NORMAL},
 {.name="Poison Spray",.description="The Defending Pokemon is now Poisoned.",.effect="ecard3-118:a1",.animation="ATK_ANIM_HIT",.cost={0,1,0,0,0,0,1,0,0},.damage=10,.category=TCG_DAMAGE_NORMAL},
@@ -9956,7 +9956,7 @@ const struct TcgCard gTcgCards[TCG_CARD_COUNT + 1] = {
 {.name="",.description="",.effect="NONE",.animation="ATK_ANIM_NONE",.cost={0},.damage=0,.category=TCG_DAMAGE_NORMAL},
 }
 },
-[1571] = {.id=1571, .name="Rhydon", .kind=TCG_POKEMON, .type=4, .rarity=2, .set=21, .set2=255, .dark=0, .holo=1, .flags=0, .origin=21,
+[1571] = {.id=1571, .name="Rhydon", .kind=TCG_POKEMON, .type=4, .rarity=2, .set=21, .set2=255, .dark=0, .holo=1, .flags=TCG_CF_READY, .origin=21,
 .hp=90, .stage=1, .species=112, .level=0, .retreat=2, .weakness=1, .resistance=2, .evolvesFrom="Rhyhorn", .description="", .attacks={
 {.name="Stomp",.description="Flip a coin. If heads, this attack does 30 damage plus 20 more damage.",.effect="ecard3-H27:a0",.animation="ATK_ANIM_HIT",.cost={0,0,0,0,1,0,2,0,0},.damage=30,.category=TCG_DAMAGE_PLUS},
 {.name="Giant Tail",.description="Flip a coin. If tails, this attack does nothing.",.effect="ecard3-H27:a1",.animation="ATK_ANIM_HIT",.cost={0,0,0,0,2,0,3,0,0},.damage=100,.category=TCG_DAMAGE_NORMAL},
@@ -10012,14 +10012,14 @@ const struct TcgCard gTcgCards[TCG_CARD_COUNT + 1] = {
 {.name="",.description="",.effect="NONE",.animation="ATK_ANIM_NONE",.cost={0},.damage=0,.category=TCG_DAMAGE_NORMAL},
 }
 },
-[1579] = {.id=1579, .name="Mewtwo", .kind=TCG_POKEMON, .type=5, .rarity=3, .set=4, .set2=255, .dark=0, .holo=0, .flags=0, .origin=22,
+[1579] = {.id=1579, .name="Mewtwo", .kind=TCG_POKEMON, .type=5, .rarity=3, .set=4, .set2=255, .dark=0, .holo=0, .flags=TCG_CF_READY, .origin=22,
 .hp=70, .stage=0, .species=150, .level=60, .retreat=2, .weakness=5, .resistance=255, .evolvesFrom="", .description="Years of genetic experiments resulted in the creation of this never-before-seen violent Pokemon.", .attacks={
 {.name="Energy Absorption",.description="Choose up to 2 Energy cards from your discard pile and attach them to Mewtwo.",.effect="basep-3:a0",.animation="ATK_ANIM_HIT",.cost={0,0,0,0,0,1,0,0,0},.damage=0,.category=TCG_RESIDUAL},
 {.name="Psyburn",.description="",.effect="NONE",.animation="ATK_ANIM_HIT",.cost={0,0,0,0,0,2,1,0,0},.damage=40,.category=TCG_DAMAGE_NORMAL},
 {.name="",.description="",.effect="NONE",.animation="ATK_ANIM_NONE",.cost={0},.damage=0,.category=TCG_DAMAGE_NORMAL},
 }
 },
-[1580] = {.id=1580, .name="Pikachu", .kind=TCG_POKEMON, .type=2, .rarity=3, .set=4, .set2=255, .dark=0, .holo=0, .flags=0, .origin=22,
+[1580] = {.id=1580, .name="Pikachu", .kind=TCG_POKEMON, .type=2, .rarity=3, .set=4, .set2=255, .dark=0, .holo=0, .flags=TCG_CF_READY, .origin=22,
 .hp=50, .stage=0, .species=25, .level=13, .retreat=1, .weakness=4, .resistance=255, .evolvesFrom="", .description="When several of these Pokemon gather, they attract so much electricity that they can cause lightning to strike.", .attacks={
 {.name="Recharge",.description="Search your deck for a Lightning Energy card and attach it to Pikachu. Shuffle your deck afterward.",.effect="basep-4:a0",.animation="ATK_ANIM_HIT",.cost={0,0,1,0,0,0,0,0,0},.damage=0,.category=TCG_RESIDUAL},
 {.name="Thunderbolt",.description="Discard all Energy cards attached to Pikachu in order to use this attack.",.effect="basep-4:a1",.animation="ATK_ANIM_HIT",.cost={0,0,3,0,0,0,0,0,0},.damage=50,.category=TCG_DAMAGE_NORMAL},
@@ -10040,7 +10040,7 @@ const struct TcgCard gTcgCards[TCG_CARD_COUNT + 1] = {
 {.name="",.description="",.effect="NONE",.animation="ATK_ANIM_NONE",.cost={0},.damage=0,.category=TCG_DAMAGE_NORMAL},
 }
 },
-[1583] = {.id=1583, .name="Jigglypuff", .kind=TCG_POKEMON, .type=6, .rarity=3, .set=4, .set2=255, .dark=0, .holo=0, .flags=0, .origin=22,
+[1583] = {.id=1583, .name="Jigglypuff", .kind=TCG_POKEMON, .type=6, .rarity=3, .set=4, .set2=255, .dark=0, .holo=0, .flags=TCG_CF_READY, .origin=22,
 .hp=50, .stage=0, .species=39, .level=12, .retreat=1, .weakness=4, .resistance=5, .evolvesFrom="", .description="When its huge eyes light up, it sings a mysteriously soothing melody that lulls its enemies to sleep.", .attacks={
 {.name="First Aid",.description="Remove 1 damage counter from Jigglypuff.",.effect="basep-7:a0",.animation="ATK_ANIM_HIT",.cost={0,0,0,0,0,0,1,0,0},.damage=0,.category=TCG_RESIDUAL},
 {.name="Double-edge",.description="Jigglypuff does 20 damage to itself.",.effect="basep-7:a1",.animation="ATK_ANIM_HIT",.cost={0,0,0,0,0,0,3,0,0},.damage=40,.category=TCG_DAMAGE_NORMAL},
@@ -10089,7 +10089,7 @@ const struct TcgCard gTcgCards[TCG_CARD_COUNT + 1] = {
 {.name="",.description="",.effect="NONE",.animation="ATK_ANIM_NONE",.cost={0},.damage=0,.category=TCG_DAMAGE_NORMAL},
 }
 },
-[1590] = {.id=1590, .name="Mewtwo", .kind=TCG_POKEMON, .type=5, .rarity=3, .set=4, .set2=255, .dark=0, .holo=0, .flags=0, .origin=22,
+[1590] = {.id=1590, .name="Mewtwo", .kind=TCG_POKEMON, .type=5, .rarity=3, .set=4, .set2=255, .dark=0, .holo=0, .flags=TCG_CF_READY, .origin=22,
 .hp=70, .stage=0, .species=150, .level=60, .retreat=2, .weakness=5, .resistance=255, .evolvesFrom="", .description="Years of genetic experiments resulted in the creation of this never-before-seen violent Pokemon.", .attacks={
 {.name="Energy Absorption",.description="Choose up to 2 Energy cards from your discard pile and attach them to Mewtwo.",.effect="basep-14:a0",.animation="ATK_ANIM_HIT",.cost={0,0,0,0,0,1,0,0,0},.damage=0,.category=TCG_RESIDUAL},
 {.name="Psyburn",.description="",.effect="NONE",.animation="ATK_ANIM_HIT",.cost={0,0,0,0,0,2,1,0,0},.damage=40,.category=TCG_DAMAGE_NORMAL},
@@ -10169,14 +10169,14 @@ const struct TcgCard gTcgCards[TCG_CARD_COUNT + 1] = {
 {.name="",.description="",.effect="NONE",.animation="ATK_ANIM_NONE",.cost={0},.damage=0,.category=TCG_DAMAGE_NORMAL},
 }
 },
-[1602] = {.id=1602, .name="Pikachu", .kind=TCG_POKEMON, .type=2, .rarity=3, .set=4, .set2=255, .dark=0, .holo=0, .flags=0, .origin=22,
+[1602] = {.id=1602, .name="Pikachu", .kind=TCG_POKEMON, .type=2, .rarity=3, .set=4, .set2=255, .dark=0, .holo=0, .flags=TCG_CF_READY, .origin=22,
 .hp=40, .stage=0, .species=25, .level=9, .retreat=1, .weakness=4, .resistance=255, .evolvesFrom="", .description="It uses its sensitive tail to sense its environment and has been known to react violently if its tail is grabbed.", .attacks={
 {.name="Scratch",.description="",.effect="NONE",.animation="ATK_ANIM_HIT",.cost={0,0,0,0,0,0,1,0,0},.damage=10,.category=TCG_DAMAGE_NORMAL},
 {.name="Thunderbolt",.description="Discard all Energy cards attached to Pikachu.",.effect="basep-26:a1",.animation="ATK_ANIM_HIT",.cost={0,0,2,0,0,0,0,0,0},.damage=40,.category=TCG_DAMAGE_NORMAL},
 {.name="",.description="",.effect="NONE",.animation="ATK_ANIM_NONE",.cost={0},.damage=0,.category=TCG_DAMAGE_NORMAL},
 }
 },
-[1603] = {.id=1603, .name="Pikachu", .kind=TCG_POKEMON, .type=2, .rarity=3, .set=4, .set2=255, .dark=0, .holo=0, .flags=0, .origin=22,
+[1603] = {.id=1603, .name="Pikachu", .kind=TCG_POKEMON, .type=2, .rarity=3, .set=4, .set2=255, .dark=0, .holo=0, .flags=TCG_CF_READY, .origin=22,
 .hp=30, .stage=0, .species=25, .level=5, .retreat=0, .weakness=4, .resistance=255, .evolvesFrom="", .description="When several of these Pokemon gather, their electricity can cause lightning storms.", .attacks={
 {.name="Thundershock",.description="Flip a coin. If heads, the Defending Pokemon is now Paralyzed.",.effect="basep-27:a0",.animation="ATK_ANIM_HIT",.cost={0,0,1,0,0,0,0,0,0},.damage=10,.category=TCG_DAMAGE_NORMAL},
 {.name="Agility",.description="Flip a coin. If heads, during your opponent's next turn, prevent all effects of attacks, including damage, done to Pikachu.",.effect="basep-27:a1",.animation="ATK_ANIM_HIT",.cost={0,0,2,0,0,0,0,0,0},.damage=20,.category=TCG_DAMAGE_NORMAL},
@@ -10190,14 +10190,14 @@ const struct TcgCard gTcgCards[TCG_CARD_COUNT + 1] = {
 {.name="",.description="",.effect="NONE",.animation="ATK_ANIM_NONE",.cost={0},.damage=0,.category=TCG_DAMAGE_NORMAL},
 }
 },
-[1605] = {.id=1605, .name="Marill", .kind=TCG_POKEMON, .type=3, .rarity=3, .set=4, .set2=255, .dark=0, .holo=0, .flags=0, .origin=22,
+[1605] = {.id=1605, .name="Marill", .kind=TCG_POKEMON, .type=3, .rarity=3, .set=4, .set2=255, .dark=0, .holo=0, .flags=TCG_CF_READY, .origin=22,
 .hp=50, .stage=0, .species=183, .level=64, .retreat=1, .weakness=2, .resistance=255, .evolvesFrom="", .description="The tip of its tail, which contains oil that is lighter than water, lets it swim without drowning.", .attacks={
 {.name="Water Gun",.description="Does 20 damage plus 10 more damage for each Energy attached to Marill but not used to pay for this attack's Energy cost. You can't add more than 20 damage in this way.",.effect="basep-29:a0",.animation="ATK_ANIM_HIT",.cost={0,0,0,2,0,0,0,0,0},.damage=20,.category=TCG_DAMAGE_PLUS},
 {.name="",.description="",.effect="NONE",.animation="ATK_ANIM_NONE",.cost={0},.damage=0,.category=TCG_DAMAGE_NORMAL},
 {.name="",.description="",.effect="NONE",.animation="ATK_ANIM_NONE",.cost={0},.damage=0,.category=TCG_DAMAGE_NORMAL},
 }
 },
-[1606] = {.id=1606, .name="Togepi", .kind=TCG_POKEMON, .type=6, .rarity=3, .set=4, .set2=255, .dark=0, .holo=0, .flags=0, .origin=22,
+[1606] = {.id=1606, .name="Togepi", .kind=TCG_POKEMON, .type=6, .rarity=3, .set=4, .set2=255, .dark=0, .holo=0, .flags=TCG_CF_READY, .origin=22,
 .hp=30, .stage=0, .species=175, .level=8, .retreat=1, .weakness=255, .resistance=5, .evolvesFrom="", .description="Still only a hatchling, it uses poison to chase off its enemies when threatened.", .attacks={
 {.name="Snivel",.description="If the Defending Pokemon attacks Togepi during your opponent's next turn, any damage done to Togepi is reduced by 20 (before applying Weakness and Resistance). (Benching either Pokemon ends this effect.)",.effect="basep-30:a0",.animation="ATK_ANIM_HIT",.cost={0,0,0,0,0,0,1,0,0},.damage=0,.category=TCG_RESIDUAL},
 {.name="Mini-Metronome",.description="Flip a coin. If heads, choose 1 of the Defending Pokemon's attacks. Mini-Metronome copies that attack except for its Energy cost. (You must still do anything else in order to use that attack.) (No matter what type the Defending Pokemon is, Togepi's type is still Colorless.) Togepi performs that attack.",.effect="basep-30:a1",.animation="ATK_ANIM_HIT",.cost={0,0,0,0,0,0,2,0,0},.damage=0,.category=TCG_RESIDUAL},
@@ -10276,21 +10276,21 @@ const struct TcgCard gTcgCards[TCG_CARD_COUNT + 1] = {
 [1618] = {.id=1618, .name="Pokemon Tower", .kind=TCG_TRAINER, .type=6, .rarity=3, .set=4, .set2=255, .dark=0, .holo=0, .flags=TCG_CF_STADIUM, .origin=22,
 .effect="basep-42:t",.description="This card stays in play when you play it. Discard this card if another Stadium card comes into play. If the effect of a Pokemon Power, attack, Energy card, or Trainer card would put a card in a discard pile into its owner's hand, that card stays in that discard pile instead."
 },
-[1619] = {.id=1619, .name="Machamp", .kind=TCG_POKEMON, .type=4, .rarity=3, .set=4, .set2=255, .dark=0, .holo=0, .flags=0, .origin=22,
+[1619] = {.id=1619, .name="Machamp", .kind=TCG_POKEMON, .type=4, .rarity=3, .set=4, .set2=255, .dark=0, .holo=0, .flags=TCG_CF_READY, .origin=22,
 .hp=90, .stage=2, .species=68, .level=54, .retreat=3, .weakness=5, .resistance=255, .evolvesFrom="Machoke", .description="Using its amazing muscles, it throws powerful punches that can knock its victim clear over the horizon.", .attacks={
 {.name="Seething Anger",.description="Flip a number of coins equal to the number of damage counters on Machamp. This attack does 20 damage plus 10 more damage for each heads.",.effect="basep-43:a0",.animation="ATK_ANIM_HIT",.cost={0,0,0,0,2,0,0,0,0},.damage=20,.category=TCG_DAMAGE_PLUS},
 {.name="Fling",.description="If your opponent has any Benched Pokemon, he or she chooses 1 of them and switches it with the Defending Pokemon. (Do the damage before switching the Pokemon.)",.effect="basep-43:a1",.animation="ATK_ANIM_HIT",.cost={0,0,0,0,2,0,2,0,0},.damage=50,.category=TCG_DAMAGE_NORMAL},
 {.name="",.description="",.effect="NONE",.animation="ATK_ANIM_NONE",.cost={0},.damage=0,.category=TCG_DAMAGE_NORMAL},
 }
 },
-[1620] = {.id=1620, .name="Magmar", .kind=TCG_POKEMON, .type=0, .rarity=3, .set=4, .set2=255, .dark=0, .holo=0, .flags=0, .origin=22,
+[1620] = {.id=1620, .name="Magmar", .kind=TCG_POKEMON, .type=0, .rarity=3, .set=4, .set2=255, .dark=0, .holo=0, .flags=TCG_CF_READY, .origin=22,
 .hp=60, .stage=0, .species=126, .level=27, .retreat=2, .weakness=3, .resistance=255, .evolvesFrom="", .description="Its body always burns with an orange glow that enables it to hide perfectly among flames.", .attacks={
 {.name="Burning Fire",.description="When you use this attack, you may discard any number of Fire Energy cards attached to your Pokemon in play. This attack does 10 damage plus 10 more damage for each Fire Energy card you discarded in this way.",.effect="basep-44:a0",.animation="ATK_ANIM_HIT",.cost={1,0,0,0,0,0,0,0,0},.damage=10,.category=TCG_DAMAGE_PLUS},
 {.name="Magma Punch",.description="",.effect="NONE",.animation="ATK_ANIM_HIT",.cost={2,0,0,0,0,0,1,0,0},.damage=40,.category=TCG_DAMAGE_NORMAL},
 {.name="",.description="",.effect="NONE",.animation="ATK_ANIM_NONE",.cost={0},.damage=0,.category=TCG_DAMAGE_NORMAL},
 }
 },
-[1621] = {.id=1621, .name="Scyther", .kind=TCG_POKEMON, .type=1, .rarity=3, .set=4, .set2=255, .dark=0, .holo=0, .flags=0, .origin=22,
+[1621] = {.id=1621, .name="Scyther", .kind=TCG_POKEMON, .type=1, .rarity=3, .set=4, .set2=255, .dark=0, .holo=0, .flags=TCG_CF_READY, .origin=22,
 .hp=60, .stage=0, .species=123, .level=23, .retreat=1, .weakness=0, .resistance=4, .evolvesFrom="", .description="With ninja-like agility and speed, it can create the illusion that there is more than one.", .attacks={
 {.name="Slashing Strike",.description="Scyther can't use this attack during your next turn. (Benching or evolving Scyther ends this effect.)",.effect="basep-45:a0",.animation="ATK_ANIM_HIT",.cost={0,2,0,0,0,0,0,0,0},.damage=40,.category=TCG_DAMAGE_NORMAL},
 {.name="",.description="",.effect="NONE",.animation="ATK_ANIM_NONE",.cost={0},.damage=0,.category=TCG_DAMAGE_NORMAL},
@@ -10423,7 +10423,7 @@ const struct TcgCard gTcgCards[TCG_CARD_COUNT + 1] = {
 {.name="",.description="",.effect="NONE",.animation="ATK_ANIM_NONE",.cost={0},.damage=0,.category=TCG_DAMAGE_NORMAL},
 }
 },
-[1640] = {.id=1640, .name="Marshtomp", .kind=TCG_POKEMON, .type=3, .rarity=3, .set=4, .set2=255, .dark=0, .holo=0, .flags=0, .origin=23,
+[1640] = {.id=1640, .name="Marshtomp", .kind=TCG_POKEMON, .type=3, .rarity=3, .set=4, .set2=255, .dark=0, .holo=0, .flags=TCG_CF_READY, .origin=23,
 .hp=70, .stage=1, .species=259, .level=0, .retreat=1, .weakness=2, .resistance=255, .evolvesFrom="Mudkip", .description="", .attacks={
 {.name="Bubble",.description="Flip a coin. If heads, the Defending Pokemon is now Paralyzed.",.effect="np-11:a0",.animation="ATK_ANIM_HIT",.cost={0,0,0,1,0,0,0,0,0},.damage=10,.category=TCG_DAMAGE_NORMAL},
 {.name="Slash",.description="",.effect="NONE",.animation="ATK_ANIM_HIT",.cost={0,0,0,0,0,0,3,0,0},.damage=40,.category=TCG_DAMAGE_NORMAL},
@@ -10451,7 +10451,7 @@ const struct TcgCard gTcgCards[TCG_CARD_COUNT + 1] = {
 {.name="",.description="",.effect="NONE",.animation="ATK_ANIM_NONE",.cost={0},.damage=0,.category=TCG_DAMAGE_NORMAL},
 }
 },
-[1644] = {.id=1644, .name="Latios", .kind=TCG_POKEMON, .type=6, .rarity=3, .set=4, .set2=255, .dark=0, .holo=0, .flags=0, .origin=23,
+[1644] = {.id=1644, .name="Latios", .kind=TCG_POKEMON, .type=6, .rarity=3, .set=4, .set2=255, .dark=0, .holo=0, .flags=TCG_CF_READY, .origin=23,
 .hp=80, .stage=0, .species=381, .level=0, .retreat=3, .weakness=5, .resistance=255, .evolvesFrom="", .description="", .attacks={
 {.name="Super Psy",.description="",.effect="NONE",.animation="ATK_ANIM_HIT",.cost={0,0,0,0,0,1,0,0,0},.damage=10,.category=TCG_DAMAGE_NORMAL},
 {.name="Freeze Dry",.description="Flip a coin. If heads, the Defending Pokemon is now Paralyzed.",.effect="np-15:a1",.animation="ATK_ANIM_HIT",.cost={0,0,1,1,0,1,0,0,0},.damage=30,.category=TCG_DAMAGE_NORMAL},
@@ -10479,7 +10479,7 @@ const struct TcgCard gTcgCards[TCG_CARD_COUNT + 1] = {
 {.name="",.description="",.effect="NONE",.animation="ATK_ANIM_NONE",.cost={0},.damage=0,.category=TCG_DAMAGE_NORMAL},
 }
 },
-[1648] = {.id=1648, .name="Whismur", .kind=TCG_POKEMON, .type=6, .rarity=3, .set=4, .set2=255, .dark=0, .holo=0, .flags=0, .origin=23,
+[1648] = {.id=1648, .name="Whismur", .kind=TCG_POKEMON, .type=6, .rarity=3, .set=4, .set2=255, .dark=0, .holo=0, .flags=TCG_CF_READY, .origin=23,
 .hp=50, .stage=0, .species=293, .level=0, .retreat=1, .weakness=4, .resistance=255, .evolvesFrom="", .description="", .attacks={
 {.name="Supersonic",.description="Flip a coin. If heads, the Defending Pokemon is now Confused.",.effect="np-19:a0",.animation="ATK_ANIM_HIT",.cost={0,0,0,0,0,0,1,0,0},.damage=0,.category=TCG_RESIDUAL},
 {.name="Pound",.description="",.effect="NONE",.animation="ATK_ANIM_HIT",.cost={0,0,0,0,0,0,1,0,0},.damage=10,.category=TCG_DAMAGE_NORMAL},

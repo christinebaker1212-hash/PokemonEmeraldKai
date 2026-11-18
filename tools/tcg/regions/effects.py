@@ -43,3 +43,122 @@ def ready(card):
     if card.get('ability') and card['ability']['effect'] not in POWERS:
         return False
     return True
+
+
+# ---------------------------------------------------------------------------------------------- learned wordings
+# Today's cards' attacks teach the wordings the engine already plays: a template is the text with the card's own name,
+# its numbers and type words as slots; the row's amount / extra come from the slot that holds the same value (or are
+# constants). A regional text with the same template gets the same kind with its own numbers.
+TYPE_WORDS = ['Fire', 'Grass', 'Lightning', 'Water', 'Fighting', 'Psychic', 'Colorless', 'Darkness', 'Metal']
+
+
+def template(text, name):
+    """(template, numbers, types): the text with the card's name as SELF, numbers as #, type words as @"""
+    t = text.replace('Pokémon', 'Pokemon').replace('é', 'e').replace('’', "'")
+    for n in sorted({name, name.split()[-1], name.replace('Dark ', '').replace('Light ', '')}, key=len, reverse=True):
+        if n:
+            t = re.sub(r"\b" + re.escape(n) + r"\b", 'SELF', t)
+    t = re.sub(r"\b(this Pokemon|this card)\b", 'SELF', t, flags=re.I)
+    nums = [int(n) for n in re.findall(r'\d+', t)]
+    t = re.sub(r'\d+', '#', t)
+    types = re.findall(r'\b(' + '|'.join(TYPE_WORDS) + r')\b', t)
+    t = re.sub(r'\b(' + '|'.join(TYPE_WORDS) + r')\b', '@', t)
+    t = re.sub(r'\s+', ' ', t.strip().lower())
+    return t, nums, [TYPE_WORDS.index(x) for x in types]
+
+
+def _spec(value, nums, types, typed):
+    if typed and value in types and value != 15:
+        return ('type', types.index(value))
+    if value in nums and value:
+        return ('num', nums.index(value))
+    return ('const', value)
+
+
+def learn(catalog_rows):
+    """catalog_rows: (card name, attack text, base damage, (kind, amount, after, extra)) of today's cards ->
+    {template: spec}"""
+    out, clash = {}, set()
+    for name, text, damage, (kind, amount, after, extra) in catalog_rows:
+        t, nums, types = template(text, name)
+        typed = kind in TYPED_EXTRA
+        spec = (kind, _spec(amount, nums, [], False), after, _spec(extra, nums, types, typed))
+        # (the numbers no parameter reads must match the example's: a constant is a code, not the text's number)
+        used = {s[1] for s in (spec[1], spec[3]) if s[0] == 'num'}
+        spec = spec + (tuple((i, 'base' if v == damage and damage else v) for i, v in enumerate(nums) if i not in used),)
+        if t in out and out[t] != spec:
+            clash.add(t)
+        out.setdefault(t, spec)
+    for t in clash:
+        out.pop(t)
+    return out
+
+
+# kinds whose extra is a type (TCG_FIRE...): learned from the type words
+TYPED_EXTRA = {'DISCARD_TYPED', 'TYPE_DOUBLE', 'ENERGY_SEARCH', 'WATER_EXTRA', 'WATER_EXTRA2'}
+
+
+def apply(spec, text, name, damage):
+    kind, amount, after, extra, fixed = spec
+    t, nums, types = template(text, name)
+    if any(i >= len(nums) or nums[i] != (damage if v == 'base' else v) for i, v in fixed):
+        return None
+
+    def val(s):
+        k, v = s
+        if k == 'const':
+            return v
+        src = types if k == 'type' else nums
+        return src[v] if v < len(src) else None
+    a, e = val(amount), val(extra)
+    if a is None or e is None:
+        return None
+    return (kind, a, after, e)
+
+
+def _today():
+    """today's cards' attacks with their rows (src/tcg/tcg_catalog.c, tcg_effect_table.inc: Game Boy rows only)"""
+    from pathlib import Path
+    root = Path(__file__).resolve().parents[3]
+    rows = {}
+    for name, kind, amount, after, extra in re.findall(r'\{"(\w+)", FX_(\w+),(\d+),(\d+),(\d+)\}',
+                                                     (root / 'src/tcg/tcg_effect_table.inc').read_text()):
+        rows[name] = (kind, int(amount), int(after), int(extra))
+    src = (root / 'src/tcg/tcg_catalog.c').read_text()
+    out = []
+    for block in re.split(r'\n\[\d+\] = ', src)[1:]:
+        m = re.match(r'\{\.id=(\d+), \.name="([^"]*)"', block)
+        if not m or int(m.group(1)) > 442:
+            continue
+        for desc, eff, dmg in re.findall(r'\.description="((?:[^"\\]|\\.)*)",\.effect="(\w*)",\.animation="[^"]*",\.cost=\{[^}]*\},\.damage=(\d+)', block):
+            if eff in rows and desc:
+                out.append((m.group(2), desc.replace('\\"', '"'), int(dmg), rows[eff]))
+    return out
+
+
+def autofill(cards):
+    """ATTACKS for the regional attacks whose wording today's cards already play (hand-written entries win)"""
+    learned = learn(_today())
+    n = 0
+    for c in cards:
+        for a in c.get('attacks', []):
+            if a['text'] and a['effect'] not in ATTACKS:
+                t = template(a['text'], c['name'])[0]
+                if t in learned:
+                    row = apply(learned[t], a['text'], c['name'], a['damage'])
+                    if row:
+                        kind, amount, after, extra = row
+                        ATTACKS[a['effect']] = (kind, amount, extra, after)
+                        n += 1
+    return n
+
+
+# (the generators read ATTACKS after this: today's wordings first, then what's written above wins)
+def _load():
+    import json
+    from pathlib import Path
+    cards = json.loads((Path(__file__).resolve().parent / 'cards.json').read_text())['cards']
+    autofill(cards)
+
+
+_load()

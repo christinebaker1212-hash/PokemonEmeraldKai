@@ -1,103 +1,69 @@
 #!/usr/bin/env python3
-"""How much of the regional sets (docs/TCG_REGIONS.md) the engine already plays: docs/TCG_REGIONS_SCOPE.md.
+"""How much of the regional sets (docs/TCG_REGIONS.md) plays: docs/TCG_REGIONS_SCOPE.md.
 
-Reads the sets' card lists (PokemonTCG/pokemon-tcg-data, cached in ~/.cache/moemon/tcgdata/<set>.json) and today's
-catalogue (src/tcg/tcg_catalog.c, effects from src/tcg/tcg_effect_table.inc). An attack with no text plays as plain
-damage; one whose words match a catalogued attack's (the card's own name, numbers and types abstracted) plays as that
-effect family, once its numbers are carried over; a Trainer plays when the catalogue has a card of that name. The rest
-is the work list, most common wordings first.
+A card is finished (TCG_CF_READY) when tools/tcg/regions/effects.py has every text on it (an attack, its power, a
+Trainer's or special Energy's rules) and the engine plays every rule it needs (Stadium, Tool, Supporter, Baby...;
+Darkness / Metal costs). The report counts them per set and lists what's left: the rules missing and the wordings
+to translate, most cards first.
 """
-import json, re, sys, collections
+import json, sys, collections, re
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[3]
-CACHE = Path.home() / '.cache/moemon/tcgdata'
-SETS = [('KANTO', 'gym1'), ('KANTO', 'gym2'), ('JOHTO', 'neo1'), ('JOHTO', 'neo2'), ('JOHTO', 'neo3'), ('JOHTO', 'neo4'),
-        ('E-CARD', 'ecard1'), ('E-CARD', 'ecard2'), ('E-CARD', 'ecard3'), ('PROMO', 'basep'), ('PROMO', 'np')]
-TYPES = 'Grass|Fire|Water|Lightning|Psychic|Fighting|Colorless|Darkness|Metal'
+sys.path.insert(0, str(ROOT / 'tools/tcg/regions'))
+sys.path.insert(0, str(ROOT / 'tools/tcg'))
+import effects as E
 
 
-def norm(text, name):
-    t = text.replace('Pokémon', 'Pokemon').replace('é', 'e').replace('’', "'")
-    if name:
-        for n in sorted({name, name.split()[-1]}, key=len, reverse=True):
-            t = re.sub(r'\b' + re.escape(n) + r'\b', 'SELF', t)
-    t = re.sub(r"\b(this Pokemon|this card)\b", 'SELF', t, flags=re.I)
-    t = re.sub(r'\b(' + TYPES + r')\b', 'TYPE', t)
-    t = re.sub(r'\d+', 'N', t)
-    t = re.sub(r'\([^)]*\)', '', t)          # reminders in brackets
-    t = re.sub(r'[^a-z A-Z]', ' ', t).lower()
-    return ' '.join(t.split())
-
-
-def catalogue():
-    src = (ROOT / 'src/tcg/tcg_catalog.c').read_text()
-    kinds = dict(re.findall(r'\{"(\w+)", (FX_\w+)', (ROOT / 'src/tcg/tcg_effect_table.inc').read_text()))
-    known, trainers = {}, set()
-    for block in re.split(r'\n\[\d+\] = ', src)[1:]:
-        name = re.search(r'\.name="([^"]*)"', block).group(1)
-        if '.kind=TCG_TRAINER' in block:
-            trainers.add(name.lower())
-            continue
-        for aname, desc, eff in re.findall(r'\{\.name="([^"]*)",\.description="((?:[^"\\]|\\.)*)",\.effect="(\w*)"', block):
-            if desc:
-                known.setdefault(norm(desc.replace('\\"', '"'), name), (kinds.get(eff, 'POWER/' + eff), name, aname))
-    return known, trainers
+def wording(text, name):
+    return E.template(text, name)[0]
 
 
 def main():
-    known, trainers = catalogue()
-    rows, unmatched, per_set = [], collections.Counter(), {}
-    examples = {}
-    for region, sid in SETS:
-        cards = json.loads((CACHE / f'{sid}.json').read_text())
-        tally = collections.Counter()
-        for c in cards:
-            ok = True
-            texts = []
-            if c['supertype'] == 'Trainer':
-                texts = [] if c['name'].lower().replace('é', 'e') in trainers else [('TRAINER', ' '.join(c.get('rules', [])))]
-            elif c['supertype'] == 'Energy':
-                texts = [] if 'Basic' in c.get('subtypes', []) else [('ENERGY', ' '.join(c.get('rules', [])))]
-            else:
-                for ab in c.get('abilities', []):
-                    texts.append((ab.get('type', 'Power'), ab.get('text', '')))
-                for a in c.get('attacks', []):
-                    if a.get('text'):
-                        texts.append(('attack', a['text']))
-            for kind, t in texts:
-                key = (kind, norm(t, c['name']))
-                if kind == 'attack' and key[1] in known:
-                    tally['attacks matched'] += 1
-                    continue
-                ok = False
-                unmatched[key] += 1
-                examples.setdefault(key, f"{c['name']} ({sid}): {t}")
-                tally[f'{kind} to translate'] += 1
-            tally['cards'] += 1
-            tally['cards that play now' if ok else 'cards waiting'] += 1
-        per_set[sid] = (region, tally)
+    cards = json.loads((ROOT / 'tools/tcg/regions/cards.json').read_text())['cards']
+    per_set = collections.OrderedDict()
+    rules, words, example = collections.Counter(), collections.Counter(), {}
+    for c in cards:
+        t = per_set.setdefault(c['set'], collections.Counter())
+        t['cards'] += 1
+        if E.ready(c):
+            t['finished'] += 1
+            continue
+        for f in c['flags']:
+            if f not in E.RULES and f not in ('DARK', 'LIGHT'):
+                rules[f] += 1
+        texts = []
+        if c['kind'] == 'pokemon':
+            for a in c['attacks']:
+                if a['text'] and a['effect'] not in E.ATTACKS:
+                    texts.append(('attack', a['text']))
+                for ty, rule in (('Darkness', 'DARK_ENERGY'), ('Metal', 'METAL_ENERGY')):
+                    if a['cost'].get(ty) and rule not in E.RULES:
+                        rules[rule] += 1
+            if c.get('ability') and c['ability']['effect'] not in E.POWERS:
+                texts.append((c['ability']['kind'], c['ability']['text']))
+        elif c['effect'] not in E.TRAINERS:
+            texts.append((c['kind'].upper(), c['text']))
+        for kind, text in texts:
+            key = (kind, wording(text, c['name']))
+            words[key] += 1
+            example.setdefault(key, f"{c['name']} ({c['src']}): {text}")
     out = ['# The regional sets: what plays (tools/tcg/regions/scope.py)', '',
-           'Generated; rerun after translating. "Plays now": every attack, power and rule on the card matches what the',
-           'engine already does (numbers to carry over), or it has none. See docs/TCG_REGIONS.md.', '',
-           '| Region | Set | Cards | Play now | Waiting | Attacks matched | Attacks to translate | Powers / Bodies | Trainers / Energy |',
-           '|---|---|---|---|---|---|---|---|---|']
+           'Generated; rerun after translating (docs/TCG_REGIONS.md). A card is finished when every text and rule on it',
+           'plays (tools/tcg/regions/effects.py); only finished cards appear in the game.', '',
+           '| Set | Cards | Finished |', '|---|---|---|']
     total = collections.Counter()
-    for sid, (region, t) in per_set.items():
-        powers = sum(v for k, v in t.items() if k.endswith(' to translate') and k.split(' to ')[0] not in ('attack', 'TRAINER', 'ENERGY'))
-        te = t['TRAINER to translate'] + t['ENERGY to translate']
-        out.append(f"| {region} | {sid} | {t['cards']} | {t['cards that play now']} | {t['cards waiting']} | "
-                   f"{t['attacks matched']} | {t['attack to translate']} | {powers} | {te} |")
+    for sid, t in per_set.items():
+        out.append(f"| {sid} | {t['cards']} | {t['finished']} |")
         total.update(t)
-        total['powers'] += powers
-        total['te'] += te
-    out.append(f"| | **all** | {total['cards']} | {total['cards that play now']} | {total['cards waiting']} | "
-               f"{total['attacks matched']} | {total['attack to translate']} | {total['powers']} | {total['te']} |")
-    out += ['', f'{len(unmatched)} different wordings to translate. The most common (count, kind, an example):', '']
-    for (kind, _), n in unmatched.most_common(80):
-        out.append(f"- {n} x {kind}: {examples[(kind, _)][:220]}")
+    out.append(f"| **all** | {total['cards']} | {total['finished']} |")
+    out += ['', '## Rules the engine doesn\'t play yet (cards needing each)', '']
+    out += [f'- {r}: {n}' for r, n in rules.most_common()]
+    out += ['', f'## Wordings to translate ({len(words)}; the most cards first)', '']
+    for (kind, _), n in words.most_common():
+        out.append(f"- {n} x {kind}: {example[(kind, _)][:240]}")
     (ROOT / 'docs/TCG_REGIONS_SCOPE.md').write_text('\n'.join(out) + '\n')
-    print('\n'.join(out[5:5 + len(per_set) + 3]))
+    print(f"{total['finished']} of {total['cards']} finished; {len(words)} wordings, rules: {dict(rules.most_common())}")
 
 
 if __name__ == '__main__':
