@@ -114,7 +114,8 @@ enum
     Z_PRIZE,
     Z_FIELD,
     Z_UNDER,
-    Z_ATTACHED
+    Z_ATTACHED,
+    Z_PLAY /* the turn's Supporter beside its Active, the Stadium under its plate */
 };
 struct CardSprite
 {
@@ -377,6 +378,21 @@ static void Place(unsigned who, unsigned physical, int zone, int slot, int index
     /* The opponent's cards face them. */
     s->tangle = who ? 180.0f : 0.0f;
 }
+/* The regional sets' table (docs/TCG_REGIONS.md, the approved mock-up): a Tool under its Pokemon, the turn's
+ * Supporter beside the Active, the Stadium a plate on the centre line */
+#define STADIUM_X 140
+#define STADIUM_Y 76
+static struct Rect ToolRect(unsigned who, unsigned slot)
+{
+    struct Rect r = SlotRect(who, slot);
+    if (!slot)
+        return who ? MakeRect(r.x - 9, r.y + r.h - 37, 20, 28) : MakeRect(r.x + r.w - 11, r.y + 9, 20, 28);
+    return who ? MakeRect(r.x + r.w - 17, r.y + r.h - 13, 14, 19) : MakeRect(r.x + 3, r.y - 6, 14, 19);
+}
+static struct Rect SupporterRect(unsigned who)
+{
+    return who ? MakeRect(ACT_X - 30, OPP_ACT_Y + 3, 20, 28) : MakeRect(ACT_X + ACT_W + 10, MY_ACT_Y + 11, 20, 28);
+}
 static void Layout(void)
 {
     unsigned who, i, s, j;
@@ -424,8 +440,26 @@ static void Layout(void)
                     B.sprite[who][f->stack[j]].tangle = (who ? 180.0f : 0.0f) + (float)StatusAngle(who, s);
             }
             for (j = 0; j < f->attachedSize; j++)
-                Place(who, f->attached[j], Z_ATTACHED, (int)s, j, r, 1, 3, 0);
+            {
+                const struct TcgCard *a = Tcg_Card(CardOf(who, f->attached[j]));
+                if (a && a->kind == TCG_TRAINER && (a->flags & TCG_CF_TOOL))
+                {
+                    /* a Pokemon Tool tucked under its Pokemon, its top edge peeking out */
+                    Place(who, f->attached[j], Z_ATTACHED, (int)s, j, ToolRect(who, s), 1, 4, 1);
+                    B.sprite[who][f->attached[j]].tangle = who ? 180.0f : 0.0f;
+                }
+                else
+                    Place(who, f->attached[j], Z_ATTACHED, (int)s, j, r, 1, 3, 0);
+            }
         }
+        /* the turn's Supporter face up beside its Active; the Stadium under its plate on the centre line */
+        if (p->supporterCard)
+        {
+            Place(who, p->supporterCard - 1u, Z_PLAY, 0, 0, SupporterRect(who), 1, 6, 1);
+            B.sprite[who][p->supporterCard - 1u].tangle = who ? 180.0f : 0.0f;
+        }
+        if (p->stadium)
+            Place(who, p->stadium - 1u, Z_PLAY, 1, 0, MakeRect(STADIUM_X + 4, STADIUM_Y + 1, 9, 9), 1, 1, 1);
     }
 }
 static void SettleAll(void)
@@ -1281,6 +1315,55 @@ static void MockUnder(void)
     G_Card(TCG_CARD_PLUSPOWER, (float)(r.x + r.w - 11), (float)(r.y + 9), 20.0f, 28.0f, 0, 255, 0);
     r = SlotRect(0, 1);
     G_Card(TCG_CARD_PLUSPOWER, (float)(r.x + 3), (float)(r.y - 6), 14.0f, 19.0f, 0, 255, 0);
+}
+/* The Stadium's plate and the Supporters' tags, over the cards */
+static void TableOver(void)
+{
+    unsigned who, owner;
+    for (who = 0; who < 2; who++)
+    {
+        const struct TcgPlayer *p = &B.view.players[who];
+        const struct CardSprite *s;
+        int w = G_Measure("SUPPORTER", TF_NARROW) + 4;
+        struct Rect r = SupporterRect(who);
+        if (!p->supporterCard)
+            continue;
+        s = &B.sprite[who][p->supporterCard - 1u];
+        if (!s->settled)
+            continue;
+        if (who)
+        {
+            G_RoundFill(r.x - w - 1, r.y + 9, w, 9, 0x2860a8, 255);
+            G_Text(r.x - w + 1, r.y + 8, G_WHITE, 0x102850, "SUPPORTER", 0, TF_NARROW);
+        }
+        else
+        {
+            G_RoundFill(r.x + r.w + 1, r.y + 10, w, 9, 0x2860a8, 255);
+            G_Text(r.x + r.w + 3, r.y + 9, G_WHITE, 0x102850, "SUPPORTER", 0, TF_NARROW);
+        }
+    }
+    if (TcgDuel_Stadium(&B.view, &owner))
+    {
+        const struct TcgPlayer *p = &B.view.players[owner];
+        const struct TcgCard *c = Tcg_Card(CardOf(owner, p->stadium - 1u));
+        char name[32];
+        unsigned i;
+        int w;
+        if (!c || !B.sprite[owner][p->stadium - 1u].settled)
+            return;
+        snprintf(name, sizeof(name), "%s", c->name);
+        for (i = 0; name[i]; i++)
+            if (name[i] >= 'a' && name[i] <= 'z')
+                name[i] = (char)(name[i] - 'a' + 'A');
+        while (G_Measure(name, TF_NARROW) > 70 && strlen(name) > 3)
+            name[strlen(name) - 1] = 0;
+        w = G_Measure(name, TF_NARROW) + 24;
+        G_RoundFill(STADIUM_X, STADIUM_Y, w, 11, 0x284830, 230);
+        G_RoundFrame(STADIUM_X, STADIUM_Y, w, 11, 0xd8c070, 255);
+        G_FillA(STADIUM_X + 3, STADIUM_Y + 3, 14, 5, 0xd8c070, 255); /* (a card on its side) */
+        G_FillA(STADIUM_X + 4, STADIUM_Y + 4, 12, 3, 0x8a6818, 255);
+        G_Text(STADIUM_X + 20, STADIUM_Y, G_WHITE, 0x102010, name, 0, TF_NARROW);
+    }
 }
 static void MockOver(void)
 {
@@ -3128,6 +3211,8 @@ static int Substatus(int x, int y, unsigned who, unsigned slot, int right, int d
         labels[n] = "STUCK", colors[n++] = 0xc06020;
     if (f->charged)
         labels[n] = "x2", colors[n++] = 0xc89010;
+    if (f->burned && n < 6)
+        labels[n] = "BRN", colors[n++] = 0xd85020;
     for (i = 0; i < n; i++)
         w += G_Measure(labels[i], TF_NARROW) + 5;
     if (!draw)
@@ -3158,8 +3243,8 @@ static void FieldInfo(unsigned who, unsigned slot)
         const struct TcgCard *e = Tcg_Card(CardOf(who, f->attached[i]));
         if (e->kind == TCG_ENERGY)
         {
-            types[n++] = e->type;
-            if (e->id == TCG_CARD_DOUBLE_COLORLESS_ENERGY && n < 24)
+            unsigned k, provides = Tcg_EnergyProvides(e->id);
+            for (k = 0; k < provides && n < 24; k++)
                 types[n++] = e->type;
         }
     }
@@ -3175,8 +3260,8 @@ static void FieldInfo(unsigned who, unsigned slot)
             snprintf(more, sizeof(more), "+%d", n - 3);
             G_Digits(r.x + r.w + 2, r.y + 19, more, 0, 1, 0xf8f8f8, 255);
         }
-        if (f->poison || f->condition)
-            G_FillA(r.x + r.w - 5, r.y + 1, 4, 4, f->poison ? 0xa040e0 : 0xf0d040, 255);
+        if (f->poison || f->condition || f->burned)
+            G_FillA(r.x + r.w - 5, r.y + 1, 4, 4, f->poison ? 0xa040e0 : f->burned ? 0xd85020 : 0xf0d040, 255);
         return;
     }
     {
@@ -3825,6 +3910,7 @@ void TcgBoard_Render(void)
         }
     }
     DrawOppHand();
+    TableOver();
     MockOver();
     if (B.mode == M_TARGET)
     {

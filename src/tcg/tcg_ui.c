@@ -4999,6 +4999,36 @@ void Tcg_Debug(const char *command)
         return;
     }
     {
+        /* Harness helpers: the regional table's pieces (a Stadium in play, the turn's Supporter, Burned) */
+        unsigned who, id, slot;
+        int stadium = sscanf(command, "stadium %u %u", &who, &id) == 2;
+        int supporter = sscanf(command, "supporter %u %u", &who, &id) == 2;
+        if ((stadium || supporter) && who < 2 && id && id <= TCG_CARD_COUNT)
+        {
+            struct TcgPlayer *p = &U.duel.players[who];
+            unsigned i, k = p->deckSize;
+            for (i = 0; i < p->deckSize && k == p->deckSize; i++)
+                if (p->cards[p->deck[i]] <= 6)
+                    k = i, p->cards[p->deck[i]] = (uint16_t)id;
+            if (k < p->deckSize)
+            {
+                uint8_t card = TcgPile_Remove(p->deck, &p->deckSize, k);
+                if (stadium)
+                    p->stadium = (uint8_t)(card + 1);
+                else
+                    p->supporterCard = (uint8_t)(card + 1), p->supporterPlayed = 1;
+            }
+            printf("[tcg] staged %s %u card %u conserved %d\n", stadium ? "stadium" : "supporter", who, id,
+                   TcgDuel_Conserved(&U.duel));
+            return;
+        }
+        if (sscanf(command, "burn %u %u", &who, &slot) == 2 && who < 2 && slot < TCG_FIELD_SIZE)
+        {
+            U.duel.players[who].field[slot].burned = 1;
+            return;
+        }
+    }
+    {
         unsigned who, slot, id, count;
         int put = sscanf(command, "put %u %u %u", &who, &slot, &id) == 3;
         int attach = sscanf(command, "attach %u %u %u %u", &who, &slot, &id, &count) == 4;
