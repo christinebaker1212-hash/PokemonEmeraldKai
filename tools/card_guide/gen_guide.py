@@ -33,8 +33,13 @@ def e(s):
 # POKeMON cards
 # ---------------------------------------------------------------------------------------------------------------
 PACKS = ['COLOSSEUM', 'EVOLUTION', 'MYSTERY', 'LABORATORY', 'BEGINNING POKéMON', 'LEGENDARY POWER',
-         'ISLAND OF FOSSIL', 'PSYCHIC BATTLE', 'SKY-FLYING POKéMON', 'WE ARE TEAM ROCKET', "TEAM ROCKET'S AMBITION"]
-TYPES = ['Fire', 'Grass', 'Lightning', 'Water', 'Fighting', 'Psychic', 'Colorless']
+         'ISLAND OF FOSSIL', 'PSYCHIC BATTLE', 'SKY-FLYING POKéMON', 'WE ARE TEAM ROCKET', "TEAM ROCKET'S AMBITION",
+         # (the regional sets' boosters, sold only in their regions: tcg_collection.c Tcg_PackSoldIn)
+         'GYM HEROES (KANTO)', 'GYM CHALLENGE (KANTO)', 'NEO GENESIS (JOHTO)', 'NEO DISCOVERY (JOHTO)',
+         'NEO REVELATION (JOHTO)', 'NEO DESTINY (JOHTO)', 'EXPEDITION (HOENN, SINNOH, UNOVA)',
+         'AQUAPOLIS (HOENN, SINNOH, UNOVA)', 'SKYRIDGE (HOENN, SINNOH, UNOVA)']
+TYPES = ['Fire', 'Grass', 'Lightning', 'Water', 'Fighting', 'Psychic', 'Colorless', 'Darkness', 'Metal']
+REGIONS = ['HOENN', 'JOHTO', 'KANTO', 'SINNOH', 'UNOVA']   # (include/mp_region.h's order: the theme decks' bits)
 # (tcg_field.c sPools: the Game Boy decks each kind of player picks from, by badges 0-1, 2-3, 4-6, 7-8)
 POOLS = {
     0: [['CharmanderAndFriends', 'LightningAndFire'], ['Flamethrower', 'Anger'], ['FireCharge', 'HeatedBattle'],
@@ -91,26 +96,21 @@ TCG_SPECIALS = [
     ('NOLAND', 'Factory Head', 'outside the Battle Factory, Battle Frontier', 'after winning the Factory silver symbol; about half the Brains are out each day'),
     ('LUCY', 'Pike Queen', 'outside the Battle Pike, Battle Frontier', 'after winning the Pike silver symbol; about half the Brains are out each day'),
 ]
-# JOHTO's, KANTO's and SINNOH's special trainers, each in one of HOENN's slots (tcg_field.c sQzSpecials, read from the source):
-# slot -> [(region, name, title, when)]
-SPECIAL_SLOTS = ['ROXANNE', 'BRAWLY', 'WATTSON', 'FLANNERY', 'NORMAN', 'WINONA', 'TATE_LIZA', 'JUAN', 'SIDNEY', 'PHOEBE',
-                 'GLACIA', 'DRAKE', 'WALLACE', 'STEVEN', 'RIVAL', 'WALLY']
+# JOHTO's, KANTO's, SINNOH's and UNOVA's special trainers, after HOENN's with their own decks and promos, in
+# tcg_field.c sQzSpecials' order (read from the source)
 QZ_WHEN = {'FLAG': 'after you win their BADGE', 'TRAINER': 'after you beat them in a Pokémon battle',
            'CLEARED': 'after you become Champion', 'NONE': 'any time'}
-QZ_SPECIALS = {}
 _src = open(Path(__file__).resolve().parent.parent.parent / 'src/tcg/tcg_field.c', encoding='utf-8').read()
 _src = _src[_src.index('sQzSpecials[] = {'):]
 _src = _src[:_src.index('};')]
 _region = 'JOHTO'
 for _line in _src.split('\n'):
-    if '// KANTO' in _line:
-        _region = 'KANTO'
-    if '// SINNOH' in _line:
-        _region = 'SINNOH'
-    _m = re.search(r'TCG_SPECIAL_(\w+), REQ_(\w+), \w+, "([^"]*)", "([^"]*)"', _line)
+    for _r in ('KANTO', 'SINNOH', 'UNOVA'):
+        if '// ' + _r in _line:
+            _region = _r
+    _m = re.search(r'TCG_SPECIAL_(\w+), REQ_(\w+), [^,"]+, "([^"]*)", "([^"]*)"', _line)
     if _m:
-        QZ_SPECIALS.setdefault(SPECIAL_SLOTS.index(_m.group(1)), []).append(
-            (_region, _m.group(3), _m.group(4).title(), QZ_WHEN[_m.group(2)]))
+        TCG_SPECIALS.append((_m.group(3), _m.group(4).title(), _region, QZ_WHEN[_m.group(2)]))
 # (tcg_ui.c sSetPromos: 75% of a booster's cards; GYM_SWEEP_BIT: every Gym Leader's deck beaten)
 SET_PROMOS = [64, 118, 145, 200, 319, 421, 315, 384, 418, 401, 441]
 GYM_PROMO = 102
@@ -164,6 +164,14 @@ for kind, tiers in POOLS.items():
 for d in tcg['decks']:
     if d['name'].startswith('GB2 '):
         kind_cards[gb2_kind(d)].update(d['cards'])
+# (the regional sets' theme decks: their regions' card players bring them, their CARD CLUB counters sell them)
+theme_of = {}
+for d in tcg['themes']:
+    if gb2_kind(d) < 7:
+        kind_cards[gb2_kind(d)].update(d['cards'])
+    where = ', '.join(r for b, r in enumerate(REGIONS) if d['regions'] >> b & 1)
+    for k in set(d['cards']):
+        theme_of.setdefault(k, []).append('%s (%s; %s)' % (d['name'], d['set'], where))
 special_of = {}
 for i, sp in enumerate(tcg['special']):
     for k in set(sp['cards']):
@@ -183,13 +191,9 @@ for i, sp in enumerate(tcg['special']):
         promo_src.setdefault(sp['promo'], []).append(
             'Beat %s%s in a POKéMON card duel for the first time (%s; they duel %s).' %
             (who, ' (%s)' % title if title else '', where, when))
-        if who in YGO_E4:
+        if who in YGO_E4 and i < 24:
             promo_src[sp['promo']].append(
                 'Or beat %s in a YU-GI-OH! duel for the first time: they hand over this card too.' % who)
-        for region, qwho, qtitle, qwhen in QZ_SPECIALS.get(i, []):
-            promo_src[sp['promo']].append(
-                'In %s: beat %s%s in a POKéMON card duel for the first time (they duel %s; same deck).' %
-                (region, qwho, ' (%s)' % qtitle if qtitle else '', qwhen))
 for i, p in enumerate(SET_PROMOS):
     promo_src.setdefault(p, []).append(
         'Own 75%% of the %s booster set\'s cards, then claim it under PRIZES at a CARD CLUB counter or the '
@@ -226,6 +230,8 @@ def tcg_row(c):
         decks_.append('Starter: ' + ', '.join(starter_of[k]))
     if k in struct_of:
         decks_.append('GAME CENTER deck: ' + ', '.join(struct_of[k]))
+    if k in theme_of:
+        decks_.append('Theme deck at the CARD CLUB counters, 250 CP: ' + ', '.join(theme_of[k]))
     special = ' '.join(promo_src.get(k, []))
     if c['set'] == 4 and not special:
         special = 'No way to get this card in this version of the game.'
@@ -513,15 +519,6 @@ for i, (who, title, where, when) in enumerate(TCG_SPECIALS):
     p = tcg['special'][i]['promo']
     st_rows.append([who, title or '-', where, when, tname(cards[p]) if p else '-'])
 page.append(table('pkmn-trainers', ['Trainer', 'Title', 'Where', 'Duels you', 'First-win promo'], st_rows))
-qz_rows = []
-for i, (who, title, where, when) in enumerate(TCG_SPECIALS):
-    p = tcg['special'][i]['promo']
-    for region, qwho, qtitle, qwhen in QZ_SPECIALS.get(i, []):
-        qz_rows.append([region, qwho, qtitle or '-', who, qwhen, tname(cards[p]) if p else '-'])
-page.append('<p>In JOHTO and KANTO, their own trainers play these decks: each stands in for one of HOENN\'s above and '
-            'hands over the same promo card the first time you beat them (once, in whichever region you win it first).</p>')
-page.append(table('pkmn-trainers-regions', ['Region', 'Trainer', 'Title', "Plays the deck of", 'Duels you',
-                                            'First-win promo'], qz_rows))
 page.append('<p class="soft">Each Frontier Brain waits outside their own facility once you hold its silver symbol. About half of the Brains you have beaten are out on any day, and the lineup shifts daily.</p>')
 if non_promo_special:
     page.append('<h3>Other cards outside packs, shops and ordinary duelists</h3>')

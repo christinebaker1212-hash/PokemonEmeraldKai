@@ -6,6 +6,10 @@
 extern const struct TcgDeckDefinition gTcgSpecialDecks[];
 extern const unsigned gTcgSpecialDeckCount;
 extern const uint16_t gTcgSpecialPromos[];
+extern const struct TcgDeckDefinition gTcgThemeDecks[];
+extern const unsigned gTcgThemeDeckCount;
+extern const char *const gTcgThemeDeckSet[];
+extern const uint8_t gTcgThemeDeckRegions[];
 int Tcg_IsHolo(unsigned card);
 unsigned Tcg_PointCost(unsigned card);
 unsigned Tcg_ShopPrice(unsigned card);
@@ -27,4 +31,6 @@ int main(void){
   for(i=0;i<gTcgSpecialDeckCount;i++){printf("%s{\"name\":",i?",":"");S(gTcgSpecialDecks[i].name);printf(",\"promo\":%u,\"cards\":",gTcgSpecialPromos[i]);Cards(gTcgSpecialDecks[i].cards,TCG_DECK_SIZE);putchar('}');}
   printf("],\"structure\":[");
   for(i=0;i<sizeof(sStructureDecks)/sizeof(sStructureDecks[0]);i++){printf("%s{\"name\":",i?",":"");S(sStructureDecks[i].name);printf(",\"set\":");S(sStructureDecks[i].set);printf(",\"price\":%u,\"cards\":",sStructureDecks[i].price);Cards(sStructureDecks[i].cards,TCG_DECK_SIZE);putchar('}');}
+  printf("],\"themes\":[");
+  for(i=0;i<gTcgThemeDeckCount;i++){printf("%s{\"name\":",i?",":"");S(gTcgThemeDecks[i].name);printf(",\"set\":");S(gTcgThemeDeckSet[i]);printf(",\"regions\":%u,\"cards\":",gTcgThemeDeckRegions[i]);Cards(gTcgThemeDecks[i].cards,TCG_DECK_SIZE);putchar('}');}
   printf("]}\n");return 0;}
