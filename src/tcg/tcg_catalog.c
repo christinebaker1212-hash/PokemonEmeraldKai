@@ -3831,7 +3831,7 @@ const struct TcgCard gTcgCards[TCG_CARD_COUNT + 1] = {
 {.name="",.description="",.effect="NONE",.animation="ATK_ANIM_NONE",.cost={0},.damage=0,.category=TCG_DAMAGE_NORMAL},
 }
 },
-[608] = {.id=608, .name="Erika's Clefairy", .kind=TCG_POKEMON, .type=6, .rarity=1, .set=14, .set2=255, .dark=0, .holo=0, .flags=TCG_CF_OWNER, .origin=14,
+[608] = {.id=608, .name="Erika's Clefairy", .kind=TCG_POKEMON, .type=6, .rarity=1, .set=14, .set2=255, .dark=0, .holo=0, .flags=TCG_CF_OWNER|TCG_CF_READY, .origin=14,
 .hp=50, .stage=0, .species=35, .level=16, .retreat=1, .weakness=4, .resistance=5, .evolvesFrom="", .description="", .attacks={
 {.name="Lunar Power",.description="Flip a coin. If heads, search your deck for a card that evolves from 1 of your Benched Pokemon and put that card on that Pokemon. (This counts as evolving that Pokemon.) Shuffle your deck afterward.",.effect="gym2-40:a0",.animation="ATK_ANIM_HIT",.cost={0,0,0,0,0,0,1,0,0},.damage=0,.category=TCG_RESIDUAL},
 {.name="Moon Kick",.description="",.effect="NONE",.animation="ATK_ANIM_HIT",.cost={0,0,0,0,0,0,2,0,0},.damage=20,.category=TCG_DAMAGE_NORMAL},
@@ -4329,7 +4329,7 @@ const struct TcgCard gTcgCards[TCG_CARD_COUNT + 1] = {
 [693] = {.id=693, .name="Transparent Walls", .kind=TCG_TRAINER, .type=6, .rarity=0, .set=14, .set2=255, .dark=0, .holo=0, .flags=TCG_CF_READY, .origin=14,
 .effect="gym2-125:t",.description="Until the end of your opponent's next turn, prevent all damage from attacks done to your Benched Pokemon. (Any other effects of attacks still happen.)"
 },
-[694] = {.id=694, .name="Warp Point", .kind=TCG_TRAINER, .type=6, .rarity=0, .set=14, .set2=255, .dark=0, .holo=0, .flags=0, .origin=14,
+[694] = {.id=694, .name="Warp Point", .kind=TCG_TRAINER, .type=6, .rarity=0, .set=14, .set2=255, .dark=0, .holo=0, .flags=TCG_CF_READY, .origin=14,
 .effect="gym2-126:t",.description="If your opponent has any Benched Pokemon, he or she chooses 1 of them and switches it with his or her Active Pokemon, then, if you have any Benched Pokemon, you switch 1 of them with your Active Pokemon."
 },
 [695] = {.id=695, .name="Ampharos", .kind=TCG_POKEMON, .type=2, .rarity=2, .set=15, .set2=255, .dark=0, .holo=1, .flags=TCG_CF_READY, .origin=15,
@@ -4776,7 +4776,7 @@ const struct TcgCard gTcgCards[TCG_CARD_COUNT + 1] = {
 {.name="",.description="",.effect="NONE",.animation="ATK_ANIM_NONE",.cost={0},.damage=0,.category=TCG_DAMAGE_NORMAL},
 }
 },
-[759] = {.id=759, .name="Mareep", .kind=TCG_POKEMON, .type=2, .rarity=0, .set=15, .set2=255, .dark=0, .holo=0, .flags=0, .origin=15,
+[759] = {.id=759, .name="Mareep", .kind=TCG_POKEMON, .type=2, .rarity=0, .set=15, .set2=255, .dark=0, .holo=0, .flags=TCG_CF_READY, .origin=15,
 .hp=40, .stage=0, .species=179, .level=12, .retreat=1, .weakness=4, .resistance=255, .evolvesFrom="", .description="If static electricity builds in its body, its fleece doubles in volume. Touching it will shock you.", .attacks={
 {.name="Static Electricity",.description="For each Mareep in play, you may search your deck for a Lightning Energy card and attach it to Mareep. Shuffle your deck afterward.",.effect="neo1-65:a0",.animation="ATK_ANIM_HIT",.cost={0,0,1,0,0,0,0,0,0},.damage=0,.category=TCG_RESIDUAL},
 {.name="Thundershock",.description="Flip a coin. If heads, the Defending Pokemon is now Paralyzed.",.effect="neo1-65:a1",.animation="ATK_ANIM_HIT",.cost={0,0,2,0,0,0,0,0,0},.damage=20,.category=TCG_DAMAGE_NORMAL},
@@ -4959,7 +4959,7 @@ const struct TcgCard gTcgCards[TCG_CARD_COUNT + 1] = {
 [795] = {.id=795, .name="Moo-Moo Milk", .kind=TCG_TRAINER, .type=6, .rarity=0, .set=15, .set2=255, .dark=0, .holo=0, .flags=TCG_CF_READY, .origin=15,
 .effect="neo1-101:t",.description="Choose 1 of your Pokemon. Flip 2 coins. Remove 2 damage counters times the number of heads from that Pokemon. If the Pokemon has fewer damage counters than that, remove all of them."
 },
-[796] = {.id=796, .name="Pokemon March", .kind=TCG_TRAINER, .type=6, .rarity=0, .set=15, .set2=255, .dark=0, .holo=0, .flags=0, .origin=15,
+[796] = {.id=796, .name="Pokemon March", .kind=TCG_TRAINER, .type=6, .rarity=0, .set=15, .set2=255, .dark=0, .holo=0, .flags=TCG_CF_READY, .origin=15,
 .effect="neo1-102:t",.description="Your opponent may search his or her deck for 1 Basic Pokemon card and put it onto his or her Bench. Then, you may search your deck for 1 Basic Pokemon card and put it onto your Bench. Then, each player shuffles his or her deck. (A player can't do any of this if his or her Bench is full.)"
 },
 [797] = {.id=797, .name="Super Rod", .kind=TCG_TRAINER, .type=6, .rarity=0, .set=15, .set2=255, .dark=0, .holo=0, .flags=TCG_CF_READY, .origin=15,
@@ -5522,7 +5522,7 @@ const struct TcgCard gTcgCards[TCG_CARD_COUNT + 1] = {
 {.name="",.description="",.effect="NONE",.animation="ATK_ANIM_NONE",.cost={0},.damage=0,.category=TCG_DAMAGE_NORMAL},
 }
 },
-[881] = {.id=881, .name="Ho-oh", .kind=TCG_POKEMON, .type=0, .rarity=2, .set=17, .set2=255, .dark=0, .holo=1, .flags=0, .origin=17,
+[881] = {.id=881, .name="Ho-oh", .kind=TCG_POKEMON, .type=0, .rarity=2, .set=17, .set2=255, .dark=0, .holo=1, .flags=TCG_CF_READY, .origin=17,
 .hp=90, .stage=0, .species=250, .level=45, .retreat=2, .weakness=3, .resistance=4, .evolvesFrom="", .description="Legends claim this Pokemon flies the world's skies continuously on its magnificent seven colored wings.", .attacks={
 {.name="Stoke",.description="You may search your deck for a Fire Energy card and attach it to Ho-Oh. Shuffle your deck afterward.",.effect="neo3-7:a0",.animation="ATK_ANIM_HIT",.cost={1,0,0,0,0,0,0,0,0},.damage=0,.category=TCG_RESIDUAL},
 {.name="Sacred Fire",.description="Flip a coin. If heads, choose 1 of your opponent's Pokemon. This attack does 40 damage to that Pokemon. Don't apply Weakness and Resistance.",.effect="neo3-7:a1",.animation="ATK_ANIM_HIT",.cost={3,0,0,0,0,0,0,0,0},.damage=0,.category=TCG_RESIDUAL},
@@ -6275,7 +6275,7 @@ const struct TcgCard gTcgCards[TCG_CARD_COUNT + 1] = {
 {.name="",.description="",.effect="NONE",.animation="ATK_ANIM_NONE",.cost={0},.damage=0,.category=TCG_DAMAGE_NORMAL},
 }
 },
-[992] = {.id=992, .name="Light Vaporeon", .kind=TCG_POKEMON, .type=3, .rarity=1, .set=18, .set2=255, .dark=0, .holo=0, .flags=TCG_CF_LIGHT, .origin=18,
+[992] = {.id=992, .name="Light Vaporeon", .kind=TCG_POKEMON, .type=3, .rarity=1, .set=18, .set2=255, .dark=0, .holo=0, .flags=TCG_CF_LIGHT|TCG_CF_READY, .origin=18,
 .hp=80, .stage=1, .species=134, .level=41, .retreat=1, .weakness=2, .resistance=255, .evolvesFrom="Eevee", .description="If its fins being to vibrate, it is a sign that it will begin raining soon.", .attacks={
 {.name="Wash Away",.description="If you have any Benched Pokemon, flip a coin. If heads, remove all damage counters from 1 of your Benched Pokemon and discard all Energy cards attached to it.",.effect="neo4-52:a0",.animation="ATK_ANIM_HIT",.cost={0,0,0,1,0,0,0,0,0},.damage=0,.category=TCG_RESIDUAL},
 {.name="Hypnoshower",.description="The Defending Pokemon is now Asleep. Remove 1 damage counter from each Benched Pokemon (yours and your opponent's) with any damage counters on it.",.effect="neo4-52:a1",.animation="ATK_ANIM_HIT",.cost={0,0,0,2,0,0,1,0,0},.damage=30,.category=TCG_DAMAGE_NORMAL},
@@ -8393,7 +8393,7 @@ const struct TcgCard gTcgCards[TCG_CARD_COUNT + 1] = {
 {.name="",.description="",.effect="NONE",.animation="ATK_ANIM_NONE",.cost={0},.damage=0,.category=TCG_DAMAGE_NORMAL},
 }
 },
-[1315] = {.id=1315, .name="Porygon", .kind=TCG_POKEMON, .type=6, .rarity=0, .set=20, .set2=255, .dark=0, .holo=0, .flags=0, .origin=20,
+[1315] = {.id=1315, .name="Porygon", .kind=TCG_POKEMON, .type=6, .rarity=0, .set=20, .set2=255, .dark=0, .holo=0, .flags=TCG_CF_READY, .origin=20,
 .hp=40, .stage=0, .species=137, .level=0, .retreat=1, .weakness=4, .resistance=255, .evolvesFrom="", .description="", .attacks={
 {.name="Data Sort",.description="Flip a coin. If heads, choose a Trainer card from your discard pile, show it to your opponent, and then shuffle it into your deck.",.effect="ecard2-103:a0",.animation="ATK_ANIM_HIT",.cost={0,0,0,0,0,0,1,0,0},.damage=0,.category=TCG_RESIDUAL},
 {.name="Peck",.description="",.effect="NONE",.animation="ATK_ANIM_HIT",.cost={0,0,0,0,0,0,1,0,0},.damage=10,.category=TCG_DAMAGE_NORMAL},
@@ -9153,7 +9153,7 @@ const struct TcgCard gTcgCards[TCG_CARD_COUNT + 1] = {
 {.name="",.description="",.effect="NONE",.animation="ATK_ANIM_NONE",.cost={0},.damage=0,.category=TCG_DAMAGE_NORMAL},
 }
 },
-[1435] = {.id=1435, .name="Omanyte", .kind=TCG_POKEMON, .type=3, .rarity=1, .set=21, .set2=255, .dark=0, .holo=0, .flags=0, .origin=21,
+[1435] = {.id=1435, .name="Omanyte", .kind=TCG_POKEMON, .type=3, .rarity=1, .set=21, .set2=255, .dark=0, .holo=0, .flags=TCG_CF_READY, .origin=21,
 .hp=60, .stage=1, .species=138, .level=0, .retreat=1, .weakness=2, .resistance=255, .evolvesFrom="Mysterious Fossil", .description="", .attacks={
 {.name="Water of Evolution",.description="Put an Omastar from your hand onto Omanyte. This counts as evolving Omanyte.",.effect="ecard3-41:a0",.animation="ATK_ANIM_HIT",.cost={0,0,0,0,0,0,1,0,0},.damage=0,.category=TCG_RESIDUAL},
 {.name="Drag Off",.description="Before doing damage, you may choose 1 of your opponent's Benched Pokemon and switch it with the Defending Pokemon.",.effect="ecard3-41:a1",.animation="ATK_ANIM_HIT",.cost={0,0,0,1,0,0,1,0,0},.damage=20,.category=TCG_DAMAGE_NORMAL},
@@ -9202,7 +9202,7 @@ const struct TcgCard gTcgCards[TCG_CARD_COUNT + 1] = {
 {.name="",.description="",.effect="NONE",.animation="ATK_ANIM_NONE",.cost={0},.damage=0,.category=TCG_DAMAGE_NORMAL},
 }
 },
-[1442] = {.id=1442, .name="Cleffa", .kind=TCG_POKEMON, .type=6, .rarity=0, .set=21, .set2=255, .dark=0, .holo=0, .flags=TCG_CF_BABY, .origin=21,
+[1442] = {.id=1442, .name="Cleffa", .kind=TCG_POKEMON, .type=6, .rarity=0, .set=21, .set2=255, .dark=0, .holo=0, .flags=TCG_CF_BABY|TCG_CF_READY, .origin=21,
 .hp=30, .stage=0, .species=173, .level=0, .retreat=1, .weakness=255, .resistance=255, .evolvesFrom="", .description="", .attacks={
 {.name="Energy Recycle",.description="Shuffle a basic Energy card from your discard pile into your deck.",.effect="ecard3-48:a0",.animation="ATK_ANIM_HIT",.cost={0,0,0,0,0,0,1,0,0},.damage=0,.category=TCG_RESIDUAL},
 {.name="",.description="",.effect="NONE",.animation="ATK_ANIM_NONE",.cost={0},.damage=0,.category=TCG_DAMAGE_NORMAL},
@@ -9335,7 +9335,7 @@ const struct TcgCard gTcgCards[TCG_CARD_COUNT + 1] = {
 {.name="",.description="",.effect="NONE",.animation="ATK_ANIM_NONE",.cost={0},.damage=0,.category=TCG_DAMAGE_NORMAL},
 }
 },
-[1461] = {.id=1461, .name="Igglybuff", .kind=TCG_POKEMON, .type=6, .rarity=0, .set=21, .set2=255, .dark=0, .holo=0, .flags=TCG_CF_BABY, .origin=21,
+[1461] = {.id=1461, .name="Igglybuff", .kind=TCG_POKEMON, .type=6, .rarity=0, .set=21, .set2=255, .dark=0, .holo=0, .flags=TCG_CF_BABY|TCG_CF_READY, .origin=21,
 .hp=30, .stage=0, .species=174, .level=0, .retreat=1, .weakness=255, .resistance=255, .evolvesFrom="", .description="", .attacks={
 {.name="Energy Heal",.description="Choose 1 of your Pokemon with an Energy card attached to it. Remove 1 damage counter from that Pokemon.",.effect="ecard3-67:a0",.animation="ATK_ANIM_HIT",.cost={0,0,0,0,0,0,1,0,0},.damage=0,.category=TCG_RESIDUAL},
 {.name="",.description="",.effect="NONE",.animation="ATK_ANIM_NONE",.cost={0},.damage=0,.category=TCG_DAMAGE_NORMAL},

@@ -126,6 +126,10 @@ static const struct TcgStep *RegionTrainerSteps(unsigned id, int *count)
               {TCG_ST_OPP_SLOT, TCG_F_SAME_TYPE_PICK, 0, 0, 0, "Of the type of which of their Pokemon?"});
     case TCG_CARD_NEO3_62:
         STEPS({TCG_ST_PICK, TCG_F_LATER_STAGE, TCG_SRC_DECK, 0, 2, "Flip for which later-Stage cards? (heads: kept)"});
+    case TCG_CARD_GYM2_126:
+        STEPS({TCG_ST_MY_SLOT, TCG_F_BENCH, 0, 0, 0, "Switch in which of your Benched Pokemon?"});
+    case TCG_CARD_NEO1_102:
+        STEPS({TCG_ST_PICK, TCG_F_BASIC_NOT_BABY, TCG_SRC_DECK, 0, 1, "Put which Basic Pokemon onto your Bench?"});
     case TCG_CARD_GYM2_18:
         STEPS({TCG_ST_MY_SLOT, TCG_F_OWNER_SLOT + TCG_OWNER_GIOVANNI, 0, 0, 0, "Which Giovanni Pokemon may evolve?"});
     }

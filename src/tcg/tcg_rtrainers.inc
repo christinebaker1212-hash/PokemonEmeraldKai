@@ -892,6 +892,43 @@ static int RegionTrainer(struct TcgDuel *g, const struct TcgAction *a, unsigned 
         p->benchShieldUntil = (uint16_t)(g->turn + 1);
         TcgDuel_Log(g, "Your Benched Pokemon are protected from damage until the end of their next turn.");
         break;
+    case TCG_CARD_GYM2_126: /* Warp Point: yours switched with the one chosen, then theirs by their own choice */
+    {
+        unsigned k, bench = 0;
+        for (k = 1; k < TCG_FIELD_SIZE; k++)
+            bench += op->field[k].stackSize != 0;
+        if (a->slot && a->slot < TCG_FIELD_SIZE && p->field[a->slot].stackSize)
+        {
+            struct TcgFieldCard temp = p->field[0];
+            p->field[0] = p->field[a->slot];
+            p->field[a->slot] = temp;
+            Cure(&p->field[a->slot]);
+            TcgDuel_Event(g, TCG_EV_SWITCH, me, a->slot, 0, 0, 0);
+        }
+        if (bench)
+        {
+            g->phase = TCG_PROMOTION;
+            g->promotePlayer = (uint8_t)(me ^ 1);
+            g->switchPending = 1;
+        }
+        break;
+    }
+    case TCG_CARD_NEO1_102: /* Pokemon March: a Basic onto each Bench from the decks, theirs first */
+    {
+        unsigned k;
+        for (k = op->deckSize; k > 0; k--)
+            if (RtBasicNotBaby(Tcg_Card(op->cards[op->deck[k - 1]])))
+            {
+                RtBench(g, me ^ 1, op->deck, &op->deckSize, op->deck[k - 1]);
+                break;
+            }
+        TcgDuel_Shuffle(g, me ^ 1);
+        if (a->selectionCount && (!RtBasicNotBaby(Tcg_Card(p->cards[a->selections[0]])) ||
+                                  !RtBench(g, me, p->deck, &p->deckSize, a->selections[0])))
+            return Fail(g, "Choose a Basic Pokemon from your deck.");
+        TcgDuel_Shuffle(g, me);
+        break;
+    }
     case TCG_CARD_GYM2_18: /* Giovanni: a Giovanni Pokemon may evolve whenever this turn */
         if (a->slot >= TCG_FIELD_SIZE || !RtNamed(TcgDuel_Field(g, me, a->slot), "Giovanni"))
             return Fail(g, "Choose a Pokemon with Giovanni in its name.");

@@ -169,7 +169,7 @@ const int16_t gTcgDeckRating[] = {
     1446, /* GB2 Big Thunder */
     1485, /* GB2 Power Of Darkness */
 };
-/* Each special trainer's own deck */
+/* Each special trainer's own deck (the regional ones, from 24 on, rated as the variants are) */
 const int16_t gTcgSpecialRating[] = {
     1391, /* ROXANNE */
     1531, /* BRAWLY */
@@ -195,8 +195,75 @@ const int16_t gTcgSpecialRating[] = {
     1658, /* GRETA */
     1325, /* NOLAND */
     1461, /* LUCY */
+    1556, /* FALKNER */
+    1574, /* BUGSY */
+    1478, /* WHITNEY */
+    1542, /* MORTY */
+    1530, /* CHUCK */
+    1608, /* JASMINE */
+    1623, /* PRYCE */
+    1569, /* CLAIR */
+    1452, /* WILL */
+    1565, /* KOGA_J */
+    1505, /* BRUNO_J */
+    1560, /* KAREN */
+    1440, /* LANCE_J */
+    1606, /* SILVER */
+    1503, /* RED */
+    1456, /* ELM */
+    1453, /* BROCK */
+    1519, /* MISTY */
+    1360, /* SURGE */
+    1480, /* ERIKA */
+    1514, /* KOGA_K */
+    1462, /* SABRINA */
+    1550, /* BLAINE */
+    1294, /* GIOVANNI */
+    1482, /* LORELEI */
+    1374, /* BRUNO_K */
+    1561, /* AGATHA */
+    1541, /* LANCE_K */
+    1488, /* BLUE */
+    1402, /* OAK */
+    1563, /* BILL */
+    1549, /* ROARK */
+    1640, /* GARDENIA */
+    1563, /* MAYLENE */
+    1596, /* WAKE */
+    1275, /* FANTINA */
+    1680, /* BYRON */
+    1549, /* CANDICE */
+    1521, /* VOLKNER */
+    1484, /* AARON */
+    1510, /* BERTHA */
+    1653, /* FLINT */
+    1387, /* LUCIAN */
+    1504, /* CYNTHIA */
+    1594, /* BARRY */
+    1459, /* ROWAN */
+    1636, /* JASMINE_S */
+    1510, /* CILAN */
+    1435, /* CHILI */
+    1673, /* CRESS */
+    1468, /* LENORA */
+    1640, /* BURGH */
+    1541, /* ELESA */
+    1684, /* CLAY */
+    1488, /* SKYLA */
+    1415, /* BRYCEN */
+    1490, /* DRAYDEN */
+    1300, /* SHAUNTAL */
+    1433, /* GRIMSLEY */
+    1403, /* CAITLIN */
+    1577, /* MARSHAL */
+    1487, /* ALDER */
+    1407, /* N */
+    1523, /* CHEREN */
+    1591, /* BIANCA */
+    1600, /* JUNIPER */
+    1429, /* IRIS */
 };
-const unsigned gTcgSpecialRatingCount = 24;
+const unsigned gTcgSpecialRatingCount = 91;
 /* Their variants (gTcgSpecialVariants), each against all of the above 10 times */
 const int16_t gTcgVariantRating[] = {
     1382, /* ROXANNE/BlisteringPokemon */

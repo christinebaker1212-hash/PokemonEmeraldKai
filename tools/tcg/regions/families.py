@@ -569,6 +569,14 @@ def _(m, d):
 
 # One wording, one script (the cards' words with SELF for the card's name; tcg_script.inc's ops)
 EXACT = {
+    'Flip a coin. If heads, search your deck for a card that evolves from 1 of your Benched Pokemon and put that card on that Pokemon. (This counts as evolving that Pokemon.) Shuffle your deck afterward.': 'c h.evbench',
+    'For each SELF in play, you may search your deck for a Lightning Energy card and attach it to SELF. Shuffle your deck afterward.': 'srchnm:2',
+    'You may search your deck for a Fire Energy card and attach it to Ho-Oh. Shuffle your deck afterward.': 'srch:0,1',
+    'If you have any Benched Pokemon, flip a coin. If heads, remove all damage counters from 1 of your Benched Pokemon and discard all Energy cards attached to it.': 'c h.healbd',
+    'Flip a coin. If heads, choose a Trainer card from your discard pile, show it to your opponent, and then shuffle it into your deck.': 'c h.distrdeck',
+    'Put an Omastar from your hand onto SELF. This counts as evolving SELF.': 'evhand',
+    'Shuffle a basic Energy card from your discard pile into your deck.': 'dised',
+    'Choose 1 of your Pokemon with an Energy card attached to it. Remove 1 damage counter from that Pokemon.': 'healte:1',
     'Before doing damage, discard any Trainer cards attached to the Defending Pokemon.': 'dtrdisc',
     'Flip a number of coins equal to the number of damage counters on SELF. This attack does 10 damage times the number of heads.': 'csc mulh:10',
     'Discard all Lightning Energy cards attached to SELF. Then, flip a number of coins equal to the number of Energy cards discarded that way. This attack does 40 damage times the number of heads.': 'ce:2 dse:2,0 mulh:40',

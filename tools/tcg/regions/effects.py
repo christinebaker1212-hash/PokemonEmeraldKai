@@ -26,7 +26,7 @@ for _label, _rule in (('neo1-19', 'METAL'), ('neo1-104', 'DARKNESS'), ('neo1-105
 
 # Trainers with a handler in src/tcg/tcg_rtrainers.inc (their first printings; a reprint with the same name and rules
 # plays as its first printing, a Game Boy games' Trainer's reprint as theirs: generate_catalog.py's canon)
-RTRAINERS = '''gym1-15 gym1-16 gym1-17 gym1-18 gym1-104 gym1-105 gym1-106 gym1-108 gym1-109 gym1-110 gym1-111 gym1-113
+RTRAINERS = '''gym2-126 neo1-102 gym1-15 gym1-16 gym1-17 gym1-18 gym1-104 gym1-105 gym1-106 gym1-108 gym1-109 gym1-110 gym1-111 gym1-113
 gym1-114 gym1-115 gym1-118 gym1-121 gym1-122 gym1-123 gym1-125 gym1-126 gym2-17 gym2-19 gym2-20 gym2-103 gym2-105
 gym2-109 gym2-113 gym2-118 gym2-120 gym2-123 gym2-124 neo1-83 neo1-85 neo1-86 neo1-88 neo1-93 neo1-94 neo1-96 neo1-97
 neo1-99 neo1-101 neo1-103 neo2-73 neo2-74 neo2-75 neo3-60 neo3-64 neo4-92 neo4-96 neo4-97 neo4-98 neo4-101 neo4-103

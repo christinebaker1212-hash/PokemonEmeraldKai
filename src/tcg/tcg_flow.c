@@ -373,6 +373,10 @@ static int AttackPickSteps(const struct TcgDuel *g, unsigned me, const struct Tc
             {52, TCG_F_ANY, TCG_SRC_HAND, "Discard which cards to draw as many?"},
             {53, TCG_F_TRAINER, TCG_SRC_OPP_HAND, "If heads, shuffle which Trainer into their deck?"},
             {54, TCG_F_ENERGY, TCG_SRC_OPP_HAND, "If heads, shuffle which Energy into their deck?"},
+            {55, TCG_F_EVOLVES_FROM_TARGET, TCG_SRC_DECK, "If heads, evolve it into which card?"},
+            {56, TCG_F_BASIC_ENERGY, TCG_SRC_MY_DISCARD, "Shuffle which basic Energy into your deck?"},
+            {57, TCG_F_TRAINER, TCG_SRC_MY_DISCARD, "If heads, shuffle which Trainer into your deck?"},
+            {58, TCG_F_EVOLVES_FROM_ACTIVE, TCG_SRC_HAND, "Evolve it into which card from your hand?"},
         };
         unsigned i;
         /* (count: the kind, and in the next byte how many may be picked: 1 if not given) */
@@ -470,11 +474,12 @@ int TcgFlow_AttackSteps(const struct TcgDuel *g, unsigned me, const struct TcgAc
     choice = attack ? TcgDuel_AttackChoice(attack, NULL) : 0;
     ask = attack ? TcgDuel_AttackAsk(attack) : TCG_ASK_NONE;
     if ((choice == 1 && BenchOn(g, me ^ 1)) || (choice == 2 && BenchOn(g, me)) || choice == 3 || choice == 4 ||
-        (choice == 5 && BenchOn(g, me ^ 1)) || choice == 6 || (choice == 7 && EvolvedOn(g, me ^ 1)))
+        (choice == 5 && BenchOn(g, me ^ 1)) || choice == 6 || (choice == 7 && EvolvedOn(g, me ^ 1)) || choice == 8)
     {
         const char *words = TcgDuel_AttackTargetPrompt(attack);
-        struct TcgStep st = {choice == 1 || choice == 3 || choice >= 5 ? TCG_ST_OPP_SLOT : TCG_ST_MY_SLOT,
-                             choice == 7   ? TCG_F_EVOLVED
+        struct TcgStep st = {choice == 1 || choice == 3 || (choice >= 5 && choice != 8) ? TCG_ST_OPP_SLOT : TCG_ST_MY_SLOT,
+                             choice == 8   ? TCG_F_HAS_ENERGY
+                             : choice == 7 ? TCG_F_EVOLVED
                              : choice == 6 ? TCG_F_DAMAGED : choice == 5 ? TCG_F_BENCH_CLEAN : choice >= 3 ? TCG_F_OCCUPIED : TCG_F_BENCH,
                              0, 0, 0,
                              words         ? words
@@ -613,9 +618,10 @@ int TcgFlow_PickMatches(const struct TcgDuel *g, unsigned me, const struct TcgAc
         const struct TcgCard *first = a->selectionCount ? Tcg_Card(CardOf(g, me, a->selections[0])) : NULL;
         return c && first && c->kind == TCG_POKEMON && !c->stage && c->type == first->type;
     }
-    if (filter == TCG_F_EVOLVES_FROM_USER || filter == TCG_F_EVOLVES_FROM_ACTIVE)
+    if (filter == TCG_F_EVOLVES_FROM_USER || filter == TCG_F_EVOLVES_FROM_ACTIVE || filter == TCG_F_EVOLVES_FROM_TARGET)
         return TcgDuel_EvolvesFrom(Tcg_Card(CardOf(g, owner, physical)),
-                                   Field(g, me, filter == TCG_F_EVOLVES_FROM_USER ? a->slot : 0));
+                                   Field(g, me, filter == TCG_F_EVOLVES_FROM_USER ? a->slot
+                                                : filter == TCG_F_EVOLVES_FROM_TARGET ? a->target : 0));
     return TcgFlow_CardMatches(g, owner, physical, filter);
 }
 

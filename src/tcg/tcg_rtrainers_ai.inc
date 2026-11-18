@@ -511,6 +511,17 @@ static int RegionTrainerAi(const struct TcgDuel *g, unsigned hand, struct TcgAct
             return 0;
         break;
     }
+    case TCG_CARD_NEO1_102: /* Pokemon March: when its own Bench has room, its first Basic */
+    {
+        unsigned k;
+        if (!AiBenchRoom(p))
+            return 0;
+        a->selectionCount = 0;
+        for (k = 0; k < p->deckSize && !a->selectionCount; k++)
+            if (AiBasic(Tcg_Card(p->cards[p->deck[k]])))
+                a->selections[a->selectionCount++] = p->deck[k];
+        break;
+    }
     default:
         /* (Minion of Team Rocket, Thought Wave Machine, Tropical Wind, Energy Flow, Sabrina, Trash Exchange,
          * Rocket's Secret Experiment, Hyper Devolution Spray: the AI keeps them) */
