@@ -783,6 +783,63 @@ static int BorrowedAttacks(void)
     printf("PASS borrowed attacks: Recall, Memory Berry, Prehistoric Memory, Psylink, Mimic\n");
     return 0;
 }
+/* Genetic Memory (Seadra's attacks under Kingdra), Sketch (Low Kick last turn), Rocket's Minefield Gym */
+static int Copies(void)
+{
+    struct TcgDuel g;
+    struct TcgAction a;
+    const struct TcgAttack *at;
+    unsigned seed, seen = 0;
+    int c;
+    if (!Tcg_Card(TCG_CARD_NEO3_19) || !Tcg_Card(TCG_CARD_NEO2_11) || !Tcg_Card(TCG_CARD_GYM2_119))
+        return printf("FAIL copies: a card isn't finished\n"), 1;
+    Stage(&g, TCG_CARD_NEO3_19, 0, 1);
+    g.players[0].deck[g.players[0].deckSize++] = g.players[0].field[0].stack[0]; /* (rebuilt as Horsea, Seadra, Kingdra) */
+    g.players[0].field[0].stackSize = 0;
+    c = Relabel(&g, 0, TCG_CARD_HORSEA);
+    g.players[0].field[0].stack[g.players[0].field[0].stackSize++] = (uint8_t)c;
+    c = Relabel(&g, 0, TCG_CARD_SEADRA);
+    g.players[0].field[0].stack[g.players[0].field[0].stackSize++] = (uint8_t)c;
+    c = Relabel(&g, 0, TCG_CARD_NEO3_19);
+    g.players[0].field[0].stack[g.players[0].field[0].stackSize++] = (uint8_t)c;
+    at = TcgDuel_MetronomeAttack(&g, 0, 1);
+    if (!at || strcmp(at->name, Tcg_Card(TCG_CARD_SEADRA)->attacks[0].name))
+        return printf("FAIL Genetic Memory: %s\n", at ? at->name : "nothing"), 1;
+    memset(&a, 0, sizeof(a));
+    a.type = TCG_ATTACK;
+    a.copy = 1;
+    if (TcgDuel_Apply(&g, &a) != TCG_OK)
+        return printf("FAIL Genetic Memory's attack: %s\n", g.error), 1;
+    /* Sketch: nothing to copy unless the Defending Pokemon attacked last turn */
+    Stage(&g, TCG_CARD_NEO2_11, 0, 1);
+    if (TcgDuel_MetronomeAttack(&g, 0, 1))
+        return printf("FAIL Sketch copies with no attack last turn\n"), 1;
+    g.players[1].field[0].lastAttack = 1;
+    g.players[1].field[0].lastAttackTurn = (uint16_t)(g.turn - 1);
+    at = TcgDuel_MetronomeAttack(&g, 0, 1);
+    if (!at || strcmp(at->name, Tcg_Card(TCG_CARD_MACHOP)->attacks[0].name))
+        return printf("FAIL Sketch: %s\n", at ? at->name : "nothing"), 1;
+    /* Rocket's Minefield Gym: tails, 2 counters on the Basic benched from the hand */
+    for (seed = 1; seed < 16; seed++)
+    {
+        Stage(&g, TCG_CARD_MACHOP, 0, seed);
+        c = Relabel(&g, 0, TCG_CARD_GYM2_119);
+        g.players[0].stadium = (uint8_t)(c + 1);
+        c = Relabel(&g, 0, TCG_CARD_MACHOP);
+        g.players[0].hand[g.players[0].handSize++] = (uint8_t)c;
+        memset(&a, 0, sizeof(a));
+        a.type = TCG_PLAY_BASIC;
+        a.hand = (uint8_t)(g.players[0].handSize - 1);
+        a.slot = 3;
+        if (TcgDuel_Apply(&g, &a) != TCG_OK)
+            return printf("FAIL Minefield: %s\n", g.error), 1;
+        seen |= g.players[0].field[3].damage == 20 ? 1 : !g.players[0].field[3].damage ? 2 : 4;
+    }
+    if (seen != 3)
+        return printf("FAIL Rocket's Minefield Gym: outcomes %u\n", seen), 1;
+    printf("PASS Genetic Memory, Sketch, Rocket's Minefield Gym\n");
+    return 0;
+}
 static int ScriptMechanics(void)
 {
     struct TcgDuel g;
@@ -1598,7 +1655,7 @@ int main(void)
     }
     printf("PASS %u finished regional cards: %u attacks used %u times, then %u AI actions after them\n", ready, used, ok,
            steps);
-    if (SpecialEnergy() || EcardEnergy() || ScriptMechanics() || Anchors() || Guards() || MovePowers() || LookPowers() || SwitchesAndFire() || BorrowedAttacks() || TechnicalMachines() || Babies())
+    if (SpecialEnergy() || EcardEnergy() || ScriptMechanics() || Anchors() || Guards() || MovePowers() || LookPowers() || SwitchesAndFire() || BorrowedAttacks() || Copies() || TechnicalMachines() || Babies())
         return 1;
     if (PlayTrainers() || UsePowers() || UseStadiums() || AttackFlows())
         return 1;

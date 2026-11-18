@@ -982,6 +982,9 @@ int TcgPower_EvolveBlocked(const struct TcgDuel *g, unsigned player, unsigned sl
 void TcgPower_BenchedFromHand(struct TcgDuel *g, unsigned player, unsigned slot)
 {
     unsigned who;
+    /* Rocket's Minefield Gym: its player's coin, tails 2 damage counters on it */
+    if (slot && TcgDuel_Stadium(g, NULL) == TCG_CARD_GYM2_119 && !TcgDuel_Coin(g, player))
+        PlainDamage(g, player, slot, 20);
     for (who = 0; who < 2; who++)
         if (slot && TcgPower_Working(g, who, 0) == TCG_POWER_R_HOT_PLATE)
         {

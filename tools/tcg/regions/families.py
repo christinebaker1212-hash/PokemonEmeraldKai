@@ -569,6 +569,8 @@ def _(m, d):
 
 # One wording, one script (the cards' words with SELF for the card's name; tcg_script.inc's ops)
 EXACT = {
+    "Use any attack from SELF's Basic Pokemon card or Evolution card. (SELF doesn't have to pay for that attack's Energy cost.)": ('METRONOME', 0, 4),
+    'If the Defending Pokemon attacked last turn, and SELF was in play during that attack, SELF copies that attack except for its Energy costs and anything else required in order to use that attack.': ('METRONOME', 0, 8),
     'If you have any Grass Pokemon on your Bench, remove all Grass Energy cards from SELF and attach them to 1 of those Pokemon, then switch SELF with that Pokemon.': 'gmove:1',
     "Flip 3 coins. For each heads, discard 1 Fire Energy card attached to SELF. If you can't discard Energy cards, this attack does nothing. This attack does 10 damage times the number of heads to each of your opponent's Pokemon. Don't apply Weakness and Resistance for this attack.": 'c:3 dsxh:0 mulh:10 nowr boh:10',
     'Discard all Fire Energy cards attached to SELF. If all Energy cards attached to SELF provide 2 Fire Energy, discard all of them. This attack does 20 damage plus 20 more damage for each Fire Energy discarded in this way.': 'adde:0,20 dse:0,0',

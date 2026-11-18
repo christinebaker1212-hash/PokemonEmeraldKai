@@ -6,27 +6,26 @@ plays (tools/tcg/regions/effects.py); only finished cards appear in the game.
 | Set | Cards | Finished |
 |---|---|---|
 | gym1 | 126 | 115 |
-| gym2 | 126 | 113 |
+| gym2 | 126 | 114 |
 | neo1 | 105 | 96 |
-| neo2 | 75 | 65 |
-| neo3 | 66 | 56 |
+| neo2 | 75 | 67 |
+| neo3 | 66 | 57 |
 | neo4 | 113 | 97 |
 | ecard1 | 159 | 153 |
 | ecard2 | 182 | 173 |
 | ecard3 | 182 | 172 |
 | basep | 53 | 45 |
 | np | 40 | 37 |
-| **all** | 1227 | 1122 |
+| **all** | 1227 | 1126 |
 
 ## Rules the engine doesn't play yet (cards needing each)
 
 
-## Wordings to translate (91; the most cards first)
+## Wordings to translate (88; the most cards first)
 
 - 3 x POWER: Entei (neo3-17): As long as Entei is your Active Pokemon, Entei and Energy cards attached to it aren't affected by effects from Trainer cards other than Stadium cards. As long as this Power is active, discard any Trainer cards attached to E
 - 2 x attack: Magnemite (neo2-7): During your next turn, treat any tails flipped when using Magnemite's Electric Bolt attack as if they were heads. (Benching or evolving either Pokemon ends this effect.)
 - 2 x POWER: Politoed (neo2-8): Whenever Politoed's attack damages the Defending Pokemon (after applying Weakness and Resistance), if there are more than 3 Poliwags, Poliwhirls, Poliwraths, and/or Politoeds in play (including your opponent's), that atta
-- 2 x attack: Smeargle (neo2-11): If the Defending Pokemon attacked last turn, and Smeargle was in play during that attack, Smeargle copies that attack except for its Energy costs and anything else required in order to use that attack.
 - 2 x POWER: Alakazam (ecard1-1): Once during your turn, instead of Alakazam's normal attack, you may choose 1 of your opponent's Pokemon's attacks. Alakazam copies that attack including its Energy costs and anything else required in order to use that a
 - 2 x POWER: Gengar (ecard1-13): Once during your turn (before your attack), if your opponent has 3 or fewer Prizes, you may move 1 damage counter from 1 Pokemon (yours or your opponent's) to another (even if it would Knock Out the other Pokemon). This 
 - 2 x POWER: Venusaur (ecard1-30): Once during your turn (before your attack), if you attach an Energy card to your Active Pokemon as part of your turn, you may attach an additional Energy card to that Pokemon at the same time. This power can't be used 
@@ -59,7 +58,6 @@ plays (tools/tcg/regions/effects.py); only finished cards appear in the game.
 - 1 x TRAINER: Blaine's Quiz #2 (gym2-111): Put a card from your hand face down in front of you. Your opponent guesses whether it is an Energy card, a Trainer card, or a Pokemon (Basic or Evolution) card. Flip the card over. If your opponent guessed right
 - 1 x TRAINER: Blaine's Quiz #3 (gym2-112): Put a Basic or Evolution card from your hand face down in front of you and tell your opponent the name of an attack of that card. Your opponent guesses the name of that card. Flip the card over. If your opponent
 - 1 x TRAINER: Koga's Ninja Trick (gym2-115): Attach Koga's Ninja Trick to your Active Pokemon with Koga in its name. If this Pokemon goes to your Bench, discard this card. When your opponent attacks, you may switch this Pokemon with 1 of your Benched Pok
-- 1 x TRAINER: Rocket's Minefield Gym (gym2-119): This card stays in play after being played. Discard this card if another Stadium card comes into play. Whenever a player puts a Basic Pokemon onto his or her Bench from his or her hand, he or she flips a c
 - 1 x TRAINER: Sabrina's Psychic Control (gym2-121): Flip a coin. If heads, choose a Trainer card in your opponent's discard pile that isn't put in play (like PlusPower or Mysterious Fossil). You may use that card as if it were in your hand, if you do eve
 - 1 x POWER: Slowking (neo1-14): Whenever your opponent plays a Trainer card, you may flip a coin. If heads, that card does nothing. Put it on top of your opponent's deck. This power can't be used if Slowking is Asleep, Confused, or Paralyzed.
 - 1 x attack: Togetic (neo1-16): Flip a coin. If heads, choose an attack on 1 of your opponent's Pokemon. Super Metronome copies that attack except for its Energy cost. (You must still do anything else in order to use that attack.) (No matter what type t
@@ -78,7 +76,6 @@ plays (tools/tcg/regions/effects.py); only finished cards appear in the game.
 - 1 x POWER: Entei (neo3-6): When you play Entei from your hand, you may discard the top 5 cards of your deck. (If you have fewer cards in your deck than that, discard all of them.) If any of those are Fire Energy cards, attach them to any of your Fire 
 - 1 x attack: Jumpluff (neo3-9): Choose any number of your Hoppips and Skiplooms. Then, for each Pokemon you chose in this way, you may search your deck for a card that evolves from that Pokemon and attach it to that Pokemon. (This counts as evolving tho
 - 1 x POWER: Porygon2 (neo3-12): Once during your turn (before your attack), you may choose 1 basic Energy card attached to 1 of your Pokemon and choose an Energy type. Treat that Energy card as that type until the end of your turn. This power can't be 
-- 1 x attack: Kingdra (neo3-19): Use any attack from Kingdra's Basic Pokemon card or Evolution card. (Kingdra doesn't have to pay for that attack's Energy cost.)
 - 1 x POWER: Parasect (neo3-35): As long as Parasect is in play, cards in any player's discard piles are not affected by attacks or Pokemon Powers. This power stops working if Parasect becomes Asleep, Confused, or Paralyzed.
 - 1 x POWER: Unown [K] (neo3-58): Your opponent's attacks, Pokemon Powers, and Trainer cards can't discard Energy cards from your Pokemon with Unown in their names. (Any other effects still happen.)
 - 1 x POWER: Dark Porygon2 (neo4-8): Once during your turn (before your attack), you may flip a coin. If heads, choose a Stadium card from your discard pile and put it into play. (If there's already a Stadium card in play, discard it.) This power can't 

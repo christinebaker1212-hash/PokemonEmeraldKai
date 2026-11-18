@@ -4308,7 +4308,7 @@ const struct TcgCard gTcgCards[TCG_CARD_COUNT + 1] = {
 [686] = {.id=686, .name="Misty's Tears", .kind=TCG_TRAINER, .type=6, .rarity=1, .set=14, .set2=255, .dark=0, .holo=0, .flags=TCG_CF_READY, .origin=14,
 .effect="gym2-118:t",.description="Discard 1 of the other cards in your hand in order to search your deck for up to 2 Water Energy cards. Show those cards to your opponent, then put them into your hand. Shuffle your deck afterward."
 },
-[687] = {.id=687, .name="Rocket's Minefield Gym", .kind=TCG_TRAINER, .type=6, .rarity=1, .set=14, .set2=255, .dark=0, .holo=0, .flags=TCG_CF_STADIUM, .origin=14,
+[687] = {.id=687, .name="Rocket's Minefield Gym", .kind=TCG_TRAINER, .type=6, .rarity=1, .set=14, .set2=255, .dark=0, .holo=0, .flags=TCG_CF_STADIUM|TCG_CF_READY, .origin=14,
 .effect="gym2-119:t",.description="This card stays in play after being played. Discard this card if another Stadium card comes into play. Whenever a player puts a Basic Pokemon onto his or her Bench from his or her hand, he or she flips a coin. If tails, put damage counters on that Pokemon."
 },
 [688] = {.id=688, .name="Rocket's Secret Experiment", .kind=TCG_TRAINER, .type=6, .rarity=1, .set=14, .set2=255, .dark=0, .holo=0, .flags=TCG_CF_READY, .origin=14,
@@ -5041,7 +5041,7 @@ const struct TcgCard gTcgCards[TCG_CARD_COUNT + 1] = {
 {.name="",.description="",.effect="NONE",.animation="ATK_ANIM_NONE",.cost={0},.damage=0,.category=TCG_DAMAGE_NORMAL},
 }
 },
-[810] = {.id=810, .name="Smeargle", .kind=TCG_POKEMON, .type=6, .rarity=2, .set=16, .set2=255, .dark=0, .holo=1, .flags=0, .origin=16,
+[810] = {.id=810, .name="Smeargle", .kind=TCG_POKEMON, .type=6, .rarity=2, .set=16, .set2=255, .dark=0, .holo=1, .flags=TCG_CF_READY, .origin=16,
 .hp=50, .stage=0, .species=235, .level=27, .retreat=1, .weakness=4, .resistance=5, .evolvesFrom="", .description="A special fluid oozes from the tip of its tail. It paints the fluid everywhere to mark its territory.", .attacks={
 {.name="Sketch",.description="If the Defending Pokemon attacked last turn, and Smeargle was in play during that attack, Smeargle copies that attack except for its Energy costs and anything else required in order to use that attack.",.effect="neo2-11:a0",.animation="ATK_ANIM_HIT",.cost={0,0,0,0,0,0,2,0,0},.damage=0,.category=TCG_RESIDUAL},
 {.name="",.description="",.effect="NONE",.animation="ATK_ANIM_NONE",.cost={0},.damage=0,.category=TCG_DAMAGE_NORMAL},
@@ -5174,7 +5174,7 @@ const struct TcgCard gTcgCards[TCG_CARD_COUNT + 1] = {
 {.name="",.description="",.effect="NONE",.animation="ATK_ANIM_NONE",.cost={0},.damage=0,.category=TCG_DAMAGE_NORMAL},
 }
 },
-[829] = {.id=829, .name="Smeargle", .kind=TCG_POKEMON, .type=6, .rarity=2, .set=16, .set2=255, .dark=0, .holo=0, .flags=0, .origin=16,
+[829] = {.id=829, .name="Smeargle", .kind=TCG_POKEMON, .type=6, .rarity=2, .set=16, .set2=255, .dark=0, .holo=0, .flags=TCG_CF_READY, .origin=16,
 .hp=50, .stage=0, .species=235, .level=27, .retreat=1, .weakness=4, .resistance=5, .evolvesFrom="", .description="A special fluid oozes from the tip of its tail. It paints the fluid everywhere to mark its territory.", .attacks={
 {.name="Sketch",.description="If the Defending Pokemon attacked last turn, and Smeargle was in play during that attack, Smeargle copies that attack except for its Energy costs and anything else required in order to use that attack.",.effect="neo2-30:a0",.animation="ATK_ANIM_HIT",.cost={0,0,0,0,0,0,2,0,0},.damage=0,.category=TCG_RESIDUAL},
 {.name="",.description="",.effect="NONE",.animation="ATK_ANIM_NONE",.cost={0},.damage=0,.category=TCG_DAMAGE_NORMAL},
@@ -5606,7 +5606,7 @@ const struct TcgCard gTcgCards[TCG_CARD_COUNT + 1] = {
 {.name="",.description="",.effect="NONE",.animation="ATK_ANIM_NONE",.cost={0},.damage=0,.category=TCG_DAMAGE_NORMAL},
 }
 },
-[893] = {.id=893, .name="Kingdra", .kind=TCG_POKEMON, .type=3, .rarity=2, .set=17, .set2=255, .dark=0, .holo=0, .flags=0, .origin=17,
+[893] = {.id=893, .name="Kingdra", .kind=TCG_POKEMON, .type=3, .rarity=2, .set=17, .set2=255, .dark=0, .holo=0, .flags=TCG_CF_READY, .origin=17,
 .hp=90, .stage=2, .species=230, .level=49, .retreat=2, .weakness=255, .resistance=255, .evolvesFrom="Seadra", .description="It sleeps deep on the ocean floor to build its energy. It is said to cause tornadoes as it wakes.", .attacks={
 {.name="Genetic Memory",.description="Use any attack from Kingdra's Basic Pokemon card or Evolution card. (Kingdra doesn't have to pay for that attack's Energy cost.)",.effect="neo3-19:a0",.animation="ATK_ANIM_HIT",.cost={0,0,0,0,0,0,1,0,0},.damage=0,.category=TCG_RESIDUAL},
 {.name="Twister",.description="Flip 2 coins. For each heads, choose 1 Energy card attached to the Defending Pokemon, if any, and discard it. If both are tails, this attack does nothing (not even damage).",.effect="neo3-19:a1",.animation="ATK_ANIM_HIT",.cost={0,0,0,2,0,0,2,0,0},.damage=50,.category=TCG_DAMAGE_NORMAL},

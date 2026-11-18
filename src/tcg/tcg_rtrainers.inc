@@ -950,6 +950,7 @@ static int RegionTrainer(struct TcgDuel *g, const struct TcgAction *a, unsigned 
     case TCG_CARD_NEO1_97:  /* Sprout Tower */
     case TCG_CARD_NEO4_92:  /* Broken Ground Gym */
     case TCG_CARD_NEO3_63:  /* Rocket's Hideout (TcgDuel_MaxHp) */
+    case TCG_CARD_GYM2_119: /* Rocket's Minefield Gym (TcgPower_BenchedFromHand) */
     case TCG_CARD_ECARD2_131: /* Pokemon Park */
     case TCG_CARD_ECARD3_132: /* Mirage Stadium */
     /* (and the ones used during a turn: RegionStadiumUse) */

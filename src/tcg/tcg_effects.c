@@ -689,10 +689,51 @@ static int Picked(const struct TcgAction *action, unsigned k, const uint8_t *pil
 static int RealAttack(const struct TcgAttack *a) { return a && a->name[0] && a->category != TCG_POKEMON_POWER; }
 /* The attack slots a card shows (2 at least, as the original's menus: a third only when it has one) */
 static unsigned AttackSlots(const struct TcgCard *c) { return c && c->attacks[2].name[0] ? 3 : 2; }
+/* What the attacker's Metronome copies from (extra 4: Genetic Memory, the cards under it; 8: Sketch, the Defending
+ * Pokemon's attack last turn; 0 the Defending Pokemon's attacks) */
+static unsigned MetronomeSource(const struct TcgDuel *g, unsigned player)
+{
+    const struct TcgCard *self = TcgDuel_Attacker(g, player);
+    unsigned i;
+    for (i = 0; self && self->kind == TCG_POKEMON && i < TCG_ATTACKS; i++)
+    {
+        const struct Effect *e = Effect(self->attacks[i].effect);
+        if (e && e->kind == FX_METRONOME && (e->extra & 12))
+            return e->extra & 12;
+    }
+    return 0;
+}
 const struct TcgAttack *TcgDuel_MetronomeAttack(const struct TcgDuel *g, unsigned player, unsigned copy)
 {
     const struct TcgCard *foe = TcgDuel_Field(g, player ^ 1, 0);
     const struct TcgAttack *a;
+    unsigned source = MetronomeSource(g, player);
+    if (source == 4)
+    {
+        /* Genetic Memory: the attacks of the cards under it, the lowest stage last */
+        const struct TcgPlayer *p = &g->players[player];
+        const struct TcgFieldCard *f = &p->field[0];
+        unsigned k, i, n = 0;
+        for (k = f->stackSize ? f->stackSize - 1 : 0; k-- > 0;)
+        {
+            const struct TcgCard *c = Tcg_Card(p->cards[f->stack[k]]);
+            for (i = 0; c && c->kind == TCG_POKEMON && i < TCG_ATTACKS; i++)
+                if (RealAttack(&c->attacks[i]) && !TcgDuel_IsMetronome(&c->attacks[i]) &&
+                    TcgDuel_EffectSupported(c->attacks[i].effect) && ++n == copy)
+                    return &c->attacks[i];
+        }
+        return NULL;
+    }
+    if (source == 8)
+    {
+        /* Sketch: the attack the Defending Pokemon used last turn, if it was in play then */
+        const struct TcgFieldCard *d = &g->players[player ^ 1].field[0];
+        if (copy != 1 || !foe || !d->lastAttack || d->lastAttackTurn + 1 != g->turn ||
+            g->players[player].field[0].enteredTurn >= g->turn)
+            return NULL;
+        a = TcgDuel_AttackOf(g, player ^ 1, d->lastAttack - 1u);
+        return a && RealAttack(a) && !TcgDuel_IsMetronome(a) && TcgDuel_EffectSupported(a->effect) ? a : NULL;
+    }
     if (!foe || foe->kind != TCG_POKEMON || copy < 1 || copy > TCG_ATTACKS)
         return NULL;
     a = &foe->attacks[copy - 1];
@@ -733,6 +774,14 @@ unsigned TcgDuel_AttackOptions(const struct TcgDuel *g, unsigned player, const s
     {
     case FX_AMNESIA:
     case FX_METRONOME:
+        if (e->kind == FX_METRONOME && MetronomeSource(g, player))
+        {
+            /* (Genetic Memory, Sketch: the attacks it may copy) */
+            const struct TcgAttack *c;
+            for (i = 0; i < 6 && (c = TcgDuel_MetronomeAttack(g, player, i + 1)) != NULL; i++)
+                labels[i] = c->name, ok[i] = 1;
+            return i;
+        }
         /* the Defending Pokemon's attacks */
         if (!foe || foe->kind != TCG_POKEMON)
             return 0;
@@ -889,7 +938,7 @@ void TcgDuel_AiAttackChoices(const struct TcgDuel *g, struct TcgAction *a)
     case FX_METRONOME:
     {
         unsigned best = 0, bestDamage = 0;
-        for (i = 1; i <= 2; i++)
+        for (i = 1; i <= 6; i++)
         {
             const struct TcgAttack *c = TcgDuel_MetronomeAttack(g, g->current, i);
             if (c && (!best || c->damage > bestDamage))
@@ -1099,9 +1148,11 @@ const char *TcgDuel_EffectBlock(const struct TcgDuel *g, unsigned player, const 
                    : "The Defending Pokemon has no attacks to choose.";
     }
     case FX_METRONOME:
-        return TcgDuel_MetronomeAttack(g, player, 1) || TcgDuel_MetronomeAttack(g, player, 2) || TcgDuel_MetronomeAttack(g, player, 3)
+        return TcgDuel_MetronomeAttack(g, player, 1) || TcgDuel_MetronomeAttack(g, player, 2) || TcgDuel_MetronomeAttack(g, player, 3) ||
+                       TcgDuel_MetronomeAttack(g, player, 4) || TcgDuel_MetronomeAttack(g, player, 5) || TcgDuel_MetronomeAttack(g, player, 6)
                    ? NULL
-                   : "There's no attack Metronome can copy.";
+                   : MetronomeSource(g, player) == 8 ? "The Defending Pokemon didn't attack last turn."
+                                                    : "There's no attack to copy.";
     case FX_WILDFIRE:
         return FireEnergyCards(g, player, 0) ? NULL : "Not enough Fire Energy.";
     case FX_WAIL:
