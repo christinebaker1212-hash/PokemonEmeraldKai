@@ -840,6 +840,95 @@ static int Copies(void)
     printf("PASS Genetic Memory, Sketch, Rocket's Minefield Gym\n");
     return 0;
 }
+/* Lock-on, Frog Song, Psymimic, Harvest Bounty */
+static int PowersOfFour(void)
+{
+    struct TcgDuel g;
+    struct TcgAction a;
+    unsigned seed, k;
+    int c;
+    if (!Tcg_Card(TCG_CARD_NEO2_7) || !Tcg_Card(TCG_CARD_NEO2_8) || !Tcg_Card(TCG_CARD_ECARD1_1) || !Tcg_Card(TCG_CARD_ECARD1_30))
+        return printf("FAIL lock-on and the rest: a card isn't finished\n"), 1;
+    /* Lock-on, then Electric Bolt next turn: always Paralyzed */
+    for (seed = 1; seed < 8; seed++)
+    {
+        unsigned turn;
+        Stage(&g, TCG_CARD_NEO2_7, 0, seed);
+        c = Relabel(&g, 0, TCG_CARD_LIGHTNING_ENERGY);
+        g.players[0].field[0].attached[g.players[0].field[0].attachedSize++] = (uint8_t)c;
+        g.players[1].field[0].poison = 0;
+        turn = g.turn;
+        memset(&a, 0, sizeof(a));
+        a.type = TCG_ATTACK;
+        if (TcgDuel_Apply(&g, &a) != TCG_OK)
+            return printf("FAIL Lock-on: %s\n", g.error), 1;
+        g.current = 0, g.phase = TCG_TURN, g.needsTurnStart = 0, g.turn = (uint16_t)(turn + 2);
+        g.players[1].field[0].damage = 0, g.players[1].field[0].condition = TCG_HEALTHY;
+        memset(&a, 0, sizeof(a));
+        a.type = TCG_ATTACK;
+        a.attack = 1;
+        if (TcgDuel_Apply(&g, &a) != TCG_OK)
+            return printf("FAIL Electric Bolt: %s\n", g.error), 1;
+        if (g.players[1].field[0].stackSize && g.players[1].field[0].condition != TCG_PARALYZED)
+            return printf("FAIL Lock-on (seed %u): not Paralyzed (%u damage)\n", seed, g.players[1].field[0].damage), 1;
+    }
+    /* Frog Song: Politoed and 3 more Poliwag in play, 40 more on a damaging Doubleslap */
+    for (seed = 1; seed < 10; seed++)
+    {
+        unsigned d;
+        Stage(&g, TCG_CARD_NEO2_8, 1, seed);
+        g.players[0].cards[g.players[0].field[1].stack[0]] = TCG_CARD_POLIWAG;
+        g.players[0].cards[g.players[0].field[2].stack[0]] = TCG_CARD_POLIWAG;
+        g.players[1].cards[g.players[1].field[1].stack[0]] = TCG_CARD_POLIWAG;
+        g.players[1].field[0].poison = 0, g.players[1].field[0].damage = 0;
+        memset(&a, 0, sizeof(a));
+        a.type = TCG_ATTACK;
+        a.attack = 1;
+        if (TcgDuel_Apply(&g, &a) != TCG_OK)
+            return printf("FAIL Frog Song: %s\n", g.error), 1;
+        d = g.players[1].field[0].damage;
+        if (g.players[1].field[0].stackSize && d != 0 && d != 80 && d != 120)
+            return printf("FAIL Frog Song: %u damage\n", d), 1;
+    }
+    /* Psymimic: their Machop's Low Kick, paid with its own Energy */
+    Stage(&g, TCG_CARD_ECARD1_1, 1, 1);
+    {
+        const struct TcgAttack *at = TcgDuel_AttackOf(&g, 0, TCG_ATTACK_BORROW);
+        if (!at || strcmp(at->name, Tcg_Card(TCG_CARD_MACHOP)->attacks[0].name))
+            return printf("FAIL Psymimic: %s\n", at ? at->name : "nothing"), 1;
+    }
+    k = g.players[1].field[0].damage;
+    memset(&a, 0, sizeof(a));
+    a.type = TCG_ATTACK;
+    a.attack = TCG_ATTACK_BORROW;
+    if (TcgDuel_Apply(&g, &a) != TCG_OK || g.players[1].field[0].damage <= k)
+        return printf("FAIL Psymimic's Low Kick: %s\n", g.error), 1;
+    /* Harvest Bounty: a second Energy only onto the Active, after the first went there */
+    Stage(&g, TCG_CARD_ECARD1_30, 1, 1);
+    g.players[0].field[0].poison = 0;
+    for (k = 0; k < 3; k++)
+    {
+        c = Relabel(&g, 0, TCG_CARD_GRASS_ENERGY);
+        g.players[0].hand[g.players[0].handSize++] = (uint8_t)c;
+    }
+    memset(&a, 0, sizeof(a));
+    a.type = TCG_ATTACH;
+    a.hand = (uint8_t)(g.players[0].handSize - 1);
+    if (TcgDuel_Apply(&g, &a) != TCG_OK)
+        return printf("FAIL Harvest Bounty's first: %s\n", g.error), 1;
+    a.hand = (uint8_t)(g.players[0].handSize - 1);
+    a.slot = 1;
+    if (TcgDuel_Apply(&g, &a) == TCG_OK)
+        return printf("FAIL Harvest Bounty onto the Bench\n"), 1;
+    a.slot = 0;
+    if (TcgDuel_Apply(&g, &a) != TCG_OK)
+        return printf("FAIL Harvest Bounty's second: %s\n", g.error), 1;
+    a.hand = (uint8_t)(g.players[0].handSize - 1);
+    if (TcgDuel_Apply(&g, &a) == TCG_OK)
+        return printf("FAIL Harvest Bounty: a third Energy\n"), 1;
+    printf("PASS Lock-on, Frog Song, Psymimic, Harvest Bounty\n");
+    return 0;
+}
 static int ScriptMechanics(void)
 {
     struct TcgDuel g;
@@ -1655,7 +1744,7 @@ int main(void)
     }
     printf("PASS %u finished regional cards: %u attacks used %u times, then %u AI actions after them\n", ready, used, ok,
            steps);
-    if (SpecialEnergy() || EcardEnergy() || ScriptMechanics() || Anchors() || Guards() || MovePowers() || LookPowers() || SwitchesAndFire() || BorrowedAttacks() || Copies() || TechnicalMachines() || Babies())
+    if (SpecialEnergy() || EcardEnergy() || ScriptMechanics() || Anchors() || Guards() || MovePowers() || LookPowers() || SwitchesAndFire() || BorrowedAttacks() || Copies() || PowersOfFour() || TechnicalMachines() || Babies())
         return 1;
     if (PlayTrainers() || UsePowers() || UseStadiums() || AttackFlows())
         return 1;

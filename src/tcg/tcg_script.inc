@@ -112,7 +112,7 @@
  *             the Energy picked in their discard pile onto the Defending Pokemon | ohshuf Dark Moon
  * After (1):  boh:x x per heads to each of their Benched | oswitch they switch their Active with a Benched one of their
  *             choice (TcgDuel_OpponentSwitch) | gmove:T Baton Pass | mime Sleight of Hand | srchk:4 a Pokemon card not
- *             named as it | ddeh:n one of the Defending's Energy per heads, up to n picked */
+ *             named as it | ddeh:n one of the Defending's Energy per heads, up to n picked | lockon Lock-on */
 #define SCRIPT_TOKEN 48
 /* Which of the player's Pokemon "it" is: the attacker (0), or a Pokemon whose power runs a script (tcg_powers.c) */
 static unsigned sScriptSelf;
@@ -1081,6 +1081,15 @@ static int ScriptRun(struct TcgDuel *g, const char *script, const struct TcgAtta
             self->barrier = (uint8_t)(x ? x : 1);
         else if (ScriptIs(&o, "guard"))
             self->guard = (uint8_t)x;
+        else if (ScriptIs(&o, "lockon"))
+        {
+            /* Lock-on: its Electric Bolt's tails are heads next turn, against this Defending Pokemon */
+            if (foe->stackSize && !blocked)
+            {
+                self->lockOnUntil = (uint16_t)(g->turn + 2);
+                self->lockOnFoe = foe->stack[foe->stackSize - 1];
+            }
+        }
         else if (ScriptIs(&o, "guardk"))
             self->guardKeep = (uint8_t)x; /* (until it takes damage, is Benched or evolves) */
         else if (ScriptIs(&o, "amn"))

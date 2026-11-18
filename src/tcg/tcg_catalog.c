@@ -5013,14 +5013,14 @@ const struct TcgCard gTcgCards[TCG_CARD_COUNT + 1] = {
 {.name="",.description="",.effect="NONE",.animation="ATK_ANIM_NONE",.cost={0},.damage=0,.category=TCG_DAMAGE_NORMAL},
 }
 },
-[806] = {.id=806, .name="Magnemite", .kind=TCG_POKEMON, .type=8, .rarity=2, .set=16, .set2=255, .dark=0, .holo=1, .flags=0, .origin=16,
+[806] = {.id=806, .name="Magnemite", .kind=TCG_POKEMON, .type=8, .rarity=2, .set=16, .set2=255, .dark=0, .holo=1, .flags=TCG_CF_READY, .origin=16,
 .hp=40, .stage=0, .species=81, .level=16, .retreat=1, .weakness=0, .resistance=1, .evolvesFrom="", .description="These Pokemon are attracted to electrical emissions and will often follow people using PokeGear.", .attacks={
 {.name="Lock-on",.description="During your next turn, treat any tails flipped when using Magnemite's Electric Bolt attack as if they were heads. (Benching or evolving either Pokemon ends this effect.)",.effect="neo2-7:a0",.animation="ATK_ANIM_HIT",.cost={0,0,0,0,0,0,1,0,0},.damage=0,.category=TCG_RESIDUAL},
 {.name="Electric Bolt",.description="Flip 2 coins. If both are heads, the Defending Pokemon is now Paralyzed. If either of them is tails, this attack does nothing (not even damage).",.effect="neo2-7:a1",.animation="ATK_ANIM_HIT",.cost={0,0,1,0,0,0,1,0,0},.damage=50,.category=TCG_DAMAGE_NORMAL},
 {.name="",.description="",.effect="NONE",.animation="ATK_ANIM_NONE",.cost={0},.damage=0,.category=TCG_DAMAGE_NORMAL},
 }
 },
-[807] = {.id=807, .name="Politoed", .kind=TCG_POKEMON, .type=3, .rarity=2, .set=16, .set2=255, .dark=0, .holo=1, .flags=0, .origin=16,
+[807] = {.id=807, .name="Politoed", .kind=TCG_POKEMON, .type=3, .rarity=2, .set=16, .set2=255, .dark=0, .holo=1, .flags=TCG_CF_READY, .origin=16,
 .hp=100, .stage=2, .species=186, .level=53, .retreat=3, .weakness=1, .resistance=255, .evolvesFrom="Poliwhirl", .description="Whenever three or more of these get together, they sing in a loud voice that sounds like bellowing.", .attacks={
 {.name="Frog Song",.description="Whenever Politoed's attack damages the Defending Pokemon (after applying Weakness and Resistance), if there are more than 3 Poliwags, Poliwhirls, Poliwraths, and/or Politoeds in play (including your opponent's), that attack does 40 more damage (no matter how many heads you get). This power stops working while Politoed is Asleep, Confused, or Paralyzed.",.effect="neo2-8:p",.animation="ATK_ANIM_HIT",.cost={0,0,0,0,0,0,0,0,0},.damage=0,.category=TCG_POKEMON_POWER},
 {.name="Doubleslap",.description="Flip 2 coins. This attack does 40 damage times the number of heads.",.effect="neo2-8:a0",.animation="ATK_ANIM_HIT",.cost={0,0,0,2,0,0,2,0,0},.damage=40,.category=TCG_DAMAGE_X},
@@ -5146,14 +5146,14 @@ const struct TcgCard gTcgCards[TCG_CARD_COUNT + 1] = {
 {.name="",.description="",.effect="NONE",.animation="ATK_ANIM_NONE",.cost={0},.damage=0,.category=TCG_DAMAGE_NORMAL},
 }
 },
-[825] = {.id=825, .name="Magnemite", .kind=TCG_POKEMON, .type=8, .rarity=2, .set=16, .set2=255, .dark=0, .holo=0, .flags=0, .origin=16,
+[825] = {.id=825, .name="Magnemite", .kind=TCG_POKEMON, .type=8, .rarity=2, .set=16, .set2=255, .dark=0, .holo=0, .flags=TCG_CF_READY, .origin=16,
 .hp=40, .stage=0, .species=81, .level=16, .retreat=1, .weakness=0, .resistance=1, .evolvesFrom="", .description="These Pokemon are attracted to electrical emissions and will often follow people using PokeGear.", .attacks={
 {.name="Lock-on",.description="During your next turn, treat any tails flipped when using Magnemite's Electric Bolt attack as if they were heads. (Benching or evolving either Pokemon ends this effect.)",.effect="neo2-26:a0",.animation="ATK_ANIM_HIT",.cost={0,0,0,0,0,0,1,0,0},.damage=0,.category=TCG_RESIDUAL},
 {.name="Electric Bolt",.description="Flip 2 coins. If both are heads, the Defending Pokemon is now Paralyzed. If either of them is tails, this attack does nothing (not even damage).",.effect="neo2-26:a1",.animation="ATK_ANIM_HIT",.cost={0,0,1,0,0,0,1,0,0},.damage=50,.category=TCG_DAMAGE_NORMAL},
 {.name="",.description="",.effect="NONE",.animation="ATK_ANIM_NONE",.cost={0},.damage=0,.category=TCG_DAMAGE_NORMAL},
 }
 },
-[826] = {.id=826, .name="Politoed", .kind=TCG_POKEMON, .type=3, .rarity=2, .set=16, .set2=255, .dark=0, .holo=0, .flags=0, .origin=16,
+[826] = {.id=826, .name="Politoed", .kind=TCG_POKEMON, .type=3, .rarity=2, .set=16, .set2=255, .dark=0, .holo=0, .flags=TCG_CF_READY, .origin=16,
 .hp=100, .stage=2, .species=186, .level=53, .retreat=3, .weakness=1, .resistance=255, .evolvesFrom="Poliwhirl", .description="Whenever three or more of these get together, they sing in a loud voice that sounds like bellowing.", .attacks={
 {.name="Frog Song",.description="Whenever Politoed's attack damages the Defending Pokemon (after applying Weakness and Resistance), if there are more than 3 Poliwags, Poliwhirls, Poliwraths, and/or Politoeds in play (including your opponent's), that attack does 40 more damage (no matter how many heads you get). This power stops working while Politoed is Asleep, Confused, or Paralyzed.",.effect="neo2-27:p",.animation="ATK_ANIM_HIT",.cost={0,0,0,0,0,0,0,0,0},.damage=0,.category=TCG_POKEMON_POWER},
 {.name="Doubleslap",.description="Flip 2 coins. This attack does 40 damage times the number of heads.",.effect="neo2-27:a0",.animation="ATK_ANIM_HIT",.cost={0,0,0,2,0,0,2,0,0},.damage=40,.category=TCG_DAMAGE_X},
@@ -6653,7 +6653,7 @@ const struct TcgCard gTcgCards[TCG_CARD_COUNT + 1] = {
 {.name="",.description="",.effect="NONE",.animation="ATK_ANIM_NONE",.cost={0},.damage=0,.category=TCG_DAMAGE_NORMAL},
 }
 },
-[1054] = {.id=1054, .name="Alakazam", .kind=TCG_POKEMON, .type=5, .rarity=2, .set=19, .set2=255, .dark=0, .holo=1, .flags=0, .origin=19,
+[1054] = {.id=1054, .name="Alakazam", .kind=TCG_POKEMON, .type=5, .rarity=2, .set=19, .set2=255, .dark=0, .holo=1, .flags=TCG_CF_READY, .origin=19,
 .hp=100, .stage=2, .species=65, .level=0, .retreat=2, .weakness=5, .resistance=255, .evolvesFrom="Kadabra", .description="", .attacks={
 {.name="Psymimic",.description="Once during your turn, instead of Alakazam's normal attack, you may choose 1 of your opponent's Pokemon's attacks. Alakazam copies that attack including its Energy costs and anything else required in order to use that attack, such as discarding Energy cards. (No matter what type that Pokemon is, Alakazam's type is still Psychic.) This power can't be used if Alakazam is affected by a Special Condition.",.effect="ecard1-1:p",.animation="ATK_ANIM_HIT",.cost={0,0,0,0,0,0,0,0,0},.damage=0,.category=TCG_POKEMON_POWER},
 {.name="Syncroblast",.description="If Alakazam and the Defending Pokemon don't have the same number of Energy cards attached to them, this attack's base damage is 20 instead of 80.",.effect="ecard1-1:a0",.animation="ATK_ANIM_HIT",.cost={0,0,0,0,0,1,2,0,0},.damage=80,.category=TCG_DAMAGE_NORMAL},
@@ -6856,7 +6856,7 @@ const struct TcgCard gTcgCards[TCG_CARD_COUNT + 1] = {
 {.name="",.description="",.effect="NONE",.animation="ATK_ANIM_NONE",.cost={0},.damage=0,.category=TCG_DAMAGE_NORMAL},
 }
 },
-[1083] = {.id=1083, .name="Venusaur", .kind=TCG_POKEMON, .type=1, .rarity=2, .set=19, .set2=255, .dark=0, .holo=1, .flags=0, .origin=19,
+[1083] = {.id=1083, .name="Venusaur", .kind=TCG_POKEMON, .type=1, .rarity=2, .set=19, .set2=255, .dark=0, .holo=1, .flags=TCG_CF_READY, .origin=19,
 .hp=100, .stage=2, .species=3, .level=0, .retreat=2, .weakness=0, .resistance=255, .evolvesFrom="Ivysaur", .description="", .attacks={
 {.name="Harvest Bounty",.description="Once during your turn (before your attack), if you attach an Energy card to your Active Pokemon as part of your turn, you may attach an additional Energy card to that Pokemon at the same time. This power can't be used if Venusaur is affected by a Special Condition.",.effect="ecard1-30:p",.animation="ATK_ANIM_HIT",.cost={0,0,0,0,0,0,0,0,0},.damage=0,.category=TCG_POKEMON_POWER},
 {.name="Body Slam",.description="Flip a coin. If heads, the Defending Pokemon is now Paralyzed.",.effect="ecard1-30:a0",.animation="ATK_ANIM_HIT",.cost={0,2,0,0,0,0,2,0,0},.damage=40,.category=TCG_DAMAGE_NORMAL},
@@ -6877,7 +6877,7 @@ const struct TcgCard gTcgCards[TCG_CARD_COUNT + 1] = {
 {.name="",.description="",.effect="NONE",.animation="ATK_ANIM_NONE",.cost={0},.damage=0,.category=TCG_DAMAGE_NORMAL},
 }
 },
-[1086] = {.id=1086, .name="Alakazam", .kind=TCG_POKEMON, .type=5, .rarity=2, .set=19, .set2=255, .dark=0, .holo=0, .flags=0, .origin=19,
+[1086] = {.id=1086, .name="Alakazam", .kind=TCG_POKEMON, .type=5, .rarity=2, .set=19, .set2=255, .dark=0, .holo=0, .flags=TCG_CF_READY, .origin=19,
 .hp=100, .stage=2, .species=65, .level=0, .retreat=2, .weakness=5, .resistance=255, .evolvesFrom="Kadabra", .description="", .attacks={
 {.name="Psymimic",.description="Once during your turn, instead of Alakazam's normal attack, you may choose 1 of your opponent's Pokemon's attacks. Alakazam copies that attack including its Energy costs and anything else required in order to use that attack, such as discarding Energy cards. (No matter what type that Pokemon is, Alakazam's type is still Psychic.) This power can't be used if Alakazam is affected by a Special Condition.",.effect="ecard1-33:p",.animation="ATK_ANIM_HIT",.cost={0,0,0,0,0,0,0,0,0},.damage=0,.category=TCG_POKEMON_POWER},
 {.name="Syncroblast",.description="If Alakazam and the Defending Pokemon don't have the same number of Energy cards attached to them, this attack's base damage is 20 instead of 80.",.effect="ecard1-33:a0",.animation="ATK_ANIM_HIT",.cost={0,0,0,0,0,1,2,0,0},.damage=80,.category=TCG_DAMAGE_NORMAL},
@@ -7122,7 +7122,7 @@ const struct TcgCard gTcgCards[TCG_CARD_COUNT + 1] = {
 {.name="",.description="",.effect="NONE",.animation="ATK_ANIM_NONE",.cost={0},.damage=0,.category=TCG_DAMAGE_NORMAL},
 }
 },
-[1121] = {.id=1121, .name="Venusaur", .kind=TCG_POKEMON, .type=1, .rarity=2, .set=19, .set2=255, .dark=0, .holo=0, .flags=0, .origin=19,
+[1121] = {.id=1121, .name="Venusaur", .kind=TCG_POKEMON, .type=1, .rarity=2, .set=19, .set2=255, .dark=0, .holo=0, .flags=TCG_CF_READY, .origin=19,
 .hp=100, .stage=2, .species=3, .level=0, .retreat=2, .weakness=0, .resistance=255, .evolvesFrom="Ivysaur", .description="", .attacks={
 {.name="Harvest Bounty",.description="Once during your turn (before your attack), if you attach an Energy card to your Active Pokemon as part of your turn, you may attach an additional Energy card to that Pokemon at the same time. This power can't be used if Venusaur is affected by a Special Condition.",.effect="ecard1-68:p",.animation="ATK_ANIM_HIT",.cost={0,0,0,0,0,0,0,0,0},.damage=0,.category=TCG_POKEMON_POWER},
 {.name="Body Slam",.description="Flip a coin. If heads, the Defending Pokemon is now Paralyzed.",.effect="ecard1-68:a0",.animation="ATK_ANIM_HIT",.cost={0,2,0,0,0,0,2,0,0},.damage=40,.category=TCG_DAMAGE_NORMAL},

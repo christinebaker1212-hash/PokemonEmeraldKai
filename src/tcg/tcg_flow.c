@@ -871,7 +871,7 @@ int TcgFlow_HandPlayable(const struct TcgDuel *g, unsigned me, const struct TcgC
                 return 1;
         return snprintf(reason, size, "Your Bench is full."), 0;
     }
-    if (c->kind == TCG_ENERGY && p->energyPlayed)
+    if (c->kind == TCG_ENERGY && p->energyPlayed && !TcgDuel_HarvestOk(g, me, 0))
         return snprintf(reason, size, "You already attached Energy this turn."), 0;
     if (c->kind == TCG_ENERGY && Tcg_EnergyRule(c->id) == TCG_ER_BOOST)
     {

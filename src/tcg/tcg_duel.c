@@ -36,6 +36,7 @@ void TcgDuel_Event(struct TcgDuel *g, unsigned type, unsigned player, unsigned s
         if (type != TCG_EV_PROMOTE)
         {
             g->players[player].field[slot].hpSet = g->players[player].field[slot].guardKeep = 0;
+            g->players[player].field[slot].lockOnUntil = 0;
             TcgPower_ToBench(g, player, slot); /* (Magma Pool) */
         }
         if (player == g->current && g->phase != TCG_SETUP)
@@ -51,6 +52,8 @@ const struct TcgEvent *TcgDuel_GetEvent(const struct TcgDuel *g, uint32_t seq)
 unsigned TcgDuel_Coin(struct TcgDuel *g, unsigned player)
 {
     unsigned heads = Tcg_RandomBelow(&g->rng, 2);
+    if (g->forceHeads && player == g->current)
+        heads = 1; /* (Lock-on: tails are heads) */
     TcgDuel_Event(g, TCG_EV_COIN, player, 0, heads, 0, 0);
     return heads;
 }
@@ -348,6 +351,19 @@ static const struct TcgAttack *Borrowed(const struct TcgDuel *g, unsigned player
                     return &c->attacks[i];
                 }
         }
+    /* Psymimic (not with a Special Condition): any of their Pokemon's attacks */
+    if (power == TCG_POWER_R_PSYMIMIC && !f->condition && !f->poison && !f->burned)
+        for (s = 0; s < TCG_FIELD_SIZE; s++)
+        {
+            const struct TcgCard *c = TcgDuel_Field(g, player ^ 1, s);
+            for (i = 0; c && c->kind == TCG_POKEMON && i < TCG_ATTACKS; i++)
+                if (c->attacks[i].name[0] && c->attacks[i].category != TCG_POKEMON_POWER && n++ == want)
+                {
+                    if (card)
+                        *card = c->id | i << 16;
+                    return &c->attacks[i];
+                }
+        }
     /* Mimic: the Defending Pokemon's attacks */
     if (power == TCG_POWER_R_MIMIC)
     {
@@ -571,6 +587,7 @@ static void ClearCondition(struct TcgFieldCard *f)
     f->anchorUntil = f->anchorBy = 0;
     f->reactUntil = f->reactKind = 0;
     f->hpSet = f->guardKeep = 0;
+    f->lockOnUntil = 0;
     if (f->boostTurn == 0xFFFF)
         f->boostTurn = f->boostAttack = f->boostValue = 0;
 }
@@ -992,7 +1009,7 @@ static int Apply(struct TcgDuel *g, const struct TcgAction *a)
             snprintf(g->error, sizeof(g->error), "Effect not yet implemented: %s", attack->effect);
             return TCG_UNSUPPORTED;
         }
-        g->noWeakRes = g->attackFailed = g->coinResult = g->swift = g->bonus = g->scriptCoins = g->scriptHeads = 0, g->scriptBits = 0;
+        g->noWeakRes = g->attackFailed = g->coinResult = g->swift = g->bonus = g->scriptCoins = g->scriptHeads = 0, g->scriptBits = 0, g->forceHeads = 0;
         /* A Baby Pokemon as the Defending Pokemon: a coin before anything; tails, the turn ends without an attack */
         if ((target->flags & TCG_CF_BABY) && !TcgDuel_Coin(g, g->current))
         {
@@ -1066,6 +1083,10 @@ static int Apply(struct TcgDuel *g, const struct TcgAction *a)
         damage = attack->damage;
         if ((f->boostTurn == g->turn || f->boostTurn == 0xFFFF) && f->boostAttack == a->attack + 1)   /* (an effect script's boost: "during your next turn"; 0xFFFF until Benched) */
             damage = f->boostValue ? f->boostValue : damage * 2;
+        /* Lock-on: its Electric Bolt's coins against the Pokemon it locked on */
+        if (f->lockOnUntil >= g->turn && !strcmp(attack->name, "Electric Bolt") && foe->stackSize &&
+            foe->stack[foe->stackSize - 1] == f->lockOnFoe)
+            g->forceHeads = 1;
         result = TcgDuel_AttackEffect(g, attack, a, &damage, 0);
         if (result != TCG_OK)
             return result;
@@ -1127,6 +1148,22 @@ static int Apply(struct TcgDuel *g, const struct TcgAction *a)
                                     TcgDuel_AttachedRule(g, g->current ^ 1, 0, TCG_ER_METAL_LATE));
             if (foe->vulnUntil >= g->turn)
                 total += foe->vulnBonus; /* (the regional sets: "that attack does 20 more damage") */
+            if (total > 0 && TcgPower_Working(g, g->current, 0) == TCG_POWER_R_FROG_SONG)
+            {
+                /* Frog Song: more than 3 Poliwag, Poliwhirl, Poliwrath and Politoed in play (both sides), 40 more */
+                static const char *const poli[4] = {"Poliwag", "Poliwhirl", "Poliwrath", "Politoed"};
+                unsigned who, s2, n = 0, i;
+                for (who = 0; who < 2; who++)
+                    for (s2 = 0; s2 < TCG_FIELD_SIZE; s2++)
+                        for (i = 0; i < 4; i++)
+                            n += TcgDuel_Field(g, who, s2) && !strcmp(TcgDuel_Field(g, who, s2)->name, poli[i]);
+                if (n > 3)
+                {
+                    total += 40;
+                    TcgDuel_Event(g, TCG_EV_POWER, g->current, 0, TCG_POWER_R_FROG_SONG, attacker->id, 0);
+                    TcgDuel_Log(g, "Frog Song: 40 more.");
+                }
+            }
             if (!g->swift)
                 total -= 20 * (int)AttachedTrainerCount(g, g->current ^ 1, 0, TCG_CARD_DEFENDER);
             guard = foe->guard ? foe->guard : foe->guardKeep;
@@ -1321,7 +1358,7 @@ static int Apply(struct TcgDuel *g, const struct TcgAction *a)
             TcgDuel_Event(g, TCG_EV_STATUS, g->current, 0, f->condition, 0, f->poison);
         g->animationCard = attacker->id;
         g->animationKind = a->attack + 1;
-        g->noWeakRes = g->attackFailed = g->coinResult = g->foeImmune = g->swift = g->bonus = g->scriptCoins = g->scriptHeads = 0, g->scriptBits = 0;
+        g->noWeakRes = g->attackFailed = g->coinResult = g->foeImmune = g->swift = g->bonus = g->scriptCoins = g->scriptHeads = 0, g->scriptBits = 0, g->forceHeads = 0;
         if (g->switchPending)
         {
             /* Only if the Defending Pokemon is still there to be switched. It comes before any
@@ -1524,7 +1561,7 @@ static int Apply(struct TcgDuel *g, const struct TcgAction *a)
         TcgDuel_ResolveKnockouts(g);
         return TCG_OK;
     case TCG_ATTACH:
-        if (c->kind != TCG_ENERGY || !f->stackSize || p->energyPlayed)
+        if (c->kind != TCG_ENERGY || !f->stackSize || (p->energyPlayed && !TcgDuel_HarvestOk(g, g->current, s)))
             return Error(g, "Only one Energy card may be attached from your hand each turn.");
         if (Tcg_EnergyRule(c->id) == TCG_ER_BOOST && f->stackSize < 2)
             return Error(g, "Boost Energy can be attached only to an Evolved Pokemon.");
@@ -1544,7 +1581,8 @@ static int Apply(struct TcgDuel *g, const struct TcgAction *a)
         if (Tcg_EnergyRule(c->id) == TCG_ER_BOOST)
             p->attachmentExpires[p->hand[a->hand]] = g->turn;
         f->attached[f->attachedSize++] = TcgPile_Remove(p->hand, &p->handSize, a->hand);
-        p->energyPlayed = 1;
+        /* (2: the first went to the Active Pokemon, Harvest Bounty may add one; 3: it did) */
+        p->energyPlayed = p->energyPlayed ? 3 : s ? 1 : 2;
         TcgDuel_Event(g, TCG_EV_ATTACH, g->current, s, 0, c->id, 0);
         if (f->attachPoisonUntil >= g->turn)
         {
@@ -1722,6 +1760,18 @@ int TcgDuel_Apply(struct TcgDuel *g, const struct TcgAction *action)
     return result;
 }
 
+int TcgDuel_HarvestOk(const struct TcgDuel *g, unsigned player, unsigned slot)
+{
+    const struct TcgPlayer *p = &g->players[player];
+    unsigned s;
+    if (slot || p->energyPlayed != 2)
+        return 0;
+    for (s = 0; s < TCG_FIELD_SIZE; s++)
+        if (TcgPower_Working(g, player, s) == TCG_POWER_R_HARVEST_BOUNTY && !p->field[s].condition && !p->field[s].poison &&
+            !p->field[s].burned)
+            return 1;
+    return 0;
+}
 int TcgDuel_OpponentSwitch(struct TcgDuel *g, unsigned who)
 {
     unsigned k, bench = 0;

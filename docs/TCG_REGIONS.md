@@ -81,7 +81,7 @@ Total 1,158 set cards (about 1,100 attacks with effect text, 250 Pokémon Powers
    (`mp cards mock 2`, tcg_board.c MockUnder / MockOver over a staged duel): the Stadium a plate on the centre line,
    the turn's Supporter face up beside its player's Active, Tools tucked under their Pokemon, a BRN badge, Darkness /
    Metal orbs. **Approved and built** (2026-11-18: docs/tcg_regions/board_table.png from a staged duel).
-   **Status (2026-11-18): 1,126 of 1,227 finished.** Where each part lives:
+   **Status (2026-11-18): 1,134 of 1,227 finished.** Where each part lives:
    - Attacks: tools/tcg/regions/families.py (regex families + EXACT, one script per wording; ops in
      src/tcg/tcg_script.inc, listed at its top and in each op's comment).
    - Trainers: src/tcg/tcg_rtrainers.inc (rules), tcg_rtrainers_flow.inc (steps, playability, menus),

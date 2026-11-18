@@ -3801,8 +3801,8 @@ static void DrawAttacks(void)
         rows += TcgDuel_AttackOf(&B.view, 0, (unsigned)i) && TcgDuel_AttackOf(&B.view, 0, (unsigned)i)->name[0] != 0;
     /* (a third attack, or a Technical Machine's: the window grows upward, the description stays at the bottom) */
     /* (borrowed attacks too: rows closer together past 6, so the window keeps to the screen) */
-    step = rows > 6 ? 11 : 15;
-    top = rows > 2 ? 98 - step * (rows - 2) : 98;
+    step = rows * 15 <= 126 ? 15 : 126 / rows;
+    top = rows > 2 ? 128 - step * rows : 98;
     if (top < 2)
         top = 2;
     G_Window(0, top, 240, 160 - top);

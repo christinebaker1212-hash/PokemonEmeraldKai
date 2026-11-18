@@ -8,27 +8,23 @@ plays (tools/tcg/regions/effects.py); only finished cards appear in the game.
 | gym1 | 126 | 115 |
 | gym2 | 126 | 114 |
 | neo1 | 105 | 96 |
-| neo2 | 75 | 67 |
+| neo2 | 75 | 71 |
 | neo3 | 66 | 57 |
 | neo4 | 113 | 97 |
-| ecard1 | 159 | 153 |
+| ecard1 | 159 | 157 |
 | ecard2 | 182 | 173 |
 | ecard3 | 182 | 172 |
 | basep | 53 | 45 |
 | np | 40 | 37 |
-| **all** | 1227 | 1126 |
+| **all** | 1227 | 1134 |
 
 ## Rules the engine doesn't play yet (cards needing each)
 
 
-## Wordings to translate (88; the most cards first)
+## Wordings to translate (84; the most cards first)
 
 - 3 x POWER: Entei (neo3-17): As long as Entei is your Active Pokemon, Entei and Energy cards attached to it aren't affected by effects from Trainer cards other than Stadium cards. As long as this Power is active, discard any Trainer cards attached to E
-- 2 x attack: Magnemite (neo2-7): During your next turn, treat any tails flipped when using Magnemite's Electric Bolt attack as if they were heads. (Benching or evolving either Pokemon ends this effect.)
-- 2 x POWER: Politoed (neo2-8): Whenever Politoed's attack damages the Defending Pokemon (after applying Weakness and Resistance), if there are more than 3 Poliwags, Poliwhirls, Poliwraths, and/or Politoeds in play (including your opponent's), that atta
-- 2 x POWER: Alakazam (ecard1-1): Once during your turn, instead of Alakazam's normal attack, you may choose 1 of your opponent's Pokemon's attacks. Alakazam copies that attack including its Energy costs and anything else required in order to use that a
 - 2 x POWER: Gengar (ecard1-13): Once during your turn (before your attack), if your opponent has 3 or fewer Prizes, you may move 1 damage counter from 1 Pokemon (yours or your opponent's) to another (even if it would Knock Out the other Pokemon). This 
-- 2 x POWER: Venusaur (ecard1-30): Once during your turn (before your attack), if you attach an Energy card to your Active Pokemon as part of your turn, you may attach an additional Energy card to that Pokemon at the same time. This power can't be used 
 - 2 x POWER: Lanturn (ecard2-21): You may use this power once during each of your turns (before your attack). All Lightning Energy attached to your Active Pokemon becomes Water Energy for the rest of the turn. (This effect ends if your Active Pokemon re
 - 2 x POWER: Magneton (ecard2-22): Once during your turn (before your attack), if Magneton is your Active Pokemon, you may flip a coin. If heads, choose 2 of your opponent's Pokemon that have Energy cards attached to them. Choose 1 of the Energy cards a
 - 2 x attack: Slowking (ecard2-34): Look at a number of cards on top of your opponent's deck equal to the number of Energy cards attached to the Defending Pokemon. Put those cards in any order, and then put them back on top of your opponent's deck.

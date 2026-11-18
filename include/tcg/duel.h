@@ -73,6 +73,10 @@ struct TcgFieldCard
     uint8_t hpSet;
     /* (effect scripts: Shadow Images) a TCG_GUARD_* kept until it takes damage, is Benched or evolves */
     uint8_t guardKeep;
+    /* (effect scripts: Lock-on) through turn lockOnUntil, its Electric Bolt's tails are heads against the Pokemon whose
+     * top card is lockOnFoe */
+    uint16_t lockOnUntil;
+    uint8_t lockOnFoe;
     /* (effect scripts, until it's Benched or evolves) stuck: it can't retreat (2: while the Pokemon stuckBy - 1, the
      * top card that did it, is its opponent's Active); blindAll: whenever it attacks, a coin, tails the attack does
      * nothing; noAttackAll: it can't attack */
@@ -340,6 +344,8 @@ struct TcgDuel
     uint8_t scriptCoins, scriptHeads;
     /* (within one attack) the first 32 of those coins, heads as bits (coin 1 the lowest) */
     uint32_t scriptBits;
+    /* (within one attack: Lock-on) the attacking player's coins all come up heads */
+    uint8_t forceHeads;
     /* (also within one attack) nothing it does reaches the Defending Pokemon: Agility and
      * the like, Neutralizing Shield, a heads for Transparency */
     uint8_t foeImmune; /* TCG_IMMUNE_* */
@@ -393,7 +399,7 @@ int TcgDuel_EvolvesFrom(const struct TcgCard *evolution, const struct TcgCard *f
 /* Borrowed attacks follow (TcgDuel_AttackOf): its Basic Pokemon's and Evolution cards' under it (Recall, Memory Berry,
  * Prehistoric Memory), your other Psychic Pokemon's (Psylink), the Defending Pokemon's (Mimic) */
 #define TCG_ATTACK_BORROW (TCG_ATTACK_TM + 1)
-#define TCG_BORROW_MAX 6
+#define TCG_BORROW_MAX 12
 #define TCG_ATTACK_SLOTS (TCG_ATTACK_BORROW + TCG_BORROW_MAX)
 const struct TcgAttack *TcgDuel_AttackOf(const struct TcgDuel *g, unsigned player, unsigned attack);
 unsigned TcgDuel_Tm(const struct TcgDuel *g, unsigned who, unsigned slot, unsigned *physical);
@@ -584,6 +590,9 @@ void TcgPower_NewActive(struct TcgDuel *g, unsigned player);
 /* who switches their Active with a Benched Pokemon of their own choice (a promotion; Drive Off, Lightning Burst, Major
  * Tsunami): 0 when they have no Benched Pokemon or it can't be switched */
 int TcgDuel_OpponentSwitch(struct TcgDuel *g, unsigned who);
+/* May that player attach another Energy card from the hand to that Pokemon this turn: Harvest Bounty (the first went
+ * to the Active Pokemon) */
+int TcgDuel_HarvestOk(const struct TcgDuel *g, unsigned player, unsigned slot);
 /* player's Active Pokemon went to Bench slot (Magma Pool) */
 void TcgPower_ToBench(struct TcgDuel *g, unsigned player, unsigned slot);
 int TcgPower_AttackBonus(struct TcgDuel *g, int amount, const struct TcgAttack *attack);
