@@ -12,6 +12,9 @@ Started 2026-11-18. **Start here** for the card game's regional sets, special du
 - Audit every current card so every effect works properly (e.g. Electrode's Energy Spike never let the player pick
   the Energy or the Pokémon).
 - TCG Island: later, not now (only one region counts towards it: all or nothing).
+- Retroactive promos (the user, 2026-11-18): some NPCs players have already beaten at cards become special card
+  trainers. Their win / loss record is kept already, so a special NPC (a courier) delivers the promos those players
+  should have received, once.
 
 ## Decisions (asked 2026-11-18; the user's answers)
 | # | Question | Answer |
@@ -60,5 +63,7 @@ Total 1,158 set cards (about 1,100 attacks with effect text, 250 Pokémon Powers
 3. Importer (pokemon-tcg-data -> catalog), printed art (fetch_art.py / build_printed_art.py), a coverage report like
    MAGIC's (docs/TCG_REGIONS_SCOPE.md: which cards fully play).
 4. Effects by families, tested on staged boards; the board's new zones (a Stadium, Tools: **mock-ups first**).
+6. Retroactive promos: a courier NPC brings each promo whose (newly special) trainer the save's card record shows as
+   beaten (TcgCollection's records by the opponent's key; as mp_battleisland.c's courier / mp_tmrefund.c), once.
 5. Per region: boosters, shops, NPC decks (built from the region's sets and today's), special trainers with their own
    decks and promos (UNOVA's too), CARD SCALING ratings rerun, the card guide rebuilt.
