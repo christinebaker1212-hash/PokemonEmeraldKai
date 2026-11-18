@@ -3247,3 +3247,4 @@ int TcgDuel_EffectTouchesDefender(const struct TcgAttack *attack)
     }
     return 0;
 }
+#include "tcg_choice.inc"

@@ -81,7 +81,7 @@ Total 1,158 set cards (about 1,100 attacks with effect text, 250 Pokémon Powers
    (`mp cards mock 2`, tcg_board.c MockUnder / MockOver over a staged duel): the Stadium a plate on the centre line,
    the turn's Supporter face up beside its player's Active, Tools tucked under their Pokemon, a BRN badge, Darkness /
    Metal orbs. **Approved and built** (2026-11-18: docs/tcg_regions/board_table.png from a staged duel).
-   **Status (2026-11-18): 1,134 of 1,227 finished.** Where each part lives:
+   **Status (2026-11-18): 1,140 of 1,227 finished.** Where each part lives:
    - Attacks: tools/tcg/regions/families.py (regex families + EXACT, one script per wording; ops in
      src/tcg/tcg_script.inc, listed at its top and in each op's comment).
    - Trainers: src/tcg/tcg_rtrainers.inc (rules), tcg_rtrainers_flow.inc (steps, playability, menus),
@@ -96,6 +96,12 @@ Total 1,158 set cards (about 1,100 attacks with effect text, 250 Pokémon Powers
      TCG_ATTACK_TM (TcgDuel_AttackOf everywhere an attack is looked up: rules, flow, board's fourth row, AI, phone's
      "i" index), discarded in EndTurn. Effects that last until Benched / evolved: TcgFieldCard stuck / blindAll /
      noAttackAll, cleared wherever a Pokemon leaves the Active spot. Crystal Type (R_CRYSTAL_TYPE: the types its words name, as Shift for the turn; one of a Crystal Pokemon a deck).
+   - Borrowed attacks (Recall, Memory Berry, Prehistoric Memory, Psylink, Psymimic, Mimic): attack slots past the
+     Technical Machine's (TCG_ATTACK_BORROW, TcgDuel_AttackOf), listed by the board, the AI and the phone as any other.
+   - Choices in the middle of an effect ("your opponent may... either way, you may do the same"): phase TCG_CHOICE
+     (choicePlayer, choiceKind TCG_CHOICE_*), answered by TCG_CHOOSE; TcgDuel_AskChoice / TcgDuel_Choose / the AI's
+     answer in src/tcg/tcg_choice.inc, the steps TcgFlow_ChoiceSteps (TCG_FLOW_CHOICE: the board and the phone begin
+     it at once for the player asked); an attack's turn ends once it's answered (choiceEndTurn).
    - Stadiums used during a turn (Healing Field, Power Plant...): TCG_USE_STADIUM, A on the Stadium's plate (USE /
      CHECK), steps TcgFlow_StadiumSteps, rules RegionStadiumUse / RegionStadiumBlock (tcg_rtrainers.inc), AI
      RegionStadiumAi; once a turn (TcgPlayer.stadiumUsed) but Celadon / Saffron City Gym.

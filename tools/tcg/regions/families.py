@@ -569,6 +569,9 @@ def _(m, d):
 
 # One wording, one script (the cards' words with SELF for the card's name; tcg_script.inc's ops)
 EXACT = {
+    'Your opponent may choose a Baby Pokemon, Basic Pokemon, or Evolution card from his or her discard pile and put it into his or her hand. Either way, you may do the same.': 'askch:1',
+    'Your opponent may choose up to 3 Baby Pokemon, Basic Pokemon, and/or Evolution cards from his or her discard pile and shuffle them into his or her deck. Either way, you may do the same.': 'askch:2',
+    'Flip a coin. If heads, each player may choose a card from his or her discard pile and put it into his or her hand.': 'c h.askch:3',
     "During your next turn, treat any tails flipped when using SELF's Electric Bolt attack as if they were heads.": 'lockon',
     "Use any attack from SELF's Basic Pokemon card or Evolution card. (SELF doesn't have to pay for that attack's Energy cost.)": ('METRONOME', 0, 4),
     'If the Defending Pokemon attacked last turn, and SELF was in play during that attack, SELF copies that attack except for its Energy costs and anything else required in order to use that attack.': ('METRONOME', 0, 8),

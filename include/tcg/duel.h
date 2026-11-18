@@ -136,7 +136,8 @@ enum TcgPhase
     TCG_SETUP,
     TCG_TURN,
     TCG_PROMOTION,
-    TCG_FINISHED
+    TCG_FINISHED,
+    TCG_CHOICE /* a player's choice in the middle of a card's effect (choicePlayer, choiceKind: TcgDuel_Choose) */
 };
 enum TcgActionType
 {
@@ -152,7 +153,20 @@ enum TcgActionType
     TCG_FINISH_SETUP,
     TCG_CONCEDE,
     TCG_DISCARD_DOLL, /* Clefairy Doll / Mysterious Fossil in slot leaves play (their text) */
-    TCG_USE_STADIUM   /* the Stadium in play used (Healing Field, Power Plant...: its steps as a Trainer's) */
+    TCG_USE_STADIUM,  /* the Stadium in play used (Healing Field, Power Plant...: its steps as a Trainer's) */
+    TCG_CHOOSE        /* the choice a card's effect asks of choicePlayer (phase TCG_CHOICE: tcg_flow.c TcgFlow_ChoiceSteps) */
+};
+/* TcgDuel.choiceKind: what a card asks a player in the middle of its effect (src/tcg/tcg_choice.inc). Stage 0 is
+ * usually the opponent's, stage 1 the player's own ("Either way, you may do the same") */
+enum
+{
+    TCG_CHOICE_NONE,
+    TCG_CHOICE_DISCARD_POKEMON,  /* Light Venomoth: a Pokemon card from your discard pile into your hand (may) */
+    TCG_CHOICE_DISCARD_TO_DECK,  /* Light Slowbro: up to 3 Pokemon cards from your discard pile into your deck */
+    TCG_CHOICE_DISCARD_ANY,      /* Light Lanturn: a card from your discard pile into your hand (may) */
+    TCG_CHOICE_TIME_CAPSULE,     /* Time Capsule: 5 Pokemon / basic Energy cards (or all, or none) into your deck */
+    TCG_CHOICE_REDRAW4,          /* Unown [E]: YES shuffles your hand into your deck and draws 4 */
+    TCG_CHOICE_HAND_TO_TOP       /* Special Delivery: a card from your hand on top of your deck */
 };
 /* Pokemon Powers (src/tcg/tcg_powers.c), by the card's power. */
 enum TcgPowerId
@@ -346,6 +360,10 @@ struct TcgDuel
     uint32_t scriptBits;
     /* (within one attack: Lock-on) the attacking player's coins all come up heads */
     uint8_t forceHeads;
+    /* Phase TCG_CHOICE: who chooses, what (TCG_CHOICE_*), the stage of it, the card that asks; choiceEndTurn: the turn
+     * ends once it's done (an attack's) */
+    uint8_t choicePlayer, choiceKind, choiceStage, choiceEndTurn;
+    uint16_t choiceCard;
     /* (also within one attack) nothing it does reaches the Defending Pokemon: Agility and
      * the like, Neutralizing Shield, a heads for Transparency */
     uint8_t foeImmune; /* TCG_IMMUNE_* */
@@ -590,6 +608,11 @@ void TcgPower_NewActive(struct TcgDuel *g, unsigned player);
 /* who switches their Active with a Benched Pokemon of their own choice (a promotion; Drive Off, Lightning Burst, Major
  * Tsunami): 0 when they have no Benched Pokemon or it can't be switched */
 int TcgDuel_OpponentSwitch(struct TcgDuel *g, unsigned who);
+/* A card's effect asks player a TCG_CHOICE_* (phase TCG_CHOICE until the TCG_CHOOSE action answers it) */
+void TcgDuel_AskChoice(struct TcgDuel *g, unsigned player, unsigned kind, unsigned card, unsigned stage);
+/* (tcg_choice.inc) The answer to the pending choice; what the AI answers */
+int TcgDuel_Choose(struct TcgDuel *g, const struct TcgAction *a);
+void TcgDuel_AiChoose(const struct TcgDuel *g, struct TcgAction *a);
 /* May that player attach another Energy card from the hand to that Pokemon this turn: Harvest Bounty (the first went
  * to the Active Pokemon) */
 int TcgDuel_HarvestOk(const struct TcgDuel *g, unsigned player, unsigned slot);

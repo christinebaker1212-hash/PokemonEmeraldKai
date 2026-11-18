@@ -482,9 +482,9 @@ JNIEXPORT jstring JNICALL FN(options)(JNIEnv *env, jclass cls, jlong h, jint sea
         // END TURN without the Energy attachment that's still possible asks first (the board's EndTurn)
         for (i = 0; !p->energyPlayed && i < p->handSize; i++)
             ends |= Tcg_Card(p->cards[p->hand[i]])->kind == TCG_ENERGY;
-        Add(&b, "],\"end\":%d,\"energyLeft\":%u,\"ready\":%d,\"promote\":%d,\"setup\":%d}",
+        Add(&b, "],\"end\":%d,\"energyLeft\":%u,\"ready\":%d,\"promote\":%d,\"setup\":%d,\"choice\":%d}",
             mine && g->phase == TCG_TURN, ends, mine && g->phase == TCG_SETUP && p->field[0].stackSize,
-            mine && g->phase == TCG_PROMOTION, g->phase == TCG_SETUP);
+            mine && g->phase == TCG_PROMOTION, g->phase == TCG_SETUP, mine && g->phase == TCG_CHOICE);
     }
     return Done(env, &b);
 }

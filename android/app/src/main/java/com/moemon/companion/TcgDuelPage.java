@@ -609,6 +609,10 @@ public final class TcgDuelPage extends Page {
                 }
             }
         }
+        // a card's effect asks this player something (the rules' TCG_CHOICE): its questions at once
+        if (!ended && idle() && q == null && opts != null && opts.optInt("choice") == 1 && st.optInt("actor") == seat) {
+            begin(Tcg.FLOW_CHOICE, 0);
+        }
         if (aiAt > 0 && now >= aiAt) {
             aiAt = 0;
             try {

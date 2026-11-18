@@ -78,6 +78,9 @@ uint32_t TcgLink_Hash(const struct TcgDuel *g)
     H(g->winner);
     H(g->prizeCount);
     H(g->promotePlayer);
+    H(g->choicePlayer);
+    H(g->choiceKind);
+    H(g->choiceStage);
     H(g->needsTurnStart);
     H(g->switchPending);
     H(g->endAfterSwitch);
@@ -195,7 +198,10 @@ int TcgLink_Accept(struct TcgLink *l, const uint16_t *deck, uint32_t now)
     SendDeck(l, ACCEPT, deck);
     return 1;
 }
-static unsigned Actor(const struct TcgDuel *g) { return g->phase == TCG_PROMOTION ? g->promotePlayer : g->current; }
+static unsigned Actor(const struct TcgDuel *g)
+{
+    return g->phase == TCG_PROMOTION ? g->promotePlayer : g->phase == TCG_CHOICE ? g->choicePlayer : g->current;
+}
 int TcgLink_Submit(struct TcgLink *l, const struct TcgAction *a, uint32_t now)
 {
     uint8_t p[27 + TCG_DECK_SIZE];

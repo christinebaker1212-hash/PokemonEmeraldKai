@@ -295,6 +295,28 @@ static const struct TcgStep *RegionPowerSteps(unsigned power, int *count)
     *count = 0;
     return sNoSteps;
 }
+/* What the pending choice asks of its player (tcg_choice.inc) */
+const struct TcgStep *TcgFlow_ChoiceSteps(const struct TcgDuel *g, int *count)
+{
+    switch (g->phase == TCG_CHOICE ? g->choiceKind : TCG_CHOICE_NONE)
+    {
+    case TCG_CHOICE_DISCARD_POKEMON:
+        STEPS({TCG_ST_PICK, TCG_F_POKEMON_CARD, TCG_SRC_MY_DISCARD, 0, 1, "Put a Pokemon card into your hand? (none: B)"});
+    case TCG_CHOICE_DISCARD_ANY:
+        STEPS({TCG_ST_PICK, TCG_F_ANY, TCG_SRC_MY_DISCARD, 0, 1, "Put a card into your hand? (none: B)"});
+    case TCG_CHOICE_DISCARD_TO_DECK:
+        STEPS({TCG_ST_PICK, TCG_F_POKEMON_CARD, TCG_SRC_MY_DISCARD, 0, 3, "Shuffle up to 3 Pokemon cards into your deck?"});
+    case TCG_CHOICE_TIME_CAPSULE:
+        STEPS({TCG_ST_PICK, TCG_F_GARBAGE, TCG_SRC_MY_DISCARD, 0, 5,
+               "Shuffle 5 Pokemon / basic Energy cards (or all, or none) into your deck?"});
+    case TCG_CHOICE_REDRAW4:
+        STEPS({TCG_ST_CHOICE, 0, 0, 0, 0, "Shuffle your hand into your deck and draw 4?"});
+    case TCG_CHOICE_HAND_TO_TOP:
+        STEPS({TCG_ST_PICK, TCG_F_ANY, TCG_SRC_HAND, 1, 1, "Put which card on top of your deck?"});
+    }
+    *count = 0;
+    return sNoSteps;
+}
 /* What using the Stadium in play asks for (tcg_rtrainers.inc RegionStadiumUse) */
 const struct TcgStep *TcgFlow_StadiumSteps(unsigned stadium, int *count)
 {

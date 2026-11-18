@@ -624,6 +624,9 @@ static int RegionTrainer(struct TcgDuel *g, const struct TcgAction *a, unsigned 
     case TCG_CARD_ECARD3_122: /* Crystal Shard */
     case TCG_CARD_ECARD2_128: /* Memory Berry (its attacks: tcg_duel.c Borrowed) */
         break;
+    case TCG_CARD_NEO1_90: /* Time Capsule: their choice, then yours (tcg_choice.inc) */
+        TcgDuel_AskChoice(g, me ^ 1, TCG_CHOICE_TIME_CAPSULE, TCG_CARD_NEO1_90, 0);
+        break;
     case TCG_CARD_GYM1_116: /* Recall: the Active's lower stages' attacks this turn */
         p->turnBuffs |= TCG_BUFF_RECALL;
         break;

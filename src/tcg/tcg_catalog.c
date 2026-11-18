@@ -4923,7 +4923,7 @@ const struct TcgCard gTcgCards[TCG_CARD_COUNT + 1] = {
 [783] = {.id=783, .name="Super Energy Retrieval", .kind=TCG_TRAINER, .type=6, .rarity=2, .set=15, .set2=255, .dark=0, .holo=0, .flags=TCG_CF_READY, .origin=15, .canon=206,
 .effect="neo1-89:t",.description="Trade 2 of the other cards in your hand for 4 basic Energy cards from your discard pile. If you have fewer than 4 basic Energy cards there, take all of them."
 },
-[784] = {.id=784, .name="Time Capsule", .kind=TCG_TRAINER, .type=6, .rarity=2, .set=15, .set2=255, .dark=0, .holo=0, .flags=0, .origin=15,
+[784] = {.id=784, .name="Time Capsule", .kind=TCG_TRAINER, .type=6, .rarity=2, .set=15, .set2=255, .dark=0, .holo=0, .flags=TCG_CF_READY, .origin=15,
 .effect="neo1-90:t",.description="Your opponent may choose 5 Basic Pokemon, Evolution, and/or basic Energy cards in his or her discard pile. (If your opponent doesn't have that many, he or she chooses all or none of them.) If your opponent chooses any cards, he or she shuffles them into his or her deck. Either way, you may do the same, and you can't play any more Trainer cards this turn."
 },
 [785] = {.id=785, .name="Bill's Teleporter", .kind=TCG_TRAINER, .type=6, .rarity=1, .set=15, .set2=255, .dark=0, .holo=0, .flags=TCG_CF_READY, .origin=15, .canon=435,
@@ -5433,7 +5433,7 @@ const struct TcgCard gTcgCards[TCG_CARD_COUNT + 1] = {
 {.name="",.description="",.effect="NONE",.animation="ATK_ANIM_NONE",.cost={0},.damage=0,.category=TCG_DAMAGE_NORMAL},
 }
 },
-[866] = {.id=866, .name="Unown [E]", .kind=TCG_POKEMON, .type=5, .rarity=0, .set=16, .set2=255, .dark=0, .holo=0, .flags=0, .origin=16,
+[866] = {.id=866, .name="Unown [E]", .kind=TCG_POKEMON, .type=5, .rarity=0, .set=16, .set2=255, .dark=0, .holo=0, .flags=TCG_CF_READY, .origin=16,
 .hp=40, .stage=0, .species=201, .level=14, .retreat=1, .weakness=5, .resistance=255, .evolvesFrom="", .description="Their shapes look like hieroglyphs on ancient tablets. It is said that the two are somehow related.", .attacks={
 {.name="[Engage]",.description="When you play Unown [E] from your hand, your opponent may shuffle his or her hand into his or her deck and then draw 4 cards. Either way, you may shuffle your hand into your deck and draw 4 cards.",.effect="neo2-67:p",.animation="ATK_ANIM_HIT",.cost={0,0,0,0,0,0,0,0,0},.damage=0,.category=TCG_POKEMON_POWER},
 {.name="Hidden Power",.description="",.effect="NONE",.animation="ATK_ANIM_HIT",.cost={0,0,0,0,0,1,0,0,0},.damage=10,.category=TCG_DAMAGE_NORMAL},
@@ -6072,7 +6072,7 @@ const struct TcgCard gTcgCards[TCG_CARD_COUNT + 1] = {
 {.name="",.description="",.effect="NONE",.animation="ATK_ANIM_NONE",.cost={0},.damage=0,.category=TCG_DAMAGE_NORMAL},
 }
 },
-[963] = {.id=963, .name="Light Lanturn", .kind=TCG_POKEMON, .type=2, .rarity=2, .set=18, .set2=255, .dark=0, .holo=0, .flags=TCG_CF_LIGHT, .origin=18,
+[963] = {.id=963, .name="Light Lanturn", .kind=TCG_POKEMON, .type=2, .rarity=2, .set=18, .set2=255, .dark=0, .holo=0, .flags=TCG_CF_LIGHT|TCG_CF_READY, .origin=18,
 .hp=80, .stage=1, .species=171, .level=33, .retreat=2, .weakness=4, .resistance=255, .evolvesFrom="Chinchou", .description="This Pokemon has evolved its dorsal fin to emit light, which attracts the fish it feeds on.", .attacks={
 {.name="Searchlight",.description="Flip a coin. If heads, each player may choose a card from his or her discard pile and put it into his or her hand.",.effect="neo4-23:a0",.animation="ATK_ANIM_HIT",.cost={0,0,1,0,0,0,0,0,0},.damage=0,.category=TCG_RESIDUAL},
 {.name="Spark",.description="If your opponent has any Benched Pokemon, choose 1 of them and this attack does 10 damage to it. (Don't apply Weakness and Resistance for Benched Pokemon.)",.effect="neo4-23:a1",.animation="ATK_ANIM_HIT",.cost={0,0,2,0,0,0,0,0,0},.damage=30,.category=TCG_DAMAGE_NORMAL},
@@ -6268,7 +6268,7 @@ const struct TcgCard gTcgCards[TCG_CARD_COUNT + 1] = {
 {.name="",.description="",.effect="NONE",.animation="ATK_ANIM_NONE",.cost={0},.damage=0,.category=TCG_DAMAGE_NORMAL},
 }
 },
-[991] = {.id=991, .name="Light Slowbro", .kind=TCG_POKEMON, .type=5, .rarity=1, .set=18, .set2=255, .dark=0, .holo=0, .flags=TCG_CF_LIGHT, .origin=18,
+[991] = {.id=991, .name="Light Slowbro", .kind=TCG_POKEMON, .type=5, .rarity=1, .set=18, .set2=255, .dark=0, .holo=0, .flags=TCG_CF_LIGHT|TCG_CF_READY, .origin=18,
 .hp=80, .stage=1, .species=80, .level=33, .retreat=2, .weakness=5, .resistance=255, .evolvesFrom="Slowpoke", .description="If the Shellder attached to its tail becomes separated, this Pokemon reverts to a normal Slowpoke.", .attacks={
 {.name="Fish Out",.description="Your opponent may choose up to 3 Baby Pokemon, Basic Pokemon, and/or Evolution cards from his or her discard pile and shuffle them into his or her deck. Either way, you may do the same.",.effect="neo4-51:a0",.animation="ATK_ANIM_HIT",.cost={0,0,0,0,0,1,0,0,0},.damage=0,.category=TCG_RESIDUAL},
 {.name="Splash About",.description="If there are more Energy attached to the Defending Pokemon than to Light Slowbro, this attack does 20 damage plus 20 more damage. If not, this attack does 20 damage.",.effect="neo4-51:a1",.animation="ATK_ANIM_HIT",.cost={0,0,0,1,0,0,1,0,0},.damage=20,.category=TCG_DAMAGE_PLUS},
@@ -6282,7 +6282,7 @@ const struct TcgCard gTcgCards[TCG_CARD_COUNT + 1] = {
 {.name="",.description="",.effect="NONE",.animation="ATK_ANIM_NONE",.cost={0},.damage=0,.category=TCG_DAMAGE_NORMAL},
 }
 },
-[993] = {.id=993, .name="Light Venomoth", .kind=TCG_POKEMON, .type=1, .rarity=1, .set=18, .set2=255, .dark=0, .holo=0, .flags=TCG_CF_LIGHT, .origin=18,
+[993] = {.id=993, .name="Light Venomoth", .kind=TCG_POKEMON, .type=1, .rarity=1, .set=18, .set2=255, .dark=0, .holo=0, .flags=TCG_CF_LIGHT|TCG_CF_READY, .origin=18,
 .hp=80, .stage=1, .species=49, .level=36, .retreat=0, .weakness=0, .resistance=4, .evolvesFrom="Venonat", .description="It defends itself by flapping its wings at high speed, spreading poisonous powder throughout the air.", .attacks={
 {.name="Mysterious Wing",.description="Your opponent may choose a Baby Pokemon, Basic Pokemon, or Evolution card from his or her discard pile and put it into his or her hand. Either way, you may do the same.",.effect="neo4-53:a0",.animation="ATK_ANIM_HIT",.cost={0,1,0,0,0,0,0,0,0},.damage=0,.category=TCG_RESIDUAL},
 {.name="Synchronize",.description="If Light Venomoth and the Defending Pokemon have a different number of Energy cards attached to them, this attack does nothing.",.effect="neo4-53:a1",.animation="ATK_ANIM_HIT",.cost={0,0,0,0,0,1,1,0,0},.damage=40,.category=TCG_DAMAGE_NORMAL},
@@ -10106,7 +10106,7 @@ const struct TcgCard gTcgCards[TCG_CARD_COUNT + 1] = {
 {.name="",.description="",.effect="NONE",.animation="ATK_ANIM_NONE",.cost={0},.damage=0,.category=TCG_DAMAGE_NORMAL},
 }
 },
-[1581] = {.id=1581, .name="Dragonite", .kind=TCG_POKEMON, .type=6, .rarity=3, .set=4, .set2=255, .dark=0, .holo=0, .flags=0, .origin=22,
+[1581] = {.id=1581, .name="Dragonite", .kind=TCG_POKEMON, .type=6, .rarity=3, .set=4, .set2=255, .dark=0, .holo=0, .flags=TCG_CF_READY, .origin=22,
 .hp=90, .stage=2, .species=149, .level=43, .retreat=2, .weakness=255, .resistance=4, .evolvesFrom="Dragonair", .description="This Pokemon can fly is spite of its large bulk. It is said to be able to circumnavigate the earth in just 16 hours.", .attacks={
 {.name="Special Delivery",.description="Once during your turn (before your attack), you may draw a card. If you do, choose a card from your hand and put it on top of your deck. This power can't be used if Dragonite is Asleep, Confused, or Paralyzed.",.effect="basep-5:p",.animation="ATK_ANIM_HIT",.cost={0,0,0,0,0,0,0,0,0},.damage=0,.category=TCG_POKEMON_POWER},
 {.name="Supersonic Flight",.description="Flip a coin. If tails, this attack does nothing.",.effect="basep-5:a0",.animation="ATK_ANIM_HIT",.cost={0,0,0,0,0,0,3,0,0},.damage=60,.category=TCG_DAMAGE_NORMAL},

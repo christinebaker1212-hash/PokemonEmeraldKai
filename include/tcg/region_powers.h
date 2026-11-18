@@ -55,6 +55,7 @@
     X(R_ANCIENT_WIND, "ANCIENT WIND", 1, 3, "nobody") \
     X(R_DRIVE_OFF, "DRIVE OFF", 1, 3, "oswitch") \
     X(R_MAJOR_TSUNAMI, "MAJOR TSUNAMI", 1, 3, "oswitch ssw") \
+    X(R_SPECIAL_DELIVERY, "SPECIAL DELIVERY", 1, 1, "draw:1 askch:6,1") \
     X(R_TERRAFORMING, "TERRAFORMING", 1, 1, "order:4") \
     X(R_STRANGE_TENTACLES, "STRANGE TENTACLES", 1, 1, "oattd") \
     X(R_DARK_MOON, "DARK MOON", 1, 3, "ohshuf") \
@@ -148,6 +149,7 @@
     X(R_PSYLINK, "PSYLINK", 0, 0, NULL) \
     X(R_MIMIC, "MIMIC", 0, 0, NULL) \
     X(R_LIGHTNING_BURST, "LIGHTNING BURST", 0, 0, NULL) \
+    X(R_EXCHANGE, "[ENGAGE]", 0, 0, NULL) \
     X(R_ATTRACT_ENERGY, "ATTRACT ENERGY", 0, 0, NULL) \
     X(R_MAGMA_POOL, "MAGMA POOL", 0, 8, NULL) \
     X(R_VANISH, "[VANISH]", 0, 0, NULL) \

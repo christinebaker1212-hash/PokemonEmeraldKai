@@ -1124,7 +1124,7 @@ static void MenuAdd(struct TcgFlowMenu *m, const char *label, unsigned value, in
 unsigned TcgFlow_TrainerChoices(const struct TcgDuel *g, unsigned me, unsigned cardId, struct TcgFlowMenu *m,
                                 const char **reason)
 {
-    if (Tcg_EnergyRule(cardId) == TCG_ER_RETRO)
+    if (Tcg_EnergyRule(cardId) == TCG_ER_RETRO || (g->phase == TCG_CHOICE && g->choiceKind == TCG_CHOICE_REDRAW4))
     {
         /* (Retro Energy: "you may") */
         memset(m, 0, sizeof(*m));
@@ -1173,7 +1173,7 @@ unsigned TcgFlow_Actor(const struct TcgDuel *g)
 {
     if (g->phase == TCG_FINISHED)
         return TCG_NONE;
-    return g->phase == TCG_PROMOTION ? g->promotePlayer : g->current;
+    return g->phase == TCG_PROMOTION ? g->promotePlayer : g->phase == TCG_CHOICE ? g->choicePlayer : g->current;
 }
 
 /* -------------------------------------------------------------------------------------- the machine (no screen) */
@@ -1409,7 +1409,7 @@ static unsigned Next(struct TcgFlow *f, const struct TcgDuel *g)
     if (st->kind == TCG_ST_CHOICE)
     {
         const char *why;
-        if (f->action.type == TCG_PLAY_TRAINER || f->action.type == TCG_ATTACH
+        if (f->action.type == TCG_PLAY_TRAINER || f->action.type == TCG_ATTACH || f->action.type == TCG_CHOOSE
                 ? !TcgFlow_TrainerChoices(g, f->me, f->flowCard, &f->menu, &why)
                                                : !TcgFlow_PowerChoices(g, f->me, f->action.slot, &f->menu, &why))
             return Fail(f, why ? why : "There is nothing that can be chosen.");
@@ -1454,6 +1454,12 @@ unsigned TcgFlow_Begin(struct TcgFlow *f, const struct TcgDuel *g, unsigned me, 
         f->action.type = TCG_PROMOTE;
         f->action.slot = (uint8_t)index;
         return Done(f);
+    case TCG_FLOW_CHOICE:
+        if (g->phase != TCG_CHOICE)
+            return Fail(f, "There is nothing to choose.");
+        f->action.type = TCG_CHOOSE;
+        f->steps = TcgFlow_ChoiceSteps(g, &f->nsteps);
+        return Next(f, g);
     case TCG_FLOW_STADIUM:
     {
         const char *block = TcgDuel_StadiumBlock(g, f->me);

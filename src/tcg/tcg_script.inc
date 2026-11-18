@@ -1081,6 +1081,12 @@ static int ScriptRun(struct TcgDuel *g, const char *script, const struct TcgAtta
             self->barrier = (uint8_t)(x ? x : 1);
         else if (ScriptIs(&o, "guard"))
             self->guard = (uint8_t)x;
+        else if (ScriptIs(&o, "askch"))
+        {
+            /* a choice for a player (TCG_CHOICE_x): the opponent first, then you (askch:x,1: only you) */
+            const struct TcgCard *it = TcgDuel_Field(g, me, sScriptSelf);
+            TcgDuel_AskChoice(g, o.arg[1] ? me : them, (unsigned)x, it ? it->id : 0, o.arg[1] ? 1 : 0);
+        }
         else if (ScriptIs(&o, "lockon"))
         {
             /* Lock-on: its Electric Bolt's tails are heads next turn, against this Defending Pokemon */

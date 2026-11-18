@@ -88,6 +88,8 @@ P('R_DRIVE_OFF', 'Drive Off', 'he or she chooses 1 of them and switches it with 
   'ONCE ACTIVE', 'oswitch')
 P('R_MAJOR_TSUNAMI', 'Major Tsunami', 'your opponent switches his or her Active Pokemon with 1 of his or her Benched',
   'USED', 'ONCE ACTIVE', 'oswitch ssw')
+P('R_SPECIAL_DELIVERY', 'Special Delivery', 'choose a card from your hand and put it on top of your deck', 'USED',
+  'ONCE', 'draw:1 askch:6,1')
 P('R_TERRAFORMING', 'Terraforming', 'look at the top 4 cards of your deck and rearrange them', 'USED', 'ONCE',
   'order:4')
 P('R_STRANGE_TENTACLES', 'Strange Tentacles', "in your opponent's discard pile and attach it to the Defending", 'USED',
@@ -191,6 +193,7 @@ P('R_PREHISTORIC_MEMORY', 'Prehistoric Memory', 'it can use any attack from its 
 P('R_PSYLINK', 'Psylink', 'always has a copy of every attack your Psychic Pokemon in play have', 'PASSIVE')
 P('R_MIMIC', 'Mimic', "it copies all of the Defending Pokemon's attacks, including their costs", 'PASSIVE')
 P('R_LIGHTNING_BURST', 'Lightning Burst', 'he or she chooses 1 of them and switches it with the Defending', 'PASSIVE')
+P('R_EXCHANGE', '[Engage]', 'your opponent may shuffle his or her hand into his or her deck', 'PASSIVE')
 P('R_ATTRACT_ENERGY', 'Attract Energy', 'move any number of basic Energy cards attached to your other Pokemon', 'PASSIVE')
 P('R_MAGMA_POOL', 'Magma Pool', 'remove 1 Fire Energy card attached to SELF', 'PASSIVE', 'ANY')
 P('R_VANISH', '[Vanish]', 'return 1 of your Pokemon with Unown in its name', 'PASSIVE')

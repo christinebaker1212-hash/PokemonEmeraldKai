@@ -165,6 +165,8 @@ const struct TcgStep *TcgFlow_TrainerSteps(unsigned id, int *count);
 const struct TcgStep *TcgFlow_PowerSteps(unsigned power, int *count);
 /* What using the Stadium in play asks for (its canon id) */
 const struct TcgStep *TcgFlow_StadiumSteps(unsigned stadium, int *count);
+/* What the pending choice asks (phase TCG_CHOICE: TcgDuel.choiceKind) */
+const struct TcgStep *TcgFlow_ChoiceSteps(const struct TcgDuel *g, int *count);
 /* A Pokemon played from the hand whose power asks when it comes into play (Sneak Attack, Power of Darkness: target;
  * Reel In, Summon Minions: selections), after its space; the action gets TCG_PLAY_CHOSEN */
 const struct TcgStep *TcgFlow_PlaySteps(unsigned cardId, int *count);
@@ -220,7 +222,8 @@ enum
     TCG_FLOW_PASS,     /* END TURN */
     TCG_FLOW_READY,    /* setup done */
     TCG_FLOW_CONCEDE,
-    TCG_FLOW_STADIUM   /* the Stadium in play used (TCG_USE_STADIUM) */
+    TCG_FLOW_STADIUM,  /* the Stadium in play used (TCG_USE_STADIUM) */
+    TCG_FLOW_CHOICE    /* the choice a card's effect asks (phase TCG_CHOICE: TCG_CHOOSE) */
 };
 /* What it asks now */
 enum

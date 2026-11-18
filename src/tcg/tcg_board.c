@@ -305,6 +305,8 @@ static int MyTurn(void)
         return 0;
     if (g->phase == TCG_PROMOTION)
         return g->promotePlayer == 0;
+    if (g->phase == TCG_CHOICE)
+        return g->choicePlayer == 0;
     return g->current == 0;
 }
 static int CanAct(void) { return MyTurn() && TcgBoard_Idle() && !B.waiting; }
@@ -2394,7 +2396,7 @@ static void Choose(struct TcgAction *out, int *result, unsigned *card)
         Submit(out, result);
         break;
     default:
-        if (id >= MENU_CHOICE && B.flow == FLOW_POWER)
+        if (id >= MENU_CHOICE && (B.flow == FLOW_POWER || B.flow == FLOW_TRAINER))
         {
             B.action.target = (uint8_t)(id - MENU_CHOICE);
             B.step++;
@@ -2658,6 +2660,21 @@ int TcgBoard_Step(unsigned pressed, unsigned held, struct TcgAction *out, unsign
     /* Hand positions follow the tray continuously. */
     if (!B.intro)
         Layout();
+    if (B.view.phase == TCG_CHOICE && MyTurn() && TcgBoard_Idle() && B.mode == M_FREE && B.flow == FLOW_NONE)
+    {
+        /* A card's effect asks this player something (TCG_CHOICE): its steps at once, as a Trainer's */
+        int chose = BOARD_NONE;
+        memset(&B.action, 0, sizeof(B.action));
+        B.action.type = TCG_CHOOSE;
+        B.flow = FLOW_TRAINER;
+        B.flowCard = 0;
+        B.heldHand = -1;
+        B.steps = TcgFlow_ChoiceSteps(&B.view, &B.nsteps);
+        B.step = 0;
+        ContinueTrainer(out, &chose);
+        if (chose != BOARD_NONE)
+            return chose;
+    }
     if (B.view.phase == TCG_PROMOTION && MyTurn() && TcgBoard_Idle() && B.mode == M_FREE && !B.promoFocused)
     {
         /* After a Knock Out: straight to the Bench, on the first Pokemon there. */

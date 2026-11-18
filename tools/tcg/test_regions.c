@@ -929,6 +929,69 @@ static int PowersOfFour(void)
     printf("PASS Lock-on, Frog Song, Psymimic, Harvest Bounty\n");
     return 0;
 }
+/* A choice in the middle of an effect: Light Venomoth's (their pick, then yours, then the turn ends), through the
+ * flow as the board and the phone ask it; Special Delivery's */
+static int Choices(void)
+{
+    struct TcgDuel g;
+    struct TcgAction a;
+    struct TcgFlow f;
+    unsigned q, k, hand;
+    int c, mine;
+    if (!Tcg_Card(TCG_CARD_NEO4_53) || !Tcg_Card(TCG_CARD_BASEP_5))
+        return printf("FAIL choices: a card isn't finished\n"), 1;
+    Stage(&g, TCG_CARD_NEO4_53, 0, 1);
+    g.players[1].field[0].poison = 0;
+    c = Relabel(&g, 1, TCG_CARD_MACHOP);
+    g.players[1].discard[g.players[1].discardSize++] = (uint8_t)c;
+    mine = Relabel(&g, 0, TCG_CARD_DIGLETT);
+    g.players[0].discard[g.players[0].discardSize++] = (uint8_t)mine;
+    hand = g.players[1].handSize;
+    memset(&a, 0, sizeof(a));
+    a.type = TCG_ATTACK;
+    if (TcgDuel_Apply(&g, &a) != TCG_OK || g.phase != TCG_CHOICE || g.choicePlayer != 1 || g.current != 0)
+        return printf("FAIL Mysterious Wing: %s (phase %u, chooser %u)\n", g.error, g.phase, g.choicePlayer), 1;
+    if (TcgFlow_Actor(&g) != 1)
+        return printf("FAIL choices: the actor isn't the chooser\n"), 1;
+    q = TcgFlow_Begin(&f, &g, 1, TCG_FLOW_CHOICE, 0);
+    if (q != TCG_Q_PICK)
+        return printf("FAIL choices: the flow asks %u (%s)\n", q, f.error), 1;
+    for (k = 0; k < f.pickCount && f.pick[k] != (uint8_t)c; k++)
+        ;
+    if (k == f.pickCount || !f.pickOk[k])
+        return printf("FAIL choices: their Machop isn't offered\n"), 1;
+    {
+        uint8_t chosen[1] = {(uint8_t)c};
+        q = TcgFlow_Pick(&f, &g, chosen, 1);
+    }
+    if (q != TCG_Q_DONE || TcgDuel_Apply(&g, &f.action) != TCG_OK)
+        return printf("FAIL choices: their pick: %s %s\n", f.error, g.error), 1;
+    if (g.phase != TCG_CHOICE || g.choicePlayer != 0 || g.players[1].handSize != hand + 1)
+        return printf("FAIL choices: then yours (phase %u, chooser %u)\n", g.phase, g.choicePlayer), 1;
+    memset(&a, 0, sizeof(a));
+    a.type = TCG_PASS;
+    if (TcgDuel_Apply(&g, &a) == TCG_OK)
+        return printf("FAIL choices: another action while it waits\n"), 1;
+    memset(&a, 0, sizeof(a));
+    a.type = TCG_CHOOSE; /* (none) */
+    if (TcgDuel_Apply(&g, &a) != TCG_OK || g.phase == TCG_CHOICE || g.current != 1)
+        return printf("FAIL choices: the turn didn't end (%s)\n", g.error), 1;
+    /* Special Delivery: draw, then a card of the hand on top */
+    Stage(&g, TCG_CARD_BASEP_5, 1, 1);
+    g.players[0].field[0].poison = 0;
+    memset(&a, 0, sizeof(a));
+    a.type = TCG_USE_POWER;
+    if (TcgDuel_Apply(&g, &a) != TCG_OK || g.phase != TCG_CHOICE || g.choicePlayer != 0)
+        return printf("FAIL Special Delivery: %s\n", g.error), 1;
+    memset(&a, 0, sizeof(a));
+    a.type = TCG_CHOOSE;
+    a.selections[0] = g.players[0].hand[0];
+    a.selectionCount = 1;
+    if (TcgDuel_Apply(&g, &a) != TCG_OK || g.phase != TCG_TURN || g.players[0].deck[g.players[0].deckSize - 1] != a.selections[0])
+        return printf("FAIL Special Delivery's card: %s\n", g.error), 1;
+    printf("PASS choices: Mysterious Wing through the flow, their pick then yours, Special Delivery\n");
+    return 0;
+}
 static int ScriptMechanics(void)
 {
     struct TcgDuel g;
@@ -1744,7 +1807,7 @@ int main(void)
     }
     printf("PASS %u finished regional cards: %u attacks used %u times, then %u AI actions after them\n", ready, used, ok,
            steps);
-    if (SpecialEnergy() || EcardEnergy() || ScriptMechanics() || Anchors() || Guards() || MovePowers() || LookPowers() || SwitchesAndFire() || BorrowedAttacks() || Copies() || PowersOfFour() || TechnicalMachines() || Babies())
+    if (SpecialEnergy() || EcardEnergy() || ScriptMechanics() || Anchors() || Guards() || MovePowers() || LookPowers() || SwitchesAndFire() || BorrowedAttacks() || Copies() || PowersOfFour() || Choices() || TechnicalMachines() || Babies())
         return 1;
     if (PlayTrainers() || UsePowers() || UseStadiums() || AttackFlows())
         return 1;

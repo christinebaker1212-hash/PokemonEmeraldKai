@@ -495,6 +495,8 @@ static unsigned PokemonCount(const struct TcgPlayer *p)
 void TcgDuel_ResolveKnockouts(struct TcgDuel *g)
 {
     unsigned who, s, win[2] = {0};
+    if (g->phase == TCG_CHOICE)
+        return; /* (after the choice: Apply's TCG_CHOICE branch) */
     /* Resolve both boards before checking victory; simultaneous KOs must not
      * award victory to whichever side happened to be scanned first. */
     for (who = 0; who < 2; who++)
@@ -901,6 +903,27 @@ static int Apply(struct TcgDuel *g, const struct TcgAction *a)
         TcgDuel_Event(g, TCG_EV_WIN, g->winner, 0, 3, 0, 0);
         return TCG_OK;
     }
+    if (g->phase == TCG_CHOICE)
+    {
+        /* A card's effect waits for choicePlayer's answer; then what the action was doing finishes */
+        int result;
+        if (a->type != TCG_CHOOSE)
+            return Error(g, "Make the choice first.");
+        if ((result = TcgDuel_Choose(g, a)) != TCG_OK)
+            return result;
+        if (g->phase == TCG_CHOICE)
+            return TCG_OK; /* (the next stage of it) */
+        TcgDuel_ResolveKnockouts(g);
+        if (g->choiceEndTurn && g->phase == TCG_TURN)
+        {
+            g->choiceEndTurn = 0;
+            EndTurn(g);
+        }
+        g->choiceEndTurn = 0;
+        return TCG_OK;
+    }
+    if (a->type == TCG_CHOOSE)
+        return Error(g, "There is nothing to choose.");
     if (g->phase == TCG_PROMOTION)
     {
         unsigned who = g->promotePlayer;
@@ -1358,6 +1381,14 @@ static int Apply(struct TcgDuel *g, const struct TcgAction *a)
             TcgDuel_Event(g, TCG_EV_STATUS, g->current, 0, f->condition, 0, f->poison);
         g->animationCard = attacker->id;
         g->animationKind = a->attack + 1;
+        if (g->phase == TCG_CHOICE)
+        {
+            /* (Light Venomoth and the like: the turn ends once the choices are made) */
+            g->noWeakRes = g->attackFailed = g->coinResult = g->foeImmune = g->swift = g->bonus = 0;
+            g->scriptCoins = g->scriptHeads = 0, g->scriptBits = 0, g->forceHeads = 0;
+            g->choiceEndTurn = 1;
+            return TCG_OK;
+        }
         g->noWeakRes = g->attackFailed = g->coinResult = g->foeImmune = g->swift = g->bonus = g->scriptCoins = g->scriptHeads = 0, g->scriptBits = 0, g->forceHeads = 0;
         if (g->switchPending)
         {

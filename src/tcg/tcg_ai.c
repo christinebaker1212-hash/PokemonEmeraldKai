@@ -1035,6 +1035,11 @@ static int Act(const struct TcgDuel *g, struct TcgAction *a)
     memset(a, 0, sizeof(*a));
     if (g->phase == TCG_FINISHED)
         return 0;
+    if (g->phase == TCG_CHOICE)
+    {
+        TcgDuel_AiChoose(g, a); /* (a card's effect asks: tcg_choice.inc) */
+        return 1;
+    }
     if (g->phase == TCG_PROMOTION)
     {
         a->type = TCG_PROMOTE;

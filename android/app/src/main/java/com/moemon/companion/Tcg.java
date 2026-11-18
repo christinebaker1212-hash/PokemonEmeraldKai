@@ -48,7 +48,7 @@ public final class Tcg {
     public static final int HEALTHY = 0, ASLEEP = 1, PARALYZED = 2, CONFUSED = 3;
     // flows
     public static final int FLOW_HAND = 0, FLOW_ATTACK = 1, FLOW_RETREAT = 2, FLOW_POWER = 3, FLOW_PROMOTE = 4,
-            FLOW_DISCARD = 5, FLOW_PASS = 6, FLOW_READY = 7, FLOW_CONCEDE = 8;
+            FLOW_DISCARD = 5, FLOW_PASS = 6, FLOW_READY = 7, FLOW_CONCEDE = 8, FLOW_STADIUM = 9, FLOW_CHOICE = 10;
     // actions
     public static final int A_PLAY_BASIC = 0, A_EVOLVE = 1, A_ATTACH = 2, A_ATTACK = 3, A_RETREAT = 4, A_TRAINER = 5,
             A_POWER = 6, A_PASS = 7, A_PROMOTE = 8, A_SETUP_DONE = 9, A_CONCEDE = 10, A_DISCARD_DOLL = 11;
