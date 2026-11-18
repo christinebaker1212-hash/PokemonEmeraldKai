@@ -270,7 +270,9 @@ static int AttackPickSteps(const struct TcgDuel *g, unsigned me, const struct Tc
         {
             unsigned k = bench < count ? bench : count;
             struct TcgStep st = {TCG_ST_PICK, TCG_F_POKEMON, TCG_SRC_OPP_BENCH, (uint8_t)k, (uint8_t)k,
-                                 k == 3 ? "Choose 3 of their Benched Pokemon." : "Hit all of their Benched Pokemon."};
+                                 bench <= count ? "Hit all of their Benched Pokemon."
+                                 : k == 3       ? "Choose 3 of their Benched Pokemon."
+                                                : "Choose 2 of their Benched Pokemon."};
             out[n++] = st;
         }
         break;

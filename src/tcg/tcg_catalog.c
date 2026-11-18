@@ -1886,7 +1886,7 @@ const struct TcgCard gTcgCards[TCG_CARD_COUNT + 1] = {
 [337] = {.id=337, .name="Dugtrio", .kind=TCG_POKEMON, .type=4, .rarity=3, .set=4, .set2=255, .dark=0, .holo=0,
 .hp=80, .stage=1, .species=51, .level=40, .retreat=2, .weakness=1, .resistance=2, .evolvesFrom="Diglett", .description="In battle, it digs through the ground and strikes the unsuspecting foe from an unexpected direction.", .attacks={
 {.name="Go Underground",.description="As long as this Pokemon is on your Bench, prevent all damage done to this Pokemon by attacks (both yours and your opponent's).",.effect="DugtrioGoUndergroundEffectCommands",.animation="ATK_ANIM_NONE",.cost={0,0,0,0,0,0,0},.damage=0,.category=TCG_POKEMON_POWER},
-{.name="Earth Wave",.description="This attack does 10 damage to 2 of your opponent's Benched Pokemon: the ones with the least HP left. (Don't apply Weakness or Resistance for Benched Pokemon.)",.effect="DugtrioEarthWaveEffectCommands",.animation="ATK_ANIM_HIT",.cost={0,0,0,0,3,0,0},.damage=30,.category=TCG_DAMAGE_NORMAL},
+{.name="Earth Wave",.description="This attack does 10 damage to 2 of your opponent's Benched Pokemon of your choice. (Don't apply Weakness or Resistance for Benched Pokemon.)",.effect="DugtrioEarthWaveEffectCommands",.animation="ATK_ANIM_HIT",.cost={0,0,0,0,3,0,0},.damage=30,.category=TCG_DAMAGE_NORMAL},
 }
 },
 [338] = {.id=338, .name="Dark Dugtrio", .kind=TCG_POKEMON, .type=4, .rarity=2, .set=11, .set2=11, .dark=1, .holo=1,

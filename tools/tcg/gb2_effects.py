@@ -7,9 +7,9 @@ Game Boy game plays a card differently from its printed text (Horrid Pollen at r
 is followed and TEXT below says what the card does in this game.
 
 Choices the player makes in the printed rules that are fixed here (the engine's own policy, as for
-Gigashock): damage "divided as you like" goes to one chosen Pokemon; "up to 2 of their Benched"
-takes the ones with the least HP left; "1 of your opponent's Pokemon" moving Energy takes it from
-the Defending Pokemon.
+Gigashock): damage "divided as you like" goes to one chosen Pokemon; "1 of your opponent's Pokemon"
+moving Energy takes it from the Defending Pokemon. (Earth Wave's 2 Benched Pokemon are chosen: the card
+audit, 2026-11-18.)
 """
 FIRE, GRASS, LIGHTNING, WATER, FIGHTING, PSYCHIC, ANY = 0, 1, 2, 3, 4, 5, 7
 PAR, PSN, CNF, SLP = 1, 2, 3, 4                     # ST_*
@@ -294,8 +294,8 @@ TEXT = {
  'CoolPorygonTextureMagic': 'Change Cool Porygon\'s Resistance to a type of your choice other than Colorless.',
  'MeowthCatPunch': 'Does 20 damage to 1 of your opponent\'s Pokemon chosen at random. Don\'t apply Weakness and '
                    'Resistance.',
- 'DugtrioEarthWave': 'This attack does 10 damage to 2 of your opponent\'s Benched Pokemon: the ones with the least '
-                     'HP left. (Don\'t apply Weakness or Resistance for Benched Pokemon.)',
+ 'DugtrioEarthWave': 'This attack does 10 damage to 2 of your opponent\'s Benched Pokemon of your choice. (Don\'t '
+                     'apply Weakness or Resistance for Benched Pokemon.)',
  'MewtwoEnergyControl': 'Flip a coin. If heads, choose a basic Energy card attached to the Defending Pokemon and '
                         'attach it to 1 of your opponent\'s Benched Pokemon of your choice.',
  'GravelerBoulderSmash': 'Flip 2 coins. For each heads, put 1 damage counter on 1 of your opponent\'s Benched '

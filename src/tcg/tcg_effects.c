@@ -590,9 +590,7 @@ unsigned TcgDuel_AttackPick(const struct TcgAttack *attack, unsigned *count)
     case FX_ENERGY_SPIKE:
         return TCG_APICK_DECK_ENERGY;
     case FX_GIGASHOCK:
-        /* (Dugtrio's Earth Wave says which: the ones with the least HP left) */
-        if (strcmp(e->name, "RaichuGigashockEffectCommands") != 0)
-            return TCG_APICK_NONE;
+        /* (Gigashock's 3, Earth Wave's 2) */
         *count = e->extra;
         return TCG_APICK_FOE_BENCH;
     case FX_CALL_FAMILY:
@@ -2576,8 +2574,8 @@ int TcgDuel_AttackEffect(struct TcgDuel *g, const struct TcgAttack *a, const str
     case FX_GIGASHOCK:
         if (after)
         {
-            /* Raichu's Gigashock: the attacker's picks (their Benched Pokemon's top cards); none given (the AI, Dugtrio's
-             * Earth Wave, which says so): the ones with the least HP left */
+            /* Gigashock / Earth Wave: the attacker's picks (their Benched Pokemon's top cards); none given (the AI): the
+             * ones with the least HP left */
             unsigned hit = 0, used[TCG_FIELD_SIZE] = {0}, k;
             for (k = 0; k < action->selectionCount && hit < e->extra; k++)
                 for (s = 1; s < TCG_FIELD_SIZE; s++)

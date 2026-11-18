@@ -247,6 +247,28 @@ int main(void)
         assert(Count(&g, 0, 0, TCG_CARD_GRASS_ENERGY) == 0 && p->discard[0] == grass);
     }
     {
+        /* Earth Wave: the 2 Benched Pokemon chosen of their 3 */
+        unsigned mine[] = {0}, theirs[] = {TCG_CARD_RATTATA, TCG_CARD_MACHOP, TCG_CARD_CHARMANDER, TCG_CARD_ZUBAT};
+        uint8_t chosen[2];
+        mine[0] = id = FindAttack("DugtrioEarthWaveEffectCommands", &attack);
+        Stage(&g, mine, 1, theirs, 4);
+        Put(&g, 0, 0, id);
+        Pay(&g, 0, id, attack);
+        Put(&g, 1, 0, TCG_CARD_RATTATA);
+        Put(&g, 1, 1, TCG_CARD_MACHOP);
+        Put(&g, 1, 2, TCG_CARD_CHARMANDER);
+        Put(&g, 1, 3, TCG_CARD_ZUBAT);
+        g.players[1].field[2].damage = 30; /* (the least HP left: not chosen) */
+        chosen[0] = g.players[1].field[1].stack[0];
+        chosen[1] = g.players[1].field[3].stack[0];
+        assert(TcgFlow_Begin(&f, &g, 0, TCG_FLOW_ATTACK, attack) == TCG_Q_PICK && f.pickSource == TCG_SRC_OPP_BENCH &&
+               f.pickMin == 2 && f.pickMax == 2 && f.pickCount == 3);
+        assert(TcgFlow_Pick(&f, &g, chosen, 2) == TCG_Q_DONE);
+        assert(TcgDuel_Apply(&g, &f.action) == TCG_OK && TcgDuel_Conserved(&g));
+        assert(g.players[1].field[1].damage == 10 && g.players[1].field[3].damage == 10 &&
+               g.players[1].field[2].damage == 30);
+    }
+    {
         /* Dark Golbat's SNEAK ATTACK: 10 damage to the Benched Pokemon chosen as it evolves */
         unsigned mine[] = {TCG_CARD_ZUBAT, TCG_CARD_DARK_GOLBAT}, theirs[] = {TCG_CARD_RATTATA, TCG_CARD_MACHOP};
         unsigned hand;
@@ -324,7 +346,7 @@ int main(void)
             "ElectrodeEnergySpikeEffectCommands", "MagmarBurningFireEffectCommands",
             "DarkMagnetonMagneticLinesEffectCommands", "MagikarpRapidEvolutionEffectCommands",
             "DarkGolduckThirdEyeEffectCommands", "PonytaFireworksEffectCommands", "CharizardFireSpinEffectCommands",
-            "RaichuGigashockEffectCommands", "BellsproutCallForFamilyEffectCommands", "DragonairHyperBeamEffectCommands",
+            "RaichuGigashockEffectCommands", "DugtrioEarthWaveEffectCommands", "BellsproutCallForFamilyEffectCommands", "DragonairHyperBeamEffectCommands",
             "MagnetonMicrowaveEffectCommands", "GastlyEnergyConversionEffectCommands"};
         for (i = 0; i < sizeof(lists) / sizeof(lists[0]); i++)
         {
@@ -353,6 +375,6 @@ int main(void)
         }
     }
     puts("PASS the card audit's choices: Energy Spike, Burning Fire, Magnetic Lines, Rapid Evolution, Third Eye, "
-         "SNEAK ATTACK, SUMMON MINIONS, Rocket's Sneak Attack, Challenge!, through the flow, and the AI's");
+         "Earth Wave, SNEAK ATTACK, SUMMON MINIONS, Rocket's Sneak Attack, Challenge!, through the flow, and the AI's");
     return 0;
 }

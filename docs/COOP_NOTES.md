@@ -2927,7 +2927,8 @@ Spike never let the player pick). Every place the rules chose cards or Pokemon f
 (tcg_board.c) and the phone (tcg_flow.c, cpp/tcg_jni.c) alike; the AI makes its own choice (tcg_effects.c
 TcgDuel_AiAttackChoices, tcg_ai.c), and an action without the choice falls back to what the rules did before.
 - Attacks (TcgDuel_AttackPick, TCG_APICK_*; steps from tcg_flow.c AttackPickSteps after the target / menu): Energy Spike
-  (the basic Energy from the deck, then the Pokemon), Gigashock (3 Benched, TCG_SRC_OPP_BENCH), Call for Family /
+  (the basic Energy from the deck, then the Pokemon), Gigashock (3 Benched, TCG_SRC_OPP_BENCH) and Earth Wave (2; its GB2 text said "the least HP left", now
+  the player's choice: gb2_effects.py TEXT), Call for Family /
   Sprout / Scatter Spores, Energy Conversion / Absorption, Hyper Beam / Whirlpool / Dissolve / Psycho Blast, Microwave,
   Fire Spin's "any Energy", Fireworks / Third Eye, Burning Fire (the Fire Energy from any of your Pokemon after the
   number: TCG_SRC_MY_FIELD_ATTACHED, the picker says which Pokemon each is on), Magnetic Lines (the Defending's basic
