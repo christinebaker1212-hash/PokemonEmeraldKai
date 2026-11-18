@@ -40,6 +40,10 @@ gym1-107 gym2-114 gym2-122 neo3-61 neo4-95 neo4-99 neo4-100 ecard2-118 ecard2-13
 ecard3-141'''.split()
 
 
+# Trainers printed again in other words with the same rules: the printing -> the one whose handler plays it
+SAME = {'ecard1-152': 'gym2-126'}   # Warp Point (Expedition: their switch first, then yours; the same choices)
+
+
 def _trainers():
     import json
     from pathlib import Path
@@ -49,7 +53,7 @@ def _trainers():
     for c in json.loads((root / 'tools/tcg/regions/cards.json').read_text())['cards']:
         if c['kind'] != 'trainer':
             continue
-        head = first.setdefault((c['name'], c['text']), c['src'])
+        head = SAME.get(c['src']) or first.setdefault((c['name'], c['text']), c['src'])
         if c['name'] in gb or head in RTRAINERS or 'TM' in c['flags']:
             TRAINERS[c['effect']] = 'C'   # (a Technical Machine: attached by its kind; its attack is checked as any)
 

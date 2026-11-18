@@ -397,6 +397,38 @@ void TcgPower_Damaged(struct TcgDuel *g, unsigned player, unsigned slot, unsigne
     unsigned power = TcgPower_Working(g, player, slot), who;
     if (!c || !damage || player == g->current)
         return;
+    if (f->reactKind && f->reactUntil >= g->turn && att->stackSize)
+    {
+        /* (an attack's reaction set on it: Fire Wall, Crosscounter, Counter, Secrete Poison, Endure, Armor Up) */
+        unsigned kind = f->reactKind, hp = c->kind == TCG_POKEMON ? c->hp : 10;
+        if (kind == TCG_REACT_FIRE_WALL)
+        {
+            int amount = 10;
+            unsigned type = TcgDuel_Type(g, player, slot);
+            if (TcgDuel_Weakness(g, g->current, 0) == type)
+                amount *= 2;
+            if (TcgDuel_Resistance(g, g->current, 0) == type)
+                amount -= 30;
+            if (amount > 0)
+                PlainDamage(g, g->current, 0, (unsigned)amount);
+        }
+        else if ((kind == TCG_REACT_CROSSCOUNTER || kind == TCG_REACT_COUNTER) && TcgDuel_Coin(g, player))
+            PlainDamage(g, g->current, 0, kind == TCG_REACT_CROSSCOUNTER ? damage * 2 : damage);
+        else if (kind == TCG_REACT_SECRETE)
+        {
+            att->poison = 10;
+            TcgDuel_Event(g, TCG_EV_STATUS, g->current, 0, att->condition, 0, att->poison);
+            for (who = 1; who < TCG_FIELD_SIZE; who++)
+                if (g->players[g->current].field[who].stackSize)
+                    PlainDamage(g, g->current, who, 10);
+        }
+        else if ((kind == TCG_REACT_ENDURE || (kind == TCG_REACT_ARMOR_UP && f->damage >= hp && TcgDuel_Coin(g, player))) &&
+                 f->damage >= hp)
+        {
+            f->damage = hp - 10u;
+            TcgDuel_Log(g, "%s hangs on with 10 HP.", c->name);
+        }
+    }
     if (power == TCG_POWER_R_FORTITUDE && c->kind == TCG_POKEMON && f->damage >= c->hp && TcgDuel_Coin(g, player))
     {
         Announce(g, player, slot, power);
@@ -568,6 +600,12 @@ static void RegionOnPlay(struct TcgDuel *g, unsigned player, unsigned slot, unsi
 /* As the Defending Pokemon retreats (Suction Cups on the other Active: its Energy discarded) */
 static void RegionAfterRetreat(struct TcgDuel *g, unsigned player, unsigned benched)
 {
+    if (g->players[player].field[benched].pursuitUntil >= g->turn)
+    {
+        /* (Pursuit: 10 to it as it retreats, no Weakness or Resistance) */
+        g->players[player].field[benched].pursuitUntil = 0;
+        PlainDamage(g, player, benched, 10);
+    }
     if (TcgPower_Working(g, player ^ 1, 0) == TCG_POWER_R_SUCTION_CUPS)
     {
         struct TcgPlayer *p = &g->players[player];

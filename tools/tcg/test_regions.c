@@ -257,7 +257,26 @@ static int Anchors(void)
     g.players[0].field[0].lastAttackTurn = (uint16_t)(g.turn - 2);
     if (!TcgDuel_CanAttack(&g, 0, 1) || !TcgDuel_CanAttackNow(&g, 0, 1))
         return printf("FAIL Earthdrill after Lie Low\n"), 1;
-    printf("PASS anchors: Jaw Clamp holds while Croconaw is Active, Earthdrill only after Lie Low\n");
+    /* Fire Wall: an attack that damages Rocket's Moltres next turn takes 10 back; Endure leaves 10 HP */
+    if (Tcg_Card(TCG_CARD_GYM1_12))
+    {
+        unsigned before;
+        Stage(&g, TCG_CARD_GYM1_12, 0, 3);
+        g.players[0].field[0].reactKind = TCG_REACT_FIRE_WALL;
+        g.players[0].field[0].reactUntil = (uint16_t)(g.turn + 1);
+        g.current = 1;
+        g.turn++;
+        before = g.players[1].field[0].damage;
+        TcgPower_Damaged(&g, 0, 0, 20);
+        if (g.players[1].field[0].damage < before + 10)
+            return printf("FAIL Fire Wall: the attacker took %u\n", g.players[1].field[0].damage - before), 1;
+        g.players[0].field[0].reactKind = TCG_REACT_ENDURE;
+        g.players[0].field[0].damage = 200;
+        TcgPower_Damaged(&g, 0, 0, 200);
+        if (g.players[0].field[0].damage != Tcg_Card(TCG_CARD_GYM1_12)->hp - 10u)
+            return printf("FAIL Endure: %u damage\n", g.players[0].field[0].damage), 1;
+    }
+    printf("PASS anchors: Jaw Clamp holds while Croconaw is Active, Earthdrill only after Lie Low, Fire Wall, Endure\n");
     return 0;
 }
 static int ScriptMechanics(void)

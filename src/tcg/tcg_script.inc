@@ -99,7 +99,9 @@
  * Blocks:     needlast:i it used attack i last turn (TcgFieldCard.lastAttack) | needhand:n n cards in the hand at most
  * After (1):  cure4:w your Active (0) / the Defending (1) no longer Asleep, Confused, Paralyzed or Poisoned | drawto:n
  *             draw until n in the hand | shiftto:T its type T for the turn | srchk:3 a Pokemon card | dbench:2 a Metal
- *             Basic */
+ *             Basic | react:k[,n] when an attack damages it through their next turn (n 2: your next too): TCG_REACT_k
+ *             (TcgPower_Damaged) | pursuit / attpsn the Defending: 10 if it retreats / Poisoned when Energy is attached
+ *             to it, through their turn */
 #define SCRIPT_TOKEN 48
 /* Which of the player's Pokemon "it" is: the attacker (0), or a Pokemon whose power runs a script (tcg_powers.c) */
 static unsigned sScriptSelf;
@@ -738,6 +740,23 @@ static int ScriptRun(struct TcgDuel *g, const char *script, const struct TcgAtta
                 a == &it->attacks[self->boostAttack - 1])
                 x *= 2;
             TcgDuel_SelfDamage(g, x);
+        }
+        else if (ScriptIs(&o, "react"))
+        {
+            /* when an attack damages it through their next turn (y: through your next turn too): TCG_REACT_x */
+            self->reactKind = (uint8_t)x;
+            self->reactUntil = (uint16_t)(g->turn + (y ? (unsigned)y : 1u));
+        }
+        else if (ScriptIs(&o, "pursuit") || ScriptIs(&o, "attpsn"))
+        {
+            /* the Defending Pokemon: 10 if it retreats / Poisoned if an Energy is attached to it, through their turn */
+            if (!blocked && foe->stackSize)
+            {
+                if (ScriptIs(&o, "pursuit"))
+                    foe->pursuitUntil = (uint16_t)(g->turn + 1);
+                else
+                    foe->attachPoisonUntil = (uint16_t)(g->turn + 1);
+            }
         }
         else if (ScriptIs(&o, "anchor"))
         {

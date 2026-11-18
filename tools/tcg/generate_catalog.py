@@ -72,6 +72,7 @@ for c in reg:
  # (a reprint plays as its first printing: the Game Boy games' card of that name, or the first regional one with
  # the same name and rules)
  canon=gb_names.get(c['name']) if c['kind']=='trainer' else None
+ if c['src'] in REG.SAME:canon=next(r['id'] for r in reg if r['src']==REG.SAME[c['src']])
  if canon is None and c['kind']!='pokemon':
   canon=first_print.setdefault((c['name'],c.get('text')),n)
   canon=None if canon==n else canon

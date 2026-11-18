@@ -449,6 +449,7 @@ static void ClearCondition(struct TcgFieldCard *f)
     f->noEvolveUntil = 0;
     f->condImmune = 0;
     f->anchorUntil = f->anchorBy = 0;
+    f->reactUntil = f->reactKind = 0;
 }
 /* What the opponent's last attack did to it (Mirror Move) */
 static void ClearMirror(struct TcgFieldCard *f)
@@ -1369,6 +1370,13 @@ static int Apply(struct TcgDuel *g, const struct TcgAction *a)
         f->attached[f->attachedSize++] = TcgPile_Remove(p->hand, &p->handSize, a->hand);
         p->energyPlayed = 1;
         TcgDuel_Event(g, TCG_EV_ATTACH, g->current, s, 0, c->id, 0);
+        if (f->attachPoisonUntil >= g->turn)
+        {
+            /* (Triggered Poison) */
+            f->poison = 10;
+            f->attachPoisonUntil = 0;
+            TcgDuel_Event(g, TCG_EV_STATUS, g->current, s, f->condition, 0, f->poison);
+        }
         TcgPower_AfterAttach(g, g->current, s, f->attached[f->attachedSize - 1]);
         /* Pokemon Park: once a turn, Energy onto a Benched Pokemon takes a counter off it */
         if (TcgDuel_Stadium(g, NULL) == TCG_CARD_ECARD2_131 && s && f->damage && !(p->turnBuffs & TCG_BUFF_PARK))

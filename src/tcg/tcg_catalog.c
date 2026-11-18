@@ -2902,7 +2902,7 @@ const struct TcgCard gTcgCards[TCG_CARD_COUNT + 1] = {
 {.name="",.description="",.effect="NONE",.animation="ATK_ANIM_NONE",.cost={0},.damage=0,.category=TCG_DAMAGE_NORMAL},
 }
 },
-[453] = {.id=453, .name="Rocket's Hitmonchan", .kind=TCG_POKEMON, .type=4, .rarity=2, .set=13, .set2=255, .dark=0, .holo=1, .flags=TCG_CF_OWNER, .origin=13,
+[453] = {.id=453, .name="Rocket's Hitmonchan", .kind=TCG_POKEMON, .type=4, .rarity=2, .set=13, .set2=255, .dark=0, .holo=1, .flags=TCG_CF_OWNER|TCG_CF_READY, .origin=13,
 .hp=60, .stage=0, .species=107, .level=29, .retreat=1, .weakness=5, .resistance=255, .evolvesFrom="", .description="", .attacks={
 {.name="Crosscounter",.description="If an attack does damage to Rocket's Hitmonchan during your opponent's next turn (even if Rocket's Hitmonchan is Knocked Out), flip a coin. If heads, Rocket's Hitmonchan attacks your opponent's Active Pokemon for double that amount of damage. (If Rocket's Hitmonchan takes 20 damage, it does 40 damage to that Pokemon.)",.effect="gym1-11:a0",.animation="ATK_ANIM_HIT",.cost={0,0,0,0,1,0,0,0,0},.damage=0,.category=TCG_RESIDUAL},
 {.name="Magnum Punch",.description="",.effect="NONE",.animation="ATK_ANIM_HIT",.cost={0,0,0,0,2,0,1,0,0},.damage=50,.category=TCG_DAMAGE_NORMAL},
@@ -4622,7 +4622,7 @@ const struct TcgCard gTcgCards[TCG_CARD_COUNT + 1] = {
 {.name="",.description="",.effect="NONE",.animation="ATK_ANIM_NONE",.cost={0},.damage=0,.category=TCG_DAMAGE_NORMAL},
 }
 },
-[737] = {.id=737, .name="Phanpy", .kind=TCG_POKEMON, .type=4, .rarity=1, .set=15, .set2=255, .dark=0, .holo=0, .flags=0, .origin=15,
+[737] = {.id=737, .name="Phanpy", .kind=TCG_POKEMON, .type=4, .rarity=1, .set=15, .set2=255, .dark=0, .holo=0, .flags=TCG_CF_READY, .origin=15,
 .hp=40, .stage=0, .species=231, .level=11, .retreat=1, .weakness=1, .resistance=2, .evolvesFrom="", .description="It swings its long snout around playfully, but, because it is so strong, that can be dangerous.", .attacks={
 {.name="Tackle",.description="",.effect="NONE",.animation="ATK_ANIM_HIT",.cost={0,0,0,0,0,0,1,0,0},.damage=10,.category=TCG_DAMAGE_NORMAL},
 {.name="Endure",.description="Flip a coin. If heads, then if, during your opponent's next turn, Phanpy would be Knocked Out by an attack, Phanpy isn't Knocked Out and its remaining HP become 10 instead.",.effect="neo1-43:a1",.animation="ATK_ANIM_HIT",.cost={0,0,0,0,1,0,0,0,0},.damage=0,.category=TCG_RESIDUAL},
@@ -5076,7 +5076,7 @@ const struct TcgCard gTcgCards[TCG_CARD_COUNT + 1] = {
 {.name="",.description="",.effect="NONE",.animation="ATK_ANIM_NONE",.cost={0},.damage=0,.category=TCG_DAMAGE_NORMAL},
 }
 },
-[815] = {.id=815, .name="Wobbuffet", .kind=TCG_POKEMON, .type=5, .rarity=2, .set=16, .set2=255, .dark=0, .holo=1, .flags=0, .origin=16,
+[815] = {.id=815, .name="Wobbuffet", .kind=TCG_POKEMON, .type=5, .rarity=2, .set=16, .set2=255, .dark=0, .holo=1, .flags=TCG_CF_READY, .origin=16,
 .hp=90, .stage=0, .species=202, .level=46, .retreat=3, .weakness=5, .resistance=255, .evolvesFrom="", .description="To keep its pitch-black tail hidden, it lives quietly in the darkness. It is never first to attack.", .attacks={
 {.name="Counter",.description="If an attack damages Wobbuffet during your opponent's next turn (even if Wobbuffet is Knocked Out), flip a coin. If heads, Wobbuffet attacks the Defending Pokemon for an equal amount of damage.",.effect="neo2-16:a0",.animation="ATK_ANIM_HIT",.cost={0,0,0,0,0,1,0,0,0},.damage=0,.category=TCG_RESIDUAL},
 {.name="",.description="",.effect="NONE",.animation="ATK_ANIM_NONE",.cost={0},.damage=0,.category=TCG_DAMAGE_NORMAL},
@@ -5188,7 +5188,7 @@ const struct TcgCard gTcgCards[TCG_CARD_COUNT + 1] = {
 {.name="",.description="",.effect="NONE",.animation="ATK_ANIM_NONE",.cost={0},.damage=0,.category=TCG_DAMAGE_NORMAL},
 }
 },
-[831] = {.id=831, .name="Umbreon", .kind=TCG_POKEMON, .type=7, .rarity=2, .set=16, .set2=255, .dark=0, .holo=0, .flags=0, .origin=16,
+[831] = {.id=831, .name="Umbreon", .kind=TCG_POKEMON, .type=7, .rarity=2, .set=16, .set2=255, .dark=0, .holo=0, .flags=TCG_CF_READY, .origin=16,
 .hp=70, .stage=1, .species=197, .level=33, .retreat=1, .weakness=255, .resistance=5, .evolvesFrom="Eevee", .description="When agitated, this Pokemon protects itself by spraying poisonous sweat from its pores.", .attacks={
 {.name="Quick Attack",.description="Flip a coin. If heads, this attack does 10 damage plus 20 more damage; if tails, this attack does 10 damage.",.effect="neo2-32:a0",.animation="ATK_ANIM_HIT",.cost={0,0,0,0,0,0,2,0,0},.damage=10,.category=TCG_DAMAGE_PLUS},
 {.name="Pursuit",.description="During your opponent's next turn, if the Defending Pokemon tries to retreat, do 10 damage to it. (Don't apply Weakness and Resistance.)",.effect="neo2-32:a1",.animation="ATK_ANIM_HIT",.cost={0,0,0,0,0,0,2,1,0},.damage=30,.category=TCG_DAMAGE_NORMAL},
@@ -5209,7 +5209,7 @@ const struct TcgCard gTcgCards[TCG_CARD_COUNT + 1] = {
 {.name="",.description="",.effect="NONE",.animation="ATK_ANIM_NONE",.cost={0},.damage=0,.category=TCG_DAMAGE_NORMAL},
 }
 },
-[834] = {.id=834, .name="Wobbuffet", .kind=TCG_POKEMON, .type=5, .rarity=2, .set=16, .set2=255, .dark=0, .holo=0, .flags=0, .origin=16,
+[834] = {.id=834, .name="Wobbuffet", .kind=TCG_POKEMON, .type=5, .rarity=2, .set=16, .set2=255, .dark=0, .holo=0, .flags=TCG_CF_READY, .origin=16,
 .hp=90, .stage=0, .species=202, .level=46, .retreat=3, .weakness=5, .resistance=255, .evolvesFrom="", .description="To keep its pitch-black tail hidden, it lives quietly in the darkness. It is never first to attack.", .attacks={
 {.name="Counter",.description="If an attack damages Wobbuffet during your opponent's next turn (even if Wobbuffet is Knocked Out), flip a coin. If heads, Wobbuffet attacks the Defending Pokemon for an equal amount of damage.",.effect="neo2-35:a0",.animation="ATK_ANIM_HIT",.cost={0,0,0,0,0,1,0,0,0},.damage=0,.category=TCG_RESIDUAL},
 {.name="",.description="",.effect="NONE",.animation="ATK_ANIM_NONE",.cost={0},.damage=0,.category=TCG_DAMAGE_NORMAL},
@@ -5251,7 +5251,7 @@ const struct TcgCard gTcgCards[TCG_CARD_COUNT + 1] = {
 {.name="",.description="",.effect="NONE",.animation="ATK_ANIM_NONE",.cost={0},.damage=0,.category=TCG_DAMAGE_NORMAL},
 }
 },
-[840] = {.id=840, .name="Kakuna", .kind=TCG_POKEMON, .type=1, .rarity=1, .set=16, .set2=255, .dark=0, .holo=0, .flags=0, .origin=16,
+[840] = {.id=840, .name="Kakuna", .kind=TCG_POKEMON, .type=1, .rarity=1, .set=16, .set2=255, .dark=0, .holo=0, .flags=TCG_CF_READY, .origin=16,
 .hp=70, .stage=1, .species=14, .level=22, .retreat=2, .weakness=0, .resistance=255, .evolvesFrom="Weedle", .description="Although it is a cocoon, it can move a little. It can extend its poison barb if it is attacked.", .attacks={
 {.name="Secrete Poison",.description="During your opponent's next turn, whenever your opponent's attack damages Kakuna (even if Kakuna is Knocked Out), your opponent's Active Pokemon is now Poisoned and Kakuna does 10 damage to each of your opponent's Benched Pokemon. (Don't apply Weakness and Resistance for Benched Pokemon.)",.effect="neo2-41:a0",.animation="ATK_ANIM_HIT",.cost={0,2,0,0,0,0,0,0,0},.damage=0,.category=TCG_RESIDUAL},
 {.name="",.description="",.effect="NONE",.animation="ATK_ANIM_NONE",.cost={0},.damage=0,.category=TCG_DAMAGE_NORMAL},
@@ -5501,7 +5501,7 @@ const struct TcgCard gTcgCards[TCG_CARD_COUNT + 1] = {
 {.name="",.description="",.effect="NONE",.animation="ATK_ANIM_NONE",.cost={0},.damage=0,.category=TCG_DAMAGE_NORMAL},
 }
 },
-[878] = {.id=878, .name="Crobat", .kind=TCG_POKEMON, .type=1, .rarity=2, .set=17, .set2=255, .dark=0, .holo=1, .flags=0, .origin=17,
+[878] = {.id=878, .name="Crobat", .kind=TCG_POKEMON, .type=1, .rarity=2, .set=17, .set2=255, .dark=0, .holo=1, .flags=TCG_CF_READY, .origin=17,
 .hp=90, .stage=2, .species=169, .level=51, .retreat=0, .weakness=5, .resistance=4, .evolvesFrom="Golbat", .description="It flies so silently through the dark on its four wings that it may not be noticed even when nearby.", .attacks={
 {.name="Triggered Poison",.description="If your opponent attaches an Energy card to the Defending Pokemon during his or her next turn, that Pokemon becomes Poisoned.",.effect="neo3-4:a0",.animation="ATK_ANIM_HIT",.cost={0,1,0,0,0,0,0,0,0},.damage=20,.category=TCG_DAMAGE_NORMAL},
 {.name="Cross Attack",.description="Flip 4 coins. This attack does 20 damage times the number of heads. If you get 2 or more heads, the Defending Pokemon is now Confused.",.effect="neo3-4:a1",.animation="ATK_ANIM_HIT",.cost={0,2,0,0,0,0,1,0,0},.damage=20,.category=TCG_DAMAGE_X},
@@ -6156,7 +6156,7 @@ const struct TcgCard gTcgCards[TCG_CARD_COUNT + 1] = {
 {.name="",.description="",.effect="NONE",.animation="ATK_ANIM_NONE",.cost={0},.damage=0,.category=TCG_DAMAGE_NORMAL},
 }
 },
-[975] = {.id=975, .name="Dark Forretress", .kind=TCG_POKEMON, .type=1, .rarity=1, .set=18, .set2=255, .dark=1, .holo=0, .flags=0, .origin=18,
+[975] = {.id=975, .name="Dark Forretress", .kind=TCG_POKEMON, .type=1, .rarity=1, .set=18, .set2=255, .dark=1, .holo=0, .flags=TCG_CF_READY, .origin=18,
 .hp=60, .stage=1, .species=205, .level=30, .retreat=2, .weakness=0, .resistance=255, .evolvesFrom="Pineco", .description="It stays motionless in trees, driving away with flying armored shards from its hard shell any who come close.", .attacks={
 {.name="Armor Up",.description="Until the end of your next turn, if Dark Forretress would be Knocked Out by damage from an attack, flip a coin. If heads, Dark Forretress is not Knocked Out and its remaining HP become 10 instead.",.effect="neo4-35:a0",.animation="ATK_ANIM_HIT",.cost={0,0,0,0,0,0,1,0,0},.damage=0,.category=TCG_RESIDUAL},
 {.name="Explosion",.description="Dark Forretress does 60 damage to itself.",.effect="neo4-35:a1",.animation="ATK_ANIM_HIT",.cost={0,2,0,0,0,0,0,0,0},.damage=60,.category=TCG_DAMAGE_NORMAL},
@@ -7655,7 +7655,7 @@ const struct TcgCard gTcgCards[TCG_CARD_COUNT + 1] = {
 [1204] = {.id=1204, .name="Super Scoop Up", .kind=TCG_TRAINER, .type=6, .rarity=1, .set=19, .set2=255, .dark=0, .holo=0, .flags=TCG_CF_READY, .origin=19, .canon=425,
 .effect="ecard1-151:t",.description="Flip a coin. If heads, return 1 of your Pokemon and all cards attached to it to your hand."
 },
-[1205] = {.id=1205, .name="Warp Point", .kind=TCG_TRAINER, .type=6, .rarity=1, .set=19, .set2=255, .dark=0, .holo=0, .flags=0, .origin=19,
+[1205] = {.id=1205, .name="Warp Point", .kind=TCG_TRAINER, .type=6, .rarity=1, .set=19, .set2=255, .dark=0, .holo=0, .flags=TCG_CF_READY, .origin=19, .canon=694,
 .effect="ecard1-152:t",.description="Your opponent switches the Defending Pokemon with 1 of his or her Benched Pokemon, if any; then you switch your Active Pokemon with 1 of your Benched Pokemon, if any."
 },
 [1206] = {.id=1206, .name="Energy Search", .kind=TCG_TRAINER, .type=6, .rarity=0, .set=19, .set2=255, .dark=0, .holo=0, .flags=TCG_CF_READY, .origin=19, .canon=207,

@@ -569,6 +569,14 @@ def _(m, d):
 
 # One wording, one script (the cards' words with SELF for the card's name; tcg_script.inc's ops)
 EXACT = {
+    "If an attack does damage to SELF during your opponent's next turn (even if SELF is Knocked Out), SELF attacks your opponent's Active Pokemon for 10 damage. (Apply Weakness and Resistance.)": 'react:1',
+    "If an attack does damage to SELF during your opponent's next turn (even if SELF is Knocked Out), flip a coin. If heads, SELF attacks your opponent's Active Pokemon for double that amount of damage. (If SELF takes 20 damage, it does 40 damage to that Pokemon.)": 'react:2',
+    "If an attack damages SELF during your opponent's next turn (even if SELF is Knocked Out), flip a coin. If heads, SELF attacks the Defending Pokemon for an equal amount of damage.": 'react:3',
+    "During your opponent's next turn, whenever your opponent's attack damages SELF (even if SELF is Knocked Out), your opponent's Active Pokemon is now Poisoned and SELF does 10 damage to each of your opponent's Benched Pokemon.": 'react:4',
+    "Flip a coin. If heads, then if, during your opponent's next turn, SELF would be Knocked Out by an attack, SELF isn't Knocked Out and its remaining HP become 10 instead.": 'c h.react:5',
+    'Until the end of your next turn, if SELF would be Knocked Out by damage from an attack, flip a coin. If heads, SELF is not Knocked Out and its remaining HP become 10 instead.': 'react:6,2',
+    "During your opponent's next turn, if the Defending Pokemon tries to retreat, do 10 damage to it. (Don't apply Weakness and Resistance.)": 'pursuit',
+    'If your opponent attaches an Energy card to the Defending Pokemon during his or her next turn, that Pokemon becomes Poisoned.': 'attpsn',
     "Flip a coin. If tails, this attack does nothing. Either way, you can't use this attack again as long as SELF stays in play (even putting SELF on the Bench won't let you use it again).": ('FAIL_COIN', 0, 1),
     "Flip a coin. If tails, this attack does nothing. Either way, you can't use this attack again as long as SELF stays in play (even putting SELF on the Bench won't let you use it again).": ('FAIL_COIN', 0, 1),
     "During your next turn, SELF's Double-edge attack's damage (base damage and damage to itself) is doubled.": 'boost:1,0',

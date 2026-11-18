@@ -64,6 +64,11 @@ struct TcgFieldCard
      * out; anchorBy: only while that card (physical + 1, the top of the stack) is the opponent's Active */
     uint16_t anchorUntil;
     uint8_t anchorBy;
+    /* (effect scripts: what it does when an attack damages it through turn reactUntil: TCG_REACT_*; Pursuit: 10 to it
+     * if it retreats through pursuitUntil; Triggered Poison: Poisoned if an Energy is attached to it through
+     * attachPoisonUntil) */
+    uint16_t reactUntil, pursuitUntil, attachPoisonUntil;
+    uint8_t reactKind;
     /* (effect scripts, until it's Benched or evolves) stuck: it can't retreat (2: while the Pokemon stuckBy - 1, the
      * top card that did it, is its opponent's Active); blindAll: whenever it attacks, a coin, tails the attack does
      * nothing; noAttackAll: it can't attack */
@@ -76,6 +81,17 @@ enum
     TCG_MIRROR_NONE,
     TCG_MIRROR_AMNESIA,       /* mirrorArg: the attack it was used on */
     TCG_MIRROR_DISCARD_ENERGY /* Hyper Beam and the like */
+};
+/* TcgFieldCard.reactKind: when an attack damages it (TcgPower_Damaged) */
+enum
+{
+    TCG_REACT_NONE,
+    TCG_REACT_FIRE_WALL,    /* 10 to the attacker, Weakness and Resistance applied */
+    TCG_REACT_CROSSCOUNTER, /* a coin: heads, double the damage to the attacker */
+    TCG_REACT_COUNTER,      /* a coin: heads, the same damage to the attacker */
+    TCG_REACT_SECRETE,      /* the attacker Poisoned and 10 to each of their Benched Pokemon */
+    TCG_REACT_ENDURE,       /* not Knocked Out: 10 HP left */
+    TCG_REACT_ARMOR_UP      /* a coin before a Knock Out: heads, 10 HP left */
 };
 enum
 {
