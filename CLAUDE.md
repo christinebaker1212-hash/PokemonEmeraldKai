@@ -427,6 +427,7 @@ pictures pinned to maps under the sprites, an "over" layer for furniture tops, p
 tools/moemon_gamecenter; the 2F CARD SHOP UI_GCSHOP with money singles and the 1999 theme decks; COOP_NOTES "The GAME
 CENTER"; tests gc_look, gc_visit). Card packs: holos one pack in three, a new one after 20 dry packs (tcg_collection.c,
 tools/tcg/pack_math.py).
+**The card game in every region** (the user, 2026-11-18: KANTO Gym Heroes / Challenge, JOHTO Neo 1-4, HOENN / SINNOH / UNOVA Expedition / Aquapolis / Skyridge, special trainers with their own decks and the era's real promos in every region, an audit of every current card's choices; one release when all is done, only finished cards appear, one extended ruleset): **start at `docs/TCG_REGIONS.md`**. TCG Island: later.
 Also CARD DUELS (src/tcg/, include/tcg/: the original 228-card TCG; rules engine with presentation events, the DS-style
 duel board tcg_board.c drawn into a 240x160 canvas display.c shows as the game picture (Tcg_Canvas; spectate gets it via
 Tcg_Frame), CARD CASE item 399 (registered: its button in front of someone challenges them, tcg_field.c), the CARD CLUB in
