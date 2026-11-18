@@ -34,6 +34,13 @@ gcc -std=c99 -D_DEFAULT_SOURCE -Wall -Wextra -Werror -fsanitize=address,undefine
     src/tcg/tcg_duel.c src/tcg/tcg_effects.c src/tcg/tcg_trainers.c src/tcg/tcg_powers.c -o "$OUT/attacks"
 "$OUT/attacks"
 
+# The card audit's choices (2026-11-18): through the flow machine, then the rules
+gcc -std=c99 -D_DEFAULT_SOURCE -Wall -Wextra -Werror -fsanitize=address,undefined -g \
+    -DTCG_TEST -DMOEMON_DEV_BUILD=1 -iquote include \
+    tools/tcg/test_picks.c src/tcg/tcg_flow.c src/tcg/tcg_collection.c "$AW" src/tcg/tcg_catalog.c \
+    src/tcg/tcg_duel.c src/tcg/tcg_effects.c src/tcg/tcg_trainers.c src/tcg/tcg_powers.c -o "$OUT/picks"
+"$OUT/picks"
+
 gcc -std=c99 -D_DEFAULT_SOURCE -Wall -Wextra -Werror -fsanitize=address,undefined -g -DCARD_QUOTES_TEST -iquote include \
     tools/tcg/test_quotes.c src/tcg/card_quotes.c -o "$OUT/quotes"
 "$OUT/quotes"

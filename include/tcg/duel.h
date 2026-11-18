@@ -338,6 +338,25 @@ enum
     TCG_ASK_DECK_TRAINER     /* Errand-Running: selections[0], a Trainer in your deck (taken on heads) */
 };
 unsigned TcgDuel_AttackAsk(const struct TcgAttack *attack);
+/* Cards an attack's player picks (a TCG_ST_PICK step, the answer in selections; the 2026-11-18 audit: none of these is
+ * picked for a player any more): which, and how many (count) */
+enum
+{
+    TCG_APICK_NONE,
+    TCG_APICK_OWN_ENERGY,     /* Fire Spin, Third Eye, Fireworks (on tails): count of the Energy cards on it */
+    TCG_APICK_FOE_ENERGY,     /* Hyper Beam / Whirlpool, Dissolve / Psycho Blast (on heads): one of the Defending's */
+    TCG_APICK_TARGET_ENERGY,  /* Microwave: one of the chosen Pokemon's (on heads) */
+    TCG_APICK_DECK_ENERGY,    /* Energy Spike: a basic Energy from the deck, then target: the Pokemon it goes on */
+    TCG_APICK_FOE_BENCH,      /* Gigashock: count of their Benched Pokemon (all of them when fewer) */
+    TCG_APICK_FAMILY,         /* Call for Family / Sprout / Scatter Spores / Call for Friend: the card from the deck */
+    TCG_APICK_DISCARD_ENERGY, /* Energy Conversion (to the hand) / Absorption (onto it): up to count from the discard */
+    TCG_APICK_EVOLUTION,      /* Rapid Evolution: a card from the deck that evolves from the attacker */
+    TCG_APICK_FIELD_FIRE,     /* Burning Fire: the option's number of Fire Energy cards from any of your Pokemon */
+    TCG_APICK_MOVE_FOE_ENERGY /* Magnetic Lines: one of the Defending's basic Energy (then target: where it goes) */
+};
+unsigned TcgDuel_AttackPick(const struct TcgAttack *attack, unsigned *count);
+/* (TCG_APICK_FAMILY / _EVOLUTION) Can this card be taken by the attacker's attack? */
+int TcgDuel_AttackCardOk(const struct TcgCard *attacker, const struct TcgAttack *attack, unsigned cardId);
 int TcgDuel_IsMetronome(const struct TcgAttack *attack);
 /* The attack Metronome copies (copy = the Defending Pokemon's attack + 1), NULL if it can't */
 const struct TcgAttack *TcgDuel_MetronomeAttack(const struct TcgDuel *g, unsigned player, unsigned copy);

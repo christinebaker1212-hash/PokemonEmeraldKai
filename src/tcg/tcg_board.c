@@ -1587,7 +1587,8 @@ static void ContinueTrainer(struct TcgAction *out, int *result)
 static void OpenPick(int source, int filter, int min, int max, const char *title)
 {
     const struct TcgPlayer *p;
-    unsigned owner = source == TCG_SRC_OPP_DISCARD || source == TCG_SRC_OPP_ATTACHED || source == TCG_SRC_TOP3_THEIRS, i, n = 0;
+    unsigned owner = source == TCG_SRC_OPP_DISCARD || source == TCG_SRC_OPP_ATTACHED || source == TCG_SRC_TOP3_THEIRS
+                  || source == TCG_SRC_OPP_BENCH || source == TCG_SRC_DEFENDER_ATTACHED, i, n = 0;
     const uint8_t *pile = NULL;
     unsigned count = 0;
     uint8_t sorted[TCG_DECK_SIZE];
@@ -1629,6 +1630,25 @@ static void OpenPick(int source, int filter, int min, int max, const char *title
         pile = sorted;
         count = max;
         break;
+    case TCG_SRC_OPP_BENCH:   /* (Gigashock: their Benched Pokemon, each one's top card) */
+        for (i = 1; i < TCG_FIELD_SIZE; i++)
+            if (p->field[i].stackSize)
+                sorted[count++] = p->field[i].stack[p->field[i].stackSize - 1];
+        pile = sorted;
+        break;
+    case TCG_SRC_DEFENDER_ATTACHED: /* (Magnetic Lines: whichever Benched Pokemon was aimed at) */
+        pile = p->field[0].attached;
+        count = p->field[0].attachedSize;
+        break;
+    case TCG_SRC_MY_FIELD_ATTACHED: /* (Burning Fire: every Pokemon's, the Active first) */
+    {
+        unsigned k;
+        for (i = 0; i < TCG_FIELD_SIZE; i++)
+            for (k = 0; k < p->field[i].attachedSize; k++)
+                sorted[count++] = p->field[i].attached[k];
+        pile = sorted;
+        break;
+    }
     }
     memset(B.pickSel, 0, sizeof(B.pickSel));
     for (i = 0; i < count; i++)
@@ -3585,8 +3605,21 @@ static void DrawPick(void)
         if (c)
         {
             char line[80];
+            const struct TcgCard *on = NULL;
+            if (B.pickSource == TCG_SRC_MY_FIELD_ATTACHED)
+            {
+                /* (which of your Pokemon it's attached to) */
+                const struct TcgPlayer *p = &B.view.players[B.pickOwner];
+                unsigned s2, k;
+                for (s2 = 0; s2 < TCG_FIELD_SIZE && !on; s2++)
+                    for (k = 0; k < p->field[s2].attachedSize; k++)
+                        if (p->field[s2].attached[k] == B.pickCards[B.pickCursor] && p->field[s2].stackSize)
+                            on = Tcg_Card(CardOf(B.pickOwner, p->field[s2].stack[p->field[s2].stackSize - 1]));
+            }
             if (c->kind == TCG_POKEMON)
                 snprintf(line, sizeof(line), "%s  HP%u  %s", c->name, c->hp, G_TypeName(c->type));
+            else if (on)
+                snprintf(line, sizeof(line), "%s on %s", c->name, on->name);
             else
                 snprintf(line, sizeof(line), "%s", c->name);
             G_Text(8, 132, G_INK, G_INK_SHADOW, line, 160, TF_SMALL);

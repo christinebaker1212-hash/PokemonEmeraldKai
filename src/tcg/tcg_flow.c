@@ -190,6 +190,124 @@ static int BenchOn(const struct TcgDuel *g, unsigned who)
     return 0;
 }
 
+/* The cards an attack's player picks (TcgDuel_AttackPick; the 2026-11-18 audit: never picked for them) */
+static int AttackPickSteps(const struct TcgDuel *g, unsigned me, const struct TcgAction *a, const struct TcgAttack *attack,
+                           struct TcgStep out[4], int n)
+{
+    unsigned count, kind = attack ? TcgDuel_AttackPick(attack, &count) : TCG_APICK_NONE, s, bench = 0;
+    const struct TcgFieldCard *defender = &g->players[me ^ 1].field[0];
+    uint8_t onHeads = 0;
+    if (kind == TCG_APICK_NONE || n >= 3)
+        return n;
+    switch (kind)
+    {
+    case TCG_APICK_OWN_ENERGY:
+    {
+        struct TcgStep st = {TCG_ST_PICK, TCG_F_ENERGY, TCG_SRC_MY_ATTACHED, (uint8_t)count, (uint8_t)count,
+                             count == 2 ? "Discard which 2 Energy cards?" : "Discard which Energy cards?"};
+        out[n++] = st;
+        break;
+    }
+    case TCG_APICK_FOE_ENERGY:
+    {
+        /* (only when the Defending Pokemon has Energy to choose from) */
+        unsigned i;
+        const char *name = attack->description ? attack->description : "";
+        onHeads = strstr(name, "Flip a coin") != NULL;
+        for (i = 0; i < defender->attachedSize; i++)
+            if (Tcg_Card(CardOf(g, me ^ 1, defender->attached[i]))->kind == TCG_ENERGY)
+                break;
+        if (i < defender->attachedSize)
+        {
+            struct TcgStep st = {TCG_ST_PICK, TCG_F_ENERGY, TCG_SRC_OPP_ATTACHED, 1, 1,
+                                 onHeads ? "If heads, discard which of their Energy?" : "Discard which of their Energy?"};
+            out[n++] = st;
+        }
+        break;
+    }
+    case TCG_APICK_TARGET_ENERGY:
+    {
+        struct TcgStep st = {TCG_ST_PICK, TCG_F_ENERGY, TCG_SRC_OPP_ATTACHED, 0, 1,
+                             "If heads, discard which of its Energy?"};
+        out[n++] = st;
+        break;
+    }
+    case TCG_APICK_DECK_ENERGY:
+    {
+        struct TcgStep pick = {TCG_ST_PICK, TCG_F_BASIC_ENERGY, TCG_SRC_DECK, 0, 1, "Take which basic Energy card?"};
+        struct TcgStep slot = {TCG_ST_MY_SLOT, TCG_F_OCCUPIED, 0, 0, 0, "Attach it to which of your Pokemon?"};
+        out[n++] = pick;
+        out[n++] = slot;
+        break;
+    }
+    case TCG_APICK_FOE_BENCH:
+    {
+        for (s = 1; s < TCG_FIELD_SIZE; s++)
+            bench += g->players[me ^ 1].field[s].stackSize != 0;
+        if (bench)
+        {
+            unsigned k = bench < count ? bench : count;
+            struct TcgStep st = {TCG_ST_PICK, TCG_F_POKEMON, TCG_SRC_OPP_BENCH, (uint8_t)k, (uint8_t)k,
+                                 k == 3 ? "Choose 3 of their Benched Pokemon." : "Hit all of their Benched Pokemon."};
+            out[n++] = st;
+        }
+        break;
+    }
+    case TCG_APICK_FAMILY:
+    {
+        struct TcgStep st = {TCG_ST_PICK, (uint8_t)(a->attack ? TCG_F_ATTACK_CARD1 : TCG_F_ATTACK_CARD0), TCG_SRC_DECK, 0,
+                             1, "Put which Pokemon onto your Bench?"};
+        out[n++] = st;
+        break;
+    }
+    case TCG_APICK_DISCARD_ENERGY:
+    {
+        int hand = strstr(attack->description ? attack->description : "", "hand") != NULL;
+        struct TcgStep st = {TCG_ST_PICK, TCG_F_ENERGY, TCG_SRC_MY_DISCARD, 0, (uint8_t)count,
+                             hand ? "Put which Energy cards into your hand?" : "Attach which Energy cards to it?"};
+        out[n++] = st;
+        break;
+    }
+    case TCG_APICK_EVOLUTION:
+    {
+        struct TcgStep st = {TCG_ST_PICK, (uint8_t)(a->attack ? TCG_F_ATTACK_CARD1 : TCG_F_ATTACK_CARD0), TCG_SRC_DECK, 0,
+                             1, "Evolve it into which card?"};
+        out[n++] = st;
+        break;
+    }
+    case TCG_APICK_FIELD_FIRE:
+        /* (after the option: how many) */
+        if (a->option)
+        {
+            struct TcgStep st = {TCG_ST_PICK, TCG_F_FIRE_ENERGY, TCG_SRC_MY_FIELD_ATTACHED, a->option, a->option,
+                                 a->option == 1 ? "Discard which Fire Energy card?" : "Discard which Fire Energy cards?"};
+            out[n++] = st;
+        }
+        break;
+    case TCG_APICK_MOVE_FOE_ENERGY:
+    {
+        /* (only when there's a choice to make: their Bench and a basic Energy on the Defending Pokemon) */
+        unsigned i;
+        for (s = 1; s < TCG_FIELD_SIZE; s++)
+            bench += g->players[me ^ 1].field[s].stackSize != 0;
+        for (i = 0; i < defender->attachedSize; i++)
+        {
+            const struct TcgCard *c = Tcg_Card(CardOf(g, me ^ 1, defender->attached[i]));
+            if (c->kind == TCG_ENERGY && c->id <= 6)
+                break;
+        }
+        if (bench && i < defender->attachedSize)
+        {
+            struct TcgStep st = {TCG_ST_PICK, TCG_F_BASIC_ENERGY, TCG_SRC_DEFENDER_ATTACHED, 1, 1,
+                                 "Move which of their basic Energy?"};
+            out[n++] = st;
+        }
+        break;
+    }
+    }
+    return n;
+}
+
 int TcgFlow_AttackSteps(const struct TcgDuel *g, unsigned me, const struct TcgAction *a, const struct TcgAttack *attack,
                         int afterOption, struct TcgStep out[4], char prompt[64])
 {
@@ -239,6 +357,7 @@ int TcgFlow_AttackSteps(const struct TcgDuel *g, unsigned me, const struct TcgAc
         struct TcgStep st = {a->option ? TCG_ST_OPP_SLOT : TCG_ST_MY_SLOT, TCG_F_EVOLVED, 0, 0, 0, "Devolve which Pokemon?"};
         out[n++] = st;
     }
+    n = AttackPickSteps(g, me, a, attack, out, n);
     return n;
 }
 
@@ -262,6 +381,15 @@ int TcgFlow_CardMatches(const struct TcgDuel *g, unsigned owner, unsigned physic
         return 0;
     switch (filter)
     {
+    case TCG_F_ATTACK_CARD0:
+    case TCG_F_ATTACK_CARD1:
+    {
+        const struct TcgCard *attacker = TcgDuel_Attacker(g, g->current);
+        return attacker && TcgDuel_AttackCardOk(TcgDuel_Field(g, g->current, 0),
+                                                &attacker->attacks[filter - TCG_F_ATTACK_CARD0], c->id);
+    }
+    case TCG_F_FIRE_ENERGY:
+        return c->id == TCG_CARD_FIRE_ENERGY;
     case TCG_F_POKEMON:
         return c->kind == TCG_POKEMON;
     case TCG_F_BASIC:
@@ -702,6 +830,7 @@ static unsigned AskPick(struct TcgFlow *f, const struct TcgDuel *g, int source, 
                         const char *prompt)
 {
     unsigned owner = source == TCG_SRC_OPP_DISCARD || source == TCG_SRC_OPP_ATTACHED || source == TCG_SRC_TOP3_THEIRS
+                          || source == TCG_SRC_OPP_BENCH || source == TCG_SRC_DEFENDER_ATTACHED
                          ? f->me ^ 1
                          : f->me,
              i, n = 0, count = 0, valid = 0;
@@ -739,6 +868,24 @@ static unsigned AskPick(struct TcgFlow *f, const struct TcgDuel *g, int source, 
             sorted[i] = p->deck[p->deckSize - 1 - i];
         pile = sorted, count = (unsigned)max;
         break;
+    case TCG_SRC_OPP_BENCH:
+        for (i = 1; i < TCG_FIELD_SIZE; i++)
+            if (p->field[i].stackSize)
+                sorted[count++] = p->field[i].stack[p->field[i].stackSize - 1];
+        pile = sorted;
+        break;
+    case TCG_SRC_DEFENDER_ATTACHED:
+        pile = p->field[0].attached, count = p->field[0].attachedSize;
+        break;
+    case TCG_SRC_MY_FIELD_ATTACHED:
+    {
+        unsigned k;
+        for (i = 0; i < TCG_FIELD_SIZE; i++)
+            for (k = 0; k < p->field[i].attachedSize; k++)
+                sorted[count++] = p->field[i].attached[k];
+        pile = sorted;
+        break;
+    }
     }
     for (i = 0; i < count; i++)
     {

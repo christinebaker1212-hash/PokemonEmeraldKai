@@ -30,7 +30,10 @@ enum
     TCG_SRC_TOP5,
     TCG_SRC_TOP7,       /* Master Ball: the top 7 of your deck */
     TCG_SRC_TOP3_MINE,  /* Prophecy: the top 3 of a deck, to put in order */
-    TCG_SRC_TOP3_THEIRS
+    TCG_SRC_TOP3_THEIRS,
+    TCG_SRC_OPP_BENCH,  /* Gigashock: their Benched Pokemon (each one's top card) */
+    TCG_SRC_DEFENDER_ATTACHED, /* Magnetic Lines: the Defending Pokemon's cards (whatever the target) */
+    TCG_SRC_MY_FIELD_ATTACHED  /* Burning Fire: every one of your Pokemon's cards, the Active first */
 };
 /* Which Pokemon in play (slot steps) or which cards (picks) can be chosen */
 enum
@@ -66,7 +69,11 @@ enum
     TCG_F_DARK_EVOLUTION,
     TCG_F_GARBAGE,         /* a Pokemon or basic Energy card */
     TCG_F_HAS_FIRE_OTHER,  /* has a Fire Energy card, not the Pokemon using the power */
-    TCG_F_FOSSIL_EVOLVED   /* evolved from a Mysterious Fossil */
+    TCG_F_FOSSIL_EVOLVED,  /* evolved from a Mysterious Fossil */
+    /* an attack's own pick (TcgDuel_AttackCardOk): the attacker's first / second attack */
+    TCG_F_ATTACK_CARD0,
+    TCG_F_ATTACK_CARD1,
+    TCG_F_FIRE_ENERGY
 };
 struct TcgStep
 {

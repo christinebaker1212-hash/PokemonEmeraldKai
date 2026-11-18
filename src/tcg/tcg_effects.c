@@ -567,6 +567,86 @@ unsigned TcgDuel_AttackAsk(const struct TcgAttack *attack)
     }
     return TCG_ASK_NONE;
 }
+static int FamilyMatch(const struct Effect *e, const struct TcgCard *c);
+unsigned TcgDuel_AttackPick(const struct TcgAttack *attack, unsigned *count)
+{
+    const struct Effect *e = attack ? Effect(attack->effect) : NULL;
+    *count = 1;
+    if (!e)
+        return TCG_APICK_NONE;
+    switch (e->kind)
+    {
+    case FX_DISCARD_TYPED:
+        /* (only "any Energy" costs ask: basic Energy of one type are all alike) */
+        if (e->extra != ANY_TYPE || !e->amount)
+            return TCG_APICK_NONE;
+        *count = e->amount;
+        return TCG_APICK_OWN_ENERGY;
+    case FX_HYPER_BEAM:
+    case FX_DISCARD_FOE_ENERGY:
+        return TCG_APICK_FOE_ENERGY;
+    case FX_MICROWAVE:
+        return TCG_APICK_TARGET_ENERGY;
+    case FX_ENERGY_SPIKE:
+        return TCG_APICK_DECK_ENERGY;
+    case FX_GIGASHOCK:
+        /* (Dugtrio's Earth Wave says which: the ones with the least HP left) */
+        if (strcmp(e->name, "RaichuGigashockEffectCommands") != 0)
+            return TCG_APICK_NONE;
+        *count = e->extra;
+        return TCG_APICK_FOE_BENCH;
+    case FX_CALL_FAMILY:
+        return TCG_APICK_FAMILY;
+    case FX_ENERGY_CONVERSION:
+    case FX_ENERGY_ABSORPTION:
+        *count = e->amount;
+        return TCG_APICK_DISCARD_ENERGY;
+    case FX_TAILS_DISCARD_SELF:
+    case FX_THIRD_EYE:
+        return TCG_APICK_OWN_ENERGY;
+    case FX_RAPID_EVOLUTION:
+        return TCG_APICK_EVOLUTION;
+    case FX_BURNING_FIRE:
+        return TCG_APICK_FIELD_FIRE;
+    case FX_MAGNETIC_LINES:
+        return TCG_APICK_MOVE_FOE_ENERGY;
+    }
+    return TCG_APICK_NONE;
+}
+static int Picked(const struct TcgAction *action, unsigned k, const uint8_t *pile, unsigned size);
+static int EvolvesFrom(const struct TcgCard *c, const struct TcgCard *from)
+{
+    return c && from && c->kind == TCG_POKEMON && c->stage && !strcmp(c->evolvesFrom, from->name);
+}
+int TcgDuel_AttackCardOk(const struct TcgCard *attacker, const struct TcgAttack *attack, unsigned cardId)
+{
+    const struct Effect *e = attack ? Effect(attack->effect) : NULL;
+    if (e && e->kind == FX_RAPID_EVOLUTION)
+        return EvolvesFrom(Tcg_Card(cardId), attacker);
+    return e && e->kind == FX_CALL_FAMILY && FamilyMatch(e, Tcg_Card(cardId));
+}
+/* (Fireworks, Third Eye) The Energy card the player picked from the Active Pokemon, else one as before */
+static int DiscardPickedOwn(struct TcgDuel *g, unsigned who, const struct TcgAction *action)
+{
+    struct TcgPlayer *p = &g->players[who];
+    struct TcgFieldCard *f = &p->field[0];
+    int at = Picked(action, 0, f->attached, f->attachedSize);
+    if (at < 0 || CardAt(g, who, f->attached[at])->kind != TCG_ENERGY)
+        return DiscardOne(g, who, 0, ANY_TYPE, 0);
+    p->discard[p->discardSize++] = TcgPile_Remove(f->attached, &f->attachedSize, (unsigned)at);
+    return 1;
+}
+/* The physical card the player picked (selections[k]) where it should be: its place in that pile, -1 if not there */
+static int Picked(const struct TcgAction *action, unsigned k, const uint8_t *pile, unsigned size)
+{
+    unsigned i;
+    if (!action || k >= action->selectionCount)
+        return -1;
+    for (i = 0; i < size; i++)
+        if (pile[i] == action->selections[k])
+            return (int)i;
+    return -1;
+}
 static int RealAttack(const struct TcgAttack *a) { return a && a->name[0] && a->category != TCG_POKEMON_POWER; }
 const struct TcgAttack *TcgDuel_MetronomeAttack(const struct TcgDuel *g, unsigned player, unsigned copy)
 {
@@ -701,6 +781,61 @@ void TcgDuel_AiAttackChoices(const struct TcgDuel *g, struct TcgAction *a)
         return;
     switch (e->kind)
     {
+    case FX_ENERGY_SPIKE:
+    {
+        /* a basic Energy of the Active Pokemon's type onto it, else any basic Energy */
+        int pick = -1;
+        for (i = 0; i < p->deckSize; i++)
+        {
+            const struct TcgCard *c = CardAt(g, g->current, p->deck[i]);
+            if (c->kind == TCG_ENERGY && c->id <= 6 && (pick < 0 || c->type == self->type))
+                pick = (int)i;
+        }
+        a->selectionCount = 0;
+        a->target = 0;
+        if (pick >= 0)
+            a->selections[a->selectionCount++] = p->deck[pick];
+        break;
+    }
+    case FX_RAPID_EVOLUTION:
+    {
+        /* the one with the most HP */
+        int at = -1;
+        a->selectionCount = 0;
+        for (i = 0; i < p->deckSize; i++)
+            if (EvolvesFrom(CardAt(g, g->current, p->deck[i]), self) &&
+                (at < 0 || CardAt(g, g->current, p->deck[i])->hp > CardAt(g, g->current, p->deck[at])->hp))
+                at = (int)i;
+        if (at >= 0)
+            a->selections[a->selectionCount++] = p->deck[at];
+        break;
+    }
+    case FX_CALL_FAMILY:
+        a->selectionCount = 0;
+        for (i = p->deckSize; i > 0; i--)
+            if (FamilyMatch(e, CardAt(g, g->current, p->deck[i - 1])))
+            {
+                a->selections[a->selectionCount++] = p->deck[i - 1];
+                break;
+            }
+        break;
+    case FX_ENERGY_CONVERSION:
+    case FX_ENERGY_ABSORPTION:
+    {
+        /* up to its amount, the attacker's own type first */
+        unsigned pass, n = 0;
+        a->selectionCount = 0;
+        for (pass = 0; pass < 2 && n < e->amount; pass++)
+            for (i = p->discardSize; i > 0 && n < e->amount; i--)
+            {
+                const struct TcgCard *c = CardAt(g, g->current, p->discard[i - 1]);
+                if (c->kind != TCG_ENERGY || (pass == 0) != (c->type == self->type))
+                    continue;
+                a->selections[a->selectionCount++] = p->discard[i - 1];
+                n++;
+            }
+        break;
+    }
     case FX_METRONOME:
     {
         unsigned best = 0, bestDamage = 0;
@@ -964,12 +1099,30 @@ static unsigned RandomSlot(struct TcgDuel *g, unsigned who, int skipActive)
             slots[n++] = s;
     return n ? slots[Tcg_RandomBelow(&g->rng, n)] : TCG_NONE;
 }
-static int TakeEnergyFromDiscard(struct TcgDuel *g, unsigned max, int attach)
+static int TakeEnergyFromDiscard(struct TcgDuel *g, unsigned max, int attach, const struct TcgAction *action)
 {
     struct TcgPlayer *p = &g->players[g->current];
     const struct TcgCard *self = TcgDuel_Field(g, g->current, 0);
-    unsigned pass, i, n = 0;
-    /* The original asks which cards; take the attacker's own type first. */
+    unsigned pass, i, n = 0, k;
+    if (action)
+    {
+        /* the player's picks, up to max Energy cards from their discard pile (none chosen: none taken) */
+        for (k = 0; k < action->selectionCount && n < max; k++)
+        {
+            int at = Picked(action, k, p->discard, p->discardSize);
+            uint8_t card;
+            if (at < 0 || CardAt(g, g->current, p->discard[at])->kind != TCG_ENERGY)
+                continue;
+            card = TcgPile_Remove(p->discard, &p->discardSize, (unsigned)at);
+            if (attach)
+                p->field[0].attached[p->field[0].attachedSize++] = card;
+            else
+                p->hand[p->handSize++] = card;
+            n++;
+        }
+        return (int)n;
+    }
+    /* (the AI's picks: the attacker's own type first) */
     for (pass = 0; pass < 2 && n < max; pass++)
         for (i = p->discardSize; i > 0 && n < max; i--)
         {
@@ -1101,14 +1254,23 @@ static unsigned Attached(const struct TcgDuel *g, unsigned who, unsigned slot, u
             out[n++] = (uint8_t)i;
     return n;
 }
-static void DiscardFoeEnergy(struct TcgDuel *g, unsigned who, unsigned slot, int random)
+static void DiscardFoeEnergyPicked(struct TcgDuel *g, unsigned who, unsigned slot, int random,
+                                   const struct TcgAction *action)
 {
     struct TcgFieldCard *f = &g->players[who].field[slot];
     uint8_t list[TCG_DECK_SIZE];
     unsigned n = Attached(g, who, slot, TCG_ENERGY, list), i, pick;
+    int k;
     if (!n)
         return;
     pick = list[0];
+    /* (the attacker's own pick: an Energy card attached to that Pokemon) */
+    if (!random && (k = Picked(action, 0, f->attached, f->attachedSize)) >= 0
+     && CardAt(g, who, f->attached[k])->kind == TCG_ENERGY)
+    {
+        g->players[who].discard[g->players[who].discardSize++] = TcgPile_Remove(f->attached, &f->attachedSize, (unsigned)k);
+        return;
+    }
     if (random)
         pick = list[Tcg_RandomBelow(&g->rng, n)];
     else
@@ -1116,6 +1278,10 @@ static void DiscardFoeEnergy(struct TcgDuel *g, unsigned who, unsigned slot, int
             if (CardAt(g, who, f->attached[list[i]])->id > 6)
                 pick = list[i];
     g->players[who].discard[g->players[who].discardSize++] = TcgPile_Remove(f->attached, &f->attachedSize, pick);
+}
+static void DiscardFoeEnergy(struct TcgDuel *g, unsigned who, unsigned slot, int random)
+{
+    DiscardFoeEnergyPicked(g, who, slot, random, NULL);
 }
 static void Evolve(struct TcgDuel *g, unsigned who, unsigned slot, unsigned deckIndex)
 {
@@ -1250,7 +1416,7 @@ static int Gb2Effect(struct TcgDuel *g, const struct Effect *e, const struct Tcg
         if (!after)
             g->coinResult = (uint8_t)(!e->extra || TcgDuel_Coin(g, me));
         else if (g->coinResult && foe->stackSize && !blocked)
-            DiscardFoeEnergy(g, them, 0, 0);
+            DiscardFoeEnergyPicked(g, them, 0, 0, action);
         break;
     case FX_REGENERATION:
         if (after)
@@ -1375,7 +1541,7 @@ static int Gb2Effect(struct TcgDuel *g, const struct Effect *e, const struct Tcg
         break;
     case FX_TAILS_DISCARD_SELF:
         if (after && !TcgDuel_Coin(g, me))
-            DiscardOne(g, me, 0, ANY_TYPE, 0);
+            DiscardPickedOwn(g, me, action);
         break;
     case FX_FLAME_INFERNO:
         if (!after)
@@ -1404,7 +1570,37 @@ static int Gb2Effect(struct TcgDuel *g, const struct Effect *e, const struct Tcg
             unsigned left = action->option;
             if (left > FieldFireCards(g, me))
                 return TCG_INVALID;
-            /* (from this Pokemon first, then the Bench) */
+            /* the player's picks (Fire Energy cards on any of their Pokemon), all of them or none */
+            if (action->selectionCount == left)
+            {
+                unsigned k, found = 0;
+                for (k = 0; k < left; k++)
+                    for (s = 0; s < TCG_FIELD_SIZE; s++)
+                    {
+                        int at = Picked(action, k, p->field[s].attached, p->field[s].attachedSize);
+                        if (at >= 0 && p->cards[p->field[s].attached[at]] == TCG_CARD_FIRE_ENERGY)
+                        {
+                            found++;
+                            break;
+                        }
+                    }
+                if (found == left)
+                {
+                    for (k = 0; k < left; k++)
+                        for (s = 0; s < TCG_FIELD_SIZE; s++)
+                        {
+                            struct TcgFieldCard *f = &p->field[s];
+                            int at = Picked(action, k, f->attached, f->attachedSize);
+                            if (at >= 0)
+                            {
+                                p->discard[p->discardSize++] = TcgPile_Remove(f->attached, &f->attachedSize, (unsigned)at);
+                                break;
+                            }
+                        }
+                    left = 0;
+                }
+            }
+            /* (none picked, as the AI: from this Pokemon first, then the Bench) */
             for (s = 0; s < TCG_FIELD_SIZE && left; s++)
             {
                 unsigned k = FireEnergyCards(g, me, s);
@@ -1456,7 +1652,7 @@ static int Gb2Effect(struct TcgDuel *g, const struct Effect *e, const struct Tcg
     case FX_THIRD_EYE:
         if (!after)
         {
-            if (!DiscardOne(g, me, 0, ANY_TYPE, 0))
+            if (!DiscardPickedOwn(g, me, action))
                 return TCG_INVALID;
         }
         else
@@ -1532,15 +1728,11 @@ static int Gb2Effect(struct TcgDuel *g, const struct Effect *e, const struct Tcg
     case FX_RAPID_EVOLUTION:
         if (after)
         {
+            /* the player's pick from the deck (none: none) */
             const struct TcgCard *mine = TcgDuel_Field(g, me, 0);
-            int at = -1;
-            for (i = 0; i < p->deckSize && mine; i++)
-            {
-                const struct TcgCard *c = CardAt(g, me, p->deck[i]);
-                if (c->kind == TCG_POKEMON && c->stage && !strcmp(c->evolvesFrom, mine->name) &&
-                    (at < 0 || c->hp > CardAt(g, me, p->deck[at])->hp))
-                    at = (int)i;
-            }
+            int at = Picked(action, 0, p->deck, p->deckSize);
+            if (at >= 0 && !EvolvesFrom(CardAt(g, me, p->deck[at]), mine))
+                at = -1;
             if (at >= 0)
                 Evolve(g, me, 0, (unsigned)at);
             TcgDuel_Shuffle(g, me);
@@ -1601,7 +1793,7 @@ static int Gb2Effect(struct TcgDuel *g, const struct Effect *e, const struct Tcg
                 break;
             HitSlot(g, them, action->target, (int)e->amount, 0);
             if (TcgDuel_Coin(g, me))
-                DiscardFoeEnergy(g, them, action->target, 0);
+                DiscardFoeEnergyPicked(g, them, action->target, 0, action);
         }
         break;
     case FX_MAGNETIC_LINES:
@@ -1609,9 +1801,13 @@ static int Gb2Effect(struct TcgDuel *g, const struct Effect *e, const struct Tcg
             g->coinResult = (uint8_t)(!e->extra || TcgDuel_Coin(g, me));
         else if (g->coinResult && foe->stackSize && !blocked && BenchCount(g, them))
         {
-            int pick = -1;
+            /* the player's pick of the Defending Pokemon's basic Energy, else the first */
+            int pick = Picked(action, 0, foe->attached, foe->attachedSize);
             if (!ValidTarget(g, them, action->target, 1))
                 return TCG_INVALID;
+            if (pick >= 0 && (CardAt(g, them, foe->attached[pick])->kind != TCG_ENERGY ||
+                              CardAt(g, them, foe->attached[pick])->id > 6))
+                pick = -1;
             for (i = 0; i < foe->attachedSize && pick < 0; i++)
             {
                 const struct TcgCard *c = CardAt(g, them, foe->attached[i]);
@@ -2095,6 +2291,24 @@ int TcgDuel_AttackEffect(struct TcgDuel *g, const struct TcgAttack *a, const str
 
     /* Costs paid in Energy cards, before the damage. */
     case FX_DISCARD_TYPED:
+        if (!after && e->extra == ANY_TYPE && e->amount && action->selectionCount == e->amount)
+        {
+            /* Fire Spin: the Energy cards the player chose to discard */
+            struct TcgFieldCard *f = &g->players[g->current].field[0];
+            unsigned k;
+            for (k = 0; k < action->selectionCount; k++)
+            {
+                int at = Picked(action, k, f->attached, f->attachedSize);
+                if (at < 0 || CardAt(g, g->current, f->attached[at])->kind != TCG_ENERGY)
+                    return TCG_INVALID;
+            }
+            for (k = 0; k < action->selectionCount; k++)
+            {
+                int at = Picked(action, k, f->attached, f->attachedSize);
+                p->discard[p->discardSize++] = TcgPile_Remove(f->attached, &f->attachedSize, (unsigned)at);
+            }
+            break;
+        }
         if (!after && !DiscardEnergy(g, g->current, 0, e->extra, e->amount))
             return TCG_INVALID;
         break;
@@ -2362,9 +2576,18 @@ int TcgDuel_AttackEffect(struct TcgDuel *g, const struct TcgAttack *a, const str
     case FX_GIGASHOCK:
         if (after)
         {
-            /* Up to three: the original lets the attacker pick; the ones
-             * with the least HP left are taken here. */
-            unsigned hit = 0, used[TCG_FIELD_SIZE] = {0};
+            /* Raichu's Gigashock: the attacker's picks (their Benched Pokemon's top cards); none given (the AI, Dugtrio's
+             * Earth Wave, which says so): the ones with the least HP left */
+            unsigned hit = 0, used[TCG_FIELD_SIZE] = {0}, k;
+            for (k = 0; k < action->selectionCount && hit < e->extra; k++)
+                for (s = 1; s < TCG_FIELD_SIZE; s++)
+                    if (op->field[s].stackSize && !used[s]
+                     && op->field[s].stack[op->field[s].stackSize - 1] == action->selections[k])
+                    {
+                        used[s] = 1;
+                        hit++;
+                        TcgDuel_EffectDamage(g, g->current ^ 1, s, (int)e->amount, 0);
+                    }
             while (hit < e->extra)
             {
                 unsigned best = TCG_NONE;
@@ -2453,13 +2676,10 @@ int TcgDuel_AttackEffect(struct TcgDuel *g, const struct TcgAttack *a, const str
     case FX_CALL_FAMILY:
         if (after)
         {
-            /* The original asks which; any copy of the card is the same. */
-            for (i = p->deckSize; i > 0; i--)
-                if (FamilyMatch(e, CardAt(g, g->current, p->deck[i - 1])))
-                {
-                    ToBench(g, g->current, p->deck[i - 1]);
-                    break;
-                }
+            /* the player's pick from the deck (none: none put on the Bench) */
+            int at = Picked(action, 0, p->deck, p->deckSize);
+            if (at >= 0 && FamilyMatch(e, CardAt(g, g->current, p->deck[at])))
+                ToBench(g, g->current, p->deck[at]);
             TcgDuel_Shuffle(g, g->current);
         }
         break;
@@ -2481,31 +2701,32 @@ int TcgDuel_AttackEffect(struct TcgDuel *g, const struct TcgAttack *a, const str
     case FX_ENERGY_CONVERSION:
         if (after)
         {
-            TakeEnergyFromDiscard(g, e->amount, 0);
+            TakeEnergyFromDiscard(g, e->amount, 0, action);
             TcgDuel_SelfDamage(g, (int)e->extra);
         }
         break;
     case FX_ENERGY_ABSORPTION:
         if (after)
-            TakeEnergyFromDiscard(g, e->amount, 1);
+            TakeEnergyFromDiscard(g, e->amount, 1, action);
         break;
     case FX_ENERGY_SPIKE:
         if (after)
         {
-            /* The original asks which Energy and where: a basic Energy of the
-             * Active Pokemon's type goes to it, else any basic Energy. */
-            const struct TcgCard *active = TcgDuel_Field(g, g->current, 0);
-            int pick = -1;
-            for (i = 0; i < p->deckSize; i++)
+            /* the player's picks: a basic Energy card from the deck (selections[0]; none: none) and the Pokemon of
+             * theirs it goes on (target) */
+            int pick = Picked(action, 0, p->deck, p->deckSize);
+            unsigned to = action->target < TCG_FIELD_SIZE && p->field[action->target].stackSize ? action->target : 0;
+            if (pick >= 0)
             {
-                const struct TcgCard *c = CardAt(g, g->current, p->deck[i]);
-                if (c->kind == TCG_ENERGY && c->id <= 6 && (pick < 0 || (active && c->type == active->type)))
-                    pick = (int)i;
+                const struct TcgCard *c = CardAt(g, g->current, p->deck[pick]);
+                if (c->kind != TCG_ENERGY || c->id > 6)
+                    pick = -1;
             }
             if (pick >= 0)
             {
-                self->attached[self->attachedSize++] = TcgPile_Remove(p->deck, &p->deckSize, (unsigned)pick);
-                TcgDuel_Event(g, TCG_EV_ATTACH, g->current, 0, 0, p->cards[self->attached[self->attachedSize - 1]], 0);
+                struct TcgFieldCard *on = &p->field[to];
+                on->attached[on->attachedSize++] = TcgPile_Remove(p->deck, &p->deckSize, (unsigned)pick);
+                TcgDuel_Event(g, TCG_EV_ATTACH, g->current, to, 0, p->cards[on->attached[on->attachedSize - 1]], 0);
             }
             TcgDuel_Shuffle(g, g->current);
         }
@@ -2513,9 +2734,11 @@ int TcgDuel_AttackEffect(struct TcgDuel *g, const struct TcgAttack *a, const str
     case FX_HYPER_BEAM:
         if (after && foe->stackSize && g->foeImmune != TCG_IMMUNE_YES)
         {
-            /* The attacker picks; Double Colorless costs the most to lose. */
-            int pick = -1;
-            for (i = 0; i < foe->attachedSize; i++)
+            /* The attacker's pick; none given (the AI): Double Colorless costs the most to lose. */
+            int pick = Picked(action, 0, foe->attached, foe->attachedSize);
+            if (pick >= 0 && CardAt(g, g->current ^ 1, foe->attached[pick])->kind != TCG_ENERGY)
+                pick = -1;
+            for (i = 0; !(action->selectionCount && pick >= 0) && i < foe->attachedSize; i++)
             {
                 const struct TcgCard *c = CardAt(g, g->current ^ 1, foe->attached[i]);
                 if (c->kind == TCG_ENERGY && (pick < 0 || c->id == TCG_CARD_DOUBLE_COLORLESS_ENERGY))
