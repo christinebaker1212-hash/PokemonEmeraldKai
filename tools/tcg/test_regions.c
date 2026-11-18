@@ -461,6 +461,141 @@ static int UsePowers(void)
            used, blocked);
     return 0;
 }
+/* Every Stadium a player uses during their turn, used through the flow on a staged board (first choices), twice: once a
+ * turn but Celadon / Saffron City Gym; then the duel goes on with the AI */
+static int Relabel(struct TcgDuel *g, unsigned who, unsigned id)
+{
+    int c = Take(g, who, TCG_CARD_FIRE_ENERGY);
+    if (c >= 0)
+        g->players[who].cards[c] = (uint16_t)id;
+    return c;
+}
+static unsigned Named(const char *word)
+{
+    unsigned id;
+    for (id = TCG_CARD_GB_COUNT + 1; id <= TCG_CARD_COUNT; id++)
+        if (Tcg_Card(id) && Tcg_Card(id)->kind == TCG_POKEMON && !Tcg_Card(id)->stage && strstr(Tcg_Card(id)->name, word))
+            return id;
+    return 0;
+}
+static int UseStadiums(void)
+{
+    static const unsigned stadiums[] = {TCG_CARD_GYM1_107, TCG_CARD_GYM2_114, TCG_CARD_GYM2_122, TCG_CARD_NEO3_61,
+                                        TCG_CARD_NEO4_95, TCG_CARD_NEO4_99, TCG_CARD_NEO4_100, TCG_CARD_ECARD2_118,
+                                        TCG_CARD_ECARD2_138, TCG_CARD_ECARD2_139, TCG_CARD_ECARD3_119,
+                                        TCG_CARD_ECARD3_137, TCG_CARD_ECARD3_141};
+    unsigned i, used = 0, again = 0;
+    for (i = 0; i < sizeof(stadiums) / sizeof(stadiums[0]); i++)
+    {
+        unsigned id = stadiums[i], active = TCG_CARD_MACHOP;
+        uint32_t seed;
+        if (!Tcg_Card(id))
+            continue;
+        if (id == TCG_CARD_GYM1_107)
+            active = Named("Erika");
+        if (id == TCG_CARD_GYM2_114)
+            active = Named("Koga");
+        if (id == TCG_CARD_GYM2_122)
+            active = Named("Sabrina");
+        if (!active)
+            continue;
+        for (seed = 1; seed <= 6; seed++)
+        {
+            struct TcgDuel g;
+            struct TcgFlow f;
+            struct TcgPlayer *p;
+            unsigned q, k, guard = 0, round;
+            int c;
+            Stage(&g, active, 0, seed);
+            p = &g.players[0];
+            if ((c = Relabel(&g, seed & 1, id)) >= 0)
+                g.players[seed & 1].stadium = (uint8_t)(c + 1);
+            if ((c = Relabel(&g, 0, TCG_CARD_MACHOKE)) >= 0)
+                p->field[1].stack[p->field[1].stackSize++] = (uint8_t)c;
+            if ((c = Relabel(&g, 0, TCG_CARD_OMANYTE)) >= 0)
+                p->discard[p->discardSize++] = (uint8_t)c;
+            if ((c = Relabel(&g, 0, TCG_CARD_MACHOKE)) >= 0)
+                p->hand[p->handSize++] = (uint8_t)c;
+            Give(&g, 0, TCG_CARD_FIGHTING_ENERGY, 0);
+            Give(&g, 0, TCG_CARD_FIGHTING_ENERGY, 1);
+            p->field[0].condition = TCG_ASLEEP;
+            for (round = 0; round < 2; round++)
+            {
+                q = TcgFlow_Begin(&f, &g, 0, TCG_FLOW_STADIUM, 0);
+                guard = 0;
+                while (q != TCG_Q_DONE && q != TCG_Q_FAIL && guard++ < 16)
+                {
+                    if (q == TCG_Q_SLOT)
+                    {
+                        for (k = 0; k < TCG_FIELD_SIZE && !(f.slotMask >> k & 1); k++)
+                            ;
+                        q = TcgFlow_Slot(&f, &g, k);
+                    }
+                    else if (q == TCG_Q_PICK)
+                    {
+                        uint8_t chosen[TCG_DECK_SIZE];
+                        unsigned n = 0, want = seed % 2 ? f.pickMin : f.pickMax;
+                        for (k = 0; k < f.pickCount && n < want; k++)
+                            if (f.pickOk[k])
+                                chosen[n++] = f.pick[k];
+                        if (n < f.pickMin)
+                            break;
+                        q = TcgFlow_Pick(&f, &g, chosen, n);
+                    }
+                    else
+                        break;
+                }
+                if (q != TCG_Q_DONE)
+                {
+                    if (!round)
+                    {
+                        printf("FAIL %s (seed %u): the flow didn't finish: %s\n", Tcg_Card(id)->name, seed, f.error);
+                        return 1;
+                    }
+                    break;
+                }
+                {
+                    int result = TcgDuel_Apply(&g, &f.action);
+                    if (result != TCG_OK)
+                    {
+                        printf("FAIL %s (seed %u): the flow's action was refused: %d %s\n", Tcg_Card(id)->name, seed,
+                               result, g.error);
+                        return 1;
+                    }
+                    assert(TcgDuel_Conserved(&g));
+                    if (round)
+                        again++;
+                    else
+                        used++;
+                    if (g.phase != TCG_TURN)
+                        break;
+                }
+            }
+            if (again && id != TCG_CARD_GYM1_107 && id != TCG_CARD_GYM2_122 && !TcgDuel_StadiumBlock(&g, 0))
+            {
+                printf("FAIL %s: used twice in a turn\n", Tcg_Card(id)->name);
+                return 1;
+            }
+            for (k = 0; k < 24 && g.phase != TCG_FINISHED; k++)
+            {
+                struct TcgAction next;
+                int result;
+                memset(&next, 0, sizeof(next));
+                if (!TcgDuel_AiAction(&g, &next))
+                    break;
+                if ((result = TcgDuel_Apply(&g, &next)) != TCG_OK)
+                {
+                    printf("FAIL after %s (seed %u): AI action %u refused: %s\n", Tcg_Card(id)->name, seed, next.type,
+                           g.error);
+                    return 1;
+                }
+                assert(TcgDuel_Conserved(&g));
+            }
+        }
+    }
+    printf("PASS Stadiums used through the flow: %u uses, %u second uses (Celadon / Saffron City Gym)\n", used, again);
+    return 0;
+}
 int main(void)
 {
     struct TcgDuel g;
@@ -535,7 +670,7 @@ int main(void)
            steps);
     if (SpecialEnergy() || Babies())
         return 1;
-    if (PlayTrainers() || UsePowers())
+    if (PlayTrainers() || UsePowers() || UseStadiums())
         return 1;
     /* Decks of them, each type against the others, to the end */
     {

@@ -431,6 +431,70 @@ static int RegionTrainerAi(const struct TcgDuel *g, unsigned hand, struct TcgAct
             return 0;
         break;
     }
+    case TCG_CARD_NEO1_87: /* Mary: two of the weakest cards in the hand go back */
+        if (p->handSize < 3 || p->deckSize < 8 || AiPick(p, p->hand, p->handSize, AiAnyCard, 2, 0, played, a) < 2)
+            return 0;
+        break;
+    case TCG_CARD_ECARD2_123: /* Forest Guardian: the best of the top 7 */
+    {
+        unsigned top = p->deckSize < 7 ? p->deckSize : 7;
+        if (!top || !AiPick(p, p->deck + p->deckSize - top, top, AiAnyCard, 1, 1, played, a))
+            return 0;
+        break;
+    }
+    case TCG_CARD_ECARD3_140: /* Underground Expedition: the best 2 of the bottom 4 */
+    {
+        unsigned bottom = p->deckSize < 4 ? p->deckSize : 4;
+        if (!bottom || !AiPick(p, p->deck, bottom, AiAnyCard, 2, 1, played, a))
+            return 0;
+        break;
+    }
+    case TCG_CARD_ECARD3_126: /* Friend Ball: the best Pokemon card of a type of theirs */
+    {
+        unsigned k, best = TCG_NONE, bestScore = 0;
+        for (s = 0; s < TCG_FIELD_SIZE; s++)
+        {
+            const struct TcgCard *t = TcgDuel_Field(g, me ^ 1, s);
+            if (!t || t->kind != TCG_POKEMON)
+                continue;
+            for (k = 0; k < p->deckSize; k++)
+            {
+                const struct TcgCard *c = Tcg_Card(p->cards[p->deck[k]]);
+                if (c->kind == TCG_POKEMON && c->type == t->type && (best == TCG_NONE || Score(c) > bestScore))
+                {
+                    best = p->deck[k], bestScore = Score(c);
+                    a->target = (uint8_t)s;
+                }
+            }
+        }
+        if (best == TCG_NONE)
+            return 0;
+        a->selections[0] = (uint8_t)best;
+        a->selectionCount = 1;
+        break;
+    }
+    case TCG_CARD_NEO3_62: /* Pokemon Breeder Fields: later Stages of ours in play (one for each) */
+    {
+        unsigned used = 0, k;
+        for (k = 0; k < p->deckSize && a->selectionCount < 2; k++)
+        {
+            const struct TcgCard *c = Tcg_Card(p->cards[p->deck[k]]);
+            for (s = 0; s < TCG_FIELD_SIZE; s++)
+            {
+                const struct TcgCard *t = TcgDuel_Field(g, me, s);
+                if (!(used & (1u << s)) && t && t->kind == TCG_POKEMON && !(t->flags & TCG_CF_BABY) &&
+                    TcgDuel_LaterStage(c, t))
+                {
+                    used |= 1u << s;
+                    a->selections[a->selectionCount++] = p->deck[k];
+                    break;
+                }
+            }
+        }
+        if (!a->selectionCount)
+            return 0;
+        break;
+    }
     default:
         /* (Minion of Team Rocket, Thought Wave Machine, Tropical Wind, Energy Flow, Sabrina, Trash Exchange,
          * Rocket's Secret Experiment, Hyper Devolution Spray: the AI keeps them) */
@@ -502,6 +566,80 @@ static int RegionPowerAi(const struct TcgDuel *g, struct TcgAction *a, unsigned 
         return op->handSize && AiPick(op, op->hand, op->handSize, AiPokemonCard, 1, 1, TCG_NONE, a);
     case TCG_POWER_R_GLARING_GAZE:
         return op->handSize && AiPick(op, op->hand, op->handSize, AiTrainerCard, 1, 1, TCG_NONE, a);
+    }
+    return 0;
+}
+
+/* The Stadium in play: when the AI uses it, what it chooses (the rest are kept for people) */
+static int RegionStadiumAi(const struct TcgDuel *g, struct TcgAction *a)
+{
+    const struct TcgPlayer *p = &g->players[g->current];
+    unsigned me = g->current, s, k;
+    if (TcgDuel_StadiumBlock(g, me))
+        return 0;
+    memset(a, 0, sizeof(*a));
+    a->type = TCG_USE_STADIUM;
+    a->hand = 0xFF;
+    switch (TcgDuel_Stadium(g, NULL))
+    {
+    case TCG_CARD_NEO3_61: /* Healing Field, Lucky Stadium */
+    case TCG_CARD_NEO4_100:
+        return p->deckSize > 6 || TcgDuel_Stadium(g, NULL) == TCG_CARD_NEO3_61;
+    case TCG_CARD_ECARD3_119: /* Ancient Ruins: with no Supporter in the hand */
+        for (k = 0; k < p->handSize; k++)
+            if (Tcg_Card(p->cards[p->hand[k]])->flags & TCG_CF_SUPPORTER)
+                return 0;
+        return p->deckSize > 6;
+    case TCG_CARD_NEO4_99: /* Energy Stadium */
+        return AiPick(p, p->discard, p->discardSize, AiBasicEnergy, 1, 1, TCG_NONE, a) == 1;
+    case TCG_CARD_ECARD3_141: /* Underground Lake */
+        for (k = 0; k < p->discardSize; k++)
+        {
+            const struct TcgCard *c = Tcg_Card(p->cards[p->discard[k]]);
+            if (c->kind == TCG_POKEMON && (!strcmp(c->name, "Omanyte") || !strcmp(c->name, "Kabuto")))
+            {
+                a->selections[0] = p->discard[k];
+                a->selectionCount = 1;
+                return 1;
+            }
+        }
+        return 0;
+    case TCG_CARD_ECARD2_118: /* Apricorn Forest: an Energy whose type has a Basic in the deck */
+        for (k = 0; k < p->handSize; k++)
+        {
+            const struct TcgCard *e = Tcg_Card(p->cards[p->hand[k]]);
+            unsigned d;
+            if (!AiBasicEnergy(e))
+                continue;
+            for (d = 0; d < p->deckSize; d++)
+            {
+                const struct TcgCard *c = Tcg_Card(p->cards[p->deck[d]]);
+                if (AiBasic(c) && c->type == e->type)
+                {
+                    a->selections[0] = p->hand[k];
+                    a->selections[1] = p->deck[d];
+                    a->selectionCount = 2;
+                    return 1;
+                }
+            }
+        }
+        return 0;
+    case TCG_CARD_GYM1_107: /* Celadon City Gym: an Erika Pokemon held by a Special Condition */
+        for (s = 0; s < TCG_FIELD_SIZE; s++)
+        {
+            const struct TcgFieldCard *f = &p->field[s];
+            if (!AiNamed(TcgDuel_Field(g, me, s), "Erika") || (!f->condition && !f->poison) || f->attachedSize < 2)
+                continue;
+            for (k = 0; k < f->attachedSize; k++)
+                if (Tcg_Card(p->cards[f->attached[k]])->kind == TCG_ENERGY)
+                {
+                    a->slot = (uint8_t)s;
+                    a->selections[0] = f->attached[k];
+                    a->selectionCount = 1;
+                    return 1;
+                }
+        }
+        return 0;
     }
     return 0;
 }

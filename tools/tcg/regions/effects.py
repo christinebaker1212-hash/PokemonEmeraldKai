@@ -33,7 +33,10 @@ neo1-99 neo1-101 neo1-103 neo2-73 neo2-74 neo2-75 neo3-60 neo3-64 neo4-92 neo4-9
 neo4-104 neo4-105 ecard1-137 ecard1-138 ecard1-139 ecard1-140 ecard1-141 ecard1-142 ecard1-145 ecard1-146 ecard1-147
 ecard1-148 ecard1-149 ecard1-150 ecard2-120 ecard2-125 ecard2-126 ecard2-130 ecard2-131 ecard2-133 ecard2-134 ecard2-136
 ecard2-137 ecard2-141 ecard3-120 ecard3-121 ecard3-122 ecard3-123 ecard3-124 ecard3-125 ecard3-127 ecard3-128 ecard3-132
-ecard3-138 np-26 np-27 np-36'''.split()
+ecard3-138 np-26 np-27 np-36
+neo1-87 neo1-95 ecard2-123 ecard3-140 ecard3-126 neo3-62 gym2-125 gym2-18
+gym1-107 gym2-114 gym2-122 neo3-61 neo4-95 neo4-99 neo4-100 ecard2-118 ecard2-138 ecard2-139 ecard3-119 ecard3-137
+ecard3-141'''.split()
 
 
 def _trainers():

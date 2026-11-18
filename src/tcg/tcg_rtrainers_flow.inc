@@ -112,6 +112,22 @@ static const struct TcgStep *RegionTrainerSteps(unsigned id, int *count)
               {TCG_ST_PICK, TCG_F_BASIC_ENERGY, TCG_SRC_MY_ATTACHED, 1, 2, "Discard 1 (3 counters) or 2 (5 counters)."});
     case TCG_CARD_ECARD3_138:
         STEPS({TCG_ST_PICK, TCG_F_ANY, TCG_SRC_DECK, TCG_MIN_ALL, 2, "Put which 2 on top? (the first one on top)"});
+    case TCG_CARD_NEO1_87:
+        STEPS({TCG_ST_PICK, TCG_F_ANY, TCG_SRC_HAND_TOP2, TCG_MIN_ALL, 2,
+               "Draw 2, then shuffle which 2 into your deck?"});
+    case TCG_CARD_NEO1_95:
+        STEPS({TCG_ST_PICK, TCG_F_ANY, TCG_SRC_TOP5, 0, 0, "Choose the order: the first is drawn next."});
+    case TCG_CARD_ECARD2_123:
+        STEPS({TCG_ST_PICK, TCG_F_ANY, TCG_SRC_TOP7, TCG_MIN_ALL, 1, "Take which card? (the rest are shuffled in)"});
+    case TCG_CARD_ECARD3_140:
+        STEPS({TCG_ST_PICK, TCG_F_ANY, TCG_SRC_BOTTOM4, TCG_MIN_ALL, 2, "Take which 2? (the rest stay at the bottom)"});
+    case TCG_CARD_ECARD3_126:
+        STEPS({TCG_ST_PICK, TCG_F_POKEMON_CARD, TCG_SRC_DECK, 0, 1, "Take which Pokemon card?"},
+              {TCG_ST_OPP_SLOT, TCG_F_SAME_TYPE_PICK, 0, 0, 0, "Of the type of which of their Pokemon?"});
+    case TCG_CARD_NEO3_62:
+        STEPS({TCG_ST_PICK, TCG_F_LATER_STAGE, TCG_SRC_DECK, 0, 2, "Flip for which later-Stage cards? (heads: kept)"});
+    case TCG_CARD_GYM2_18:
+        STEPS({TCG_ST_MY_SLOT, TCG_F_OWNER_SLOT + TCG_OWNER_GIOVANNI, 0, 0, 0, "Which Giovanni Pokemon may evolve?"});
     }
     if (Tcg_Card(id) && (Tcg_Card(id)->flags & TCG_CF_TOOL))
         STEPS({TCG_ST_MY_SLOT, TCG_F_NO_TOOL, 0, 0, 0, "Attach it to which Pokemon?"});
@@ -217,6 +233,41 @@ static const struct TcgStep *RegionPowerSteps(unsigned power, int *count)
               {TCG_ST_MY_SLOT, TCG_F_OTHER_HOLDER, 0, 0, 0, "Move it to which Pokemon?"});
     case TCG_POWER_R_ENERGY_CONNECT:
         STEPS({TCG_ST_PICK, TCG_F_BASIC_ENERGY, TCG_SRC_MY_FIELD_ATTACHED, 1, 1, "Move which basic Energy to your Active?"});
+    }
+    *count = 0;
+    return sNoSteps;
+}
+/* What using the Stadium in play asks for (tcg_rtrainers.inc RegionStadiumUse) */
+const struct TcgStep *TcgFlow_StadiumSteps(unsigned stadium, int *count)
+{
+    switch (stadium)
+    {
+    case TCG_CARD_GYM1_107:
+        STEPS({TCG_ST_MY_SLOT, TCG_F_OWNER_SLOT + TCG_OWNER_ERIKA, 0, 0, 0, "Cure which Erika Pokemon?"},
+              {TCG_ST_PICK, TCG_F_ENERGY, TCG_SRC_MY_ATTACHED, 1, 1, "Discard which of its Energy?"});
+    case TCG_CARD_GYM2_114:
+        STEPS({TCG_ST_MY_SLOT, TCG_F_OWNER_SLOT + TCG_OWNER_KOGA, 0, 0, 0,
+               "If heads: shuffle which Koga Pokemon into your deck?"});
+    case TCG_CARD_GYM2_122:
+        STEPS({TCG_ST_MY_SLOT, TCG_F_OWNER_SLOT + TCG_OWNER_SABRINA, 0, 0, 0, "From which Sabrina Pokemon?"},
+              {TCG_ST_PICK, TCG_F_BASIC_ENERGY, TCG_SRC_MY_ATTACHED, 1, 1, "Return which basic Energy to your hand?"});
+    case TCG_CARD_NEO4_95:
+        STEPS({TCG_ST_PICK, TCG_F_ANY, TCG_SRC_TOP2, 0, 0, "The top 2 cards of your deck (they stay as they are)."});
+    case TCG_CARD_NEO4_99:
+        STEPS({TCG_ST_PICK, TCG_F_BASIC_ENERGY, TCG_SRC_MY_DISCARD, 1, 1, "If heads: take which basic Energy?"});
+    case TCG_CARD_ECARD2_118:
+        STEPS({TCG_ST_PICK, TCG_F_BASIC_ENERGY, TCG_SRC_HAND, 1, 1, "If heads: show which basic Energy?"},
+              {TCG_ST_PICK, TCG_F_BASIC_TYPE_PICK, TCG_SRC_DECK, 0, 1, "Bench which Basic Pokemon of its type?"});
+    case TCG_CARD_ECARD2_138:
+        STEPS({TCG_ST_MY_SLOT, TCG_F_EVOLVED, 0, 0, 0, "If heads: devolve which Pokemon?"});
+    case TCG_CARD_ECARD2_139:
+        STEPS({TCG_ST_PICK, TCG_F_BASIC_ENERGY, TCG_SRC_HAND, 1, 1, "Discard which basic Energy from your hand?"},
+              {TCG_ST_PICK, TCG_F_BASIC_ENERGY, TCG_SRC_MY_DISCARD, 1, 1, "Take which basic Energy?"});
+    case TCG_CARD_ECARD3_137:
+        STEPS({TCG_ST_PICK, TCG_F_BASIC_ENERGY, TCG_SRC_DECK, 0, 1, "Take which basic Energy?"},
+              {TCG_ST_PICK, TCG_F_EVOLUTION, TCG_SRC_HAND, 1, 1, "Shuffle which Evolution card into your deck?"});
+    case TCG_CARD_ECARD3_141:
+        STEPS({TCG_ST_PICK, TCG_F_OMANYTE_KABUTO, TCG_SRC_MY_DISCARD, 1, 1, "Put which onto your Bench?"});
     }
     *count = 0;
     return sNoSteps;

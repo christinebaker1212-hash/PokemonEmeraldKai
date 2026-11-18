@@ -34,7 +34,10 @@ enum
     TCG_SRC_OPP_BENCH,  /* Gigashock: their Benched Pokemon (each one's top card) */
     TCG_SRC_DEFENDER_ATTACHED, /* Magnetic Lines: the Defending Pokemon's cards (whatever the target) */
     TCG_SRC_MY_FIELD_ATTACHED, /* Burning Fire: every one of your Pokemon's cards, the Active first */
-    TCG_SRC_OPP_HAND           /* Rocket's Sneak Attack: their hand, looked at (min drops to what can be chosen) */
+    TCG_SRC_OPP_HAND,          /* Rocket's Sneak Attack: their hand, looked at (min drops to what can be chosen) */
+    TCG_SRC_HAND_TOP2,         /* Mary: your hand and the 2 cards you'll draw (the top 2 of your deck) */
+    TCG_SRC_BOTTOM4,           /* Underground Expedition: the bottom 4 of your deck */
+    TCG_SRC_TOP2               /* Radio Tower: the top 2 of your deck, only looked at */
 };
 /* Which Pokemon in play (slot steps) or which cards (picks) can be chosen */
 enum
@@ -89,6 +92,10 @@ enum
     TCG_F_UNOWN,                /* an Unown */
     TCG_F_LIGHTNING_ENERGY,     /* a Lightning Energy card */
     TCG_F_OTHER_HOLDER,         /* (slot) occupied, not the one the card picked is attached to */
+    TCG_F_SAME_TYPE_PICK,       /* (slot) of the type of the card picked first (Friend Ball) */
+    TCG_F_LATER_STAGE,          /* an Evolution card of a later Stage of one of yours in play, not a Baby */
+    TCG_F_OMANYTE_KABUTO,       /* an Omanyte or Kabuto card */
+    TCG_F_BASIC_TYPE_PICK,      /* a Basic Pokemon card of the type of the card picked first (Apricorn Forest) */
     /* "with Brock in its name" and the like (+ TCG_OWNER_*): a Pokemon card; one of yours in play (slot); another
      * one of yours than the first chosen (slot: the action's target) */
     TCG_F_OWNER_CARD = 100,
@@ -126,6 +133,8 @@ int TcgFlow_PowerSlotIsTarget(const struct TcgStep *steps, int step);
  * the second action.attack: tcg_powers.c TcgDuel_Power) */
 const struct TcgStep *TcgFlow_TrainerSteps(unsigned id, int *count);
 const struct TcgStep *TcgFlow_PowerSteps(unsigned power, int *count);
+/* What using the Stadium in play asks for (its canon id) */
+const struct TcgStep *TcgFlow_StadiumSteps(unsigned stadium, int *count);
 /* A Pokemon played from the hand whose power asks when it comes into play (Sneak Attack, Power of Darkness: target;
  * Reel In, Summon Minions: selections), after its space; the action gets TCG_PLAY_CHOSEN */
 const struct TcgStep *TcgFlow_PlaySteps(unsigned cardId, int *count);
@@ -144,6 +153,9 @@ int TcgFlow_TrainerHasUse(const struct TcgDuel *g, unsigned me, unsigned id); /*
 int TcgFlow_AttackReady(const struct TcgDuel *g, unsigned me, unsigned attack, char *reason, size_t size);
 int TcgFlow_CanRetreat(const struct TcgDuel *g, unsigned me, char *reason, size_t size);
 int TcgFlow_HasPower(const struct TcgCard *c);
+/* A pick's card filter where it depends on what was picked before (the action so far) */
+int TcgFlow_PickMatches(const struct TcgDuel *g, unsigned me, const struct TcgAction *a, unsigned owner, unsigned physical,
+                        int filter);
 int TcgFlow_HasEnergy(const struct TcgDuel *g, unsigned who, unsigned slot);
 unsigned TcgFlow_EnergyValue(unsigned id); /* Double Colorless: 2 */
 const char *TcgFlow_HandVerb(const struct TcgCard *c); /* ATTACH, EVOLVE, PLAY */
@@ -177,7 +189,8 @@ enum
     TCG_FLOW_DISCARD,  /* index: the Clefairy Doll / Mysterious Fossil in play */
     TCG_FLOW_PASS,     /* END TURN */
     TCG_FLOW_READY,    /* setup done */
-    TCG_FLOW_CONCEDE
+    TCG_FLOW_CONCEDE,
+    TCG_FLOW_STADIUM   /* the Stadium in play used (TCG_USE_STADIUM) */
 };
 /* What it asks now */
 enum

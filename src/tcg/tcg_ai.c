@@ -1189,6 +1189,9 @@ static int Act(const struct TcgDuel *g, struct TcgAction *a)
             return 1;
     if (g->phase == TCG_TURN && PowerAction(g, a))
         return 1;
+    if (g->phase == TCG_TURN && RegionStadiumAi(g, a) && Legal(g, a))
+        return 1;
+    memset(a, 0, sizeof(*a));
     for (attack = 0; attack < TCG_ATTACKS; attack++)
     {
         const struct TcgCard *c = TcgDuel_Attacker(g, g->current);

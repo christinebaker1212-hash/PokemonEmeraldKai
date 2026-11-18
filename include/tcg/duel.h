@@ -51,6 +51,8 @@ struct TcgFieldCard
     /* (an effect script's vuln: damage from attacks to it is vulnBonus more until turn vulnUntil) */
     uint8_t vulnBonus;
     uint16_t vulnUntil;
+    /* freeEvolve: turn + 1 it may evolve whenever (Giovanni: even just played or evolved, even on the first turn) */
+    uint16_t freeEvolve;
 };
 enum
 {
@@ -105,7 +107,8 @@ enum TcgActionType
     TCG_PROMOTE,
     TCG_FINISH_SETUP,
     TCG_CONCEDE,
-    TCG_DISCARD_DOLL /* Clefairy Doll / Mysterious Fossil in slot leaves play (their text) */
+    TCG_DISCARD_DOLL, /* Clefairy Doll / Mysterious Fossil in slot leaves play (their text) */
+    TCG_USE_STADIUM   /* the Stadium in play used (Healing Field, Power Plant...: its steps as a Trainer's) */
 };
 /* Pokemon Powers (src/tcg/tcg_powers.c), by the card's power. */
 enum TcgPowerId
@@ -215,8 +218,12 @@ struct TcgPlayer
      * turn (one a turn; shown beside the Active until the turn ends: supporterCard, its card + 1); stadium: the
      * Stadium this player put in play (its card + 1; one of the two players' at most) */
     uint8_t noSupporters, supporterPlayed, supporterCard, stadium;
-    /* turnBuffs: what a Trainer did for this turn's attack (TCG_BUFF_*) */
-    uint8_t turnBuffs;
+    /* turnBuffs: what a Trainer did for this turn's attack (TCG_BUFF_*); stadiumUsed: the Stadium in play used this
+     * turn (once a turn, TCG_USE_STADIUM) */
+    uint8_t turnBuffs, stadiumUsed;
+    /* benchShieldUntil: no damage from attacks to this player's Benched Pokemon until the end of that turn
+     * (Transparent Walls) */
+    uint16_t benchShieldUntil;
     /* GB2's, as turn numbers: skipDrawTurn, the turn this player doesn't draw (Perplex); poisonMistUntil, Poison
      * Mist's 20 a turn (theirs too) until then; strangeBeamUntil, their damaged Water Pokemon have no Weakness;
      * noTrainersTurn, their turn without Trainers (Spookify). prizesUp: their Prizes face up (Here Comes Team
@@ -333,6 +340,14 @@ unsigned TcgDuel_AttachedRule(const struct TcgDuel *g, unsigned who, unsigned sl
 int TcgDuel_EvolvesFrom(const struct TcgCard *evolution, const struct TcgCard *from);
 /* The Stadium in play (Tcg_Canon of its card; 0 none) and whose it is (*owner) */
 unsigned TcgDuel_Stadium(const struct TcgDuel *g, unsigned *owner);
+/* Why the current player can't use the Stadium in play now (NULL: they can) */
+const char *TcgDuel_StadiumBlock(const struct TcgDuel *g, unsigned who);
+/* TCG_USE_STADIUM: the Stadium in play used (tcg_trainers.c) */
+int TcgDuel_UseStadium(struct TcgDuel *g, const struct TcgAction *a);
+/* May the Pokemon there evolve now (not on its first turn in play nor its owner's first turn; Giovanni) */
+int TcgDuel_CanEvolveNow(const struct TcgDuel *g, unsigned who, unsigned slot);
+/* Is the Evolution card a later Stage of that Pokemon (it, or the Stage 1 between: Pokemon Breeder Fields) */
+int TcgDuel_LaterStage(const struct TcgCard *evolution, const struct TcgCard *from);
 /* TcgPlayer.turnBuffs */
 enum
 {

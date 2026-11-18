@@ -796,6 +796,107 @@ static int RegionTrainer(struct TcgDuel *g, const struct TcgAction *a, unsigned 
         }
         break;
     }
+    case TCG_CARD_NEO1_87: /* Mary: draw 2, then 2 of the hand into the deck (picked from the hand and the 2 drawn) */
+    {
+        uint8_t pool[TCG_DECK_SIZE + 2];
+        unsigned count = 0, want;
+        for (i = 0; i < p->handSize; i++)
+            pool[count++] = p->hand[i];
+        for (i = 0; i < 2 && i < p->deckSize; i++)
+            pool[count++] = p->deck[p->deckSize - 1 - i];
+        want = count < 2 ? count : 2;
+        if (a->selectionCount != want || !RtPicked(p, pool, count, a, 0, want, RtAny))
+            return Fail(g, "Choose 2 cards to shuffle into your deck.");
+        RtDraw(g, me, 2);
+        for (i = 0; i < want; i++)
+            Move(p->hand, &p->handSize, p->deck, &p->deckSize, a->selections[i]);
+        TcgDuel_Shuffle(g, me);
+        break;
+    }
+    case TCG_CARD_NEO1_95: /* New Pokedex: shuffle; the top 5 in the order chosen */
+        n = p->deckSize < 5 ? p->deckSize : 5;
+        if (a->selectionCount != n || !RtPicked(p, p->deck + p->deckSize - n, n, a, 0, n, RtAny))
+            return Fail(g, "Choose the order of the top cards of your deck.");
+        TcgDuel_Shuffle(g, me);
+        for (i = 0; i < n; i++)
+            TcgPile_Remove(p->deck, &p->deckSize, (unsigned)Index(p->deck, p->deckSize, a->selections[i]));
+        for (i = n; i > 0; i--)
+            p->deck[p->deckSize++] = a->selections[i - 1];
+        TcgDuel_Event(g, TCG_EV_DECK_CHANGED, me, 0, 0, 0, 0);
+        break;
+    case TCG_CARD_ECARD2_123: /* Forest Guardian: 1 of the top 7 into your hand, the rest shuffled in */
+    {
+        unsigned top = p->deckSize < 7 ? p->deckSize : 7, want = top ? 1 : 0;
+        if (a->selectionCount != want || !RtPicked(p, p->deck + p->deckSize - top, top, a, 0, want, RtAny))
+            return Fail(g, "Choose 1 of the top 7 cards.");
+        if (want)
+            Move(p->deck, &p->deckSize, p->hand, &p->handSize, a->selections[0]);
+        TcgDuel_Shuffle(g, me);
+        break;
+    }
+    case TCG_CARD_ECARD3_140: /* Underground Expedition: 2 of the bottom 4 into your hand */
+    {
+        unsigned bottom = p->deckSize < 4 ? p->deckSize : 4, want = bottom < 2 ? bottom : 2;
+        if (a->selectionCount != want || !RtPicked(p, p->deck, bottom, a, 0, want, RtAny))
+            return Fail(g, "Choose 2 of the bottom 4 cards.");
+        for (i = 0; i < want; i++)
+            Move(p->deck, &p->deckSize, p->hand, &p->handSize, a->selections[i]);
+        TcgDuel_Event(g, TCG_EV_DECK_CHANGED, me, 0, 0, 0, 0);
+        break;
+    }
+    case TCG_CARD_ECARD3_126: /* Friend Ball: a Pokemon card of the type of one of theirs */
+    {
+        const struct TcgCard *theirs = a->target < TCG_FIELD_SIZE ? TcgDuel_Field(g, me ^ 1, a->target) : NULL;
+        if (!theirs || a->selectionCount > 1 || !RtPicked(p, p->deck, p->deckSize, a, 0, a->selectionCount, RtPokemon))
+            return Fail(g, "Choose a Pokemon card in your deck and one of their Pokemon of its type.");
+        if (a->selectionCount && Tcg_Card(p->cards[a->selections[0]])->type != theirs->type)
+            return Fail(g, "That card isn't the same type as their Pokemon.");
+        if (a->selectionCount)
+        {
+            Move(p->deck, &p->deckSize, p->hand, &p->handSize, a->selections[0]);
+            TcgDuel_Log(g, "Shown: %s.", Tcg_Card(p->cards[a->selections[0]])->name);
+        }
+        TcgDuel_Shuffle(g, me);
+        break;
+    }
+    case TCG_CARD_NEO3_62: /* Pokemon Breeder Fields: a coin for each of 1 or 2 later-Stage cards (each for one of
+                            * yours in play, not a Baby); heads, into your hand */
+    {
+        unsigned used = 0, k;
+        if (a->selectionCount > 2 || !RtPicked(p, p->deck, p->deckSize, a, 0, a->selectionCount, RtEvolution))
+            return TCG_INVALID;
+        for (i = 0; i < a->selectionCount; i++)
+        {
+            const struct TcgCard *e = Tcg_Card(p->cards[a->selections[i]]);
+            for (k = 0; k < TCG_FIELD_SIZE; k++)
+            {
+                const struct TcgCard *t = TcgDuel_Field(g, me, k);
+                if (!(used & (1u << k)) && t && t->kind == TCG_POKEMON && !(t->flags & TCG_CF_BABY) &&
+                    TcgDuel_LaterStage(e, t))
+                    break;
+            }
+            if (k == TCG_FIELD_SIZE)
+                return Fail(g, "Each card must be a later Stage of a different Pokemon of yours.");
+            used |= 1u << k;
+        }
+        for (i = 0; i < a->selectionCount; i++)
+            if (TcgDuel_Coin(g, me))
+            {
+                Move(p->deck, &p->deckSize, p->hand, &p->handSize, a->selections[i]);
+                TcgDuel_Log(g, "Shown: %s.", Tcg_Card(p->cards[a->selections[i]])->name);
+            }
+        TcgDuel_Shuffle(g, me);
+        break;
+    }
+    case TCG_CARD_GYM2_125: /* Transparent Walls: no damage from attacks to your Bench until their next turn ends */
+        p->benchShieldUntil = (uint16_t)(g->turn + 1);
+        TcgDuel_Log(g, "Your Benched Pokemon are protected from damage until the end of their next turn.");
+        break;
+    case TCG_CARD_GYM2_18: /* Giovanni: a Giovanni Pokemon may evolve whenever this turn */
+        if (a->slot >= TCG_FIELD_SIZE || !RtNamed(TcgDuel_Field(g, me, a->slot), "Giovanni"))
+            return Fail(g, "Choose a Pokemon with Giovanni in its name.");
+        p->field[a->slot].freeEvolve = (uint16_t)(g->turn + 1);
+        break;
     /* Stadiums whose rules are elsewhere (TcgDuel_RetreatCost, the damage, evolving...) */
     case TCG_CARD_GYM1_104: /* The Rocket's Training Gym */
     case TCG_CARD_GYM1_108: /* Cerulean City Gym */
@@ -807,10 +908,259 @@ static int RegionTrainer(struct TcgDuel *g, const struct TcgAction *a, unsigned 
     case TCG_CARD_NEO4_92:  /* Broken Ground Gym */
     case TCG_CARD_ECARD2_131: /* Pokemon Park */
     case TCG_CARD_ECARD3_132: /* Mirage Stadium */
+    /* (and the ones used during a turn: RegionStadiumUse) */
+    case TCG_CARD_GYM1_107: case TCG_CARD_GYM2_114: case TCG_CARD_GYM2_122: case TCG_CARD_NEO3_61:
+    case TCG_CARD_NEO4_95: case TCG_CARD_NEO4_99: case TCG_CARD_NEO4_100: case TCG_CARD_ECARD2_118:
+    case TCG_CARD_ECARD2_138: case TCG_CARD_ECARD2_139: case TCG_CARD_ECARD3_119: case TCG_CARD_ECARD3_137:
+    case TCG_CARD_ECARD3_141:
         break;
     default:
         snprintf(g->error, sizeof(g->error), "Trainer effect not yet ported: %s", Tcg_Card(id)->name);
         return TCG_UNSUPPORTED;
     }
+    return TCG_OK;
+}
+
+/* ------------------------------------------------------------------------------------------------ Stadiums used
+ * Stadiums a player uses during their turn (TCG_USE_STADIUM, asking as a Trainer does): once a turn, but Celadon City Gym and
+ * Saffron City Gym as often as they like. The Stadium in play is either player's. */
+static int RtStadiumUnlimited(unsigned stadium)
+{
+    return stadium == TCG_CARD_GYM1_107 || stadium == TCG_CARD_GYM2_122;
+}
+static int RtStadiumUsable(unsigned stadium)
+{
+    switch (stadium)
+    {
+    case TCG_CARD_GYM1_107: case TCG_CARD_GYM2_114: case TCG_CARD_GYM2_122: case TCG_CARD_NEO3_61:
+    case TCG_CARD_NEO4_95: case TCG_CARD_NEO4_99: case TCG_CARD_NEO4_100: case TCG_CARD_ECARD2_118:
+    case TCG_CARD_ECARD2_138: case TCG_CARD_ECARD2_139: case TCG_CARD_ECARD3_119: case TCG_CARD_ECARD3_137:
+    case TCG_CARD_ECARD3_141:
+        return 1;
+    }
+    return 0;
+}
+static int RtOmanyteKabuto(const struct TcgCard *c)
+{
+    return RtPokemon(c) && (!strcmp(c->name, "Omanyte") || !strcmp(c->name, "Kabuto"));
+}
+static const char *RegionStadiumBlock(const struct TcgDuel *g, unsigned who)
+{
+    const struct TcgPlayer *p = &g->players[who];
+    unsigned stadium = TcgDuel_Stadium(g, NULL), s, n = 0;
+    if (!stadium)
+        return "There is no Stadium in play.";
+    if (!RtStadiumUsable(stadium))
+        return "This Stadium works on its own.";
+    if (g->phase != TCG_TURN || g->current != who)
+        return "A Stadium is used during your turn.";
+    if (p->stadiumUsed && !RtStadiumUnlimited(stadium))
+        return "You already used the Stadium this turn.";
+    switch (stadium)
+    {
+    case TCG_CARD_GYM1_107: /* Celadon City Gym */
+        for (s = 0; s < TCG_FIELD_SIZE; s++)
+            n += RtErika(TcgDuel_Field(g, who, s)) && RtCount(p, p->field[s].attached, p->field[s].attachedSize, RtEnergy);
+        return n ? NULL : "No Erika Pokemon of yours has Energy attached.";
+    case TCG_CARD_GYM2_114: /* Fuchsia City Gym */
+    {
+        unsigned others = 0;
+        for (s = 0; s < TCG_FIELD_SIZE; s++)
+        {
+            n += RtNamed(TcgDuel_Field(g, who, s), "Koga");
+            others += p->field[s].stackSize != 0;
+        }
+        return !n ? "You have no Pokemon with Koga in its name." : others < 2 ? "It's your only Pokemon in play." : NULL;
+    }
+    case TCG_CARD_GYM2_122: /* Saffron City Gym */
+        for (s = 0; s < TCG_FIELD_SIZE; s++)
+            if (RtNamed(TcgDuel_Field(g, who, s), "Sabrina"))
+            {
+                unsigned i;
+                for (i = 0; i < p->field[s].attachedSize; i++)
+                    n += RtBasicEnergy(Tcg_Card(p->cards[p->field[s].attached[i]]));
+            }
+        return n ? NULL : "No Sabrina Pokemon of yours has basic Energy attached.";
+    case TCG_CARD_NEO3_61: /* Healing Field */
+        return p->field[0].damage ? NULL : "Your Active Pokemon isn't damaged.";
+    case TCG_CARD_NEO4_95: /* Radio Tower */
+    case TCG_CARD_NEO4_100: /* Lucky Stadium */
+        return p->deckSize ? NULL : "Your deck is empty.";
+    case TCG_CARD_NEO4_99: /* Energy Stadium */
+        return RtCount(p, p->discard, p->discardSize, RtBasicEnergy) ? NULL : "No basic Energy in your discard pile.";
+    case TCG_CARD_ECARD2_118: /* Apricorn Forest */
+        if (RtEmptyBench(p) < 0)
+            return "Your Bench is full.";
+        return RtCount(p, p->hand, p->handSize, RtBasicEnergy) ? NULL : "No basic Energy card in your hand.";
+    case TCG_CARD_ECARD2_138: /* Undersea Ruins */
+        for (s = 0; s < TCG_FIELD_SIZE; s++)
+            n += p->field[s].stackSize >= 2;
+        return n ? NULL : "You have no Evolved Pokemon.";
+    case TCG_CARD_ECARD2_139: /* Power Plant */
+        if (!RtCount(p, p->hand, p->handSize, RtBasicEnergy))
+            return "No basic Energy card in your hand.";
+        return RtCount(p, p->discard, p->discardSize, RtBasicEnergy) ? NULL : "No basic Energy in your discard pile.";
+    case TCG_CARD_ECARD3_119: /* Ancient Ruins */
+        return p->supporterPlayed ? "You played a Supporter this turn." : !p->deckSize ? "Your deck is empty." : NULL;
+    case TCG_CARD_ECARD3_137: /* Mystery Zone */
+        return RtCount(p, p->hand, p->handSize, RtEvolution) ? NULL : "No Evolution card in your hand.";
+    case TCG_CARD_ECARD3_141: /* Underground Lake */
+        if (RtEmptyBench(p) < 0)
+            return "Your Bench is full.";
+        return RtCount(p, p->discard, p->discardSize, RtOmanyteKabuto) ? NULL : "No Omanyte or Kabuto in your discard pile.";
+    }
+    return NULL;
+}
+static int RegionStadiumUse(struct TcgDuel *g, const struct TcgAction *a)
+{
+    unsigned me = g->current, stadium = TcgDuel_Stadium(g, NULL), i;
+    struct TcgPlayer *p = &g->players[me];
+    struct TcgFieldCard *f;
+    const char *blocked = RegionStadiumBlock(g, me);
+    if (blocked)
+        return Fail(g, blocked);
+    switch (stadium)
+    {
+    case TCG_CARD_GYM1_107: /* Celadon City Gym: an Energy off an Erika Pokemon, which is cured */
+        if (a->slot >= TCG_FIELD_SIZE || !RtErika(TcgDuel_Field(g, me, a->slot)) || a->selectionCount != 1 ||
+            Index(p->field[a->slot].attached, p->field[a->slot].attachedSize, a->selections[0]) < 0 ||
+            !RtEnergy(Tcg_Card(p->cards[a->selections[0]])))
+            return Fail(g, "Choose an Erika Pokemon and one of its Energy cards.");
+        f = &p->field[a->slot];
+        Move(f->attached, &f->attachedSize, p->discard, &p->discardSize, a->selections[0]);
+        f->condition = TCG_HEALTHY;
+        f->poison = 0;
+        TcgDuel_Event(g, TCG_EV_STATUS, me, a->slot, f->condition, 0, 0);
+        break;
+    case TCG_CARD_GYM2_114: /* Fuchsia City Gym: heads, a Koga Pokemon and its cards into the deck */
+    {
+        unsigned slot = a->slot, k;
+        if (slot >= TCG_FIELD_SIZE || !RtNamed(TcgDuel_Field(g, me, slot), "Koga"))
+            return Fail(g, "Choose a Pokemon with Koga in its name.");
+        p->stadiumUsed = 1;
+        if (!TcgDuel_Coin(g, me))
+            break;
+        f = &p->field[slot];
+        for (k = 0; k < f->stackSize; k++)
+            p->deck[p->deckSize++] = f->stack[k];
+        for (k = 0; k < f->attachedSize; k++)
+        {
+            p->attachmentExpires[f->attached[k]] = 0;
+            p->deck[p->deckSize++] = f->attached[k];
+        }
+        memset(f, 0, sizeof(*f));
+        TcgDuel_Shuffle(g, me);
+        TcgDuel_Event(g, TCG_EV_DECK_CHANGED, me, 0, 0, 0, 0);
+        if (!slot)
+        {
+            /* (its owner brings out another: the empty Active spot switched with a Benched Pokemon) */
+            g->phase = TCG_PROMOTION;
+            g->promotePlayer = (uint8_t)me;
+            g->switchPending = 1;
+        }
+        break;
+    }
+    case TCG_CARD_GYM2_122: /* Saffron City Gym: a basic Energy off a Sabrina Pokemon into the hand */
+        if (a->slot >= TCG_FIELD_SIZE || !RtNamed(TcgDuel_Field(g, me, a->slot), "Sabrina") || a->selectionCount != 1 ||
+            Index(p->field[a->slot].attached, p->field[a->slot].attachedSize, a->selections[0]) < 0 ||
+            !RtBasicEnergy(Tcg_Card(p->cards[a->selections[0]])))
+            return Fail(g, "Choose a Sabrina Pokemon and one of its basic Energy cards.");
+        f = &p->field[a->slot];
+        Move(f->attached, &f->attachedSize, p->hand, &p->handSize, a->selections[0]);
+        break;
+    case TCG_CARD_NEO3_61: /* Healing Field: heads, 2 counters off the Active */
+        p->stadiumUsed = 1;
+        if (TcgDuel_Coin(g, me))
+            RtHeal(g, me, 0, 20);
+        break;
+    case TCG_CARD_NEO4_95: /* Radio Tower: the top 2 looked at, left as they are */
+        TcgDuel_Event(g, TCG_EV_DECK_CHANGED, me, 0, 0, 0, 0);
+        break;
+    case TCG_CARD_NEO4_99: /* Energy Stadium: heads, a basic Energy from the discard pile into the hand */
+        if (a->selectionCount != 1 || !RtPicked(p, p->discard, p->discardSize, a, 0, 1, RtBasicEnergy))
+            return Fail(g, "Choose a basic Energy card in your discard pile.");
+        p->stadiumUsed = 1;
+        if (TcgDuel_Coin(g, me))
+            Move(p->discard, &p->discardSize, p->hand, &p->handSize, a->selections[0]);
+        break;
+    case TCG_CARD_NEO4_100: /* Lucky Stadium: heads, draw a card */
+        p->stadiumUsed = 1;
+        if (TcgDuel_Coin(g, me))
+            RtDraw(g, me, 1);
+        break;
+    case TCG_CARD_ECARD2_118: /* Apricorn Forest: heads, a Basic of the shown basic Energy's type onto the Bench */
+    {
+        const struct TcgCard *energy;
+        if (!RtPicked(p, p->hand, p->handSize, a, 0, 1, RtBasicEnergy) || a->selectionCount > 2 ||
+            (a->selectionCount == 2 && !RtPicked(p, p->deck, p->deckSize, a, 1, 1, RtBasic)))
+            return Fail(g, "Choose a basic Energy card in your hand and a Basic Pokemon in your deck.");
+        energy = Tcg_Card(p->cards[a->selections[0]]);
+        if (a->selectionCount == 2 && Tcg_Card(p->cards[a->selections[1]])->type != energy->type)
+            return Fail(g, "That Pokemon isn't the same type as the Energy.");
+        p->stadiumUsed = 1;
+        if (!TcgDuel_Coin(g, me))
+            break;
+        TcgDuel_Log(g, "Shown: %s.", energy->name);
+        if (a->selectionCount == 2)
+            RtBench(g, me, p->deck, &p->deckSize, a->selections[1]);
+        TcgDuel_Shuffle(g, me);
+        break;
+    }
+    case TCG_CARD_ECARD2_138: /* Undersea Ruins: heads, an Evolved Pokemon's top card discarded */
+        if (a->slot >= TCG_FIELD_SIZE || p->field[a->slot].stackSize < 2)
+            return Fail(g, "Choose one of your Evolved Pokemon.");
+        p->stadiumUsed = 1;
+        if (!TcgDuel_Coin(g, me))
+            break;
+        f = &p->field[a->slot];
+        p->discard[p->discardSize++] = f->stack[--f->stackSize];
+        Cure(f);
+        TcgDuel_Event(g, TCG_EV_DEVOLVE, me, a->slot, 0, 0, 0);
+        TcgDuel_ResolveKnockouts(g);
+        break;
+    case TCG_CARD_ECARD2_139: /* Power Plant: a basic Energy from the hand discarded, one from the discard pile taken */
+        if (a->selectionCount != 2 || !RtPicked(p, p->hand, p->handSize, a, 0, 1, RtBasicEnergy) ||
+            !RtPicked(p, p->discard, p->discardSize, a, 1, 1, RtBasicEnergy))
+            return Fail(g, "Choose a basic Energy card in your hand and one in your discard pile.");
+        p->stadiumUsed = 1;
+        Move(p->discard, &p->discardSize, p->hand, &p->handSize, a->selections[1]);
+        Move(p->hand, &p->handSize, p->discard, &p->discardSize, a->selections[0]);
+        TcgDuel_Log(g, "Shown: %s.", Tcg_Card(p->cards[a->selections[1]])->name);
+        break;
+    case TCG_CARD_ECARD3_119: /* Ancient Ruins: the hand shown; no Supporter there, draw a card */
+    {
+        unsigned supporters = 0;
+        p->stadiumUsed = 1;
+        for (i = 0; i < p->handSize; i++)
+            supporters += (Tcg_Card(p->cards[p->hand[i]])->flags & TCG_CF_SUPPORTER) != 0;
+        TcgDuel_Log(g, "Player %u shows their hand: %s.", me + 1, supporters ? "a Supporter is there" : "no Supporter");
+        if (!supporters)
+            RtDraw(g, me, 1);
+        break;
+    }
+    case TCG_CARD_ECARD3_137: /* Mystery Zone: a basic Energy from the deck; an Evolution card from the hand into it */
+        if (a->selectionCount < 1 || a->selectionCount > 2 ||
+            !RtPicked(p, p->hand, p->handSize, a, a->selectionCount - 1, 1, RtEvolution) ||
+            (a->selectionCount == 2 && !RtPicked(p, p->deck, p->deckSize, a, 0, 1, RtBasicEnergy)))
+            return Fail(g, "Choose an Evolution card in your hand (and a basic Energy card in your deck).");
+        p->stadiumUsed = 1;
+        if (a->selectionCount == 2)
+        {
+            Move(p->deck, &p->deckSize, p->hand, &p->handSize, a->selections[0]);
+            TcgDuel_Log(g, "Shown: %s.", Tcg_Card(p->cards[a->selections[0]])->name);
+        }
+        Move(p->hand, &p->handSize, p->deck, &p->deckSize, a->selections[a->selectionCount - 1]);
+        TcgDuel_Log(g, "Shown: %s.", Tcg_Card(p->cards[a->selections[a->selectionCount - 1]])->name);
+        TcgDuel_Shuffle(g, me);
+        break;
+    case TCG_CARD_ECARD3_141: /* Underground Lake: an Omanyte or Kabuto from the discard pile onto the Bench */
+        if (a->selectionCount != 1 || !RtPicked(p, p->discard, p->discardSize, a, 0, 1, RtOmanyteKabuto))
+            return Fail(g, "Choose an Omanyte or Kabuto in your discard pile.");
+        p->stadiumUsed = 1;
+        RtBench(g, me, p->discard, &p->discardSize, a->selections[0]);
+        break;
+    }
+    p->stadiumUsed = 1;
+    TcgDuel_Log(g, "Player %u uses %s.", me + 1, Tcg_Card(stadium)->name);
     return TCG_OK;
 }

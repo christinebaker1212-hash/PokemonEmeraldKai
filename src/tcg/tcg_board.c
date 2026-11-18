@@ -173,7 +173,8 @@ enum
     T_OPP_DISCARD,
     T_MY_PRIZES,
     T_OPP_PRIZES,
-    T_OPP_HAND
+    T_OPP_HAND,
+    T_STADIUM /* the Stadium in play, under its plate */
 };
 struct Target
 {
@@ -210,6 +211,7 @@ enum
     MENU_STAGE1,
     MENU_STAGE2,
     MENU_DISCARD,
+    MENU_USE_STADIUM,
     MENU_CHOICE /* + the value (TCG_ST_CHOICE) */
 };
 struct MenuItem
@@ -1427,6 +1429,25 @@ void TcgBoard_Result(const char *message) { snprintf(B.result, sizeof(B.result),
 /* ------------------------------------------------------------------ */
 /* Targets and navigation                                               */
 /* ------------------------------------------------------------------ */
+/* The Stadium's plate (as TableOver draws it); w 0: no Stadium in play */
+static struct Rect StadiumPlate(unsigned *owner)
+{
+    const struct TcgCard *c;
+    char name[32];
+    unsigned i, who = 0;
+    if (!TcgDuel_Stadium(&B.view, &who))
+        return MakeRect(STADIUM_X, STADIUM_Y, 0, 0);
+    if (owner)
+        *owner = who;
+    c = Tcg_Card(CardOf(who, B.view.players[who].stadium - 1u));
+    snprintf(name, sizeof(name), "%s", c ? c->name : "");
+    for (i = 0; name[i]; i++)
+        if (name[i] >= 'a' && name[i] <= 'z')
+            name[i] = (char)(name[i] - 'a' + 'A');
+    while (G_Measure(name, TF_NARROW) > 70 && strlen(name) > 3)
+        name[strlen(name) - 1] = 0;
+    return MakeRect(STADIUM_X, STADIUM_Y, G_Measure(name, TF_NARROW) + 24, 11);
+}
 static int Targets(struct Target *out)
 {
     int n = 0;
@@ -1457,6 +1478,8 @@ static int Targets(struct Target *out)
     ADD(T_MY_PRIZES, 0, PrizeArea(0));
     ADD(T_OPP_PRIZES, 0, PrizeArea(1));
     ADD(T_OPP_HAND, 0, sOppHand);
+    if (StadiumPlate(NULL).w)
+        ADD(T_STADIUM, 0, StadiumPlate(NULL));
 #undef ADD
     return n;
 }
@@ -1546,7 +1569,7 @@ static void Navigate(int dx, int dy)
 /* ------------------------------------------------------------------ */
 static int CardMatches(unsigned owner, unsigned physical, int filter)
 {
-    return TcgFlow_CardMatches(&B.view, owner, physical, filter);
+    return TcgFlow_PickMatches(&B.view, 0, &B.action, owner, physical, filter);
 }
 static int SlotMatches(unsigned who, unsigned slot, int filter)
 {
@@ -1797,6 +1820,23 @@ static void OpenPick(int source, int filter, int min, int max, const char *title
         pile = sorted;
         break;
     }
+    case TCG_SRC_HAND_TOP2: /* (Mary: the hand and the 2 cards drawn first) */
+        for (i = 0; i < p->handSize; i++)
+            if (!(B.flow == FLOW_TRAINER && (int)i == B.action.hand))
+                sorted[count++] = p->hand[i];
+        for (i = 0; i < 2 && i < p->deckSize; i++)
+            sorted[count++] = p->deck[p->deckSize - 1 - i];
+        pile = sorted;
+        break;
+    case TCG_SRC_BOTTOM4: /* (Underground Expedition) */
+        pile = p->deck;
+        count = p->deckSize < 4 ? p->deckSize : 4;
+        break;
+    case TCG_SRC_TOP2: /* (Radio Tower: only looked at) */
+        for (i = 0; i < 2 && i < p->deckSize; i++)
+            sorted[count++] = p->deck[p->deckSize - 1 - i];
+        pile = sorted;
+        break;
     }
     memset(B.pickSel, 0, sizeof(B.pickSel));
     for (i = 0; i < count; i++)
@@ -2115,6 +2155,21 @@ static void OpenFieldMenu(void)
     AddMenu("CHECK", MENU_CHECK, 1, NULL);
     Menu(r.x + r.w + 4 > 170 ? r.x - 74 : r.x + r.w + 4, r.y > 100 ? 92 : r.y);
 }
+/* The Stadium in play: USE (the ones a player uses during their turn), CHECK */
+static void OpenStadiumMenu(void)
+{
+    struct Rect r = StadiumPlate(NULL);
+    unsigned stadium = TcgDuel_Stadium(&B.view, NULL);
+    const char *why;
+    B.menuCount = 0;
+    if (!stadium)
+        return;
+    why = !CanAct() ? (MyTurn() ? "Wait a moment." : "It isn't your turn.") : TcgDuel_StadiumBlock(&B.view, 0);
+    if (!why || strcmp(why, "This Stadium works on its own."))
+        AddMenu("USE", MENU_USE_STADIUM, !why, why);
+    AddMenu("CHECK", MENU_CHECK, 1, NULL);
+    Menu(r.x + r.w + 4 > 170 ? r.x - 74 : r.x + r.w + 4, r.y);
+}
 /* The turn menu (B, START or SELECT on the table, as on the Yu-Gi-Oh! table): END TURN (READY while setting up), at
  * the bottom right. Everything else is done on the cards themselves; CONCEDE is A on your own deck. */
 static void OpenTurnMenu(void)
@@ -2237,6 +2292,11 @@ static void Choose(struct TcgAction *out, int *result, unsigned *card)
         B.mode = M_FREE;
         if (B.focusKind == T_HAND)
             *card = p->cards[p->hand[B.focusIndex]];
+        else if (B.focusKind == T_STADIUM)
+        {
+            unsigned owner = 0;
+            *card = TcgDuel_Stadium(&B.view, &owner) ? CardOf(owner, B.view.players[owner].stadium - 1u) : 0;
+        }
         else
         {
             const struct TcgCard *c = Field(B.focusKind == T_THEIRS, B.focusIndex);
@@ -2289,6 +2349,20 @@ static void Choose(struct TcgAction *out, int *result, unsigned *card)
         break;
     case MENU_POWER:
         BeginPower((unsigned)B.focusIndex, out, result);
+        break;
+    case MENU_USE_STADIUM:
+        memset(&B.action, 0, sizeof(B.action));
+        B.action.type = TCG_USE_STADIUM;
+        B.action.hand = 0xFF;
+        B.flow = FLOW_TRAINER;
+        B.flowCard = 0;
+        B.heldHand = -1;
+        B.mode = M_FREE;
+        B.steps = TcgFlow_StadiumSteps(TcgDuel_Stadium(&B.view, NULL), &B.nsteps);
+        B.step = 0;
+        if (B.nsteps && B.steps[0].kind == TCG_ST_MY_SLOT)
+            B.focusKind = T_MINE, B.focusIndex = 0;
+        ContinueTrainer(out, result);
         break;
     case MENU_DISCARD:
         memset(&B.action, 0, sizeof(B.action));
@@ -2898,6 +2972,9 @@ int TcgBoard_Step(unsigned pressed, unsigned held, struct TcgAction *out, unsign
         case T_MY_DECK:
             OpenDeckMenu();
             break;
+        case T_STADIUM:
+            OpenStadiumMenu();
+            break;
         case T_OPP_HAND:
             if (Clairvoyant() && B.view.players[1].handSize)
             {
@@ -3431,6 +3508,16 @@ static void Tooltip(void)
         snprintf(line, sizeof(line), "THEIR HAND: %u cards%s", B.view.players[1].handSize,
                  Clairvoyant() && B.view.players[1].handSize ? "  {A} LOOK" : "");
         break;
+    case T_STADIUM:
+    {
+        unsigned owner = 0;
+        const struct TcgCard *c = TcgDuel_Stadium(&B.view, &owner)
+                                      ? Tcg_Card(CardOf(owner, B.view.players[owner].stadium - 1u)) : NULL;
+        if (c)
+            snprintf(line, sizeof(line), "STADIUM: %s  {A} %s", c->name,
+                     TcgDuel_StadiumBlock(&B.view, 0) ? "CHECK" : "USE");
+        break;
+    }
     default:
         return;
     }

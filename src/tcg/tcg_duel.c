@@ -449,6 +449,31 @@ static void ToolsBetweenTurns(struct TcgDuel *g, int start)
         }
 }
 
+int TcgDuel_CanEvolveNow(const struct TcgDuel *g, unsigned who, unsigned slot)
+{
+    const struct TcgPlayer *p = &g->players[who];
+    const struct TcgFieldCard *f = &p->field[slot];
+    return f->stackSize && ((p->turnsTaken >= 2 && f->enteredTurn != g->turn) || f->freeEvolve == g->turn + 1u);
+}
+int TcgDuel_LaterStage(const struct TcgCard *evolution, const struct TcgCard *from)
+{
+    unsigned i;
+    if (!evolution || !from || evolution->kind != TCG_POKEMON || !evolution->stage)
+        return 0;
+    if (TcgDuel_EvolvesFrom(evolution, from))
+        return 1;
+    if (evolution->stage != 2)
+        return 0;
+    for (i = 1; i <= TCG_CARD_COUNT; i++)
+    {
+        const struct TcgCard *mid = Tcg_CardAny(i);
+        if (mid && mid->kind == TCG_POKEMON && mid->stage == 1 && !strcmp(mid->name, evolution->evolvesFrom) &&
+            TcgDuel_EvolvesFrom(mid, from))
+            return 1;
+    }
+    return 0;
+}
+
 unsigned TcgDuel_Stadium(const struct TcgDuel *g, unsigned *owner)
 {
     unsigned who;
@@ -541,7 +566,7 @@ static void EndTurn(struct TcgDuel *g)
         p->field[s].fossilBoost = 0;
     }
     p->noTrainers = p->noSupporters = 0;
-    p->turnBuffs = 0;
+    p->turnBuffs = p->stadiumUsed = 0;
     /* (the turn's Supporter goes to the discard pile as the turn ends) */
     if (p->supporterCard)
     {
@@ -1096,6 +1121,13 @@ static int Apply(struct TcgDuel *g, const struct TcgAction *a)
         }
         return result;
     }
+    if (a->type == TCG_USE_STADIUM)
+    {
+        int result = TcgDuel_UseStadium(g, a);
+        if (result == TCG_OK)
+            TcgPower_Sanitize(g);
+        return result;
+    }
     if (a->type == TCG_DISCARD_DOLL)
     {
         /* Clefairy Doll / Mysterious Fossil: "At any time during your turn before your attack,
@@ -1162,7 +1194,7 @@ static int Apply(struct TcgDuel *g, const struct TcgAction *a)
         if (c->kind != TCG_POKEMON || !f->stackSize || f->stackSize == 4 ||
             !TcgDuel_EvolvesFrom(c, TcgDuel_Field(g, g->current, s)))
             return Error(g, "This Pokemon does not evolve from that card.");
-        if (p->turnsTaken < 2 || f->enteredTurn == g->turn)
+        if (!TcgDuel_CanEvolveNow(g, g->current, s))
             return Error(g, "A Pokemon cannot evolve on its first turn in play.");
         if (TcgPower_InPlay(g, 2, TCG_POWER_PREHISTORIC))
             return Error(g, "Aerodactyl's Prehistoric Power: no Evolution cards can be played.");

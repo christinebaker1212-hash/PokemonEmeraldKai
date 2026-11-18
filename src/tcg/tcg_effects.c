@@ -330,6 +330,9 @@ void TcgDuel_EffectDamage(struct TcgDuel *g, unsigned player, unsigned slot, int
     unsigned i;
     if (!f->stackSize || amount <= 0)
         return;
+    /* (Transparent Walls: none to the Bench from attacks) */
+    if (slot && p->benchShieldUntil && g->turn <= p->benchShieldUntil)
+        return;
     /* (the Defending Pokemon's protection was settled as the attack began; Mew's
      * Neutralizing Shield and Haunter's Transparency cover the Bench too) */
     if (!slot && player != g->current)

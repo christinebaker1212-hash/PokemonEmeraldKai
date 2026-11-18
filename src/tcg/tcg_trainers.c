@@ -765,3 +765,6 @@ int TcgDuel_Trainer(struct TcgDuel *g, const struct TcgAction *a)
     TcgDuel_Log(g, "Player %u plays %s.", g->current + 1, Tcg_Card(id)->name);
     return TCG_OK;
 }
+
+const char *TcgDuel_StadiumBlock(const struct TcgDuel *g, unsigned who) { return RegionStadiumBlock(g, who); }
+int TcgDuel_UseStadium(struct TcgDuel *g, const struct TcgAction *a) { return RegionStadiumUse(g, a); }

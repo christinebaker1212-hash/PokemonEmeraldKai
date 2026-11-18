@@ -526,7 +526,7 @@ static int ParseAction(const char *json, struct TcgAction *a)
                 p++;
         }
     }
-    return a->type <= TCG_DISCARD_DOLL;
+    return a->type <= TCG_USE_STADIUM;
 }
 
 // Applies an action (actionJson) for whoever is to move: {"ok":1} or {"ok":0,"error":...}
