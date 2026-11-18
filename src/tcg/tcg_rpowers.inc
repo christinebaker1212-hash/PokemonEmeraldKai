@@ -55,7 +55,7 @@ static const char *RegionBlock(const struct TcgDuel *g, unsigned player, unsigne
         return "It works only while it's on your Bench.";
     {
         /* (the e-Card sets' words: "can't be used if it is affected by a Special Condition": Poisoned and Burned too) */
-        const struct TcgCard *c = TcgDuel_Field(g, player, slot);
+        const struct TcgCard *c = TcgDuel_PowerCard(g, player, slot);
         const struct TcgFieldCard *f = &p->field[slot];
         const char *have;
         if (c && c->attacks[0].description && strstr(c->attacks[0].description, "affected by a Special Condition") &&
@@ -82,6 +82,20 @@ static const char *RegionBlock(const struct TcgDuel *g, unsigned player, unsigne
     }
     switch (power)
     {
+    case TCG_POWER_R_SHAPESHIFT:
+    {
+        /* (Brock's Ninetales: an Evolution card in the hand to take the shape of, or a shape to give up) */
+        unsigned k;
+        const struct TcgCard *e;
+        if (p->field[slot].shape)
+            break;
+        for (k = 0; k < p->handSize; k++)
+            if ((e = Tcg_Card(p->cards[p->hand[k]])) != NULL && e->kind == TCG_POKEMON && e->stage)
+                break;
+        if (k == p->handSize)
+            return "You have no Evolution card in your hand.";
+        break;
+    }
     case TCG_POWER_R_EVOLUTION_HELPER:
     {
         unsigned k;

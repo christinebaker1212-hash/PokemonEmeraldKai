@@ -821,6 +821,15 @@ int TcgFlow_SlotMatches(const struct TcgDuel *g, unsigned me, const struct TcgAc
         /* (while setting up, the Active spot first: a Basic on the Bench with nothing Active could leave no way on) */
         if (g->phase == TCG_SETUP)
             return !c && (!slot || p->field[0].stackSize);
+        if (!c && slot && TcgDuel_Stadium(g, NULL) == TCG_CARD_GYM1_124)
+        {
+            /* (Narrow Gym: no fifth on the Bench) */
+            unsigned b, n = 0;
+            for (b = 1; b < TCG_FIELD_SIZE; b++)
+                n += p->field[b].stackSize != 0;
+            if (n >= 4)
+                return 0;
+        }
         /* (or its Baby, to evolve: Pikachu on Pichu) */
         if (c && Tcg_Card(flowCard) && !Tcg_Card(flowCard)->stage)
             return (c->flags & TCG_CF_BABY) && TcgDuel_EvolvesFrom(Tcg_Card(flowCard), c) && f->stackSize < 4 &&

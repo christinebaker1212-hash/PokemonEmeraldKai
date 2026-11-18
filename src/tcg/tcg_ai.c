@@ -1115,7 +1115,9 @@ static int Act(const struct TcgDuel *g, struct TcgAction *a)
                 a->type = TCG_PLAY_BASIC;
                 a->hand = i;
                 a->slot = s;
-                return 1;
+                if (g->phase == TCG_SETUP || Legal(g, a))   /* (Narrow Gym: no fifth on the Bench) */
+                    return 1;
+                break;
             }
     }
     if (g->phase == TCG_SETUP)

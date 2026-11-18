@@ -89,7 +89,9 @@ uint8_t TcgPile_Remove(uint8_t *pile, uint8_t *count, unsigned index)
     return card;
 }
 /* (Lt. Surge's Secret Plan: what a face-down card plays as, a Basic Pokemon with nothing; id 0 draws as a card back) */
+#define FACE_DOWN_NONE {.name = "", .description = "", .effect = "", .animation = ""}
 static const struct TcgCard sFaceDown = {.name = "Face-down card", .evolvesFrom = "", .description = "", .effect = "",
+                                         .attacks = {FACE_DOWN_NONE, FACE_DOWN_NONE, FACE_DOWN_NONE},
                                          .kind = TCG_POKEMON, .type = TCG_COLORLESS, .hp = 250, .weakness = 255,
                                          .resistance = 255, .set2 = 255};
 const struct TcgCard *TcgDuel_Field(const struct TcgDuel *g, unsigned player, unsigned slot)
