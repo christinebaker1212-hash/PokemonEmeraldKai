@@ -623,6 +623,7 @@ static int RegionTrainer(struct TcgDuel *g, const struct TcgAction *a, unsigned 
     case TCG_CARD_ECARD2_125: /* Healing Berry */
     case TCG_CARD_ECARD3_122: /* Crystal Shard */
     case TCG_CARD_ECARD2_128: /* Memory Berry (its attacks: tcg_duel.c Borrowed) */
+    case TCG_CARD_ECARD3_139: /* Star Piece (between turns: tcg_duel.c EndTurn) */
         break;
     case TCG_CARD_NEO1_100: /* Double Gust: theirs you chose comes in; then they choose which of yours does */
         if (a->target >= 1 && a->target < TCG_FIELD_SIZE && op->field[a->target].stackSize && !TcgDuel_Anchored(g, me ^ 1))
@@ -635,6 +636,21 @@ static int RegionTrainer(struct TcgDuel *g, const struct TcgAction *a, unsigned 
         }
         TcgDuel_AskChoice(g, me ^ 1, TCG_CHOICE_SWITCH_THEIRS, TCG_CARD_NEO1_100, 0);
         break;
+    case TCG_CARD_GYM1_97:  /* Blaine's Quiz #1 / #3: a Pokemon card picked in the hand, their guess at its length / name
+                             * among 4 (tcg_choice.inc) */
+    case TCG_CARD_GYM2_112:
+    {
+        unsigned k;
+        const struct TcgCard *c = NULL;
+        for (k = 0; a->selectionCount && k < p->handSize; k++)
+            if (p->hand[k] == a->selections[0] && k != a->hand)
+                c = Tcg_Card(p->cards[p->hand[k]]);
+        if (!c || c->kind != TCG_POKEMON)
+            return Fail(g, "Choose a Pokemon card from your hand.");
+        g->choiceData = a->selections[0];
+        TcgDuel_AskChoice(g, me ^ 1, id == TCG_CARD_GYM1_97 ? TCG_CHOICE_QUIZ1 : TCG_CHOICE_QUIZ3, id, 0);
+        break;
+    }
     case TCG_CARD_GYM2_111: /* Blaine's Quiz #2 / Pokemon Personality Test: the card picked, their guess */
     case TCG_CARD_NEO4_102:
     {

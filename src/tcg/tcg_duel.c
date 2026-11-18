@@ -794,10 +794,93 @@ static int DarkPokemon(const struct TcgCard *c)
 {
     return c->type == TCG_DARKNESS || c->dark || strstr(c->name, "Dark") != NULL;
 }
+#include "tcg_heights.inc"
+unsigned TcgDuel_TopCount(const struct TcgDuel *g, unsigned deckSize)
+{
+    unsigned n = g->phase == TCG_CHOICE && g->choiceKind == TCG_CHOICE_ORDER_THEIRS ? g->choiceData : 3u;
+    return deckSize < n ? deckSize : n;
+}
+unsigned TcgDuel_QuizOptions(const struct TcgDuel *g, uint16_t out[4])
+{
+    /* (the quiz's player is the one not answering) */
+    unsigned owner = g->choicePlayer ^ 1, k = 0, tries, truth, id;
+    const struct TcgCard *c = Tcg_Card(g->players[owner].cards[g->choiceData]);
+    uint32_t seed = (uint32_t)(c ? c->id : 0) * 2654435761u + g->turn * 40503u + 7u;
+    if (!c)
+        return 0;
+    truth = seed % 4;
+    if (g->choiceKind == TCG_CHOICE_QUIZ1)
+    {
+        unsigned h = c->species < TCG_HEIGHT_SPECIES ? TCG_HEIGHTS[c->species] : 0;
+        out[truth] = (uint16_t)(h ? h : 1);
+        for (tries = 0; k < 4 && tries < 400; tries++)
+        {
+            unsigned other, j, same = 0;
+            seed = seed * 1103515245u + 12345u;
+            other = TCG_HEIGHTS[1 + (seed >> 8) % (TCG_HEIGHT_SPECIES - 1)];
+            if (k == truth)
+                k++;
+            for (j = 0; j < 4; j++)
+                same |= (j < k || j == truth) && out[j] == other;
+            if (!other || same || k >= 4)
+                continue;
+            out[k++] = (uint16_t)other;
+        }
+        return truth;
+    }
+    out[truth] = c->id;
+    for (tries = 0; k < 4 && tries < 4000; tries++)
+    {
+        const struct TcgCard *o;
+        unsigned j, same = 0;
+        seed = seed * 1103515245u + 12345u;
+        id = 1 + (seed >> 8) % TCG_CARD_COUNT;
+        o = Tcg_Card(id);
+        if (k == truth)
+            k++;
+        if (k >= 4)
+            break;
+        if (!o || o->kind != TCG_POKEMON || o->type != c->type)
+            continue;
+        for (j = 0; j < 4; j++)
+            same |= (j < k || j == truth) && !strcmp(Tcg_Card(out[j])->name, o->name);
+        if (!same)
+            out[k++] = (uint16_t)id;
+    }
+    while (k < 4)
+    {
+        if (k != truth)
+            out[k] = c->id;
+        k++;
+    }
+    return truth;
+}
 static void EndTurn(struct TcgDuel *g)
 {
     unsigned who, s;
     struct TcgPlayer *p = &g->players[g->current];
+    if (g->phase == TCG_TURN)
+    {
+        /* Star Piece (between turns): on a Benched Pokemon with 2 or more damage counters, an evolution of it from the
+         * deck, its player's pick (tcg_choice.inc); the Star Piece discarded */
+        unsigned w, s2;
+        for (w = 0; w < 2; w++)
+            for (s2 = 1; s2 < TCG_FIELD_SIZE; s2++)
+            {
+                unsigned piece;
+                if (g->players[w].field[s2].damage < 20 || !TcgDuel_Tool(g, w, s2, &piece) ||
+                    Tcg_Canon(g->players[w].cards[piece]) != TCG_CARD_ECARD3_139)
+                    continue;
+                TcgDuel_DiscardAttached(g, w, s2, piece);
+                g->choiceData = (uint8_t)s2;
+                TcgDuel_AskChoice(g, w, TCG_CHOICE_STAR_PIECE, TCG_CARD_ECARD3_139, 1);
+                if (g->phase == TCG_CHOICE)
+                {
+                    g->choiceEndTurn = 1;
+                    return;
+                }
+            }
+    }
     if (g->phase == TCG_TURN && p->handSize > 7 && TcgDuel_Stadium(g, NULL) == TCG_CARD_NP_28)
     {
         /* Championship Arena: down to 7 in the hand first, the player's pick; then the turn ends (TcgDuel_Apply) */

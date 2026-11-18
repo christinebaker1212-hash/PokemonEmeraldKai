@@ -750,6 +750,22 @@ static void RegionOnPlay(struct TcgDuel *g, unsigned player, unsigned slot, unsi
             }
         TcgDuel_Shuffle(g, player);
         break;
+    case TCG_POWER_R_MANIPULATE:
+    case TCG_POWER_R_STREAMING_MANTLE:
+        /* (evolving the Active from the hand) Gengar's / Magcargo's choices (tcg_choice.inc) */
+        if (!g->fromHand || slot)
+            return;
+        Announce(g, player, slot, power);
+        TcgDuel_AskChoice(g, player, power == TCG_POWER_R_MANIPULATE ? TCG_CHOICE_MANIPULATE : TCG_CHOICE_MANTLE_YES,
+                          TcgDuel_Field(g, player, slot)->id, 1);
+        break;
+    case TCG_POWER_R_HOWL:
+        /* (played from the hand) YES: the top 5 discarded, their Fire Energy onto Fire Pokemon; the turn ends */
+        if (!g->fromHand)
+            return;
+        Announce(g, player, slot, power);
+        TcgDuel_AskChoice(g, player, TCG_CHOICE_HOWL_YES, TcgDuel_Field(g, player, slot)->id, 1);
+        break;
     case TCG_POWER_R_GIFT:
         /* (played from the hand) their choice of a Pokemon Tool, then yours */
         if (!g->fromHand)

@@ -1732,8 +1732,7 @@ static void ContinueTrainer(struct TcgAction *out, int *result)
             n = 1;
         if (st->source == TCG_SRC_TOP3_MINE || st->source == TCG_SRC_TOP3_THEIRS)
         {
-            n = B.view.players[st->source == TCG_SRC_TOP3_THEIRS].deckSize;
-            n = n < 3 ? n : 3;
+            n = (int)TcgDuel_TopCount(&B.view, B.view.players[st->source == TCG_SRC_TOP3_THEIRS].deckSize);
         }
         OpenPick(st->source, st->filter, all ? n : st->min, n, st->prompt);
         return;

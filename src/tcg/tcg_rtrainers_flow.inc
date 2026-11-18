@@ -91,6 +91,10 @@ static const struct TcgStep *RegionTrainerSteps(unsigned id, int *count)
         STEPS({TCG_ST_OPP_SLOT, TCG_F_BENCH, 0, 1, 0, "Bring out which of their Benched Pokemon?"});
     case TCG_CARD_GYM2_111:
         STEPS({TCG_ST_PICK, TCG_F_ANY, TCG_SRC_HAND, 1, 1, "Which card do they guess at?"});
+    case TCG_CARD_GYM1_97:
+        STEPS({TCG_ST_PICK, TCG_F_POKEMON_CARD, TCG_SRC_HAND, 1, 1, "Which Pokemon do they guess the length of?"});
+    case TCG_CARD_GYM2_112:
+        STEPS({TCG_ST_PICK, TCG_F_POKEMON_CARD, TCG_SRC_HAND, 1, 1, "Which Pokemon card do they guess the name of?"});
     case TCG_CARD_NEO2_72:
         STEPS({TCG_ST_PICK, TCG_F_FOSSIL_KID, TCG_SRC_DECK, 0, 1, "If heads: which card from your deck onto your Bench?"},
               {TCG_ST_PICK, TCG_F_FOSSIL_KID, TCG_SRC_HAND, 0, 1, "(Or which from your hand? None: B)"});
@@ -168,6 +172,13 @@ static int RegionTrainerPlayable(const struct TcgDuel *g, unsigned me, const str
     case TCG_CARD_NEO2_72:
         if (!bench)
             return snprintf(reason, size, "Your Bench is full."), 0;
+        break;
+    case TCG_CARD_GYM1_97:
+    case TCG_CARD_GYM2_112:
+        for (i = 0; i < p->handSize && Tcg_Card(p->cards[p->hand[i]])->kind != TCG_POKEMON; i++)
+            ;
+        if (i == p->handSize)
+            return snprintf(reason, size, "You have no Pokemon card in your hand."), 0;
         break;
     case TCG_CARD_GYM2_108:
         if (!p->prizeSize)
@@ -375,6 +386,26 @@ const struct TcgStep *TcgFlow_ChoiceSteps(const struct TcgDuel *g, int *count)
     case TCG_CHOICE_ATTACH_LIGHTNING:
         STEPS({TCG_ST_MY_SLOT, TCG_F_LIGHTNING_POKEMON, 0, 0, 0, "Attach a Lightning Energy to which? (or none: then B)"},
               {TCG_ST_PICK, TCG_F_LIGHTNING_ENERGY, TCG_SRC_DECK, 0, 1, "Which Lightning Energy from your deck?"});
+    case TCG_CHOICE_MANIPULATE:
+        STEPS({TCG_ST_PICK, TCG_F_BASIC_NOT_BABY, TCG_SRC_MY_DISCARD, 0, 1, "Manipulate: put which onto your Bench? (none: B)"});
+    case TCG_CHOICE_MANIPULATE_ENERGY:
+        STEPS({TCG_ST_PICK, TCG_F_BASIC_ENERGY, TCG_SRC_MY_DISCARD, 1, 1, "Attach which basic Energy to it?"});
+    case TCG_CHOICE_MANTLE_YES:
+        STEPS({TCG_ST_CHOICE, 0, 0, 0, 0, "Streaming Mantle: discard your top 3 cards?"});
+    case TCG_CHOICE_MANTLE_PICK:
+        STEPS({TCG_ST_PICK, TCG_F_BASIC_ENERGY, TCG_SRC_MY_DISCARD, 1, 3, "Shuffle which 3 basic Energy into your deck?"});
+    case TCG_CHOICE_HOWL_YES:
+        STEPS({TCG_ST_CHOICE, 0, 0, 0, 0, "Howl: discard your top 5 cards? (Your turn ends.)"});
+    case TCG_CHOICE_HOWL_ATTACH:
+        STEPS({TCG_ST_MY_SLOT, TCG_F_FIRE_POKEMON, 0, 0, 0, "Attach a Fire Energy to which Fire Pokemon?"});
+    case TCG_CHOICE_ORDER_THEIRS:
+        STEPS({TCG_ST_PICK, TCG_F_ANY, TCG_SRC_TOP3_THEIRS, 0, 3, "Put their top cards in order: the first on top."});
+    case TCG_CHOICE_STAR_PIECE:
+        STEPS({TCG_ST_PICK, TCG_F_EVOLVES_FROM_DATA, TCG_SRC_DECK, 0, 1, "Star Piece: evolve it into which card?"});
+    case TCG_CHOICE_QUIZ1:
+        STEPS({TCG_ST_CHOICE, 0, 0, 0, 0, "Blaine's Quiz #1: how long is the Pokemon named?"});
+    case TCG_CHOICE_QUIZ3:
+        STEPS({TCG_ST_CHOICE, 0, 0, 0, 0, "Blaine's Quiz #3: which card has the attack named?"});
     case TCG_CHOICE_CHAOS_FROM_SIDE:
         STEPS({TCG_ST_CHOICE, 0, 0, 0, 0, "Chaos Move: a damage counter off whose Pokemon?"});
     case TCG_CHOICE_CHAOS_FROM_MINE:

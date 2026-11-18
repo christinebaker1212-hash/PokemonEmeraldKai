@@ -37,7 +37,7 @@ ecard2-137 ecard2-141 ecard3-120 ecard3-121 ecard3-122 ecard3-123 ecard3-124 eca
 ecard3-138 np-26 np-27 np-36
 neo1-87 neo1-95 ecard2-123 ecard3-140 ecard3-126 neo3-62 gym2-125 gym2-18
 gym1-107 gym2-114 gym2-122 neo3-61 neo4-95 neo4-99 neo4-100 ecard2-118 ecard2-138 ecard2-139 ecard3-119 ecard3-137
-ecard3-141 neo3-63 gym1-116 ecard2-128 gym2-119 neo1-90 neo1-100 gym2-111 neo4-102 gym1-112 neo2-72 neo1-92 neo4-94 np-28 gym2-108 gym1-119 gym1-103'''.split()
+ecard3-141 neo3-63 gym1-116 ecard2-128 gym2-119 neo1-90 neo1-100 gym2-111 neo4-102 gym1-112 neo2-72 neo1-92 neo4-94 np-28 gym2-108 gym1-119 gym1-103 gym1-97 gym2-112 ecard3-139'''.split()
 
 
 # Trainers printed again in other words with the same rules: the printing -> the one whose handler plays it

@@ -1412,6 +1412,100 @@ static int EvenMoreRules(void)
     printf("PASS even more rules: Chaos Move, Magnetic Flow, Invigorate, Misty's Wish, Mind Games, Tickling Machine, Fairy Power\n");
     return 0;
 }
+/* Blaine's Quiz #1 / #3, Shuffle Attack, Howl, Manipulate */
+static int QuizzesAndPlays(void)
+{
+    struct TcgDuel g;
+    struct TcgAction a;
+    unsigned k, n, q;
+    int c;
+    uint16_t opts[4];
+    if (!Tcg_Card(TCG_CARD_GYM1_97) || !Tcg_Card(TCG_CARD_GYM2_112) || !Tcg_Card(TCG_CARD_ECARD2_34) ||
+        !Tcg_Card(TCG_CARD_NEO3_6) || !Tcg_Card(TCG_CARD_ECARD3_10))
+        return printf("FAIL quizzes and plays: a card isn't finished\n"), 1;
+    /* the Quizzes: a right guess draws the guesser 2 / 3 */
+    for (q = 0; q < 2; q++)
+    {
+        Stage(&g, TCG_CARD_MACHOP, 0, 1);
+        c = Take(&g, 0, TCG_CARD_MACHOP);
+        g.players[0].hand[g.players[0].handSize++] = (uint8_t)c;
+        k = Relabel(&g, 0, q ? TCG_CARD_GYM2_112 : TCG_CARD_GYM1_97);
+        g.players[0].hand[g.players[0].handSize++] = (uint8_t)k;
+        memset(&a, 0, sizeof(a));
+        a.type = TCG_PLAY_TRAINER;
+        a.hand = (uint8_t)(g.players[0].handSize - 1);
+        a.selections[0] = (uint8_t)c;
+        a.selectionCount = 1;
+        if (TcgDuel_Apply(&g, &a) != TCG_OK || g.choicePlayer != 1 ||
+            g.choiceKind != (q ? TCG_CHOICE_QUIZ3 : TCG_CHOICE_QUIZ1))
+            return printf("FAIL Blaine's Quiz #%u: %s\n", q ? 3 : 1, g.error), 1;
+        n = g.players[1].handSize;
+        Choose(&g, TcgDuel_QuizOptions(&g, opts), -1);
+        if (g.players[1].handSize != n + (q ? 3 : 2) || g.phase == TCG_CHOICE)
+            return printf("FAIL Blaine's Quiz #%u's right guess\n", q ? 3 : 1), 1;
+    }
+    /* Shuffle Attack: their top cards (3 Energy on the Defending Machop) in the order picked */
+    Stage(&g, TCG_CARD_ECARD2_34, 1, 1);
+    memset(&a, 0, sizeof(a));
+    a.type = TCG_ATTACK;
+    a.attack = 1;
+    if (TcgDuel_Apply(&g, &a) != TCG_OK || g.choiceKind != TCG_CHOICE_ORDER_THEIRS || g.choiceData != 3)
+        return printf("FAIL Shuffle Attack: %s (%u)\n", g.error, g.choiceData), 1;
+    {
+        struct TcgPlayer *d = &g.players[1];
+        uint8_t was[3] = {d->deck[d->deckSize - 1], d->deck[d->deckSize - 2], d->deck[d->deckSize - 3]};
+        memset(&a, 0, sizeof(a));
+        a.type = TCG_CHOOSE;
+        a.selections[0] = was[2], a.selections[1] = was[1], a.selections[2] = was[0];
+        a.selectionCount = 3;
+        if (TcgDuel_Apply(&g, &a) != TCG_OK || d->deck[d->deckSize - 1] != was[2] || d->deck[d->deckSize - 3] != was[0])
+            return printf("FAIL Shuffle Attack's order: %s\n", g.error), 1;
+    }
+    /* Howl: YES discards the top 5 and ends the turn */
+    Stage(&g, TCG_CARD_MACHOP, 0, 1);
+    c = Relabel(&g, 0, TCG_CARD_NEO3_6);
+    g.players[0].hand[g.players[0].handSize++] = (uint8_t)c;
+    n = g.players[0].deckSize;
+    memset(&a, 0, sizeof(a));
+    a.type = TCG_PLAY_BASIC;
+    a.hand = (uint8_t)(g.players[0].handSize - 1);
+    a.slot = 3;
+    if (TcgDuel_Apply(&g, &a) != TCG_OK || g.choiceKind != TCG_CHOICE_HOWL_YES)
+        return printf("FAIL Howl: %s\n", g.error), 1;
+    Choose(&g, 1, -1);
+    while (g.phase == TCG_CHOICE && g.choiceKind == TCG_CHOICE_HOWL_ATTACH)
+        Choose(&g, 3, -1);
+    if (g.players[0].deckSize + 5u != n || g.current != 1u)
+        return printf("FAIL Howl: deck %u -> %u, current %u\n", n, g.players[0].deckSize, g.current), 1;
+    /* Manipulate: Gengar evolving the Active, a Basic from the discard pile onto the Bench */
+    Stage(&g, TCG_CARD_GASTLY_LV8, 0, 1);
+    g.players[0].field[0].enteredTurn = 0;
+    c = Relabel(&g, 0, TCG_CARD_HAUNTER_LV17);
+    g.players[0].field[0].stack[g.players[0].field[0].stackSize++] = (uint8_t)c;
+    c = Relabel(&g, 0, TCG_CARD_ECARD3_10);
+    g.players[0].hand[g.players[0].handSize++] = (uint8_t)c;
+    c = Take(&g, 0, TCG_CARD_GASTLY_LV8);
+    if (c < 0)
+        c = Relabel(&g, 0, TCG_CARD_GASTLY_LV8);
+    g.players[0].discard[g.players[0].discardSize++] = (uint8_t)c;
+    memset(&a, 0, sizeof(a));
+    a.type = TCG_EVOLVE;
+    a.hand = (uint8_t)(g.players[0].handSize - 1);
+    a.slot = 0;
+    if (TcgDuel_Apply(&g, &a) != TCG_OK || g.choiceKind != TCG_CHOICE_MANIPULATE)
+        return printf("FAIL Manipulate: %s (phase %u kind %u)\n", g.error, g.phase, g.choiceKind), 1;
+    Choose(&g, 0, c);
+    while (g.phase == TCG_CHOICE)
+    {
+        TcgDuel_AiChoose(&g, &a);
+        if (TcgDuel_Apply(&g, &a) != TCG_OK)
+            return printf("FAIL Manipulate's Energy: %s\n", g.error), 1;
+    }
+    if (!g.players[0].field[3].stackSize)
+        return printf("FAIL Manipulate: nothing on the Bench\n"), 1;
+    printf("PASS quizzes and plays: Blaine's Quiz #1 and #3, Shuffle Attack, Howl, Manipulate\n");
+    return 0;
+}
 static int Choices(void)
 {
     struct TcgDuel g;
@@ -2327,7 +2421,7 @@ int main(void)
     }
     printf("PASS %u finished regional cards: %u attacks used %u times, then %u AI actions after them\n", ready, used, ok,
            steps);
-    if (SpecialEnergy() || EcardEnergy() || ScriptMechanics() || Anchors() || Guards() || MovePowers() || LookPowers() || SwitchesAndFire() || BorrowedAttacks() || Copies() || PowersOfFour() || Choices() || Peeks() || MoreChoices() || MoreRules() || EvenMoreRules() || TechnicalMachines() || Babies())
+    if (SpecialEnergy() || EcardEnergy() || ScriptMechanics() || Anchors() || Guards() || MovePowers() || LookPowers() || SwitchesAndFire() || BorrowedAttacks() || Copies() || PowersOfFour() || Choices() || Peeks() || MoreChoices() || MoreRules() || EvenMoreRules() || QuizzesAndPlays() || TechnicalMachines() || Babies())
         return 1;
     if (PlayTrainers() || UsePowers() || UseStadiums() || AttackFlows())
         return 1;

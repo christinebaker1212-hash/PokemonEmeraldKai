@@ -3484,7 +3484,7 @@ const struct TcgCard gTcgCards[TCG_CARD_COUNT + 1] = {
 {.name="",.description="",.effect="NONE",.animation="ATK_ANIM_NONE",.cost={0},.damage=0,.category=TCG_DAMAGE_NORMAL},
 }
 },
-[539] = {.id=539, .name="Blaine's Quiz #1", .kind=TCG_TRAINER, .type=6, .rarity=2, .set=13, .set2=255, .dark=0, .holo=0, .flags=0, .origin=13,
+[539] = {.id=539, .name="Blaine's Quiz #1", .kind=TCG_TRAINER, .type=6, .rarity=2, .set=13, .set2=255, .dark=0, .holo=0, .flags=TCG_CF_READY, .origin=13,
 .effect="gym1-97:t",.description="Put a Basic Pokemon or Evolution card from your hand face down in front of you and tell your opponent its name. Your opponent guesses the length of that Pokemon. Flip the card over. If your opponent guessed right, he or she draws 2 cards. If your opponent guessed wrong, you draw 2 cards. Either way, return the card to your hand."
 },
 [540] = {.id=540, .name="Brock", .kind=TCG_TRAINER, .type=6, .rarity=2, .set=13, .set2=255, .dark=0, .holo=0, .flags=TCG_CF_READY, .origin=13, .canon=457,
@@ -4287,7 +4287,7 @@ const struct TcgCard gTcgCards[TCG_CARD_COUNT + 1] = {
 [679] = {.id=679, .name="Blaine's Quiz #2", .kind=TCG_TRAINER, .type=6, .rarity=1, .set=14, .set2=255, .dark=0, .holo=0, .flags=TCG_CF_READY, .origin=14,
 .effect="gym2-111:t",.description="Put a card from your hand face down in front of you. Your opponent guesses whether it is an Energy card, a Trainer card, or a Pokemon (Basic or Evolution) card. Flip the card over. If your opponent guessed right, he or she draws 2 cards. If your opponent guessed wrong, you draw 2 cards. Either way, return the card to your hand."
 },
-[680] = {.id=680, .name="Blaine's Quiz #3", .kind=TCG_TRAINER, .type=6, .rarity=1, .set=14, .set2=255, .dark=0, .holo=0, .flags=0, .origin=14,
+[680] = {.id=680, .name="Blaine's Quiz #3", .kind=TCG_TRAINER, .type=6, .rarity=1, .set=14, .set2=255, .dark=0, .holo=0, .flags=TCG_CF_READY, .origin=14,
 .effect="gym2-112:t",.description="Put a Basic or Evolution card from your hand face down in front of you and tell your opponent the name of an attack of that card. Your opponent guesses the name of that card. Flip the card over. If your opponent guessed right, he or she draws 3 cards. If your opponent guessed wrong, you draw 3 cards. Either way, return the card to your hand."
 },
 [681] = {.id=681, .name="Cinnabar City Gym", .kind=TCG_TRAINER, .type=6, .rarity=1, .set=14, .set2=255, .dark=0, .holo=0, .flags=TCG_CF_STADIUM|TCG_CF_READY, .origin=14,
@@ -5515,7 +5515,7 @@ const struct TcgCard gTcgCards[TCG_CARD_COUNT + 1] = {
 {.name="",.description="",.effect="NONE",.animation="ATK_ANIM_NONE",.cost={0},.damage=0,.category=TCG_DAMAGE_NORMAL},
 }
 },
-[880] = {.id=880, .name="Entei", .kind=TCG_POKEMON, .type=0, .rarity=2, .set=17, .set2=255, .dark=0, .holo=1, .flags=0, .origin=17,
+[880] = {.id=880, .name="Entei", .kind=TCG_POKEMON, .type=0, .rarity=2, .set=17, .set2=255, .dark=0, .holo=1, .flags=TCG_CF_READY, .origin=17,
 .hp=80, .stage=0, .species=244, .level=38, .retreat=1, .weakness=3, .resistance=255, .evolvesFrom="", .description="Volcanoes erupt when it barks. Unable to restrain its extreme power, it races headlong around the land.", .attacks={
 {.name="Howl",.description="When you play Entei from your hand, you may discard the top 5 cards of your deck. (If you have fewer cards in your deck than that, discard all of them.) If any of those are Fire Energy cards, attach them to any of your Fire Pokemon of your choice. Using this power ends your turn.",.effect="neo3-6:p",.animation="ATK_ANIM_HIT",.cost={0,0,0,0,0,0,0,0,0},.damage=0,.category=TCG_POKEMON_POWER},
 {.name="Searing Flames",.description="Discard 2 Fire Energy cards attached to Entei or this attack does nothing.",.effect="neo3-6:a0",.animation="ATK_ANIM_HIT",.cost={3,0,0,0,0,0,0,0,0},.damage=60,.category=TCG_DAMAGE_NORMAL},
@@ -7910,7 +7910,7 @@ const struct TcgCard gTcgCards[TCG_CARD_COUNT + 1] = {
 {.name="",.description="",.effect="NONE",.animation="ATK_ANIM_NONE",.cost={0},.damage=0,.category=TCG_DAMAGE_NORMAL},
 }
 },
-[1246] = {.id=1246, .name="Slowking", .kind=TCG_POKEMON, .type=5, .rarity=2, .set=20, .set2=255, .dark=0, .holo=0, .flags=0, .origin=20,
+[1246] = {.id=1246, .name="Slowking", .kind=TCG_POKEMON, .type=5, .rarity=2, .set=20, .set2=255, .dark=0, .holo=0, .flags=TCG_CF_READY, .origin=20,
 .hp=80, .stage=1, .species=199, .level=0, .retreat=1, .weakness=5, .resistance=255, .evolvesFrom="Slowpoke", .description="", .attacks={
 {.name="Bursting Hand",.description="Look at your opponent's hand. This attack does 10 damage times the number of Energy cards there.",.effect="ecard2-34:a0",.animation="ATK_ANIM_HIT",.cost={0,0,0,0,0,0,1,0,0},.damage=10,.category=TCG_DAMAGE_X},
 {.name="Shuffle Attack",.description="Look at a number of cards on top of your opponent's deck equal to the number of Energy cards attached to the Defending Pokemon. Put those cards in any order, and then put them back on top of your opponent's deck.",.effect="ecard2-34:a1",.animation="ATK_ANIM_HIT",.cost={0,0,0,0,0,1,2,0,0},.damage=40,.category=TCG_DAMAGE_NORMAL},
@@ -8796,7 +8796,7 @@ const struct TcgCard gTcgCards[TCG_CARD_COUNT + 1] = {
 {.name="Heavy Metal",.description="Flip a number of coins equal to the amount of Metal Energy attached to Scizor. This attack does 30 damage plus 20 more damage for each heads.",.effect="ecard2-H21:a1",.animation="ATK_ANIM_HIT",.cost={0,0,0,0,0,0,3,0,0},.damage=30,.category=TCG_DAMAGE_PLUS},
 }
 },
-[1384] = {.id=1384, .name="Slowking", .kind=TCG_POKEMON, .type=5, .rarity=2, .set=20, .set2=255, .dark=0, .holo=1, .flags=0, .origin=20,
+[1384] = {.id=1384, .name="Slowking", .kind=TCG_POKEMON, .type=5, .rarity=2, .set=20, .set2=255, .dark=0, .holo=1, .flags=TCG_CF_READY, .origin=20,
 .hp=80, .stage=1, .species=199, .level=0, .retreat=1, .weakness=5, .resistance=255, .evolvesFrom="Slowpoke", .description="", .attacks={
 {.name="Bursting Hand",.description="Look at your opponent's hand. This attack does 10 damage times the number of Energy cards there.",.effect="ecard2-H22:a0",.animation="ATK_ANIM_HIT",.cost={0,0,0,0,0,0,1,0,0},.damage=10,.category=TCG_DAMAGE_X},
 {.name="Shuffle Attack",.description="Look at a number of cards on top of your opponent's deck equal to the number of Energy cards attached to the Defending Pokemon. Put those cards in any order, and then put them back on top of your opponent's deck.",.effect="ecard2-H22:a1",.animation="ATK_ANIM_HIT",.cost={0,0,0,0,0,1,2,0,0},.damage=40,.category=TCG_DAMAGE_NORMAL},
@@ -8936,7 +8936,7 @@ const struct TcgCard gTcgCards[TCG_CARD_COUNT + 1] = {
 {.name="",.description="",.effect="NONE",.animation="ATK_ANIM_NONE",.cost={0},.damage=0,.category=TCG_DAMAGE_NORMAL},
 }
 },
-[1404] = {.id=1404, .name="Gengar", .kind=TCG_POKEMON, .type=5, .rarity=2, .set=21, .set2=255, .dark=0, .holo=0, .flags=0, .origin=21,
+[1404] = {.id=1404, .name="Gengar", .kind=TCG_POKEMON, .type=5, .rarity=2, .set=21, .set2=255, .dark=0, .holo=0, .flags=TCG_CF_READY, .origin=21,
 .hp=100, .stage=2, .species=94, .level=0, .retreat=2, .weakness=7, .resistance=4, .evolvesFrom="Haunter", .description="", .attacks={
 {.name="Manipulate",.description="When you play Gengar from your hand to evolve your Active Pokemon, you may put a Basic Pokemon (excluding Baby Pokemon) from your discard pile onto your Bench. Then, flip 3 coins. For each heads, choose a basic Energy card from your discard pile and attach it to that Pokemon.",.effect="ecard3-10:p",.animation="ATK_ANIM_HIT",.cost={0,0,0,0,0,0,0,0,0},.damage=0,.category=TCG_POKEMON_POWER},
 {.name="Hydrokinesis",.description="Flip a coin. If heads, the Defending Pokemon is now Burned. If tails, the Defending Pokemon is now Confused.",.effect="ecard3-10:a0",.animation="ATK_ANIM_HIT",.cost={0,0,0,0,0,2,2,0,0},.damage=40,.category=TCG_DAMAGE_NORMAL},
@@ -8992,7 +8992,7 @@ const struct TcgCard gTcgCards[TCG_CARD_COUNT + 1] = {
 {.name="",.description="",.effect="NONE",.animation="ATK_ANIM_NONE",.cost={0},.damage=0,.category=TCG_DAMAGE_NORMAL},
 }
 },
-[1412] = {.id=1412, .name="Magcargo", .kind=TCG_POKEMON, .type=4, .rarity=2, .set=21, .set2=255, .dark=0, .holo=0, .flags=0, .origin=21,
+[1412] = {.id=1412, .name="Magcargo", .kind=TCG_POKEMON, .type=4, .rarity=2, .set=21, .set2=255, .dark=0, .holo=0, .flags=TCG_CF_READY, .origin=21,
 .hp=80, .stage=1, .species=219, .level=0, .retreat=3, .weakness=3, .resistance=255, .evolvesFrom="Slugma", .description="", .attacks={
 {.name="Streaming Mantle",.description="When you play Magcargo from your hand to evolve your Active Pokemon, you may discard the top 3 cards of your deck and and then shuffle 3 basic Energy cards from your discard pile into your deck. If you do, your opponent does the same.",.effect="ecard3-18:p",.animation="ATK_ANIM_HIT",.cost={0,0,0,0,0,0,0,0,0},.damage=0,.category=TCG_POKEMON_POWER},
 {.name="Crushing Lava",.description="You may discard a Fire or Fighting basic Energy card attached to Magcargo. If you discard a Fire Energy card in this way, the Defending Pokemon is now Burned. If you discard a Fighting Energy card in this way, this attack does 40 damage plus 20 more damage.",.effect="ecard3-18:a0",.animation="ATK_ANIM_HIT",.cost={0,0,0,0,1,0,2,0,0},.damage=40,.category=TCG_DAMAGE_PLUS},
@@ -9794,7 +9794,7 @@ const struct TcgCard gTcgCards[TCG_CARD_COUNT + 1] = {
 [1532] = {.id=1532, .name="Oracle", .kind=TCG_TRAINER, .type=6, .rarity=1, .set=21, .set2=255, .dark=0, .holo=0, .flags=TCG_CF_SUPPORTER|TCG_CF_READY, .origin=21,
 .effect="ecard3-138:t",.description="You can play only 1 Supporter card each turn. When you play this card, put it next to your Active Pokemon. When your turn ends, discard this card. Choose 2 cards from your deck and shuffle the rest of your deck. Put the chosen cards on top of your deck in any order."
 },
-[1533] = {.id=1533, .name="Star Piece", .kind=TCG_TRAINER, .type=6, .rarity=1, .set=21, .set2=255, .dark=0, .holo=0, .flags=TCG_CF_TOOL, .origin=21,
+[1533] = {.id=1533, .name="Star Piece", .kind=TCG_TRAINER, .type=6, .rarity=1, .set=21, .set2=255, .dark=0, .holo=0, .flags=TCG_CF_TOOL|TCG_CF_READY, .origin=21,
 .effect="ecard3-139:t",.description="Attach Star Piece to 1 of your Pokemon that doesn't already have a Pokemon Tool attached to it. If that Pokemon is Knocked Out, discard this card. At any time between turns, if the Pokemon this card is attached to is Benched and has 2 or more damage counters on it, search your deck for an Evolution card that Pokemon evolves into and put it on top of that Pokemon. (This counts as evolving that Pokemon.) Shuffle your deck afterward. Then, discard Star Piece."
 },
 [1534] = {.id=1534, .name="Underground Expedition", .kind=TCG_TRAINER, .type=6, .rarity=1, .set=21, .set2=255, .dark=0, .holo=0, .flags=TCG_CF_SUPPORTER|TCG_CF_READY, .origin=21,
@@ -9910,7 +9910,7 @@ const struct TcgCard gTcgCards[TCG_CARD_COUNT + 1] = {
 {.name="",.description="",.effect="NONE",.animation="ATK_ANIM_NONE",.cost={0},.damage=0,.category=TCG_DAMAGE_NORMAL},
 }
 },
-[1553] = {.id=1553, .name="Gengar", .kind=TCG_POKEMON, .type=5, .rarity=2, .set=21, .set2=255, .dark=0, .holo=1, .flags=0, .origin=21,
+[1553] = {.id=1553, .name="Gengar", .kind=TCG_POKEMON, .type=5, .rarity=2, .set=21, .set2=255, .dark=0, .holo=1, .flags=TCG_CF_READY, .origin=21,
 .hp=100, .stage=2, .species=94, .level=0, .retreat=2, .weakness=7, .resistance=4, .evolvesFrom="Haunter", .description="", .attacks={
 {.name="Manipulate",.description="When you play Gengar from your hand to evolve your Active Pokemon, you may put a Basic Pokemon (excluding Baby Pokemon) from your discard pile onto your Bench. Then, flip 3 coins. For each heads, choose a basic Energy card from your discard pile and attach it to that Pokemon.",.effect="ecard3-H9:p",.animation="ATK_ANIM_HIT",.cost={0,0,0,0,0,0,0,0,0},.damage=0,.category=TCG_POKEMON_POWER},
 {.name="Hydrokinesis",.description="Flip a coin. If heads, the Defending Pokemon is now Burned. If tails, the Defending Pokemon is now Confused.",.effect="ecard3-H9:a0",.animation="ATK_ANIM_HIT",.cost={0,0,0,0,0,2,2,0,0},.damage=40,.category=TCG_DAMAGE_NORMAL},
@@ -9966,7 +9966,7 @@ const struct TcgCard gTcgCards[TCG_CARD_COUNT + 1] = {
 {.name="",.description="",.effect="NONE",.animation="ATK_ANIM_NONE",.cost={0},.damage=0,.category=TCG_DAMAGE_NORMAL},
 }
 },
-[1561] = {.id=1561, .name="Magcargo", .kind=TCG_POKEMON, .type=4, .rarity=2, .set=21, .set2=255, .dark=0, .holo=1, .flags=0, .origin=21,
+[1561] = {.id=1561, .name="Magcargo", .kind=TCG_POKEMON, .type=4, .rarity=2, .set=21, .set2=255, .dark=0, .holo=1, .flags=TCG_CF_READY, .origin=21,
 .hp=80, .stage=1, .species=219, .level=0, .retreat=3, .weakness=3, .resistance=255, .evolvesFrom="Slugma", .description="", .attacks={
 {.name="Streaming Mantle",.description="When you play Magcargo from your hand to evolve your Active Pokemon, you may discard the top 3 cards of your deck and and then shuffle 3 basic Energy cards from your discard pile into your deck. If you do, your opponent does the same.",.effect="ecard3-H17:p",.animation="ATK_ANIM_HIT",.cost={0,0,0,0,0,0,0,0,0},.damage=0,.category=TCG_POKEMON_POWER},
 {.name="Crushing Lava",.description="You may discard a Fire or Fighting basic Energy card attached to Magcargo. If you discard a Fire Energy card in this way, the Defending Pokemon is now Burned. If you discard a Fighting Energy card in this way, this attack does 40 damage plus 20 more damage.",.effect="ecard3-H17:a0",.animation="ATK_ANIM_HIT",.cost={0,0,0,0,1,0,2,0,0},.damage=40,.category=TCG_DAMAGE_PLUS},

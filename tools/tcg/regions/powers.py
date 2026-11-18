@@ -108,6 +108,9 @@ P('R_CHAOS_MOVE', 'Chaos Move', "move 1 damage counter from 1 Pokemon (yours or 
   'askch:33,1')
 P('R_MAGNETIC_FLOW', 'Magnetic Flow', 'Choose 1 of the Energy cards attached to each of those Pokemon and switch them',
   'USED', 'ONCE ACTIVE', 'c h.askch:39,1')
+P('R_MANIPULATE', 'Manipulate', 'you may put a Basic Pokemon (excluding Baby Pokemon) from your discard pile', 'PASSIVE')
+P('R_STREAMING_MANTLE', 'Streaming Mantle', 'shuffle 3 basic Energy cards from your discard pile into your deck', 'PASSIVE')
+P('R_HOWL', 'Howl', 'you may discard the top 5 cards of your deck', 'PASSIVE')
 P('R_SCAVENGER_HUNT', 'Scavenger Hunt', 'put 2 cards from your hand into your deck', 'USED', 'ONCE', 'scav')
 P('R_SPATIAL_DISTORTION', 'Spatial Distortion', 'choose a Stadium card from your discard pile and put it into play',
   'USED', 'ONCE', 'c h.stadis')

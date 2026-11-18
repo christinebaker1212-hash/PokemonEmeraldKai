@@ -1153,6 +1153,17 @@ static int ScriptRun(struct TcgDuel *g, const char *script, const struct TcgAtta
                 }
             }
         }
+        else if (ScriptIs(&o, "shufatk"))
+        {
+            /* Shuffle Attack: the top cards of their deck, one per Energy card on the Defending Pokemon, in your order */
+            unsigned n = foe->stackSize ? EnergyCards(g, them, 0) : 0;
+            const struct TcgCard *it = TcgDuel_Field(g, me, sScriptSelf);
+            if (n && op->deckSize)
+            {
+                g->choiceData = (uint8_t)(n > 60 ? 60 : n);
+                TcgDuel_AskChoice(g, me, TCG_CHOICE_ORDER_THEIRS, it ? it->id : 0, 1);
+            }
+        }
         else if (ScriptIs(&o, "ask0"))
         {
             /* ask0:K your choice TCG_CHOICE_K with choiceData 0 (Evolutionary Spore: none chosen yet) */

@@ -76,6 +76,26 @@ static int ChoiceSporeSlot(const struct TcgDuel *g, unsigned who, unsigned s)
     const struct TcgCard *c = TcgDuel_Field(g, who, s);
     return c && (!strcmp(c->name, "Hoppip") || !strcmp(c->name, "Skiploom")) && !(g->choiceData & (1u << s));
 }
+static unsigned ChoiceBasicEnergyInDiscard(const struct TcgDuel *g, unsigned who)
+{
+    const struct TcgPlayer *q = &g->players[who];
+    unsigned k, n = 0;
+    for (k = 0; k < q->discardSize; k++)
+        n += CardAt(g, who, q->discard[k])->kind == TCG_ENERGY && CardAt(g, who, q->discard[k])->id <= 6;
+    return n;
+}
+/* Streaming Mantle for a player: the top 3 of the deck discarded, then their pick of 3 basic Energy into the deck */
+static void ChoiceMantle(struct TcgDuel *g, unsigned who, unsigned card, unsigned theirs)
+{
+    struct TcgPlayer *q = &g->players[who];
+    unsigned k;
+    for (k = 0; k < 3 && q->deckSize; k++)
+        q->discard[q->discardSize++] = q->deck[--q->deckSize];
+    TcgDuel_Event(g, TCG_EV_DECK_CHANGED, who, 0, k, 0, 0);
+    g->choiceData = (uint8_t)theirs;
+    g->phase = TCG_TURN;
+    TcgDuel_AskChoice(g, who, TCG_CHOICE_MANTLE_PICK, card, 1);
+}
 /* Has that player anything to choose (else the stage is passed over: no question with no answer) */
 static int ChoiceHasAny(const struct TcgDuel *g, unsigned player, unsigned kind)
 {
@@ -132,6 +152,33 @@ static int ChoiceHasAny(const struct TcgDuel *g, unsigned player, unsigned kind)
         return g->players[player ^ 1].deckSize != 0;
     case TCG_CHOICE_CHAOS_FROM_SIDE:
         return ChoiceDamaged(g, 0) || ChoiceDamaged(g, 1);
+    case TCG_CHOICE_MANIPULATE:
+        if (BenchCount(g, player) >= TCG_FIELD_SIZE - 1)
+            return 0;
+        for (k = 0; k < p->discardSize; k++)
+            if (CardAt(g, player, p->discard[k])->kind == TCG_POKEMON && !CardAt(g, player, p->discard[k])->stage &&
+                !(CardAt(g, player, p->discard[k])->flags & TCG_CF_BABY))
+                return 1;
+        return 0;
+    case TCG_CHOICE_MANIPULATE_ENERGY:
+        return (g->choiceData >> 3) && ChoiceBasicEnergyInDiscard(g, player);
+    case TCG_CHOICE_MANTLE_PICK:
+        return ChoiceBasicEnergyInDiscard(g, player) != 0;
+    case TCG_CHOICE_HOWL_ATTACH:
+    {
+        unsigned s;
+        for (s = 0; g->choiceData && s < TCG_FIELD_SIZE; s++)
+            if (TcgDuel_Field(g, player, s) && TcgDuel_Type(g, player, s) == TCG_FIRE)
+                return 1;
+        return 0;
+    }
+    case TCG_CHOICE_ORDER_THEIRS:
+        return g->choiceData && g->players[player ^ 1].deckSize;
+    case TCG_CHOICE_STAR_PIECE:
+        for (k = 0; g->choiceData < TCG_FIELD_SIZE && k < p->deckSize; k++)
+            if (EvolvesFrom(CardAt(g, player, p->deck[k]), TcgDuel_Field(g, player, g->choiceData)))
+                return 1;
+        return 0;
     case TCG_CHOICE_FLOW_A:
         return ChoiceEnergyHolders(g, player ^ 1) >= 2;
     case TCG_CHOICE_INVIGORATE_SIDE:
@@ -240,6 +287,15 @@ static void ChoiceSkipped(struct TcgDuel *g, unsigned player, unsigned kind)
 {
     if (kind == TCG_CHOICE_TOP3_ENERGY || kind == TCG_CHOICE_ATTACH_LIGHTNING || kind == TCG_CHOICE_SPORE)
         TcgDuel_Shuffle(g, player);
+    if (kind == TCG_CHOICE_MANTLE_PICK && !g->choiceData)
+    {
+        /* (none to put back: then the other player does the same; their own pass is the end) */
+        struct TcgPlayer *q = &g->players[player ^ 1];
+        unsigned k;
+        for (k = 0; k < 3 && q->deckSize; k++)
+            q->discard[q->discardSize++] = q->deck[--q->deckSize];
+        g->choiceData = 1;
+    }
 }
 /* Once more (choiceData left): the same question again, else done */
 static int ChoiceAgain(struct TcgDuel *g, unsigned who, unsigned kind)
@@ -468,6 +524,168 @@ int TcgDuel_Choose(struct TcgDuel *g, const struct TcgAction *a)
             q->field[room].enteredTurn = g->turn;
             TcgDuel_Event(g, TCG_EV_PLAY, who ^ 1, room, 0, c->id, 0);
         }
+        break;
+    }
+    case TCG_CHOICE_MANIPULATE:
+    {
+        /* the Basic picked onto the Bench; then 3 coins, a basic Energy from the discard pile onto it per heads */
+        int at = n == 1 ? Picked(a, 0, p->discard, p->discardSize) : -1;
+        const struct TcgCard *c = at >= 0 ? CardAt(g, who, p->discard[at]) : NULL;
+        unsigned room, heads = 0;
+        if (!n)
+            break;
+        for (room = 1; room < TCG_FIELD_SIZE && p->field[room].stackSize; room++)
+            ;
+        if (!c || c->kind != TCG_POKEMON || c->stage || (c->flags & TCG_CF_BABY) || room == TCG_FIELD_SIZE)
+            return ChoiceFail(g, "Choose a Basic Pokemon (not a Baby).");
+        memset(&p->field[room], 0, sizeof(p->field[room]));
+        p->field[room].stack[p->field[room].stackSize++] = TcgPile_Remove(p->discard, &p->discardSize, (unsigned)at);
+        p->field[room].enteredTurn = g->turn;
+        TcgDuel_Event(g, TCG_EV_PLAY, who, room, 0, c->id, 0);
+        for (k = 0; k < 3; k++)
+            heads += TcgDuel_Coin(g, who);
+        if (!heads)
+            break;
+        g->choiceData = (uint8_t)(heads << 3 | room);
+        return ChoiceAgain(g, who, TCG_CHOICE_MANIPULATE_ENERGY);
+    }
+    case TCG_CHOICE_MANIPULATE_ENERGY:
+    {
+        unsigned slot = g->choiceData & 7, left = g->choiceData >> 3;
+        int at = n == 1 ? Picked(a, 0, p->discard, p->discardSize) : -1;
+        struct TcgFieldCard *f = &p->field[slot];
+        if (at < 0 || CardAt(g, who, p->discard[at])->kind != TCG_ENERGY || CardAt(g, who, p->discard[at])->id > 6 || !f->stackSize)
+            return ChoiceFail(g, "Choose a basic Energy card.");
+        f->attached[f->attachedSize++] = TcgPile_Remove(p->discard, &p->discardSize, (unsigned)at);
+        TcgDuel_Event(g, TCG_EV_ATTACH, who, slot, 0, p->cards[f->attached[f->attachedSize - 1]], 0);
+        if (--left)
+        {
+            g->choiceData = (uint8_t)(left << 3 | slot);
+            return ChoiceAgain(g, who, TCG_CHOICE_MANIPULATE_ENERGY);
+        }
+        break;
+    }
+    case TCG_CHOICE_MANTLE_YES:
+        if (a->target > 1)
+            return ChoiceFail(g, "Choose YES or NO.");
+        if (!a->target)
+            break;
+        ChoiceMantle(g, who, g->choiceCard, 0);
+        if (g->phase != TCG_CHOICE && g->choiceData == 1)
+            ChoiceMantle(g, who ^ 1, g->choiceCard, 1);   /* (nothing of yours to put back: theirs at once) */
+        if (g->phase != TCG_CHOICE)
+            ChoiceEnd(g, TCG_CHOICE_MANTLE_PICK);
+        return TCG_OK;
+    case TCG_CHOICE_MANTLE_PICK:
+    {
+        /* 3 basic Energy cards (all there are, if fewer) from the discard pile into the deck, shuffled; then theirs */
+        unsigned need = ChoiceBasicEnergyInDiscard(g, who), theirs = g->choiceData;
+        need = need < 3 ? need : 3;
+        if (n != need)
+            return ChoiceFail(g, "Choose 3 basic Energy cards (or all there are).");
+        for (k = 0; k < n; k++)
+        {
+            int at = Picked(a, k, p->discard, p->discardSize);
+            if (at < 0 || CardAt(g, who, p->discard[at])->kind != TCG_ENERGY || CardAt(g, who, p->discard[at])->id > 6)
+                return ChoiceFail(g, "Only basic Energy cards.");
+        }
+        for (k = 0; k < n; k++)
+            p->deck[p->deckSize++] = TcgPile_Remove(p->discard, &p->discardSize, (unsigned)Picked(a, k, p->discard, p->discardSize));
+        TcgDuel_Shuffle(g, who);
+        TcgDuel_Event(g, TCG_EV_DECK_CHANGED, who, 0, 0, 0, 0);
+        if (!theirs)
+        {
+            ChoiceMantle(g, who ^ 1, g->choiceCard, 1);
+            if (g->phase != TCG_CHOICE)
+                ChoiceEnd(g, TCG_CHOICE_MANTLE_PICK);
+            return TCG_OK;
+        }
+        break;
+    }
+    case TCG_CHOICE_HOWL_YES:
+    {
+        /* YES: the top 5 discarded, the Fire Energy among them onto Fire Pokemon of yours; the turn ends */
+        unsigned fire = 0;
+        if (a->target > 1)
+            return ChoiceFail(g, "Choose YES or NO.");
+        if (!a->target)
+            break;
+        for (k = 0; k < 5 && p->deckSize; k++)
+        {
+            fire += p->cards[p->deck[p->deckSize - 1]] == TCG_CARD_FIRE_ENERGY;
+            p->discard[p->discardSize++] = p->deck[--p->deckSize];
+        }
+        TcgDuel_Event(g, TCG_EV_DECK_CHANGED, who, 0, k, 0, 0);
+        g->choiceEndTurn = 1;
+        if (!fire)
+            break;
+        g->choiceData = (uint8_t)fire;
+        return ChoiceAgain(g, who, TCG_CHOICE_HOWL_ATTACH);
+    }
+    case TCG_CHOICE_HOWL_ATTACH:
+    {
+        /* the last Fire Energy discarded (one of the 5) onto the Fire Pokemon chosen */
+        struct TcgFieldCard *f = a->target < TCG_FIELD_SIZE ? &p->field[a->target] : NULL;
+        unsigned at;
+        if (!f || !f->stackSize || TcgDuel_Type(g, who, a->target) != TCG_FIRE)
+            return ChoiceFail(g, "Choose one of your Fire Pokemon.");
+        for (at = p->discardSize; at > 0 && p->cards[p->discard[at - 1]] != TCG_CARD_FIRE_ENERGY; at--)
+            ;
+        if (at)
+        {
+            f->attached[f->attachedSize++] = TcgPile_Remove(p->discard, &p->discardSize, at - 1);
+            TcgDuel_Event(g, TCG_EV_ATTACH, who, a->target, 0, TCG_CARD_FIRE_ENERGY, 0);
+        }
+        if (--g->choiceData)
+            return ChoiceAgain(g, who, TCG_CHOICE_HOWL_ATTACH);
+        break;
+    }
+    case TCG_CHOICE_ORDER_THEIRS:
+    {
+        /* their top cards in the order picked, the first on top */
+        struct TcgPlayer *d = &g->players[who ^ 1];
+        unsigned top = d->deckSize < g->choiceData ? d->deckSize : g->choiceData, i, j;
+        if (n != top)
+            return ChoiceFail(g, "Put all of them in order.");
+        for (i = 0; i < top; i++)
+        {
+            for (j = 0; j < top && d->deck[d->deckSize - 1 - j] != a->selections[i]; j++)
+                ;
+            for (k = 0; k < i; k++)
+                if (a->selections[k] == a->selections[i])
+                    j = top;
+            if (j == top)
+                return ChoiceFail(g, "Put all of them in order.");
+        }
+        for (i = 0; i < top; i++)
+            d->deck[d->deckSize - 1 - i] = a->selections[i];
+        TcgDuel_Event(g, TCG_EV_DECK_CHANGED, who ^ 1, 0, 0, 0, 0);
+        break;
+    }
+    case TCG_CHOICE_STAR_PIECE:
+    {
+        int at = n ? Picked(a, 0, p->deck, p->deckSize) : -1;
+        if (n)
+        {
+            if (at < 0 || !EvolvesFrom(CardAt(g, who, p->deck[at]), TcgDuel_Field(g, who, g->choiceData)))
+                return ChoiceFail(g, "Choose a card that evolves from it.");
+            Evolve(g, who, g->choiceData, (unsigned)at);
+        }
+        TcgDuel_Shuffle(g, who);
+        break;
+    }
+    case TCG_CHOICE_QUIZ1:
+    case TCG_CHOICE_QUIZ3:
+    {
+        /* the guess (the answerer's): right, they draw (2 / 3); wrong, the quiz's player does */
+        uint16_t opts[4];
+        unsigned truth = TcgDuel_QuizOptions(g, opts), draws = g->choiceKind == TCG_CHOICE_QUIZ1 ? 2 : 3,
+                 drawer = a->target == truth ? who : who ^ 1;
+        if (a->target > 3)
+            return ChoiceFail(g, "Make a guess.");
+        TcgDuel_Event(g, TCG_EV_PEEK, who, 0, TCG_PEEK_THEIR_HAND, g->players[who ^ 1].cards[g->choiceData], 0);
+        TcgDuel_Log(g, "%s.", a->target == truth ? "Right" : "Wrong");
+        TcgDuel_Event(g, TCG_EV_DRAW, drawer, 0, TcgDuel_Draw(g, drawer, draws), 0, 0);
         break;
     }
     case TCG_CHOICE_CHAOS_FROM_SIDE:
@@ -951,6 +1169,64 @@ void TcgDuel_AiChoose(const struct TcgDuel *g, struct TcgAction *a)
         break;
     case TCG_CHOICE_CHAOS_FROM_SIDE:
         a->target = !ChoiceDamaged(g, who);
+        break;
+    case TCG_CHOICE_MANIPULATE:
+    {
+        /* (the Basic with the most HP) */
+        int best = -1;
+        for (k = 0; k < p->discardSize; k++)
+        {
+            const struct TcgCard *c = CardAt(g, who, p->discard[k]);
+            if (c->kind == TCG_POKEMON && !c->stage && !(c->flags & TCG_CF_BABY) &&
+                (best < 0 || c->hp > CardAt(g, who, p->discard[best])->hp))
+                best = (int)k;
+        }
+        if (best >= 0)
+            a->selections[a->selectionCount++] = p->discard[best];
+        break;
+    }
+    case TCG_CHOICE_MANIPULATE_ENERGY:
+    case TCG_CHOICE_MANTLE_PICK:
+    {
+        unsigned most = g->choiceKind == TCG_CHOICE_MANTLE_PICK ? 3 : 1;
+        for (k = 0; k < p->discardSize && a->selectionCount < most; k++)
+            if (CardAt(g, who, p->discard[k])->kind == TCG_ENERGY && CardAt(g, who, p->discard[k])->id <= 6)
+                a->selections[a->selectionCount++] = p->discard[k];
+        break;
+    }
+    case TCG_CHOICE_MANTLE_YES:
+        a->target = ChoiceBasicEnergyInDiscard(g, who) >= 3;   /* (only with Energy to put back) */
+        break;
+    case TCG_CHOICE_HOWL_YES:
+        a->target = 0;   /* (the turn's attack is worth more) */
+        break;
+    case TCG_CHOICE_HOWL_ATTACH:
+    {
+        unsigned s;
+        for (s = 0; s < TCG_FIELD_SIZE && !(TcgDuel_Field(g, who, s) && TcgDuel_Type(g, who, s) == TCG_FIRE); s++)
+            ;
+        a->target = (uint8_t)s;
+        break;
+    }
+    case TCG_CHOICE_ORDER_THEIRS:
+    {
+        /* (their Energy cards to the bottom of what's looked at) */
+        const struct TcgPlayer *d = &g->players[who ^ 1];
+        unsigned top = d->deckSize < g->choiceData ? d->deckSize : g->choiceData, pass;
+        for (pass = 0; pass < 2; pass++)
+            for (k = 0; k < top; k++)
+                if ((CardAt(g, who ^ 1, d->deck[d->deckSize - 1 - k])->kind == TCG_ENERGY) == (pass == 1))
+                    a->selections[a->selectionCount++] = d->deck[d->deckSize - 1 - k];
+        break;
+    }
+    case TCG_CHOICE_STAR_PIECE:
+        for (k = 0; k < p->deckSize && !a->selectionCount; k++)
+            if (EvolvesFrom(CardAt(g, who, p->deck[k]), TcgDuel_Field(g, who, g->choiceData)))
+                a->selections[a->selectionCount++] = p->deck[k];
+        break;
+    case TCG_CHOICE_QUIZ1:
+    case TCG_CHOICE_QUIZ3:
+        a->target = (uint8_t)(g->turn % 4);   /* (a guess) */
         break;
     case TCG_CHOICE_CHAOS_TO_SIDE:
         a->target = 1;

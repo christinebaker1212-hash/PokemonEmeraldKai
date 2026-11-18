@@ -569,6 +569,7 @@ def _(m, d):
 
 # One wording, one script (the cards' words with SELF for the card's name; tcg_script.inc's ops)
 EXACT = {
+    "Look at a number of cards on top of your opponent's deck equal to the number of Energy cards attached to the Defending Pokemon. Put those cards in any order, and then put them back on top of your opponent's deck.": 'shufatk',
     "Choose 1 Basic Pokemon in any player's discard pile. Put it onto that player's Bench. Put a number of damage counters on that Pokemon equal to half its HP (rounded down to the nearest 10). (You can't put a Pokemon on a Bench that's full.)": 'askch:41,1',
     'Choose any number of your Hoppips and Skiplooms. Then, for each Pokemon you chose in this way, you may search your deck for a card that evolves from that Pokemon and attach it to that Pokemon. (This counts as evolving those Pokemon.) Shuffle your deck afterward.': 'ask0:47',
     'Flip a coin. If heads, you may return any number of your Pokemon in play and all cards attached to them to your hand.': 'c h.askch:48,1',

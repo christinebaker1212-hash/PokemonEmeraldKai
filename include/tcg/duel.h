@@ -216,7 +216,17 @@ enum
     TCG_CHOICE_EEVEE_EVOLVE,     /* Energy Evolution: an Eevee evolution of the Energy's type (choiceData: type << 4 | slot) */
     TCG_CHOICE_SPORE,            /* Evolutionary Spore: a Hoppip or Skiploom and its evolution (choiceData: slots done) */
     TCG_CHOICE_RETURN_MON,       /* Fairy Power: one of yours (with its cards) into the hand; DONE ends it */
-    TCG_CHOICE_DISCARD2          /* No Removal Gym: 2 cards from the hand discarded */
+    TCG_CHOICE_DISCARD2,         /* No Removal Gym: 2 cards from the hand discarded */
+    TCG_CHOICE_MANIPULATE,       /* Manipulate: a Basic (not a Baby) from your discard pile onto your Bench... */
+    TCG_CHOICE_MANIPULATE_ENERGY,/* ...a basic Energy from it onto that one per heads (choiceData: left << 3 | slot) */
+    TCG_CHOICE_MANTLE_YES,       /* Streaming Mantle: YES discards your top 3... */
+    TCG_CHOICE_MANTLE_PICK,      /* ...and 3 basic Energy from the discard pile into the deck; theirs after (choiceData 1) */
+    TCG_CHOICE_HOWL_YES,         /* Howl: YES discards your top 5 (and ends your turn)... */
+    TCG_CHOICE_HOWL_ATTACH,      /* ...each Fire Energy among them onto a Fire Pokemon of yours (choiceData left) */
+    TCG_CHOICE_ORDER_THEIRS,     /* Shuffle Attack: the top choiceData cards of their deck in the order picked */
+    TCG_CHOICE_STAR_PIECE,       /* Star Piece: an evolution from the deck for the Benched one in slot choiceData */
+    TCG_CHOICE_QUIZ1,            /* Blaine's Quiz #1: the length of their card (choiceData) guessed among 4 */
+    TCG_CHOICE_QUIZ3             /* Blaine's Quiz #3: the name of their card (choiceData) guessed among 4 */
 };
 /* Pokemon Powers (src/tcg/tcg_powers.c), by the card's power. */
 enum TcgPowerId
@@ -623,6 +633,11 @@ int TcgDuel_RunPowerScript(struct TcgDuel *g, unsigned slot, const char *script,
 int TcgPower_AttachBlock(const struct TcgDuel *g, unsigned player, unsigned slot, unsigned energy);
 void TcgPower_AfterAttach(struct TcgDuel *g, unsigned player, unsigned slot, unsigned physical);
 unsigned TcgPower_EnergyType(const struct TcgDuel *g, unsigned player, unsigned slot, unsigned type, unsigned *amount);
+/* Blaine's Quizzes (TCG_CHOICE_QUIZ1 / QUIZ3): the 4 answers offered for the card choiceData of the quiz's player
+ * (lengths in decimetres / card ids) and which of them is right; the same every time for the same duel state */
+unsigned TcgDuel_QuizOptions(const struct TcgDuel *g, uint16_t out[4]);
+/* How many cards a pick over the top of a deck (TCG_SRC_TOP3_*) shows: 3, or Shuffle Attack's count */
+unsigned TcgDuel_TopCount(const struct TcgDuel *g, unsigned deckSize);
 /* Light Dragonite's Miraculous Wind blows (an Active one's power works): every Special Energy card provides Colorless
  * and its other rules stop */
 int TcgPower_WindBlows(const struct TcgDuel *g);

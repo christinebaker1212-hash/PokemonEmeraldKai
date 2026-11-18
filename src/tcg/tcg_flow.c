@@ -1226,6 +1226,28 @@ unsigned TcgFlow_TrainerChoices(const struct TcgDuel *g, unsigned me, unsigned c
         MenuAdd(m, "THEIR POKEMON", 1, okTheirs, "None of theirs can be chosen.");
         return m->count;
     }
+    if (g->phase == TCG_CHOICE && (g->choiceKind == TCG_CHOICE_QUIZ1 || g->choiceKind == TCG_CHOICE_QUIZ3))
+    {
+        /* (the 4 answers: lengths as printed, feet and inches; card names) */
+        static char lengths[4][16];
+        uint16_t opts[4];
+        unsigned i2;
+        TcgDuel_QuizOptions(g, opts);
+        memset(m, 0, sizeof(*m));
+        *reason = NULL;
+        for (i2 = 0; i2 < 4; i2++)
+        {
+            if (g->choiceKind == TCG_CHOICE_QUIZ1)
+            {
+                unsigned inches = (opts[i2] * 3937u + 500u) / 1000u;
+                snprintf(lengths[i2], sizeof(lengths[i2]), "%u'%u\"", inches / 12, inches % 12);
+                MenuAdd(m, lengths[i2], i2, 1, NULL);
+            }
+            else
+                MenuAdd(m, Tcg_Card(opts[i2]) ? Tcg_Card(opts[i2])->name : "?", i2, 1, NULL);
+        }
+        return m->count;
+    }
     if (g->phase == TCG_CHOICE && g->choiceKind == TCG_CHOICE_RETURN_MON)
     {
         unsigned s2;
@@ -1247,7 +1269,8 @@ unsigned TcgFlow_TrainerChoices(const struct TcgDuel *g, unsigned me, unsigned c
     }
     if (Tcg_EnergyRule(cardId) == TCG_ER_RETRO ||
         (g->phase == TCG_CHOICE && (g->choiceKind == TCG_CHOICE_REDRAW4 || g->choiceKind == TCG_CHOICE_SHUFFLE_THEIRS ||
-                                    g->choiceKind == TCG_CHOICE_IMPOSTOR || g->choiceKind == TCG_CHOICE_WISH_ASK)))
+                                    g->choiceKind == TCG_CHOICE_IMPOSTOR || g->choiceKind == TCG_CHOICE_WISH_ASK ||
+                                    g->choiceKind == TCG_CHOICE_MANTLE_YES || g->choiceKind == TCG_CHOICE_HOWL_YES)))
     {
         /* (Retro Energy: "you may") */
         memset(m, 0, sizeof(*m));
@@ -1520,8 +1543,9 @@ static unsigned Next(struct TcgFlow *f, const struct TcgDuel *g)
             n = 1;
         if (st->source == TCG_SRC_TOP3_MINE || st->source == TCG_SRC_TOP3_THEIRS)
         {
-            n = g->players[st->source == TCG_SRC_TOP3_THEIRS ? f->me ^ 1 : f->me].deckSize;
-            n = n < 3 ? n : 3;
+            n = (int)TcgDuel_TopCount(g, g->players[st->source == TCG_SRC_TOP3_THEIRS ? f->me ^ 1 : f->me].deckSize);
+            if (g->phase == TCG_CHOICE && g->choiceKind == TCG_CHOICE_ORDER_THEIRS)
+                all = 1;   /* (Shuffle Attack: every one of them in order) */
             if (!all)   /* (one of the top 3 into the hand: the rest only looked at) */
                 return AskPick(f, g, st->source, st->filter, n ? 1 : 0, n ? 1 : 0, st->prompt);
         }

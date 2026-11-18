@@ -68,6 +68,9 @@
     X(R_ENERGY_CONVERTER, "ENERGY CONVERTER", 1, 1, "conv") \
     X(R_CHAOS_MOVE, "CHAOS MOVE", 1, 1, "askch:33,1") \
     X(R_MAGNETIC_FLOW, "MAGNETIC FLOW", 1, 3, "c h.askch:39,1") \
+    X(R_MANIPULATE, "MANIPULATE", 0, 0, NULL) \
+    X(R_STREAMING_MANTLE, "STREAMING MANTLE", 0, 0, NULL) \
+    X(R_HOWL, "HOWL", 0, 0, NULL) \
     X(R_SCAVENGER_HUNT, "SCAVENGER HUNT", 1, 1, "scav") \
     X(R_SPATIAL_DISTORTION, "SPATIAL DISTORTION", 1, 1, "c h.stadis") \
     X(R_JOIN, "[JOIN]", 1, 5, "srchk:3") \
