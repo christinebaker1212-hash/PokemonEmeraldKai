@@ -777,6 +777,7 @@
 {"neo1-13:a1", FX_SCRIPT,0,2,0,"c h.guard:2"},
 {"neo1-14:a0", FX_SCRIPT,0,2,0,"c h.add:10 h.cnf"},
 {"neo1-15:a1", FX_SCRIPT,0,2,0,"c h.add:20"},
+{"neo1-16:a0", FX_METRONOME,0,2,17,NULL},
 {"neo1-16:a1", FX_SCRIPT,0,2,0,"c t.none h.bar:2"},
 {"neo1-17:a0", FX_SCRIPT,0,2,0,"c h.add:20 h.rec:20"},
 {"neo1-18:a0", FX_SCRIPT,0,2,0,"dse:0,3 bb:20"},

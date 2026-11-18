@@ -81,7 +81,7 @@ Total 1,158 set cards (about 1,100 attacks with effect text, 250 Pokémon Powers
    (`mp cards mock 2`, tcg_board.c MockUnder / MockOver over a staged duel): the Stadium a plate on the centre line,
    the turn's Supporter face up beside its player's Active, Tools tucked under their Pokemon, a BRN badge, Darkness /
    Metal orbs. **Approved and built** (2026-11-18: docs/tcg_regions/board_table.png from a staged duel).
-   **Status (2026-11-18): 1,204 of 1,227 finished.** Where each part lives:
+   **Status (2026-11-18): 1,217 of 1,227 finished.** Where each part lives:
    - Attacks: tools/tcg/regions/families.py (regex families + EXACT, one script per wording; ops in
      src/tcg/tcg_script.inc, listed at its top and in each op's comment).
    - Trainers: src/tcg/tcg_rtrainers.inc (rules), tcg_rtrainers_flow.inc (steps, playability, menus),
@@ -125,6 +125,14 @@ Total 1,158 set cards (about 1,100 attacks with effect text, 250 Pokémon Powers
      stay while a Pokemon is in play: TcgFieldCard.markers (TCG_MARK_ROD Lightning Rod, TCG_MARK_CHAR Char counters:
      a coin after every turn) and colorType (Smeargle's Coloring counter, read by TcgDuel_Type); the board's badges ROD
      / CHAR.
+   - Protections checked after an action against the state before it (tcg_duel.c Undo, TcgDuel.effectFrom the
+     action's kind, kept through its choices): Unown [K]'s [Keep] and Brock's Protection put the Energy discarded back
+     on, Ecogym sends it to the hand, Allergic Pollen (attacks and powers) and Pokemon Tower (anything into the hand)
+     put cards back in the discard pile. Legendary Body: a Trainer other than a Stadium is tried on a copy and refused
+     when it would change that Active (its Tools discarded as it comes in). Flee asks after the attack's damage
+     (TCG_CHOICE_FLEE, STAY or a Benched one); Bench Guard takes 10 of a Benched one's damage while Rhydon survives it
+     (TcgDuel_EffectDamage); Time Shard / EXP.ALL as their Pokemon is Knocked Out by an attack (KnockedOutByAttack,
+     TcgDuel.attackTurn); Super Metronome (Metronome source 16) lists every attack of their Pokemon in play.
    - Stadiums used during a turn (Healing Field, Power Plant...): TCG_USE_STADIUM, A on the Stadium's plate (USE /
      CHECK), steps TcgFlow_StadiumSteps, rules RegionStadiumUse / RegionStadiumBlock (tcg_rtrainers.inc), AI
      RegionStadiumAi; once a turn (TcgPlayer.stadiumUsed) but Celadon / Saffron City Gym.

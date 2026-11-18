@@ -402,6 +402,8 @@ const struct TcgStep *TcgFlow_ChoiceSteps(const struct TcgDuel *g, int *count)
         STEPS({TCG_ST_PICK, TCG_F_ANY, TCG_SRC_TOP3_THEIRS, 0, 3, "Put their top cards in order: the first on top."});
     case TCG_CHOICE_STAR_PIECE:
         STEPS({TCG_ST_PICK, TCG_F_EVOLVES_FROM_DATA, TCG_SRC_DECK, 0, 1, "Star Piece: evolve it into which card?"});
+    case TCG_CHOICE_FLEE:
+        STEPS({TCG_ST_CHOICE, 0, 0, 0, 0, "Flee: switch Misty's Tentacruel with which Benched Pokemon?"});
     case TCG_CHOICE_QUIZ1:
         STEPS({TCG_ST_CHOICE, 0, 0, 0, 0, "Blaine's Quiz #1: how long is the Pokemon named?"});
     case TCG_CHOICE_QUIZ3:

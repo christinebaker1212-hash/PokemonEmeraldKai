@@ -226,7 +226,8 @@ enum
     TCG_CHOICE_ORDER_THEIRS,     /* Shuffle Attack: the top choiceData cards of their deck in the order picked */
     TCG_CHOICE_STAR_PIECE,       /* Star Piece: an evolution from the deck for the Benched one in slot choiceData */
     TCG_CHOICE_QUIZ1,            /* Blaine's Quiz #1: the length of their card (choiceData) guessed among 4 */
-    TCG_CHOICE_QUIZ3             /* Blaine's Quiz #3: the name of their card (choiceData) guessed among 4 */
+    TCG_CHOICE_QUIZ3,            /* Blaine's Quiz #3: the name of their card (choiceData) guessed among 4 */
+    TCG_CHOICE_FLEE              /* Misty's Tentacruel's Flee: switch it with one of the Bench (7: stay) */
 };
 /* Pokemon Powers (src/tcg/tcg_powers.c), by the card's power. */
 enum TcgPowerId
@@ -428,6 +429,11 @@ struct TcgDuel
     /* Phase TCG_CHOICE: who chooses, what (TCG_CHOICE_*), the stage of it, the card that asks; choiceEndTurn: the turn
      * ends once it's done (an attack's) */
     uint8_t choicePlayer, choiceKind, choiceStage, choiceEndTurn, choiceData;
+    /* effectFrom: what the last action that started an effect was (TCG_ATTACK, TCG_USE_POWER, TCG_PLAY_TRAINER...: a
+     * choice continues it), for the rules that undo an effect (Unown [K], Brock's Protection, Ecogym, Parasect, Pokemon
+     * Tower: tcg_duel.c Undo); attackTurn: the turn an attack is resolving in (Time Shard, EXP.ALL) */
+    uint8_t effectFrom;
+    uint16_t attackTurn;
     uint16_t choiceCard;
     /* (also within one attack) nothing it does reaches the Defending Pokemon: Agility and
      * the like, Neutralizing Shield, a heads for Transparency */

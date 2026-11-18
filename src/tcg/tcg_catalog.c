@@ -2839,7 +2839,7 @@ const struct TcgCard gTcgCards[TCG_CARD_COUNT + 1] = {
 {.name="",.description="",.effect="NONE",.animation="ATK_ANIM_NONE",.cost={0},.damage=0,.category=TCG_DAMAGE_NORMAL},
 }
 },
-[444] = {.id=444, .name="Brock's Rhydon", .kind=TCG_POKEMON, .type=4, .rarity=2, .set=13, .set2=255, .dark=0, .holo=1, .flags=TCG_CF_OWNER, .origin=13,
+[444] = {.id=444, .name="Brock's Rhydon", .kind=TCG_POKEMON, .type=4, .rarity=2, .set=13, .set2=255, .dark=0, .holo=1, .flags=TCG_CF_OWNER|TCG_CF_READY, .origin=13,
 .hp=80, .stage=1, .species=112, .level=38, .retreat=3, .weakness=1, .resistance=2, .evolvesFrom="Brock's Rhyhorn", .description="", .attacks={
 {.name="Bench Guard",.description="As long as Brock's Rhydon is Benched, whenever 1 of your Benched Pokemon is damaged, you may do 10 of that damage to Brock's Rhydon instead. (If more than 1 of your Benched Pokemon is damaged at the same time, you may use this power once for each of them.)",.effect="gym1-2:p",.animation="ATK_ANIM_HIT",.cost={0,0,0,0,0,0,0,0,0},.damage=0,.category=TCG_POKEMON_POWER},
 {.name="Lariat",.description="Flip a coin. If tails, this attack does nothing.",.effect="gym1-2:a0",.animation="ATK_ANIM_HIT",.cost={0,0,0,0,2,0,2,0,0},.damage=70,.category=TCG_DAMAGE_NORMAL},
@@ -2895,7 +2895,7 @@ const struct TcgCard gTcgCards[TCG_CARD_COUNT + 1] = {
 {.name="",.description="",.effect="NONE",.animation="ATK_ANIM_NONE",.cost={0},.damage=0,.category=TCG_DAMAGE_NORMAL},
 }
 },
-[452] = {.id=452, .name="Misty's Tentacruel", .kind=TCG_POKEMON, .type=3, .rarity=2, .set=13, .set2=255, .dark=0, .holo=1, .flags=TCG_CF_OWNER, .origin=13,
+[452] = {.id=452, .name="Misty's Tentacruel", .kind=TCG_POKEMON, .type=3, .rarity=2, .set=13, .set2=255, .dark=0, .holo=1, .flags=TCG_CF_OWNER|TCG_CF_READY, .origin=13,
 .hp=70, .stage=1, .species=73, .level=30, .retreat=0, .weakness=2, .resistance=255, .evolvesFrom="Misty's Tentacool", .description="", .attacks={
 {.name="Flee",.description="If an attack does damage to Misty's Tentacruel while it's your Active Pokemon, you may switch it with 1 of your Benched Pokemon, which prevents all other effects of that attack on Misty's Tentacruel. This power can't be used if Misty's Tentacruel is already Asleep, Confused, or Paralyzed.",.effect="gym1-10:p",.animation="ATK_ANIM_HIT",.cost={0,0,0,0,0,0,0,0,0},.damage=0,.category=TCG_POKEMON_POWER},
 {.name="Jellyfish Poison",.description="Flip a coin. If heads, the Defending Pokemon is now Poisoned. If tails, the Defending Pokemon is now Confused.",.effect="gym1-10:a0",.animation="ATK_ANIM_HIT",.cost={0,0,0,2,0,0,2,0,0},.damage=30,.category=TCG_DAMAGE_NORMAL},
@@ -4254,7 +4254,7 @@ const struct TcgCard gTcgCards[TCG_CARD_COUNT + 1] = {
 [668] = {.id=668, .name="Blaine", .kind=TCG_TRAINER, .type=6, .rarity=2, .set=14, .set2=255, .dark=0, .holo=0, .flags=TCG_CF_READY, .origin=14, .canon=585,
 .effect="gym2-100:t",.description="During this turn, instead of attaching your free Energy card, you may instead attach 2 Fire Energy cards to 1 of your Pokemon with Blaine in its name. (Playing additional copies of this card this turn has no effect.)"
 },
-[669] = {.id=669, .name="Brock's Protection", .kind=TCG_TRAINER, .type=6, .rarity=2, .set=14, .set2=255, .dark=0, .holo=0, .flags=0, .origin=14,
+[669] = {.id=669, .name="Brock's Protection", .kind=TCG_TRAINER, .type=6, .rarity=2, .set=14, .set2=255, .dark=0, .holo=0, .flags=TCG_CF_READY, .origin=14,
 .effect="gym2-101:t",.description="Attach Brock's Protection to 1 of your Pokemon with Brock in its name. Energy cards attached to that Pokemon can't be removed by your opponent's attacks or Trainer cards. (This doesn't stop the rest of the attack or Trainer card from working normally.)"
 },
 [670] = {.id=670, .name="Chaos Gym", .kind=TCG_TRAINER, .type=6, .rarity=2, .set=14, .set2=255, .dark=0, .holo=0, .flags=TCG_CF_STADIUM, .origin=14,
@@ -4437,7 +4437,7 @@ const struct TcgCard gTcgCards[TCG_CARD_COUNT + 1] = {
 {.name="",.description="",.effect="NONE",.animation="ATK_ANIM_NONE",.cost={0},.damage=0,.category=TCG_DAMAGE_NORMAL},
 }
 },
-[710] = {.id=710, .name="Togetic", .kind=TCG_POKEMON, .type=6, .rarity=2, .set=15, .set2=255, .dark=0, .holo=1, .flags=0, .origin=15,
+[710] = {.id=710, .name="Togetic", .kind=TCG_POKEMON, .type=6, .rarity=2, .set=15, .set2=255, .dark=0, .holo=1, .flags=TCG_CF_READY, .origin=15,
 .hp=60, .stage=1, .species=176, .level=31, .retreat=0, .weakness=255, .resistance=4, .evolvesFrom="Togepi", .description="They say that it will appear before kindhearted, caring people and shower them with happiness.", .attacks={
 {.name="Super Metronome",.description="Flip a coin. If heads, choose an attack on 1 of your opponent's Pokemon. Super Metronome copies that attack except for its Energy cost. (You must still do anything else in order to use that attack.) (No matter what type the Defending Pokemon is, Togetic's type is still Colorless.) Togetic performs that attack. (Togetic can make that attack even if it does not have the appropriate number or type of Energy attached to it necessary to make the attack.)",.effect="neo1-16:a0",.animation="ATK_ANIM_HIT",.cost={0,0,0,0,0,0,1,0,0},.damage=0,.category=TCG_RESIDUAL},
 {.name="Fly",.description="Flip a coin. If heads, during your opponent's next turn, prevent all effects of attacks, including damage, done to Togetic; if tails, this attack does nothing (not even damage).",.effect="neo1-16:a1",.animation="ATK_ANIM_HIT",.cost={0,0,0,0,0,0,3,0,0},.damage=30,.category=TCG_DAMAGE_NORMAL},
@@ -4905,7 +4905,7 @@ const struct TcgCard gTcgCards[TCG_CARD_COUNT + 1] = {
 [777] = {.id=777, .name="Arcade Game", .kind=TCG_TRAINER, .type=6, .rarity=2, .set=15, .set2=255, .dark=0, .holo=0, .flags=TCG_CF_GAME_CORNER|TCG_CF_READY, .origin=15,
 .effect="neo1-83:t",.description="Shuffle your deck, then reveal the top 3 cards of it. If at least 2 of those cards share the same name, put all the ones with that name into your hand and shuffle the rest into your deck. If none of them do, shuffle all 3 into your deck."
 },
-[778] = {.id=778, .name="Ecogym", .kind=TCG_TRAINER, .type=6, .rarity=2, .set=15, .set2=255, .dark=0, .holo=0, .flags=TCG_CF_STADIUM, .origin=15,
+[778] = {.id=778, .name="Ecogym", .kind=TCG_TRAINER, .type=6, .rarity=2, .set=15, .set2=255, .dark=0, .holo=0, .flags=TCG_CF_STADIUM|TCG_CF_READY, .origin=15,
 .effect="neo1-84:t",.description="This card stays in play when you play it. Discard this card if another Stadium card comes into play. Whenever an attack, Pokemon Power, or Trainer card discards another player's non-Colorless Energy card from a Pokemon, return that Energy card to its owner's hand. (Energy cards that are discarded when that Pokemon is Knocked Out don't count.)"
 },
 [779] = {.id=779, .name="Energy Charge", .kind=TCG_TRAINER, .type=6, .rarity=2, .set=15, .set2=255, .dark=0, .holo=0, .flags=TCG_CF_READY, .origin=15,
@@ -5592,7 +5592,7 @@ const struct TcgCard gTcgCards[TCG_CARD_COUNT + 1] = {
 {.name="",.description="",.effect="NONE",.animation="ATK_ANIM_NONE",.cost={0},.damage=0,.category=TCG_DAMAGE_NORMAL},
 }
 },
-[891] = {.id=891, .name="Entei", .kind=TCG_POKEMON, .type=0, .rarity=2, .set=17, .set2=255, .dark=0, .holo=0, .flags=0, .origin=17,
+[891] = {.id=891, .name="Entei", .kind=TCG_POKEMON, .type=0, .rarity=2, .set=17, .set2=255, .dark=0, .holo=0, .flags=TCG_CF_READY, .origin=17,
 .hp=60, .stage=0, .species=244, .level=24, .retreat=0, .weakness=3, .resistance=255, .evolvesFrom="", .description="A Pokemon that races across the land. It is said that one is born every time a new volcano appears.", .attacks={
 {.name="Legendary Body",.description="As long as Entei is your Active Pokemon, Entei and Energy cards attached to it aren't affected by effects from Trainer cards other than Stadium cards. As long as this Power is active, discard any Trainer cards attached to Entei. (This power works even if Entei is Asleep, Confused, or Paralyzed.)",.effect="neo3-17:p",.animation="ATK_ANIM_HIT",.cost={0,0,0,0,0,0,0,0,0},.damage=0,.category=TCG_POKEMON_POWER},
 {.name="Mega Flame",.description="Flip 2 coins. For each tails, discard 1 Fire Energy card from Entei, if it has any.",.effect="neo3-17:a0",.animation="ATK_ANIM_HIT",.cost={3,0,0,0,0,0,0,0,0},.damage=50,.category=TCG_DAMAGE_NORMAL},
@@ -5627,7 +5627,7 @@ const struct TcgCard gTcgCards[TCG_CARD_COUNT + 1] = {
 {.name="",.description="",.effect="NONE",.animation="ATK_ANIM_NONE",.cost={0},.damage=0,.category=TCG_DAMAGE_NORMAL},
 }
 },
-[896] = {.id=896, .name="Raikou", .kind=TCG_POKEMON, .type=2, .rarity=2, .set=17, .set2=255, .dark=0, .holo=0, .flags=0, .origin=17,
+[896] = {.id=896, .name="Raikou", .kind=TCG_POKEMON, .type=2, .rarity=2, .set=17, .set2=255, .dark=0, .holo=0, .flags=TCG_CF_READY, .origin=17,
 .hp=60, .stage=0, .species=243, .level=26, .retreat=0, .weakness=4, .resistance=255, .evolvesFrom="", .description="A Pokemon that races across the land while barking a cry that sounds like crashing thunder.", .attacks={
 {.name="Legendary Body",.description="As long as Raikou is your Active Pokemon, Raikou and Energy cards attached to it aren't affected by effects from Trainer cards other than Stadium cards. As long as this Power is active, discard any Trainer cards attached to Raikou. (This power works even if Raikou is Asleep, Confused, or Paralyzed.)",.effect="neo3-22:p",.animation="ATK_ANIM_HIT",.cost={0,0,0,0,0,0,0,0,0},.damage=0,.category=TCG_POKEMON_POWER},
 {.name="Lightning Spark",.description="If your opponent has any Benched Pokemon, flip a coin. If heads, choose 1 of them and this attack does 20 damage to it. (Don't apply Weakness and Resistance for Benched Pokemon.)",.effect="neo3-22:a0",.animation="ATK_ANIM_HIT",.cost={0,0,3,0,0,0,0,0,0},.damage=30,.category=TCG_DAMAGE_NORMAL},
@@ -5662,7 +5662,7 @@ const struct TcgCard gTcgCards[TCG_CARD_COUNT + 1] = {
 {.name="",.description="",.effect="NONE",.animation="ATK_ANIM_NONE",.cost={0},.damage=0,.category=TCG_DAMAGE_NORMAL},
 }
 },
-[901] = {.id=901, .name="Suicune", .kind=TCG_POKEMON, .type=3, .rarity=2, .set=17, .set2=255, .dark=0, .holo=0, .flags=0, .origin=17,
+[901] = {.id=901, .name="Suicune", .kind=TCG_POKEMON, .type=3, .rarity=2, .set=17, .set2=255, .dark=0, .holo=0, .flags=TCG_CF_READY, .origin=17,
 .hp=60, .stage=0, .species=245, .level=25, .retreat=0, .weakness=2, .resistance=255, .evolvesFrom="", .description="This Pokemon races across the land. It is said that north winds will somehow blow whenever it appears.", .attacks={
 {.name="Legendary Body",.description="As long as Suicune is your Active Pokemon, Suicune and Energy cards attached to it aren't affected by effects from Trainer cards other than Stadium cards. As long as this Power is active, discard any Trainer cards attached to Suicune. (This power works even if Suicune is Asleep, Confused, or Paralyzed.)",.effect="neo3-27:p",.animation="ATK_ANIM_HIT",.cost={0,0,0,0,0,0,0,0,0},.damage=0,.category=TCG_POKEMON_POWER},
 {.name="Crystal Wave",.description="Flip a coin. If heads, this attack does 30 damage plus 10 more damage. If tails, this attack does 30 damage and, if your opponent has any Benched Pokemon, he or she chooses 1 of them and switches it with the Defending Pokemon. (Do the damage before switching the Pokemon.)",.effect="neo3-27:a0",.animation="ATK_ANIM_HIT",.cost={0,0,0,3,0,0,0,0,0},.damage=30,.category=TCG_DAMAGE_PLUS},
@@ -5718,7 +5718,7 @@ const struct TcgCard gTcgCards[TCG_CARD_COUNT + 1] = {
 {.name="",.description="",.effect="NONE",.animation="ATK_ANIM_NONE",.cost={0},.damage=0,.category=TCG_DAMAGE_NORMAL},
 }
 },
-[909] = {.id=909, .name="Parasect", .kind=TCG_POKEMON, .type=1, .rarity=1, .set=17, .set2=255, .dark=0, .holo=0, .flags=0, .origin=17,
+[909] = {.id=909, .name="Parasect", .kind=TCG_POKEMON, .type=1, .rarity=1, .set=17, .set2=255, .dark=0, .holo=0, .flags=TCG_CF_READY, .origin=17,
 .hp=60, .stage=1, .species=47, .level=30, .retreat=2, .weakness=0, .resistance=255, .evolvesFrom="Paras", .description="It stays mostly in dark, damp places, the preference not of the bug, but of the big mushrooms on its back.", .attacks={
 {.name="Allergic Pollen",.description="As long as Parasect is in play, cards in any player's discard piles are not affected by attacks or Pokemon Powers. This power stops working if Parasect becomes Asleep, Confused, or Paralyzed.",.effect="neo3-35:p",.animation="ATK_ANIM_HIT",.cost={0,0,0,0,0,0,0,0,0},.damage=0,.category=TCG_POKEMON_POWER},
 {.name="Sleep Pinchers",.description="Flip a coin. If heads, the Defending Pokemon is now Asleep.",.effect="neo3-35:a0",.animation="ATK_ANIM_HIT",.cost={0,2,0,0,0,0,0,0,0},.damage=30,.category=TCG_DAMAGE_NORMAL},
@@ -5879,7 +5879,7 @@ const struct TcgCard gTcgCards[TCG_CARD_COUNT + 1] = {
 {.name="",.description="",.effect="NONE",.animation="ATK_ANIM_NONE",.cost={0},.damage=0,.category=TCG_DAMAGE_NORMAL},
 }
 },
-[932] = {.id=932, .name="Unown [K]", .kind=TCG_POKEMON, .type=5, .rarity=0, .set=17, .set2=255, .dark=0, .holo=0, .flags=0, .origin=17,
+[932] = {.id=932, .name="Unown [K]", .kind=TCG_POKEMON, .type=5, .rarity=0, .set=17, .set2=255, .dark=0, .holo=0, .flags=TCG_CF_READY, .origin=17,
 .hp=40, .stage=0, .species=201, .level=14, .retreat=1, .weakness=5, .resistance=255, .evolvesFrom="", .description="Their shapes look like hieroglyphs on ancient tablets. It is said that the two are somehow related.", .attacks={
 {.name="[Keep]",.description="Your opponent's attacks, Pokemon Powers, and Trainer cards can't discard Energy cards from your Pokemon with Unown in their names. (Any other effects still happen.)",.effect="neo3-58:p",.animation="ATK_ANIM_HIT",.cost={0,0,0,0,0,0,0,0,0},.damage=0,.category=TCG_POKEMON_POWER},
 {.name="Hidden Power",.description="",.effect="NONE",.animation="ATK_ANIM_HIT",.cost={0,0,0,0,0,1,0,0,0},.damage=10,.category=TCG_DAMAGE_NORMAL},
@@ -6558,7 +6558,7 @@ const struct TcgCard gTcgCards[TCG_CARD_COUNT + 1] = {
 [1032] = {.id=1032, .name="Broken Ground Gym", .kind=TCG_TRAINER, .type=6, .rarity=2, .set=18, .set2=255, .dark=0, .holo=0, .flags=TCG_CF_STADIUM|TCG_CF_READY, .origin=18,
 .effect="neo4-92:t",.description="This card stays in play when you play it. Discard this card if another Stadium card comes into play. Each player pays Colorless more to retreat a Baby Pokemon or Basic Pokemon."
 },
-[1033] = {.id=1033, .name="EXP.ALL", .kind=TCG_TRAINER, .type=6, .rarity=2, .set=18, .set2=255, .dark=0, .holo=0, .flags=TCG_CF_TOOL, .origin=18,
+[1033] = {.id=1033, .name="EXP.ALL", .kind=TCG_TRAINER, .type=6, .rarity=2, .set=18, .set2=255, .dark=0, .holo=0, .flags=TCG_CF_TOOL|TCG_CF_READY, .origin=18,
 .effect="neo4-93:t",.description="Attach EXP.ALL to 1 of your Pokemon that doesn't have a Pokemon Tool attached to it. During your opponent's turn, if your Active Pokemon would be Knocked Out by your opponent's attack, you may take 1 of the basic Energy cards attached to your Active Pokemon and attach it to the Pokemon with EXP.ALL attached to it. If you do, discard EXP.ALL."
 },
 [1034] = {.id=1034, .name="Impostor Professor Oak's Invention", .kind=TCG_TRAINER, .type=6, .rarity=2, .set=18, .set2=255, .dark=0, .holo=0, .flags=TCG_CF_READY, .origin=18,
@@ -8584,7 +8584,7 @@ const struct TcgCard gTcgCards[TCG_CARD_COUNT + 1] = {
 [1346] = {.id=1346, .name="Super Energy Removal 2", .kind=TCG_TRAINER, .type=6, .rarity=1, .set=20, .set2=255, .dark=0, .holo=0, .flags=TCG_CF_READY, .origin=20,
 .effect="ecard2-134:t",.description="Flip 2 coins. If both are heads, discard all Energy cards attached to the Defending Pokemon. If both are tails, discard all Energy cards attached to your Active Pokemon. If 1 is heads and 1 is tails, this card does nothing."
 },
-[1347] = {.id=1347, .name="Time Shard", .kind=TCG_TRAINER, .type=6, .rarity=1, .set=20, .set2=255, .dark=0, .holo=0, .flags=TCG_CF_TOOL, .origin=20,
+[1347] = {.id=1347, .name="Time Shard", .kind=TCG_TRAINER, .type=6, .rarity=1, .set=20, .set2=255, .dark=0, .holo=0, .flags=TCG_CF_TOOL|TCG_CF_READY, .origin=20,
 .effect="ecard2-135:t",.description="Attach Time Shard to 1 of your Pokemon that doesn't already have a Pokemon Tool card attached to it. If that Pokemon is Knocked Out, discard this card. If the Pokemon this card is attached to is Knocked Out by damage from the Defending Pokemon's attack during your opponent's turn, you may return up to 2 basic Energy cards attached to that Pokemon to your hand."
 },
 [1348] = {.id=1348, .name="Town Volunteers", .kind=TCG_TRAINER, .type=6, .rarity=1, .set=20, .set2=255, .dark=0, .holo=0, .flags=TCG_CF_SUPPORTER|TCG_CF_READY, .origin=20,
@@ -10353,7 +10353,7 @@ const struct TcgCard gTcgCards[TCG_CARD_COUNT + 1] = {
 [1617] = {.id=1617, .name="Lucky Stadium", .kind=TCG_TRAINER, .type=6, .rarity=3, .set=4, .set2=255, .dark=0, .holo=0, .flags=TCG_CF_STADIUM|TCG_CF_READY, .origin=22, .canon=1040,
 .effect="basep-41:t",.description="This card stays in play when you play it. Discard this card if another Stadium card comes into play. Once during each player's turn (before attacking), that player may flip a coin. If heads, that player draws a card."
 },
-[1618] = {.id=1618, .name="Pokemon Tower", .kind=TCG_TRAINER, .type=6, .rarity=3, .set=4, .set2=255, .dark=0, .holo=0, .flags=TCG_CF_STADIUM, .origin=22,
+[1618] = {.id=1618, .name="Pokemon Tower", .kind=TCG_TRAINER, .type=6, .rarity=3, .set=4, .set2=255, .dark=0, .holo=0, .flags=TCG_CF_STADIUM|TCG_CF_READY, .origin=22,
 .effect="basep-42:t",.description="This card stays in play when you play it. Discard this card if another Stadium card comes into play. If the effect of a Pokemon Power, attack, Energy card, or Trainer card would put a card in a discard pile into its owner's hand, that card stays in that discard pile instead."
 },
 [1619] = {.id=1619, .name="Machamp", .kind=TCG_POKEMON, .type=4, .rarity=3, .set=4, .set2=255, .dark=0, .holo=0, .flags=TCG_CF_READY, .origin=22,

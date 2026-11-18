@@ -1248,13 +1248,13 @@ unsigned TcgFlow_TrainerChoices(const struct TcgDuel *g, unsigned me, unsigned c
         }
         return m->count;
     }
-    if (g->phase == TCG_CHOICE && g->choiceKind == TCG_CHOICE_RETURN_MON)
+    if (g->phase == TCG_CHOICE && (g->choiceKind == TCG_CHOICE_RETURN_MON || g->choiceKind == TCG_CHOICE_FLEE))
     {
         unsigned s2;
         memset(m, 0, sizeof(*m));
         *reason = NULL;
-        MenuAdd(m, "DONE", 7, 1, NULL);
-        for (s2 = 0; s2 < TCG_FIELD_SIZE; s2++)
+        MenuAdd(m, g->choiceKind == TCG_CHOICE_FLEE ? "STAY" : "DONE", 7, 1, NULL);
+        for (s2 = g->choiceKind == TCG_CHOICE_FLEE; s2 < TCG_FIELD_SIZE; s2++)
             if (Field(g, g->choicePlayer, s2))
                 MenuAdd(m, Field(g, g->choicePlayer, s2)->name, s2, 1, NULL);
         return m->count;

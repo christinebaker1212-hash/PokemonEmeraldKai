@@ -1506,6 +1506,162 @@ static int QuizzesAndPlays(void)
     printf("PASS quizzes and plays: Blaine's Quiz #1 and #3, Shuffle Attack, Howl, Manipulate\n");
     return 0;
 }
+/* Play the Trainer id from player 0's hand at target, with one selection (or none: sel < 0) */
+static int PlayAt(struct TcgDuel *g, unsigned id, unsigned target, int sel)
+{
+    struct TcgAction a;
+    int c = Relabel(g, 0, id);
+    g->players[0].hand[g->players[0].handSize++] = (uint8_t)c;
+    memset(&a, 0, sizeof(a));
+    a.type = TCG_PLAY_TRAINER;
+    a.hand = (uint8_t)(g->players[0].handSize - 1);
+    a.target = (uint8_t)target;
+    if (sel >= 0)
+        a.selections[0] = (uint8_t)sel, a.selectionCount = 1;
+    return TcgDuel_Apply(g, &a);
+}
+static void Prizes3(struct TcgDuel *g)
+{
+    unsigned who;
+    for (who = 0; who < 2; who++)
+        while (g->players[who].prizeSize < 3)
+            g->players[who].prizes[g->players[who].prizeSize++] = g->players[who].deck[--g->players[who].deckSize];
+}
+static void AttachTool(struct TcgDuel *g, unsigned who, unsigned slot, unsigned id)
+{
+    int c = Relabel(g, who, id);
+    g->players[who].field[slot].attached[g->players[who].field[slot].attachedSize++] = (uint8_t)c;
+}
+/* Flee, Bench Guard, Legendary Body, Unown [K], Ecogym, Brock's Protection, Pokemon Tower, Allergic Pollen, Time Shard,
+ * EXP.ALL, Super Metronome */
+static int LastRules(void)
+{
+    struct TcgDuel g;
+    struct TcgAction a;
+    const struct TcgAttack *at;
+    unsigned k, n, d;
+    int c;
+    static const unsigned need[] = {TCG_CARD_GYM1_10, TCG_CARD_GYM1_2, TCG_CARD_NEO3_17, TCG_CARD_NEO3_58, TCG_CARD_NEO1_84,
+                                    TCG_CARD_GYM2_101, TCG_CARD_BASEP_42, TCG_CARD_NEO3_35, TCG_CARD_ECARD2_135,
+                                    TCG_CARD_NEO4_93, TCG_CARD_NEO1_16, TCG_CARD_GYM2_56};
+    for (k = 0; k < sizeof(need) / sizeof(need[0]); k++)
+        if (!Tcg_Card(need[k]))
+            return printf("FAIL last rules: card %u isn't finished\n", need[k]), 1;
+    /* Flee: their Tentacruel, damaged and not Knocked Out, switched with a Benched one; then their turn */
+    Stage(&g, TCG_CARD_MACHOP, 0, 1);
+    Prizes3(&g);
+    g.players[0].field[0].poison = 0;
+    g.players[1].cards[g.players[1].field[0].stack[0]] = TCG_CARD_GYM1_10;
+    memset(&a, 0, sizeof(a));
+    a.type = TCG_ATTACK;
+    if (TcgDuel_Apply(&g, &a) != TCG_OK || g.phase != TCG_CHOICE || g.choiceKind != TCG_CHOICE_FLEE || g.choicePlayer != 1)
+        return printf("FAIL Flee: not asked (%s)\n", g.error), 1;
+    Choose(&g, 1, -1);
+    if (g.players[1].cards[g.players[1].field[1].stack[0]] != TCG_CARD_GYM1_10 || !g.players[1].field[1].damage ||
+        g.phase != TCG_TURN || g.current != 1)
+        return printf("FAIL Flee's switch\n"), 1;
+    /* Bench Guard: 10 of a Benched one's 20 to the Benched Rhydon */
+    Stage(&g, TCG_CARD_MACHOP, 0, 1);
+    g.players[1].cards[g.players[1].field[1].stack[0]] = TCG_CARD_GYM1_2;
+    TcgDuel_EffectDamage(&g, 1, 2, 20, 0);
+    if (g.players[1].field[1].damage != 10 || g.players[1].field[2].damage != 10)
+        return printf("FAIL Bench Guard (%u, %u)\n", g.players[1].field[1].damage, g.players[1].field[2].damage), 1;
+    /* Legendary Body: no Potion on the Active Entei */
+    Stage(&g, TCG_CARD_NEO3_17, 0, 1);
+    g.players[0].field[0].damage = 20;
+    if (PlayAt(&g, TCG_CARD_POTION, 0, -1) == TCG_OK || g.players[0].field[0].damage != 20)
+        return printf("FAIL Legendary Body let a Potion through\n"), 1;
+    /* Unown [K]: Energy Removal leaves its Energy on */
+    Stage(&g, TCG_CARD_MACHOP, 0, 1);
+    g.players[1].cards[g.players[1].field[0].stack[0]] = TCG_CARD_NEO3_58;
+    n = g.players[1].field[0].attachedSize;
+    if (PlayAt(&g, TCG_CARD_ENERGY_REMOVAL, 0, g.players[1].field[0].attached[0]) != TCG_OK || g.players[1].field[0].attachedSize != n)
+        return printf("FAIL [Keep] (%s)\n", g.error), 1;
+    /* Brock's Protection, the same */
+    Stage(&g, TCG_CARD_MACHOP, 0, 1);
+    g.players[1].cards[g.players[1].field[0].stack[0]] = TCG_CARD_GYM1_2;
+    AttachTool(&g, 1, 0, TCG_CARD_GYM2_101);
+    n = g.players[1].field[0].attachedSize;
+    if (PlayAt(&g, TCG_CARD_ENERGY_REMOVAL, 0, g.players[1].field[0].attached[0]) != TCG_OK || g.players[1].field[0].attachedSize != n)
+        return printf("FAIL Brock's Protection (%s)\n", g.error), 1;
+    /* Ecogym: the Water Energy removed goes to their hand */
+    Stage(&g, TCG_CARD_MACHOP, 0, 1);
+    c = Relabel(&g, 0, TCG_CARD_NEO1_84);
+    g.players[0].stadium = (uint8_t)(c + 1);
+    n = g.players[1].handSize, d = g.players[1].discardSize;
+    if (PlayAt(&g, TCG_CARD_ENERGY_REMOVAL, 0, g.players[1].field[0].attached[0]) != TCG_OK ||
+        g.players[1].handSize != n + 1 || g.players[1].discardSize != d)
+        return printf("FAIL Ecogym (%s)\n", g.error), 1;
+    /* Pokemon Tower: Item Finder's Potion stays in the discard pile */
+    Stage(&g, TCG_CARD_MACHOP, 0, 1);
+    c = Relabel(&g, 0, TCG_CARD_BASEP_42);
+    g.players[0].stadium = (uint8_t)(c + 1);
+    c = Relabel(&g, 0, TCG_CARD_POTION);
+    g.players[0].discard[g.players[0].discardSize++] = (uint8_t)c;
+    for (k = 0; k < 2; k++)
+        g.players[0].hand[g.players[0].handSize++] = g.players[0].deck[--g.players[0].deckSize];
+    c = Relabel(&g, 0, TCG_CARD_ITEM_FINDER);
+    g.players[0].hand[g.players[0].handSize++] = (uint8_t)c;
+    memset(&a, 0, sizeof(a));
+    a.type = TCG_PLAY_TRAINER;
+    a.hand = (uint8_t)(g.players[0].handSize - 1);
+    a.selections[0] = g.players[0].hand[g.players[0].handSize - 2];
+    a.selections[1] = g.players[0].hand[g.players[0].handSize - 3];
+    a.selections[2] = g.players[0].discard[g.players[0].discardSize - 1];
+    a.selectionCount = 3;
+    k = a.selections[2];
+    if (TcgDuel_Apply(&g, &a) != TCG_OK)
+        return printf("FAIL Pokemon Tower: %s\n", g.error), 1;
+    for (n = 0; n < g.players[0].discardSize && g.players[0].discard[n] != k; n++)
+        ;
+    if (n == g.players[0].discardSize)
+        return printf("FAIL Pokemon Tower: the Potion came back\n"), 1;
+    /* Allergic Pollen: Invigorate can't take their Diglett from the discard pile */
+    Stage(&g, TCG_CARD_GYM2_56, 0, 1);
+    g.players[1].cards[g.players[1].field[1].stack[0]] = TCG_CARD_NEO3_35;
+    for (k = 0; k < g.players[1].deckSize && g.players[1].cards[g.players[1].deck[k]] != TCG_CARD_DIGLETT; k++)
+        ;
+    g.players[1].discard[g.players[1].discardSize++] = TcgPile_Remove(g.players[1].deck, &g.players[1].deckSize, k);
+    memset(&a, 0, sizeof(a));
+    a.type = TCG_ATTACK;
+    if (TcgDuel_Apply(&g, &a) == TCG_OK && g.phase == TCG_CHOICE)
+    {
+        Choose(&g, 1, -1);
+        if (g.phase == TCG_CHOICE)
+            Choose(&g, 0, g.players[1].discard[g.players[1].discardSize - 1]);
+    }
+    if (g.players[1].field[3].stackSize || g.players[1].cards[g.players[1].discard[g.players[1].discardSize - 1]] != TCG_CARD_DIGLETT)
+        return printf("FAIL Allergic Pollen\n"), 1;
+    /* Time Shard: their Machop Knocked Out, 2 basic Energy cards to their hand */
+    Stage(&g, TCG_CARD_MACHOP, 0, 1);
+    Prizes3(&g);
+    g.players[0].field[0].poison = 0;
+    AttachTool(&g, 1, 0, TCG_CARD_ECARD2_135);
+    g.players[1].field[0].damage = (uint16_t)(TcgDuel_MaxHp(&g, 1, 0) - 10);
+    n = g.players[1].handSize;
+    memset(&a, 0, sizeof(a));
+    a.type = TCG_ATTACK;
+    if (TcgDuel_Apply(&g, &a) != TCG_OK || g.players[1].handSize != n + 2)
+        return printf("FAIL Time Shard (%u to the hand; %s)\n", g.players[1].handSize - n, g.error), 1;
+    /* EXP.ALL: a basic Energy of the Knocked Out Machop onto the Benched one with it, EXP.ALL discarded */
+    Stage(&g, TCG_CARD_MACHOP, 0, 1);
+    Prizes3(&g);
+    g.players[0].field[0].poison = 0;
+    AttachTool(&g, 1, 1, TCG_CARD_NEO4_93);
+    g.players[1].field[0].damage = (uint16_t)(TcgDuel_MaxHp(&g, 1, 0) - 10);
+    memset(&a, 0, sizeof(a));
+    a.type = TCG_ATTACK;
+    if (TcgDuel_Apply(&g, &a) != TCG_OK || g.players[1].field[1].attachedSize != 1 ||
+        Tcg_Card(g.players[1].cards[g.players[1].field[1].attached[0]])->kind != TCG_ENERGY)
+        return printf("FAIL EXP.ALL (%s)\n", g.error), 1;
+    /* Super Metronome: any attack of their Pokemon in play */
+    Stage(&g, TCG_CARD_NEO1_16, 0, 1);
+    at = TcgDuel_MetronomeAttack(&g, 0, 3);
+    if (!at || strcmp(at->name, Tcg_Card(TCG_CARD_DIGLETT)->attacks[0].name))
+        return printf("FAIL Super Metronome: %s\n", at ? at->name : "nothing"), 1;
+    printf("PASS last rules: Flee, Bench Guard, Legendary Body, [Keep], Brock's Protection, Ecogym, Pokemon Tower, Allergic Pollen, Time Shard, EXP.ALL, Super Metronome\n");
+    return 0;
+}
 static int Choices(void)
 {
     struct TcgDuel g;
@@ -2342,6 +2498,8 @@ int main(void)
     struct TcgDuel g;
     unsigned id, attack, used = 0, ok = 0, steps = 0, ready = 0;
     uint32_t seed;
+    if (getenv("TCG_ONLY_LAST"))
+        return LastRules(); /* (the newest rules alone, while translating) */
     for (id = TCG_CARD_GB_COUNT + 1; id <= TCG_CARD_COUNT; id++)
     {
         const struct TcgCard *c = Tcg_Card(id);
@@ -2421,7 +2579,7 @@ int main(void)
     }
     printf("PASS %u finished regional cards: %u attacks used %u times, then %u AI actions after them\n", ready, used, ok,
            steps);
-    if (SpecialEnergy() || EcardEnergy() || ScriptMechanics() || Anchors() || Guards() || MovePowers() || LookPowers() || SwitchesAndFire() || BorrowedAttacks() || Copies() || PowersOfFour() || Choices() || Peeks() || MoreChoices() || MoreRules() || EvenMoreRules() || QuizzesAndPlays() || TechnicalMachines() || Babies())
+    if (SpecialEnergy() || EcardEnergy() || ScriptMechanics() || Anchors() || Guards() || MovePowers() || LookPowers() || SwitchesAndFire() || BorrowedAttacks() || Copies() || PowersOfFour() || Choices() || Peeks() || MoreChoices() || MoreRules() || EvenMoreRules() || QuizzesAndPlays() || LastRules() || TechnicalMachines() || Babies())
         return 1;
     if (PlayTrainers() || UsePowers() || UseStadiums() || AttackFlows())
         return 1;

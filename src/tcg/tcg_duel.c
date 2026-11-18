@@ -43,6 +43,13 @@ void TcgDuel_Event(struct TcgDuel *g, unsigned type, unsigned player, unsigned s
         }
         if (player == g->current && g->phase != TCG_SETUP)
             TcgPower_NewActive(g, player); /* (Spikes) */
+        if (TcgPower_Working(g, player, 0) == TCG_POWER_R_LEGENDARY_BODY)
+        {
+            /* (Legendary Body: the Trainer cards attached to it discarded once it's the Active Pokemon) */
+            unsigned tool;
+            while (TcgDuel_Tool(g, player, 0, &tool))
+                TcgDuel_DiscardAttached(g, player, 0, tool);
+        }
     }
     if (type == TCG_EV_EVOLVE && player < 2 && player == g->current && g->phase == TCG_TURN)
     {
@@ -514,6 +521,44 @@ static unsigned PokemonCount(const struct TcgPlayer *p)
         n += p->field[i].stackSize != 0;
     return n;
 }
+/* A Pokemon of who's Knocked Out by the other player's attack, before its cards are discarded: Time Shard (up to 2
+ * basic Energy cards of it into the hand), EXP.ALL on another of theirs (a basic Energy of the Active onto that one; the
+ * EXP.ALL discarded). Both "may": always taken, the basic Energy cards first in the order attached. */
+static void KnockedOutByAttack(struct TcgDuel *g, unsigned who, unsigned s)
+{
+    struct TcgPlayer *p = &g->players[who];
+    struct TcgFieldCard *f = &p->field[s];
+    unsigned tool, k, n = 0, t;
+    if (TcgDuel_Tool(g, who, s, &tool) == TCG_CARD_ECARD2_135)
+    {
+        for (k = 0; k < f->attachedSize && n < 2;)
+        {
+            if (p->cards[f->attached[k]] >= 1 && p->cards[f->attached[k]] <= 6)
+            {
+                p->hand[p->handSize++] = TcgPile_Remove(f->attached, &f->attachedSize, k);
+                n++;
+            }
+            else
+                k++;
+        }
+    }
+    if (s)
+        return;
+    for (t = 1; t < TCG_FIELD_SIZE; t++)
+        if (TcgDuel_Tool(g, who, t, &tool) == TCG_CARD_NEO4_93)
+        {
+            for (k = 0; k < f->attachedSize && !(p->cards[f->attached[k]] >= 1 && p->cards[f->attached[k]] <= 6); k++)
+                ;
+            if (k < f->attachedSize)
+            {
+                struct TcgFieldCard *to = &p->field[t];
+                to->attached[to->attachedSize++] = TcgPile_Remove(f->attached, &f->attachedSize, k);
+                TcgDuel_Event(g, TCG_EV_ATTACH, who, t, 0, p->cards[to->attached[to->attachedSize - 1]], 0);
+                TcgDuel_DiscardAttached(g, who, t, tool);
+            }
+            break;
+        }
+}
 void TcgDuel_ResolveKnockouts(struct TcgDuel *g)
 {
     unsigned who, s, win[2] = {0};
@@ -535,6 +580,8 @@ void TcgDuel_ResolveKnockouts(struct TcgDuel *g)
                 int rebirth = TcgPower_Working(g, who, s) == TCG_POWER_R_REBIRTH;
                 uint8_t top = f->stack[f->stackSize - 1];
                 TcgDuel_Log(g, "%s is Knocked Out.", c->name);
+                if (who != g->current && g->attackTurn == g->turn)
+                    KnockedOutByAttack(g, who, s);   /* (Time Shard, EXP.ALL) */
                 TcgDuel_Event(g, TCG_EV_KO, who, s, 0, c->id, 0);
                 TcgDuel_DiscardField(g, who, s);
                 if (rebirth)
@@ -859,6 +906,7 @@ static void EndTurn(struct TcgDuel *g)
 {
     unsigned who, s;
     struct TcgPlayer *p = &g->players[g->current];
+    g->attackTurn = 0;
     if (g->phase == TCG_TURN)
     {
         /* Star Piece (between turns): on a Benched Pokemon with 2 or more damage counters, an evolution of it from the
@@ -1131,7 +1179,11 @@ static int Apply(struct TcgDuel *g, const struct TcgAction *a)
         uint16_t struck[TCG_FIELD_SIZE];
         const char *blocked;
         int result, total;
+        /* (Misty's Tentacruel's Flee: it must be able to use it as the attack begins) */
+        unsigned fleeTop = foe->stackSize ? foe->stack[foe->stackSize - 1] : 255u, fleeDamage = foe->damage;
+        int flee = TcgPower_Working(g, g->current ^ 1, 0) == TCG_POWER_R_FLEE;
         f = &p->field[0];
+        g->attackTurn = g->turn;
         if (!attacker || !target || attacker->kind != TCG_POKEMON || a->attack >= TCG_ATTACK_SLOTS ||
             !EnergyPaid(g, g->current, a->attack))
             return Error(g, "That attack cannot be used with the attached Energy.");
@@ -1543,6 +1595,17 @@ static int Apply(struct TcgDuel *g, const struct TcgAction *a)
             }
             g->switchPending = 0;
         }
+        if (flee && foe->stackSize && foe->stack[foe->stackSize - 1] == fleeTop && foe->damage > fleeDamage &&
+            foe->damage < TcgDuel_MaxHp(g, g->current ^ 1, 0))
+        {
+            /* Flee: the attack damaged it; its player may switch it with a Benched one (tcg_choice.inc) */
+            TcgDuel_AskChoice(g, g->current ^ 1, TCG_CHOICE_FLEE, TcgDuel_Field(g, g->current ^ 1, 0)->id, 0);
+            if (g->phase == TCG_CHOICE)
+            {
+                g->choiceEndTurn = 1;
+                return TCG_OK;
+            }
+        }
         TcgDuel_ResolveKnockouts(g);
         if (g->phase == TCG_FINISHED || g->phase == TCG_SETUP)
             return TCG_OK;
@@ -1665,6 +1728,26 @@ static int Apply(struct TcgDuel *g, const struct TcgAction *a)
             return Error(g, "You can't play Supporter cards this turn.");
         if (TcgPower_NoTrainers(g))
             return Error(g, "Dark Vileplume's Hay Fever: no Trainer cards can be played.");
+        if (!(c->flags & TCG_CF_STADIUM) && (TcgPower_Working(g, 0, 0) == TCG_POWER_R_LEGENDARY_BODY ||
+                                              TcgPower_Working(g, 1, 0) == TCG_POWER_R_LEGENDARY_BODY))
+        {
+            /* Entei's Legendary Body: no Trainer but a Stadium affects the Active Entei or its Energy (a Trainer that
+             * would is refused) */
+            struct TcgDuel *test = malloc(sizeof(*test));
+            unsigned w;
+            int touched = 0;
+            if (test)
+            {
+                *test = *g;
+                if (TcgDuel_Trainer(test, a) == TCG_OK)
+                    for (w = 0; w < 2; w++)
+                        touched |= TcgPower_Working(g, w, 0) == TCG_POWER_R_LEGENDARY_BODY &&
+                                   memcmp(&test->players[w].field[0], &g->players[w].field[0], sizeof(g->players[w].field[0]));
+                free(test);
+            }
+            if (touched)
+                return Error(g, "Legendary Body: Trainer cards don't affect that Entei.");
+        }
         if (TcgDuel_Stadium(g, NULL) == TCG_CARD_GYM1_103 &&
             (Tcg_Canon(c->id) == TCG_CARD_ENERGY_REMOVAL || Tcg_Canon(c->id) == TCG_CARD_SUPER_ENERGY_REMOVAL) &&
             p->handSize < 3)
@@ -1932,6 +2015,105 @@ int TcgDuel_Conserved(const struct TcgDuel *g)
     }
     return 1;
 }
+/* ------------------------------------------------------------------ */
+/* The rules that undo part of what an effect did, after the action      */
+/* ------------------------------------------------------------------ */
+static int PileAt(const uint8_t *pile, unsigned n, unsigned card)
+{
+    unsigned i;
+    for (i = 0; i < n; i++)
+        if (pile[i] == card)
+            return (int)i;
+    return -1;
+}
+/* card out of wherever it is now (the hand, the deck, the Prizes, attached, a lone Pokemon or the top of one) */
+static int TakeBack(struct TcgPlayer *p, unsigned card)
+{
+    int at;
+    unsigned s;
+    if ((at = PileAt(p->hand, p->handSize, card)) >= 0)
+        return TcgPile_Remove(p->hand, &p->handSize, (unsigned)at), 1;
+    if ((at = PileAt(p->deck, p->deckSize, card)) >= 0)
+        return TcgPile_Remove(p->deck, &p->deckSize, (unsigned)at), 1;
+    for (s = 0; s < TCG_FIELD_SIZE; s++)
+    {
+        struct TcgFieldCard *f = &p->field[s];
+        if ((at = PileAt(f->attached, f->attachedSize, card)) >= 0)
+            return TcgPile_Remove(f->attached, &f->attachedSize, (unsigned)at), 1;
+        if (f->stackSize && f->stack[f->stackSize - 1] == card && (f->stackSize > 1 || !f->attachedSize))
+        {
+            if (--f->stackSize == 0)
+                memset(f, 0, sizeof(*f));
+            return 1;
+        }
+    }
+    return 0;
+}
+static void Undo(const struct TcgDuel *before, struct TcgDuel *g)
+{
+    unsigned actor = before->current, v = actor ^ 1, from = g->effectFrom, s, s2, k, q;
+    int effect = from == TCG_ATTACK || from == TCG_USE_POWER || from == TCG_PLAY_TRAINER;
+    unsigned stadium = TcgDuel_Stadium(before, NULL);
+    if (effect && before->phase != TCG_SETUP)
+    {
+        /* Unown [K] (the Unown), Brock's Protection (attacks and Trainers): the Energy cards the other player's effect
+         * discarded from them go back on; Ecogym: a non-Colorless one goes to its owner's hand */
+        int keep = TcgPower_InPlay(before, v, TCG_POWER_R_KEEP), eco = stadium == TCG_CARD_NEO1_84 ||
+                                                                        TcgDuel_Stadium(g, NULL) == TCG_CARD_NEO1_84;
+        const struct TcgPlayer *was = &before->players[v];
+        struct TcgPlayer *now = &g->players[v];
+        for (s = 0; s < TCG_FIELD_SIZE; s++)
+        {
+            const struct TcgFieldCard *f = &was->field[s];
+            const struct TcgCard *c = f->stackSize ? Tcg_Card(was->cards[f->stack[f->stackSize - 1]]) : NULL;
+            int guard;
+            if (!c)
+                continue;
+            for (s2 = 0; s2 < TCG_FIELD_SIZE && !(now->field[s2].stackSize &&
+                                                   now->field[s2].stack[now->field[s2].stackSize - 1] == f->stack[f->stackSize - 1]); s2++)
+                ;
+            if (s2 == TCG_FIELD_SIZE)
+                continue; /* (Knocked Out: those don't count) */
+            guard = (keep && strstr(c->name, "Unown")) ||
+                    (from != TCG_USE_POWER && TcgDuel_AttachedCard(before, v, s, TCG_CARD_GYM2_101) >= 0);
+            for (k = 0; k < f->attachedSize; k++)
+            {
+                unsigned e = f->attached[k];
+                int at = PileAt(now->discard, now->discardSize, e);
+                const struct TcgCard *ec = Tcg_Card(now->cards[e]);
+                if (at < 0 || !ec || ec->kind != TCG_ENERGY)
+                    continue;
+                if (guard)
+                {
+                    TcgPile_Remove(now->discard, &now->discardSize, (unsigned)at);
+                    now->field[s2].attached[now->field[s2].attachedSize++] = (uint8_t)e;
+                }
+                else if (eco && ec->type != TCG_COLORLESS)
+                {
+                    TcgPile_Remove(now->discard, &now->discardSize, (unsigned)at);
+                    now->hand[now->handSize++] = (uint8_t)e;
+                }
+            }
+        }
+    }
+    for (q = 0; q < 2 && before->phase != TCG_SETUP; q++)
+    {
+        const struct TcgPlayer *was = &before->players[q];
+        struct TcgPlayer *now = &g->players[q];
+        int pollen = (from == TCG_ATTACK || from == TCG_USE_POWER) && TcgPower_InPlay(before, 2, TCG_POWER_R_ALLERGIC_POLLEN);
+        for (k = 0; k < was->discardSize; k++)
+        {
+            unsigned card = was->discard[k];
+            if (PileAt(now->discard, now->discardSize, card) >= 0)
+                continue;
+            /* Parasect's Allergic Pollen: attacks and powers leave the discard piles alone; Pokemon Tower: nothing
+             * goes from a discard pile into the hand */
+            if ((pollen || (stadium == TCG_CARD_BASEP_42 && PileAt(now->hand, now->handSize, card) >= 0)) &&
+                TakeBack(now, card))
+                now->discard[now->discardSize++] = (uint8_t)card;
+        }
+    }
+}
 int TcgDuel_Apply(struct TcgDuel *g, const struct TcgAction *action)
 {
     struct TcgDuel next = *g;
@@ -1939,6 +2121,8 @@ int TcgDuel_Apply(struct TcgDuel *g, const struct TcgAction *action)
     if (action->selectionCount > 60)
         return TCG_INVALID;
     next.error[0] = 0;
+    if (action->type != TCG_CHOOSE)
+        next.effectFrom = action->type;
     result = Apply(&next, action);
     if (result == TCG_OK)
     {
@@ -1961,6 +2145,7 @@ int TcgDuel_Apply(struct TcgDuel *g, const struct TcgAction *action)
                             break;
                         }
                 }
+        Undo(g, &next);
         if (!TcgDuel_Conserved(&next))
         {
             snprintf(g->error, sizeof(g->error), "Internal error: card conservation failed.");

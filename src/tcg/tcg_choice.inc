@@ -204,6 +204,8 @@ static int ChoiceHasAny(const struct TcgDuel *g, unsigned player, unsigned kind)
     }
     case TCG_CHOICE_RETURN_MON:
         return ChoiceInPlay(g, player) != 0;
+    case TCG_CHOICE_FLEE:
+        return BenchCount(g, player) && !TcgDuel_Anchored(g, player);
     case TCG_CHOICE_DISCARD2:
         return p->handSize != 0;
     case TCG_CHOICE_TEXTURE_WEAK:
@@ -674,6 +676,15 @@ int TcgDuel_Choose(struct TcgDuel *g, const struct TcgAction *a)
         TcgDuel_Shuffle(g, who);
         break;
     }
+    case TCG_CHOICE_FLEE:
+        /* (7: it stays) */
+        if (a->target == 7)
+            break;
+        if (!ValidTarget(g, who, a->target, 1))
+            return ChoiceFail(g, "Choose one of your Benched Pokemon.");
+        Switch(g, who, a->target);
+        TcgDuel_Event(g, TCG_EV_SWITCH, who, a->target, 0, 0, 0);
+        break;
     case TCG_CHOICE_QUIZ1:
     case TCG_CHOICE_QUIZ3:
     {
@@ -1228,6 +1239,17 @@ void TcgDuel_AiChoose(const struct TcgDuel *g, struct TcgAction *a)
     case TCG_CHOICE_QUIZ3:
         a->target = (uint8_t)(g->turn % 4);   /* (a guess) */
         break;
+    case TCG_CHOICE_FLEE:
+    {
+        /* (to the healthiest Benched one) */
+        unsigned s, best = 7;
+        for (s = 1; s < TCG_FIELD_SIZE; s++)
+            if (p->field[s].stackSize &&
+                (best == 7 || TcgDuel_MaxHp(g, who, s) - p->field[s].damage > TcgDuel_MaxHp(g, who, best) - p->field[best].damage))
+                best = s;
+        a->target = (uint8_t)best;
+        break;
+    }
     case TCG_CHOICE_CHAOS_TO_SIDE:
         a->target = 1;
         break;
