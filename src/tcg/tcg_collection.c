@@ -98,6 +98,9 @@ int Tcg_DeckValidate(const uint16_t cards[TCG_DECK_SIZE], const uint16_t *owned,
                 same++;
         if (same > 4)
             return Invalid(reason, size, "Only four cards with the same name are allowed.");
+        /* (a Shining Pokemon, Miracle Energy: one of a name) */
+        if (same > 1 && ((c->flags & TCG_CF_SHINING) || Tcg_EnergyRule(c->id) == TCG_ER_MIRACLE))
+            return Invalid(reason, size, "Only one of a Shining Pokemon (or Miracle Energy) is allowed.");
     }
     if (!basic)
         return Invalid(reason, size, "A deck needs at least one Basic Pokemon.");

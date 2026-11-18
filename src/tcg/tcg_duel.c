@@ -302,11 +302,12 @@ void TcgDuel_ResolveKnockouts(struct TcgDuel *g)
             if (c && f->damage >= hp)
             {
                 struct TcgPlayer *winner = &g->players[who ^ 1];
-                unsigned prize = !f->noPrize;
+                /* (a Pokemon-ex: 2 Prizes) */
+                unsigned prize = f->noPrize ? 0 : c->kind == TCG_POKEMON && (c->flags & TCG_CF_EX) ? 2 : 1;
                 TcgDuel_Log(g, "%s is Knocked Out.", c->name);
                 TcgDuel_Event(g, TCG_EV_KO, who, s, 0, c->id, 0);
                 TcgDuel_DiscardField(g, who, s);
-                if (prize && winner->prizeSize)
+                while (prize-- && winner->prizeSize)
                 {
                     winner->hand[winner->handSize++] = winner->prizes[--winner->prizeSize];
                     TcgDuel_Event(g, TCG_EV_PRIZE, who ^ 1, 0, winner->prizeSize, 0, 0);

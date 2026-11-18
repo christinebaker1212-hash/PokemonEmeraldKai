@@ -15,7 +15,7 @@ ATTACKS = {}
 POWERS = {}
 TRAINERS = {}
 # rules: TcgCard flags (import_sets.py) the engine plays; DARK_ENERGY / METAL_ENERGY: Darkness / Metal costs payable
-RULES = {'OWNER', 'DARK', 'LIGHT', 'DARK_ENERGY', 'METAL_ENERGY', 'SPECIAL', 'SUPPORTER', 'STADIUM', 'TOOL', 'RSM', 'BABY',
+RULES = {'OWNER', 'DARK', 'LIGHT', 'DARK_ENERGY', 'METAL_ENERGY', 'SPECIAL', 'SUPPORTER', 'STADIUM', 'TOOL', 'RSM', 'BABY', 'SHINING', 'EX',
          'GAME_CORNER'}
 # special Energy whose rules the engine plays (Tcg_EnergyRule, src/tcg/tcg_collection.c)
 for _label, _rule in (('neo1-19', 'METAL'), ('neo1-104', 'DARKNESS'), ('neo1-105', 'RECYCLE'), ('ecard1-158', 'DARKNESS'),

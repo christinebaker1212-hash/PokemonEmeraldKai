@@ -21,9 +21,7 @@ plays (tools/tcg/regions/effects.py); only finished cards appear in the game.
 ## Rules the engine doesn't play yet (cards needing each)
 
 - TM: 16
-- SHINING: 10
 - CRYSTAL: 9
-- EX: 8
 
 ## Wordings to translate (757; the most cards first)
 
