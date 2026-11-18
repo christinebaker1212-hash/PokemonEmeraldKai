@@ -1067,6 +1067,15 @@ static void MenuAdd(struct TcgFlowMenu *m, const char *label, unsigned value, in
 unsigned TcgFlow_TrainerChoices(const struct TcgDuel *g, unsigned me, unsigned cardId, struct TcgFlowMenu *m,
                                 const char **reason)
 {
+    if (Tcg_EnergyRule(cardId) == TCG_ER_RETRO)
+    {
+        /* (Retro Energy: "you may") */
+        memset(m, 0, sizeof(*m));
+        *reason = NULL;
+        m->label[0] = "YES", m->value[0] = 1, m->ok[0] = 1;
+        m->label[1] = "NO", m->value[1] = 0, m->ok[1] = 1;
+        return m->count = 2;
+    }
     return RegionTrainerChoices(g, me, cardId, m, reason);
 }
 unsigned TcgFlow_PowerChoices(const struct TcgDuel *g, unsigned me, unsigned slot, struct TcgFlowMenu *m,
@@ -1325,7 +1334,8 @@ static unsigned Next(struct TcgFlow *f, const struct TcgDuel *g)
     if (st->kind == TCG_ST_CHOICE)
     {
         const char *why;
-        if (f->action.type == TCG_PLAY_TRAINER ? !TcgFlow_TrainerChoices(g, f->me, f->flowCard, &f->menu, &why)
+        if (f->action.type == TCG_PLAY_TRAINER || f->action.type == TCG_ATTACH
+                ? !TcgFlow_TrainerChoices(g, f->me, f->flowCard, &f->menu, &why)
                                                : !TcgFlow_PowerChoices(g, f->me, f->action.slot, &f->menu, &why))
             return Fail(f, why ? why : "There is nothing that can be chosen.");
         f->prompt = st->prompt;
@@ -1406,7 +1416,10 @@ unsigned TcgFlow_Begin(struct TcgFlow *f, const struct TcgDuel *g, unsigned me, 
         if (c->kind == TCG_ENERGY)
         {
             f->action.type = TCG_ATTACH;
-            return AskSlot(f, g, f->me, Tcg_EnergyRule(c->id) == TCG_ER_BOOST ? TCG_F_EVOLVED : TCG_F_ANY_POKEMON,
+            return AskSlot(f, g, f->me,
+                           Tcg_EnergyRule(c->id) == TCG_ER_BOOST    ? TCG_F_EVOLVED
+                           : Tcg_EnergyRule(c->id) == TCG_ER_BOUNCE ? TCG_F_HAS_BASIC_ENERGY
+                                                                    : TCG_F_ANY_POKEMON,
                            "Attach it to which Pokemon?");
         }
         if (c->kind == TCG_POKEMON)
@@ -1521,6 +1534,33 @@ unsigned TcgFlow_Slot(struct TcgFlow *f, const struct TcgDuel *g, unsigned slot)
             return Next(f, g);
         }
         f->action.slot = (uint8_t)slot;
+        if (f->action.type == TCG_ATTACH && g->phase == TCG_TURN)
+        {
+            /* (the e-Card sets' special Energy that ask as they're attached: Warp Energy onto the Active, which
+             * Benched Pokemon switches in; Bounce Energy, which basic Energy goes back to the hand; Retro Energy on
+             * an Evolved Pokemon, whether to devolve it) */
+            static const struct TcgStep warp[1] = {{TCG_ST_MY_SLOT, TCG_F_OTHER_MINE, 0, 0, 0, "Switch in which Benched Pokemon?"}};
+            static const struct TcgStep bounce[1] = {{TCG_ST_PICK, TCG_F_BASIC_ENERGY, TCG_SRC_MY_ATTACHED, 1, 1,
+                                                      "Return which basic Energy to your hand?"}};
+            static const struct TcgStep retro[1] = {{TCG_ST_CHOICE, 0, 0, 0, 0, "Remove 2 damage counters and devolve it?"}};
+            unsigned rule = Tcg_EnergyRule(f->flowCard), b, bench = 0;
+            const struct TcgStep *st = NULL;
+            for (b = 1; b < TCG_FIELD_SIZE; b++)
+                bench += g->players[f->me].field[b].stackSize != 0;
+            if (rule == TCG_ER_WARP && !slot && bench && !TcgDuel_Anchored(g, f->me))
+                st = warp;
+            else if (rule == TCG_ER_BOUNCE)
+                st = bounce;
+            else if (rule == TCG_ER_RETRO && g->players[f->me].field[slot].stackSize >= 2)
+                st = retro;
+            if (st)
+            {
+                f->steps = st;
+                f->nsteps = 1;
+                f->step = 0;
+                return Next(f, g);
+            }
+        }
         /* (a Basic put on its Baby evolves it) */
         if (f->action.type == TCG_PLAY_BASIC && g->players[f->me].field[slot].stackSize)
             f->action.type = TCG_EVOLVE;

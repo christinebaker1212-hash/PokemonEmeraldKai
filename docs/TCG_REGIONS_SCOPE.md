@@ -12,16 +12,16 @@ plays (tools/tcg/regions/effects.py); only finished cards appear in the game.
 | neo3 | 66 | 44 |
 | neo4 | 113 | 83 |
 | ecard1 | 159 | 146 |
-| ecard2 | 182 | 162 |
-| ecard3 | 182 | 158 |
+| ecard2 | 182 | 164 |
+| ecard3 | 182 | 161 |
 | basep | 53 | 41 |
 | np | 40 | 37 |
-| **all** | 1227 | 1030 |
+| **all** | 1227 | 1035 |
 
 ## Rules the engine doesn't play yet (cards needing each)
 
 
-## Wordings to translate (174; the most cards first)
+## Wordings to translate (169; the most cards first)
 
 - 3 x POWER: Entei (neo3-17): As long as Entei is your Active Pokemon, Entei and Energy cards attached to it aren't affected by effects from Trainer cards other than Stadium cards. As long as this Power is active, discard any Trainer cards attached to E
 - 2 x POWER: Forretress (neo2-2): During your opponent's turn, whenever 1 of your opponent's Benched Pokemon becomes his or her Active Pokemon, Forretress does 10 damage to it. (Don't apply Weakness and Resistance.) This power stops working if Forretres
@@ -167,8 +167,6 @@ plays (tools/tcg/regions/effects.py); only finished cards appear in the game.
 - 1 x BODY: Magnemite (ecard2-91): You pay Colorless less to retreat Magnemite for each Magnemite on your Bench.
 - 1 x TRAINER: Memory Berry (ecard2-128): Attach Memory Berry to 1 of your Pokemon that doesn't have a Pokemon Tool attached to it. If that Pokemon is Knocked Out, discard this card. The Pokemon this card is attached to can use any attack from its Basic P
 - 1 x TRAINER: Time Shard (ecard2-135): Attach Time Shard to 1 of your Pokemon that doesn't already have a Pokemon Tool card attached to it. If that Pokemon is Knocked Out, discard this card. If the Pokemon this card is attached to is Knocked Out by damag
-- 1 x ENERGY: Crystal Energy (ecard2-146): Crystal Energy provides 1 Energy of all types (colors) of basic Energy cards attached to the Pokemon Crystal Energy is attached to. If there are no basic Energy cards attached to the Pokemon Crystal Energy is at
-- 1 x ENERGY: Warp Energy (ecard2-147): Warp Energy provides 1 Colorless Energy. When you attach Warp Energy from your hand to your Active Pokemon, switch your Active Pokemon with 1 of your Benched Pokemon.
 - 1 x POWER: Aerodactyl (ecard3-1): Once during your turn (before your attack), if Aerodactyl is your Active Pokemon, you may ignore all Poke-Bodies until the end of your turn. This power can't be used if Aerodactyl is affected by a Special Condition.
 - 1 x BODY: Omastar (ecard3-23): As long as Omastar is your Active Pokemon, your opponent can't play Basic Pokemon or Evolution cards from his or her hand to evolve his or her Active Pokemon.
 - 1 x POWER: Wigglytuff (ecard3-34): Once during your turn (before your attack), if Wigglytuff is on your bench, you may flip a coin. If heads, each player removes up to 2 damage counters from his or her Active Pokemon. This power can't be used if you h
@@ -178,9 +176,6 @@ plays (tools/tcg/regions/effects.py); only finished cards appear in the game.
 - 1 x BODY: Ditto (ecard3-51): Each basic Energy card attached to Ditto provides every type of Energy but provides only 1 Energy at a time.
 - 1 x POWER: Snorlax (ecard3-100): Once during your turn (before your attack), if Snorlax is your Active Pokemon, you may remove 1 damage counter from Snorlax. Snorlax is now Asleep. This power can't be used if Snorlax is affected by a Special Condition
 - 1 x TRAINER: Star Piece (ecard3-139): Attach Star Piece to 1 of your Pokemon that doesn't already have a Pokemon Tool attached to it. If that Pokemon is Knocked Out, discard this card. At any time between turns, if the Pokemon this card is attached to i
-- 1 x ENERGY: Bounce Energy (ecard3-142): This card provides ColorlessColorless Energy. You can attach this card to your Pokemon that has basic Energy cards attached to it. When you play this card from your hand and attach it to 1 of your Pokemon, return
-- 1 x ENERGY: Cyclone Energy (ecard3-143): This card provides Colorless Energy. When you play this card from your hand and attach it to your Active Pokemon, your opponent switches his or her Active Pokemon with 1 of his or her Benched Pokemon.
-- 1 x ENERGY: Retro Energy (ecard3-144): This card provides Colorless Energy. When you play this card from your hand and attach it to 1 of your Evolved Pokemon, you may remove up to 2 damage counters from that Pokemon and discard the top card from it. (T
 - 1 x POWER: Dragonite (basep-5): Once during your turn (before your attack), you may draw a card. If you do, choose a card from your hand and put it on top of your deck. This power can't be used if Dragonite is Asleep, Confused, or Paralyzed.
 - 1 x attack: Meowth (basep-10): Flip a coin. If heads, this attack does 20 damage. If tails and if your opponent has any Benched Pokemon, he or she chooses 1 of them and this attack does 20 damage to it. (Don't apply Weakness and Resistance for Benched 
 - 1 x POWER: Eevee (basep-11): This power can only be used when a Pokemon evolves. Search your deck for a card that evolves from Eevee and attach it to Eevee. This counts as evolving Eevee. Shuffle your deck afterward. This power can't be used if Eevee 

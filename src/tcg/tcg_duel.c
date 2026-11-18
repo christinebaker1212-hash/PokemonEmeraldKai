@@ -317,11 +317,14 @@ static int EnergyPaid(const struct TcgDuel *g, unsigned player, unsigned attack)
 /* Does that player's Active's Energy pay for this attack's cost? */
 static int EnergyPaidFor(const struct TcgDuel *g, unsigned player, const struct TcgAttack *a)
 {
-    unsigned t, total = 0, typed = 0, from = EnergySlot(g, player), rainbow = 0, short_ = 0, i;
+    unsigned t, total = 0, typed = 0, from = EnergySlot(g, player), rainbow = 0, short_ = 0, i, crystal = 0, shortBare = 0;
     const struct TcgFieldCard *f = &g->players[player].field[from];
-    /* (Rainbow Energy: any one type each) */
+    /* (Rainbow Energy: any one type each; Crystal Energy: one of the types of the basic Energy cards on it) */
     for (i = 0; i < f->attachedSize; i++)
+    {
         rainbow += Tcg_EnergyRule(g->players[player].cards[f->attached[i]]) == TCG_ER_RAINBOW;
+        crystal += Tcg_EnergyRule(g->players[player].cards[f->attached[i]]) == TCG_ER_CRYSTAL;
+    }
     if (!a || !a->name[0] || a->category == TCG_POKEMON_POWER)
         return 0;
     for (t = 0; t < TCG_TYPES; t++)
@@ -329,14 +332,21 @@ static int EnergyPaidFor(const struct TcgDuel *g, unsigned player, const struct 
         total += a->cost[t];
         if (t != TCG_COLORLESS)
         {
-            unsigned have = TcgDuel_Energy(g, player, from, t);
+            unsigned have = TcgDuel_Energy(g, player, from, t), k, basic = 0;
+            for (k = 0; k < f->attachedSize; k++)
+                basic |= g->players[player].cards[f->attached[k]] <= 6 &&
+                         Tcg_Card(g->players[player].cards[f->attached[k]])->type == t;
             if (have < a->cost[t])
+            {
                 short_ += a->cost[t] - have;
+                if (!basic)
+                    shortBare += a->cost[t] - have; /* (Crystal Energy can't be this type) */
+            }
             typed += a->cost[t];
         }
     }
     (void)typed;
-    return short_ <= rainbow && TcgDuel_Energy(g, player, from, TCG_NONE) >= total;
+    return short_ <= rainbow + crystal && shortBare <= rainbow && TcgDuel_Energy(g, player, from, TCG_NONE) >= total;
 }
 void TcgDuel_DiscardField(struct TcgDuel *g, unsigned player, unsigned slot)
 {
@@ -1341,6 +1351,14 @@ static int Apply(struct TcgDuel *g, const struct TcgAction *a)
             return Error(g, "Only one Energy card may be attached from your hand each turn.");
         if (Tcg_EnergyRule(c->id) == TCG_ER_BOOST && f->stackSize < 2)
             return Error(g, "Boost Energy can be attached only to an Evolved Pokemon.");
+        if (Tcg_EnergyRule(c->id) == TCG_ER_BOUNCE)
+        {
+            unsigned k;
+            for (k = 0; k < f->attachedSize && p->cards[f->attached[k]] > 6; k++)
+                ;
+            if (k == f->attachedSize)
+                return Error(g, "Bounce Energy goes only on a Pokemon with a basic Energy card.");
+        }
         if (TcgPower_AttachBlock(g, g->current, s, c->id))
             return Error(g, "That Energy can't be attached to this Pokemon (its power).");
         if (!s && p->noAttachActive >= g->turn)
@@ -1376,6 +1394,58 @@ static int Apply(struct TcgDuel *g, const struct TcgAction *a)
             f->damage += 10;
             TcgDuel_Event(g, TCG_EV_DAMAGE, g->current, s, 10, 0, 0);
             TcgDuel_ResolveKnockouts(g);
+        }
+        else if (Tcg_EnergyRule(c->id) == TCG_ER_BOUNCE)
+        {
+            /* a basic Energy on it back to the hand: the one picked (a->selections[0]), else the first */
+            unsigned k, at = f->attachedSize;
+            for (k = 0; k < f->attachedSize; k++)
+                if (p->cards[f->attached[k]] <= 6 && (at == f->attachedSize || (a->selectionCount && f->attached[k] == a->selections[0])))
+                    at = k;
+            if (at < f->attachedSize)
+                p->hand[p->handSize++] = TcgPile_Remove(f->attached, &f->attachedSize, at);
+        }
+        else if (Tcg_EnergyRule(c->id) == TCG_ER_WARP && !s && !TcgDuel_Anchored(g, g->current))
+        {
+            /* its Active switches with the Benched Pokemon chosen (a->target), else the first */
+            unsigned t = a->target, k;
+            if (t < 1 || t >= TCG_FIELD_SIZE || !p->field[t].stackSize)
+                for (t = 0, k = 1; k < TCG_FIELD_SIZE && !t; k++)
+                    if (p->field[k].stackSize)
+                        t = k;
+            if (t)
+            {
+                struct TcgFieldCard temp = p->field[0];
+                p->field[0] = p->field[t];
+                p->field[t] = temp;
+                ClearCondition(&p->field[t]);
+                ClearMirror(&p->field[t]);
+                TcgDuel_Event(g, TCG_EV_SWITCH, g->current, t, 0, 0, 0);
+            }
+        }
+        else if (Tcg_EnergyRule(c->id) == TCG_ER_CYCLONE && !s && !TcgDuel_Anchored(g, g->current ^ 1))
+        {
+            /* their Active switches with one of their Benched Pokemon: they choose */
+            unsigned k;
+            for (k = 1; k < TCG_FIELD_SIZE && !g->players[g->current ^ 1].field[k].stackSize; k++)
+                ;
+            if (k < TCG_FIELD_SIZE)
+            {
+                g->phase = TCG_PROMOTION;
+                g->promotePlayer = (uint8_t)(g->current ^ 1);
+                g->switchPending = 1;
+            }
+        }
+        else if (Tcg_EnergyRule(c->id) == TCG_ER_RETRO && f->stackSize >= 2 && a->target == 1)
+        {
+            /* (they chose YES) up to 2 counters off it, its top card discarded: devolved */
+            unsigned heal = f->damage < 20 ? f->damage : 20;
+            f->damage -= heal;
+            if (heal)
+                TcgDuel_Event(g, TCG_EV_HEAL, g->current, s, heal, 0, 0);
+            p->discard[p->discardSize++] = f->stack[--f->stackSize];
+            ClearCondition(f);
+            TcgDuel_Event(g, TCG_EV_DEVOLVE, g->current, s, 0, p->cards[f->stack[f->stackSize - 1]], 0);
         }
         return TCG_OK;
     default:

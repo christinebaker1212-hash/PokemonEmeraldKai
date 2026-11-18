@@ -483,6 +483,95 @@ static int SpecialEnergy(void)
     printf("PASS special Energy: Darkness Energy's 10 more and its damage counter, Metal Energy both ways, Boost Energy\n");
     return 0;
 }
+/* The e-Card sets' special Energy attached through the flow: Warp Energy switches the Active with the Benched one
+ * chosen, Cyclone Energy has them switch, Bounce Energy returns the basic Energy picked, Retro Energy devolves on YES;
+ * Crystal Energy pays a type of the basic Energy beside it */
+static int EcardEnergy(void)
+{
+    static const unsigned ids[4] = {TCG_CARD_ECARD2_147, TCG_CARD_ECARD3_143, TCG_CARD_ECARD3_142, TCG_CARD_ECARD3_144};
+    unsigned e;
+    for (e = 0; e < 4; e++)
+    {
+        struct TcgDuel g;
+        struct TcgFlow f;
+        struct TcgPlayer *p;
+        unsigned q, guard = 0, hand, before, machop;
+        int c;
+        if (!Tcg_Card(ids[e]))
+            continue;
+        Stage(&g, TCG_CARD_MACHOP, 0, 7);
+        p = &g.players[0];
+        if (e == 3)
+        {
+            /* (Retro Energy: a Machoke on Machop, damaged) */
+            int m = Take(&g, 0, TCG_CARD_MACHOKE);
+            if (m < 0)
+                continue;
+            p->field[0].stack[p->field[0].stackSize++] = (uint8_t)m;
+            p->field[0].damage = 30;
+        }
+        c = Take(&g, 0, TCG_CARD_GRASS_ENERGY);
+        if (c < 0)
+            return printf("FAIL e-Card Energy: no card to stand in\n"), 1;
+        p->cards[c] = (uint16_t)ids[e];
+        p->hand[p->handSize++] = (uint8_t)c;
+        hand = p->handSize;
+        machop = p->field[0].stack[0];
+        before = p->field[0].attachedSize;
+        q = TcgFlow_Begin(&f, &g, 0, TCG_FLOW_HAND, p->handSize - 1u);
+        while (q != TCG_Q_DONE && q != TCG_Q_FAIL && guard++ < 8)
+        {
+            if (q == TCG_Q_SLOT)
+                q = TcgFlow_Slot(&f, &g, guard == 1 ? 0u : 2u); /* (the Active, then Diglett on the Bench) */
+            else if (q == TCG_Q_PICK)
+            {
+                uint8_t chosen[1];
+                unsigned k;
+                for (k = 0; k < f.pickCount && !f.pickOk[k]; k++)
+                    ;
+                chosen[0] = f.pick[k];
+                q = TcgFlow_Pick(&f, &g, chosen, 1);
+            }
+            else if (q == TCG_Q_MENU)
+                q = TcgFlow_Menu(&f, &g, 1);
+        }
+        if (q != TCG_Q_DONE || TcgDuel_Apply(&g, &f.action) != TCG_OK)
+            return printf("FAIL %s through the flow: %s %s\n", Tcg_Card(ids[e])->name, f.error, g.error), 1;
+        assert(TcgDuel_Conserved(&g));
+        if (e == 0 && p->field[0].stack[0] == machop)
+            return printf("FAIL Warp Energy: the Active didn't switch\n"), 1;
+        if (e == 1 && (g.phase != TCG_PROMOTION || g.promotePlayer != 1))
+            return printf("FAIL Cyclone Energy: they weren't asked to switch\n"), 1;
+        if (e == 2 && (p->handSize != hand || p->field[0].attachedSize != before))
+            return printf("FAIL Bounce Energy: hand %u (%u), attached %u (%u)\n", p->handSize, hand,
+                          p->field[0].attachedSize, before), 1;
+        if (e == 3 && (p->field[0].stackSize != 1 || p->field[0].damage != 10))
+            return printf("FAIL Retro Energy: stack %u, damage %u\n", p->field[0].stackSize, p->field[0].damage), 1;
+    }
+    /* Crystal Energy: with a Fighting Energy beside it, it pays a Fighting cost; alone, only Colorless */
+    if (Tcg_Card(TCG_CARD_ECARD2_146))
+    {
+        struct TcgDuel g;
+        struct TcgFieldCard *f;
+        int c;
+        Stage(&g, TCG_CARD_MACHOP, 0, 9);
+        f = &g.players[0].field[0];
+        while (f->attachedSize)
+            g.players[0].discard[g.players[0].discardSize++] = f->attached[--f->attachedSize];
+        c = Take(&g, 0, TCG_CARD_GRASS_ENERGY);
+        g.players[0].cards[c] = TCG_CARD_ECARD2_146;
+        f->attached[f->attachedSize++] = (uint8_t)c;
+        if (TcgDuel_CanAttack(&g, 0, 0) && Tcg_Card(TCG_CARD_MACHOP)->attacks[0].cost[TCG_FIGHTING])
+            return printf("FAIL Crystal Energy alone paid a Fighting cost\n"), 1;
+        c = Take(&g, 0, TCG_CARD_FIGHTING_ENERGY);
+        f->attached[f->attachedSize++] = (uint8_t)c;
+        if (Tcg_Card(TCG_CARD_MACHOP)->attacks[0].cost[TCG_FIGHTING] == 1 &&
+            Tcg_Card(TCG_CARD_MACHOP)->attacks[0].cost[TCG_COLORLESS] <= 1 && !TcgDuel_CanAttack(&g, 0, 0))
+            return printf("FAIL Crystal Energy with a Fighting Energy\n"), 1;
+    }
+    printf("PASS e-Card Energy through the flow: Warp, Cyclone, Bounce, Retro; Crystal Energy's types\n");
+    return 0;
+}
 /* Every finished regional Trainer played through the flow (the board's and the phone's questions, answered with the
  * first choices; with the most cards picked on even seeds) on staged boards: the rules must take what the flow built;
  * then the duel goes on with the AI. */
@@ -986,7 +1075,7 @@ int main(void)
     }
     printf("PASS %u finished regional cards: %u attacks used %u times, then %u AI actions after them\n", ready, used, ok,
            steps);
-    if (SpecialEnergy() || ScriptMechanics() || Anchors() || TechnicalMachines() || Babies())
+    if (SpecialEnergy() || EcardEnergy() || ScriptMechanics() || Anchors() || TechnicalMachines() || Babies())
         return 1;
     if (PlayTrainers() || UsePowers() || UseStadiums() || AttackFlows())
         return 1;

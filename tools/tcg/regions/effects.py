@@ -20,7 +20,8 @@ RULES = {'OWNER', 'DARK', 'LIGHT', 'DARK_ENERGY', 'METAL_ENERGY', 'SPECIAL', 'SU
 # special Energy whose rules the engine plays (Tcg_EnergyRule, src/tcg/tcg_collection.c)
 for _label, _rule in (('neo1-19', 'METAL'), ('neo1-104', 'DARKNESS'), ('neo1-105', 'RECYCLE'), ('ecard1-158', 'DARKNESS'),
                       ('ecard1-159', 'METAL_LATE'), ('ecard2-142', 'DARKNESS'), ('ecard2-143', 'METAL'),
-                      ('ecard2-144', 'RAINBOW'), ('ecard2-145', 'BOOST')):
+                      ('ecard2-144', 'RAINBOW'), ('ecard2-145', 'BOOST'), ('ecard2-146', 'CRYSTAL'), ('ecard2-147', 'WARP'),
+                      ('ecard3-142', 'BOUNCE'), ('ecard3-143', 'CYCLONE'), ('ecard3-144', 'RETRO')):
     TRAINERS[_label + ':t'] = 'ENERGY_' + _rule
 
 

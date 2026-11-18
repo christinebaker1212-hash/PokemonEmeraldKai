@@ -8622,10 +8622,10 @@ const struct TcgCard gTcgCards[TCG_CARD_COUNT + 1] = {
 [1357] = {.id=1357, .name="Boost Energy", .kind=TCG_ENERGY, .type=6, .rarity=1, .set=20, .set2=255, .dark=0, .holo=0, .flags=TCG_CF_SPECIAL|TCG_CF_READY, .origin=20,
 .effect="ecard2-145:t",.description="Boost Energy can be attached only to an Evolved Pokemon. Discard Boost Energy at the end of the turn it was attached. Boost Energy provides ColorlessColorlessColorless Energy. The Pokemon Boost Energy is attached to can't retreat. When the Pokemon Boost Energy is attached to is no longer an Evolved Pokemon, discard Boost Energy."
 },
-[1358] = {.id=1358, .name="Crystal Energy", .kind=TCG_ENERGY, .type=6, .rarity=1, .set=20, .set2=255, .dark=0, .holo=0, .flags=TCG_CF_SPECIAL, .origin=20,
+[1358] = {.id=1358, .name="Crystal Energy", .kind=TCG_ENERGY, .type=6, .rarity=1, .set=20, .set2=255, .dark=0, .holo=0, .flags=TCG_CF_SPECIAL|TCG_CF_READY, .origin=20,
 .effect="ecard2-146:t",.description="Crystal Energy provides 1 Energy of all types (colors) of basic Energy cards attached to the Pokemon Crystal Energy is attached to. If there are no basic Energy cards attached to the Pokemon Crystal Energy is attached to, Crystal Energy provides Colorless Energy."
 },
-[1359] = {.id=1359, .name="Warp Energy", .kind=TCG_ENERGY, .type=6, .rarity=1, .set=20, .set2=255, .dark=0, .holo=0, .flags=TCG_CF_SPECIAL, .origin=20,
+[1359] = {.id=1359, .name="Warp Energy", .kind=TCG_ENERGY, .type=6, .rarity=1, .set=20, .set2=255, .dark=0, .holo=0, .flags=TCG_CF_SPECIAL|TCG_CF_READY, .origin=20,
 .effect="ecard2-147:t",.description="Warp Energy provides 1 Colorless Energy. When you attach Warp Energy from your hand to your Active Pokemon, switch your Active Pokemon with 1 of your Benched Pokemon."
 },
 [1360] = {.id=1360, .name="Kingdra", .kind=TCG_POKEMON, .type=6, .rarity=2, .set=20, .set2=255, .dark=0, .holo=1, .flags=TCG_CF_CRYSTAL|TCG_CF_BODY|TCG_CF_READY, .origin=20,
@@ -9803,13 +9803,13 @@ const struct TcgCard gTcgCards[TCG_CARD_COUNT + 1] = {
 [1535] = {.id=1535, .name="Underground Lake", .kind=TCG_TRAINER, .type=6, .rarity=1, .set=21, .set2=255, .dark=0, .holo=0, .flags=TCG_CF_STADIUM|TCG_CF_READY, .origin=21,
 .effect="ecard3-141:t",.description="This card stays in play when you play it. Discard this card if another Stadium card comes into play. Once during each player's turn, that player may put an Omanyte or a Kabuto card from his or her discard pile onto his or her Bench. (Cards put on the Bench this way are considered Basic Pokemon.)"
 },
-[1536] = {.id=1536, .name="Bounce Energy", .kind=TCG_ENERGY, .type=6, .rarity=1, .set=21, .set2=255, .dark=0, .holo=0, .flags=TCG_CF_SPECIAL, .origin=21,
+[1536] = {.id=1536, .name="Bounce Energy", .kind=TCG_ENERGY, .type=6, .rarity=1, .set=21, .set2=255, .dark=0, .holo=0, .flags=TCG_CF_SPECIAL|TCG_CF_READY, .origin=21,
 .effect="ecard3-142:t",.description="This card provides ColorlessColorless Energy. You can attach this card to your Pokemon that has basic Energy cards attached to it. When you play this card from your hand and attach it to 1 of your Pokemon, return a basic Energy card attached to that Pokemon to your hand."
 },
-[1537] = {.id=1537, .name="Cyclone Energy", .kind=TCG_ENERGY, .type=6, .rarity=1, .set=21, .set2=255, .dark=0, .holo=0, .flags=TCG_CF_SPECIAL, .origin=21,
+[1537] = {.id=1537, .name="Cyclone Energy", .kind=TCG_ENERGY, .type=6, .rarity=1, .set=21, .set2=255, .dark=0, .holo=0, .flags=TCG_CF_SPECIAL|TCG_CF_READY, .origin=21,
 .effect="ecard3-143:t",.description="This card provides Colorless Energy. When you play this card from your hand and attach it to your Active Pokemon, your opponent switches his or her Active Pokemon with 1 of his or her Benched Pokemon."
 },
-[1538] = {.id=1538, .name="Retro Energy", .kind=TCG_ENERGY, .type=6, .rarity=1, .set=21, .set2=255, .dark=0, .holo=0, .flags=TCG_CF_SPECIAL, .origin=21,
+[1538] = {.id=1538, .name="Retro Energy", .kind=TCG_ENERGY, .type=6, .rarity=1, .set=21, .set2=255, .dark=0, .holo=0, .flags=TCG_CF_SPECIAL|TCG_CF_READY, .origin=21,
 .effect="ecard3-144:t",.description="This card provides Colorless Energy. When you play this card from your hand and attach it to 1 of your Evolved Pokemon, you may remove up to 2 damage counters from that Pokemon and discard the top card from it. (This counts as devolving it.)"
 },
 [1539] = {.id=1539, .name="Celebi", .kind=TCG_POKEMON, .type=6, .rarity=2, .set=21, .set2=255, .dark=0, .holo=1, .flags=TCG_CF_CRYSTAL|TCG_CF_BODY|TCG_CF_READY, .origin=21,
