@@ -713,6 +713,13 @@ static void RegionOnPlay(struct TcgDuel *g, unsigned player, unsigned slot, unsi
             }
         TcgDuel_Shuffle(g, player);
         break;
+    case TCG_POWER_R_GIFT:
+        /* (played from the hand) their choice of a Pokemon Tool, then yours */
+        if (!g->fromHand)
+            return;
+        Announce(g, player, slot, power);
+        TcgDuel_AskChoice(g, player ^ 1, TCG_CHOICE_TOOL, TcgDuel_Field(g, player, slot)->id, 0);
+        break;
     case TCG_POWER_R_EXCHANGE:
         /* (played from the hand) their choice to redraw 4, then yours */
         if (!g->fromHand)

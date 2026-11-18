@@ -4284,7 +4284,7 @@ const struct TcgCard gTcgCards[TCG_CARD_COUNT + 1] = {
 [678] = {.id=678, .name="Sabrina", .kind=TCG_TRAINER, .type=6, .rarity=2, .set=14, .set2=255, .dark=0, .holo=0, .flags=TCG_CF_READY, .origin=14, .canon=588,
 .effect="gym2-110:t",.description="Take all Energy cards attached to 1 of your Pokemon with Sabrina in its name and attach them to another 1 of your Pokemon with Sabrina in its name."
 },
-[679] = {.id=679, .name="Blaine's Quiz #2", .kind=TCG_TRAINER, .type=6, .rarity=1, .set=14, .set2=255, .dark=0, .holo=0, .flags=0, .origin=14,
+[679] = {.id=679, .name="Blaine's Quiz #2", .kind=TCG_TRAINER, .type=6, .rarity=1, .set=14, .set2=255, .dark=0, .holo=0, .flags=TCG_CF_READY, .origin=14,
 .effect="gym2-111:t",.description="Put a card from your hand face down in front of you. Your opponent guesses whether it is an Energy card, a Trainer card, or a Pokemon (Basic or Evolution) card. Flip the card over. If your opponent guessed right, he or she draws 2 cards. If your opponent guessed wrong, you draw 2 cards. Either way, return the card to your hand."
 },
 [680] = {.id=680, .name="Blaine's Quiz #3", .kind=TCG_TRAINER, .type=6, .rarity=1, .set=14, .set2=255, .dark=0, .holo=0, .flags=0, .origin=14,
@@ -4953,7 +4953,7 @@ const struct TcgCard gTcgCards[TCG_CARD_COUNT + 1] = {
 [793] = {.id=793, .name="Berry", .kind=TCG_TRAINER, .type=6, .rarity=0, .set=15, .set2=255, .dark=0, .holo=0, .flags=TCG_CF_TOOL|TCG_CF_READY, .origin=15,
 .effect="neo1-99:t",.description="Attach Berry to 1 of your Pokemon that doesn't have a Pokemon Tool attached to it. At any time between turns, if there are at least 2 damage counters on the Pokemon Berry is attached to, you may remove 2 of them and discard Berry. At the start of each turn, if there are at least 2 damage counters on the Pokemon Berry is attached to, remove 2 of them and discard Berry."
 },
-[794] = {.id=794, .name="Double Gust", .kind=TCG_TRAINER, .type=6, .rarity=0, .set=15, .set2=255, .dark=0, .holo=0, .flags=0, .origin=15,
+[794] = {.id=794, .name="Double Gust", .kind=TCG_TRAINER, .type=6, .rarity=0, .set=15, .set2=255, .dark=0, .holo=0, .flags=TCG_CF_READY, .origin=15,
 .effect="neo1-100:t",.description="If you have any Benched Pokemon, your opponent chooses 1 of them and switches it with your Active Pokemon. Then, if your opponent has any Benched Pokemon, choose 1 of them and switch it with his or her Active Pokemon."
 },
 [795] = {.id=795, .name="Moo-Moo Milk", .kind=TCG_TRAINER, .type=6, .rarity=0, .set=15, .set2=255, .dark=0, .holo=0, .flags=TCG_CF_READY, .origin=15,
@@ -6020,7 +6020,7 @@ const struct TcgCard gTcgCards[TCG_CARD_COUNT + 1] = {
 {.name="",.description="",.effect="NONE",.animation="ATK_ANIM_NONE",.cost={0},.damage=0,.category=TCG_DAMAGE_NORMAL},
 }
 },
-[955] = {.id=955, .name="Light Togetic", .kind=TCG_POKEMON, .type=6, .rarity=2, .set=18, .set2=255, .dark=0, .holo=1, .flags=TCG_CF_LIGHT, .origin=18,
+[955] = {.id=955, .name="Light Togetic", .kind=TCG_POKEMON, .type=6, .rarity=2, .set=18, .set2=255, .dark=0, .holo=1, .flags=TCG_CF_LIGHT|TCG_CF_READY, .origin=18,
 .hp=60, .stage=1, .species=176, .level=32, .retreat=0, .weakness=255, .resistance=4, .evolvesFrom="Togepi", .description="It becomes depressed if it is not near kind-hearted people. Is is able to float in the air without moving its wings.", .attacks={
 {.name="Gift",.description="When you play Light Togetic from your hand, your opponent may search his or her deck for a Pokemon Tool card, show that card to you, and put it into his or her hand. Either way, you may do the same, and then each player who searched shuffles his or her deck.",.effect="neo4-15:p",.animation="ATK_ANIM_HIT",.cost={0,0,0,0,0,0,0,0,0},.damage=0,.category=TCG_POKEMON_POWER},
 {.name="Sweet Kiss",.description="Your opponent may draw a card.",.effect="neo4-15:a0",.animation="ATK_ANIM_HIT",.cost={0,0,0,0,0,0,2,0,0},.damage=30,.category=TCG_DAMAGE_NORMAL},
@@ -6058,7 +6058,7 @@ const struct TcgCard gTcgCards[TCG_CARD_COUNT + 1] = {
 {.name="",.description="",.effect="NONE",.animation="ATK_ANIM_NONE",.cost={0},.damage=0,.category=TCG_DAMAGE_NORMAL},
 }
 },
-[961] = {.id=961, .name="Dark Ursaring", .kind=TCG_POKEMON, .type=6, .rarity=2, .set=18, .set2=255, .dark=1, .holo=0, .flags=0, .origin=18,
+[961] = {.id=961, .name="Dark Ursaring", .kind=TCG_POKEMON, .type=6, .rarity=2, .set=18, .set2=255, .dark=1, .holo=0, .flags=TCG_CF_READY, .origin=18,
 .hp=60, .stage=1, .species=217, .level=28, .retreat=2, .weakness=4, .resistance=5, .evolvesFrom="Teddiursa", .description="Its keen nose can pick out any scent, even that of food buried deep underground.", .attacks={
 {.name="Provoke",.description="Look at your opponent's hand. If he or she has any Baby Pokemon and/or Basic Pokemon there, you may put any number of them onto your opponent's Bench (as long as there's room). Then, your opponent looks at your hand. If you have any Baby Pokemon and/or Basic Pokemon there, your opponent may put any number of them onto your Bench (as long as there's room).",.effect="neo4-21:a0",.animation="ATK_ANIM_HIT",.cost={0,0,0,0,0,0,1,0,0},.damage=0,.category=TCG_RESIDUAL},
 {.name="Battle Frenzy",.description="For each Pokemon in play (yours and your opponent's), flip a coin. For each heads, this attack does 20 damage to that Pokemon. Don't apply Weakness and Resistance for this attack.",.effect="neo4-21:a1",.animation="ATK_ANIM_HIT",.cost={0,0,0,0,0,0,2,0,0},.damage=0,.category=TCG_RESIDUAL},
@@ -6240,7 +6240,7 @@ const struct TcgCard gTcgCards[TCG_CARD_COUNT + 1] = {
 {.name="",.description="",.effect="NONE",.animation="ATK_ANIM_NONE",.cost={0},.damage=0,.category=TCG_DAMAGE_NORMAL},
 }
 },
-[987] = {.id=987, .name="Light Golduck", .kind=TCG_POKEMON, .type=3, .rarity=1, .set=18, .set2=255, .dark=0, .holo=0, .flags=TCG_CF_LIGHT, .origin=18,
+[987] = {.id=987, .name="Light Golduck", .kind=TCG_POKEMON, .type=3, .rarity=1, .set=18, .set2=255, .dark=0, .holo=0, .flags=TCG_CF_LIGHT|TCG_CF_READY, .origin=18,
 .hp=80, .stage=1, .species=55, .level=36, .retreat=1, .weakness=2, .resistance=255, .evolvesFrom="Psyduck", .description="The faster it swims, the brighter the glow on its forehead becomes.", .attacks={
 {.name="Flipper Stroke",.description="Your opponent looks at the top 3 cards of his or her deck. If any of them are basic Energy cards, he or she may show any number of them to you and put them into his or her hand. You do the same. Either way, each player shuffles his or her deck.",.effect="neo4-47:a0",.animation="ATK_ANIM_HIT",.cost={0,0,0,1,0,0,0,0,0},.damage=0,.category=TCG_RESIDUAL},
 {.name="Core Blast",.description="This attack does 30 damage plus 20 more damage for each Special Energy card attached to the Defending Pokemon.",.effect="neo4-47:a1",.animation="ATK_ANIM_HIT",.cost={0,0,0,0,0,1,2,0,0},.damage=30,.category=TCG_DAMAGE_PLUS},
@@ -6289,7 +6289,7 @@ const struct TcgCard gTcgCards[TCG_CARD_COUNT + 1] = {
 {.name="",.description="",.effect="NONE",.animation="ATK_ANIM_NONE",.cost={0},.damage=0,.category=TCG_DAMAGE_NORMAL},
 }
 },
-[994] = {.id=994, .name="Light Wigglytuff", .kind=TCG_POKEMON, .type=6, .rarity=1, .set=18, .set2=255, .dark=0, .holo=0, .flags=TCG_CF_LIGHT, .origin=18,
+[994] = {.id=994, .name="Light Wigglytuff", .kind=TCG_POKEMON, .type=6, .rarity=1, .set=18, .set2=255, .dark=0, .holo=0, .flags=TCG_CF_LIGHT|TCG_CF_READY, .origin=18,
 .hp=80, .stage=1, .species=40, .level=33, .retreat=1, .weakness=4, .resistance=5, .evolvesFrom="Jigglypuff", .description="If two of them brush against each other, they will not be able to separate themselves, as they enjoy touching each other's soft fur too much.", .attacks={
 {.name="Evolution Song",.description="Your opponent may choose 1 of his or her Pokemon and search his or her deck for a card that evolves from that Pokemon. Your opponent attaches that card to that Pokemon. This counts as evolving that Pokemon. Either way, you may do the same, and then each player who searched shuffles his or her deck.",.effect="neo4-54:a0",.animation="ATK_ANIM_HIT",.cost={0,0,0,0,0,0,1,0,0},.damage=0,.category=TCG_RESIDUAL},
 {.name="Body Slam",.description="Flip a coin. If heads, the Defending Pokemon is now Paralyzed.",.effect="neo4-54:a1",.animation="ATK_ANIM_HIT",.cost={0,0,0,0,0,0,3,0,0},.damage=20,.category=TCG_DAMAGE_NORMAL},
@@ -6585,7 +6585,7 @@ const struct TcgCard gTcgCards[TCG_CARD_COUNT + 1] = {
 [1041] = {.id=1041, .name="Magnifier", .kind=TCG_TRAINER, .type=6, .rarity=1, .set=18, .set2=255, .dark=0, .holo=0, .flags=TCG_CF_READY, .origin=18,
 .effect="neo4-101:t",.description="Attach Magnifier to 1 of your Pokemon. At the end of your turn, discard Magnifier. If the Pokemon Magnifier is attached to attacks, don't apply Resistance for that attack."
 },
-[1042] = {.id=1042, .name="Pokemon Personality Test", .kind=TCG_TRAINER, .type=6, .rarity=1, .set=18, .set2=255, .dark=0, .holo=0, .flags=0, .origin=18,
+[1042] = {.id=1042, .name="Pokemon Personality Test", .kind=TCG_TRAINER, .type=6, .rarity=1, .set=18, .set2=255, .dark=0, .holo=0, .flags=TCG_CF_READY, .origin=18,
 .effect="neo4-102:t",.description="Put an Evolution card from your hand face down in front of you. Your opponent guesses whether it is a Pokemon card with Light in its name, a Pokemon card with Dark in its name, or neither one. Flip the card over. If your opponent guessed right, he or she draws 3 cards. If your opponent guessed wrong, you draw 3 cards. Either way, return the card to your hand."
 },
 [1043] = {.id=1043, .name="Team Rocket's Evil Deeds", .kind=TCG_TRAINER, .type=6, .rarity=1, .set=18, .set2=255, .dark=0, .holo=0, .flags=TCG_CF_READY, .origin=18,
@@ -7735,7 +7735,7 @@ const struct TcgCard gTcgCards[TCG_CARD_COUNT + 1] = {
 {.name="",.description="",.effect="NONE",.animation="ATK_ANIM_NONE",.cost={0},.damage=0,.category=TCG_DAMAGE_NORMAL},
 }
 },
-[1221] = {.id=1221, .name="Elekid", .kind=TCG_POKEMON, .type=2, .rarity=2, .set=20, .set2=255, .dark=0, .holo=0, .flags=TCG_CF_BABY, .origin=20,
+[1221] = {.id=1221, .name="Elekid", .kind=TCG_POKEMON, .type=2, .rarity=2, .set=20, .set2=255, .dark=0, .holo=0, .flags=TCG_CF_BABY|TCG_CF_READY, .origin=20,
 .hp=30, .stage=0, .species=239, .level=0, .retreat=1, .weakness=255, .resistance=255, .evolvesFrom="", .description="", .attacks={
 {.name="Energy Kick",.description="Flip a coin. If heads, choose an Energy card attached to the Defending Pokemon. Your opponent moves that card to 1 of his or her other Pokemon. (If your opponent has no Benched Pokemon, this attack does nothing.)",.effect="ecard2-9:a0",.animation="ATK_ANIM_HIT",.cost={0,0,1,0,0,0,0,0,0},.damage=0,.category=TCG_RESIDUAL},
 {.name="",.description="",.effect="NONE",.animation="ATK_ANIM_NONE",.cost={0},.damage=0,.category=TCG_DAMAGE_NORMAL},
@@ -10141,7 +10141,7 @@ const struct TcgCard gTcgCards[TCG_CARD_COUNT + 1] = {
 {.name="",.description="",.effect="NONE",.animation="ATK_ANIM_NONE",.cost={0},.damage=0,.category=TCG_DAMAGE_NORMAL},
 }
 },
-[1586] = {.id=1586, .name="Meowth", .kind=TCG_POKEMON, .type=6, .rarity=3, .set=4, .set2=255, .dark=0, .holo=0, .flags=0, .origin=22,
+[1586] = {.id=1586, .name="Meowth", .kind=TCG_POKEMON, .type=6, .rarity=3, .set=4, .set2=255, .dark=0, .holo=0, .flags=TCG_CF_READY, .origin=22,
 .hp=50, .stage=0, .species=52, .level=13, .retreat=1, .weakness=4, .resistance=5, .evolvesFrom="", .description="Adores circular objects. Wanders the streets on a nightly basis to look for dropped loose change.", .attacks={
 {.name="Cat Punch",.description="Flip a coin. If heads, this attack does 20 damage. If tails and if your opponent has any Benched Pokemon, he or she chooses 1 of them and this attack does 20 damage to it. (Don't apply Weakness and Resistance for Benched Pokemon.)",.effect="basep-10:a0",.animation="ATK_ANIM_HIT",.cost={0,0,0,0,0,0,2,0,0},.damage=0,.category=TCG_RESIDUAL},
 {.name="",.description="",.effect="NONE",.animation="ATK_ANIM_NONE",.cost={0},.damage=0,.category=TCG_DAMAGE_NORMAL},

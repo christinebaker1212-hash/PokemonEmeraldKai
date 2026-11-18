@@ -42,8 +42,61 @@ static int ChoiceHasAny(const struct TcgDuel *g, unsigned player, unsigned kind)
         return 0;
     case TCG_CHOICE_HAND_TO_TOP:
         return p->handSize != 0;
+    case TCG_CHOICE_TOP3_ENERGY:
+        for (k = 0; k < 3 && k < p->deckSize; k++)
+            if (CardAt(g, player, p->deck[p->deckSize - 1 - k])->kind == TCG_ENERGY &&
+                CardAt(g, player, p->deck[p->deckSize - 1 - k])->id <= 6)
+                return 1;
+        return 0;
+    case TCG_CHOICE_EVOLVE:
+    {
+        unsigned s, d;
+        for (s = 0; s < TCG_FIELD_SIZE; s++)
+            for (d = 0; TcgDuel_Field(g, player, s) && p->field[s].stackSize < 4 && d < p->deckSize; d++)
+                if (EvolvesFrom(CardAt(g, player, p->deck[d]), TcgDuel_Field(g, player, s)))
+                    return 1;
+        return 0;
+    }
+    case TCG_CHOICE_TOOL:
+        for (k = 0; k < p->deckSize; k++)
+            if (CardAt(g, player, p->deck[k])->kind == TCG_TRAINER && (CardAt(g, player, p->deck[k])->flags & TCG_CF_TOOL))
+                return 1;
+        return 0;
+    case TCG_CHOICE_SWITCH_THEIRS:
+        return BenchCount(g, player ^ 1) && !TcgDuel_Anchored(g, player ^ 1);
+    case TCG_CHOICE_BENCH_HIT:
+    case TCG_CHOICE_MOVE_ENERGY:
+        return BenchCount(g, player) != 0;
+    case TCG_CHOICE_BENCH_THEIRS:
+    {
+        const struct TcgPlayer *q = &g->players[player ^ 1];
+        if (BenchCount(g, player ^ 1) >= TCG_FIELD_SIZE - 1)
+            return 0;
+        for (k = 0; k < q->handSize; k++)
+            if (CardAt(g, player ^ 1, q->hand[k])->kind == TCG_POKEMON && !CardAt(g, player ^ 1, q->hand[k])->stage)
+                return 1;
+        return 0;
+    }
     }
     return 1;
+}
+/* What a passed-over stage still does: Flipper Stroke's shuffle ("Either way, each player shuffles") */
+static void ChoiceSkipped(struct TcgDuel *g, unsigned player, unsigned kind)
+{
+    if (kind == TCG_CHOICE_TOP3_ENERGY)
+        TcgDuel_Shuffle(g, player);
+}
+/* Is the choice the player's too after the opponent's ("Either way, you may do the same"), or theirs alone */
+static int ChoiceBoth(unsigned kind)
+{
+    switch (kind)
+    {
+    case TCG_CHOICE_DISCARD_POKEMON: case TCG_CHOICE_DISCARD_TO_DECK: case TCG_CHOICE_DISCARD_ANY:
+    case TCG_CHOICE_TIME_CAPSULE: case TCG_CHOICE_REDRAW4: case TCG_CHOICE_TOP3_ENERGY: case TCG_CHOICE_EVOLVE:
+    case TCG_CHOICE_TOOL:
+        return 1;
+    }
+    return 0;
 }
 /* The choice is done: what ends with it, and back to the turn */
 static void ChoiceEnd(struct TcgDuel *g, unsigned kind)
@@ -68,7 +121,8 @@ void TcgDuel_AskChoice(struct TcgDuel *g, unsigned player, unsigned kind, unsign
             g->choiceStage = (uint8_t)stage;
             return;
         }
-        if (stage == 0 && (player & 1) != g->current)
+        ChoiceSkipped(g, player & 1, kind);
+        if (stage == 0 && (player & 1) != g->current && ChoiceBoth(kind))
             player = g->current, stage = 1;
         else
         {
@@ -81,7 +135,7 @@ void TcgDuel_AskChoice(struct TcgDuel *g, unsigned player, unsigned kind, unsign
 static void ChoiceNext(struct TcgDuel *g)
 {
     unsigned kind = g->choiceKind;
-    if (g->choiceStage == 0 && g->choicePlayer != g->current)
+    if (g->choiceStage == 0 && g->choicePlayer != g->current && ChoiceBoth(kind))
     {
         g->phase = TCG_TURN; /* (AskChoice sets it again if the player has something to choose) */
         TcgDuel_AskChoice(g, g->current, kind, g->choiceCard, 1);
@@ -151,6 +205,109 @@ int TcgDuel_Choose(struct TcgDuel *g, const struct TcgAction *a)
         ChoiceEnd(g, TCG_CHOICE_HAND_TO_TOP);
         return TCG_OK;
     }
+    case TCG_CHOICE_TOP3_ENERGY:
+        /* the basic Energy picked among the top 3 into the hand, then the deck shuffled */
+        for (k = 0; k < n; k++)
+        {
+            int at = Picked(a, k, p->deck, p->deckSize);
+            if (at < 0 || at + 3 < (int)p->deckSize || CardAt(g, who, p->deck[at])->kind != TCG_ENERGY ||
+                CardAt(g, who, p->deck[at])->id > 6)
+                return ChoiceFail(g, "Only basic Energy cards among the top 3.");
+            TcgDuel_Log(g, "Shown: %s.", CardAt(g, who, p->deck[at])->name);
+            p->hand[p->handSize++] = TcgPile_Remove(p->deck, &p->deckSize, (unsigned)at);
+        }
+        TcgDuel_Shuffle(g, who);
+        break;
+    case TCG_CHOICE_EVOLVE:
+    {
+        /* the card picked from the deck onto the one of yours chosen (none: nothing), the deck shuffled */
+        int at = n ? Picked(a, 0, p->deck, p->deckSize) : -1;
+        if (n)
+        {
+            if (a->target >= TCG_FIELD_SIZE || !TcgDuel_Field(g, who, a->target) || at < 0 ||
+                !EvolvesFrom(CardAt(g, who, p->deck[at]), TcgDuel_Field(g, who, a->target)))
+                return ChoiceFail(g, "That card doesn't evolve from it.");
+            Evolve(g, who, a->target, (unsigned)at);
+        }
+        TcgDuel_Shuffle(g, who);
+        break;
+    }
+    case TCG_CHOICE_TOOL:
+    {
+        int at = n ? Picked(a, 0, p->deck, p->deckSize) : -1;
+        if (n && (at < 0 || CardAt(g, who, p->deck[at])->kind != TCG_TRAINER || !(CardAt(g, who, p->deck[at])->flags & TCG_CF_TOOL)))
+            return ChoiceFail(g, "Choose a Pokemon Tool.");
+        if (n)
+        {
+            TcgDuel_Log(g, "Shown: %s.", CardAt(g, who, p->deck[at])->name);
+            p->hand[p->handSize++] = TcgPile_Remove(p->deck, &p->deckSize, (unsigned)at);
+            TcgDuel_Shuffle(g, who);
+        }
+        break;
+    }
+    case TCG_CHOICE_SWITCH_THEIRS:
+        /* (the other player's: their Benched one chosen comes in) */
+        if (!ValidTarget(g, who ^ 1, a->target, 1))
+            return ChoiceFail(g, "Choose one of their Benched Pokemon.");
+        Switch(g, who ^ 1, a->target);
+        break;
+    case TCG_CHOICE_BENCH_HIT:
+        if (!ValidTarget(g, who, a->target, 1))
+            return ChoiceFail(g, "Choose one of your Benched Pokemon.");
+        p->field[a->target].damage += 20; /* (no Weakness or Resistance for Benched Pokemon) */
+        TcgDuel_Event(g, TCG_EV_DAMAGE, who, a->target, 20, 0, 0);
+        break;
+    case TCG_CHOICE_MOVE_ENERGY:
+    {
+        /* the Energy card chosen of the Active (choiceData) onto the Benched one chosen */
+        struct TcgFieldCard *f = &p->field[0];
+        if (!ValidTarget(g, who, a->target, 1))
+            return ChoiceFail(g, "Choose one of your other Pokemon.");
+        for (k = 0; k < f->attachedSize && f->attached[k] != g->choiceData; k++)
+            ;
+        if (k < f->attachedSize)
+        {
+            struct TcgFieldCard *to = &p->field[a->target];
+            to->attached[to->attachedSize++] = TcgPile_Remove(f->attached, &f->attachedSize, k);
+            TcgDuel_Event(g, TCG_EV_ATTACH, who, a->target, 0, p->cards[to->attached[to->attachedSize - 1]], 0);
+        }
+        break;
+    }
+    case TCG_CHOICE_GUESS_KIND:
+    case TCG_CHOICE_GUESS_LIGHT:
+    {
+        /* the card shown (the other player's, choiceData): right, the guesser draws (2 / 3); wrong, its player does */
+        const struct TcgCard *c = CardAt(g, who ^ 1, g->choiceData);
+        unsigned truth = g->choiceKind == TCG_CHOICE_GUESS_KIND
+                             ? (c->kind == TCG_ENERGY ? 0u : c->kind == TCG_TRAINER ? 1u : 2u)
+                             : (strstr(c->name, "Light") ? 0u : strstr(c->name, "Dark") ? 1u : 2u),
+                 draws = g->choiceKind == TCG_CHOICE_GUESS_KIND ? 2 : 3, drawer = a->target == truth ? who : who ^ 1;
+        if (a->target > 2)
+            return ChoiceFail(g, "Make a guess.");
+        TcgDuel_Log(g, "It was %s: %s.", c->name, a->target == truth ? "right" : "wrong");
+        TcgDuel_Event(g, TCG_EV_DRAW, drawer, 0, TcgDuel_Draw(g, drawer, draws), 0, 0);
+        break;
+    }
+    case TCG_CHOICE_BENCH_THEIRS:
+    {
+        /* Provoke: the Basic Pokemon picked in the other player's hand onto their Bench */
+        struct TcgPlayer *q = &g->players[who ^ 1];
+        for (k = 0; k < n; k++)
+        {
+            int at = Picked(a, k, q->hand, q->handSize);
+            unsigned room;
+            const struct TcgCard *c = at >= 0 ? CardAt(g, who ^ 1, q->hand[at]) : NULL;
+            for (room = 1; room < TCG_FIELD_SIZE && q->field[room].stackSize; room++)
+                ;
+            if (!c || c->kind != TCG_POKEMON || c->stage || room == TCG_FIELD_SIZE)
+                return ChoiceFail(g, "Only Basic Pokemon, while there's room.");
+            memset(&q->field[room], 0, sizeof(q->field[room]));
+            q->field[room].stack[q->field[room].stackSize++] = TcgPile_Remove(q->hand, &q->handSize, (unsigned)at);
+            q->field[room].enteredTurn = g->turn;
+            TcgDuel_Event(g, TCG_EV_PLAY, who ^ 1, room, 0, c->id, 0);
+        }
+        break;
+    }
     default:
         return ChoiceFail(g, "There is nothing to choose.");
     }
@@ -185,6 +342,57 @@ void TcgDuel_AiChoose(const struct TcgDuel *g, struct TcgAction *a)
     case TCG_CHOICE_REDRAW4:
         a->target = p->handSize < 4; /* (a small hand for 4 new ones) */
         break;
+    case TCG_CHOICE_TOP3_ENERGY:
+        for (k = 0; k < 3 && k < p->deckSize; k++)
+            if (CardAt(g, who, p->deck[p->deckSize - 1 - k])->kind == TCG_ENERGY && CardAt(g, who, p->deck[p->deckSize - 1 - k])->id <= 6)
+                a->selections[a->selectionCount++] = p->deck[p->deckSize - 1 - k];
+        break;
+    case TCG_CHOICE_EVOLVE:
+    {
+        unsigned s, d;
+        for (s = 0; s < TCG_FIELD_SIZE && !a->selectionCount; s++)
+            for (d = 0; TcgDuel_Field(g, who, s) && p->field[s].stackSize < 4 && d < p->deckSize && !a->selectionCount; d++)
+                if (EvolvesFrom(CardAt(g, who, p->deck[d]), TcgDuel_Field(g, who, s)))
+                    a->target = (uint8_t)s, a->selections[a->selectionCount++] = p->deck[d];
+        break;
+    }
+    case TCG_CHOICE_TOOL:
+        for (k = 0; k < p->deckSize && !a->selectionCount; k++)
+            if (CardAt(g, who, p->deck[k])->kind == TCG_TRAINER && (CardAt(g, who, p->deck[k])->flags & TCG_CF_TOOL))
+                a->selections[a->selectionCount++] = p->deck[k];
+        break;
+    case TCG_CHOICE_SWITCH_THEIRS:
+    {
+        /* (theirs: the most damaged of the Bench comes in, else the first) */
+        unsigned s, best = 0;
+        for (s = 1; s < TCG_FIELD_SIZE; s++)
+            if (g->players[who ^ 1].field[s].stackSize &&
+                (!best || g->players[who ^ 1].field[s].damage > g->players[who ^ 1].field[best].damage))
+                best = s;
+        a->target = (uint8_t)best;
+        break;
+    }
+    case TCG_CHOICE_BENCH_HIT:
+    case TCG_CHOICE_MOVE_ENERGY:
+    {
+        /* (yours: the healthiest of the Bench takes the 20; the Energy to the first that has Energy, else the first) */
+        unsigned s, best = 0;
+        for (s = 1; s < TCG_FIELD_SIZE; s++)
+            if (p->field[s].stackSize && (!best || (g->choiceKind == TCG_CHOICE_BENCH_HIT
+                                                        ? p->field[s].damage < p->field[best].damage
+                                                        : p->field[s].attachedSize > p->field[best].attachedSize)))
+                best = s;
+        a->target = (uint8_t)best;
+        break;
+    }
+    case TCG_CHOICE_GUESS_KIND:
+        a->target = 2; /* (Pokemon: the commonest guess) */
+        break;
+    case TCG_CHOICE_GUESS_LIGHT:
+        a->target = 2;
+        break;
+    case TCG_CHOICE_BENCH_THEIRS:
+        break; /* (none of theirs onto their Bench) */
     case TCG_CHOICE_HAND_TO_TOP:
     {
         /* an Energy card back if there are 2 or more, else the last card */

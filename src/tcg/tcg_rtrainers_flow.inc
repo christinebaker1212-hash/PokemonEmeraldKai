@@ -87,6 +87,12 @@ static const struct TcgStep *RegionTrainerSteps(unsigned id, int *count)
         STEPS({TCG_ST_MY_SLOT, TCG_F_DAMAGED, 0, 0, 0, "Heal which Pokemon? (its Energy is discarded)"});
     case TCG_CARD_ECARD1_146:
         STEPS({TCG_ST_OPP_SLOT, TCG_F_BENCH, 0, 0, 0, "If heads: bring out which of theirs?"});
+    case TCG_CARD_NEO1_100: /* Double Gust (then they choose yours: tcg_choice.inc) */
+        STEPS({TCG_ST_OPP_SLOT, TCG_F_BENCH, 0, 1, 0, "Bring out which of their Benched Pokemon?"});
+    case TCG_CARD_GYM2_111:
+        STEPS({TCG_ST_PICK, TCG_F_ANY, TCG_SRC_HAND, 1, 1, "Which card do they guess at?"});
+    case TCG_CARD_NEO4_102:
+        STEPS({TCG_ST_PICK, TCG_F_EVOLUTION, TCG_SRC_HAND, 1, 1, "Which Evolution card do they guess at?"});
     case TCG_CARD_ECARD1_148:
         STEPS({TCG_ST_PICK, TCG_F_EVOLUTION, TCG_SRC_DECK, 0, 1, "Take which Evolution card?"});
     case TCG_CARD_ECARD2_120:
@@ -313,6 +319,25 @@ const struct TcgStep *TcgFlow_ChoiceSteps(const struct TcgDuel *g, int *count)
         STEPS({TCG_ST_CHOICE, 0, 0, 0, 0, "Shuffle your hand into your deck and draw 4?"});
     case TCG_CHOICE_HAND_TO_TOP:
         STEPS({TCG_ST_PICK, TCG_F_ANY, TCG_SRC_HAND, 1, 1, "Put which card on top of your deck?"});
+    case TCG_CHOICE_TOP3_ENERGY:
+        STEPS({TCG_ST_PICK, TCG_F_BASIC_ENERGY, TCG_SRC_TOP3_PICK, 0, 3, "Take which basic Energy of your top 3?"});
+    case TCG_CHOICE_EVOLVE:
+        STEPS({TCG_ST_MY_SLOT, TCG_F_OCCUPIED, 0, 0, 0, "Evolve which of your Pokemon? (or none: then B)"},
+              {TCG_ST_PICK, TCG_F_EVOLVES_FROM_TARGET, TCG_SRC_DECK, 0, 1, "Into which card from your deck?"});
+    case TCG_CHOICE_TOOL:
+        STEPS({TCG_ST_PICK, TCG_F_TOOL, TCG_SRC_DECK, 0, 1, "Take a Pokemon Tool from your deck?"});
+    case TCG_CHOICE_SWITCH_THEIRS:
+        STEPS({TCG_ST_OPP_SLOT, TCG_F_BENCH, 0, 0, 0, "Which of their Benched Pokemon comes in?"});
+    case TCG_CHOICE_BENCH_HIT:
+        STEPS({TCG_ST_MY_SLOT, TCG_F_BENCH, 0, 0, 0, "Which of your Benched Pokemon takes 20?"});
+    case TCG_CHOICE_MOVE_ENERGY:
+        STEPS({TCG_ST_MY_SLOT, TCG_F_BENCH, 0, 0, 0, "Move the Energy to which of your Pokemon?"});
+    case TCG_CHOICE_GUESS_KIND:
+        STEPS({TCG_ST_CHOICE, 0, 0, 0, 0, "Guess: is the card an Energy, a Trainer or a Pokemon?"});
+    case TCG_CHOICE_GUESS_LIGHT:
+        STEPS({TCG_ST_CHOICE, 0, 0, 0, 0, "Guess: Light in its name, Dark, or neither?"});
+    case TCG_CHOICE_BENCH_THEIRS:
+        STEPS({TCG_ST_PICK, TCG_F_BASIC, TCG_SRC_OPP_HAND, 0, 5, "Put which of their Basic Pokemon onto their Bench?"});
     }
     *count = 0;
     return sNoSteps;

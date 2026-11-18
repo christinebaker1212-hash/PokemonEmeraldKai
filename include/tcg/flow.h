@@ -38,7 +38,8 @@ enum
     TCG_SRC_HAND_TOP2,         /* Mary: your hand and the 2 cards you'll draw (the top 2 of your deck) */
     TCG_SRC_BOTTOM4,           /* Underground Expedition: the bottom 4 of your deck */
     TCG_SRC_TOP2,              /* Radio Tower: the top 2 of your deck, only looked at */
-    TCG_SRC_MY_BENCH_ATTACHED  /* Energy Connect: your Benched Pokemon's cards */
+    TCG_SRC_MY_BENCH_ATTACHED, /* Energy Connect: your Benched Pokemon's cards */
+    TCG_SRC_TOP3_PICK          /* Flipper Stroke: the top 3 of your deck, picked from as any pile */
 };
 /* Which Pokemon in play (slot steps) or which cards (picks) can be chosen */
 enum
@@ -118,7 +119,8 @@ enum
     TCG_F_UNOWN_DAMAGED_OTHER,  /* (slot) a damaged Pokemon with Unown in its name, not the power's */
     TCG_F_PSYCHIC_ENERGY,       /* a Psychic Energy card */
     TCG_F_POKEMON_OTHER_NAME,   /* a Pokemon card not named as your Active Pokemon (Messenger) */
-    TCG_F_GRASS_BENCH,          /* (slot) a Benched Grass Pokemon */              /* (slot) a Pokemon the Technical Machine being played may go on (TcgDuel_TmFits) */
+    TCG_F_GRASS_BENCH,          /* (slot) a Benched Grass Pokemon */
+    TCG_F_TOOL,                 /* a Pokemon Tool */              /* (slot) a Pokemon the Technical Machine being played may go on (TcgDuel_TmFits) */
     /* "with Brock in its name" and the like (+ TCG_OWNER_*): a Pokemon card; one of yours in play (slot); another
      * one of yours than the first chosen (slot: the action's target) */
     TCG_F_OWNER_CARD = 100,

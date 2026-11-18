@@ -569,6 +569,11 @@ def _(m, d):
 
 # One wording, one script (the cards' words with SELF for the card's name; tcg_script.inc's ops)
 EXACT = {
+    'Your opponent looks at the top 3 cards of his or her deck. If any of them are basic Energy cards, he or she may show any number of them to you and put them into his or her hand. You do the same. Either way, each player shuffles his or her deck.': 'askch:7',
+    'Your opponent may choose 1 of his or her Pokemon and search his or her deck for a card that evolves from that Pokemon. Your opponent attaches that card to that Pokemon. This counts as evolving that Pokemon. Either way, you may do the same, and then each player who searched shuffles his or her deck.': 'askch:8',
+    'Flip a coin. If heads, this attack does 20 damage. If tails and if your opponent has any Benched Pokemon, he or she chooses 1 of them and this attack does 20 damage to it.': 'c h.add:20 t.askch:11',
+    'Flip a coin. If heads, choose an Energy card attached to the Defending Pokemon. Your opponent moves that card to 1 of his or her other Pokemon. (If your opponent has no Benched Pokemon, this attack does nothing.)': 'c h.ekick',
+    "Look at your opponent's hand. If he or she has any Baby Pokemon and/or Basic Pokemon there, you may put any number of them onto your opponent's Bench (as long as there's room). Then, your opponent looks at your hand. If you have any Baby Pokemon and/or Basic Pokemon there, your opponent may put any number of them onto your Bench (as long as there's room).": 'obench',
     'Your opponent may choose a Baby Pokemon, Basic Pokemon, or Evolution card from his or her discard pile and put it into his or her hand. Either way, you may do the same.': 'askch:1',
     'Your opponent may choose up to 3 Baby Pokemon, Basic Pokemon, and/or Evolution cards from his or her discard pile and shuffle them into his or her deck. Either way, you may do the same.': 'askch:2',
     'Flip a coin. If heads, each player may choose a card from his or her discard pile and put it into his or her hand.': 'c h.askch:3',

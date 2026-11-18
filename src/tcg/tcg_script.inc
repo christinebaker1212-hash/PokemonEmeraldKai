@@ -1081,6 +1081,44 @@ static int ScriptRun(struct TcgDuel *g, const char *script, const struct TcgAtta
             self->barrier = (uint8_t)(x ? x : 1);
         else if (ScriptIs(&o, "guard"))
             self->guard = (uint8_t)x;
+        else if (ScriptIs(&o, "ekick"))
+        {
+            /* Energy Kick: the Defending's Energy card picked; they choose where it goes among their other Pokemon */
+            int at = Picked(action, 0, foe->attached, foe->attachedSize);
+            unsigned k;
+            if (!foe->stackSize || blocked || !BenchCount(g, them))
+                continue;
+            for (k = 0; at < 0 && k < foe->attachedSize; k++) /* (none picked: the first, as Magnetic Lines) */
+                if (CardAt(g, them, foe->attached[k])->kind == TCG_ENERGY)
+                    at = (int)k;
+            if (at < 0)
+                continue;
+            if (CardAt(g, them, foe->attached[at])->kind != TCG_ENERGY)
+                return TCG_INVALID;
+            g->choiceData = foe->attached[at];
+            TcgDuel_AskChoice(g, them, TCG_CHOICE_MOVE_ENERGY, TcgDuel_Field(g, me, sScriptSelf)->id, 0);
+        }
+        else if (ScriptIs(&o, "obench"))
+        {
+            /* Provoke: the Basic Pokemon picked in their hand onto their Bench (room permitting), then their choice of
+             * yours onto yours */
+            unsigned k;
+            for (k = 0; action && k < action->selectionCount; k++)
+            {
+                int at = Picked(action, k, op->hand, op->handSize);
+                unsigned room;
+                const struct TcgCard *c = at >= 0 ? CardAt(g, them, op->hand[at]) : NULL;
+                for (room = 1; room < TCG_FIELD_SIZE && op->field[room].stackSize; room++)
+                    ;
+                if (!c || c->kind != TCG_POKEMON || c->stage || room == TCG_FIELD_SIZE)
+                    return TCG_INVALID;
+                memset(&op->field[room], 0, sizeof(op->field[room]));
+                op->field[room].stack[op->field[room].stackSize++] = TcgPile_Remove(op->hand, &op->handSize, (unsigned)at);
+                op->field[room].enteredTurn = g->turn;
+                TcgDuel_Event(g, TCG_EV_PLAY, them, room, 0, c->id, 0);
+            }
+            TcgDuel_AskChoice(g, them, TCG_CHOICE_BENCH_THEIRS, TcgDuel_Field(g, me, sScriptSelf)->id, 0);
+        }
         else if (ScriptIs(&o, "askch"))
         {
             /* a choice for a player (TCG_CHOICE_x): the opponent first, then you (askch:x,1: only you) */
@@ -2855,6 +2893,13 @@ static unsigned ScriptPick(const char *script, unsigned *count)
         {
             *count = ScriptIs(&o, "nsrch") ? (60u + (unsigned)o.arg[0]) | (unsigned)(o.arg[1] ? o.arg[1] : 60) << 8
                      : ScriptIs(&o, "dbown") ? 70u + (unsigned)o.arg[0] : 80u | 5u << 8;
+            return TCG_APICK_SEARCH;
+        }
+        if (ScriptIs(&o, "ekick"))
+            return TCG_APICK_FOE_ENERGY;
+        if (ScriptIs(&o, "obench"))
+        {
+            *count = 83u | 5u << 8; /* (their Basic Pokemon from their hand) */
             return TCG_APICK_SEARCH;
         }
         if (ScriptIs(&o, "mime"))

@@ -989,7 +989,46 @@ static int Choices(void)
     a.selectionCount = 1;
     if (TcgDuel_Apply(&g, &a) != TCG_OK || g.phase != TCG_TURN || g.players[0].deck[g.players[0].deckSize - 1] != a.selections[0])
         return printf("FAIL Special Delivery's card: %s\n", g.error), 1;
-    printf("PASS choices: Mysterious Wing through the flow, their pick then yours, Special Delivery\n");
+    /* Blaine's Quiz #2: their right guess (a Pokemon) draws them 2 */
+    if (Tcg_Card(TCG_CARD_GYM2_111) && Tcg_Card(TCG_CARD_NEO1_100))
+    {
+        int quiz, mon;
+        Stage(&g, TCG_CARD_MACHOP, 0, 1);
+        quiz = Relabel(&g, 0, TCG_CARD_GYM2_111);
+        mon = Relabel(&g, 0, TCG_CARD_MACHOP);
+        g.players[0].hand[g.players[0].handSize++] = (uint8_t)mon;
+        g.players[0].hand[g.players[0].handSize++] = (uint8_t)quiz;
+        memset(&a, 0, sizeof(a));
+        a.type = TCG_PLAY_TRAINER;
+        a.hand = (uint8_t)(g.players[0].handSize - 1);
+        a.selections[0] = (uint8_t)mon;
+        a.selectionCount = 1;
+        if (TcgDuel_Apply(&g, &a) != TCG_OK || g.phase != TCG_CHOICE || g.choicePlayer != 1)
+            return printf("FAIL Blaine's Quiz #2: %s\n", g.error), 1;
+        hand = g.players[1].handSize;
+        memset(&a, 0, sizeof(a));
+        a.type = TCG_CHOOSE;
+        a.target = 2;
+        if (TcgDuel_Apply(&g, &a) != TCG_OK || g.players[1].handSize != hand + 2 || g.phase != TCG_TURN)
+            return printf("FAIL Blaine's Quiz #2's guess: %s (hand %u -> %u, phase %u, mine %u)\n", g.error, hand, g.players[1].handSize, g.phase, g.players[0].handSize), 1;
+        /* Double Gust: their Benched one you chose, then they choose yours */
+        Stage(&g, TCG_CARD_MACHOP, 0, 1);
+        c = Relabel(&g, 0, TCG_CARD_NEO1_100);
+        g.players[0].hand[g.players[0].handSize++] = (uint8_t)c;
+        k = g.players[1].field[2].stack[0], hand = g.players[0].field[1].stack[0];
+        memset(&a, 0, sizeof(a));
+        a.type = TCG_PLAY_TRAINER;
+        a.hand = (uint8_t)(g.players[0].handSize - 1);
+        a.target = 2;
+        if (TcgDuel_Apply(&g, &a) != TCG_OK || g.players[1].field[0].stack[0] != k || g.phase != TCG_CHOICE)
+            return printf("FAIL Double Gust: %s\n", g.error), 1;
+        memset(&a, 0, sizeof(a));
+        a.type = TCG_CHOOSE;
+        a.target = 1;
+        if (TcgDuel_Apply(&g, &a) != TCG_OK || g.players[0].field[0].stack[0] != hand)
+            return printf("FAIL Double Gust's choice: %s\n", g.error), 1;
+    }
+    printf("PASS choices: Mysterious Wing through the flow, their pick then yours, Special Delivery, Quiz #2, Double Gust\n");
     return 0;
 }
 static int ScriptMechanics(void)

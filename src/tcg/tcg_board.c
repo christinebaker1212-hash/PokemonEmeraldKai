@@ -1800,6 +1800,12 @@ static void OpenPick(int source, int filter, int min, int max, const char *title
         pile = p->field[B.action.target].attached;
         count = p->field[B.action.target].attachedSize;
         break;
+    case TCG_SRC_TOP3_PICK:
+        count = p->deckSize < 3 ? p->deckSize : 3;
+        for (i = 0; i < count; i++)
+            sorted[i] = p->deck[p->deckSize - 1 - i];
+        pile = sorted;
+        break;
     case TCG_SRC_TOP7:
         count = p->deckSize < 7 ? p->deckSize : 7;
         for (i = 0; i < count; i++)

@@ -193,6 +193,7 @@ P('R_PREHISTORIC_MEMORY', 'Prehistoric Memory', 'it can use any attack from its 
 P('R_PSYLINK', 'Psylink', 'always has a copy of every attack your Psychic Pokemon in play have', 'PASSIVE')
 P('R_MIMIC', 'Mimic', "it copies all of the Defending Pokemon's attacks, including their costs", 'PASSIVE')
 P('R_LIGHTNING_BURST', 'Lightning Burst', 'he or she chooses 1 of them and switches it with the Defending', 'PASSIVE')
+P('R_GIFT', 'Gift', 'your opponent may search his or her deck for a Pokemon Tool card', 'PASSIVE')
 P('R_EXCHANGE', '[Engage]', 'your opponent may shuffle his or her hand into his or her deck', 'PASSIVE')
 P('R_ATTRACT_ENERGY', 'Attract Energy', 'move any number of basic Energy cards attached to your other Pokemon', 'PASSIVE')
 P('R_MAGMA_POOL', 'Magma Pool', 'remove 1 Fire Energy card attached to SELF', 'PASSIVE', 'ANY')

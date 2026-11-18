@@ -211,6 +211,7 @@ static const struct { const char *label; uint16_t power; } sRegionPowerLabels[] 
     {"neo3-40:p", TCG_POWER_R_YIELD},
     {"neo3-51:p", TCG_POWER_R_HARD_SHELL},
     {"neo4-12:p", TCG_POWER_R_DRIVE_OFF},
+    {"neo4-15:p", TCG_POWER_R_GIFT},
     {"neo4-18:p", TCG_POWER_R_HOT_PLATE},
     {"neo4-1:p", TCG_POWER_R_CONDUCTIVITY},
     {"neo4-25:p", TCG_POWER_R_TAG_TEAM},

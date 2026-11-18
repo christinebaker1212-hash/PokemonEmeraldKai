@@ -166,7 +166,16 @@ enum
     TCG_CHOICE_DISCARD_ANY,      /* Light Lanturn: a card from your discard pile into your hand (may) */
     TCG_CHOICE_TIME_CAPSULE,     /* Time Capsule: 5 Pokemon / basic Energy cards (or all, or none) into your deck */
     TCG_CHOICE_REDRAW4,          /* Unown [E]: YES shuffles your hand into your deck and draws 4 */
-    TCG_CHOICE_HAND_TO_TOP       /* Special Delivery: a card from your hand on top of your deck */
+    TCG_CHOICE_HAND_TO_TOP,      /* Special Delivery: a card from your hand on top of your deck */
+    TCG_CHOICE_TOP3_ENERGY,      /* Light Golduck: basic Energy among your top 3 into your hand, your deck shuffled */
+    TCG_CHOICE_EVOLVE,           /* Light Wigglytuff: one of yours and a card from your deck that evolves from it */
+    TCG_CHOICE_TOOL,             /* Gift: a Pokemon Tool from your deck into your hand (may) */
+    TCG_CHOICE_SWITCH_THEIRS,    /* Double Gust: which of the other player's Benched Pokemon comes in */
+    TCG_CHOICE_BENCH_HIT,        /* Cat Punch: which of your Benched Pokemon takes 20 */
+    TCG_CHOICE_MOVE_ENERGY,      /* Energy Kick: which of your other Pokemon the Energy choiceData goes to */
+    TCG_CHOICE_GUESS_KIND,       /* Blaine's Quiz #2: Energy, Trainer or Pokemon (the card choiceData) */
+    TCG_CHOICE_GUESS_LIGHT,      /* Pokemon Personality Test: Light, Dark or neither (the card choiceData) */
+    TCG_CHOICE_BENCH_THEIRS      /* Provoke: Basic Pokemon of the other player's hand onto their Bench */
 };
 /* Pokemon Powers (src/tcg/tcg_powers.c), by the card's power. */
 enum TcgPowerId
@@ -362,7 +371,7 @@ struct TcgDuel
     uint8_t forceHeads;
     /* Phase TCG_CHOICE: who chooses, what (TCG_CHOICE_*), the stage of it, the card that asks; choiceEndTurn: the turn
      * ends once it's done (an attack's) */
-    uint8_t choicePlayer, choiceKind, choiceStage, choiceEndTurn;
+    uint8_t choicePlayer, choiceKind, choiceStage, choiceEndTurn, choiceData;
     uint16_t choiceCard;
     /* (also within one attack) nothing it does reaches the Defending Pokemon: Agility and
      * the like, Neutralizing Shield, a heads for Transparency */

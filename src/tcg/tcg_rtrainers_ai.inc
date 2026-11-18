@@ -377,6 +377,12 @@ static int RegionTrainerAi(const struct TcgDuel *g, unsigned hand, struct TcgAct
             return 0;
         break;
     }
+    case TCG_CARD_GYM2_111: /* Blaine's Quiz #2 / Pokemon Personality Test: a card to guess at */
+    case TCG_CARD_NEO4_102:
+        if (!AiPick(p, p->hand, p->handSize, id == TCG_CARD_NEO4_102 ? AiEvolution : AiGarbage, 1, 0, played, a))
+            return 0;
+        break;
+    case TCG_CARD_NEO1_100: /* Double Gust: their weakest Benched Pokemon (they choose which of yours) */
     case TCG_CARD_ECARD1_146: /* Pokemon Reversal: their weakest Benched Pokemon */
     {
         unsigned best = TCG_NONE, left = 0;

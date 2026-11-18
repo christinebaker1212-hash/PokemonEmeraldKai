@@ -81,6 +81,7 @@ uint32_t TcgLink_Hash(const struct TcgDuel *g)
     H(g->choicePlayer);
     H(g->choiceKind);
     H(g->choiceStage);
+    H(g->choiceData);
     H(g->needsTurnStart);
     H(g->switchPending);
     H(g->endAfterSwitch);

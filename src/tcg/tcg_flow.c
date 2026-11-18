@@ -370,6 +370,7 @@ static int AttackPickSteps(const struct TcgDuel *g, unsigned me, const struct Tc
             {12, TCG_F_TRAINER, TCG_SRC_DECK, "Take which Trainer?"},
             {13, TCG_F_POKEMON_CARD, TCG_SRC_DECK, "Take which Pokemon card?"},
             {14, TCG_F_POKEMON_OTHER_NAME, TCG_SRC_DECK, "Take which Pokemon card?"},
+            {83, TCG_F_BASIC, TCG_SRC_OPP_HAND, "Put which of theirs onto their Bench?"},
             {59, TCG_F_ANY, TCG_SRC_HAND, "Put which cards (up to 3) on top of your deck?"},
             {59, TCG_F_BASIC_ENERGY, TCG_SRC_DECK, "Then take that many basic Energy cards (at most)."},
             {20, TCG_F_BASIC, TCG_SRC_DECK, "Put which Basic Pokemon onto your Bench?"},
@@ -619,6 +620,8 @@ int TcgFlow_CardMatches(const struct TcgDuel *g, unsigned owner, unsigned physic
         return c->kind == TCG_POKEMON && !c->stage && !(c->flags & TCG_CF_BABY);
     case TCG_F_POKEMON_CARD:
         return c->kind == TCG_POKEMON;
+    case TCG_F_TOOL:
+        return c->kind == TCG_TRAINER && (c->flags & TCG_CF_TOOL);
     case TCG_F_TM_TOOL:
         return c->kind == TCG_TRAINER && (c->flags & (TCG_CF_TM | TCG_CF_TOOL));
     case TCG_F_SUPPORTER_STADIUM:
@@ -1124,6 +1127,17 @@ static void MenuAdd(struct TcgFlowMenu *m, const char *label, unsigned value, in
 unsigned TcgFlow_TrainerChoices(const struct TcgDuel *g, unsigned me, unsigned cardId, struct TcgFlowMenu *m,
                                 const char **reason)
 {
+    if (g->phase == TCG_CHOICE && (g->choiceKind == TCG_CHOICE_GUESS_KIND || g->choiceKind == TCG_CHOICE_GUESS_LIGHT))
+    {
+        /* (the guess) */
+        static const char *const kinds[3] = {"ENERGY", "TRAINER", "POKEMON"}, *const lights[3] = {"LIGHT", "DARK", "NEITHER"};
+        unsigned i;
+        memset(m, 0, sizeof(*m));
+        *reason = NULL;
+        for (i = 0; i < 3; i++)
+            m->label[i] = g->choiceKind == TCG_CHOICE_GUESS_KIND ? kinds[i] : lights[i], m->value[i] = (uint8_t)i, m->ok[i] = 1;
+        return m->count = 3;
+    }
     if (Tcg_EnergyRule(cardId) == TCG_ER_RETRO || (g->phase == TCG_CHOICE && g->choiceKind == TCG_CHOICE_REDRAW4))
     {
         /* (Retro Energy: "you may") */
@@ -1233,6 +1247,12 @@ static unsigned AskPick(struct TcgFlow *f, const struct TcgDuel *g, int source, 
         break;
     case TCG_SRC_OPP_ATTACHED:
         pile = p->field[f->action.target].attached, count = p->field[f->action.target].attachedSize;
+        break;
+    case TCG_SRC_TOP3_PICK:
+        count = p->deckSize < 3 ? p->deckSize : 3;
+        for (i = 0; i < count; i++)
+            sorted[i] = p->deck[p->deckSize - 1 - i];
+        pile = sorted;
         break;
     case TCG_SRC_TOP7:
         count = p->deckSize < 7 ? p->deckSize : 7;
