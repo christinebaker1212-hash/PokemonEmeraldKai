@@ -20,7 +20,7 @@ int main(int argc, char **argv)
     unsigned s, p, i;
     assert(argc == 2);
     for (i = 1; i <= TCG_CARD_COUNT; i++)
-        assert(Tcg_Card(i)->id == i && Tcg_Card(i)->name[0]);
+        assert(Tcg_CardAny(i)->id == i && Tcg_CardAny(i)->name[0] && (i <= TCG_CARD_GB_COUNT || !Tcg_Card(i) == !(Tcg_CardAny(i)->flags & TCG_CF_READY)));
     assert(!Tcg_Card(0) && !Tcg_Card(TCG_CARD_COUNT + 1));
     for (s = 0; s < 3; s++)
     {

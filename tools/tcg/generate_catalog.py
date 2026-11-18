@@ -44,6 +44,42 @@ for c in x['cards']:
   out.append('}')
  else:out.append(f'.effect={q(c["effect"])},.description={q(c["description"])}')
  out.append('},')
+# The regional sets' cards (tools/tcg/regions/cards.json from import_sets.py; docs/TCG_REGIONS.md): after the Game Boy games'
+_sys.path.insert(0,str(ROOT/'tools/tcg/regions'))
+import effects as REG
+REG_TYPES=['Fire','Grass','Lightning','Water','Fighting','Psychic','Colorless','Darkness','Metal']
+reg=json.loads((ROOT/'tools/tcg/regions/cards.json').read_text())['cards']
+assert reg[0]['id']==len(x['cards'])+1, 'the regional cards follow the Game Boy games\''
+def rtype(t):return REG_TYPES.index(t) if t in REG_TYPES else 255
+for c in reg:
+ n=c['id']
+ sym=c['src'].upper().replace('-','_')
+ ids.append(f'#define TCG_CARD_{sym} {n}')
+ kind={'pokemon':'TCG_POKEMON','energy':'TCG_ENERGY','trainer':'TCG_TRAINER'}[c['kind']]
+ holo=c['rarity'] in ('Rare Holo','Rare Shining','Rare Secret')
+ rarity={'Common':0,'Uncommon':1}.get(c['rarity'],3 if c['rarity']=='Promo' else 2)
+ # boosters: the set's own (13+); promos: TCG_SET_PROMO
+ cardset=4 if c['region']=='PROMO' else c['origin']
+ flags=[{'STADIUM':'TCG_CF_STADIUM','TOOL':'TCG_CF_TOOL','SUPPORTER':'TCG_CF_SUPPORTER','TM':'TCG_CF_TM','BABY':'TCG_CF_BABY','EX':'TCG_CF_EX','RSM':'TCG_CF_RSM','GAME_CORNER':'TCG_CF_GAME_CORNER','SPECIAL':'TCG_CF_SPECIAL','SHINING':'TCG_CF_SHINING','LIGHT':'TCG_CF_LIGHT','CRYSTAL':'TCG_CF_CRYSTAL','OWNER':'TCG_CF_OWNER'}[f] for f in c['flags'] if f!='DARK']
+ if c.get('ability') and c['ability']['kind']=='BODY':flags.append('TCG_CF_BODY')
+ if REG.ready(c):flags.append('TCG_CF_READY')
+ flagx='|'.join(flags) or '0'
+ out.append(f'[{n}] = {{.id={n}, .name={q(c["name"])}, .kind={kind}, .type={rtype(c["type"])}, .rarity={rarity}, .set={cardset}, .set2=255, .dark={1 if "DARK" in c["flags"] else 0}, .holo={1 if holo else 0}, .flags={flagx}, .origin={c["origin"]},')
+ if c['kind']=='pokemon':
+  out.append(f'.hp={c["hp"]}, .stage={c["stage"]}, .species={c["species"]}, .level={c["level"]}, .retreat={c["retreat"]}, .weakness={rtype(c["weakness"])}, .resistance={rtype(c["resistance"])}, .evolvesFrom={q(c["evolvesFrom"])}, .description={q(c["flavor"])}, .attacks={{')
+  attacks=[]
+  if c.get('ability'):
+   ab=c['ability'];attacks.append({'name':ab['name'],'text':ab['text'],'effect':ab['effect'],'cost':{},'damage':0,'category':'POKEMON_POWER'})
+  attacks+=c['attacks']
+  assert len(attacks)<=3,c['src']
+  for a in attacks+[None]*(3-len(attacks)):
+   if a is None:
+    out.append('{.name="",.description="",.effect="NONE",.animation="ATK_ANIM_NONE",.cost={0},.damage=0,.category=TCG_DAMAGE_NORMAL},');continue
+   costs=','.join(str(a['cost'].get(t,0)) for t in REG_TYPES)
+   out.append(f'{{.name={q(a["name"])},.description={q(a["text"])},.effect={q(a["effect"])},.animation="ATK_ANIM_HIT",.cost={{{costs}}},.damage={a["damage"]},.category=TCG_{a["category"]}}},')
+  out.append('}')
+ else:out.append(f'.effect={q(c["effect"])},.description={q(c["text"])}')
+ out.append('},')
 out+=['};','const struct TcgDeckDefinition gTcgDeckDefinitions[] = {']
 for d in x['decks']:out.append('{'+q(d['name'])+',{'+','.join(map(str,d['cards']))+'}},')
 # GB2's decks: "GB2 " and their name (tcg_field.c deals them to card players alongside the first game's)
@@ -55,4 +91,4 @@ for pk in x.get('gb2_packs',[]):out.append('{'+','.join(map(str,pk['cards']))+'}
 out+=['};']
 (ROOT/'src/tcg/tcg_catalog.c').write_text('\n'.join(out)+'\n')
 (ROOT/'include/tcg/card_ids.h').write_text('\n'.join(ids+['#endif'])+'\n')
-print(f'Generated {len(x["cards"])} native cards and {len(x["decks"])} decks')
+print(f'Generated {len(x["cards"])} native cards, {len(reg)} regional ones ({sum(1 for c in reg if REG.ready(c))} finished) and {len(x["decks"])} decks')

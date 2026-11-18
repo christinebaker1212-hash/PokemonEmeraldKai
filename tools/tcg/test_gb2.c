@@ -112,7 +112,7 @@ int main(void)
     struct TcgDuel g;
     unsigned id, attack, used = 0, ok = 0, steps = 0;
     uint32_t seed;
-    for (id = 229; id <= TCG_CARD_COUNT; id++)
+    for (id = 229; id <= TCG_CARD_GB_COUNT; id++)
     {
         const struct TcgCard *c = &gTcgCards[id];
         if (c->kind != TCG_POKEMON)

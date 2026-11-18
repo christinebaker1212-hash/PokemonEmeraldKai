@@ -119,6 +119,10 @@ have={c[0] for c in covered}
 for row in gb2_effects.table():
  if row[0] not in have:covered.append(row)
  if row[0] in pending:pending.remove(row[0])
+# The regional sets' attacks (tools/tcg/regions/effects.py)
+sys.path.insert(0,str(ROOT/'tools/tcg/regions'))
+import effects as regions_effects
+for row in regions_effects.table():covered.append(row)
 out=['/* Generated explicit original effect coverage. */']
 for name,op,param,after,extra in covered:out.append('{"'+name+'", FX_'+op+','+str(param)+','+str(after)+','+str(extra)+'},')
 (ROOT/'src/tcg/tcg_effect_table.inc').write_text('\n'.join(out)+'\n')

@@ -2,7 +2,9 @@
 #define MOEMON_TCG_H
 #include <stddef.h>
 #include <stdint.h>
-#define TCG_CARD_COUNT 442   /* the first Game Boy game's 228, then Pokemon Card GB2's (tools/tcg/import_poketcg2.py) */
+#define TCG_CARD_COUNT 1669  /* the first Game Boy game's 228, then Pokemon Card GB2's (tools/tcg/import_poketcg2.py), then
+                              * the regional sets' 1,227 (tools/tcg/regions/import_sets.py: docs/TCG_REGIONS.md) */
+#define TCG_CARD_GB_COUNT 442 /* (the two Game Boy games' cards: every one of them plays) */
 #define TCG_DECK_SIZE 60
 #define TCG_SAVED_DECKS 8
 #define TCG_NAME_LEN 24
@@ -56,7 +58,49 @@ struct TcgCard
     /* set: its booster (TCG_SET_*: 0-3 the first game's, 4 promos, 5 energy, 6-12 GB2's); set2: the GB2 booster that
      * also holds a first-game card (255 none); dark: a Dark Pokemon (Team Rocket's) */
     uint8_t set2, dark, holo;   /* holo: printed as a holofoil (GB2's cards; the first game's: Tcg_IsHolo's list) */
+    /* The regional sets' cards (docs/TCG_REGIONS.md): TCG_CF_* and the set it was printed in (TCG_ORIGIN_*; 0 the Game
+     * Boy games') */
+    uint16_t flags;
+    uint8_t origin;
 };
+enum
+{
+    TCG_CF_STADIUM = 1 << 0,
+    TCG_CF_TOOL = 1 << 1,
+    TCG_CF_SUPPORTER = 1 << 2,
+    TCG_CF_TM = 1 << 3,           /* a Technical Machine */
+    TCG_CF_BABY = 1 << 4,
+    TCG_CF_EX = 1 << 5,           /* a Pokemon-ex */
+    TCG_CF_RSM = 1 << 6,          /* a Rocket's Secret Machine */
+    TCG_CF_GAME_CORNER = 1 << 7,  /* a Goldenrod Game Corner card */
+    TCG_CF_SPECIAL = 1 << 8,      /* a special Energy card */
+    TCG_CF_SHINING = 1 << 9,
+    TCG_CF_LIGHT = 1 << 10,
+    TCG_CF_CRYSTAL = 1 << 11,
+    TCG_CF_OWNER = 1 << 12,       /* an owner's Pokemon (Brock's, Misty's...) */
+    TCG_CF_BODY = 1 << 13,        /* its attacks[0] is a Poke-Body (always on), not a Poke-Power / Pokemon Power */
+    TCG_CF_READY = 1 << 15        /* every rule, attack and power on it plays: only these appear (decision 2) */
+};
+/* TcgCard.origin: the sets after the Game Boy games */
+enum
+{
+    TCG_ORIGIN_GB = 0,
+    TCG_ORIGIN_GYM_HEROES = 13,
+    TCG_ORIGIN_GYM_CHALLENGE,
+    TCG_ORIGIN_NEO_GENESIS,
+    TCG_ORIGIN_NEO_DISCOVERY,
+    TCG_ORIGIN_NEO_REVELATION,
+    TCG_ORIGIN_NEO_DESTINY,
+    TCG_ORIGIN_EXPEDITION,
+    TCG_ORIGIN_AQUAPOLIS,
+    TCG_ORIGIN_SKYRIDGE,
+    TCG_ORIGIN_WIZARDS_PROMO,
+    TCG_ORIGIN_NINTENDO_PROMO
+};
+/* Every card, finished or not (the catalogue as data): tests and the regional sets' tools. Tcg_Card gives only the
+ * cards that play (TCG_CF_READY, the Game Boy games' all) unless gTcgAllCards is set. */
+const struct TcgCard *Tcg_CardAny(unsigned id);
+extern int gTcgAllCards;
 /* Each GB2 booster's cards (0 ends a list) */
 extern const uint16_t gTcgGb2PackCards[TCG_GB2_PACKS][TCG_GB2_PACK_MAX];
 /* Can that booster (pack type 0-10) hold this card? */

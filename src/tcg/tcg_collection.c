@@ -6,7 +6,15 @@
 #include <string.h>
 #include "aw_file.h"   // (sidecars written in the background: src/platform/aw_file.c)
 
-const struct TcgCard *Tcg_Card(unsigned id) { return id && id <= TCG_CARD_COUNT ? &gTcgCards[id] : NULL; }
+int gTcgAllCards;
+const struct TcgCard *Tcg_CardAny(unsigned id) { return id && id <= TCG_CARD_COUNT ? &gTcgCards[id] : NULL; }
+/* (a regional card plays only once it's finished: decision 2) */
+const struct TcgCard *Tcg_Card(unsigned id)
+{
+    return id && id <= TCG_CARD_COUNT && (id <= TCG_CARD_GB_COUNT || gTcgAllCards || (gTcgCards[id].flags & TCG_CF_READY))
+               ? &gTcgCards[id]
+               : NULL;
+}
 uint32_t Tcg_Random(uint32_t *state)
 {
     uint32_t x = *state ? *state : 0x6d2b79f5u;
@@ -116,7 +124,7 @@ static const uint16_t sHolo[] = {
 int Tcg_IsHolo(unsigned card)
 {
     unsigned i;
-    if (card && card <= TCG_CARD_COUNT && gTcgCards[card].holo)
+    if (Tcg_Card(card) && gTcgCards[card].holo)
         return 1;   /* (GB2's: generate_catalog.py) */
     for (i = 0; i < sizeof(sHolo) / sizeof(sHolo[0]); i++)
         if (sHolo[i] == card)
@@ -483,11 +491,13 @@ void Tcg_RecordResult(struct TcgCollection *c, uint32_t key, int won, unsigned d
 
 /* Explicit little-endian encoding, independent of compiler padding and ABI. Formats up to 7 hold the first Game Boy
  * game's 228 cards and its 4 boosters; 8 adds Pokemon Card GB2's (TCG_CARD_COUNT, TCG_PACK_TYPES) and the
- * milestones' upper bits. A save of an older format loads into the new collection (the added cards at 0). */
-#define FORMAT 10
+ * milestones' upper bits; 11 the regional sets' cards. A save of an older format loads into the new collection (the added
+ * cards at 0). */
+#define FORMAT 11
 #define OLD_CARDS 228
 #define OLD_PACKS 4
-#define CARDS_IN(format) ((format) >= 8 ? TCG_CARD_COUNT : OLD_CARDS)
+/* 11: the regional sets' cards (TCG_CARD_COUNT; docs/TCG_REGIONS.md) */
+#define CARDS_IN(format) ((format) >= 11 ? TCG_CARD_COUNT : (format) >= 8 ? TCG_CARD_GB_COUNT : OLD_CARDS)
 #define PACKS_IN(format) ((format) >= 8 ? TCG_PACK_TYPES : OLD_PACKS)
 #define GC_BYTES(cards) (((cards) + 8) / 8)
 #define PAYLOAD_SIZE(format)                                                                                           \
@@ -619,7 +629,7 @@ int Tcg_CollectionLoad(struct TcgCollection *c, const char *path)
         if (format >= 6)
         {
             next.gcDecks = Get(&p, 1);
-            for (i = 0; i < GC_BYTES(cards); i++)
+            for (i = 0; i < GC_BYTES(cards) && i < TCG_GC_SINGLE_BYTES; i++)
                 next.gcSingles[i] = Get(&p, 1);
             for (i = 0; i < TCG_RECORD_SLOTS; i++)
             {
