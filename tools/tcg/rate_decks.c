@@ -25,7 +25,7 @@
 #define MAXD 256
 
 /* The tables this tool makes (the game's are in tcg_ratings.c): filled in before use */
-int16_t gTcgDeckRating[MAXD], gTcgSpecialRating[1], gTcgVariantRating[1];
+int16_t gTcgDeckRating[MAXD], gTcgSpecialRating[1], gTcgVariantRating[1], gTcgThemeRating[1];
 unsigned gTcgSpecialRatingCount;
 uint8_t gTcgRatingReferences[REFERENCES];
 unsigned gTcgRatingReferenceCount;
@@ -149,6 +149,11 @@ int main(void)
         }
         printf("    %d, /* %s */\n", TcgScale_Fit(ratings, games, half, sCount), gTcgSpecialVariants[k].name);
     }
+    printf("};\n/* The regional sets' theme decks (gTcgThemeDecks), as the regional special trainers' */\n"
+           "const int16_t gTcgThemeRating[] = {\n");
+    for (k = 0; k < gTcgThemeDeckCount; k++)
+        printf("    %d, /* %s (%s) */\n", RateAgainst(gTcgThemeDecks[k].cards, elo, k * 40503u + 7), gTcgThemeDecks[k].name,
+               gTcgThemeDeckSet[k]);
     printf("};\n/* The decks a player's deck is measured against in the game */\nconst uint8_t gTcgRatingReferences[] = {");
     for (k = 0; k < REFERENCES; k++)
         printf("%s%u", k ? ", " : "", gTcgRatingReferences[k]);

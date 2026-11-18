@@ -1,0 +1,8 @@
+# KANTO's card players bring the region's theme decks (Gym Heroes / Challenge) among the rest, and its CARD CLUB
+# counter sells them: one bought for CARD POINTS goes into DECKS (tcg_field.c ThemeHere, tcg_ui.c BUY_THEME0)
+MODE=1
+TMO=150
+ENV_A="MOEMON_DEBUG_REGION=2"
+EXPECT_A=("theme deck " "counter: theme deck 7, slot")
+UNEXPECT_A=("[crash]")
+CHECK="python3 tools/test/scenarios/cards_theme_kanto/check.py"

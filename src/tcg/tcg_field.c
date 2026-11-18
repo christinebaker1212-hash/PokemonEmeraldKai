@@ -581,9 +581,9 @@ static bool8 Gb2Plays(const struct TcgDeckDefinition *def)
     return TRUE;
 }
 
-static int Gb2Tier(const struct TcgDeckDefinition *def)
+static int TierOf(int rating)
 {
-    int rating = gTcgDeckRating[def - gTcgDeckDefinitions], t, kind, k;
+    int t, kind, k;
     for (t = 0; t < 3; t++)
     {
         int top = 0;
@@ -596,6 +596,13 @@ static int Gb2Tier(const struct TcgDeckDefinition *def)
             return t;
     }
     return 3;
+}
+static int Gb2Tier(const struct TcgDeckDefinition *def) { return TierOf(gTcgDeckRating[def - gTcgDeckDefinitions]); }
+// The regional sets' theme decks of the region the player is in (gTcgThemeDecks: KANTO's Gym, JOHTO's Neo, the e-Card
+// sets' elsewhere)
+static bool8 ThemeHere(unsigned i)
+{
+    return i < gTcgThemeDeckCount && (gTcgThemeDeckRegions[i] >> MP_Region_Current()) & 1;
 }
 
 // What they say before a duel (include/tcg/quotes.h): their own line or, more and more once you've met, one about
@@ -668,7 +675,7 @@ struct Candidate
 {
     const uint16_t *deck;
     int rating;
-    u8 gb2;   // a Pokemon Card GB2 deck (or a special trainer's on one)
+    u8 gb2;   // a Pokemon Card GB2 deck (or a special trainer's on one); 2: the region's own theme deck
 };
 // The decks the player met lately (Tcg_NoteDeckMet, at each duel's start): passed over while others fit as well
 #define RECENT_DECKS 12
@@ -724,7 +731,7 @@ static const struct Candidate *Pick(const struct Candidate *list, unsigned count
         weights[i] = 0;
         if (d > window || (fresh && MetLately(list[i].deck)))
             continue;
-        weights[i] = (window + 1 - d) * (list[i].gb2 ? w2 : w1);
+        weights[i] = (window + 1 - d) * (list[i].gb2 == 2 ? 3 : list[i].gb2 ? w2 : w1);
         total += weights[i];
     }
     if (!total)
@@ -798,6 +805,14 @@ again:
                 list[n].gb2 = 1;
                 list[n++].rating = gTcgDeckRating[i];
             }
+        // (and their region's theme decks of their kind)
+        for (i = 0; i < gTcgThemeDeckCount && n < ARRAY_COUNT(list); i++)
+            if (ThemeHere(i) && Gb2Kind(&gTcgThemeDecks[i]) == o->pool)
+            {
+                list[n].deck = gTcgThemeDecks[i].cards;
+                list[n].gb2 = 2;
+                list[n++].rating = gTcgThemeRating[i];
+            }
         target = you - SCALE_FAVOR - TcgScale_LevelRating(o->level);
         if (target > cap)
         {
@@ -834,6 +849,14 @@ again:
                 list[n].deck = gTcgDeckDefinitions[i].cards;
                 list[n].gb2 = 1;
                 list[n++].rating = gTcgDeckRating[i];
+            }
+        // (and their region's theme decks of their kind and tier)
+        for (i = 0; i < gTcgThemeDeckCount && n < ARRAY_COUNT(list); i++)
+            if (ThemeHere(i) && Gb2Kind(&gTcgThemeDecks[i]) == o->pool && TierOf(gTcgThemeRating[i]) == tier)
+            {
+                list[n].deck = gTcgThemeDecks[i].cards;
+                list[n].gb2 = 2;
+                list[n++].rating = gTcgThemeRating[i];
             }
         target = 0;
     }
@@ -1640,16 +1663,19 @@ static const char *DeckNameOf(const uint16_t *deck)
     for (i = 0; i < gTcgSpecialDeckCount; i++)
         if (gTcgSpecialDecks[i].cards == deck)
             return gTcgSpecialDecks[i].name;
+    for (i = 0; i < gTcgThemeDeckCount; i++)
+        if (gTcgThemeDecks[i].cards == deck)
+            return gTcgThemeDecks[i].name;
     return "?";
 }
 void Tcg_DebugVariety(void)
 {
     static struct TcgOpponent o;
-    unsigned pool, k, j, total = 0, gb2 = 0;
+    unsigned pool, k, j, total = 0, gb2 = 0, themes = 0;
     for (pool = 0; pool < DECK_MIXED; pool++)
     {
         const uint16_t *seen[20];
-        unsigned distinct = 0, g = 0;
+        unsigned distinct = 0, g = 0, th = 0;
         for (k = 0; k < 20; k++)
         {
             bool8 dup = FALSE;
@@ -1665,10 +1691,17 @@ void Tcg_DebugVariety(void)
             {
                 seen[distinct++] = o.deck;
                 g += !strncmp(DeckNameOf(o.deck), "GB2 ", 4);
+                for (j = 0; j < gTcgThemeDeckCount; j++)
+                    if (gTcgThemeDecks[j].cards == o.deck)
+                    {
+                        th++;
+                        printf("[test] tcgvariety kind %u: theme deck %s (%s)\n", pool, gTcgThemeDecks[j].name,
+                               gTcgThemeDeckSet[j]);
+                    }
             }
         }
-        printf("[test] tcgvariety kind %u: %u different decks of 20 (%u GB2)\n", pool, distinct, g);
-        total += distinct, gb2 += g;
+        printf("[test] tcgvariety kind %u: %u different decks of 20 (%u GB2, %u theme)\n", pool, distinct, g, th);
+        total += distinct, gb2 += g, themes += th;
     }
     // the special trainers: one each, five times
     for (k = 0; k < TCG_SPECIAL_COUNT; k++)
@@ -1692,5 +1725,6 @@ void Tcg_DebugVariety(void)
         }
         printf("[test] tcgvariety special %u: %u different decks of 5\n", k, distinct);
     }
-    printf("[test] tcgvariety: %u different decks for 140 card players, %u of them GB2's\n", total, gb2);
+    printf("[test] tcgvariety: %u different decks for 140 card players, %u of them GB2's, %u the region's theme decks\n",
+           total, gb2, themes);
 }

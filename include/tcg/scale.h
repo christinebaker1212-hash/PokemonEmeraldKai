@@ -22,6 +22,7 @@ extern TCG_RATING_CONST int16_t gTcgDeckRating[];
 extern TCG_RATING_CONST int16_t gTcgSpecialRating[];
 extern TCG_RATING_CONST unsigned gTcgSpecialRatingCount;
 extern TCG_RATING_CONST int16_t gTcgVariantRating[];
+extern TCG_RATING_CONST int16_t gTcgThemeRating[]; /* (gTcgThemeDecks, rated as the regional special trainers' are) */
 /* The Game Boy decks a deck is measured against in the game (gTcgDeckDefinitions indices). */
 extern TCG_RATING_CONST uint8_t gTcgRatingReferences[];
 extern TCG_RATING_CONST unsigned gTcgRatingReferenceCount;

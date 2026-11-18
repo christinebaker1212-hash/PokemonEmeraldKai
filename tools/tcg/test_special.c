@@ -56,5 +56,45 @@ int main(void)
     assert(hoenn == 15); /* (HOENN's; the regional ones each hold a Black Star promo of their region's era) */
     printf("PASS %u special decks: legal, %u promo holders (%u of them HOENN's), every one plays to the end against each "
            "starter\n", gTcgSpecialDeckCount, promos, hoenn);
+    /* The regional sets' theme decks: legal, each in a region, every one playing to the end against the starters */
+    assert(gTcgThemeDeckCount && gTcgThemeDeckCount <= TCG_THEME_DECKS_MAX);
+    for (d = 0; d < gTcgThemeDeckCount; d++)
+    {
+        if (!Tcg_DeckValidate(gTcgThemeDecks[d].cards, NULL, reason, sizeof(reason)))
+        {
+            printf("FAIL theme deck %s: %s\n", gTcgThemeDecks[d].name, reason);
+            return 1;
+        }
+        assert(gTcgThemeDeckRegions[d] && gTcgThemeDeckSet[d][0]);
+        for (s = 0; s < 3; s++)
+        {
+            static const char *starters[] = {"CharmanderAndFriends", "SquirtleAndFriends", "BulbasaurAndFriends"};
+            const uint16_t *mine = NULL;
+            struct TcgDuel g;
+            struct TcgAction a;
+            unsigned i, steps = 0;
+            for (i = 0; i < gTcgDeckDefinitionCount; i++)
+                if (!strcmp(gTcgDeckDefinitions[i].name, starters[s]))
+                    mine = gTcgDeckDefinitions[i].cards;
+            assert(mine && TcgDuel_Init(&g, gTcgThemeDecks[d].cards, mine, 3000 + d * 7 + s, 6));
+            while (g.phase != TCG_FINISHED && steps++ < 3000)
+            {
+                if (!TcgDuel_AiAction(&g, &a) || TcgDuel_Apply(&g, &a) != TCG_OK)
+                {
+                    memset(&a, 0, sizeof(a));
+                    a.type = g.phase == TCG_SETUP ? TCG_FINISH_SETUP : TCG_PASS;
+                    if (TcgDuel_Apply(&g, &a) != TCG_OK)
+                        break;
+                }
+                assert(TcgDuel_Conserved(&g));
+            }
+            if (g.phase != TCG_FINISHED)
+            {
+                printf("FAIL theme deck %s didn't finish against %s\n", gTcgThemeDecks[d].name, starters[s]);
+                return 1;
+            }
+        }
+    }
+    printf("PASS %u regional theme decks: legal, every one plays to the end against each starter\n", gTcgThemeDeckCount);
     return 0;
 }

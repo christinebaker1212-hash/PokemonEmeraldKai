@@ -167,6 +167,16 @@ Total 1,158 set cards (about 1,100 attacks with effect text, 250 Pokémon Powers
      region's finished cards, a promo each) -> gen_special_decks.py -> include/tcg/region_specials.h, tcg_decks.c;
      tcg_field.c sQzSpecials in the same order (people by their sprite: UNOVA's by Black's object code); rated against
      the round robin by rate_decks.c. Rerun gen_special_decks.py whenever cards finish (their decks change).
+   - Theme decks (step 5, 2026-11-18): the regional sets' 20 real theme decks, card for card
+     (tools/tcg/regions/theme_decks.py from theme_decks.json, pokemon-tcg-data's decks/en: Gym Heroes / Challenge's 8
+     for KANTO, Neo Genesis / Discovery / Destiny's 6 for JOHTO, Expedition / Aquapolis / Skyridge's 6 for HOENN, SINNOH
+     and UNOVA; Base Set 2's Trainers as the Game Boy games' cards of that name; Vermilion City Gym and Sabrina's
+     Psychic Control, which don't play, stood in for by Potion / Bill) -> gen_special_decks.py -> tcg_decks.c
+     gTcgThemeDecks (gTcgThemeDeckSet, gTcgThemeDeckRegions). Their region's card players bring them among the Game Boy
+     decks of their kind (tcg_field.c ThemeHere, weighted 3), rated as the regional special trainers' are
+     (rate_decks.c: gTcgThemeRating); their region's CARD CLUB counters sell them for 250 CP each (tcg_ui.c
+     BUY_THEME0, put in the first empty DECKS slot). Tests: test_special.c (each legal, playing to the end), scenarios
+     cards_theme_kanto, cards_variety.
 5. Per region: boosters, shops, NPC decks (built from the region's sets and today's), special trainers with their own
    decks and promos (UNOVA's too), CARD SCALING ratings rerun, the card guide rebuilt.
 6. Retroactive promos: a courier NPC brings each promo whose (newly special) trainer the save's card record shows as

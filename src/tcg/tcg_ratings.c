@@ -589,6 +589,29 @@ const int16_t gTcgVariantRating[] = {
     1504, /* LUCY/GB2 Bug Collecting */
     1469, /* LUCY/GB2 Demonic Forest */
 };
+/* The regional sets' theme decks (gTcgThemeDecks), as the regional special trainers' */
+const int16_t gTcgThemeRating[] = {
+    1500,
+    1500,
+    1500,
+    1500,
+    1500,
+    1500,
+    1500,
+    1500,
+    1500,
+    1500,
+    1500,
+    1500,
+    1500,
+    1500,
+    1500,
+    1500,
+    1500,
+    1500,
+    1500,
+    1500,
+};
 /* The decks a player's deck is measured against in the game */
 const uint8_t gTcgRatingReferences[] = {131, 54, 38, 99, 98, 117, 130, 29, 49, 44, 144, 118};
 const unsigned gTcgRatingReferenceCount = 12;

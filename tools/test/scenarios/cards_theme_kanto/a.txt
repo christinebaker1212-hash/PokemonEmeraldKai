@@ -1,0 +1,20 @@
+pressuntil A field 5000
+wait 60
+mp cards starter 0
+mp tcgvariety
+mp cards points 1000
+mp cards club
+wait 60
+press R 2
+wait 20
+press UP 2
+wait 20
+rendershot a_counter
+press A 2
+wait 30
+press A 2
+wait 60
+rendershot a_bought
+mash B 6 20
+wait 30
+quit

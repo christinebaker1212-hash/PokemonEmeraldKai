@@ -69,6 +69,13 @@ extern const char *const gTcgSpecialRegionTitles[];
 extern const struct TcgDeckDefinition gTcgSpecialVariants[];
 extern const unsigned gTcgSpecialVariantCount;
 extern const uint8_t gTcgSpecialVariantOwner[];
+/* The regional sets' theme decks (tcg_decks.c from tools/tcg/regions/theme_decks.py): each one's set and its regions
+ * (1 << REGION_*); their region's card players bring them, their CARD CLUB counters sell them. */
+#define TCG_THEME_DECKS_MAX 24
+extern const struct TcgDeckDefinition gTcgThemeDecks[];
+extern const unsigned gTcgThemeDeckCount;
+extern const char *const gTcgThemeDeckSet[];
+extern const uint8_t gTcgThemeDeckRegions[];
 
 #define TCG_SCALE_POOL_NONE 0xFF    /* a fixed deck: the teaching duel, practice, a friend */
 #define TCG_SCALE_POOL_SPECIAL 0xFE /* a special trainer: their own deck or one of its variants */

@@ -9,6 +9,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <ctype.h>
 #include <math.h>   // (floorf, lroundf: the booster carousel; MinGW needs it said)
 #include "global.h"
 #include "item.h"
@@ -2759,8 +2760,10 @@ enum
     BUY_RARE_CANDY,
     BUY_PP_UP,
     BUY_TICKET,
-    BUY_COUNT
+    BUY_THEME0, /* (the regional sets' theme decks, gTcgThemeDecks: their regions' counters sell them) */
+    BUY_COUNT = BUY_THEME0 + TCG_THEME_DECKS_MAX
 };
+#define THEME_DECK_COST 250
 static const char *const sBuyNames[BUY_COUNT] = {"COLOSSEUM PACK", "EVOLUTION PACK", "MYSTERY PACK", "LABORATORY PACK",
                                                  "BEGINNING PACK", "LEGENDARY PACK", "FOSSIL ISLE PACK", "PSYCHIC PACK",
                                                  "SKY-FLYING PACK", "TEAM ROCKET PACK", "AMBITION PACK",
@@ -2770,12 +2773,30 @@ static const char *const sBuyNames[BUY_COUNT] = {"COLOSSEUM PACK", "EVOLUTION PA
                                                  "A CARD YOU PICK", "RARE CANDY", "PP UP", "MOEGATCHA TICKET"};
 static const unsigned sBuyCost[BUY_COUNT] = {40, 40, 40, 40, 40, 40, 40, 40, 40, 40, 40,
                                              40, 40, 40, 40, 40, 40, 40, 40, 40, 0, 20, 25, 30};
-/* The counter's rows: the boosters sold in this region (today's everywhere, a region's own there), then the rest */
+static int ThemeSoldHere(unsigned i)
+{
+    return i < gTcgThemeDeckCount && (gTcgThemeDeckRegions[i] >> MP_Region_Current()) & 1;
+}
+static unsigned BuyCost(int k) { return k >= BUY_THEME0 ? THEME_DECK_COST : sBuyCost[k]; }
+static const char *BuyName(int k)
+{
+    static char name[40];
+    unsigned i;
+    if (k < BUY_THEME0)
+        return sBuyNames[k];
+    snprintf(name, sizeof(name), "%s DECK", gTcgThemeDecks[k - BUY_THEME0].name);
+    for (i = 0; name[i]; i++)
+        name[i] = (char)toupper((unsigned char)name[i]);
+    return name;
+}
+/* The counter's rows: the boosters sold in this region (today's everywhere, a region's own there), then the rest,
+ * then the region's theme decks */
 static unsigned BuyRows(uint8_t rows[BUY_COUNT])
 {
     unsigned k, n = 0;
     for (k = 0; k < BUY_COUNT; k++)
-        if (k >= BUY_CARD || Tcg_PackSoldIn(k - BUY_PACK0, MP_Region_Current()))
+        if (k >= BUY_THEME0 ? ThemeSoldHere(k - BUY_THEME0)
+                            : k >= BUY_CARD || Tcg_PackSoldIn(k - BUY_PACK0, MP_Region_Current()))
             rows[n++] = (uint8_t)k;
     return n;
 }
@@ -3105,14 +3126,22 @@ static void CounterLists(int tab)
             if (k == BUY_CARD)
                 snprintf(right, sizeof(right), "5-15");
             else
-                snprintf(right, sizeof(right), "%u", sBuyCost[k]);
-            Row(LIST_X + 2, 8 + i * ROW_H, LIST_W - 4, U.scroll + i == U.cursor, k == BUY_CARD || c->dust >= sBuyCost[k],
-                sBuyNames[k], right);
+                snprintf(right, sizeof(right), "%u", BuyCost(k));
+            Row(LIST_X + 2, 8 + i * ROW_H, LIST_W - 4, U.scroll + i == U.cursor, k == BUY_CARD || c->dust >= BuyCost(k),
+                BuyName(k), right);
         }
-        Strip(0, sel == BUY_CARD ? "Commons and uncommons, 5 or 15 CP. Rares: the GAME CENTER in RUSTBORO."
-                 : sel < BUY_CARD ? "A booster pack of 10 cards from this set."
-                 : sel == BUY_TICKET ? "One pull on any MOEGATCHA banner."
-                                     : "It goes into your BAG.");
+        if (sel >= BUY_THEME0)
+        {
+            char line[120];
+            snprintf(line, sizeof(line), "The %s theme deck, card for card: 60 cards, put in DECKS ready to play.",
+                     gTcgThemeDeckSet[sel - BUY_THEME0]);
+            Strip(0, line);
+        }
+        else
+            Strip(0, sel == BUY_CARD ? "Commons and uncommons, 5 or 15 CP. Rares: the GAME CENTER in RUSTBORO."
+                     : sel < BUY_CARD ? "A booster pack of 10 cards from this set."
+                     : sel == BUY_TICKET ? "One pull on any MOEGATCHA banner."
+                                         : "It goes into your BAG.");
     }
     else
     {
@@ -3456,8 +3485,37 @@ static void Act(int action)
             }
             break;
         }
-        if (c->dust < sBuyCost[k])
+        if (k < 0 || k >= BUY_COUNT || c->dust < BuyCost(k))
             break;
+        if (k >= BUY_THEME0)
+        {
+            /* a theme deck: its cards, and the deck in the first empty slot */
+            const struct TcgDeckDefinition *d = &gTcgThemeDecks[k - BUY_THEME0];
+            unsigned i, slot;
+            if (!ThemeSoldHere((unsigned)(k - BUY_THEME0)))
+                break;
+            c->dust -= THEME_DECK_COST;
+            for (i = 0; i < TCG_DECK_SIZE; i++)
+                if (d->cards[i] > 6)
+                    AddCard(d->cards[i]);
+            for (slot = 0; slot < TCG_SAVED_DECKS; slot++)
+                if (!DeckCount(slot, 0))
+                    break;
+            PlaySE(SE_SHOP);
+            CollectionChanged();
+            printf("[tcg] counter: theme deck %d, slot %u\n", k - BUY_THEME0, slot);
+            if (slot < TCG_SAVED_DECKS)
+            {
+                memcpy(c->decks[slot].cards, d->cards, sizeof(c->decks[slot].cards));
+                snprintf(c->decks[slot].name, TCG_NAME_LEN, "%s", d->name);
+                c->ace[slot] = 0;
+                Say(ACT_NONE, "You got the %s deck! It's in DECKS, slot %u, ready to play.", d->name, slot + 1);
+            }
+            else
+                Say(ACT_NONE, "You got the %s deck's cards! Every DECKS slot is full, so build it from the BINDER.",
+                    d->name);
+            break;
+        }
         if (k == BUY_RARE_CANDY || k == BUY_PP_UP)
         {
             if (!AddBagItem(k == BUY_RARE_CANDY ? ITEM_RARE_CANDY : ITEM_PP_UP, 1))
@@ -3720,13 +3778,13 @@ static void CounterStep(unsigned pressed, int tab)
                 U.filter = 9;
                 U.showAll = SHOP_BINDER;
             }
-            else if (c->dust < sBuyCost[k])
+            else if (c->dust < BuyCost(k))
             {
                 PlaySE(SE_FAILURE);
-                Say(ACT_NONE, "You need %u CARD POINTS for that.", sBuyCost[k]);
+                Say(ACT_NONE, "You need %u CARD POINTS for that.", BuyCost(k));
             }
             else
-                Ask(ACT_BUY, k, "%s for %u CP?", sBuyNames[k], sBuyCost[k]);
+                Ask(ACT_BUY, k, "%s for %u CP?", BuyName(k), BuyCost(k));
         }
     }
     else

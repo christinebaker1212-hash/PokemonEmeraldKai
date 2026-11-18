@@ -1,0 +1,1913 @@
+{
+ "gym1": [
+  {
+   "name": "Brock",
+   "cards": [
+    {
+     "id": "gym1-66",
+     "name": "Brock's Geodude",
+     "count": 3
+    },
+    {
+     "id": "gym1-40",
+     "name": "Brock's Graveler",
+     "count": 1
+    },
+    {
+     "id": "gym1-67",
+     "name": "Brock's Mankey",
+     "count": 3
+    },
+    {
+     "id": "gym1-69",
+     "name": "Brock's Onix",
+     "count": 4
+    },
+    {
+     "id": "gym1-70",
+     "name": "Brock's Rhyhorn",
+     "count": 3
+    },
+    {
+     "id": "gym1-2",
+     "name": "Brock's Rhydon",
+     "count": 1
+    },
+    {
+     "id": "gym1-71",
+     "name": "Brock's Sandshrew",
+     "count": 2
+    },
+    {
+     "id": "gym1-72",
+     "name": "Brock's Sandshrew",
+     "count": 1
+    },
+    {
+     "id": "gym1-41",
+     "name": "Brock's Lickitung",
+     "count": 1
+    },
+    {
+     "id": "base4-118",
+     "name": "Bill",
+     "count": 1
+    },
+    {
+     "id": "gym1-98",
+     "name": "Brock",
+     "count": 1
+    },
+    {
+     "id": "gym1-106",
+     "name": "Brock's Training Method",
+     "count": 2
+    },
+    {
+     "id": "base4-110",
+     "name": "Energy Retrieval",
+     "count": 2
+    },
+    {
+     "id": "base4-111",
+     "name": "Full Heal",
+     "count": 1
+    },
+    {
+     "id": "gym1-115",
+     "name": "Pewter City Gym",
+     "count": 1
+    },
+    {
+     "id": "base4-123",
+     "name": "Switch",
+     "count": 2
+    },
+    {
+     "id": "base4-122",
+     "name": "Potion",
+     "count": 3
+    },
+    {
+     "id": "gym1-127",
+     "name": "Fighting Energy",
+     "count": 28
+    }
+   ]
+  },
+  {
+   "name": "Misty",
+   "cards": [
+    {
+     "id": "gym1-85",
+     "name": "Misty's Goldeen",
+     "count": 3
+    },
+    {
+     "id": "gym1-86",
+     "name": "Misty's Horsea",
+     "count": 4
+    },
+    {
+     "id": "gym1-87",
+     "name": "Misty's Poliwag",
+     "count": 3
+    },
+    {
+     "id": "gym1-53",
+     "name": "Misty's Poliwhirl",
+     "count": 1
+    },
+    {
+     "id": "gym1-54",
+     "name": "Misty's Psyduck",
+     "count": 2
+    },
+    {
+     "id": "gym1-90",
+     "name": "Misty's Staryu",
+     "count": 4
+    },
+    {
+     "id": "gym1-56",
+     "name": "Misty's Starmie",
+     "count": 2
+    },
+    {
+     "id": "gym1-57",
+     "name": "Misty's Tentacool",
+     "count": 2
+    },
+    {
+     "id": "gym1-10",
+     "name": "Misty's Tentacruel",
+     "count": 1
+    },
+    {
+     "id": "gym1-108",
+     "name": "Cerulean City Gym",
+     "count": 1
+    },
+    {
+     "id": "base4-119",
+     "name": "Energy Removal",
+     "count": 2
+    },
+    {
+     "id": "base4-122",
+     "name": "Potion",
+     "count": 2
+    },
+    {
+     "id": "gym1-102",
+     "name": "Misty",
+     "count": 1
+    },
+    {
+     "id": "base4-121",
+     "name": "Poké Ball",
+     "count": 3
+    },
+    {
+     "id": "base4-123",
+     "name": "Switch",
+     "count": 1
+    },
+    {
+     "id": "gym1-132",
+     "name": "Water Energy",
+     "count": 28
+    }
+   ]
+  },
+  {
+   "name": "Lt. Surge",
+   "cards": [
+    {
+     "id": "gym1-80",
+     "name": "Lt. Surge's Magnemite",
+     "count": 4
+    },
+    {
+     "id": "gym1-8",
+     "name": "Lt. Surge's Magneton",
+     "count": 1
+    },
+    {
+     "id": "gym1-81",
+     "name": "Lt. Surge's Pikachu",
+     "count": 4
+    },
+    {
+     "id": "gym1-84",
+     "name": "Lt. Surge's Voltorb",
+     "count": 3
+    },
+    {
+     "id": "gym1-52",
+     "name": "Lt. Surge's Spearow",
+     "count": 2
+    },
+    {
+     "id": "gym1-83",
+     "name": "Lt. Surge's Spearow",
+     "count": 2
+    },
+    {
+     "id": "gym1-82",
+     "name": "Lt. Surge's Rattata",
+     "count": 4
+    },
+    {
+     "id": "gym1-51",
+     "name": "Lt. Surge's Raticate",
+     "count": 2
+    },
+    {
+     "id": "base4-119",
+     "name": "Energy Removal",
+     "count": 1
+    },
+    {
+     "id": "base4-120",
+     "name": "Gust of Wind",
+     "count": 2
+    },
+    {
+     "id": "gym1-101",
+     "name": "Lt. Surge",
+     "count": 1
+    },
+    {
+     "id": "base4-113",
+     "name": "PlusPower",
+     "count": 1
+    },
+    {
+     "id": "base4-122",
+     "name": "Potion",
+     "count": 2
+    },
+    {
+     "id": "gym1-118",
+     "name": "Secret Mission",
+     "count": 2
+    },
+    {
+     "id": "gym1-120",
+     "name": "Vermilion City Gym",
+     "count": 1
+    },
+    {
+     "id": "gym1-130",
+     "name": "Lightning Energy",
+     "count": 28
+    }
+   ]
+  },
+  {
+   "name": "Erika",
+   "cards": [
+    {
+     "id": "gym1-76",
+     "name": "Erika's Bellsprout",
+     "count": 4
+    },
+    {
+     "id": "gym1-49",
+     "name": "Erika's Weepinbell",
+     "count": 2
+    },
+    {
+     "id": "gym1-77",
+     "name": "Erika's Exeggcute",
+     "count": 3
+    },
+    {
+     "id": "gym1-44",
+     "name": "Erika's Exeggutor",
+     "count": 1
+    },
+    {
+     "id": "gym1-78",
+     "name": "Erika's Oddish",
+     "count": 4
+    },
+    {
+     "id": "gym1-46",
+     "name": "Erika's Gloom",
+     "count": 1
+    },
+    {
+     "id": "gym1-45",
+     "name": "Erika's Gloom",
+     "count": 1
+    },
+    {
+     "id": "gym1-5",
+     "name": "Erika's Vileplume",
+     "count": 1
+    },
+    {
+     "id": "gym1-79",
+     "name": "Erika's Tangela",
+     "count": 4
+    },
+    {
+     "id": "gym1-42",
+     "name": "Erika's Dratini",
+     "count": 1
+    },
+    {
+     "id": "gym1-107",
+     "name": "Celadon City Gym",
+     "count": 1
+    },
+    {
+     "id": "gym1-110",
+     "name": "Erika's Perfume",
+     "count": 1
+    },
+    {
+     "id": "gym1-100",
+     "name": "Erika",
+     "count": 1
+    },
+    {
+     "id": "base4-121",
+     "name": "Poké Ball",
+     "count": 2
+    },
+    {
+     "id": "base4-122",
+     "name": "Potion",
+     "count": 2
+    },
+    {
+     "id": "base4-123",
+     "name": "Switch",
+     "count": 3
+    },
+    {
+     "id": "gym1-129",
+     "name": "Grass Energy",
+     "count": 22
+    },
+    {
+     "id": "gym1-131",
+     "name": "Psychic Energy",
+     "count": 6
+    }
+   ]
+  }
+ ],
+ "gym2": [
+  {
+   "name": "Sabrina",
+   "cards": [
+    {
+     "id": "gym2-93",
+     "name": "Sabrina's Abra",
+     "count": 2
+    },
+    {
+     "id": "gym2-94",
+     "name": "Sabrina's Abra",
+     "count": 2
+    },
+    {
+     "id": "gym2-58",
+     "name": "Sabrina's Kadabra",
+     "count": 2
+    },
+    {
+     "id": "gym2-16",
+     "name": "Sabrina's Alakazam",
+     "count": 1
+    },
+    {
+     "id": "gym2-95",
+     "name": "Sabrina's Drowzee",
+     "count": 3
+    },
+    {
+     "id": "gym2-96",
+     "name": "Sabrina's Gastly",
+     "count": 4
+    },
+    {
+     "id": "gym2-55",
+     "name": "Sabrina's Haunter",
+     "count": 2
+    },
+    {
+     "id": "gym2-57",
+     "name": "Sabrina's Jynx",
+     "count": 2
+    },
+    {
+     "id": "gym2-98",
+     "name": "Sabrina's Porygon",
+     "count": 3
+    },
+    {
+     "id": "base4-118",
+     "name": "Bill",
+     "count": 2
+    },
+    {
+     "id": "base4-122",
+     "name": "Potion",
+     "count": 2
+    },
+    {
+     "id": "gym2-110",
+     "name": "Sabrina",
+     "count": 1
+    },
+    {
+     "id": "gym1-125",
+     "name": "Sabrina's Gaze",
+     "count": 2
+    },
+    {
+     "id": "gym2-121",
+     "name": "Sabrina's Psychic Control",
+     "count": 1
+    },
+    {
+     "id": "gym2-122",
+     "name": "Saffron City Gym",
+     "count": 1
+    },
+    {
+     "id": "base4-123",
+     "name": "Switch",
+     "count": 2
+    },
+    {
+     "id": "gym2-131",
+     "name": "Psychic Energy",
+     "count": 28
+    }
+   ]
+  },
+  {
+   "name": "Koga",
+   "cards": [
+    {
+     "id": "gym2-82",
+     "name": "Koga's Weedle",
+     "count": 4
+    },
+    {
+     "id": "gym2-47",
+     "name": "Koga's Kakuna",
+     "count": 2
+    },
+    {
+     "id": "gym2-9",
+     "name": "Koga's Beedrill",
+     "count": 1
+    },
+    {
+     "id": "gym2-77",
+     "name": "Koga's Ekans",
+     "count": 3
+    },
+    {
+     "id": "gym2-78",
+     "name": "Koga's Grimer",
+     "count": 3
+    },
+    {
+     "id": "gym2-79",
+     "name": "Koga's Koffing",
+     "count": 3
+    },
+    {
+     "id": "gym2-48",
+     "name": "Koga's Koffing",
+     "count": 1
+    },
+    {
+     "id": "gym2-50",
+     "name": "Koga's Weezing",
+     "count": 2
+    },
+    {
+     "id": "gym2-80",
+     "name": "Koga's Pidgey",
+     "count": 3
+    },
+    {
+     "id": "base4-119",
+     "name": "Energy Removal",
+     "count": 1
+    },
+    {
+     "id": "gym2-114",
+     "name": "Fuchsia City Gym",
+     "count": 1
+    },
+    {
+     "id": "base4-111",
+     "name": "Full Heal",
+     "count": 1
+    },
+    {
+     "id": "base4-120",
+     "name": "Gust of Wind",
+     "count": 2
+    },
+    {
+     "id": "gym2-106",
+     "name": "Koga",
+     "count": 1
+    },
+    {
+     "id": "base4-113",
+     "name": "PlusPower",
+     "count": 1
+    },
+    {
+     "id": "base4-122",
+     "name": "Potion",
+     "count": 3
+    },
+    {
+     "id": "gym2-129",
+     "name": "Grass Energy",
+     "count": 28
+    }
+   ]
+  },
+  {
+   "name": "Blaine",
+   "cards": [
+    {
+     "id": "gym1-62",
+     "name": "Blaine's Growlithe",
+     "count": 2
+    },
+    {
+     "id": "gym2-62",
+     "name": "Blaine's Growlithe",
+     "count": 2
+    },
+    {
+     "id": "gym2-1",
+     "name": "Blaine's Arcanine",
+     "count": 1
+    },
+    {
+     "id": "gym2-60",
+     "name": "Blaine's Charmander",
+     "count": 3
+    },
+    {
+     "id": "gym2-31",
+     "name": "Blaine's Charmeleon",
+     "count": 2
+    },
+    {
+     "id": "gym2-61",
+     "name": "Blaine's Doduo",
+     "count": 2
+    },
+    {
+     "id": "gym2-32",
+     "name": "Blaine's Dodrio",
+     "count": 1
+    },
+    {
+     "id": "gym2-64",
+     "name": "Blaine's Ponyta",
+     "count": 4
+    },
+    {
+     "id": "gym2-33",
+     "name": "Blaine's Rapidash",
+     "count": 2
+    },
+    {
+     "id": "gym2-66",
+     "name": "Blaine's Vulpix",
+     "count": 2
+    },
+    {
+     "id": "base4-118",
+     "name": "Bill",
+     "count": 2
+    },
+    {
+     "id": "gym2-100",
+     "name": "Blaine",
+     "count": 1
+    },
+    {
+     "id": "gym1-121",
+     "name": "Blaine's Gamble",
+     "count": 1
+    },
+    {
+     "id": "gym2-113",
+     "name": "Cinnabar City Gym",
+     "count": 1
+    },
+    {
+     "id": "gym2-117",
+     "name": "Max Revive",
+     "count": 1
+    },
+    {
+     "id": "base4-122",
+     "name": "Potion",
+     "count": 2
+    },
+    {
+     "id": "gym2-124",
+     "name": "Fervor",
+     "count": 2
+    },
+    {
+     "id": "base4-117",
+     "name": "Super Potion",
+     "count": 1
+    },
+    {
+     "id": "gym2-128",
+     "name": "Fire Energy",
+     "count": 28
+    }
+   ]
+  },
+  {
+   "name": "Giovanni",
+   "cards": [
+    {
+     "id": "gym2-75",
+     "name": "Giovanni's Nidoran♀",
+     "count": 3
+    },
+    {
+     "id": "gym2-44",
+     "name": "Giovanni's Nidorina",
+     "count": 1
+    },
+    {
+     "id": "gym2-76",
+     "name": "Giovanni's Nidoran♂",
+     "count": 4
+    },
+    {
+     "id": "gym2-45",
+     "name": "Giovanni's Nidorino",
+     "count": 2
+    },
+    {
+     "id": "gym2-72",
+     "name": "Giovanni's Machop",
+     "count": 4
+    },
+    {
+     "id": "gym2-42",
+     "name": "Giovanni's Machoke",
+     "count": 2
+    },
+    {
+     "id": "gym2-74",
+     "name": "Giovanni's Meowth",
+     "count": 3
+    },
+    {
+     "id": "gym2-43",
+     "name": "Giovanni's Meowth",
+     "count": 1
+    },
+    {
+     "id": "gym2-8",
+     "name": "Giovanni's Persian",
+     "count": 1
+    },
+    {
+     "id": "base4-118",
+     "name": "Bill",
+     "count": 2
+    },
+    {
+     "id": "base4-119",
+     "name": "Energy Removal",
+     "count": 2
+    },
+    {
+     "id": "base4-111",
+     "name": "Full Heal",
+     "count": 1
+    },
+    {
+     "id": "gym2-104",
+     "name": "Giovanni",
+     "count": 1
+    },
+    {
+     "id": "base4-122",
+     "name": "Potion",
+     "count": 2
+    },
+    {
+     "id": "gym2-123",
+     "name": "Viridian City Gym",
+     "count": 1
+    },
+    {
+     "id": "gym2-126",
+     "name": "Warp Point",
+     "count": 2
+    },
+    {
+     "id": "gym2-129",
+     "name": "Grass Energy",
+     "count": 20
+    },
+    {
+     "id": "gym2-127",
+     "name": "Fighting Energy",
+     "count": 8
+    }
+   ]
+  }
+ ],
+ "neo1": [
+  {
+   "name": "Hotfoot",
+   "cards": [
+    {
+     "id": "neo1-61",
+     "name": "Hoppip",
+     "count": 4
+    },
+    {
+     "id": "neo1-49",
+     "name": "Skiploom",
+     "count": 2
+    },
+    {
+     "id": "neo1-7",
+     "name": "Jumpluff",
+     "count": 1
+    },
+    {
+     "id": "neo1-68",
+     "name": "Oddish",
+     "count": 4
+    },
+    {
+     "id": "neo1-75",
+     "name": "Spinarak",
+     "count": 3
+    },
+    {
+     "id": "neo1-27",
+     "name": "Ariados",
+     "count": 1
+    },
+    {
+     "id": "neo1-56",
+     "name": "Cyndaquil",
+     "count": 2
+    },
+    {
+     "id": "neo1-57",
+     "name": "Cyndaquil",
+     "count": 2
+    },
+    {
+     "id": "neo1-47",
+     "name": "Quilava",
+     "count": 1
+    },
+    {
+     "id": "neo1-23",
+     "name": "Magby",
+     "count": 1
+    },
+    {
+     "id": "neo1-40",
+     "name": "Magmar",
+     "count": 2
+    },
+    {
+     "id": "neo1-91",
+     "name": "Bill's Teleporter",
+     "count": 1
+    },
+    {
+     "id": "neo1-101",
+     "name": "Moo-Moo Milk",
+     "count": 3
+    },
+    {
+     "id": "neo1-102",
+     "name": "Pokémon March",
+     "count": 2
+    },
+    {
+     "id": "neo1-96",
+     "name": "Professor Elm",
+     "count": 1
+    },
+    {
+     "id": "neo1-103",
+     "name": "Super Rod",
+     "count": 2
+    },
+    {
+     "id": "neo1-108",
+     "name": "Grass Energy",
+     "count": 21
+    },
+    {
+     "id": "neo1-107",
+     "name": "Fire Energy",
+     "count": 7
+    }
+   ]
+  },
+  {
+   "name": "Cold Fusion",
+   "cards": [
+    {
+     "id": "neo1-80",
+     "name": "Totodile",
+     "count": 2
+    },
+    {
+     "id": "neo1-81",
+     "name": "Totodile",
+     "count": 2
+    },
+    {
+     "id": "neo1-31",
+     "name": "Croconaw",
+     "count": 1
+    },
+    {
+     "id": "neo1-32",
+     "name": "Croconaw",
+     "count": 1
+    },
+    {
+     "id": "neo1-64",
+     "name": "Mantine",
+     "count": 4
+    },
+    {
+     "id": "neo1-62",
+     "name": "Horsea",
+     "count": 4
+    },
+    {
+     "id": "neo1-48",
+     "name": "Seadra",
+     "count": 2
+    },
+    {
+     "id": "neo1-8",
+     "name": "Kingdra",
+     "count": 1
+    },
+    {
+     "id": "neo1-55",
+     "name": "Chinchou",
+     "count": 4
+    },
+    {
+     "id": "neo1-38",
+     "name": "Lanturn",
+     "count": 2
+    },
+    {
+     "id": "neo1-22",
+     "name": "Elekid",
+     "count": 1
+    },
+    {
+     "id": "neo1-33",
+     "name": "Electabuzz",
+     "count": 1
+    },
+    {
+     "id": "neo1-70",
+     "name": "Pikachu",
+     "count": 2
+    },
+    {
+     "id": "neo1-101",
+     "name": "Moo-Moo Milk",
+     "count": 3
+    },
+    {
+     "id": "neo1-96",
+     "name": "Professor Elm",
+     "count": 1
+    },
+    {
+     "id": "neo1-103",
+     "name": "Super Rod",
+     "count": 1
+    },
+    {
+     "id": "neo1-111",
+     "name": "Water Energy",
+     "count": 16
+    },
+    {
+     "id": "neo1-109",
+     "name": "Lightning Energy",
+     "count": 12
+    }
+   ]
+  }
+ ],
+ "neo2": [
+  {
+   "name": "BrainWave",
+   "cards": [
+    {
+     "id": "neo2-38",
+     "name": "Eevee",
+     "count": 1
+    },
+    {
+     "id": "neo2-20",
+     "name": "Espeon",
+     "count": 1
+    },
+    {
+     "id": "neo1-58",
+     "name": "Girafarig",
+     "count": 3
+    },
+    {
+     "id": "neo2-59",
+     "name": "Natu",
+     "count": 4
+    },
+    {
+     "id": "neo2-52",
+     "name": "Xatu",
+     "count": 1
+    },
+    {
+     "id": "neo2-14",
+     "name": "Unown A",
+     "count": 1
+    },
+    {
+     "id": "neo2-68",
+     "name": "Unown I",
+     "count": 2
+    },
+    {
+     "id": "neo2-50",
+     "name": "Unown N",
+     "count": 1
+    },
+    {
+     "id": "neo1-64",
+     "name": "Mantine",
+     "count": 2
+    },
+    {
+     "id": "neo1-66",
+     "name": "Marill",
+     "count": 1
+    },
+    {
+     "id": "neo2-60",
+     "name": "Omanyte",
+     "count": 3
+    },
+    {
+     "id": "neo2-43",
+     "name": "Omastar",
+     "count": 2
+    },
+    {
+     "id": "neo2-65",
+     "name": "Teddiursa",
+     "count": 2
+    },
+    {
+     "id": "neo2-75",
+     "name": "Energy Ark",
+     "count": 2
+    },
+    {
+     "id": "neo2-72",
+     "name": "Fossil Egg",
+     "count": 2
+    },
+    {
+     "id": "neo1-101",
+     "name": "Moo-Moo Milk",
+     "count": 3
+    },
+    {
+     "id": "neo1-96",
+     "name": "Professor Elm",
+     "count": 1
+    },
+    {
+     "id": "neo1-110",
+     "name": "Psychic Energy",
+     "count": 16
+    },
+    {
+     "id": "neo1-111",
+     "name": "Water Energy",
+     "count": 12
+    }
+   ]
+  },
+  {
+   "name": "Wallop",
+   "cards": [
+    {
+     "id": "neo2-57",
+     "name": "Larvitar",
+     "count": 3
+    },
+    {
+     "id": "neo2-45",
+     "name": "Pupitar",
+     "count": 2
+    },
+    {
+     "id": "neo2-66",
+     "name": "Tyrogue",
+     "count": 4
+    },
+    {
+     "id": "neo2-3",
+     "name": "Hitmontop",
+     "count": 1
+    },
+    {
+     "id": "neo2-63",
+     "name": "Sentret",
+     "count": 4
+    },
+    {
+     "id": "neo2-53",
+     "name": "Caterpie",
+     "count": 4
+    },
+    {
+     "id": "neo2-42",
+     "name": "Metapod",
+     "count": 2
+    },
+    {
+     "id": "neo2-19",
+     "name": "Butterfree",
+     "count": 1
+    },
+    {
+     "id": "neo2-46",
+     "name": "Scyther",
+     "count": 2
+    },
+    {
+     "id": "neo1-100",
+     "name": "Double Gust",
+     "count": 1
+    },
+    {
+     "id": "neo2-75",
+     "name": "Energy Ark",
+     "count": 2
+    },
+    {
+     "id": "neo2-73",
+     "name": "Hyper Devolution Spray",
+     "count": 1
+    },
+    {
+     "id": "neo1-101",
+     "name": "Moo-Moo Milk",
+     "count": 1
+    },
+    {
+     "id": "neo1-96",
+     "name": "Professor Elm",
+     "count": 1
+    },
+    {
+     "id": "neo1-103",
+     "name": "Super Rod",
+     "count": 3
+    },
+    {
+     "id": "neo1-106",
+     "name": "Fighting Energy",
+     "count": 12
+    },
+    {
+     "id": "neo1-108",
+     "name": "Grass Energy",
+     "count": 16
+    }
+   ]
+  }
+ ],
+ "neo4": [
+  {
+   "name": "Light",
+   "cards": [
+    {
+     "id": "neo4-67",
+     "name": "Gligar",
+     "count": 4
+    },
+    {
+     "id": "neo4-42",
+     "name": "Hitmonlee",
+     "count": 2
+    },
+    {
+     "id": "neo4-73",
+     "name": "Machop",
+     "count": 4
+    },
+    {
+     "id": "neo4-49",
+     "name": "Light Machoke",
+     "count": 2
+    },
+    {
+     "id": "neo4-25",
+     "name": "Light Machamp",
+     "count": 1
+    },
+    {
+     "id": "neo1-66",
+     "name": "Marill",
+     "count": 4
+    },
+    {
+     "id": "neo4-13",
+     "name": "Light Azumarill",
+     "count": 1
+    },
+    {
+     "id": "neo4-81",
+     "name": "Seel",
+     "count": 4
+    },
+    {
+     "id": "neo4-45",
+     "name": "Light Dewgong",
+     "count": 2
+    },
+    {
+     "id": "neo1-99",
+     "name": "Berry",
+     "count": 4
+    },
+    {
+     "id": "neo4-104",
+     "name": "Heal Powder",
+     "count": 2
+    },
+    {
+     "id": "neo3-62",
+     "name": "Pokémon Breeder Fields",
+     "count": 2
+    },
+    {
+     "id": "neo1-106",
+     "name": "Fighting Energy",
+     "count": 15
+    },
+    {
+     "id": "neo1-111",
+     "name": "Water Energy",
+     "count": 13
+    }
+   ]
+  },
+  {
+   "name": "Dark",
+   "cards": [
+    {
+     "id": "neo4-61",
+     "name": "Cyndaquil",
+     "count": 3
+    },
+    {
+     "id": "neo1-57",
+     "name": "Cyndaquil",
+     "count": 1
+    },
+    {
+     "id": "neo4-39",
+     "name": "Dark Quilava",
+     "count": 3
+    },
+    {
+     "id": "neo4-10",
+     "name": "Dark Typhlosion",
+     "count": 1
+    },
+    {
+     "id": "neo4-68",
+     "name": "Growlithe",
+     "count": 1
+    },
+    {
+     "id": "neo4-82",
+     "name": "Slugma",
+     "count": 3
+    },
+    {
+     "id": "neo3-33",
+     "name": "Magcargo",
+     "count": 1
+    },
+    {
+     "id": "neo4-18",
+     "name": "Dark Magcargo",
+     "count": 1
+    },
+    {
+     "id": "neo4-91",
+     "name": "Vulpix",
+     "count": 2
+    },
+    {
+     "id": "neo4-65",
+     "name": "Gastly",
+     "count": 2
+    },
+    {
+     "id": "neo4-36",
+     "name": "Dark Haunter",
+     "count": 1
+    },
+    {
+     "id": "neo2-67",
+     "name": "Unown E",
+     "count": 1
+    },
+    {
+     "id": "neo4-87",
+     "name": "Unown S",
+     "count": 1
+    },
+    {
+     "id": "neo4-88",
+     "name": "Unown T",
+     "count": 1
+    },
+    {
+     "id": "neo4-66",
+     "name": "Girafarig",
+     "count": 1
+    },
+    {
+     "id": "neo1-99",
+     "name": "Berry",
+     "count": 2
+    },
+    {
+     "id": "neo4-97",
+     "name": "Counterattack Claws",
+     "count": 1
+    },
+    {
+     "id": "neo4-99",
+     "name": "Energy Stadium",
+     "count": 2
+    },
+    {
+     "id": "neo4-105",
+     "name": "Mail from Bill",
+     "count": 1
+    },
+    {
+     "id": "neo3-63",
+     "name": "Rocket's Hideout",
+     "count": 1
+    },
+    {
+     "id": "neo1-103",
+     "name": "Super Rod",
+     "count": 2
+    },
+    {
+     "id": "neo1-107",
+     "name": "Fire Energy",
+     "count": 20
+    },
+    {
+     "id": "neo1-110",
+     "name": "Psychic Energy",
+     "count": 8
+    }
+   ]
+  }
+ ],
+ "ecard1": [
+  {
+   "name": "Echo",
+   "cards": [
+    {
+     "id": "ecard1-93",
+     "name": "Abra",
+     "count": 4
+    },
+    {
+     "id": "ecard1-84",
+     "name": "Kadabra",
+     "count": 2
+    },
+    {
+     "id": "ecard1-33",
+     "name": "Alakazam",
+     "count": 2
+    },
+    {
+     "id": "ecard1-109",
+     "name": "Gastly",
+     "count": 4
+    },
+    {
+     "id": "ecard1-80",
+     "name": "Haunter",
+     "count": 2
+    },
+    {
+     "id": "ecard1-72",
+     "name": "Chansey",
+     "count": 2
+    },
+    {
+     "id": "ecard1-101",
+     "name": "Clefairy",
+     "count": 3
+    },
+    {
+     "id": "ecard1-41",
+     "name": "Clefable",
+     "count": 1
+    },
+    {
+     "id": "ecard1-121",
+     "name": "Meowth",
+     "count": 2
+    },
+    {
+     "id": "ecard1-138",
+     "name": "Copycat",
+     "count": 2
+    },
+    {
+     "id": "ecard1-153",
+     "name": "Energy Search",
+     "count": 2
+    },
+    {
+     "id": "ecard1-154",
+     "name": "Full Heal",
+     "count": 2
+    },
+    {
+     "id": "ecard1-155",
+     "name": "Moo-Moo Milk",
+     "count": 3
+    },
+    {
+     "id": "ecard1-148",
+     "name": "Professor Elm's Training Method",
+     "count": 3
+    },
+    {
+     "id": "ecard1-164",
+     "name": "Psychic Energy",
+     "count": 16
+    },
+    {
+     "id": "ecard1-165",
+     "name": "Water Energy",
+     "count": 2
+    },
+    {
+     "id": "ecard1-162",
+     "name": "Grass Energy",
+     "count": 2
+    },
+    {
+     "id": "ecard1-163",
+     "name": "Lightning Energy",
+     "count": 2
+    },
+    {
+     "id": "ecard1-161",
+     "name": "Fire Energy",
+     "count": 2
+    },
+    {
+     "id": "ecard1-160",
+     "name": "Fighting Energy",
+     "count": 2
+    }
+   ]
+  },
+  {
+   "name": "Electric Garden",
+   "cards": [
+    {
+     "id": "ecard1-122",
+     "name": "Oddish",
+     "count": 4
+    },
+    {
+     "id": "ecard1-78",
+     "name": "Gloom",
+     "count": 2
+    },
+    {
+     "id": "ecard1-69",
+     "name": "Vileplume",
+     "count": 1
+    },
+    {
+     "id": "ecard1-112",
+     "name": "Hoppip",
+     "count": 2
+    },
+    {
+     "id": "ecard1-114",
+     "name": "Koffing",
+     "count": 3
+    },
+    {
+     "id": "ecard1-70",
+     "name": "Weezing",
+     "count": 1
+    },
+    {
+     "id": "ecard1-124",
+     "name": "Pikachu",
+     "count": 3
+    },
+    {
+     "id": "ecard1-61",
+     "name": "Raichu",
+     "count": 1
+    },
+    {
+     "id": "ecard1-119",
+     "name": "Mareep",
+     "count": 4
+    },
+    {
+     "id": "ecard1-77",
+     "name": "Flaaffy",
+     "count": 2
+    },
+    {
+     "id": "ecard1-76",
+     "name": "Electabuzz",
+     "count": 2
+    },
+    {
+     "id": "ecard1-137",
+     "name": "Bill's Maintenance",
+     "count": 2
+    },
+    {
+     "id": "ecard1-138",
+     "name": "Copycat",
+     "count": 2
+    },
+    {
+     "id": "ecard1-153",
+     "name": "Energy Search",
+     "count": 1
+    },
+    {
+     "id": "ecard1-156",
+     "name": "Potion",
+     "count": 3
+    },
+    {
+     "id": "ecard1-147",
+     "name": "Power Charge",
+     "count": 1
+    },
+    {
+     "id": "ecard1-157",
+     "name": "Switch",
+     "count": 2
+    },
+    {
+     "id": "ecard1-162",
+     "name": "Grass Energy",
+     "count": 12
+    },
+    {
+     "id": "ecard1-163",
+     "name": "Lightning Energy",
+     "count": 12
+    }
+   ]
+  }
+ ],
+ "ecard2": [
+  {
+   "name": "Rock Garden",
+   "cards": [
+    {
+     "id": "ecard2-96",
+     "name": "Nidoran♂",
+     "count": 4
+    },
+    {
+     "id": "ecard2-55",
+     "name": "Nidorino",
+     "count": 2
+    },
+    {
+     "id": "ecard2-24",
+     "name": "Nidoking",
+     "count": 1
+    },
+    {
+     "id": "ecard2-76",
+     "name": "Exeggcute",
+     "count": 3
+    },
+    {
+     "id": "ecard2-12",
+     "name": "Exeggutor",
+     "count": 1
+    },
+    {
+     "id": "ecard2-69",
+     "name": "Chansey",
+     "count": 3
+    },
+    {
+     "id": "ecard2-6",
+     "name": "Blissey",
+     "count": 1
+    },
+    {
+     "id": "ecard2-72",
+     "name": "Cubone",
+     "count": 3
+    },
+    {
+     "id": "ecard2-54",
+     "name": "Marowak",
+     "count": 1
+    },
+    {
+     "id": "ecard2-98",
+     "name": "Onix",
+     "count": 2
+    },
+    {
+     "id": "ecard2-111",
+     "name": "Spinarak",
+     "count": 2
+    },
+    {
+     "id": "ecard1-156",
+     "name": "Potion",
+     "count": 4
+    },
+    {
+     "id": "ecard1-137",
+     "name": "Bill's Maintenance",
+     "count": 3
+    },
+    {
+     "id": "ecard2-123",
+     "name": "Forest Guardian",
+     "count": 2
+    },
+    {
+     "id": "ecard2-130",
+     "name": "Pokémon Fan Club",
+     "count": 2
+    },
+    {
+     "id": "ecard2-136",
+     "name": "Town Volunteers",
+     "count": 1
+    },
+    {
+     "id": "ecard1-162",
+     "name": "Grass Energy",
+     "count": 13
+    },
+    {
+     "id": "ecard1-160",
+     "name": "Fighting Energy",
+     "count": 12
+    }
+   ]
+  },
+  {
+   "name": "Abyss",
+   "cards": [
+    {
+     "id": "ecard2-116",
+     "name": "Vulpix",
+     "count": 3
+    },
+    {
+     "id": "ecard2-25",
+     "name": "Ninetales",
+     "count": 1
+    },
+    {
+     "id": "ecard2-85",
+     "name": "Horsea",
+     "count": 4
+    },
+    {
+     "id": "ecard2-58",
+     "name": "Seadra",
+     "count": 2
+    },
+    {
+     "id": "ecard2-19",
+     "name": "Kingdra",
+     "count": 1
+    },
+    {
+     "id": "ecard2-103",
+     "name": "Porygon",
+     "count": 3
+    },
+    {
+     "id": "ecard2-28",
+     "name": "Porygon2",
+     "count": 1
+    },
+    {
+     "id": "ecard2-94",
+     "name": "Miltank",
+     "count": 2
+    },
+    {
+     "id": "ecard2-113",
+     "name": "Tentacool",
+     "count": 2
+    },
+    {
+     "id": "ecard2-86",
+     "name": "Houndour",
+     "count": 2
+    },
+    {
+     "id": "ecard1-155",
+     "name": "Moo-Moo Milk",
+     "count": 4
+    },
+    {
+     "id": "ecard1-149",
+     "name": "Professor Oak's Research",
+     "count": 3
+    },
+    {
+     "id": "ecard2-123",
+     "name": "Forest Guardian",
+     "count": 3
+    },
+    {
+     "id": "ecard2-126",
+     "name": "Juggler",
+     "count": 2
+    },
+    {
+     "id": "ecard2-136",
+     "name": "Town Volunteers",
+     "count": 1
+    },
+    {
+     "id": "ecard1-165",
+     "name": "Water Energy",
+     "count": 14
+    },
+    {
+     "id": "ecard1-161",
+     "name": "Fire Energy",
+     "count": 12
+    }
+   ]
+  }
+ ],
+ "ecard3": [
+  {
+   "name": "Eeveelution",
+   "cards": [
+    {
+     "id": "ecard3-54",
+     "name": "Eevee",
+     "count": 4
+    },
+    {
+     "id": "ecard3-33",
+     "name": "Vaporeon",
+     "count": 1
+    },
+    {
+     "id": "ecard3-8",
+     "name": "Flareon",
+     "count": 1
+    },
+    {
+     "id": "ecard3-13",
+     "name": "Jolteon",
+     "count": 1
+    },
+    {
+     "id": "ecard3-113",
+     "name": "Voltorb",
+     "count": 3
+    },
+    {
+     "id": "ecard3-36",
+     "name": "Electrode",
+     "count": 2
+    },
+    {
+     "id": "ecard3-62",
+     "name": "Growlithe",
+     "count": 3
+    },
+    {
+     "id": "ecard3-71",
+     "name": "Lapras",
+     "count": 3
+    },
+    {
+     "id": "ecard3-109",
+     "name": "Teddiursa",
+     "count": 2
+    },
+    {
+     "id": "ecard3-110",
+     "name": "Ursaring",
+     "count": 1
+    },
+    {
+     "id": "ecard1-137",
+     "name": "Bill's Maintenance",
+     "count": 3
+    },
+    {
+     "id": "ecard1-156",
+     "name": "Potion",
+     "count": 4
+    },
+    {
+     "id": "ecard3-124",
+     "name": "Fast Ball",
+     "count": 2
+    },
+    {
+     "id": "ecard2-136",
+     "name": "Town Volunteers",
+     "count": 2
+    },
+    {
+     "id": "ecard3-125",
+     "name": "Fisherman",
+     "count": 2
+    },
+    {
+     "id": "ecard1-165",
+     "name": "Water Energy",
+     "count": 9
+    },
+    {
+     "id": "ecard1-163",
+     "name": "Lightning Energy",
+     "count": 9
+    },
+    {
+     "id": "ecard1-161",
+     "name": "Fire Energy",
+     "count": 8
+    }
+   ]
+  },
+  {
+   "name": "Mind Machine",
+   "cards": [
+    {
+     "id": "ecard3-80",
+     "name": "Natu",
+     "count": 4
+    },
+    {
+     "id": "ecard3-35",
+     "name": "Xatu",
+     "count": 3
+    },
+    {
+     "id": "ecard3-51",
+     "name": "Ditto",
+     "count": 4
+    },
+    {
+     "id": "ecard3-90",
+     "name": "Rattata",
+     "count": 4
+    },
+    {
+     "id": "ecard3-89",
+     "name": "Raticate",
+     "count": 2
+    },
+    {
+     "id": "ecard3-100",
+     "name": "Snorlax",
+     "count": 2
+    },
+    {
+     "id": "ecard3-129",
+     "name": "Miracle Sphere α",
+     "count": 2
+    },
+    {
+     "id": "ecard3-130",
+     "name": "Miracle Sphere β",
+     "count": 2
+    },
+    {
+     "id": "ecard3-131",
+     "name": "Miracle Sphere γ",
+     "count": 2
+    },
+    {
+     "id": "ecard3-138",
+     "name": "Oracle",
+     "count": 2
+    },
+    {
+     "id": "ecard1-155",
+     "name": "Moo-Moo Milk",
+     "count": 4
+    },
+    {
+     "id": "ecard1-149",
+     "name": "Professor Oak's Research",
+     "count": 2
+    },
+    {
+     "id": "ecard2-136",
+     "name": "Town Volunteers",
+     "count": 1
+    },
+    {
+     "id": "ecard1-164",
+     "name": "Psychic Energy",
+     "count": 11
+    },
+    {
+     "id": "ecard1-160",
+     "name": "Fighting Energy",
+     "count": 3
+    },
+    {
+     "id": "ecard1-161",
+     "name": "Fire Energy",
+     "count": 3
+    },
+    {
+     "id": "ecard1-162",
+     "name": "Grass Energy",
+     "count": 3
+    },
+    {
+     "id": "ecard1-163",
+     "name": "Lightning Energy",
+     "count": 3
+    },
+    {
+     "id": "ecard1-165",
+     "name": "Water Energy",
+     "count": 3
+    }
+   ]
+  }
+ ]
+}

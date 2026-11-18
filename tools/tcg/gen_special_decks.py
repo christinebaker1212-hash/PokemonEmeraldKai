@@ -286,7 +286,19 @@ def main():
     out += ['    {"%s", {%s}},' % (name, listing(v)) for _, name, v in variants]
     out += ['};', 'const unsigned gTcgSpecialVariantCount = sizeof(gTcgSpecialVariants) / sizeof(gTcgSpecialVariants[0]);',
             '/* Whose each variant is (TCG_SPECIAL_*). */',
-            'const uint8_t gTcgSpecialVariantOwner[] = {' + ', '.join(str(n) for n, _, _ in variants) + '};', '']
+            'const uint8_t gTcgSpecialVariantOwner[] = {' + ', '.join(str(n) for n, _, _ in variants) + '};']
+    # The regional sets' own theme decks (tools/tcg/regions/theme_decks.py): their region's card players and counters
+    import theme_decks
+    themes = theme_decks.decks()
+    out += ['/* The regional sets\' theme decks, card for card (tools/tcg/regions/theme_decks.py; stand-ins for the cards',
+            ' * that don\'t play yet): their regions\' card players bring them, their CARD CLUB counters sell them. */',
+            'const struct TcgDeckDefinition gTcgThemeDecks[] = {']
+    out += ['    {"%s", {%s}},%s' % (name, listing(counts), ' /* stand-ins for %s */' % ', '.join(missing) if missing else '')
+            for name, _, _, counts, missing in themes]
+    out += ['};', 'const unsigned gTcgThemeDeckCount = sizeof(gTcgThemeDecks) / sizeof(gTcgThemeDecks[0]);',
+            '/* Each one\'s set, and the regions it belongs to (1 << REGION_*) */',
+            'const char *const gTcgThemeDeckSet[] = {' + ', '.join('"%s"' % s for _, s, _, _, _ in themes) + '};',
+            'const uint8_t gTcgThemeDeckRegions[] = {' + ', '.join(str(r) for _, _, r, _, _ in themes) + '};', '']
     (ROOT / 'src/tcg/tcg_decks.c').write_text('\n'.join(out))
     print('Generated %d special decks and %d variants' % (len(SPECIAL), len(variants)))
 
