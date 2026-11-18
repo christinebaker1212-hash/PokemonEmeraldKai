@@ -482,6 +482,9 @@ static unsigned ExpectedDamage(const struct TcgDuel *g, const struct TcgCard *c,
             score -= 30;
         if (d && (strstr(d, "damage to itself") || strstr(d, "damage to itself.")))
             score -= 20;
+        /* (the regional sets: it goes back to the hand or the deck, its Energy with it) */
+        if (d && (strstr(d, "attached to it into your deck") || strstr(d, "attached to it to your hand")))
+            score -= 40;
         return score > 1 ? (unsigned)score : 1;
     }
 }

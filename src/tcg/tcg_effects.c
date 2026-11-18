@@ -284,6 +284,8 @@ static void Switch(struct TcgDuel *g, unsigned who, unsigned slot)
     p->field[slot].charged = 0;
     p->field[slot].effectBy = 0;
     p->field[slot].burn = p->field[slot].shift = 0;
+    p->field[slot].burned = 0;
+    p->field[slot].stuck = p->field[slot].stuckBy = p->field[slot].blindAll = p->field[slot].noAttackAll = 0;
     p->field[slot].disabled = p->field[slot].destinyBond = p->field[slot].weakAs = p->field[slot].resistAs = 0;
     p->field[slot].mirrorDamage = 0;
     p->field[slot].mirrorCondition = p->field[slot].mirrorPoison = p->field[slot].mirrorWeaken = 0;
@@ -1339,6 +1341,7 @@ static void Evolve(struct TcgDuel *g, unsigned who, unsigned slot, unsigned deck
     f->noAttack = f->noRetreat = f->weaken = f->guard = f->charged = f->effectBy = f->charge3 = 0;
     f->disabled = f->weakAs = f->resistAs = f->burn = f->shift = 0;
     f->lockTurn = f->lockAttack = 0;
+    f->burned = f->stuck = f->stuckBy = f->blindAll = f->noAttackAll = 0;
     TcgDuel_Event(g, TCG_EV_EVOLVE, who, slot, 0, p->cards[f->stack[f->stackSize - 1]], 0);
     TcgDuel_Log(g, "Evolved into %s.", CardAt(g, who, f->stack[f->stackSize - 1])->name);
     TcgPower_OnPlay(g, who, slot);

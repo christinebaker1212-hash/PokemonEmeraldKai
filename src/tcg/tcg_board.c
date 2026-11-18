@@ -3293,9 +3293,9 @@ static int Substatus(int x, int y, unsigned who, unsigned slot, int right, int d
         labels[n] = guards[f->guard], colors[n++] = 0x3070c8;
     if (f->weaken && f->weaken < 4 && (f->weaken == TCG_WEAKEN_SMOKESCREEN || bound))
         labels[n] = weakens[f->weaken], colors[n++] = 0xc06020;
-    if (f->noAttack == 1 || (f->noAttack == 2 && bound))
+    if (f->noAttack == 1 || (f->noAttack == 2 && bound) || f->noAttackAll)
         labels[n] = "NO ATK", colors[n++] = 0xc06020;
-    if (f->noRetreat)
+    if (f->noRetreat || f->stuck)
         labels[n] = "STUCK", colors[n++] = 0xc06020;
     if (f->charged)
         labels[n] = "x2", colors[n++] = 0xc89010;

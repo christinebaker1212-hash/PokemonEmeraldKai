@@ -57,6 +57,10 @@ struct TcgFieldCard
      * retreatUntil; boostTurn: on that turn its attack boostAttack - 1 does boostValue base damage (0: double) */
     uint16_t condImmune, retreatUntil, boostTurn;
     uint8_t retreatPlus, boostAttack, boostValue;
+    /* (effect scripts, until it's Benched or evolves) stuck: it can't retreat (2: while the Pokemon stuckBy - 1, the
+     * top card that did it, is its opponent's Active); blindAll: whenever it attacks, a coin, tails the attack does
+     * nothing; noAttackAll: it can't attack */
+    uint8_t stuck, stuckBy, blindAll, noAttackAll;
 };
 enum
 {
@@ -342,6 +346,8 @@ int TcgDuel_BoundEffect(const struct TcgDuel *g, unsigned player, unsigned slot)
 unsigned TcgDuel_AttachedRule(const struct TcgDuel *g, unsigned who, unsigned slot, unsigned rule);
 /* Can `evolution` be put on `from`: its Evolution card, or a Basic on its Baby (Pikachu on Pichu) */
 int TcgDuel_EvolvesFrom(const struct TcgCard *evolution, const struct TcgCard *from);
+/* Can't that player's Active retreat for an effect that lasts (an effect script's: stuck)? */
+int TcgDuel_Stuck(const struct TcgDuel *g, unsigned player);
 /* The Stadium in play (Tcg_Canon of its card; 0 none) and whose it is (*owner) */
 unsigned TcgDuel_Stadium(const struct TcgDuel *g, unsigned *owner);
 /* Why the current player can't use the Stadium in play now (NULL: they can) */

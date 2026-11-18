@@ -362,6 +362,8 @@ static int AttackPickSteps(const struct TcgDuel *g, unsigned me, const struct Tc
             {50, TCG_F_BASIC_ENERGY, TCG_SRC_DECK, "Take which basic Energy cards?"},
             {51, TCG_F_ANY, TCG_SRC_TOP3_MINE, "Put which card into your hand?"},
             {52, TCG_F_ANY, TCG_SRC_HAND, "Discard which cards to draw as many?"},
+            {53, TCG_F_TRAINER, TCG_SRC_OPP_HAND, "If heads, shuffle which Trainer into their deck?"},
+            {54, TCG_F_ENERGY, TCG_SRC_OPP_HAND, "If heads, shuffle which Energy into their deck?"},
         };
         unsigned i;
         /* (count: the kind, and in the next byte how many may be picked: 1 if not given) */
@@ -947,7 +949,7 @@ int TcgFlow_CanRetreat(const struct TcgDuel *g, unsigned me, char *reason, size_
         return snprintf(reason, size, "No Benched Pokemon to switch in."), 0;
     if (p->retreated || p->confusionRetreatFailed)
         return snprintf(reason, size, "You can only retreat once each turn."), 0;
-    if (c->kind == TCG_TRAINER || f->noRetreat)
+    if (c->kind == TCG_TRAINER || f->noRetreat || TcgDuel_Stuck(g, me))
         return snprintf(reason, size, "%s can't retreat.", c->name), 0;
     if (f->condition == TCG_ASLEEP || f->condition == TCG_PARALYZED)
         return snprintf(reason, size, "%s is %s.", c->name, f->condition == TCG_ASLEEP ? "Asleep" : "Paralyzed"), 0;

@@ -373,6 +373,7 @@ void TcgPower_AfterRetreat(struct TcgDuel *g, unsigned player, unsigned benched)
             op->field[s].condition = TCG_HEALTHY;
             op->field[s].poison = op->field[s].barrier = op->field[s].noRetreat = op->field[s].noAttack = 0;
             op->field[s].guard = op->field[s].weaken = op->field[s].charged = op->field[s].effectBy = 0;
+            op->field[s].burned = op->field[s].stuck = op->field[s].blindAll = op->field[s].noAttackAll = 0;
             op->field[s].burn = op->field[s].shift = op->field[s].disabled = 0;
             op->field[s].weakAs = op->field[s].resistAs = op->field[s].lockTurn = op->field[s].lockAttack = 0;
             TcgDuel_Event(g, TCG_EV_SWITCH, player ^ 1, s, 0, 0, 0);
@@ -775,6 +776,7 @@ int TcgDuel_Power(struct TcgDuel *g, const struct TcgAction *a)
         f->condition = TCG_HEALTHY;
         f->poison = f->barrier = f->noRetreat = f->noAttack = f->guard = f->weaken = f->charged = 0;
         f->effectBy = f->burn = f->shift = 0;
+        f->burned = f->stuck = f->blindAll = f->noAttackAll = 0;
         TcgDuel_Event(g, TCG_EV_SWITCH, me, slot, 0, 0, 0);
         slot = 0; /* (Dragonite is the Active now: it's the one that used its power) */
         break;

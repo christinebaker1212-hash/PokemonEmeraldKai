@@ -30,6 +30,7 @@ static void Cure(struct TcgFieldCard *f)
     f->effectBy = 0;
     f->guard = f->weaken = f->charged = f->burn = f->shift = 0;
     f->burned = 0;
+    f->stuck = f->stuckBy = f->blindAll = f->noAttackAll = 0;
 }
 static int Fail(struct TcgDuel *g, const char *message)
 {

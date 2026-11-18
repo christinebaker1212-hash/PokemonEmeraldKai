@@ -202,7 +202,13 @@ int TcgDuel_BoundEffect(const struct TcgDuel *g, unsigned player, unsigned slot)
 int TcgDuel_NoAttack(const struct TcgDuel *g, unsigned player)
 {
     const struct TcgFieldCard *f = &g->players[player].field[0];
-    return f->noAttack == 1 || (f->noAttack == 2 && TcgDuel_BoundEffect(g, player, 0));
+    return f->noAttack == 1 || (f->noAttack == 2 && TcgDuel_BoundEffect(g, player, 0)) || f->noAttackAll;
+}
+int TcgDuel_Stuck(const struct TcgDuel *g, unsigned player)
+{
+    const struct TcgFieldCard *f = &g->players[player].field[0], *them = &g->players[player ^ 1].field[0];
+    return f->stuck == 1 ||
+           (f->stuck == 2 && them->stackSize && them->stack[them->stackSize - 1] == f->stuckBy - 1);
 }
 static int EnergyPaid(const struct TcgDuel *g, unsigned player, unsigned attack);
 /* (Hypno's Puppet Master: a Clefairy Doll uses Hypno's attacks, paid with Hypno's Energy) */
@@ -363,6 +369,7 @@ static void ClearCondition(struct TcgFieldCard *f)
     f->burn = f->shift = 0;
     f->disabled = f->destinyBond = f->weakAs = f->resistAs = 0;
     f->lockTurn = f->lockAttack = f->mirrorShell = f->charge3 = f->fossilBoost = 0;
+    f->stuck = f->stuckBy = f->blindAll = f->noAttackAll = 0;
 }
 /* What the opponent's last attack did to it (Mirror Move) */
 static void ClearMirror(struct TcgFieldCard *f)
@@ -776,7 +783,7 @@ static int Apply(struct TcgDuel *g, const struct TcgAction *a)
                 EndTurn(g);
             return TCG_OK;
         }
-        if (f->weaken == TCG_WEAKEN_SMOKESCREEN && !TcgDuel_Coin(g, g->current))
+        if ((f->weaken == TCG_WEAKEN_SMOKESCREEN || f->blindAll) && !TcgDuel_Coin(g, g->current))
         {
             /* Sand-attack / Smokescreen: tails, and the attack does nothing. */
             TcgDuel_Event(g, TCG_EV_NO_DAMAGE, g->current, 0, 1, 0, 0);
@@ -991,6 +998,8 @@ static int Apply(struct TcgDuel *g, const struct TcgAction *a)
             foe->condition = foeBefore.condition;
             foe->poison = foeBefore.poison;
             foe->burned = foeBefore.burned;
+            foe->stuck = foeBefore.stuck, foe->stuckBy = foeBefore.stuckBy;
+            foe->blindAll = foeBefore.blindAll, foe->noAttackAll = foeBefore.noAttackAll;
             foe->noAttack = foeBefore.noAttack;
             foe->noRetreat = foeBefore.noRetreat;
             foe->weaken = foeBefore.weaken;
@@ -1063,6 +1072,7 @@ static int Apply(struct TcgDuel *g, const struct TcgAction *a)
         if (p->retreated)
             return Error(g, "You can only retreat once each turn.");
         if (c->kind == TCG_TRAINER || f->condition == TCG_ASLEEP || f->condition == TCG_PARALYZED || f->noRetreat ||
+            TcgDuel_Stuck(g, g->current) ||
             p->confusionRetreatFailed || (f->lockTurn == g->turn && f->lockAttack == TCG_LOCK_ALL) ||
             TcgDuel_AttachedRule(g, g->current, 0, TCG_ER_BOOST))
             return Error(g, "This Pokemon cannot retreat.");

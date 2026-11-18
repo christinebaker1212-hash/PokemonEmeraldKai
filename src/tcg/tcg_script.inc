@@ -1119,10 +1119,12 @@ static int ScriptRun(struct TcgDuel *g, const char *script, const struct TcgAtta
         }
         else if (ScriptIs(&o, "endturn"))
             g->turnOver = 1;
-        else if (ScriptIs(&o, "selfhand") || ScriptIs(&o, "benchdeck"))
+        else if (ScriptIs(&o, "selfhand") || ScriptIs(&o, "benchdeck") || ScriptIs(&o, "selfdeck"))
         {
-            /* it (or the Benched Pokemon chosen) and its cards back to the hand / into the deck */
-            unsigned slot = ScriptIs(&o, "selfhand") ? sScriptSelf : action->target, k;
+            /* it (or the Benched Pokemon chosen) and its cards back to the hand / into the deck (selfhand:1 only its
+             * Energy cards to the hand, :2 only its basic Energy: the rest discarded) */
+            unsigned slot = ScriptIs(&o, "benchdeck") ? action->target : sScriptSelf, k;
+            int toHand = ScriptIs(&o, "selfhand");
             struct TcgFieldCard *f;
             if (ScriptIs(&o, "benchdeck") && !ValidTarget(g, me, slot, 1))
                 return TCG_INVALID;
@@ -1130,15 +1132,32 @@ static int ScriptRun(struct TcgDuel *g, const char *script, const struct TcgAtta
             for (k = 0; k < f->stackSize + f->attachedSize; k++)
             {
                 uint8_t card = k < f->stackSize ? f->stack[k] : f->attached[k - f->stackSize];
-                if (slot == sScriptSelf)
+                const struct TcgCard *c = CardAt(g, me, card);
+                if (toHand && k >= f->stackSize && x && (c->kind != TCG_ENERGY || (x == 2 && c->id > 6)))
+                    p->discard[p->discardSize++] = card;
+                else if (toHand)
                     p->hand[p->handSize++] = card;
                 else
                     p->deck[p->deckSize++] = card;
             }
             memset(f, 0, sizeof(*f));
-            if (slot != sScriptSelf)
+            if (!toHand)
                 TcgDuel_Shuffle(g, me);
             TcgDuel_Event(g, TCG_EV_DECK_CHANGED, me, 0, 0, 0, 0);
+        }
+        else if (ScriptIs(&o, "odeck"))
+        {
+            /* their Active and its cards shuffled into their deck (not one this attack Knocked Out) */
+            const struct TcgCard *t = TcgDuel_Field(g, them, 0);
+            if (!blocked && t && foe->damage < (t->kind == TCG_TRAINER ? 10u : t->hp))
+            {
+                unsigned k;
+                for (k = 0; k < foe->stackSize + foe->attachedSize; k++)
+                    op->deck[op->deckSize++] = k < foe->stackSize ? foe->stack[k] : foe->attached[k - foe->stackSize];
+                memset(foe, 0, sizeof(*foe));
+                TcgDuel_Shuffle(g, them);
+                TcgDuel_Event(g, TCG_EV_DECK_CHANGED, them, 0, 0, 0, 0);
+            }
         }
         else if (ScriptIs(&o, "plunge"))
         {
@@ -1222,13 +1241,62 @@ static int ScriptRun(struct TcgDuel *g, const char *script, const struct TcgAtta
         }
         else if (ScriptIs(&o, "ohdeck"))
         {
-            /* the card picked from their hand (looked at) into their deck */
+            /* the card picked from their hand (looked at) into their deck (x 1: a Trainer, 2: an Energy card) */
             int at = Picked(action, 0, op->hand, op->handSize);
+            if (at >= 0 && ((x == 1 && CardAt(g, them, op->hand[at])->kind != TCG_TRAINER) ||
+                            (x == 2 && CardAt(g, them, op->hand[at])->kind != TCG_ENERGY)))
+                return TCG_INVALID;
+            if (at < 0 && x)
+            {
+                /* (after a coin, never looked at before it: the one that costs them most, a Supporter / Special
+                 * Energy first) */
+                unsigned k;
+                for (k = 0; k < op->handSize; k++)
+                {
+                    const struct TcgCard *c = CardAt(g, them, op->hand[k]);
+                    if (c->kind != (x == 1 ? TCG_TRAINER : TCG_ENERGY))
+                        continue;
+                    if (at < 0 || (x == 1 ? (c->flags & TCG_CF_SUPPORTER) != 0 : c->id > 6))
+                        at = (int)k;
+                }
+                if (at >= 0)
+                    TcgDuel_Log(g, "Shuffled into their deck: %s.", CardAt(g, them, op->hand[at])->name);
+            }
             if (at >= 0)
             {
                 op->deck[op->deckSize++] = TcgPile_Remove(op->hand, &op->handSize, (unsigned)at);
                 TcgDuel_Shuffle(g, them);
                 TcgDuel_Event(g, TCG_EV_DECK_CHANGED, them, 0, 0, 0, 0);
+            }
+        }
+        else if (ScriptIs(&o, "ohtmtool"))
+        {
+            /* every Technical Machine and Pokemon Tool in their hand into their deck */
+            unsigned k, n = 0;
+            for (k = op->handSize; k > 0; k--)
+                if (CardAt(g, them, op->hand[k - 1])->kind == TCG_TRAINER &&
+                    (CardAt(g, them, op->hand[k - 1])->flags & (TCG_CF_TM | TCG_CF_TOOL)))
+                    op->deck[op->deckSize++] = TcgPile_Remove(op->hand, &op->handSize, k - 1), n++;
+            TcgDuel_Log(g, "%u Technical Machine and Tool cards shuffled into their deck.", n);
+            if (n)
+            {
+                TcgDuel_Shuffle(g, them);
+                TcgDuel_Event(g, TCG_EV_DECK_CHANGED, them, 0, 0, 0, 0);
+            }
+        }
+        else if (ScriptIs(&o, "attdn"))
+        {
+            /* a Metal (x 0) / Darkness (1) Energy card from the discard pile onto it */
+            unsigned k;
+            for (k = p->discardSize; k > 0; k--)
+            {
+                const struct TcgCard *c = CardAt(g, me, p->discard[k - 1]);
+                if (c->kind == TCG_ENERGY && c->id > 6 && strstr(c->name, x ? "Darkness" : "Metal"))
+                {
+                    self->attached[self->attachedSize++] = TcgPile_Remove(p->discard, &p->discardSize, k - 1);
+                    TcgDuel_Event(g, TCG_EV_ATTACH, me, sScriptSelf, 0, p->cards[self->attached[self->attachedSize - 1]], 0);
+                    break;
+                }
             }
         }
         else if (ScriptIs(&o, "chosc"))
@@ -1496,6 +1564,23 @@ static int ScriptRun(struct TcgDuel *g, const char *script, const struct TcgAtta
                                                               (unsigned)Picked(action, k, p->hand, p->handSize));
             if (n)
                 TcgDuel_Event(g, TCG_EV_DRAW, me, sScriptSelf, TcgDuel_Draw(g, me, n), 0, 0);
+        }
+        else if (ScriptIs(&o, "stuck") || ScriptIs(&o, "blindall") || ScriptIs(&o, "noatall"))
+        {
+            /* until it's Benched or evolves: can't retreat (stuck:2 while it's the Defending's opponent), a coin to
+             * attack, can't attack */
+            if (!blocked && foe->stackSize)
+            {
+                if (ScriptIs(&o, "stuck"))
+                {
+                    foe->stuck = (uint8_t)(x == 2 ? 2 : 1);
+                    foe->stuckBy = (uint8_t)(self->stack[self->stackSize - 1] + 1);
+                }
+                else if (ScriptIs(&o, "blindall"))
+                    foe->blindAll = 1;
+                else
+                    foe->noAttackAll = 1;
+            }
         }
         else if (ScriptIs(&o, "noconds"))
             self->condImmune = (uint16_t)(g->turn + 1);
@@ -1856,6 +1941,11 @@ static unsigned ScriptPick(const char *script, unsigned *count)
         }
         if (ScriptIs(&o, "evdeck"))
             return TCG_APICK_EVOLUTION;
+        if (ScriptIs(&o, "ohdeck") && o.arg[0] && !o.cond[0])
+        {
+            *count = 52u + (unsigned)o.arg[0];
+            return TCG_APICK_SEARCH;
+        }
         if (ScriptIs(&o, "srche") || ScriptIs(&o, "top3h") || ScriptIs(&o, "hdraw"))
         {
             *count = ScriptIs(&o, "srche") ? 50u | (unsigned)(o.arg[1] ? o.arg[1] : o.arg[0] ? o.arg[0] : 3) << 8
@@ -2168,4 +2258,14 @@ static void ScriptAi(const struct TcgDuel *g, struct TcgAction *a, const char *s
         }
         else if (ScriptIs(&o, "hdraw"))
             a->selectionCount = 0;
+        else if (ScriptIs(&o, "ohdeck") && o.arg[0] && !o.cond[0])
+        {
+            /* (their hand is looked at: its first Trainer / Energy card) */
+            const struct TcgPlayer *op = &g->players[g->current ^ 1];
+            unsigned i;
+            a->selectionCount = 0;
+            for (i = 0; i < op->handSize && !a->selectionCount; i++)
+                if (CardAt(g, g->current ^ 1, op->hand[i])->kind == (o.arg[0] == 1 ? TCG_TRAINER : TCG_ENERGY))
+                    a->selections[a->selectionCount++] = op->hand[i];
+        }
 }
