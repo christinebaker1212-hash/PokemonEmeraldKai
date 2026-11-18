@@ -7924,7 +7924,7 @@ const struct TcgCard gTcgCards[TCG_CARD_COUNT + 1] = {
 {.name="",.description="",.effect="NONE",.animation="ATK_ANIM_NONE",.cost={0},.damage=0,.category=TCG_DAMAGE_NORMAL},
 }
 },
-[1248] = {.id=1248, .name="Sudowoodo", .kind=TCG_POKEMON, .type=4, .rarity=2, .set=20, .set2=255, .dark=0, .holo=0, .flags=0, .origin=20,
+[1248] = {.id=1248, .name="Sudowoodo", .kind=TCG_POKEMON, .type=4, .rarity=2, .set=20, .set2=255, .dark=0, .holo=0, .flags=TCG_CF_READY, .origin=20,
 .hp=60, .stage=0, .species=185, .level=0, .retreat=2, .weakness=3, .resistance=255, .evolvesFrom="", .description="", .attacks={
 {.name="Copy",.description="Choose 1 of the Defending Pokemon's attacks. Copy copies that attack. This attack does nothing if Sudowoodo doesn't have the Energy necessary to use that attack. (You must still do anything else required in order to use that attack.)",.effect="ecard2-36:a0",.animation="ATK_ANIM_HIT",.cost={0,0,0,0,0,0,1,0,0},.damage=0,.category=TCG_RESIDUAL},
 {.name="Energy Draw",.description="Search your deck for a basic Energy card and attach it to Sudowoodo. Shuffle your deck afterward.",.effect="ecard2-36:a1",.animation="ATK_ANIM_HIT",.cost={0,0,0,0,1,0,0,0,0},.damage=0,.category=TCG_RESIDUAL},
@@ -8810,7 +8810,7 @@ const struct TcgCard gTcgCards[TCG_CARD_COUNT + 1] = {
 {.name="",.description="",.effect="NONE",.animation="ATK_ANIM_NONE",.cost={0},.damage=0,.category=TCG_DAMAGE_NORMAL},
 }
 },
-[1386] = {.id=1386, .name="Sudowoodo", .kind=TCG_POKEMON, .type=4, .rarity=2, .set=20, .set2=255, .dark=0, .holo=1, .flags=0, .origin=20,
+[1386] = {.id=1386, .name="Sudowoodo", .kind=TCG_POKEMON, .type=4, .rarity=2, .set=20, .set2=255, .dark=0, .holo=1, .flags=TCG_CF_READY, .origin=20,
 .hp=60, .stage=0, .species=185, .level=0, .retreat=2, .weakness=3, .resistance=255, .evolvesFrom="", .description="", .attacks={
 {.name="Copy",.description="Choose 1 of the Defending Pokemon's attacks. Copy copies that attack. This attack does nothing if Sudowoodo doesn't have the Energy necessary to use that attack. (You must still do anything else required in order to use that attack.)",.effect="ecard2-H24:a0",.animation="ATK_ANIM_HIT",.cost={0,0,0,0,0,0,1,0,0},.damage=0,.category=TCG_RESIDUAL},
 {.name="Energy Draw",.description="Search your deck for a basic Energy card and attach it to Sudowoodo. Shuffle your deck afterward.",.effect="ecard2-H24:a1",.animation="ATK_ANIM_HIT",.cost={0,0,0,0,1,0,0,0,0},.damage=0,.category=TCG_RESIDUAL},
@@ -10277,7 +10277,7 @@ const struct TcgCard gTcgCards[TCG_CARD_COUNT + 1] = {
 {.name="",.description="",.effect="NONE",.animation="ATK_ANIM_NONE",.cost={0},.damage=0,.category=TCG_DAMAGE_NORMAL},
 }
 },
-[1606] = {.id=1606, .name="Togepi", .kind=TCG_POKEMON, .type=6, .rarity=3, .set=4, .set2=255, .dark=0, .holo=0, .flags=0, .origin=22,
+[1606] = {.id=1606, .name="Togepi", .kind=TCG_POKEMON, .type=6, .rarity=3, .set=4, .set2=255, .dark=0, .holo=0, .flags=TCG_CF_READY, .origin=22,
 .hp=30, .stage=0, .species=175, .level=8, .retreat=1, .weakness=255, .resistance=5, .evolvesFrom="", .description="Still only a hatchling, it uses poison to chase off its enemies when threatened.", .attacks={
 {.name="Snivel",.description="If the Defending Pokemon attacks Togepi during your opponent's next turn, any damage done to Togepi is reduced by 20 (before applying Weakness and Resistance). (Benching either Pokemon ends this effect.)",.effect="basep-30:a0",.animation="ATK_ANIM_HIT",.cost={0,0,0,0,0,0,1,0,0},.damage=0,.category=TCG_RESIDUAL},
 {.name="Mini-Metronome",.description="Flip a coin. If heads, choose 1 of the Defending Pokemon's attacks. Mini-Metronome copies that attack except for its Energy cost. (You must still do anything else in order to use that attack.) (No matter what type the Defending Pokemon is, Togepi's type is still Colorless.) Togepi performs that attack.",.effect="basep-30:a1",.animation="ATK_ANIM_HIT",.cost={0,0,0,0,0,0,2,0,0},.damage=0,.category=TCG_RESIDUAL},

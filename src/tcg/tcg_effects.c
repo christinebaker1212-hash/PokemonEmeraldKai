@@ -564,7 +564,13 @@ int TcgDuel_SleepAttack(const struct TcgAttack *attack)
 int TcgDuel_MetronomeHeads(const struct TcgAttack *attack)
 {
     const struct Effect *e = attack ? Effect(attack->effect) : NULL;
-    return e && e->kind == FX_METRONOME && e->extra;
+    return e && e->kind == FX_METRONOME && (e->extra & 1);
+}
+/* (the regional sets' Copy: it does nothing unless its own Energy pays for the copied attack: extra bit 2) */
+int TcgDuel_MetronomeNeedsEnergy(const struct TcgAttack *attack)
+{
+    const struct Effect *e = attack ? Effect(attack->effect) : NULL;
+    return e && e->kind == FX_METRONOME && (e->extra & 2);
 }
 int TcgDuel_IsMetronome(const struct TcgAttack *attack)
 {

@@ -299,18 +299,23 @@ int TcgDuel_CanAttackNow(const struct TcgDuel *g, unsigned player, unsigned atta
     /* (Big Snore: only while Asleep) */
     return f->condition != TCG_ASLEEP || TcgDuel_SleepAttack(a);
 }
+static int EnergyPaidFor(const struct TcgDuel *g, unsigned player, const struct TcgAttack *a);
 static int EnergyPaid(const struct TcgDuel *g, unsigned player, unsigned attack)
 {
     const struct TcgCard *c = TcgDuel_Attacker(g, player);
-    const struct TcgAttack *a;
+    if (!c || c->kind != TCG_POKEMON)
+        return 0;
+    return EnergyPaidFor(g, player, TcgDuel_AttackOf(g, player, attack));
+}
+/* Does that player's Active's Energy pay for this attack's cost? */
+static int EnergyPaidFor(const struct TcgDuel *g, unsigned player, const struct TcgAttack *a)
+{
     unsigned t, total = 0, typed = 0, from = EnergySlot(g, player), rainbow = 0, short_ = 0, i;
     const struct TcgFieldCard *f = &g->players[player].field[from];
     /* (Rainbow Energy: any one type each) */
     for (i = 0; i < f->attachedSize; i++)
         rainbow += Tcg_EnergyRule(g->players[player].cards[f->attached[i]]) == TCG_ER_RAINBOW;
-    if (!c || c->kind != TCG_POKEMON || !(a = TcgDuel_AttackOf(g, player, attack)))
-        return 0;
-    if (!a->name[0] || a->category == TCG_POKEMON_POWER)
+    if (!a || !a->name[0] || a->category == TCG_POKEMON_POWER)
         return 0;
     for (t = 0; t < TCG_TYPES; t++)
     {
@@ -821,6 +826,15 @@ static int Apply(struct TcgDuel *g, const struct TcgAction *a)
             if ((blocked = TcgDuel_EffectBlock(g, g->current, attack)))
                 return Error(g, blocked);
             TcgDuel_Log(g, "Metronome copies %s.", attack->name);
+            if (TcgDuel_MetronomeNeedsEnergy(&attacker->attacks[a->attack < TCG_ATTACKS ? a->attack : 0]) &&
+                !EnergyPaidFor(g, g->current, attack))
+            {
+                /* (Copy: without the Energy for it, the attack does nothing) */
+                TcgDuel_Log(g, "Not enough Energy for %s: nothing happens.", attack->name);
+                TcgDuel_Event(g, TCG_EV_NO_DAMAGE, g->current, 0, 1, 0, 0);
+                EndTurn(g);
+                return TCG_OK;
+            }
         }
         if (!TcgDuel_CanAttackNow(g, g->current, a->attack))
             return Error(g, "This Pokemon cannot attack now.");

@@ -356,6 +356,7 @@ int TcgDuel_EvolvesFrom(const struct TcgCard *evolution, const struct TcgCard *f
 const struct TcgAttack *TcgDuel_AttackOf(const struct TcgDuel *g, unsigned player, unsigned attack);
 unsigned TcgDuel_Tm(const struct TcgDuel *g, unsigned who, unsigned slot, unsigned *physical);
 int TcgDuel_TmFits(const struct TcgDuel *g, unsigned who, unsigned slot, const struct TcgCard *tm);
+int TcgDuel_MetronomeNeedsEnergy(const struct TcgAttack *attack);
 /* Can't that player's Active retreat for an effect that lasts (an effect script's: stuck)? */
 int TcgDuel_Stuck(const struct TcgDuel *g, unsigned player);
 /* The Stadium in play (Tcg_Canon of its card; 0 none) and whose it is (*owner) */

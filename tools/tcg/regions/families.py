@@ -569,6 +569,10 @@ def _(m, d):
 
 # One wording, one script (the cards' words with SELF for the card's name; tcg_script.inc's ops)
 EXACT = {
+    # (Metronome's own effect row: extra 1 a coin first, 2 the copied attack's Energy paid by its own)
+    "Choose 1 of the Defending Pokemon's attacks. Copy copies that attack. This attack does nothing if SELF doesn't have the Energy necessary to use that attack. (You must still do anything else required in order to use that attack.)": ('METRONOME', 0, 2),
+    "Flip a coin. If heads, choose 1 of the Defending Pokemon's attacks. Mini-Metronome copies that attack except for its Energy cost. (You must still do anything else required in order to use that attack.) (No matter what type the Defending Pokemon is, SELF is still Colorless.) SELF performs that attack.": ('METRONOME', 0, 1),
+    "Flip a coin. If heads, choose 1 of the Defending Pokemon's attacks. Mini-Metronome copies that attack except for its Energy cost. (You must still do anything else in order to use that attack.) (No matter what type the Defending Pokemon is, SELF's type is still Colorless.) SELF performs that attack.": ('METRONOME', 0, 1),
     'Flip a coin. If heads, search your deck for a card that evolves from 1 of your Benched Pokemon and put that card on that Pokemon. (This counts as evolving that Pokemon.) Shuffle your deck afterward.': 'c h.evbench',
     'For each SELF in play, you may search your deck for a Lightning Energy card and attach it to SELF. Shuffle your deck afterward.': 'srchnm:2',
     'You may search your deck for a Fire Energy card and attach it to Ho-Oh. Shuffle your deck afterward.': 'srch:0,1',
@@ -982,7 +986,7 @@ EXACT = {
 def script(text, name, damage):
     t = clean(text, name)
     if t in EXACT:
-        return ('SCRIPT', EXACT[t])
+        return EXACT[t] if isinstance(EXACT[t], tuple) else ('SCRIPT', EXACT[t])
     for rx, fn in F:
         m = rx.match(t)
         if m:
