@@ -1077,10 +1077,13 @@ static int Act(const struct TcgDuel *g, struct TcgAction *a)
         for (i = 0; i < p->handSize; i++)
         {
             const struct TcgCard *c = Tcg_Card(p->cards[p->hand[i]]);
-            if (c->kind != TCG_POKEMON || !c->stage)
+            if (c->kind != TCG_POKEMON)
                 continue;
             for (s = 0; s < TCG_FIELD_SIZE; s++)
             {
+                /* (a Basic only onto its Baby) */
+                if (!c->stage && !TcgDuel_EvolvesFrom(c, TcgDuel_Field(g, g->current, s)))
+                    continue;
                 a->type = TCG_EVOLVE;
                 a->hand = i;
                 a->slot = s;

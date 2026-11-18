@@ -185,6 +185,43 @@ static int LowKick(unsigned mine, unsigned theirs, unsigned *dealt, unsigned *to
     *took = g.players[0].field[0].damage;
     return 0;
 }
+/* The Baby rules: a Basic Pikachu goes on a Pichu (any printing of either); attacking a Baby, tails ends the turn */
+static int Babies(void)
+{
+    struct TcgDuel g;
+    struct TcgAction a;
+    unsigned seed, attacked = 0, stopped = 0, baby = 0, id;
+    /* (a finished Baby: only those play) */
+    for (id = TCG_CARD_GB_COUNT + 1; id <= TCG_CARD_COUNT && !baby; id++)
+        if (Tcg_Card(id) && (Tcg_Card(id)->flags & TCG_CF_BABY))
+            baby = id;
+    if (!TcgDuel_EvolvesFrom(Tcg_CardAny(TCG_CARD_PIKACHU_LV12), Tcg_CardAny(TCG_CARD_NEO1_12)) ||
+        !TcgDuel_EvolvesFrom(Tcg_CardAny(TCG_CARD_PIKACHU_LV12), Tcg_CardAny(TCG_CARD_BASEP_35)) ||
+        TcgDuel_EvolvesFrom(Tcg_CardAny(TCG_CARD_PIKACHU_LV12), Tcg_CardAny(TCG_CARD_NEO1_20)))
+        return printf("FAIL Pikachu evolves from Pichu (only)\n"), 1;
+    if (!baby)
+        return printf("PASS Baby Pokemon: Pikachu on Pichu (no finished Baby to attack yet)\n"), 0;
+    for (seed = 1; seed <= 20; seed++)
+    {
+        Stage(&g, TCG_CARD_MACHOP, 0, seed);
+        {
+            /* their Active becomes a Pichu (the card in its place) */
+            struct TcgPlayer *op = &g.players[1];
+            op->cards[op->field[0].stack[0]] = (uint16_t)baby;
+            op->field[0].damage = 0;
+        }
+        memset(&a, 0, sizeof(a));
+        a.type = TCG_ATTACK;
+        if (TcgDuel_Apply(&g, &a) != TCG_OK)
+            return printf("FAIL attacking a Baby: %s\n", g.error), 1;
+        attacked++;
+        stopped += g.players[1].field[0].damage == 0;
+    }
+    if (!stopped || stopped == attacked)
+        return printf("FAIL the Baby's coin: %u of %u attacks stopped\n", stopped, attacked), 1;
+    printf("PASS Baby Pokemon: Pikachu on Pichu, %u of %u attacks on a Baby stopped by tails\n", stopped, attacked);
+    return 0;
+}
 static int SpecialEnergy(void)
 {
     struct TcgDuel g;
@@ -408,7 +445,7 @@ int main(void)
     }
     printf("PASS %u finished regional cards: %u attacks used %u times, then %u AI actions after them\n", ready, used, ok,
            steps);
-    if (SpecialEnergy())
+    if (SpecialEnergy() || Babies())
         return 1;
     if (PlayTrainers())
         return 1;

@@ -322,6 +322,8 @@ int TcgDuel_CanAttack(const struct TcgDuel *g, unsigned player, unsigned attack)
 int TcgDuel_BoundEffect(const struct TcgDuel *g, unsigned player, unsigned slot);
 /* Leer / Tail Wag / Bone Attack: the Active Pokemon can't attack now. */
 unsigned TcgDuel_AttachedRule(const struct TcgDuel *g, unsigned who, unsigned slot, unsigned rule);
+/* Can `evolution` be put on `from`: its Evolution card, or a Basic on its Baby (Pikachu on Pichu) */
+int TcgDuel_EvolvesFrom(const struct TcgCard *evolution, const struct TcgCard *from);
 /* The Stadium in play (Tcg_Canon of its card; 0 none) and whose it is (*owner) */
 unsigned TcgDuel_Stadium(const struct TcgDuel *g, unsigned *owner);
 /* TcgPlayer.turnBuffs */

@@ -489,6 +489,25 @@ unsigned TcgDuel_AttachedRule(const struct TcgDuel *g, unsigned who, unsigned sl
     }
     return n;
 }
+int TcgDuel_EvolvesFrom(const struct TcgCard *evolution, const struct TcgCard *from)
+{
+    /* the Babies and what they evolve into (by species: Pichu, Cleffa, Igglybuff, Tyrogue, Smoochum, Elekid, Magby) */
+    static const uint16_t babies[][4] = {{172, 25}, {173, 35}, {174, 39}, {236, 106, 107, 237}, {238, 124}, {239, 125},
+                                         {240, 126}};
+    unsigned i, k;
+    if (!evolution || !from || evolution->kind != TCG_POKEMON || from->kind != TCG_POKEMON)
+        return 0;
+    if (evolution->stage)
+        return !strcmp(evolution->evolvesFrom, from->name);
+    if (!(from->flags & TCG_CF_BABY))
+        return 0;
+    for (i = 0; i < sizeof(babies) / sizeof(babies[0]); i++)
+        if (babies[i][0] == from->species)
+            for (k = 1; k < 4 && babies[i][k]; k++)
+                if (babies[i][k] == evolution->species && !(evolution->flags & TCG_CF_BABY))
+                    return 1;
+    return 0;
+}
 static int DarkPokemon(const struct TcgCard *c)
 {
     return c->type == TCG_DARKNESS || c->dark || strstr(c->name, "Dark") != NULL;
@@ -712,6 +731,14 @@ static int Apply(struct TcgDuel *g, const struct TcgAction *a)
             return TCG_UNSUPPORTED;
         }
         g->noWeakRes = g->attackFailed = g->coinResult = g->swift = g->bonus = g->scriptCoins = g->scriptHeads = 0;
+        /* A Baby Pokemon as the Defending Pokemon: a coin before anything; tails, the turn ends without an attack */
+        if ((target->flags & TCG_CF_BABY) && !TcgDuel_Coin(g, g->current))
+        {
+            TcgDuel_Event(g, TCG_EV_NO_DAMAGE, g->current ^ 1, 0, 1, 0, 0);
+            TcgDuel_Log(g, "Baby Pokemon: %s couldn't bring itself to attack.", attacker->name);
+            EndTurn(g);
+            return TCG_OK;
+        }
         TcgDuel_Event(g, TCG_EV_ATTACK, g->current, a->attack, 0, attacker->id, 0);
         if (f->condition == TCG_CONFUSED && !TcgDuel_Coin(g, g->current))
         {
@@ -1118,8 +1145,8 @@ static int Apply(struct TcgDuel *g, const struct TcgAction *a)
         }
         return TCG_OK;
     case TCG_EVOLVE:
-        if (c->kind != TCG_POKEMON || !c->stage || !f->stackSize || f->stackSize == 4 ||
-            strcmp(c->evolvesFrom, TcgDuel_Field(g, g->current, s)->name))
+        if (c->kind != TCG_POKEMON || !f->stackSize || f->stackSize == 4 ||
+            !TcgDuel_EvolvesFrom(c, TcgDuel_Field(g, g->current, s)))
             return Error(g, "This Pokemon does not evolve from that card.");
         if (p->turnsTaken < 2 || f->enteredTurn == g->turn)
             return Error(g, "A Pokemon cannot evolve on its first turn in play.");

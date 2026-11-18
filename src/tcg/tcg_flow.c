@@ -534,13 +534,16 @@ int TcgFlow_SlotMatches(const struct TcgDuel *g, unsigned me, const struct TcgAc
     {
         /* (not on its first turn in play) */
         const struct TcgCard *e = Tcg_Card(flowCard);
-        return c && e && c->kind == TCG_POKEMON && !strcmp(e->evolvesFrom, c->name) && p->turnsTaken >= 2 &&
-               f->enteredTurn != g->turn;
+        return c && e && TcgDuel_EvolvesFrom(e, c) && p->turnsTaken >= 2 && f->enteredTurn != g->turn;
     }
     case TCG_F_BASIC_SLOT:
         /* (while setting up, the Active spot first: a Basic on the Bench with nothing Active could leave no way on) */
         if (g->phase == TCG_SETUP)
             return !c && (!slot || p->field[0].stackSize);
+        /* (or its Baby, to evolve: Pikachu on Pichu) */
+        if (c && Tcg_Card(flowCard) && !Tcg_Card(flowCard)->stage)
+            return (c->flags & TCG_CF_BABY) && TcgDuel_EvolvesFrom(Tcg_Card(flowCard), c) && f->stackSize < 4 &&
+                   p->turnsTaken >= 2 && f->enteredTurn != g->turn;
         return !c && slot;
     case TCG_F_ANY_POKEMON:
         return c && c->kind == TCG_POKEMON;
@@ -620,6 +623,9 @@ int TcgFlow_HandPlayable(const struct TcgDuel *g, unsigned me, const struct TcgC
         for (s = 1; s < TCG_FIELD_SIZE; s++)
             if (!p->field[s].stackSize)
                 return 1;
+        for (s = 0; s < TCG_FIELD_SIZE; s++)
+            if (TcgDuel_EvolvesFrom(c, Field(g, me, s)) && p->turnsTaken >= 2 && p->field[s].enteredTurn != g->turn)
+                return 1; /* (on its Baby) */
         return snprintf(reason, size, "Your Bench is full."), 0;
     }
     if (c->kind == TCG_POKEMON)
@@ -628,7 +634,7 @@ int TcgFlow_HandPlayable(const struct TcgDuel *g, unsigned me, const struct TcgC
         for (s = 0; s < TCG_FIELD_SIZE; s++)
         {
             const struct TcgCard *f = Field(g, me, s);
-            if (f && f->kind == TCG_POKEMON && !strcmp(c->evolvesFrom, f->name))
+            if (TcgDuel_EvolvesFrom(c, f))
             {
                 if (p->turnsTaken >= 2 && p->field[s].enteredTurn != g->turn)
                     return 1;
@@ -1265,6 +1271,9 @@ unsigned TcgFlow_Slot(struct TcgFlow *f, const struct TcgDuel *g, unsigned slot)
             return Next(f, g);
         }
         f->action.slot = (uint8_t)slot;
+        /* (a Basic put on its Baby evolves it) */
+        if (f->action.type == TCG_PLAY_BASIC && g->players[f->me].field[slot].stackSize)
+            f->action.type = TCG_EVOLVE;
         if (g->phase == TCG_TURN)
         {
             /* (a power that asks as it comes into play) */

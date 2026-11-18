@@ -2778,6 +2778,9 @@ int TcgBoard_Step(unsigned pressed, unsigned held, struct TcgAction *out, unsign
                 return result;
             }
             B.action.slot = (uint8_t)B.focusIndex;
+            /* (a Basic put on its Baby evolves it) */
+            if (B.flow == FLOW_BASIC && B.action.type == TCG_PLAY_BASIC && B.view.players[0].field[B.focusIndex].stackSize)
+                B.action.type = TCG_EVOLVE;
             if (B.flow == FLOW_RETREAT)
             {
                 B.mode = M_FREE;

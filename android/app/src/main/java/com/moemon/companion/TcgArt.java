@@ -43,7 +43,10 @@ public final class TcgArt {
             catalog = new JSONObject[443];
             try {
                 JSONArray a = new JSONArray(Tcg.catalog());
-                catalog = new JSONObject[a.length() + 1];
+                int max = 0;
+                for (int i = 0; i < a.length(); i++)
+                    max = Math.max(max, a.getJSONObject(i).getInt("id"));
+                catalog = new JSONObject[max + 1];   // (ids can skip: only finished cards are listed)
                 for (int i = 0; i < a.length(); i++) {
                     catalog[a.getJSONObject(i).getInt("id")] = a.getJSONObject(i);
                 }

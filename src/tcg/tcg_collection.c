@@ -319,7 +319,7 @@ unsigned Tcg_SetOwned(const struct TcgCollection *c, unsigned set, unsigned *tot
     unsigned id, have = 0, all = 0;
     for (id = 1; id <= TCG_CARD_COUNT; id++)
     {
-        if (set < TCG_SET_COUNT && !Tcg_InPack(id, set))
+        if (!Tcg_Card(id) || (set < TCG_SET_COUNT && !Tcg_InPack(id, set)))
             continue;
         all++;
         have += c->owned[id] != 0;

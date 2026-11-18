@@ -159,7 +159,10 @@ public final class TcgCoreTest {
 
     public static void main(String[] args) throws Exception {
         JSONArray cat = new JSONArray(Tcg.catalog());
-        check(cat.length() == 442, "442 cards (" + cat.length() + ")");
+        // the Game Boy games' 442, then the regional sets' finished cards (only those are listed)
+        check(cat.length() >= 442 && cat.getJSONObject(441).getInt("id") == 442, "442 cards and the finished regional ones (" + cat.length() + ")");
+        for (int i = 442; i < cat.length(); i++)
+            check(cat.getJSONObject(i).getInt("id") > 442, "a regional card after the 442");
         check(cat.getJSONObject(7).getString("n").equals("Bulbasaur"), "card 8 is Bulbasaur");
         check(new JSONArray(Tcg.packs()).length() == Tcg.PACKS, "11 boosters");
         int[] charmander = Tcg.namedDeck("CharmanderAndFriends"), squirtle = Tcg.namedDeck("SquirtleAndFriends");

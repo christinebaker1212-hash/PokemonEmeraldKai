@@ -5426,7 +5426,7 @@ const struct TcgCard gTcgCards[TCG_CARD_COUNT + 1] = {
 {.name="",.description="",.effect="NONE",.animation="ATK_ANIM_NONE",.cost={0},.damage=0,.category=TCG_DAMAGE_NORMAL},
 }
 },
-[865] = {.id=865, .name="Tyrogue", .kind=TCG_POKEMON, .type=4, .rarity=0, .set=16, .set2=255, .dark=0, .holo=0, .flags=TCG_CF_BABY, .origin=16,
+[865] = {.id=865, .name="Tyrogue", .kind=TCG_POKEMON, .type=4, .rarity=0, .set=16, .set2=255, .dark=0, .holo=0, .flags=TCG_CF_BABY|TCG_CF_READY, .origin=16,
 .hp=30, .stage=0, .species=236, .level=7, .retreat=0, .weakness=255, .resistance=255, .evolvesFrom="", .description="It is always bursting with energy. To make itself stronger, it keeps on fighting even if it loses.", .attacks={
 {.name="Smash Punch",.description="Flip a coin. If tails, this attack does nothing.",.effect="neo2-66:a0",.animation="ATK_ANIM_HIT",.cost={0,0,0,0,0,0,1,0,0},.damage=30,.category=TCG_DAMAGE_NORMAL},
 {.name="",.description="",.effect="NONE",.animation="ATK_ANIM_NONE",.cost={0},.damage=0,.category=TCG_DAMAGE_NORMAL},
@@ -10239,7 +10239,7 @@ const struct TcgCard gTcgCards[TCG_CARD_COUNT + 1] = {
 {.name="",.description="",.effect="NONE",.animation="ATK_ANIM_NONE",.cost={0},.damage=0,.category=TCG_DAMAGE_NORMAL},
 }
 },
-[1612] = {.id=1612, .name="Igglybuff", .kind=TCG_POKEMON, .type=6, .rarity=3, .set=4, .set2=255, .dark=0, .holo=0, .flags=TCG_CF_BABY, .origin=22,
+[1612] = {.id=1612, .name="Igglybuff", .kind=TCG_POKEMON, .type=6, .rarity=3, .set=4, .set2=255, .dark=0, .holo=0, .flags=TCG_CF_BABY|TCG_CF_READY, .origin=22,
 .hp=30, .stage=0, .species=174, .level=5, .retreat=0, .weakness=255, .resistance=255, .evolvesFrom="", .description="Its extremely flexible and elastic body makes it bounce continuously-anytime, anywhere.", .attacks={
 {.name="Good Night Song",.description="The Defending Pokemon is now Asleep.",.effect="basep-36:a0",.animation="ATK_ANIM_HIT",.cost={0,0,0,0,0,0,1,0,0},.damage=0,.category=TCG_RESIDUAL},
 {.name="",.description="",.effect="NONE",.animation="ATK_ANIM_NONE",.cost={0},.damage=0,.category=TCG_DAMAGE_NORMAL},

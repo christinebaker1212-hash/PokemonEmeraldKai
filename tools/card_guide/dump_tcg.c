@@ -14,8 +14,10 @@ static void Cards(const uint16_t *c,unsigned n){unsigned i;putchar('[');for(i=0;
 int main(void){
   unsigned i,p;
   printf("{\"cards\":[");
+  unsigned shown=0;
   for(i=1;i<=TCG_CARD_COUNT;i++){const struct TcgCard*c=Tcg_Card(i);
-    printf("%s{\"id\":%u,\"name\":",i>1?",":"",i);S(c->name);
+    if(!c)continue; /* (only finished cards appear) */
+    printf("%s{\"id\":%u,\"name\":",shown++?",":"",i);S(c->name);
     printf(",\"kind\":%u,\"type\":%u,\"set\":%u,\"set2\":%u,\"rarity\":%u,\"holo\":%d,\"stage\":%u,\"level\":%u,\"packs\":[",c->kind,c->type,c->set,c->set2,c->rarity,Tcg_IsHolo(i),c->stage,c->level);
     { int f=1; for(p=0;p<TCG_PACK_TYPES;p++) if(Tcg_InPack(i,p) && c->kind!=TCG_ENERGY && c->rarity<3){printf("%s%u",f?"":",",p);f=0;} }
     printf("],\"cp\":%u,\"money\":%u}",Tcg_PointCost(i),Tcg_ShopPrice(i));}

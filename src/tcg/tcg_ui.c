@@ -493,7 +493,7 @@ static int CardFilter(unsigned id, unsigned filter)
 static int Visible(unsigned id)
 {
     struct TcgCollection *c = Tcg_GetCollection();
-    if (!CardFilter(id, U.filter))
+    if (!Tcg_Card(id) || !CardFilter(id, U.filter)) /* (a regional card plays only once it's finished) */
         return 0;
     if (U.screen == UI_BUILDER)
         return id <= 6 || c->owned[id] != 0;
@@ -4848,7 +4848,7 @@ void Tcg_Debug(const char *command)
     {
         unsigned id;
         for (id = 1; id <= TCG_CARD_COUNT; id++)
-            if (!c->owned[id])
+            if (!c->owned[id] && Tcg_Card(id))
                 c->owned[id] = 1;
         CollectionChanged();
         return;

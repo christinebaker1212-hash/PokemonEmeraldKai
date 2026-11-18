@@ -8,19 +8,18 @@ plays (tools/tcg/regions/effects.py); only finished cards appear in the game.
 | gym1 | 126 | 64 |
 | gym2 | 126 | 37 |
 | neo1 | 105 | 48 |
-| neo2 | 75 | 26 |
+| neo2 | 75 | 27 |
 | neo3 | 66 | 14 |
 | neo4 | 113 | 36 |
 | ecard1 | 159 | 105 |
 | ecard2 | 182 | 58 |
 | ecard3 | 182 | 45 |
-| basep | 53 | 12 |
+| basep | 53 | 13 |
 | np | 40 | 19 |
-| **all** | 1227 | 464 |
+| **all** | 1227 | 466 |
 
 ## Rules the engine doesn't play yet (cards needing each)
 
-- BABY: 19
 - TM: 16
 - SHINING: 10
 - CRYSTAL: 9

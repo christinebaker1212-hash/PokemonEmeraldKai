@@ -83,12 +83,14 @@ static int Deck(JNIEnv *env, jintArray a, uint16_t out[TCG_DECK_SIZE])
 JNIEXPORT jstring JNICALL FN(catalog)(JNIEnv *env, jclass cls)
 {
     struct Buf b = {0};
-    unsigned id, k, t;
+    unsigned id, k, t, n = 0;
     Add(&b, "[");
     for (id = 1; id <= TCG_CARD_COUNT; id++)
     {
         const struct TcgCard *c = Tcg_Card(id);
-        Add(&b, "%s{\"id\":%u,\"n\":", id > 1 ? "," : "", id);
+        if (!c)
+            continue; /* (a regional card plays only once it's finished) */
+        Add(&b, "%s{\"id\":%u,\"n\":", n++ ? "," : "", id);
         AddStr(&b, c->name);
         Add(&b, ",\"k\":%u,\"t\":%u,\"ra\":%u,\"set\":%u,\"set2\":%u,\"h\":%u,\"d\":%u", c->kind, c->type, c->rarity, c->set,
             c->set2, Tcg_IsHolo(id) ? 1 : 0, c->dark);
