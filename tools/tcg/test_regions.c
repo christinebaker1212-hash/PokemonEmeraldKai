@@ -131,8 +131,14 @@ static int TypeDeck(uint16_t out[60], unsigned type, unsigned skip)
         }
         if (seen++ < skip)
             continue;
-        for (k = 0; k < (c->stage ? 2u : 3u) && n < 32; k++)
-            out[n++] = (uint16_t)id;
+        {
+            /* (4 of a name at most: several sets print the same Pokemon) */
+            unsigned same = 0, j;
+            for (j = 0; j < n; j++)
+                same += !strcmp(Tcg_Card(out[j])->name, c->name);
+            for (k = 0; k < (c->stage ? 2u : 3u) && n < 32 && same < 4; k++, same++)
+                out[n++] = (uint16_t)id;
+        }
         basics += !c->stage;
     }
     if (!basics)

@@ -9,6 +9,7 @@ generate_effects.py adds ATTACKS to tcg_effect_table.inc. scope.py reports what'
 """
 import re
 from gb2_effects import SINGLE_PHASE
+import families
 
 ATTACKS = {}
 POWERS = {}
@@ -18,9 +19,12 @@ RULES = {'OWNER', 'DARK', 'LIGHT'}
 
 
 def table():
-    """(label, kind, amount, after, extra) for each attack"""
+    """(label, kind, amount, after, extra[, script]) for each attack (a script: ('SCRIPT', script))"""
     out = []
     for name, v in ATTACKS.items():
+        if v[0] == 'SCRIPT':
+            out.append((name, 'SCRIPT', 0, 2, 0, v[1]))
+            continue
         kind, amount, extra = v[:3]
         after = v[3] if len(v) > 3 else SINGLE_PHASE.get(kind, 2)
         out.append((name, kind, amount, after, extra))
@@ -77,8 +81,9 @@ def _spec(value, nums, types, typed):
 
 def learn(catalog_rows):
     """catalog_rows: (card name, attack text, base damage, (kind, amount, after, extra)) of today's cards ->
-    {template: spec}"""
-    out, clash = {}, set()
+    {template: spec} (a wording played two ways: the way most of its cards play it, if two thirds of them do)"""
+    import collections
+    votes = collections.defaultdict(collections.Counter)
     for name, text, damage, (kind, amount, after, extra) in catalog_rows:
         t, nums, types = template(text, name)
         typed = kind in TYPED_EXTRA
@@ -86,11 +91,12 @@ def learn(catalog_rows):
         # (the numbers no parameter reads must match the example's: a constant is a code, not the text's number)
         used = {s[1] for s in (spec[1], spec[3]) if s[0] == 'num'}
         spec = spec + (tuple((i, 'base' if v == damage and damage else v) for i, v in enumerate(nums) if i not in used),)
-        if t in out and out[t] != spec:
-            clash.add(t)
-        out.setdefault(t, spec)
-    for t in clash:
-        out.pop(t)
+        votes[t][spec] += 1
+    out = {}
+    for t, v in votes.items():
+        spec, n = v.most_common(1)[0]
+        if n * 3 >= sum(v.values()) * 2:
+            out[t] = spec
     return out
 
 
@@ -150,6 +156,11 @@ def autofill(cards):
                         kind, amount, after, extra = row
                         ATTACKS[a['effect']] = (kind, amount, extra, after)
                         n += 1
+                        continue
+                fam = families.script(a['text'], c['name'], a['damage'])
+                if fam:
+                    ATTACKS[a['effect']] = fam
+                    n += 1
     return n
 
 

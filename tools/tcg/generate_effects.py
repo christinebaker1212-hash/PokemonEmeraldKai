@@ -124,7 +124,10 @@ sys.path.insert(0,str(ROOT/'tools/tcg/regions'))
 import effects as regions_effects
 for row in regions_effects.table():covered.append(row)
 out=['/* Generated explicit original effect coverage. */']
-for name,op,param,after,extra in covered:out.append('{"'+name+'", FX_'+op+','+str(param)+','+str(after)+','+str(extra)+'},')
+for row in covered:
+ name,op,param,after,extra=row[:5]
+ script=(',"'+row[5]+'"') if len(row)>5 else ',NULL'
+ out.append('{"'+name+'", FX_'+op+','+str(param)+','+str(after)+','+str(extra)+script+'},')
 (ROOT/'src/tcg/tcg_effect_table.inc').write_text('\n'.join(out)+'\n')
 (ROOT/'tools/tcg/effect_coverage.json').write_text(json.dumps({'implemented_command_lists':[c[0] for c in covered],'pending_command_lists':pending},indent=2)+'\n')
 print(f'Explicit attack-effect coverage: {len(covered)} command lists; {len(pending)} still require porting (including trainers/powers).')

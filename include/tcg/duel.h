@@ -7,7 +7,8 @@
 /* Pile/attachment entries identify one of the original sixty physical cards.
  * They are not catalogue IDs. This makes conservation and duplicate ownership
  * testable after every action, including evolutions and double-colourless costs. */
-#define TCG_LOCK_ALL 15 /* TcgFieldCard.lockAttack: every attack (and no retreat) */
+#define TCG_LOCK_ALL 15     /* TcgFieldCard.lockAttack: every attack (and no retreat) */
+#define TCG_LOCK_ATTACKS 14 /* every attack (it can still retreat: "can't attack during your next turn") */
 struct TcgFieldCard
 {
     uint8_t stack[4], stackSize, attached[TCG_DECK_SIZE], attachedSize;
@@ -43,6 +44,9 @@ struct TcgFieldCard
      * charge3, Water Power's tripling (with charged); fossilBoost, Prehistoric Dream's +10 this turn */
     uint16_t lockTurn, powerOffUntil;
     uint8_t lockAttack, food, mirrorShell, charge3, fossilBoost;
+    /* The regional sets: Burned (a Special Condition beside the others, as Poisoned: between turns its owner flips a
+     * coin, tails 2 damage counters) */
+    uint8_t burned;
 };
 enum
 {
@@ -267,6 +271,8 @@ struct TcgDuel
      * Weakness/Resistance, a failed coin cancels the rest, a coin flipped
      * before the damage decides an effect after it. */
     uint8_t noWeakRes, attackFailed, coinResult;
+    /* (within one attack: an effect script's coins, tcg_script.inc) */
+    uint8_t scriptCoins, scriptHeads;
     /* (also within one attack) nothing it does reaches the Defending Pokemon: Agility and
      * the like, Neutralizing Shield, a heads for Transparency */
     uint8_t foeImmune; /* TCG_IMMUNE_* */

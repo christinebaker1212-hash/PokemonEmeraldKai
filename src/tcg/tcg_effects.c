@@ -2,6 +2,7 @@
 #include "tcg/card_ids.h"
 #include "tcg/duel.h"
 #include <stdio.h>
+#include <stdlib.h>
 #include <string.h>
 enum
 {
@@ -174,7 +175,9 @@ enum
     FX_ROLLOUT,           /* option Food counters off: amount more each */
     FX_COIN_PLUS,         /* amount coins: extra more each heads */
     FX_STIR_UP,           /* they switch (they choose), then it may switch with target on its Bench */
-    FX_NOTHING            /* (an attack without an effect of its own: Corkscrew Punch) */
+    FX_NOTHING,           /* (an attack without an effect of its own: Corkscrew Punch) */
+    /* The regional sets' (docs/TCG_REGIONS.md): an effect script, tcg_script.inc */
+    FX_SCRIPT
 };
 /* GB2's Special Conditions (FX_STATUS_HT ...) */
 enum { ST_NONE, ST_PAR, ST_PSN, ST_CNF, ST_SLP };
@@ -188,7 +191,13 @@ struct Effect
 {
     const char *name;
     unsigned kind, amount, after, extra;
+    const char *script; /* (FX_SCRIPT) */
 };
+/* (tcg_script.inc: the regional sets' scripts) */
+static unsigned ScriptChoice(const char *script, int *required);
+static const char *ScriptPrompt(const char *script);
+static unsigned ScriptPick(const char *script, unsigned *count);
+static const char *ScriptBlock(const struct TcgDuel *g, unsigned player, const char *script);
 static const struct Effect sEffects[] = {
 #include "tcg_effect_table.inc"
 };
@@ -468,6 +477,8 @@ unsigned TcgDuel_AttackChoice(const struct TcgAttack *attack, int *required)
         *required = 0;
     if (!e)
         return 0;
+    if (e->kind == FX_SCRIPT)
+        return ScriptChoice(e->script, required);
     switch (e->kind)
     {
     case FX_CHOSEN_BENCH:
@@ -513,6 +524,8 @@ const char *TcgDuel_AttackTargetPrompt(const struct TcgAttack *attack)
     const struct Effect *e = attack ? Effect(attack->effect) : NULL;
     if (!e)
         return NULL;
+    if (e->kind == FX_SCRIPT)
+        return ScriptPrompt(e->script);
     switch (e->kind)
     {
     case FX_SWITCH_HIT: return e->extra ? "Drag out which of their Benched Pokemon?" : "Switch in which of theirs? (B: none)";
@@ -574,6 +587,8 @@ unsigned TcgDuel_AttackPick(const struct TcgAttack *attack, unsigned *count)
     *count = 1;
     if (!e)
         return TCG_APICK_NONE;
+    if (e->kind == FX_SCRIPT)
+        return ScriptPick(e->script, count);
     switch (e->kind)
     {
     case FX_DISCARD_TYPED:
@@ -996,6 +1011,8 @@ const char *TcgDuel_EffectBlock(const struct TcgDuel *g, unsigned player, const 
     unsigned i;
     if (!e)
         return NULL;
+    if (e->kind == FX_SCRIPT)
+        return ScriptBlock(g, player, e->script);
     switch (e->kind)
     {
     case FX_DREAM_EATER:
@@ -1308,6 +1325,7 @@ static void Evolve(struct TcgDuel *g, unsigned who, unsigned slot, unsigned deck
     TcgDuel_Log(g, "Evolved into %s.", CardAt(g, who, f->stack[f->stackSize - 1])->name);
     TcgPower_OnPlay(g, who, slot);
 }
+#include "tcg_script.inc"
 static int Gb2Effect(struct TcgDuel *g, const struct Effect *e, const struct TcgAttack *a, const struct TcgAction *action,
                      unsigned *damage, int after)
 {
@@ -2198,6 +2216,8 @@ int TcgDuel_AttackEffect(struct TcgDuel *g, const struct TcgAttack *a, const str
         return TCG_OK;
     if (!e)
         return TCG_UNSUPPORTED;
+    if (e->kind == FX_SCRIPT)
+        return g->attackFailed && after != 3 ? TCG_OK : ScriptRun(g, e->script, a, action, damage, after);
     if (after == 3)
     {
         /* Before the attack (and before the Defending Pokemon's protection is settled): Fox Fire, Drag Off */

@@ -212,7 +212,7 @@ const struct TcgCard *TcgDuel_Attacker(const struct TcgDuel *g, unsigned player)
 static int Locked(const struct TcgDuel *g, unsigned player, unsigned attack)
 {
     const struct TcgFieldCard *f = &g->players[player].field[0];
-    return f->lockTurn == g->turn && (f->lockAttack == TCG_LOCK_ALL || f->lockAttack == attack + 1);
+    return f->lockTurn == g->turn && (f->lockAttack == TCG_LOCK_ALL || f->lockAttack == TCG_LOCK_ATTACKS || f->lockAttack == attack + 1);
 }
 int TcgDuel_CanAttack(const struct TcgDuel *g, unsigned player, unsigned attack)
 {
@@ -344,6 +344,7 @@ static void ClearCondition(struct TcgFieldCard *f)
 {
     f->condition = TCG_HEALTHY;
     f->poison = 0;
+    f->burned = 0;
     f->barrier = 0;
     f->noRetreat = 0;
     f->noAttack = 0;
@@ -412,6 +413,12 @@ static void EndTurn(struct TcgDuel *g)
                                                   g->players[1].poisonMistUntil >= g->turn) ? 20u : f->poison;
             f->damage += amount;
             TcgDuel_Event(g, TCG_EV_DAMAGE, who, 0, amount, 0, TCG_DMG_POISON);
+        }
+        if (f->burned && !TcgDuel_Coin(g, who))
+        {
+            /* Burned (the regional sets): tails, 2 damage counters */
+            f->damage += 20;
+            TcgDuel_Event(g, TCG_EV_DAMAGE, who, 0, 20, 0, TCG_DMG_POISON);
         }
         if (f->condition == TCG_ASLEEP && TcgDuel_Coin(g, who))
         {
@@ -565,7 +572,7 @@ static int Apply(struct TcgDuel *g, const struct TcgAction *a)
             snprintf(g->error, sizeof(g->error), "Effect not yet implemented: %s", attack->effect);
             return TCG_UNSUPPORTED;
         }
-        g->noWeakRes = g->attackFailed = g->coinResult = g->swift = g->bonus = 0;
+        g->noWeakRes = g->attackFailed = g->coinResult = g->swift = g->bonus = g->scriptCoins = g->scriptHeads = 0;
         TcgDuel_Event(g, TCG_EV_ATTACK, g->current, a->attack, 0, attacker->id, 0);
         if (f->condition == TCG_CONFUSED && !TcgDuel_Coin(g, g->current))
         {
@@ -742,7 +749,7 @@ static int Apply(struct TcgDuel *g, const struct TcgAction *a)
             TcgDuel_Event(g, TCG_EV_STATUS, g->current, 0, f->condition, 0, f->poison);
         g->animationCard = attacker->id;
         g->animationKind = a->attack + 1;
-        g->noWeakRes = g->attackFailed = g->coinResult = g->foeImmune = g->swift = g->bonus = 0;
+        g->noWeakRes = g->attackFailed = g->coinResult = g->foeImmune = g->swift = g->bonus = g->scriptCoins = g->scriptHeads = 0;
         if (g->switchPending)
         {
             /* Only if the Defending Pokemon is still there to be switched. It comes before any
