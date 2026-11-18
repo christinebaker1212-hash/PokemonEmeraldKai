@@ -352,7 +352,7 @@ JNIEXPORT jstring JNICALL FN(state)(JNIEnv *env, jclass cls, jlong h, jint seat)
                 Add(&b, "%s[%u,%u]", i ? "," : "", f->attached[i], p->cards[f->attached[i]]);
             Add(&b, "],\"dmg\":%u,\"hp\":%u,\"cond\":%u,\"poison\":%u,\"type\":%u,\"weak\":%u,\"resist\":%u,\"plus\":%u,"
                     "\"defender\":%u,\"new\":%u,\"power\":%u}",
-                hidden ? 0 : f->damage, hidden ? 0 : top->kind == TCG_TRAINER ? 10 : top->hp, f->condition, f->poison,
+                hidden ? 0 : f->damage, hidden ? 0 : TcgDuel_MaxHp(g, who, s), f->condition, f->poison,
                 hidden ? 0 : TcgDuel_Type(g, who, s), TcgDuel_Weakness(g, who, s), TcgDuel_Resistance(g, who, s),
                 f->plusPower, f->defender, f->enteredTurn == g->turn, hidden ? 0 : TcgPower_Working(g, who, s));
         }

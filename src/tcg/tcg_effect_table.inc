@@ -630,6 +630,7 @@
 {"gym2-8:a0", FX_SCRIPT,0,2,0,"c h.add:20"},
 {"gym2-9:a0", FX_SCRIPT,0,2,0,"c h.par h.psn"},
 {"gym2-9:a1", FX_FAIL_COIN,0,2,1,NULL},
+{"gym2-10:a0", FX_SCRIPT,0,2,0,"c h.hpset:80,1,30"},
 {"gym2-11:a0", FX_SCRIPT,0,2,0,"c h.add:30 h.dsa:2,0"},
 {"gym2-11:a1", FX_SCRIPT,0,2,0,"c h.par t.rec:20"},
 {"gym2-12:a0", FX_SCRIPT,0,2,0,"c t.dsa:15,0"},

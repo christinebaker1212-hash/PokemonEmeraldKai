@@ -569,6 +569,7 @@ def _(m, d):
 
 # One wording, one script (the cards' words with SELF for the card's name; tcg_script.inc's ops)
 EXACT = {
+    "Flip a coin. If heads, SELF's maximum HP is now 80 and SELF's Pound attack's base damage is 30 instead of 10. (Benching SELF ends this effect.)": 'c h.hpset:80,1,30',
     "If an attack does damage to SELF during your opponent's next turn (even if SELF is Knocked Out), SELF attacks your opponent's Active Pokemon for 10 damage. (Apply Weakness and Resistance.)": 'react:1',
     "If an attack does damage to SELF during your opponent's next turn (even if SELF is Knocked Out), flip a coin. If heads, SELF attacks your opponent's Active Pokemon for double that amount of damage. (If SELF takes 20 damage, it does 40 damage to that Pokemon.)": 'react:2',
     "If an attack damages SELF during your opponent's next turn (even if SELF is Knocked Out), flip a coin. If heads, SELF attacks the Defending Pokemon for an equal amount of damage.": 'react:3',

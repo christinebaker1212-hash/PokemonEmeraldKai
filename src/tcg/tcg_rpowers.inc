@@ -426,7 +426,7 @@ void TcgPower_Damaged(struct TcgDuel *g, unsigned player, unsigned slot, unsigne
     if (f->reactKind && f->reactUntil >= g->turn && att->stackSize)
     {
         /* (an attack's reaction set on it: Fire Wall, Crosscounter, Counter, Secrete Poison, Endure, Armor Up) */
-        unsigned kind = f->reactKind, hp = c->kind == TCG_POKEMON ? c->hp : 10;
+        unsigned kind = f->reactKind, hp = TcgDuel_MaxHp(g, player, slot);
         if (kind == TCG_REACT_FIRE_WALL)
         {
             int amount = 10;
@@ -467,24 +467,26 @@ void TcgPower_Damaged(struct TcgDuel *g, unsigned player, unsigned slot, unsigne
         att->condition = TCG_ASLEEP;
         TcgDuel_Event(g, TCG_EV_STATUS, g->current, 0, att->condition, 0, att->poison);
     }
-    if (power == TCG_POWER_R_BOLT && f->damage < (c->kind == TCG_POKEMON ? c->hp : 10u) && TcgDuel_Coin(g, player))
+    if (power == TCG_POWER_R_BOLT && f->damage < TcgDuel_MaxHp(g, player, slot) && TcgDuel_Coin(g, player))
     {
         /* (Entei and its cards into the deck: unless Knocked Out) */
         Announce(g, player, slot, power);
         RpToDeck(g, player, slot);
         return;
     }
-    if ((power == TCG_POWER_R_TIME_TRAVEL && c->kind == TCG_POKEMON && f->damage >= c->hp && TcgDuel_Coin(g, player)) ||
-        (power == TCG_POWER_R_SCRAM && c->kind == TCG_POKEMON && f->damage + 10u == c->hp))
+    if ((power == TCG_POWER_R_TIME_TRAVEL && c->kind == TCG_POKEMON && f->damage >= TcgDuel_MaxHp(g, player, slot) &&
+         TcgDuel_Coin(g, player)) ||
+        (power == TCG_POWER_R_SCRAM && c->kind == TCG_POKEMON && f->damage + 10u == TcgDuel_MaxHp(g, player, slot)))
     {
         Announce(g, player, slot, power);
         RpToDeck(g, player, slot);
         return;
     }
-    if (power == TCG_POWER_R_FORTITUDE && c->kind == TCG_POKEMON && f->damage >= c->hp && TcgDuel_Coin(g, player))
+    if (power == TCG_POWER_R_FORTITUDE && c->kind == TCG_POKEMON && f->damage >= TcgDuel_MaxHp(g, player, slot) &&
+        TcgDuel_Coin(g, player))
     {
         Announce(g, player, slot, power);
-        f->damage = c->hp - 10u;
+        f->damage = (uint16_t)(TcgDuel_MaxHp(g, player, slot) - 10u);
     }
     if (power == TCG_POWER_R_RESTLESS_SLEEP && f->condition == TCG_ASLEEP)
     {
@@ -722,7 +724,7 @@ void TcgPower_BetweenTurns(struct TcgDuel *g)
         {
             struct TcgFieldCard *f = &g->players[who].field[s];
             unsigned power = f->stackSize ? TcgPower_Working(g, who, s) : TCG_POWER_NONE;
-            if (power == TCG_POWER_R_SCRAM && f->damage + 10u == TcgDuel_Field(g, who, s)->hp)
+            if (power == TCG_POWER_R_SCRAM && f->damage + 10u == TcgDuel_MaxHp(g, who, s))
             {
                 Announce(g, who, s, power);
                 RpToDeck(g, who, s);
@@ -757,7 +759,7 @@ static int RegionAttackBonus(struct TcgDuel *g, const struct TcgAttack *attack)
     int bonus = 0;
     if (!it)
         return 0;
-    if (power == TCG_POWER_R_FINAL_BLOW && attack && !strcmp(attack->name, "Megahorn") && it->hp <= f->damage + 20u)
+    if (power == TCG_POWER_R_FINAL_BLOW && attack && !strcmp(attack->name, "Megahorn") && TcgDuel_MaxHp(g, g->current, 0) <= f->damage + 20u)
     {
         Announce(g, g->current, 0, power);
         bonus += 120 - (int)attack->damage;

@@ -209,8 +209,7 @@ unsigned TcgDuel_Type(const struct TcgDuel *g, unsigned player, unsigned slot)
 /* ------------------------------------------------------------------ */
 static unsigned MaxHp(const struct TcgDuel *g, unsigned player, unsigned slot)
 {
-    const struct TcgCard *c = TcgDuel_Field(g, player, slot);
-    return !c ? 0 : c->kind == TCG_TRAINER ? 10 : c->hp;
+    return TcgDuel_MaxHp(g, player, slot);
 }
 static unsigned InPlay(const struct TcgDuel *g, unsigned player)
 {

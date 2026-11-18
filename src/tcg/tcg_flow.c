@@ -770,7 +770,7 @@ int TcgFlow_SlotMatches(const struct TcgDuel *g, unsigned me, const struct TcgAc
     case TCG_F_HAS_POWER:
         return c && slot && TcgPower_Id(c) != TCG_POWER_NONE;
     case TCG_F_ROOM_OTHER:
-        return c && slot != a->target && f->damage + 10u < (c->kind == TCG_TRAINER ? 10u : c->hp);
+        return c && slot != a->target && f->damage + 10u < TcgDuel_MaxHp(g, who, slot);
     case TCG_F_DAMAGED_OTHER:
         return c && f->damage && slot != a->slot;
     case TCG_F_HAS_FIRE_OTHER:

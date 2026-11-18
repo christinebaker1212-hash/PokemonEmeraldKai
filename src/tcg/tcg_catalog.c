@@ -3637,7 +3637,7 @@ const struct TcgCard gTcgCards[TCG_CARD_COUNT + 1] = {
 {.name="",.description="",.effect="NONE",.animation="ATK_ANIM_NONE",.cost={0},.damage=0,.category=TCG_DAMAGE_NORMAL},
 }
 },
-[578] = {.id=578, .name="Koga's Ditto", .kind=TCG_POKEMON, .type=6, .rarity=2, .set=14, .set2=255, .dark=0, .holo=1, .flags=TCG_CF_OWNER, .origin=14,
+[578] = {.id=578, .name="Koga's Ditto", .kind=TCG_POKEMON, .type=6, .rarity=2, .set=14, .set2=255, .dark=0, .holo=1, .flags=TCG_CF_OWNER|TCG_CF_READY, .origin=14,
 .hp=40, .stage=0, .species=132, .level=12, .retreat=1, .weakness=4, .resistance=5, .evolvesFrom="", .description="", .attacks={
 {.name="Giant Growth",.description="Flip a coin. If heads, Koga's Ditto's maximum HP is now 80 and Koga's Ditto's Pound attack's base damage is 30 instead of 10. (Benching Koga's Ditto ends this effect.)",.effect="gym2-10:a0",.animation="ATK_ANIM_HIT",.cost={0,0,0,0,0,0,1,0,0},.damage=0,.category=TCG_RESIDUAL},
 {.name="Pound",.description="",.effect="NONE",.animation="ATK_ANIM_HIT",.cost={0,0,0,0,0,0,1,0,0},.damage=10,.category=TCG_DAMAGE_NORMAL},
@@ -4230,7 +4230,7 @@ const struct TcgCard gTcgCards[TCG_CARD_COUNT + 1] = {
 {.name="",.description="",.effect="NONE",.animation="ATK_ANIM_NONE",.cost={0},.damage=0,.category=TCG_DAMAGE_NORMAL},
 }
 },
-[665] = {.id=665, .name="Sabrina's Gastly", .kind=TCG_POKEMON, .type=5, .rarity=0, .set=14, .set2=255, .dark=0, .holo=0, .flags=TCG_CF_OWNER, .origin=14,
+[665] = {.id=665, .name="Sabrina's Gastly", .kind=TCG_POKEMON, .type=5, .rarity=0, .set=14, .set2=255, .dark=0, .holo=0, .flags=TCG_CF_OWNER|TCG_CF_READY, .origin=14,
 .hp=40, .stage=0, .species=92, .level=10, .retreat=1, .weakness=255, .resistance=4, .evolvesFrom="", .description="", .attacks={
 {.name="Gaseous Form",.description="Sabrina's Gastly gets +10 HP for each Psychic Energy card attached to it. This power works even if Sabrina's Gastly is Asleep, Confused, or Paralyzed.",.effect="gym2-97:p",.animation="ATK_ANIM_HIT",.cost={0,0,0,0,0,0,0,0,0},.damage=0,.category=TCG_POKEMON_POWER},
 {.name="Suffocating Gas",.description="",.effect="NONE",.animation="ATK_ANIM_HIT",.cost={0,0,0,0,0,2,0,0,0},.damage=30,.category=TCG_DAMAGE_NORMAL},
@@ -5902,7 +5902,7 @@ const struct TcgCard gTcgCards[TCG_CARD_COUNT + 1] = {
 [936] = {.id=936, .name="Pokemon Breeder Fields", .kind=TCG_TRAINER, .type=6, .rarity=1, .set=17, .set2=255, .dark=0, .holo=0, .flags=TCG_CF_READY, .origin=17,
 .effect="neo3-62:t",.description="Flip a coin for 1 or 2 of your non-Baby Pokemon that can evolve. For each heads, search your deck for a later-Stage card that matches that Pokemon. Then put that card into your hand. Shuffle your deck afterward."
 },
-[937] = {.id=937, .name="Rocket's Hideout", .kind=TCG_TRAINER, .type=6, .rarity=1, .set=17, .set2=255, .dark=0, .holo=0, .flags=TCG_CF_STADIUM, .origin=17,
+[937] = {.id=937, .name="Rocket's Hideout", .kind=TCG_TRAINER, .type=6, .rarity=1, .set=17, .set2=255, .dark=0, .holo=0, .flags=TCG_CF_STADIUM|TCG_CF_READY, .origin=17,
 .effect="neo3-63:t",.description="This card stays in play when you play it. Discard this card if another Stadium card comes into play. Each Pokemon in play with Dark in its name (even your opponent's) gets +20 HP."
 },
 [938] = {.id=938, .name="Old Rod", .kind=TCG_TRAINER, .type=6, .rarity=0, .set=17, .set2=255, .dark=0, .holo=0, .flags=TCG_CF_READY, .origin=17,

@@ -69,6 +69,8 @@ struct TcgFieldCard
      * attachPoisonUntil) */
     uint16_t reactUntil, pursuitUntil, attachPoisonUntil;
     uint8_t reactKind;
+    /* (effect scripts: Giant Growth) its maximum HP while it stays Active (0: its card's) */
+    uint8_t hpSet;
     /* (effect scripts, until it's Benched or evolves) stuck: it can't retreat (2: while the Pokemon stuckBy - 1, the
      * top card that did it, is its opponent's Active); blindAll: whenever it attacks, a coin, tails the attack does
      * nothing; noAttackAll: it can't attack */
@@ -388,6 +390,9 @@ int TcgDuel_MetronomeNeedsEnergy(const struct TcgAttack *attack);
 /* Can't that player's Active retreat for an effect that lasts (an effect script's: stuck)? */
 int TcgDuel_Stuck(const struct TcgDuel *g, unsigned player);
 /* Can't the player's Active Pokemon be switched out by effects now (or retreat): Jaw Clamp and the like */
+/* A Pokemon in play's maximum HP: its card's, Giant Growth's, Rocket's Hideout's 20 more for a Dark Pokemon, Sabrina's
+ * Gastly's 10 more a Psychic Energy card (a Trainer in play, Clefairy Doll or Mysterious Fossil: 10) */
+unsigned TcgDuel_MaxHp(const struct TcgDuel *g, unsigned player, unsigned slot);
 int TcgDuel_Anchored(const struct TcgDuel *g, unsigned player);
 /* The Stadium in play (Tcg_Canon of its card; 0 none) and whose it is (*owner) */
 unsigned TcgDuel_Stadium(const struct TcgDuel *g, unsigned *owner);

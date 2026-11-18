@@ -471,7 +471,7 @@ static unsigned ExpectedDamage(const struct TcgDuel *g, const struct TcgCard *c,
         damage *= 2;
     if (damage && foe->resistance == c->type)
         damage = damage > 30 ? damage - 30 : 0;
-    left = (foe->kind == TCG_TRAINER ? 10 : foe->hp) - f->damage;
+    left = TcgDuel_MaxHp(g, g->current ^ 1, 0) - f->damage;
     if (damage >= left)
         return 1000 + damage;
     {
@@ -493,7 +493,7 @@ static unsigned ExpectedDamage(const struct TcgDuel *g, const struct TcgCard *c,
 static unsigned Left(const struct TcgDuel *g, unsigned who, unsigned slot)
 {
     const struct TcgCard *c = TcgDuel_Field(g, who, slot);
-    unsigned hp = !c ? 0 : c->kind == TCG_TRAINER ? 10 : c->hp, damage = g->players[who].field[slot].damage;
+    unsigned hp = c ? TcgDuel_MaxHp(g, who, slot) : 0, damage = g->players[who].field[slot].damage;
     return hp > damage ? hp - damage : 0;
 }
 /* The most a Pokemon's attacks ask for, of one type (TCG_NONE: in all) */
@@ -1233,7 +1233,8 @@ static int Act(const struct TcgDuel *g, struct TcgAction *a)
                 unsigned hp;
                 if (!c)
                     continue;
-                hp = c->hp > g->players[g->current ^ 1].field[s].damage ? c->hp - g->players[g->current ^ 1].field[s].damage : 0;
+                hp = TcgDuel_MaxHp(g, g->current ^ 1, s) > g->players[g->current ^ 1].field[s].damage
+                         ? TcgDuel_MaxHp(g, g->current ^ 1, s) - g->players[g->current ^ 1].field[s].damage : 0;
                 if (!a->target || hp < left)
                 {
                     a->target = s;

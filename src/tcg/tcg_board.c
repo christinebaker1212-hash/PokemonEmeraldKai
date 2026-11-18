@@ -297,7 +297,7 @@ static int Fast(void) { return Tcg_GetCollection()->fastAnimations; }
 /* ------------------------------------------------------------------ */
 static const struct TcgCard *Field(unsigned who, unsigned slot) { return TcgDuel_Field(&B.view, who, slot); }
 static unsigned CardOf(unsigned who, unsigned physical) { return B.view.players[who].cards[physical]; }
-static unsigned MaxHp(const struct TcgCard *c) { return !c ? 0 : c->kind == TCG_TRAINER ? 10 : c->hp; }
+static unsigned MaxHp(unsigned who, unsigned slot) { return TcgDuel_MaxHp(&B.view, who, slot); }
 static int MyTurn(void)
 {
     const struct TcgDuel *g = &B.view;
@@ -3328,7 +3328,7 @@ static void FieldInfo(unsigned who, unsigned slot)
     unsigned types[24];
     if (!c || (who && B.view.phase == TCG_SETUP))
         return;
-    hp = (int)MaxHp(c) - (int)(B.shownDamage[who][slot] + 0.5f);
+    hp = (int)MaxHp(who, slot) - (int)(B.shownDamage[who][slot] + 0.5f);
     for (i = 0; i < f->attachedSize && n < 24; i++)
     {
         const struct TcgCard *e = Tcg_Card(CardOf(who, f->attached[i]));
@@ -3342,7 +3342,7 @@ static void FieldInfo(unsigned who, unsigned slot)
     if (slot)
     {
         /* Bench: a small plate over the card's text box, Energy beside it. */
-        G_HpPlate(r.x - 2, r.y + r.h - 9, hp, MaxHp(c), 1, 255);
+        G_HpPlate(r.x - 2, r.y + r.h - 9, hp, MaxHp(who, slot), 1, 255);
         for (i = 0; i < n && i < 3; i++)
             G_EnergyOrb(r.x + r.w + 3, r.y + 1 + i * 6, types[i], 0);
         if (n > 3)
@@ -3384,7 +3384,7 @@ static void FieldInfo(unsigned who, unsigned slot)
             for (i = 0; i < n && i < 8; i++)
                 G_EnergyOrb(x + i * 8, orbY, types[i], 1);
         }
-        G_HpPlate(plateX, plateY, hp, MaxHp(c), 0, 255);
+        G_HpPlate(plateX, plateY, hp, MaxHp(who, slot), 0, 255);
     }
 }
 static void DrawSprite(unsigned who, unsigned i)
@@ -3490,8 +3490,8 @@ static void Tooltip(void)
         if (c && !(B.focusKind == T_THEIRS && B.view.phase == TCG_SETUP))
         {
             const struct TcgFieldCard *f = &B.view.players[B.focusKind == T_THEIRS].field[B.focusIndex];
-            unsigned hp = MaxHp(c) > f->damage ? MaxHp(c) - f->damage : 0;
-            snprintf(line, sizeof(line), "%s  %u/%u HP", c->name, hp, MaxHp(c));
+            unsigned max = MaxHp(B.focusKind == T_THEIRS, B.focusIndex), hp = max > f->damage ? max - f->damage : 0;
+            snprintf(line, sizeof(line), "%s  %u/%u HP", c->name, hp, max);
         }
         else if (!c)
             snprintf(line, sizeof(line), "%s", B.focusIndex ? "Empty Bench space" : "Active Pokemon space");

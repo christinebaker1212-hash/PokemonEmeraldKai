@@ -148,6 +148,7 @@ static const struct { const char *label; uint16_t power; } sRegionPowerLabels[] 
     {"gym2-52:p", TCG_POWER_R_SHOCK_BLAST},
     {"gym2-6:p", TCG_POWER_R_FORTITUDE},
     {"gym2-8:p", TCG_POWER_R_CALL_THE_BOSS},
+    {"gym2-97:p", TCG_POWER_R_PSYCHIC_HP},
     {"neo1-10:p", TCG_POWER_R_HERBAL_SCENT},
     {"neo1-11:p", TCG_POWER_R_WILD_GROWTH},
     {"neo1-17:p", TCG_POWER_R_FIRE_RECHARGE},

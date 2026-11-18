@@ -276,7 +276,22 @@ static int Anchors(void)
         if (g.players[0].field[0].damage != Tcg_Card(TCG_CARD_GYM1_12)->hp - 10u)
             return printf("FAIL Endure: %u damage\n", g.players[0].field[0].damage), 1;
     }
-    printf("PASS anchors: Jaw Clamp holds while Croconaw is Active, Earthdrill only after Lie Low, Fire Wall, Endure\n");
+    /* maximum HP: Rocket's Hideout gives a Dark Pokemon 20 more; Gaseous Form 10 more a Psychic Energy card */
+    if (Tcg_Card(TCG_CARD_NEO3_63) && Tcg_Card(TCG_CARD_NEO4_2) && Tcg_Card(TCG_CARD_GYM2_97))
+    {
+        int c;
+        Stage(&g, TCG_CARD_NEO4_2, 0, 5);
+        c = Take(&g, 0, TCG_CARD_GRASS_ENERGY);
+        g.players[0].cards[c] = TCG_CARD_NEO3_63;
+        g.players[0].stadium = (uint8_t)(c + 1);
+        if (TcgDuel_MaxHp(&g, 0, 0) != Tcg_Card(TCG_CARD_NEO4_2)->hp + 20u)
+            return printf("FAIL Rocket's Hideout: %u HP\n", TcgDuel_MaxHp(&g, 0, 0)), 1;
+        Stage(&g, TCG_CARD_GYM2_97, 0, 5);
+        Attach(&g, 0, 0, TCG_CARD_PSYCHIC_ENERGY, 2);
+        if (TcgDuel_MaxHp(&g, 0, 0) < Tcg_Card(TCG_CARD_GYM2_97)->hp + 20u)
+            return printf("FAIL Gaseous Form: %u HP\n", TcgDuel_MaxHp(&g, 0, 0)), 1;
+    }
+    printf("PASS anchors: Jaw Clamp holds while Croconaw is Active, Earthdrill only after Lie Low, Fire Wall, Endure, maximum HP\n");
     return 0;
 }
 static int ScriptMechanics(void)

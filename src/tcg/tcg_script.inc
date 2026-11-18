@@ -217,7 +217,7 @@ static int ScriptCond(const struct TcgDuel *g, const char *cond)
     if (!strcmp(cond, "dhp50"))
     {
         const struct TcgCard *d = TcgDuel_Field(g, g->current ^ 1, 0);
-        return d && d->kind == TCG_POKEMON && d->hp <= 50;
+        return d && d->kind == TCG_POKEMON && TcgDuel_MaxHp(g, g->current ^ 1, 0) <= 50;
     }
     if (!strcmp(cond, "pg5"))
         return g->players[g->current ^ 1].prizeSize >= 5;
@@ -612,7 +612,7 @@ static int ScriptRun(struct TcgDuel *g, const char *script, const struct TcgAtta
         {
             /* half the Defending Pokemon's remaining HP (x: rounded up, else down, to 10) */
             const struct TcgCard *d = TcgDuel_Field(g, them, 0);
-            unsigned left = d && d->hp > foe->damage ? (unsigned)(d->hp - foe->damage) : 0u;
+            unsigned left = d && TcgDuel_MaxHp(g, them, 0) > foe->damage ? TcgDuel_MaxHp(g, them, 0) - foe->damage : 0u;
             *damage = x ? (left / 2 + 9) / 10 * 10 : left / 2 / 10 * 10;
         }
         else if (ScriptIs(&o, "subsc"))
@@ -773,10 +773,10 @@ static int ScriptRun(struct TcgDuel *g, const char *script, const struct TcgAtta
             /* the Defending Pokemon Knocked Out if it's Asleep and it used its attack x last turn (Perish Song) */
             const struct TcgCard *d = TcgDuel_Field(g, them, 0);
             if (!blocked && d && foe->condition == TCG_ASLEEP && self->lastAttack == x + 1 &&
-                self->lastAttackTurn + 2 == g->turn && foe->damage < d->hp)
+                self->lastAttackTurn + 2 == g->turn && foe->damage < TcgDuel_MaxHp(g, them, 0))
             {
-                unsigned add = d->hp - foe->damage;
-                foe->damage = d->hp;
+                unsigned add = TcgDuel_MaxHp(g, them, 0) - foe->damage;
+                foe->damage = (uint16_t)TcgDuel_MaxHp(g, them, 0);
                 TcgDuel_Event(g, TCG_EV_DAMAGE, them, 0, add, 0, 0);
             }
         }
@@ -1282,10 +1282,10 @@ static int ScriptRun(struct TcgDuel *g, const char *script, const struct TcgAtta
         else if (ScriptIs(&o, "to10"))
         {
             const struct TcgCard *d = TcgDuel_Field(g, them, 0);
-            if (!blocked && d && d->kind == TCG_POKEMON && d->hp > foe->damage + 10u)
+            if (!blocked && d && d->kind == TCG_POKEMON && TcgDuel_MaxHp(g, them, 0) > foe->damage + 10u)
             {
-                unsigned add = d->hp - 10u - foe->damage;
-                foe->damage = (uint16_t)(d->hp - 10u);
+                unsigned add = TcgDuel_MaxHp(g, them, 0) - 10u - foe->damage;
+                foe->damage = (uint16_t)(TcgDuel_MaxHp(g, them, 0) - 10u);
                 TcgDuel_Event(g, TCG_EV_DAMAGE, them, 0, add, 0, 0);
             }
         }
@@ -1452,7 +1452,7 @@ static int ScriptRun(struct TcgDuel *g, const char *script, const struct TcgAtta
         {
             /* their Active and its cards shuffled into their deck (not one this attack Knocked Out) */
             const struct TcgCard *t = TcgDuel_Field(g, them, 0);
-            if (!blocked && t && foe->damage < (t->kind == TCG_TRAINER ? 10u : t->hp))
+            if (!blocked && t && foe->damage < TcgDuel_MaxHp(g, them, 0))
             {
                 unsigned k;
                 for (k = 0; k < foe->stackSize + foe->attachedSize; k++)
@@ -1466,7 +1466,7 @@ static int ScriptRun(struct TcgDuel *g, const char *script, const struct TcgAtta
         {
             /* their Active and its cards back to their hand (not one this attack Knocked Out) */
             const struct TcgCard *t = TcgDuel_Field(g, them, 0);
-            if (!blocked && t && foe->damage < (t->kind == TCG_TRAINER ? 10u : t->hp))
+            if (!blocked && t && foe->damage < TcgDuel_MaxHp(g, them, 0))
             {
                 unsigned k;
                 for (k = 0; k < foe->stackSize + foe->attachedSize; k++)
@@ -1735,7 +1735,7 @@ static int ScriptRun(struct TcgDuel *g, const char *script, const struct TcgAtta
         {
             unsigned t = action->target;
             const struct TcgCard *d = TcgDuel_Field(g, them, 0);
-            if (t && ValidTarget(g, them, t, 1) && d && foe->damage < (d->kind == TCG_POKEMON ? d->hp : 10u) && !blocked)
+            if (t && ValidTarget(g, them, t, 1) && d && foe->damage < TcgDuel_MaxHp(g, them, 0) && !blocked)
             {
                 struct TcgFieldCard tmp = op->field[0];
                 op->field[0] = op->field[t];
@@ -2187,6 +2187,14 @@ static int ScriptRun(struct TcgDuel *g, const char *script, const struct TcgAtta
                 foe->retreatPlus = (uint8_t)(x ? x : 1);
                 foe->retreatUntil = (uint16_t)(g->turn + 1);
             }
+        }
+        else if (ScriptIs(&o, "hpset"))
+        {
+            /* its maximum HP is now x, and its attack y does z base damage, until it's Benched (Giant Growth) */
+            self->hpSet = (uint8_t)x;
+            self->boostTurn = 0xFFFF;
+            self->boostAttack = (uint8_t)(y + 1);
+            self->boostValue = (uint8_t)z;
         }
         else if (ScriptIs(&o, "boost"))
         {

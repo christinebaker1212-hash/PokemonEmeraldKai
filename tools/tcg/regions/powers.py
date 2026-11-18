@@ -161,6 +161,7 @@ P('R_REBIRTH', 'Rebirth', 'return it to your hand after discarding it', 'PASSIVE
 P('R_TAG_TEAM', 'Tag Team', 'Then, switch SELF with your Active Pokemon', 'PASSIVE')
 P('R_SURPRISE_BITE', 'Surprise Bite', 'This power does 20 damage to that Pokemon', 'PASSIVE')
 P('R_ENERVATING_POLLEN', 'Enervating Pollen', 'only reduces damage by 10', 'PASSIVE')
+P('R_PSYCHIC_HP', 'Gaseous Form', 'gets +10 HP for each Psychic Energy card', 'PASSIVE', 'ANY')
 P('R_CONDUCTIVITY', 'Conductivity', 'attaches an Energy card from his or her hand', 'PASSIVE')
 # when it's played from the hand (TcgPower_OnPlay)
 P('R_VENOM_SPRAY', 'Venom Spray', 'Paralyzed and Poisoned', 'PASSIVE')

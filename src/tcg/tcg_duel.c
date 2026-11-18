@@ -207,6 +207,24 @@ int TcgDuel_NoAttack(const struct TcgDuel *g, unsigned player)
     return f->noAttack == 1 || (f->noAttack == 2 && TcgDuel_BoundEffect(g, player, 0)) || f->noAttackAll ||
            (c && (c->flags & TCG_CF_BABY) && TcgPower_Working(g, player ^ 1, 0) == TCG_POWER_R_SCARE);
 }
+unsigned TcgDuel_MaxHp(const struct TcgDuel *g, unsigned player, unsigned slot)
+{
+    const struct TcgCard *c = TcgDuel_Field(g, player, slot);
+    const struct TcgFieldCard *f;
+    unsigned hp, k;
+    if (!c)
+        return 0;
+    if (c->kind != TCG_POKEMON)
+        return 10;
+    f = &g->players[player].field[slot];
+    hp = f->hpSet ? f->hpSet : c->hp;
+    if (TcgDuel_Stadium(g, NULL) == TCG_CARD_NEO3_63 && (c->dark || !strncmp(c->name, "Dark ", 5)))
+        hp += 20; /* (Rocket's Hideout) */
+    if (TcgPower_Working(g, player, slot) == TCG_POWER_R_PSYCHIC_HP)
+        for (k = 0; k < f->attachedSize; k++)
+            hp += g->players[player].cards[f->attached[k]] == TCG_CARD_PSYCHIC_ENERGY ? 10 : 0;
+    return hp;
+}
 int TcgDuel_Anchored(const struct TcgDuel *g, unsigned player)
 {
     const struct TcgFieldCard *f = &g->players[player].field[0], *them = &g->players[player ^ 1].field[0];
@@ -402,7 +420,7 @@ void TcgDuel_ResolveKnockouts(struct TcgDuel *g)
         {
             const struct TcgCard *c = TcgDuel_Field(g, who, s);
             struct TcgFieldCard *f = &g->players[who].field[s];
-            unsigned hp = c ? (c->kind == TCG_TRAINER ? 10 : c->hp) : 0;
+            unsigned hp = TcgDuel_MaxHp(g, who, s);
             if (c && f->damage >= hp)
             {
                 struct TcgPlayer *winner = &g->players[who ^ 1];
@@ -486,6 +504,9 @@ static void ClearCondition(struct TcgFieldCard *f)
     f->condImmune = 0;
     f->anchorUntil = f->anchorBy = 0;
     f->reactUntil = f->reactKind = 0;
+    f->hpSet = 0;
+    if (f->boostTurn == 0xFFFF)
+        f->boostTurn = f->boostAttack = f->boostValue = 0;
 }
 /* What the opponent's last attack did to it (Mirror Move) */
 static void ClearMirror(struct TcgFieldCard *f)
@@ -556,8 +577,8 @@ static void ToolsBetweenTurns(struct TcgDuel *g, int start)
                 f->poison = f->burned = 0;
                 TcgDuel_Event(g, TCG_EV_STATUS, who, s, TCG_HEALTHY, 0, 0);
             }
-            else if (!start && tool == TCG_CARD_ECARD2_125 && c->kind == TCG_POKEMON && f->damage && f->damage < c->hp &&
-                     c->hp - f->damage <= 20)
+            else if (!start && tool == TCG_CARD_ECARD2_125 && c->kind == TCG_POKEMON && f->damage &&
+                     f->damage < TcgDuel_MaxHp(g, who, s) && TcgDuel_MaxHp(g, who, s) - f->damage <= 20)
                 heal = 30;
             else
                 continue;
@@ -967,7 +988,7 @@ static int Apply(struct TcgDuel *g, const struct TcgAction *a)
         else if (attack->damage || TcgDuel_EffectTouchesDefender(attack))
             g->foeImmune = TcgPower_Immune(g, g->current ^ 1, 0) ? TCG_IMMUNE_YES : TCG_IMMUNE_NO;
         damage = attack->damage;
-        if (f->boostTurn == g->turn && f->boostAttack == a->attack + 1)   /* (an effect script's boost: "during your next turn") */
+        if ((f->boostTurn == g->turn || f->boostTurn == 0xFFFF) && f->boostAttack == a->attack + 1)   /* (an effect script's boost: "during your next turn"; 0xFFFF until Benched) */
             damage = f->boostValue ? f->boostValue : damage * 2;
         result = TcgDuel_AttackEffect(g, attack, a, &damage, 0);
         if (result != TCG_OK)
@@ -1085,12 +1106,12 @@ static int Apply(struct TcgDuel *g, const struct TcgAction *a)
         TcgDuel_Damage(g, g->current ^ 1, 0, damage);
         if (damage)
             TcgDuel_Event(g, TCG_EV_DAMAGE, g->current ^ 1, 0, damage, 0, flags);
-        if (damage && foe->destinyBond && foe->damage >= (target->kind == TCG_TRAINER ? 10u : target->hp) &&
-            f->damage < attacker->hp)
+        if (damage && foe->destinyBond && foe->damage >= TcgDuel_MaxHp(g, g->current ^ 1, 0) &&
+            f->damage < TcgDuel_MaxHp(g, g->current, 0))
         {
             /* Destiny Bond: the Pokemon that Knocks it Out is Knocked Out too */
-            TcgDuel_Event(g, TCG_EV_DAMAGE, g->current, 0, attacker->hp - f->damage, 0, TCG_DMG_SELF);
-            f->damage = attacker->hp;
+            TcgDuel_Event(g, TCG_EV_DAMAGE, g->current, 0, TcgDuel_MaxHp(g, g->current, 0) - f->damage, 0, TCG_DMG_SELF);
+            f->damage = (uint16_t)TcgDuel_MaxHp(g, g->current, 0);
             TcgDuel_Log(g, "Destiny Bond: %s is Knocked Out too.", attacker->name);
         }
         if (damage)
@@ -1102,12 +1123,12 @@ static int Apply(struct TcgDuel *g, const struct TcgAction *a)
             TcgDuel_Event(g, TCG_EV_STATUS, g->current ^ 1, 0, foe->condition, 0, foe->poison);
         }
         /* Focus Band: a Knock Out by this attack, heads, leaves it at 10 HP (then discarded) */
-        if (damage && target->kind == TCG_POKEMON && foe->damage >= target->hp)
+        if (damage && target->kind == TCG_POKEMON && foe->damage >= TcgDuel_MaxHp(g, g->current ^ 1, 0))
         {
             int band = TcgDuel_AttachedCard(g, g->current ^ 1, 0, TCG_CARD_NEO1_86);
             if (band >= 0 && TcgDuel_Coin(g, g->current ^ 1))
             {
-                foe->damage = target->hp - 10u;
+                foe->damage = (uint16_t)(TcgDuel_MaxHp(g, g->current ^ 1, 0) - 10u);
                 TcgDuel_Log(g, "Focus Band: %s hangs on.", target->name);
                 TcgDuel_DiscardAttached(g, g->current ^ 1, 0, (unsigned)band);
             }
@@ -1132,7 +1153,7 @@ static int Apply(struct TcgDuel *g, const struct TcgAction *a)
             if (shard >= 0)
                 g->players[g->current].attachmentExpires[shard] = g->turn;
         }
-        if (damage && foe->damage >= (target->kind == TCG_TRAINER ? 10u : target->hp))
+        if (damage && foe->damage >= TcgDuel_MaxHp(g, g->current ^ 1, 0))
             TcgPower_KnockedOut(g, g->current ^ 1, 0); /* (Dark Gyarados's Final Beam) */
         if (damage && foe->mirrorShell && f->stackSize)
         {
@@ -1197,7 +1218,7 @@ static int Apply(struct TcgDuel *g, const struct TcgAction *a)
             /* Only if the Defending Pokemon is still there to be switched. It comes before any
              * Knock Out: Ram switches "even if Rhydon is Knocked Out" (the end of the turn,
              * after the switch, takes care of that). */
-            unsigned who = g->current ^ 1, bench = 0, k, hp = target->kind == TCG_TRAINER ? 10 : target->hp;
+            unsigned who = g->current ^ 1, bench = 0, k, hp = TcgDuel_MaxHp(g, g->current ^ 1, 0);
             for (k = 1; k < TCG_FIELD_SIZE; k++)
                 bench += g->players[who].field[k].stackSize != 0;
             if (g->players[who].field[0].stackSize && g->players[who].field[0].damage < hp && bench &&

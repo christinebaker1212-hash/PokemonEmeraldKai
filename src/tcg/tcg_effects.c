@@ -233,7 +233,7 @@ static unsigned BenchCount(const struct TcgDuel *g, unsigned who)
 static unsigned HpLeft(const struct TcgDuel *g, unsigned who, unsigned slot)
 {
     const struct TcgCard *c = TcgDuel_Field(g, who, slot);
-    unsigned hp = !c ? 0 : c->kind == TCG_TRAINER ? 10 : c->hp, damage = g->players[who].field[slot].damage;
+    unsigned hp = c ? TcgDuel_MaxHp(g, who, slot) : 0, damage = g->players[who].field[slot].damage;
     return hp > damage ? hp - damage : 0;
 }
 /* The original lets the player pick which cards pay these costs; every
