@@ -1106,13 +1106,17 @@ struct FlowCh { u16 src; u8 c; };
 static struct FlowCh sFlow[FLOW_MAX];
 static u16 sLineStart[FLOW_LINES], sLineEnd[FLOW_LINES];
 
+// (the JOURNAL: each sentence starts its own line in every style, its breaks never joined: the user, 2026-11-18)
+static bool8 sFlowKeepBreaks;
+
 static int FlowPage(const struct UiFont *f, const u8 *t, int from, int to, int maxW)
 {
     int n = 0, nl = 0, i, k, lineFirst = 0, w = 0, lastSpace = -1;
     // (RED / CRYSTAL: once a line of Kai's runs past the box in the style's letters, the words it pushes over go on
     // at the start of Kai's next line, not on a line of their own, so the page fills the box as the Game Boy's text
     // does; Kai's own breaks stay where nothing ran over: the user, 2026-11-17)
-    bool8 join = MP_UiStyle_Active() == UISTYLE_RED || MP_UiStyle_Active() == UISTYLE_CRYSTAL, wrapped = FALSE;
+    bool8 join = (MP_UiStyle_Active() == UISTYLE_RED || MP_UiStyle_Active() == UISTYLE_CRYSTAL) && !sFlowKeepBreaks;
+    bool8 wrapped = FALSE;
     sLineStart[0] = 0;
     for (i = from; i < to && n < FLOW_MAX; i++)
     {
@@ -3061,6 +3065,7 @@ static void SummaryScreen(struct UiPack *p, u16 *frame)
                 sJournal[n++] = *t++;
         }
         sJournal[n] = EOS;
+        sFlowKeepBreaks = TRUE;   // (until the page is drawn)
         d.msg[3] = sJournal;
         d.msgLen[3] = d.msgPrinted[3] = n;
         for (k = 0; k < sp->nOps && jop == NULL; k++)
@@ -3100,6 +3105,7 @@ static void SummaryScreen(struct UiPack *p, u16 *frame)
     }
     MP_FadeFit_FromPalette(&fit, BG_PLTT_ID(0));
     DrawSpec(p, sp, &d, frame, 0, 0, &fit);
+    sFlowKeepBreaks = FALSE;
     for (k = 0; k < sp->nOps && list == NULL; k++)
         if (sp->ops[k].kind == OP_LIST)
             list = &sp->ops[k];

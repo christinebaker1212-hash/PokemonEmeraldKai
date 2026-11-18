@@ -3429,6 +3429,17 @@ void MP_TestCommand(const char *cmd, const char *arg)
         gMpConfig.menuTheme = strcmp(arg, "dark") == 0 ? MP_MENU_THEME_DARK : MP_MENU_THEME_DEFAULT;
         printf("[test] theme %s\n", gMpConfig.menuTheme == MP_MENU_THEME_DARK ? "dark" : "default");
     }
+    else if (strcmp(cmd, "buttonicons") == 0)
+    {
+        // buttonicons auto|keyboard|xbox|playstation|nintendo - OPTIONS > CONTROLS > BUTTON ICONS (tests have no pad)
+        static const char *const sSets[] = {"auto", "keyboard", "xbox", "playstation", "nintendo"};
+        void Gamepad_SetIconSet(int set);
+        int i;
+        for (i = 0; i < 5 && strcmp(arg, sSets[i]) != 0; i++)
+            ;
+        Gamepad_SetIconSet(i < 5 ? i : 0);
+        printf("[test] buttonicons %s\n", i < 5 ? sSets[i] : "auto");
+    }
     else if (strcmp(cmd, "social") == 0)
     {
         MP_Social_Open();

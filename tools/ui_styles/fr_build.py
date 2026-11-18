@@ -560,10 +560,9 @@ class FRPack:
             for row in (0, 1):
                 band, blue = ent[row * 32], ent[row * 32 + 19]
                 t = lambda n: base + n + 16 * row  # noqa: E731
-                if k < 5:
-                    new = [band] * 10 + [t(49)] * k + [t(17), t(16)] + [t(18)] * (5 - k) + [t(21)] + [blue] * 14
-                else:
-                    new = [band] * 10 + [t(49)] * 5 + [t(17), t(48)] + [blue] * 15
+                # (every page the same bar: the last one keeps the teal tail, empty, so the header neither shortens
+                # nor changes shape there: the user, 2026-11-18)
+                new = [band] * 10 + [t(49)] * k + [t(17), t(16)] + [t(18)] * (5 - k) + [t(21)] + [blue] * 14
                 ent[row * 32:row * 32 + 32] = new[:32]
             return ent
 

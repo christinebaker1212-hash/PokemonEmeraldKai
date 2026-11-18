@@ -1046,6 +1046,10 @@ void VDraw(void)
         MP_MakerAnim_Composite(image);   // ... Moemon Maker: a move's own animation (src/maker/maker_anims.c)
     }
     MP_TriCards_Composite(image);   // Moemon Co-op: Triple Battle cards over the frame
+    {
+        void MP_ButtonIcon_Composite(u16 *frame);
+        MP_ButtonIcon_Composite(image);  // Moemon Kai: button icons in their own colours, whatever the window's palette
+    }
     MP_UiStyle_Composite(image);    // Moemon Kai: ... or UI STYLE's boxes, panels, message box and START
     MP_TypeIcons_Composite(image);  // ... type icons by the healthboxes (OPTIONS > TYPE ICONS)
     MP_LegacyAnim_Composite(image); // ... GENESIS / EPOCH BALL throws (Red's / Crystal's own)

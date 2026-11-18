@@ -8160,6 +8160,23 @@ Settings: gMpConfig.gbOptions[2] (RED, CRYSTAL), MP_GB_* bits (include/mp.h), "g
 (hex) in the settings file and the canonical list; MP_Gb_On / MP_Gb_Off (mp_uistyle.c). `mp gboptions red|crystal HEX`.
 The GB fonts got a ">" (gbstyle.py SYNTH): the option pages' titles read "DISPLAY > ..." (it was "?").
 
+### Button icons in their own colours; the JOURNAL's breaks; FIRERED's header (2026-11-18)
+
+- Controller button icons (mp_buttons.c) are still drawn into the window in its palette's nearest colours (what anything
+  reading the window sees), and each one drawn is remembered (Remember: window, place, icon, the indices used). Over the
+  finished frame (sdl2.c VDraw, before UI STYLE's) MP_ButtonIcon_Composite paints each in its own colours
+  (sBtnClassColor), moved as far as a fade moved the window's colour, on the pixels that still show it: the window's
+  pixel still that icon's index (else the entry is dropped), the window's own tile on its background's map there now
+  (WindowShownAt: a summary page's header shares its place with the others'), and the frame's colour the window's.
+  The user: "Button icons should always show the correct colors and never change palettes" (a THEME DARK window turned
+  them light, the summary's green made them pale). `mp buttonicons playstation` (tests have no pad);
+  MOEMON_BUTTONS_PALETTE=1 shows the palette's version, MOEMON_BUTTONS_TRACE=1 logs each icon remembered.
+- The JOURNAL in RED / CRYSTAL: FlowPage's joining of KAI's breaks after a wrapped line (the Game Boy's text flow) is
+  off while the JOURNAL's page is laid out and drawn (sFlowKeepBreaks), so each sentence starts its own line.
+- FIRERED's summary header: the last page keeps the bar's teal tail (empty), so the bar is the same length and shape on
+  every page (fr_build.py header_ents; uistyle/firered.pak rebuilt from pret/pokefirered, the unchanged build matching
+  the committed pack byte for byte first).
+
 ### GB OPTIONS stage 2: BALL THROWS (after 1.203.3)
 
 With RED or CRYSTAL showing and BALL THROWS on its game (MP_GB_KAI_BALLS unset, the default), every ball is thrown the

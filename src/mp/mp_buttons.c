@@ -6,8 +6,11 @@
 // Colors come from the window's own palette: the body takes its dark text
 // color, the button colors (PlayStation symbols, Xbox letters) the closest one.
 #include <string.h>
+#include <stdio.h>
+#include <stdlib.h>
 #include "global.h"
 #include "palette.h"
+#include "gpu_regs.h"
 #include "text.h"
 #include "window.h"
 #include "constants/characters.h"
@@ -259,6 +262,155 @@ static void DrawIcon(u8 windowId, int icon, u16 x, u16 y, bool8 plain, int overl
     DrawIconAt(windowId, icon, x, y + IconTop(sBtnIcons[icon].h), plain, overlay);
 }
 
+// Every button drawn into a window, so the finished frame can show it in its own colours (MP_ButtonIcon_Composite):
+// a window's palette only gives it the nearest of the window's colours (a light grey A on a dark window, a pale one on
+// the summary's green), and the user, 2026-11-18: "Button icons should always show the correct colors and never change
+// palettes". The window keeps the palette's version underneath (what anything reading the window sees).
+#define SHOWN_MAX 48
+static struct Shown {
+    u8 windowId, w, h, plain;
+    s16 icon, overlay;
+    u16 x, y;
+    u8 map[10];
+} sShown[SHOWN_MAX];
+static u8 sShownNext;
+
+static u8 IconClass(int icon, int overlay, bool8 plain, int i, int j, int w)
+{
+    u8 c = sBtnPixels[sBtnIcons[icon].offset + j * w + i];
+    if (overlay >= 0 && sBtnPixels[sBtnIcons[overlay].offset + j * w + i] > c)
+        c = sBtnPixels[sBtnIcons[overlay].offset + j * w + i];
+    if (plain && c == 2)
+        c = 1;
+    return c;
+}
+
+static void Remember(u8 windowId, int icon, u16 x, u16 y, bool8 plain, int overlay, const u8 *map)
+{
+    struct Shown *s = &sShown[sShownNext];
+    u8 k;
+    for (k = 0; k < SHOWN_MAX; k++)   // (the same spot drawn again: that entry)
+        if (sShown[k].w && sShown[k].windowId == windowId && sShown[k].x == x && sShown[k].y == y)
+        {
+            s = &sShown[k];
+            break;
+        }
+    if (k == SHOWN_MAX)
+        sShownNext = (sShownNext + 1) % SHOWN_MAX;
+    s->windowId = windowId, s->icon = icon, s->overlay = overlay, s->plain = plain;
+    s->x = x, s->y = y, s->w = sBtnIcons[icon].w, s->h = sBtnIcons[icon].h;
+    memcpy(s->map, map, sizeof(s->map));
+    if (getenv("MOEMON_BUTTONS_TRACE"))
+        printf("[btn] window %u icon %d at %u,%u (%ux%u) map %u %u %u\n", windowId, icon, x, y, s->w, s->h, map[1], map[2], map[3]);
+}
+
+// The window's pixel (x, y): its palette index
+static u8 WindowPixel(u8 windowId, int x, int y)
+{
+    const struct Window *win = &gWindows[windowId];
+    const u8 *t = win->tileData;
+    int width = win->window.width;
+    u8 b;
+    if (t == NULL || x < 0 || y < 0 || x >= width * 8 || y >= win->window.height * 8)
+        return 0xFF;
+    b = t[((y / 8) * width + x / 8) * TILE_SIZE_4BPP + (y % 8) * 4 + (x % 8) / 2];
+    return (x & 1) ? b >> 4 : b & 15;
+}
+
+// Is the window's own tile on its background's map at window pixel (x, y) right now? (another window can sit in the same
+// place, shown while this one isn't: a summary page's header under another page's)
+static bool8 WindowShownAt(const struct Window *win, int x, int y)
+{
+    int bg = win->window.bg, size, mx, my, block;
+    u16 cnt = GetGpuReg(REG_OFFSET_BG0CNT + bg * 2), e;
+    size = cnt >> 14;
+    mx = (win->window.tilemapLeft + x / 8) & ((size & 1) ? 63 : 31);
+    my = (win->window.tilemapTop + y / 8) & ((size & 2) ? 63 : 31);
+    block = ((cnt >> 8) & 31) + (mx >> 5) + ((my >> 5) * ((size & 1) ? 2 : 1));
+    e = ((const u16 *)(VRAM + block * 0x800))[(my & 31) * 32 + (mx & 31)];
+    return (e & 0x3FF) == (u16)(win->window.baseBlock + (y / 8) * win->window.width + x / 8)
+        && (e >> 12) == win->window.paletteNum;
+}
+
+static u16 Shade(u16 trueColor, u16 unfaded, u16 faded)
+{
+    // (a fade on the screen: the icon's colour moved as far as the window's own colour was)
+    s32 out = 0, sh;
+    if (unfaded == faded)
+        return trueColor;
+    for (sh = 0; sh <= 10; sh += 5)
+    {
+        s32 v = ((trueColor >> sh) & 31) + (((faded >> sh) & 31) - ((unfaded >> sh) & 31));
+        out |= (v < 0 ? 0 : v > 31 ? 31 : v) << sh;
+    }
+    return out;
+}
+
+// sdl2.c VDraw, over the finished frame: each button still in its window, in its own colours, on the pixels that show
+// it (where the window's colour for that pixel is what the frame has: not under anything drawn over the window)
+void MP_ButtonIcon_Composite(u16 *frame)
+{
+    u8 k;
+    {
+        char *getenv(const char *name);
+        static s8 sOff = -1;
+        if (sOff < 0)
+            sOff = getenv("MOEMON_BUTTONS_PALETTE") != NULL;   // (tests: the window's own palette version, as before)
+        if (sOff)
+            return;
+    }
+    for (k = 0; k < SHOWN_MAX; k++)
+    {
+        struct Shown *s = &sShown[k];
+        const struct Window *win;
+        int i, j, sx, sy, bg, pal;
+        bool8 alive = TRUE;
+        if (!s->w)
+            continue;
+        win = &gWindows[s->windowId];
+        if (s->windowId >= WINDOWS_MAX || win->tileData == NULL)
+        {
+            s->w = 0;
+            continue;
+        }
+        // still there? (the text erased or written over: forgotten)
+        for (j = 0; j < s->h && alive; j++)
+            for (i = 0; i < s->w && alive; i++)
+            {
+                u8 c = IconClass(s->icon, s->overlay, s->plain, i, j, s->w);
+                if (c && WindowPixel(s->windowId, s->x + i, s->y + j) != s->map[c])
+                    alive = FALSE;
+            }
+        if (!alive)
+        {
+            s->w = 0;
+            continue;
+        }
+        bg = win->window.bg;
+        pal = win->window.paletteNum;
+        if (!(GetGpuReg(REG_OFFSET_DISPCNT) & (DISPCNT_BG0_ON << bg)))
+            continue;
+        sx = win->window.tilemapLeft * 8 + s->x - (GetGpuReg(REG_OFFSET_BG0HOFS + bg * 4) & 0x1FF);
+        sy = win->window.tilemapTop * 8 + s->y - (GetGpuReg(REG_OFFSET_BG0VOFS + bg * 4) & 0x1FF);
+        for (j = 0; j < s->h; j++)
+            for (i = 0; i < s->w; i++)
+            {
+                u8 c = IconClass(s->icon, s->overlay, s->plain, i, j, s->w);
+                int px = sx + i, py = sy + j;
+                u16 shown, unf;
+                if (!c || px < 0 || py < 0 || px >= DISPLAY_WIDTH || py >= DISPLAY_HEIGHT
+                 || !WindowShownAt(win, s->x + i, s->y + j))
+                    continue;
+                shown = gPlttBufferFaded[BG_PLTT_ID(pal) + s->map[c]] & 0x7FFF;
+                unf = gPlttBufferUnfaded[BG_PLTT_ID(pal) + s->map[c]] & 0x7FFF;
+                if ((frame[py * DISPLAY_WIDTH + px] & 0x7FFF) != shown)
+                    continue;   // (something over the window here, or the window not there)
+                frame[py * DISPLAY_WIDTH + px] = (frame[py * DISPLAY_WIDTH + px] & 0x8000)
+                                               | Shade(sBtnClassColor[c] & 0x7FFF, unf, shown);
+            }
+    }
+}
+
 // overlay: a same-sized icon whose lit pixels are added (a D-Pad with two arms lit)
 static void DrawIconAt(u8 windowId, int icon, u16 x, u16 y, bool8 plain, int overlay)
 {
@@ -289,4 +441,5 @@ static void DrawIconAt(u8 windowId, int icon, u16 x, u16 y, bool8 plain, int ove
     gMpUiTextBlit++;   // (a button in the words: the UI STYLE writes it as letters)
     BlitBitmapRectToWindow(windowId, sBuf, 0, 0, 16, 16, x, y, w, h);
     gMpUiTextBlit--;
+    Remember(windowId, icon, x, y, plain, overlay, map);
 }
