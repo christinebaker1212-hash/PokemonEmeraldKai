@@ -198,6 +198,7 @@ static unsigned ScriptChoice(const char *script, int *required);
 static const char *ScriptPrompt(const char *script);
 static unsigned ScriptPick(const char *script, unsigned *count);
 static const char *ScriptBlock(const struct TcgDuel *g, unsigned player, const char *script);
+static void ScriptAi(const struct TcgDuel *g, struct TcgAction *a, const char *script);
 static const struct Effect sEffects[] = {
 #include "tcg_effect_table.inc"
 };
@@ -794,6 +795,11 @@ void TcgDuel_AiAttackChoices(const struct TcgDuel *g, struct TcgAction *a)
     unsigned i, s;
     if (!e)
         return;
+    if (e->kind == FX_SCRIPT)
+    {
+        ScriptAi(g, a, e->script);
+        return;
+    }
     switch (e->kind)
     {
     case FX_ENERGY_SPIKE:

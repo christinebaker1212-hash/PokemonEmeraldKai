@@ -93,6 +93,7 @@ uint32_t TcgLink_Hash(const struct TcgDuel *g)
         H(p->setupDone);
         H(p->retreated);
         H(p->noTrainers);
+        H(p->noSupporters);
         H(p->turnsTaken);
         for (j = 0; j < 60; j++)
         {

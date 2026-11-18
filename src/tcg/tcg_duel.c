@@ -400,7 +400,7 @@ static void EndTurn(struct TcgDuel *g)
             p->field[s].charged = p->field[s].charge3 = 0;
         p->field[s].fossilBoost = 0;
     }
-    p->noTrainers = 0;
+    p->noTrainers = p->noSupporters = 0;
     for (who = 0; who < 2; who++)
     {
         struct TcgFieldCard *f = &g->players[who].field[0];
@@ -632,17 +632,20 @@ static int Apply(struct TcgDuel *g, const struct TcgAction *a)
             if (f->charged == 2)
                 total *= f->charge3 ? 3 : 2;
             total += g->bonus + TcgPower_AttackBonus(g, total); /* (Frenzy, Dark Wave, Prehistoric Dream) */
-            if (!g->noWeakRes && TcgDuel_Weakness(g, g->current ^ 1, 0) == type)
+            /* (noWeakRes 1: neither, 2: no Resistance, 3: no Weakness) */
+            if ((!g->noWeakRes || g->noWeakRes == 2) && TcgDuel_Weakness(g, g->current ^ 1, 0) == type)
             {
                 total *= 2;
                 flags |= TCG_DMG_WEAK;
             }
-            if (!g->noWeakRes && TcgDuel_Resistance(g, g->current ^ 1, 0) == type)
+            if ((!g->noWeakRes || g->noWeakRes == 3) && TcgDuel_Resistance(g, g->current ^ 1, 0) == type)
             {
                 total -= 30;
                 flags |= TCG_DMG_RESIST;
             }
             total += 10 * (int)AttachedTrainerCount(g, g->current, 0, TCG_CARD_PLUSPOWER);
+            if (foe->vulnUntil >= g->turn)
+                total += foe->vulnBonus; /* (the regional sets: "that attack does 20 more damage") */
             if (!g->swift)
                 total -= 20 * (int)AttachedTrainerCount(g, g->current ^ 1, 0, TCG_CARD_DEFENDER);
             if (g->swift)
@@ -853,6 +856,8 @@ static int Apply(struct TcgDuel *g, const struct TcgAction *a)
     {
         if (p->noTrainers)
             return Error(g, "Headache: you can't play Trainer cards this turn.");
+        if (p->noSupporters && (c->flags & TCG_CF_SUPPORTER))
+            return Error(g, "You can't play Supporter cards this turn.");
         if (TcgPower_NoTrainers(g))
             return Error(g, "Dark Vileplume's Hay Fever: no Trainer cards can be played.");
         {

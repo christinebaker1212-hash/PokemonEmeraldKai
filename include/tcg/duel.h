@@ -47,6 +47,9 @@ struct TcgFieldCard
     /* The regional sets: Burned (a Special Condition beside the others, as Poisoned: between turns its owner flips a
      * coin, tails 2 damage counters) */
     uint8_t burned;
+    /* (an effect script's vuln: damage from attacks to it is vulnBonus more until turn vulnUntil) */
+    uint8_t vulnBonus;
+    uint16_t vulnUntil;
 };
 enum
 {
@@ -201,6 +204,8 @@ struct TcgPlayer
     struct TcgFieldCard field[TCG_FIELD_SIZE];
     uint8_t energyPlayed, confusionRetreatFailed, setupDone, retreated, noTrainers;
     uint16_t turnsTaken;
+    /* noSupporters: no Supporter this turn (Ruins of Alph's attacks...) */
+    uint8_t noSupporters;
     /* GB2's, as turn numbers: skipDrawTurn, the turn this player doesn't draw (Perplex); poisonMistUntil, Poison
      * Mist's 20 a turn (theirs too) until then; strangeBeamUntil, their damaged Water Pokemon have no Weakness;
      * noTrainersTurn, their turn without Trainers (Spookify). prizesUp: their Prizes face up (Here Comes Team
@@ -359,7 +364,8 @@ enum
     TCG_APICK_DISCARD_ENERGY, /* Energy Conversion (to the hand) / Absorption (onto it): up to count from the discard */
     TCG_APICK_EVOLUTION,      /* Rapid Evolution: a card from the deck that evolves from the attacker */
     TCG_APICK_FIELD_FIRE,     /* Burning Fire: the option's number of Fire Energy cards from any of your Pokemon */
-    TCG_APICK_MOVE_FOE_ENERGY /* Magnetic Lines: one of the Defending's basic Energy (then target: where it goes) */
+    TCG_APICK_MOVE_FOE_ENERGY, /* Magnetic Lines: one of the Defending's basic Energy (then target: where it goes) */
+    TCG_APICK_DECK_BASIC      /* a basic Energy from the deck onto the attacker (count: its type, 15 any) */
 };
 unsigned TcgDuel_AttackPick(const struct TcgAttack *attack, unsigned *count);
 /* (TCG_APICK_FAMILY / _EVOLUTION) Can this card be taken by the attacker's attack? */

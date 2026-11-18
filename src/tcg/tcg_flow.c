@@ -292,6 +292,12 @@ static int AttackPickSteps(const struct TcgDuel *g, unsigned me, const struct Tc
         out[n++] = st;
         break;
     }
+    case TCG_APICK_DECK_BASIC:
+    {
+        struct TcgStep st = {TCG_ST_PICK, TCG_F_BASIC_ENERGY, TCG_SRC_DECK, 0, 1, "Attach which basic Energy card to it?"};
+        out[n++] = st;
+        break;
+    }
     case TCG_APICK_EVOLUTION:
     {
         struct TcgStep st = {TCG_ST_PICK, (uint8_t)(a->attack ? TCG_F_ATTACK_CARD1 : TCG_F_ATTACK_CARD0), TCG_SRC_DECK, 0,
@@ -576,6 +582,8 @@ int TcgFlow_HandPlayable(const struct TcgDuel *g, unsigned me, const struct TcgC
     }
     if (c->kind == TCG_TRAINER && p->noTrainers)
         return snprintf(reason, size, "Headache: no Trainer cards this turn."), 0;
+    if (c->kind == TCG_TRAINER && p->noSupporters && (c->flags & TCG_CF_SUPPORTER))
+        return snprintf(reason, size, "No Supporter cards this turn."), 0;
     return 1;
 }
 

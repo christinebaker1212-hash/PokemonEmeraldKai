@@ -22,8 +22,12 @@
  *             next turn | selflock it can't attack next turn | dde one of the Defending's Energy discarded (picked)
  *             | dsa:T,n n of its Energy cards of type T discarded (0 all; as many as it has) | attd:T,n up to n Energy of type T from the discard pile onto it | srch:T,n n basic Energy of type T
  *             from the deck onto it | draw:n | notr no Trainers for them next turn
+ *             | vuln:x attacks do x more to the Defending until the end of your next turn | srchp:T a basic Energy (of
+ *             type T) picked from the deck onto it | nores / noweak / nowr no Resistance / Weakness / either (0) |
+ *             dsx:T,n as dse, else the attack does nothing (0)
  * Conditions: h heads (some) | t tails (some) | ah all heads | at all tails | geN N heads or more | dpsn / dbrn /
- *             ddmg / dnodmg the Defending Pokemon Poisoned / Burned / damaged / not damaged */
+ *             ddmg / dnodmg the Defending Pokemon Poisoned / Burned / damaged / not damaged | eqe / neqe it and
+ *             the Defending have (not) the same number of Energy cards */
 #define SCRIPT_TOKEN 48
 struct ScriptOp
 {
@@ -72,7 +76,8 @@ static int ScriptIs(const struct ScriptOp *op, const char *name) { return !strcm
 static int ScriptPhase(const struct ScriptOp *op)
 {
     static const char *const before[] = {"c", "cu", "ce", "cdc", "csc", "add", "addh", "mulh", "set", "none", "zero",
-                                         "addsc", "adddc", "adde", "addde", "addpast", "dse"};
+                                         "addsc", "adddc", "adde", "addde", "addpast", "dse", "dsx", "nores",
+                                         "noweak", "nowr"};
     unsigned i;
     if (ScriptIs(op, "drag"))
         return 3;
@@ -97,6 +102,8 @@ static int ScriptCond(const struct TcgDuel *g, const char *cond)
         return !heads;
     if (!strncmp(cond, "ge", 2))
         return heads >= (unsigned)atoi(cond + 2);
+    if (!strncmp(cond, "sc", 2) && cond[2] >= '0' && cond[2] <= '9')
+        return g->players[g->current].field[0].damage / 10 >= (unsigned)atoi(cond + 2);
     if (!strcmp(cond, "dpsn"))
         return foe->poison != 0;
     if (!strcmp(cond, "dbrn"))
@@ -105,6 +112,11 @@ static int ScriptCond(const struct TcgDuel *g, const char *cond)
         return foe->damage != 0;
     if (!strcmp(cond, "dnodmg"))
         return foe->damage == 0;
+    if (!strcmp(cond, "eqe") || !strcmp(cond, "neqe"))
+    {
+        int same = EnergyCards(g, g->current, 0) == EnergyCards(g, g->current ^ 1, 0);
+        return cond[0] == 'e' ? same : !same;
+    }
     return 0;
 }
 static void ScriptFlip(struct TcgDuel *g, unsigned n)
@@ -205,6 +217,24 @@ static int ScriptRun(struct TcgDuel *g, const char *script, const struct TcgAtta
             if (n > (unsigned)z)
                 n = (unsigned)z;
             *damage += (unsigned)y * n;
+        }
+        else if (ScriptIs(&o, "nores"))
+            g->noWeakRes = 2;
+        else if (ScriptIs(&o, "noweak"))
+            g->noWeakRes = 3;
+        else if (ScriptIs(&o, "nowr"))
+            g->noWeakRes = 1;
+        else if (ScriptIs(&o, "dsx"))
+        {
+            /* discard them "or this attack does nothing" */
+            unsigned have = ScriptEnergyOf(g, me, 0, x);
+            if (!have || (y && have < (unsigned)y))
+            {
+                *damage = 0;
+                g->attackFailed = 1;
+                return TCG_OK;
+            }
+            DiscardEnergy(g, me, 0, x >= TCG_TYPES ? ANY_TYPE : (unsigned)x, (unsigned)y);
         }
         else if (ScriptIs(&o, "dse"))
         {
@@ -360,10 +390,45 @@ static int ScriptRun(struct TcgDuel *g, const char *script, const struct TcgAtta
         }
         else if (ScriptIs(&o, "dsa"))
             DiscardEnergy(g, me, 0, x >= TCG_TYPES ? ANY_TYPE : (unsigned)x, (unsigned)y);
+        else if (ScriptIs(&o, "vuln"))
+        {
+            if (!blocked && foe->stackSize)
+            {
+                foe->vulnBonus = (uint8_t)x;
+                foe->vulnUntil = (uint16_t)(g->turn + 2);
+            }
+        }
+        else if (ScriptIs(&o, "srchp"))
+        {
+            /* the basic Energy card the player picked from the deck (none: none), onto it */
+            int i = Picked(action, 0, p->deck, p->deckSize);
+            if (i >= 0 && CardAt(g, me, p->deck[i])->kind == TCG_ENERGY && CardAt(g, me, p->deck[i])->id <= 6 &&
+                (x >= TCG_TYPES || CardAt(g, me, p->deck[i])->type == (unsigned)x))
+            {
+                self->attached[self->attachedSize++] = TcgPile_Remove(p->deck, &p->deckSize, (unsigned)i);
+                TcgDuel_Event(g, TCG_EV_ATTACH, me, 0, 0, p->cards[self->attached[self->attachedSize - 1]], 0);
+            }
+            TcgDuel_Shuffle(g, me);
+        }
         else if (ScriptIs(&o, "draw"))
             TcgDuel_Event(g, TCG_EV_DRAW, me, 0, TcgDuel_Draw(g, me, (unsigned)x), 0, 0);
         else if (ScriptIs(&o, "notr"))
             op->noTrainers = 1;
+        else if (ScriptIs(&o, "nosup"))
+            op->noSupporters = 1;
+        else if (ScriptIs(&o, "mill"))
+        {
+            /* each player discards the top x cards of their deck */
+            unsigned who, k;
+            for (who = 0; who < 2; who++)
+            {
+                struct TcgPlayer *q = &g->players[who];
+                for (k = 0; k < (unsigned)x && q->deckSize; k++)
+                    q->discard[q->discardSize++] = q->deck[--q->deckSize];
+                if (k)
+                    TcgDuel_Event(g, TCG_EV_DECK_CHANGED, who, 0, k, 0, 0);
+            }
+        }
     }
     return TCG_OK;
 }
@@ -419,6 +484,8 @@ static unsigned ScriptPick(const char *script, unsigned *count)
     {
         if (ScriptIs(&o, "dde"))
             return TCG_APICK_FOE_ENERGY;
+        if (ScriptIs(&o, "srchp"))
+            return TCG_APICK_DECK_BASIC;
         if (ScriptIs(&o, "dse") && o.arg[0] >= TCG_TYPES && o.arg[1])
         {
             *count = (unsigned)o.arg[1];
@@ -440,4 +507,30 @@ static const char *ScriptBlock(const struct TcgDuel *g, unsigned player, const c
                 return "Not enough Energy attached to discard.";
         }
     return NULL;
+}
+/* The AI's picks for a script (TcgDuel_AiAttackChoices; a target is chosen by tcg_ai.c from ScriptChoice) */
+static void ScriptAi(const struct TcgDuel *g, struct TcgAction *a, const char *script)
+{
+    const struct TcgPlayer *p = &g->players[g->current];
+    const struct TcgCard *self = TcgDuel_Attacker(g, g->current);
+    struct ScriptOp o;
+    const char *at = script;
+    while (ScriptNext(&at, &o))
+        if (ScriptIs(&o, "srchp"))
+        {
+            /* a basic Energy of its own type, else any it may take */
+            int pick = -1;
+            unsigned i;
+            for (i = 0; i < p->deckSize; i++)
+            {
+                const struct TcgCard *c = CardAt(g, g->current, p->deck[i]);
+                if (c->kind != TCG_ENERGY || c->id > 6 || (o.arg[0] < TCG_TYPES && c->type != (unsigned)o.arg[0]))
+                    continue;
+                if (pick < 0 || (self && c->type == self->type))
+                    pick = (int)i;
+            }
+            a->selectionCount = 0;
+            if (pick >= 0)
+                a->selections[a->selectionCount++] = p->deck[pick];
+        }
 }
