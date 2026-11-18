@@ -5,25 +5,25 @@ plays (tools/tcg/regions/effects.py); only finished cards appear in the game.
 
 | Set | Cards | Finished |
 |---|---|---|
-| gym1 | 126 | 99 |
+| gym1 | 126 | 100 |
 | gym2 | 126 | 84 |
-| neo1 | 105 | 80 |
-| neo2 | 75 | 46 |
+| neo1 | 105 | 81 |
+| neo2 | 75 | 47 |
 | neo3 | 66 | 30 |
-| neo4 | 113 | 56 |
+| neo4 | 113 | 58 |
 | ecard1 | 159 | 142 |
-| ecard2 | 182 | 131 |
-| ecard3 | 182 | 96 |
-| basep | 53 | 18 |
-| np | 40 | 19 |
-| **all** | 1227 | 801 |
+| ecard2 | 182 | 132 |
+| ecard3 | 182 | 112 |
+| basep | 53 | 31 |
+| np | 40 | 26 |
+| **all** | 1227 | 843 |
 
 ## Rules the engine doesn't play yet (cards needing each)
 
 - TM: 16
 - CRYSTAL: 9
 
-## Wordings to translate (411; the most cards first)
+## Wordings to translate (350; the most cards first)
 
 - 6 x TRAINER: Darkness Cube 01 (ecard2-119): Attach this card to 1 of your Darkness Pokemon in play. That Pokemon may use this card's attack instead of its own. At the end of your turn, discard Darkness Cube 01.
 - 6 x BODY: Celebi (ecard3-145): Whenever you attach a Grass, Water, or Psychic basic Energy card from your hand to Celebi, Celebi's type (color) becomes the same as that type of Energy until the end of the turn.
@@ -32,7 +32,6 @@ plays (tools/tcg/regions/effects.py); only finished cards appear in the game.
 - 3 x BODY: Metapod (ecard1-87): All damage done by attacks to Metapod is reduced by 20 (after applying Weakness and Resistance).
 - 3 x attack: Sudowoodo (ecard2-36): Choose 1 of the Defending Pokemon's attacks. Copy copies that attack. This attack does nothing if Sudowoodo doesn't have the Energy necessary to use that attack. (You must still do anything else required in order to u
 - 3 x BODY: Kingdra (ecard2-148): Whenever you attach a Water, Lightning, or Psychic basic Energy card from your hand to Kingdra, Kingdra's type (color) becomes the same as that Energy card type until the end of the turn.
-- 2 x attack: Erika's Exeggcute (gym1-43): During your opponent's next turn, whenever Erika's Exeggcute takes damage, divide that damage in half (rounded down to the nearest 10). (Any other effects still happen.)
 - 2 x attack: Erika's Venusaur (gym2-4): Flip a coin. If heads, you may attach up to 2 Grass Energy cards from your hand to Erika's Venusaur.
 - 2 x attack: Koga's Beedrill (gym2-9): Flip a coin. If tails, this attack does nothing. Either way, you can't use this attack again as long as Koga's Beedrill stays in play (even putting Koga's Beedrill on the Bench won't let you use it again).
 - 2 x POWER: Forretress (neo2-2): During your opponent's turn, whenever 1 of your opponent's Benched Pokemon becomes his or her Active Pokemon, Forretress does 10 damage to it. (Don't apply Weakness and Resistance.) This power stops working if Forretres
@@ -170,7 +169,6 @@ plays (tools/tcg/regions/effects.py); only finished cards appear in the game.
 - 1 x attack: Umbreon (neo2-32): During your opponent's next turn, if the Defending Pokemon tries to retreat, do 10 damage to it. (Don't apply Weakness and Resistance.)
 - 1 x POWER: Eevee (neo2-38): Whenever you attach an Energy card to Eevee, flip a coin. If heads, search your deck for a card that evolves from Eevee that is the same type as the Energy card you attached to Eevee. Attach that card to Eevee. This counts 
 - 1 x attack: Kakuna (neo2-41): During your opponent's next turn, whenever your opponent's attack damages Kakuna (even if Kakuna is Knocked Out), your opponent's Active Pokemon is now Poisoned and Kakuna does 10 damage to each of your opponent's Benched 
-- 1 x attack: Metapod (neo2-42): During your opponent's next turn, whenever 20 or less damage is done to Metapod (after applying Weakness and Resistance), prevent that damage. (Any other effects of attacks still happen).
 - 1 x attack: Metapod (neo2-42): Flip a coin. If heads, remove all damage counters from Metapod. Then, search your deck for a card that evolves from Metapod and attach that card to Metapod. This counts as evolving Metapod. Shuffle your deck afterward.
 - 1 x POWER: Unown [F] (neo2-48): Once during your turn (before your attack), if you have Unown [F], Unown [I], Unown [N], and Unown [D] on your Bench, you may search your deck for a Trainer card. Show that card to your opponent, then put it into your h
 - 1 x POWER: Unown [U] (neo2-51): Once during your turn (before your attack), if you have Unown [U], Unown [N], Unown [D], and Unown [O] on your Bench, you may return your Active Pokemon and all cards attached to it to your hand.
@@ -182,7 +180,6 @@ plays (tools/tcg/regions/effects.py); only finished cards appear in the game.
 - 1 x POWER: Unown [E] (neo2-67): When you play Unown [E] from your hand, your opponent may shuffle his or her hand into his or her deck and then draw 4 cards. Either way, you may shuffle your hand into your deck and draw 4 cards.
 - 1 x POWER: Unown [I] (neo2-68): When you play Unown [I] from your hand, you may search your deck for a card with Unown in its name and put it onto your Bench. Shuffle your deck afterward. You can't use this power if your Bench is full.
 - 1 x POWER: Unown [O] (neo2-69): Once during your turn (before your attack), you may look at 5 cards from the top of your opponent's deck and put them back in the same order.
-- 1 x attack: Wooper (neo2-71): If an attack would do damage to Wooper during your opponent's next turn, your opponent flips a coin. If tails, prevent all damage to Wooper from that attack. (Any other effects of that attack happen.)
 - 1 x TRAINER: Fossil Egg (neo2-72): Flip a coin. If heads, search your deck for a card that evolves from Mysterious Fossil and put it onto your Bench or put a card that evolves from Mysterious Fossil from your hand onto your Bench. Either way, treat the 
 - 1 x attack: Ampharos (neo3-1): Flip 3 coins. For each heads, you may search your deck for a Lightning Energy card and attach it to 1 of your Lightning Pokemon. Shuffle your deck afterward.
 - 1 x POWER: Celebi (neo3-3): If an opponent's attack would Knock Out Celebi, flip a coin. If heads, Celebi isn't Knocked Out and you shuffle it and all cards attached to it into your deck. This power doesn't work if Celebi is already Asleep, Confused, 
@@ -256,7 +253,6 @@ plays (tools/tcg/regions/effects.py); only finished cards appear in the game.
 - 1 x attack: Dark Forretress (neo4-35): Until the end of your next turn, if Dark Forretress would be Knocked Out by damage from an attack, flip a coin. If heads, Dark Forretress is not Knocked Out and its remaining HP become 10 instead.
 - 1 x attack: Dark Haunter (neo4-36): Put a Baby Pokemon or Basic Pokemon card from your opponent's discard pile onto his or her Bench. Put 1 damage counter on that Pokemon. (You can't use this attack if your Bench is full.)
 - 1 x attack: Dark Pupitar (neo4-38): Flip a coin. If heads, this attack does 10 damage to each of your opponent's Pokemon. Don't apply Weakness and Resistance. Then, search your deck for an Evolution card named Dark Tyranitar and put it on Dark Pupitar.
-- 1 x attack: Light Dewgong (neo4-45): Until the end of your opponent's next turn, as long as Light Dewgong is your Active Pokemon, prevent all damage done by attacks to your Benched Pokemon. (Any other effects of attacks still happen.)
 - 1 x attack: Light Golduck (neo4-47): Your opponent looks at the top 3 cards of his or her deck. If any of them are basic Energy cards, he or she may show any number of them to you and put them into his or her hand. You do the same. Either way, each pla
 - 1 x attack: Light Jolteon (neo4-48): During your opponent's next turn, whenever 30 or more damage is done to Light Jolteon (after applying Weakness and Resistance), prevent that damage. (Any other effects of attacks still happen.)
 - 1 x attack: Light Ninetales (neo4-50): Put a Baby Pokemon or a Basic Pokemon card from your discard pile onto your Bench. (You can't use this attack if your Bench is full.)
@@ -270,7 +266,6 @@ plays (tools/tcg/regions/effects.py); only finished cards appear in the game.
 - 1 x POWER: Unown [Q] (neo4-59): Once during your turn (before your attack), you may flip a coin. If heads, prevent all effects of attacks, including damage, done to any of your Pokemon with Unown in its name during your opponent's next turn. If you ha
 - 1 x POWER: Unown [Z] (neo4-60): As long as Unown [Z] is Benched, you pay no Energy cost to retreat a Pokemon with Unown in its name.
 - 1 x attack: Dark Octillery (neo4-62): Flip a coin. If heads, the Defending Pokemon is now Paralyzed. If tails, during your opponent's next turn, your opponent pays Colorless more to retreat the Defending Pokemon.
-- 1 x attack: Hitmonchan (neo4-69): If Hitmonchan would be damaged by an attack during your opponent's next turn, flip a coin. If heads, prevent that attack's damage done to Hitmonchan. (Any other effects of attacks still happen.)
 - 1 x attack: Light Sunflora (neo4-72): Attach up to 2 Grass Energy cards from your hand to 1 of your Grass Pokemon.
 - 1 x attack: Sunkern (neo4-83): Flip a coin. If heads, remove all damage counters from Sunkern. Search your deck for a card that evolves from Sunkern and attach that card to Sunkern. This counts as evolving Sunkern. Shuffle your deck afterward.
 - 1 x POWER: Unown [L] (neo4-86): Once during your turn (before your attack), you may flip a coin. If heads, each player shuffles his or her deck. This power can be used even if Unown [L] is Asleep, Confused, or Paralyzed.
@@ -291,7 +286,6 @@ plays (tools/tcg/regions/effects.py); only finished cards appear in the game.
 - 1 x attack: Tyrogue (ecard2-63): Flip a coin. If heads, discard a Special Energy card attached to the Defending Pokemon. If tails, this attack does nothing.
 - 1 x attack: Weepinbell (ecard2-65): Attach up to 2 Grass Energy cards from your hand to Weepinbell.
 - 1 x attack: Aipom (ecard2-67): Return Aipom and all basic Energy cards attached to it to your hand. If you have no Benched Pokemon, this attack does nothing.
-- 1 x attack: Eevee (ecard2-75): Flip a coin. If heads, search your deck for an Energy card and attach it to Eevee. Shuffle your deck afterward.
 - 1 x attack: Exeggcute (ecard2-76): Attach an Energy card from your hand to Exeggcute.
 - 1 x attack: Kangaskhan (ecard2-88): Look at the top 3 cards of your deck, and then choose 1 of those cards and put it into your hand. Shuffle the rest into your deck afterward.
 - 1 x BODY: Magnemite (ecard2-91): You pay Colorless less to retreat Magnemite for each Magnemite on your Bench.
@@ -307,131 +301,76 @@ plays (tools/tcg/regions/effects.py); only finished cards appear in the game.
 - 1 x TRAINER: Time Shard (ecard2-135): Attach Time Shard to 1 of your Pokemon that doesn't already have a Pokemon Tool card attached to it. If that Pokemon is Knocked Out, discard this card. If the Pokemon this card is attached to is Knocked Out by damag
 - 1 x ENERGY: Crystal Energy (ecard2-146): Crystal Energy provides 1 Energy of all types (colors) of basic Energy cards attached to the Pokemon Crystal Energy is attached to. If there are no basic Energy cards attached to the Pokemon Crystal Energy is at
 - 1 x ENERGY: Warp Energy (ecard2-147): Warp Energy provides 1 Colorless Energy. When you attach Warp Energy from your hand to your Active Pokemon, switch your Active Pokemon with 1 of your Benched Pokemon.
-- 1 x attack: Kingdra (ecard2-148): Flip 2 coins. For each tails, discard 1 Energy card attached to Kingdra.
-- 1 x attack: Lugia (ecard2-149): This attack does 10 damage times the number of Energy cards attached to the Defending Pokemon.
-- 1 x attack: Nidoking (ecard2-150): Flip a coin, If heads, this attack does 10 damage to each of your opponent's Benched Pokemon. If tails, this attack does 10 damage to each of your Benched Pokemon. (Don't apply Weakness or Resistance for Benched Pokem
 - 1 x POWER: Aerodactyl (ecard3-1): Once during your turn (before your attack), if Aerodactyl is your Active Pokemon, you may ignore all Poke-Bodies until the end of your turn. This power can't be used if Aerodactyl is affected by a Special Condition.
 - 1 x BODY: Omastar (ecard3-23): As long as Omastar is your Active Pokemon, your opponent can't play Basic Pokemon or Evolution cards from his or her hand to evolve his or her Active Pokemon.
-- 1 x attack: Wigglytuff (ecard3-34): Flip a coin. If heads, this attack does 10 damage times the number of Pokemon you have in play.
 - 1 x POWER: Wigglytuff (ecard3-34): Once during your turn (before your attack), if Wigglytuff is on your bench, you may flip a coin. If heads, each player removes up to 2 damage counters from his or her Active Pokemon. This power can't be used if you h
-- 1 x attack: Electrode (ecard3-36): If there are any Lightning Energy card in your discard pile, flip a coin. If heads, attach 1 of them to Electrode.
-- 1 x attack: Electrode (ecard3-36): This attack does 20 damage to each Pokemon on each player's Bench. (Don't apply Weakness and Resistance for Benched Pokemon.) Electrode does 100 damage to itself.
 - 1 x BODY: Kabuto (ecard3-37): All damage done by attacks to Kabuto from Evolved Pokemon is reduced by 10 (after applying Weakness and Resistance).
 - 1 x attack: Machoke (ecard3-38): During your next turn, Machoke's Mega Punch attack's base damage is 80.
-- 1 x attack: Misdreavus (ecard3-39): Count the number of your Pokemon in play with damage counters on them. Put that many damage counters on the Defending Pokemon.
 - 1 x POWER: Noctowl (ecard3-40): Once during your turn (before your attack), you may look at the top 2 cards of any player's deck or at up to 2 of any player's Prizes. Put any cards you looked at back in the same order. This power can't be used if Noct
 - 1 x attack: Omanyte (ecard3-41): Put an Omastar from your hand onto Omanyte. This counts as evolving Omanyte.
 - 1 x attack: Omanyte (ecard3-41): Before doing damage, you may choose 1 of your opponent's Benched Pokemon and switch it with the Defending Pokemon.
 - 1 x attack: Persian (ecard3-42): Flip a coin. If heads, look at your opponent's hand. If he or she has any Trainer cards there, choose 1 of them. You opponent shuffles that card into his or her deck.
-- 1 x attack: Piloswine (ecard3-43): Flip 4 coins. This attack does 30 damage plus 20 more damage for each heads. Put a damage counter on Piloswine for each heads.
-- 1 x attack: Wobbuffet (ecard3-45): Flip 2 coins. If either is heads, this attack does 10 damage times the number of damage counters on Wobbuffet.
 - 1 x BODY: Wobbuffet (ecard3-45): If Wobbuffet becomes Poisoned or Burned by the Defending Pokemon's attack during your opponent's turn, the Defending Pokemon becomes affected by the same Special Condition.
 - 1 x BODY: Abra (ecard3-46): As long as there is a Psychic Energy card attached to Abra, its Retreat Cost is 0.
 - 1 x POWER: Buried Fossil (ecard3-47): Once during your turn (before your attack), if you have a basic Energy card in your hand, you may search your deck for an Omanyte or Kabuto card, show it to your opponent, and put it into your hand. Then put a bas
 - 1 x attack: Cleffa (ecard3-48): Shuffle a basic Energy card from your discard pile into your deck.
 - 1 x attack: Delibird (ecard3-49): Search your deck for a Technical Machine or Pokemon Tool card, show it to your opponent, and put it into your hand. Shuffle your deck afterward.
 - 1 x BODY: Ditto (ecard3-51): Each basic Energy card attached to Ditto provides every type of Energy but provides only 1 Energy at a time.
-- 1 x attack: Dugtrio (ecard3-52): Choose 1 of your opponent's Pokemon. This attack does 30 damage to that Pokemon. Don't apply Weakness or Resistance. (Any other effects that would happen after applying Weakness and Resistance still happen.)
 - 1 x BODY: Dunsparce (ecard3-53): As long as the Defending Pokemon is an Evolved Pokemon, Dunsparce's Retreat Cost is 0.
-- 1 x attack: Farfetch'd (ecard3-55): Your opponent switches the Defending Pokemon with 1 of his or her Benched Pokemon.
-- 1 x attack: Gastly (ecard3-57): Put a damage counter on the Defending Pokemon.
 - 1 x attack: Golbat (ecard3-60): This attack does 30 damage plus 10 more damage for each Zubat, Golbat, and Crobat on your Bench.
 - 1 x attack: Haunter (ecard3-63): You may discard up to 2 cards from your hand. If you do, draw that many cards.
-- 1 x attack: Heracross (ecard3-64): If there are 4 or more damage counters on Heracross, this attack's base damage is 50 instead of 30.
 - 1 x attack: Igglybuff (ecard3-67): Choose 1 of your Pokemon with an Energy card attached to it. Remove 1 damage counter from that Pokemon.
 - 1 x BODY: Kakuna (ecard3-70): All damage by attacks to Kakuna is reduced by 10 (after applying Weakness and Resistance).
 - 1 x attack: Lapras (ecard3-71): Search your deck for a Supporter card, show it to your opponent, and put it into your hand. Shuffle your deck afterward.
 - 1 x attack: Magikarp (ecard3-75): Flip a coin. If heads, search your deck for a card that evolves from Magikarp, show it to your opponent, and put it into your hand. Shuffle your deck afterward.
 - 1 x attack: Magnemite (ecard3-76): If the Defending Pokemon has any basic Energy cards attached to it, flip a coin. If heads, choose 1 of those Energy cards and move it to 1 of your opponent's Benched Pokemon. If your opponent has no Benched Pokemon, i
-- 1 x attack: Mantine (ecard3-77): Flip 2 coins. This attack does 10 damage times the number of heads
 - 1 x attack: Meowth (ecard3-78): Flip a coin. If heads, look at your opponent's hand. If he or she has any Energy cards there, choose 1 of them. Your opponent shuffles that card into his or her deck.
-- 1 x attack: Murkrow (ecard3-79): Choose 1 of your opponent's Pokemon. Put a damage counter on that Pokemon.
 - 1 x attack: Murkrow (ecard3-79): Choose 1 of your opponent's Pokemon that has a damage counter on it. This attack does 20 damage to that Pokemon. Don't apply Weakness and Resistance.
 - 1 x attack: Nidoran F (ecard3-81): Search your deck for a Basic Pokemon card named Nidoran F or Nidoran M and put it onto your Bench. Shuffle your deck afterward. (You can't use this attack if your Bench is full.)
-- 1 x attack: Pikachu (ecard3-84): Discard all Lightning Energy cards attached to Pikachu. This attack does 20 damage plus 10 more damage for each Energy card discarded in this way.
 - 1 x attack: Raticate (ecard3-89): Flip 3 coins. If you get 1 heads, this attack does 10 damage plus 10 more damage. If you get 2 heads, this attack does 10 damage plus 30 more damage. If you get 3 heads, this attack does 10 damage plus 60 more damage.
 - 1 x attack: Rattata (ecard3-90): Search your deck for a Baby Pokemon or Basic Pokemon card and put it onto your Bench. Shuffle your deck afterward. (You can't use this attack if your Bench is full.)
-- 1 x attack: Sandslash (ecard3-93): Flip 3 coins. This attack does 20 damage times the number of heads. If you get at least 1 heads, the Defending Pokemon is now Poisoned.
-- 1 x attack: Skarmory (ecard3-97): Flip a coin. If heads, switch Skarmory with 1 of your Benched Pokemon.
-- 1 x attack: Slugma (ecard3-98): Discard a Fire Energy card attached to Slugma in order to use this attack. The Defending Pokemon is now Burned.
 - 1 x POWER: Snorlax (ecard3-100): Once during your turn (before your attack), if Snorlax is your Active Pokemon, you may remove 1 damage counter from Snorlax. Snorlax is now Asleep. This power can't be used if Snorlax is affected by a Special Condition
-- 1 x attack: Snubbull (ecard3-101): Flip a coin. If heads, until the end of your opponent's next turn the Defending Pokemon can't attack or retreat.
 - 1 x attack: Stantler (ecard3-102): Flip a coin. If heads, this attack does 20 damage to the Defending Pokemon (don't apply Weakness or Resistance). If tails and your opponent has any Benched Pokemon, choose 1 of them and this attack does 20 damage to i
-- 1 x attack: Staryu (ecard3-103): Remove 2 damage counters from Staryu for each Energy attached to it. If it has fewer damage counters than that, remove all of them.
-- 1 x attack: Sunflora (ecard3-105): Search your deck for a basic Energy card and attach it to 1 of your Pokemon. Shuffle your deck afterward.
-- 1 x attack: Venomoth (ecard3-111): Flip 2 coins. For each heads, remove 1 damage counter from each of your Pokemon. If a Pokemon has fewer damage counters than the number of heads, remove all of them.
 - 1 x TRAINER: Miracle Sphere Alpha (ecard3-129): Attach this card to 1 of your Evolved Fire, Lightning, or Fighting Pokemon in play. That Pokemon may use this card's attack instead of its own. At the end of your turn, discard Miracle Plate Alpha.
 - 1 x TRAINER: Star Piece (ecard3-139): Attach Star Piece to 1 of your Pokemon that doesn't already have a Pokemon Tool attached to it. If that Pokemon is Knocked Out, discard this card. At any time between turns, if the Pokemon this card is attached to i
 - 1 x ENERGY: Bounce Energy (ecard3-142): This card provides ColorlessColorless Energy. You can attach this card to your Pokemon that has basic Energy cards attached to it. When you play this card from your hand and attach it to 1 of your Pokemon, return
 - 1 x ENERGY: Cyclone Energy (ecard3-143): This card provides Colorless Energy. When you play this card from your hand and attach it to your Active Pokemon, your opponent switches his or her Active Pokemon with 1 of his or her Benched Pokemon.
 - 1 x ENERGY: Retro Energy (ecard3-144): This card provides Colorless Energy. When you play this card from your hand and attach it to 1 of your Evolved Pokemon, you may remove up to 2 damage counters from that Pokemon and discard the top card from it. (T
-- 1 x attack: Celebi (ecard3-145): Remove 2 damage counters from Celebi and each Pokemon that's the same type (color) as Celebi.
-- 1 x attack: Golem (ecard3-148): Golem does 20 damage to itself. This attack also does 10 damage to each Benched Pokemon (yours and your opponent's). (Don't apply Weakness and Resistance for Benched Pokemon.)
-- 1 x attack: Ho-oh (ecard3-149): Discard an Energy card attached to Ho-oh and flip a coin. If heads, the Defending Pokemon is now Burned.
-- 1 x attack: Kabutops (ecard3-150): Remove a damage counter from Kabutops.
 - 1 x attack: Pikachu (basep-1): If the Defending Pokemon attacks Pikachu during your opponent's next turn, any damage done by the attack is reduced by 10 (after applying Weakness and Resistance). (Benching either Pokemon ends this effect.)
-- 1 x attack: Electabuzz (basep-2): Whenever an attack does damage to Electabuzz (after applying Weakness and Resistance) during your opponent's next turn, that attack only does half the damage to Electabuzz (rounded down to the nearest 10). (Any other e
 - 1 x POWER: Dragonite (basep-5): Once during your turn (before your attack), you may draw a card. If you do, choose a card from your hand and put it on top of your deck. This power can't be used if Dragonite is Asleep, Confused, or Paralyzed.
-- 1 x attack: Arcanine (basep-6): Discard 2 Fire Energy cards attached to Arcanine in order to use this attack. This attack does 40 damage plus 10 more damage for each damage counter on Arcanine.
 - 1 x attack: Meowth (basep-10): Flip a coin. If heads, this attack does 20 damage. If tails and if your opponent has any Benched Pokemon, he or she chooses 1 of them and this attack does 20 damage to it. (Don't apply Weakness and Resistance for Benched 
 - 1 x POWER: Eevee (basep-11): This power can only be used when a Pokemon evolves. Search your deck for a card that evolves from Eevee and attach it to Eevee. This counts as evolving Eevee. Shuffle your deck afterward. This power can't be used if Eevee 
 - 1 x attack: Mewtwo (basep-12): Flip a coin. If heads, choose a basic Energy card attached to 1 of your opponent's Pokemon and attach it to another of your opponent's Pokemon of your choice.
 - 1 x POWER: Venusaur (basep-13): Once during your turn (before your attack), you may use this power. Your Active Pokemon and the Defending Pokemon are no longer Asleep, Confused, Paralyzed, or Poisoned. This power can't be used if Venusaur is Asleep, C
 - 1 x attack: Cool Porygon (basep-15): You may change Cool Porygon's Resistance to a type of your choice other than Colorless. If the Defending Pokemon has a Weakness, you may change it to a type of your choice other than Colorless. (Benching either Poke
-- 1 x attack: Dark Persian (basep-17): If your opponent has any Benched Pokemon, flip a coin. If heads, choose 1 of your opponent's Benched Pokemon and switch it with the Defending Pokemon.
-- 1 x attack: Team Rocket's Meowth (basep-18): Flip a number of coins equal to the number of Pokemon in play. This attack does 10 damage times the number of heads. Then Team Rocket's Meowth does 10 damage times the number of tails to itself.
-- 1 x attack: Psyduck (basep-20): Your opponent can't play Trainer cards during his or her next turn.
 - 1 x attack: Moltres (basep-21): Flip a coin. If heads, discard 1 Fire Energy card attached to Moltres. If tails, discard all Energy cards attached to Moltres. If you can't discard Energy cards, this attack does nothing.
-- 1 x attack: Zapdos (basep-23): Flip a coin. If heads, and if your opponent has any Benched Pokemon, choose 1 of them. This attack does 30 damage to that Pokemon. (Don't apply Weakness and Resistance for Benched Pokemon.) If tails, Zapdos does 30 damage
 - 1 x attack: _____'s Pikachu (basep-24): If it's not your birthday, this attack does 30 damage. If it is your birthday, flip a coin. If heads, this attack does 30 damage plus 50 more damage; if tails, this attack does 30 damage.
-- 1 x attack: Pikachu (basep-26): Discard all Energy cards attached to Pikachu.
 - 1 x attack: Togepi (basep-30): If the Defending Pokemon attacks Togepi during your opponent's next turn, any damage done to Togepi is reduced by 20 (before applying Weakness and Resistance). (Benching either Pokemon ends this effect.)
 - 1 x attack: Togepi (basep-30): Flip a coin. If heads, choose 1 of the Defending Pokemon's attacks. Mini-Metronome copies that attack except for its Energy cost. (You must still do anything else in order to use that attack.) (No matter what type the Def
-- 1 x attack: Cleffa (basep-31): Draw 2 cards.
 - 1 x attack: Smeargle (basep-32): Flip a coin. If heads, choose a type (other than Colorless) and put a Coloring counter on the Defending Pokemon. That Pokemon is now the type you chose. If it already had a Coloring counter, remove the old one. If tails
-- 1 x attack: Scizor (basep-33): Flip a coin. If heads, the Defending Pokemon can't attack Scizor during your opponent's next turn. (Benching either Pokemon ends this effect.)
-- 1 x attack: Entei (basep-34): During your opponent's next turn, prevent all effects of attacks, including damage, done to your Benched Pokemon.
 - 1 x POWER: Entei (basep-34): Whenever your opponent's attack damages Entei, unless that attack Knocks Out Entei, flip a coin. If heads, shuffle Entei and all cards attached to it into your deck. This power can't be used if Entei is already Asleep, Con
 - 1 x attack: Pichu (basep-35): Search your deck for a Baby Pokemon card and put it onto your Bench. Shuffle your deck afterward. (You can't use this attack if your Bench is full.)
 - 1 x POWER: Unown [J] (basep-38): Once during your turn (before your attack), if you have Unown [J], Unown [O], Unown [I], and Unown Dragon on your Bench, you may search your deck for a Basic Pokemon or Evolution card. Show that card to your opponent, 
-- 1 x attack: Misdreavus (basep-39): Put 1 damage counter on the Defending Pokemon for each damage counter on Misdreavus.
 - 1 x TRAINER: Pokemon Tower (basep-42): This card stays in play when you play it. Discard this card if another Stadium card comes into play. If the effect of a Pokemon Power, attack, Energy card, or Trainer card would put a card in a discard pile into it
 - 1 x attack: Magmar (basep-44): When you use this attack, you may discard any number of Fire Energy cards attached to your Pokemon in play. This attack does 10 damage plus 10 more damage for each Fire Energy card you discarded in this way.
-- 1 x attack: Scyther (basep-45): Scyther can't use this attack during your next turn. (Benching or evolving Scyther ends this effect.)
 - 1 x attack: Electabuzz (basep-46): Choose 1 of your opponent's Pokemon and put a Lightning Rod marker on it. (A Pokemon can have only 1 Lightning Rod marker on it at a time.)
 - 1 x attack: Electabuzz (basep-46): This attack does 20 damage to any Pokemon with a Lightning Rod marker on it. Apply Weakness and Resistance.
 - 1 x POWER: Mew (basep-47): Prevent all effects of attacks, including damage, done to Mew by Evolved Pokemon. You can't use this power if Mew is Asleep, Confused, or Paralyzed.
 - 1 x POWER: Articuno (basep-48): As long as Articuno is your Active Pokemon, your Benched Pokemon do not take damage from and are not affected by attacks. This power cannot be used if Articuno is affected by a Special Condition.
-- 1 x attack: Snorlax (basep-49): Snorlax is now Asleep. Flip a coin. If heads, the Defending Pokemon is now Asleep.
 - 1 x POWER: Snorlax (basep-49): As long as Snorlax is your Active Pokemon, the Defending Pokemon can't Retreat. This power stops working when Snorlax is affected by a Special Condition.
-- 1 x attack: Rapidash (basep-51): If your opponent has any Benched Pokemon, choose 1 of them. Flip a coin. If heads, this attack does 20 damage to that Pokemon. (Don't apply Weakness and Resistance for Benched Pokemon.)
-- 1 x attack: Ho-oh (basep-52): Flip a coin. If tails, this attack's base damage is 20 instead of 60.
-- 1 x attack: Kyogre ex (np-1): Discard a Water Energy card attached to Kyogre ex. Does 10 damage to each Benched Pokemon (both yours and your opponent's). (Don't apply Weakness and Resistance for Benched Pokemon.)
-- 1 x attack: Groudon ex (np-2): Discard a Fighting Energy card attached to Groudon ex. Does 10 damage to your Benched Pokemon. (Don't apply Weakness and Resistance for Benched Pokemon.)
-- 1 x attack: Pikachu (np-12): Flip a coin. If heads, prevent all effects of an attack, including damage, done to Pikachu during your opponent's next turn.
-- 1 x attack: Meowth (np-13): Before doing damage, discard all Trainer cards attached to the Defending Pokemon (before they affect the damage.).
-- 1 x attack: Mudkip (np-18): Flip a coin. If heads, discard an Energy card attached to the Defending Pokemon.
 - 1 x BODY: Ludicolo (np-20): At any time between turns, remove 1 damage counter from Ludicolo.
-- 1 x attack: Jirachi (np-21): Discard an Energy card attached to Jirachi and draw 3 cards.
-- 1 x attack: Beldum (np-22): Put 1 damage counter on Beldum.
 - 1 x POWER: Beldum (np-22): Once during your turn (before your attack), you may flip a coin. If heads, search your deck for a Metal Basic Pokemon and put it onto your Bench. Shuffle your deck afterward. This power can't be used if Beldum is affected by
 - 1 x attack: Metang (np-23): Search your discard pile for a Metal Energy card and attach it to Metang.
 - 1 x attack: Chimecho (np-24): Your opponent switches each Defending Pokemon with his or her Benched Pokemon. If your opponent has only 1 Benched Pokemon, you choose the Defending Pokemon to switch.
-- 1 x attack: Chimecho (np-24): Remove 3 damage counters from each of your Active Pokemon. Each Defending Pokemon is now Asleep.
-- 1 x attack: Flygon (np-25): The Defending Pokemon can't retreat until the end of your opponent's next turn.
 - 1 x TRAINER: Championship Arena (np-28): This card stays in play when you play it. Discard this card if another Stadium card comes into play. If another card with the same name is in play, you can't play this card. At the end of each player's turn, if t
 - 1 x BODY: Suicune (np-30): Whenever you attach a Water Energy card from your hand to Suicune, discard an Energy card attached to Suicune. (You can't attach a Water Energy card from your hand if Suicune has no Energy cards attached.)
-- 1 x attack: Moltres ex (np-31): Discard all Fire Energy attached to Moltres ex.
 - 1 x BODY: Moltres ex (np-31): As long as you have Articuno ex and Zapdos ex in play, the Retreat Cost for Moltres ex is 0.
 - 1 x attack: Articuno ex (np-32): You may move a Water Energy attached to Articuno ex to 1 of your Pokemon.
 - 1 x BODY: Articuno ex (np-32): As long as you have Zapdos ex and Moltres ex in play, the Retreat Cost for Articuno ex is 0.
-- 1 x attack: Zapdos ex (np-33): Does 10 damage to 1 of your Benched Pokemon. (Don't apply Weakness and Resistance for Benched Pokemon.)
 - 1 x BODY: Zapdos ex (np-33): As long as you have Articuno ex and Moltres ex in play, the Retreat Cost for Zapdos ex is 0.
 - 1 x BODY: Typhlosion (np-34): As long as Typhlosion is your Active Pokemon, put 1 damage counter on each Active Pokemon (both yours and your opponent's) between turns.
 - 1 x attack: Kyogre ex (np-37): You may attach a basic Energy card from your hand to 1 of your Pokemon.
 - 1 x BODY: Kyogre ex (np-37): As long as your opponent has Groudon, Groudon ex, Rayquaza, or Rayquaza ex in play. Kyogre ex's attacks do 40 more damage to the Defending Pokemon (before applying Weakness and Resistance).
-- 1 x attack: Groudon ex (np-38): Flip a coin. If heads, your opponent discards the top card from his or her deck.
-- 1 x attack: Groudon ex (np-38): Does 10 damage to each of your Benched Pokemon. (Don't apply Weakness and Resistance for Benched Pokemon.)
 - 1 x BODY: Groudon ex (np-38): As long as your opponent has Kyogre, Kyogre ex, Rayquaza, or Rayquaza ex in play, Groudon ex's attacks do 40 more damage to the Defending Pokemon (before applying Weakness and Resistance).
 - 1 x attack: Rayquaza ex (np-39): Flip 2 coins. If both are tails, this attack does nothing. For each heads, discard an Energy attached to the Defending Pokemon.
 - 1 x BODY: Rayquaza ex (np-39): As long as your opponent has Kyogre, Kyogre ex, Groudon, or Groudon ex in play, Rayquaza ex's attacks do 40 damage to the Defending Pokemon (before applying Weakness and Resistance).
