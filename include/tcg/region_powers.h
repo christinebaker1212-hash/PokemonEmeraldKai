@@ -64,6 +64,10 @@
     X(R_TELL, "[TELL]", 1, 9, "c h.peek:2 h.showhand") \
     X(R_INVESTIGATE, "INVESTIGATE", 1, 1, "askch:17,1") \
     X(R_CUNNING, "CUNNING", 1, 1, "c h.peek:1,1 h.askch:16,1") \
+    X(R_ION_COATING, "ION COATING", 1, 1, "ion") \
+    X(R_ENERGY_CONVERTER, "ENERGY CONVERTER", 1, 1, "conv") \
+    X(R_SCAVENGER_HUNT, "SCAVENGER HUNT", 1, 1, "scav") \
+    X(R_SPATIAL_DISTORTION, "SPATIAL DISTORTION", 1, 1, "c h.stadis") \
     X(R_JOIN, "[JOIN]", 1, 5, "srchk:3") \
     X(R_MAGNETIC_CALL, "MAGNETIC CALL", 1, 1, "needroom c h.dbench:2") \
     X(R_GOOD_NEIGHBOR, "GOOD NEIGHBOR", 1, 5, "c h.healact:2") \
@@ -168,6 +172,9 @@
     X(R_HERBAL_SCENT, "HERBAL SCENT", 0, 0, NULL) \
     X(R_FLAME_VAPOR, "FLAME VAPOR", 0, 0, NULL) \
     X(R_FIRE_BOOST, "FIRE BOOST", 0, 0, NULL) \
+    X(R_MIRACULOUS_WIND, "MIRACULOUS WIND", 0, 0, NULL) \
+    X(R_CHAIN_REACTION, "CHAIN REACTION", 0, 0, NULL) \
+    X(R_HYDROELECTRIC, "HYDROELECTRIC POWER", 0, 0, NULL) \
     X(R_CALL_THE_BOSS, "CALL THE BOSS", 0, 0, NULL) \
     X(R_INCREASE, "[INCREASE]", 0, 0, NULL) \
     X(R_ENERGY_RECHARGE, "ENERGY RECHARGE", 0, 0, NULL) \

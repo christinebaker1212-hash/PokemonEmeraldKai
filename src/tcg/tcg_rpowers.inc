@@ -268,6 +268,16 @@ static const char *RegionBlock(const struct TcgDuel *g, unsigned player, unsigne
         if (!op->handSize)
             return "Their hand is empty.";
         break;
+    case TCG_POWER_R_SCAVENGER_HUNT:
+        if (p->handSize < 2)
+            return "You need 2 cards in your hand.";
+        break;
+    case TCG_POWER_R_SPATIAL_DISTORTION:
+        for (i = 0; i < p->discardSize && !(Tcg_Card(p->cards[p->discard[i]])->flags & TCG_CF_STADIUM); i++)
+            ;
+        if (i == p->discardSize)
+            return "There's no Stadium card in your discard pile.";
+        break;
     }
     return NULL;
 }
@@ -409,6 +419,8 @@ int TcgPower_AttachBlock(const struct TcgDuel *g, unsigned player, unsigned slot
     const struct TcgCard *c = Tcg_Card(energy);
     if (!c || c->kind != TCG_ENERGY)
         return 0;
+    if (power == TCG_POWER_R_PURE_BODY_WATER && c->type == TCG_WATER && !g->players[player].field[slot].attachedSize)
+        return 1;   /* (Suicune's Pure Body: no Water Energy from the hand while it has no Energy) */
     return (power == TCG_POWER_R_ANTI_LIGHTNING && energy == TCG_CARD_LIGHTNING_ENERGY) ||
            (power == TCG_POWER_R_WATER_IMMUNITY && energy == TCG_CARD_WATER_ENERGY) ||
            (power == TCG_POWER_R_FIRE_IMMUNITY && energy == TCG_CARD_FIRE_ENERGY);
@@ -419,6 +431,14 @@ void TcgPower_AfterAttach(struct TcgDuel *g, unsigned player, unsigned slot, uns
     struct TcgPlayer *p = &g->players[player];
     struct TcgFieldCard *f = &p->field[slot];
     unsigned power = TcgPower_Working(g, player, slot), id = p->cards[physical], s, who, i;
+    if (power == TCG_POWER_R_PURE_BODY_WATER && Tcg_Card(id)->kind == TCG_ENERGY && Tcg_Card(id)->type == TCG_WATER)
+    {
+        /* Suicune's Pure Body: an Energy card of its discarded, the player's pick (tcg_choice.inc) */
+        Announce(g, player, slot, power);
+        g->choiceData = (uint8_t)slot;
+        TcgDuel_AskChoice(g, player, TCG_CHOICE_PURE_BODY, TcgDuel_Field(g, player, slot)->id, 1);
+        return;
+    }
     if (power == TCG_POWER_R_CRYSTAL_TYPE && id >= 1 && id <= 6)
     {
         /* Crystal Type: a basic Energy of a type its words name makes it that type until the end of the turn (as
@@ -501,6 +521,11 @@ unsigned TcgPower_EnergyType(const struct TcgDuel *g, unsigned player, unsigned 
                 }
     }
     return type;
+}
+int TcgPower_WindBlows(const struct TcgDuel *g)
+{
+    return TcgPower_Working(g, 0, 0) == TCG_POWER_R_MIRACULOUS_WIND ||
+           TcgPower_Working(g, 1, 0) == TCG_POWER_R_MIRACULOUS_WIND;
 }
 /* player's Active Pokemon went to Bench slot: Magma Pool (a Fire Energy card of its onto the new Active) */
 void TcgPower_ToBench(struct TcgDuel *g, unsigned player, unsigned slot)

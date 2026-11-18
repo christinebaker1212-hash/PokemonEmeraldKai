@@ -626,6 +626,8 @@ int TcgFlow_CardMatches(const struct TcgDuel *g, unsigned owner, unsigned physic
         return c->kind == TCG_TRAINER && (c->flags & (TCG_CF_TM | TCG_CF_TOOL));
     case TCG_F_SUPPORTER_STADIUM:
         return c->kind == TCG_TRAINER && (c->flags & (TCG_CF_SUPPORTER | TCG_CF_STADIUM));
+    case TCG_F_STADIUM:
+        return c->kind == TCG_TRAINER && (c->flags & TCG_CF_STADIUM);
     case TCG_F_BALL:
         return c->kind == TCG_TRAINER && strstr(c->name, "Ball") != NULL;
     case TCG_F_UNOWN:
@@ -695,6 +697,18 @@ int TcgFlow_PickMatches(const struct TcgDuel *g, unsigned me, const struct TcgAc
                 if (g->players[me].field[s].attached[k] == physical)
                     return filter == TCG_F_GRASS_ENERGY_OTHER ? s != a->slot
                                                               : Field(g, me, s) && TcgFlow_InNameGroup(Field(g, me, s)->name, 6);
+        return 0;
+    }
+    if (filter == TCG_F_EVOLVES_FROM_DATA)
+        return g->choiceData < TCG_FIELD_SIZE &&
+               TcgDuel_EvolvesFrom(Tcg_Card(CardOf(g, owner, physical)), Field(g, me, g->choiceData));
+    if (filter == TCG_F_ON_DATA_SLOT)
+    {
+        const struct TcgFieldCard *f = g->choiceData < TCG_FIELD_SIZE ? &g->players[me].field[g->choiceData] : NULL;
+        unsigned k;
+        for (k = 0; f && owner == me && k < f->attachedSize; k++)
+            if (f->attached[k] == physical)
+                return Tcg_Card(CardOf(g, owner, physical))->kind == TCG_ENERGY;
         return 0;
     }
     if (filter == TCG_F_POKEMON_OTHER_NAME)
@@ -818,6 +832,10 @@ int TcgFlow_SlotMatches(const struct TcgDuel *g, unsigned me, const struct TcgAc
         return c && slot != a->target;
     case TCG_F_WATER_POKEMON:
         return c && c->kind == TCG_POKEMON && TcgDuel_Type(g, who, slot) == TCG_WATER;
+    case TCG_F_SHINING_LIGHT:
+        return c && c->kind == TCG_POKEMON && (c->flags & (TCG_CF_SHINING | TCG_CF_LIGHT));
+    case TCG_F_LIGHTNING_POKEMON:
+        return c && c->kind == TCG_POKEMON && TcgDuel_Type(g, who, slot) == TCG_LIGHTNING;
     case TCG_F_BENCH_CLEAN:
         return c && slot && !f->damage;
     case TCG_F_FIRE_POKEMON:
@@ -1127,7 +1145,21 @@ static void MenuAdd(struct TcgFlowMenu *m, const char *label, unsigned value, in
 unsigned TcgFlow_TrainerChoices(const struct TcgDuel *g, unsigned me, unsigned cardId, struct TcgFlowMenu *m,
                                 const char **reason)
 {
-    if (g->phase == TCG_CHOICE && (g->choiceKind == TCG_CHOICE_GUESS_KIND || g->choiceKind == TCG_CHOICE_GUESS_LIGHT))
+    if (g->phase == TCG_CHOICE && (g->choiceKind == TCG_CHOICE_TEXTURE_RES || g->choiceKind == TCG_CHOICE_TEXTURE_WEAK))
+    {
+        /* (Texture Magic: as it is, or any type but Colorless) */
+        static const char *const names[] = {"FIRE", "GRASS", "LIGHTNING", "WATER", "FIGHTING", "PSYCHIC", "", "DARKNESS", "METAL"};
+        unsigned t;
+        memset(m, 0, sizeof(*m));
+        *reason = NULL;
+        MenuAdd(m, "LEAVE IT", 9, 1, NULL);
+        for (t = 0; t < TCG_TYPES; t++)
+            if (t != TCG_COLORLESS)
+                MenuAdd(m, names[t], t, 1, NULL);
+        return m->count;
+    }
+    if (g->phase == TCG_CHOICE && (g->choiceKind == TCG_CHOICE_GUESS_KIND || g->choiceKind == TCG_CHOICE_GUESS_LIGHT ||
+                                   g->choiceKind == TCG_CHOICE_CARD_FLIP))
     {
         /* (the guess) */
         static const char *const kinds[3] = {"ENERGY", "TRAINER", "POKEMON"}, *const lights[3] = {"LIGHT", "DARK", "NEITHER"};
@@ -1135,7 +1167,7 @@ unsigned TcgFlow_TrainerChoices(const struct TcgDuel *g, unsigned me, unsigned c
         memset(m, 0, sizeof(*m));
         *reason = NULL;
         for (i = 0; i < 3; i++)
-            m->label[i] = g->choiceKind == TCG_CHOICE_GUESS_KIND ? kinds[i] : lights[i], m->value[i] = (uint8_t)i, m->ok[i] = 1;
+            m->label[i] = g->choiceKind != TCG_CHOICE_GUESS_LIGHT ? kinds[i] : lights[i], m->value[i] = (uint8_t)i, m->ok[i] = 1;
         return m->count = 3;
     }
     if (g->phase == TCG_CHOICE && g->choiceKind == TCG_CHOICE_PEEK_ZONE)
@@ -1159,7 +1191,8 @@ unsigned TcgFlow_TrainerChoices(const struct TcgDuel *g, unsigned me, unsigned c
         return m->count;
     }
     if (Tcg_EnergyRule(cardId) == TCG_ER_RETRO ||
-        (g->phase == TCG_CHOICE && (g->choiceKind == TCG_CHOICE_REDRAW4 || g->choiceKind == TCG_CHOICE_SHUFFLE_THEIRS)))
+        (g->phase == TCG_CHOICE && (g->choiceKind == TCG_CHOICE_REDRAW4 || g->choiceKind == TCG_CHOICE_SHUFFLE_THEIRS ||
+                                    g->choiceKind == TCG_CHOICE_IMPOSTOR)))
     {
         /* (Retro Energy: "you may") */
         memset(m, 0, sizeof(*m));
@@ -1176,6 +1209,15 @@ unsigned TcgFlow_PowerChoices(const struct TcgDuel *g, unsigned me, unsigned slo
     unsigned power = TcgPower_Id(Field(g, me, slot)), t, who, s;
     memset(m, 0, sizeof(*m));
     *reason = NULL;
+    if (power == TCG_POWER_R_ENERGY_CONVERTER)
+    {
+        /* (Energy Converter: any Energy type but Colorless) */
+        static const char *const names[] = {"FIRE", "GRASS", "LIGHTNING", "WATER", "FIGHTING", "PSYCHIC", "", "DARKNESS", "METAL"};
+        for (t = 0; t < TCG_TYPES; t++)
+            if (t != TCG_COLORLESS)
+                MenuAdd(m, names[t], t, 1, NULL);
+        return m->count;
+    }
     if (power == TCG_POWER_SHIFT)
     {
         static const char *const names[TCG_COLORLESS] = {"FIRE", "GRASS", "LIGHTNING", "WATER", "FIGHTING", "PSYCHIC"};
@@ -1539,9 +1581,10 @@ unsigned TcgFlow_Begin(struct TcgFlow *f, const struct TcgDuel *g, unsigned me, 
         {
             f->action.type = TCG_ATTACH;
             return AskSlot(f, g, f->me,
-                           Tcg_EnergyRule(c->id) == TCG_ER_BOOST    ? TCG_F_EVOLVED
-                           : Tcg_EnergyRule(c->id) == TCG_ER_BOUNCE ? TCG_F_HAS_BASIC_ENERGY
-                                                                    : TCG_F_ANY_POKEMON,
+                           Tcg_EnergyRule(c->id) == TCG_ER_BOOST     ? TCG_F_EVOLVED
+                           : Tcg_EnergyRule(c->id) == TCG_ER_BOUNCE  ? TCG_F_HAS_BASIC_ENERGY
+                           : Tcg_EnergyRule(c->id) == TCG_ER_MIRACLE ? TCG_F_SHINING_LIGHT
+                                                                     : TCG_F_ANY_POKEMON,
                            "Attach it to which Pokemon?");
         }
         if (c->kind == TCG_POKEMON)

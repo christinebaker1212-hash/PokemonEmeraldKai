@@ -120,7 +120,12 @@ enum
     TCG_F_PSYCHIC_ENERGY,       /* a Psychic Energy card */
     TCG_F_POKEMON_OTHER_NAME,   /* a Pokemon card not named as your Active Pokemon (Messenger) */
     TCG_F_GRASS_BENCH,          /* (slot) a Benched Grass Pokemon */
-    TCG_F_TOOL,                 /* a Pokemon Tool */              /* (slot) a Pokemon the Technical Machine being played may go on (TcgDuel_TmFits) */
+    TCG_F_TOOL,                 /* a Pokemon Tool */
+    TCG_F_LIGHTNING_POKEMON,    /* (slot) a Lightning Pokemon */
+    TCG_F_SHINING_LIGHT,        /* (slot) a Shining or Light Pokemon (Miracle Energy) */
+    TCG_F_STADIUM,              /* a Stadium card */
+    TCG_F_ON_DATA_SLOT,         /* an Energy card attached to the Pokemon of yours in slot choiceData */
+    TCG_F_EVOLVES_FROM_DATA,    /* a card that evolves from the Pokemon of yours in slot choiceData */              /* (slot) a Pokemon the Technical Machine being played may go on (TcgDuel_TmFits) */
     /* "with Brock in its name" and the like (+ TCG_OWNER_*): a Pokemon card; one of yours in play (slot); another
      * one of yours than the first chosen (slot: the action's target) */
     TCG_F_OWNER_CARD = 100,

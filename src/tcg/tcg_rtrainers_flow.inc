@@ -91,6 +91,9 @@ static const struct TcgStep *RegionTrainerSteps(unsigned id, int *count)
         STEPS({TCG_ST_OPP_SLOT, TCG_F_BENCH, 0, 1, 0, "Bring out which of their Benched Pokemon?"});
     case TCG_CARD_GYM2_111:
         STEPS({TCG_ST_PICK, TCG_F_ANY, TCG_SRC_HAND, 1, 1, "Which card do they guess at?"});
+    case TCG_CARD_NEO2_72:
+        STEPS({TCG_ST_PICK, TCG_F_FOSSIL_KID, TCG_SRC_DECK, 0, 1, "If heads: which card from your deck onto your Bench?"},
+              {TCG_ST_PICK, TCG_F_FOSSIL_KID, TCG_SRC_HAND, 0, 1, "(Or which from your hand? None: B)"});
     case TCG_CARD_NEO4_102:
         STEPS({TCG_ST_PICK, TCG_F_EVOLUTION, TCG_SRC_HAND, 1, 1, "Which Evolution card do they guess at?"});
     case TCG_CARD_ECARD1_148:
@@ -162,8 +165,14 @@ static int RegionTrainerPlayable(const struct TcgDuel *g, unsigned me, const str
     case TCG_CARD_GYM1_17:
     case TCG_CARD_NEO2_74:
     case TCG_CARD_ECARD2_130:
+    case TCG_CARD_NEO2_72:
         if (!bench)
             return snprintf(reason, size, "Your Bench is full."), 0;
+        break;
+    case TCG_CARD_NEO1_92:
+    case TCG_CARD_NEO4_94:
+        if (!g->players[me ^ 1].prizeSize)
+            return snprintf(reason, size, "They have no Prizes left."), 0;
         break;
     case TCG_CARD_GYM1_105:
         if (p->handSize > 1)
@@ -295,6 +304,14 @@ static const struct TcgStep *RegionPowerSteps(unsigned power, int *count)
     case TCG_POWER_R_RECONSTRUCTION:
         STEPS({TCG_ST_PICK, TCG_F_OMANYTE_KABUTO, TCG_SRC_DECK, 0, 1, "Take which Omanyte or Kabuto?"},
               {TCG_ST_PICK, TCG_F_BASIC_ENERGY, TCG_SRC_HAND, 1, 1, "Put which basic Energy into your deck?"});
+    case TCG_POWER_R_SCAVENGER_HUNT:
+        STEPS({TCG_ST_PICK, TCG_F_ANY, TCG_SRC_HAND, 2, 2, "Put which 2 cards from your hand into your deck?"},
+              {TCG_ST_PICK, TCG_F_ENERGY, TCG_SRC_DECK, 0, 1, "Then take which Energy card from your deck?"});
+    case TCG_POWER_R_SPATIAL_DISTORTION:
+        STEPS({TCG_ST_PICK, TCG_F_STADIUM, TCG_SRC_MY_DISCARD, 1, 1, "If heads: put which Stadium into play?"});
+    case TCG_POWER_R_ENERGY_CONVERTER:
+        STEPS({TCG_ST_PICK, TCG_F_BASIC_ENERGY, TCG_SRC_MY_FIELD_ATTACHED, 1, 1, "Change which basic Energy's type?"},
+              {TCG_ST_CHOICE, 0, 0, 0, 0, "Treat it as which type this turn?"});
     case TCG_POWER_R_ENERGY_CONNECT:
         STEPS({TCG_ST_PICK, TCG_F_BASIC_ENERGY, TCG_SRC_MY_BENCH_ATTACHED, 1, 1, "Move which basic Energy to your Active?"});
     }
@@ -342,6 +359,32 @@ const struct TcgStep *TcgFlow_ChoiceSteps(const struct TcgDuel *g, int *count)
         STEPS({TCG_ST_MY_SLOT, TCG_F_DAMAGED, 0, 0, 0, "Remove 2 damage counters from which of yours?"});
     case TCG_CHOICE_HEAL_THEIRS:
         STEPS({TCG_ST_OPP_SLOT, TCG_F_DAMAGED, 0, 0, 0, "Remove 2 damage counters from which of theirs?"});
+    case TCG_CHOICE_MOVE_THEIRS_FROM:
+        STEPS({TCG_ST_OPP_SLOT, TCG_F_HAS_BASIC_ENERGY, 0, 0, 0, "Move a basic Energy from which of theirs?"},
+              {TCG_ST_PICK, TCG_F_BASIC_ENERGY, TCG_SRC_OPP_ATTACHED, 1, 1, "Move which basic Energy?"});
+    case TCG_CHOICE_MOVE_THEIRS_TO:
+        STEPS({TCG_ST_OPP_SLOT, TCG_F_OCCUPIED, 0, 0, 0, "Attach it to which other of theirs?"});
+    case TCG_CHOICE_WATER_TO_BENCH:
+        STEPS({TCG_ST_MY_SLOT, TCG_F_BENCH, 0, 0, 0, "Move a Water Energy to which Benched Pokemon?"});
+    case TCG_CHOICE_COUNTER_BENCH:
+        STEPS({TCG_ST_OPP_SLOT, TCG_F_BENCH, 0, 0, 0, "Put a damage counter on which of their Benched?"});
+    case TCG_CHOICE_ATTACH_LIGHTNING:
+        STEPS({TCG_ST_MY_SLOT, TCG_F_LIGHTNING_POKEMON, 0, 0, 0, "Attach a Lightning Energy to which? (or none: then B)"},
+              {TCG_ST_PICK, TCG_F_LIGHTNING_ENERGY, TCG_SRC_DECK, 0, 1, "Which Lightning Energy from your deck?"});
+    case TCG_CHOICE_CARD_FLIP:
+        STEPS({TCG_ST_CHOICE, 0, 0, 0, 0, "Guess: is their Prize an Energy, a Trainer or a Pokemon?"});
+    case TCG_CHOICE_IMPOSTOR:
+        STEPS({TCG_ST_CHOICE, 0, 0, 0, 0, "Have them shuffle their Prizes into their deck and set new ones?"});
+    case TCG_CHOICE_TEXTURE_RES:
+        STEPS({TCG_ST_CHOICE, 0, 0, 0, 0, "Change its Resistance to which type?"});
+    case TCG_CHOICE_TEXTURE_WEAK:
+        STEPS({TCG_ST_CHOICE, 0, 0, 0, 0, "Change the Defending Pokemon's Weakness to which type?"});
+    case TCG_CHOICE_PURE_BODY:
+        STEPS({TCG_ST_PICK, TCG_F_ON_DATA_SLOT, TCG_SRC_MY_FIELD_ATTACHED, 1, 1, "Pure Body: discard which of its Energy?"});
+    case TCG_CHOICE_CHAIN_REACTION:
+        STEPS({TCG_ST_PICK, TCG_F_EVOLVES_FROM_DATA, TCG_SRC_DECK, 0, 1, "Chain Reaction: evolve Eevee into which? (none: B)"});
+    case TCG_CHOICE_ARENA:
+        STEPS({TCG_ST_PICK, TCG_F_ANY, TCG_SRC_HAND, 1, 60, "Championship Arena: discard down to 7 cards."});
     case TCG_CHOICE_SHUFFLE_THEIRS:
         STEPS({TCG_ST_CHOICE, 0, 0, 0, 0, "Have them shuffle their deck?"});
     case TCG_CHOICE_PEEK_ZONE:

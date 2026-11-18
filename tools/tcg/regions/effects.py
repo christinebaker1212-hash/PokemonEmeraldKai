@@ -21,7 +21,7 @@ RULES = {'OWNER', 'DARK', 'LIGHT', 'DARK_ENERGY', 'METAL_ENERGY', 'SPECIAL', 'SU
 for _label, _rule in (('neo1-19', 'METAL'), ('neo1-104', 'DARKNESS'), ('neo1-105', 'RECYCLE'), ('ecard1-158', 'DARKNESS'),
                       ('ecard1-159', 'METAL_LATE'), ('ecard2-142', 'DARKNESS'), ('ecard2-143', 'METAL'),
                       ('ecard2-144', 'RAINBOW'), ('ecard2-145', 'BOOST'), ('ecard2-146', 'CRYSTAL'), ('ecard2-147', 'WARP'),
-                      ('ecard3-142', 'BOUNCE'), ('ecard3-143', 'CYCLONE'), ('ecard3-144', 'RETRO')):
+                      ('ecard3-142', 'BOUNCE'), ('ecard3-143', 'CYCLONE'), ('ecard3-144', 'RETRO'), ('neo4-16', 'MIRACLE')):
     TRAINERS[_label + ':t'] = 'ENERGY_' + _rule
 
 
@@ -37,10 +37,13 @@ ecard2-137 ecard2-141 ecard3-120 ecard3-121 ecard3-122 ecard3-123 ecard3-124 eca
 ecard3-138 np-26 np-27 np-36
 neo1-87 neo1-95 ecard2-123 ecard3-140 ecard3-126 neo3-62 gym2-125 gym2-18
 gym1-107 gym2-114 gym2-122 neo3-61 neo4-95 neo4-99 neo4-100 ecard2-118 ecard2-138 ecard2-139 ecard3-119 ecard3-137
-ecard3-141 neo3-63 gym1-116 ecard2-128 gym2-119 neo1-90 neo1-100 gym2-111 neo4-102 gym1-112'''.split()
+ecard3-141 neo3-63 gym1-116 ecard2-128 gym2-119 neo1-90 neo1-100 gym2-111 neo4-102 gym1-112 neo2-72 neo1-92 neo4-94 np-28'''.split()
 
 
 # Trainers printed again in other words with the same rules: the printing -> the one whose handler plays it
+# Attacks of one card whose play differs from the shared wording's (written here: these win)
+ATTACKS['neo1-38:a0'] = ('SCRIPT', 'c h.par pw.addpast:3,10,9')   # Lanturn's Floodlight with Hydroelectric Power
+ATTACKS['basep-15:a0'] = ('SCRIPT', 'askch:28,1')                  # Cool Porygon's Texture Magic (tcg_choice.inc)
 SAME = {'ecard1-152': 'gym2-126'}   # Warp Point (Expedition: their switch first, then yours; the same choices)
 
 

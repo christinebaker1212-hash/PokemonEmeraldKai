@@ -4587,7 +4587,7 @@ const struct TcgCard gTcgCards[TCG_CARD_COUNT + 1] = {
 {.name="",.description="",.effect="NONE",.animation="ATK_ANIM_NONE",.cost={0},.damage=0,.category=TCG_DAMAGE_NORMAL},
 }
 },
-[732] = {.id=732, .name="Lanturn", .kind=TCG_POKEMON, .type=2, .rarity=1, .set=15, .set2=255, .dark=0, .holo=0, .flags=0, .origin=15,
+[732] = {.id=732, .name="Lanturn", .kind=TCG_POKEMON, .type=2, .rarity=1, .set=15, .set2=255, .dark=0, .holo=0, .flags=TCG_CF_READY, .origin=15,
 .hp=70, .stage=1, .species=171, .level=26, .retreat=2, .weakness=4, .resistance=255, .evolvesFrom="Chinchou", .description="The light it emits is so bright that it can illuminate the sea's surface from a depth of over three miles.", .attacks={
 {.name="Hydroelectric Power",.description="You may make Floodlight do 10 more damage for each Water Energy attached to Lanturn, but not used to pay for Floodlight's Energy cost. This power can't be used if Lanturn is Asleep, Confused, or Paralyzed.",.effect="neo1-38:p",.animation="ATK_ANIM_HIT",.cost={0,0,0,0,0,0,0,0,0},.damage=0,.category=TCG_POKEMON_POWER},
 {.name="Floodlight",.description="Flip a coin. If heads, the Defending Pokemon is now Paralyzed.",.effect="neo1-38:a0",.animation="ATK_ANIM_HIT",.cost={0,0,2,0,0,0,0,0,0},.damage=20,.category=TCG_DAMAGE_NORMAL},
@@ -4929,7 +4929,7 @@ const struct TcgCard gTcgCards[TCG_CARD_COUNT + 1] = {
 [785] = {.id=785, .name="Bill's Teleporter", .kind=TCG_TRAINER, .type=6, .rarity=1, .set=15, .set2=255, .dark=0, .holo=0, .flags=TCG_CF_READY, .origin=15, .canon=435,
 .effect="neo1-91:t",.description="Flip a coin. If heads, draw 4 cards."
 },
-[786] = {.id=786, .name="Card-Flip Game", .kind=TCG_TRAINER, .type=6, .rarity=1, .set=15, .set2=255, .dark=0, .holo=0, .flags=TCG_CF_GAME_CORNER, .origin=15,
+[786] = {.id=786, .name="Card-Flip Game", .kind=TCG_TRAINER, .type=6, .rarity=1, .set=15, .set2=255, .dark=0, .holo=0, .flags=TCG_CF_GAME_CORNER|TCG_CF_READY, .origin=15,
 .effect="neo1-92:t",.description="Choose 1 of your opponent's face-down Prizes. Guess whether it is an Energy card, a Trainer card, or a Pokemon (Basic or Evolution) card. Flip the card face up (and leave it face up). If you guessed right, draw 2 cards."
 },
 [787] = {.id=787, .name="Gold Berry", .kind=TCG_TRAINER, .type=6, .rarity=1, .set=15, .set2=255, .dark=0, .holo=0, .flags=TCG_CF_TOOL|TCG_CF_READY, .origin=15,
@@ -5468,7 +5468,7 @@ const struct TcgCard gTcgCards[TCG_CARD_COUNT + 1] = {
 {.name="",.description="",.effect="NONE",.animation="ATK_ANIM_NONE",.cost={0},.damage=0,.category=TCG_DAMAGE_NORMAL},
 }
 },
-[871] = {.id=871, .name="Fossil Egg", .kind=TCG_TRAINER, .type=6, .rarity=1, .set=16, .set2=255, .dark=0, .holo=0, .flags=0, .origin=16,
+[871] = {.id=871, .name="Fossil Egg", .kind=TCG_TRAINER, .type=6, .rarity=1, .set=16, .set2=255, .dark=0, .holo=0, .flags=TCG_CF_READY, .origin=16,
 .effect="neo2-72:t",.description="Flip a coin. If heads, search your deck for a card that evolves from Mysterious Fossil and put it onto your Bench or put a card that evolves from Mysterious Fossil from your hand onto your Bench. Either way, treat the new card as a Basic Pokemon. If you searched your deck, shuffle it. (You can't play this card if your Bench is full.)"
 },
 [872] = {.id=872, .name="Hyper Devolution Spray", .kind=TCG_TRAINER, .type=6, .rarity=1, .set=16, .set2=255, .dark=0, .holo=0, .flags=TCG_CF_READY, .origin=16,
@@ -5480,7 +5480,7 @@ const struct TcgCard gTcgCards[TCG_CARD_COUNT + 1] = {
 [874] = {.id=874, .name="Energy Ark", .kind=TCG_TRAINER, .type=6, .rarity=0, .set=16, .set2=255, .dark=0, .holo=0, .flags=TCG_CF_READY, .origin=16,
 .effect="neo2-75:t",.description="Flip 2 coins. For each heads, search your deck for a Basic Energy card. Show that card to your opponent, then put it into your hand. Shuffle your deck afterward."
 },
-[875] = {.id=875, .name="Ampharos", .kind=TCG_POKEMON, .type=2, .rarity=2, .set=17, .set2=255, .dark=0, .holo=1, .flags=0, .origin=17,
+[875] = {.id=875, .name="Ampharos", .kind=TCG_POKEMON, .type=2, .rarity=2, .set=17, .set2=255, .dark=0, .holo=1, .flags=TCG_CF_READY, .origin=17,
 .hp=90, .stage=2, .species=181, .level=46, .retreat=3, .weakness=4, .resistance=255, .evolvesFrom="Flaaffy", .description="The bright light on its tail can be seen far away. It has been treasured since ancient times as a beacon.", .attacks={
 {.name="Attract Current",.description="Flip 3 coins. For each heads, you may search your deck for a Lightning Energy card and attach it to 1 of your Lightning Pokemon. Shuffle your deck afterward.",.effect="neo3-1:a0",.animation="ATK_ANIM_HIT",.cost={0,0,1,0,0,0,0,0,0},.damage=20,.category=TCG_DAMAGE_NORMAL},
 {.name="Gigavolt",.description="Flip a coin. If heads, this attack does 40 damage plus 20 more damage. If tails, this attack does 40 damage and the Defending Pokemon is now Paralyzed.",.effect="neo3-1:a1",.animation="ATK_ANIM_HIT",.cost={0,0,3,0,0,0,1,0,0},.damage=40,.category=TCG_DAMAGE_PLUS},
@@ -5557,7 +5557,7 @@ const struct TcgCard gTcgCards[TCG_CARD_COUNT + 1] = {
 {.name="",.description="",.effect="NONE",.animation="ATK_ANIM_NONE",.cost={0},.damage=0,.category=TCG_DAMAGE_NORMAL},
 }
 },
-[886] = {.id=886, .name="Porygon2", .kind=TCG_POKEMON, .type=6, .rarity=2, .set=17, .set2=255, .dark=0, .holo=1, .flags=0, .origin=17,
+[886] = {.id=886, .name="Porygon2", .kind=TCG_POKEMON, .type=6, .rarity=2, .set=17, .set2=255, .dark=0, .holo=1, .flags=TCG_CF_READY, .origin=17,
 .hp=70, .stage=1, .species=233, .level=33, .retreat=1, .weakness=4, .resistance=5, .evolvesFrom="Porygon", .description="This upgraded version of Porygon is designed for space exploration. It can't fly, though.", .attacks={
 {.name="Energy Converter",.description="Once during your turn (before your attack), you may choose 1 basic Energy card attached to 1 of your Pokemon and choose an Energy type. Treat that Energy card as that type until the end of your turn. This power can't be used if Porygon2 is Asleep, Confused, or Paralyzed. If Porygon2 becomes Asleep, Confused, or Paralyzed, the Energy card goes back to its original type.",.effect="neo3-12:p",.animation="ATK_ANIM_HIT",.cost={0,0,0,0,0,0,0,0,0},.damage=0,.category=TCG_POKEMON_POWER},
 {.name="Delta Beam",.description="Flip a coin. If heads, choose whether the Defending Pokemon becomes Asleep, Confused, or Paralyzed.",.effect="neo3-12:a0",.animation="ATK_ANIM_HIT",.cost={0,0,0,0,0,0,3,0,0},.damage=20,.category=TCG_DAMAGE_NORMAL},
@@ -5971,7 +5971,7 @@ const struct TcgCard gTcgCards[TCG_CARD_COUNT + 1] = {
 {.name="",.description="",.effect="NONE",.animation="ATK_ANIM_NONE",.cost={0},.damage=0,.category=TCG_DAMAGE_NORMAL},
 }
 },
-[948] = {.id=948, .name="Dark Porygon2", .kind=TCG_POKEMON, .type=6, .rarity=2, .set=18, .set2=255, .dark=1, .holo=1, .flags=0, .origin=18,
+[948] = {.id=948, .name="Dark Porygon2", .kind=TCG_POKEMON, .type=6, .rarity=2, .set=18, .set2=255, .dark=1, .holo=1, .flags=TCG_CF_READY, .origin=18,
 .hp=60, .stage=1, .species=233, .level=34, .retreat=1, .weakness=4, .resistance=5, .evolvesFrom="Porygon", .description="Advances in technology have allowed it to evolve. It occasionally displays behavior not found in its programming.", .attacks={
 {.name="Spatial Distortion",.description="Once during your turn (before your attack), you may flip a coin. If heads, choose a Stadium card from your discard pile and put it into play. (If there's already a Stadium card in play, discard it.) This power can't be used if Dark Porygon2 is Asleep, Confused, or Paralyzed.",.effect="neo4-8:p",.animation="ATK_ANIM_HIT",.cost={0,0,0,0,0,0,0,0,0},.damage=0,.category=TCG_POKEMON_POWER},
 {.name="Curve Attack",.description="Flip a coin. If heads, prevent all damage done by attacks to Dark Porygon2 during your opponent's next turn. (Any other effects of attacks still happen.)",.effect="neo4-8:a0",.animation="ATK_ANIM_HIT",.cost={0,0,0,0,0,0,3,0,0},.damage=20,.category=TCG_DAMAGE_NORMAL},
@@ -6013,7 +6013,7 @@ const struct TcgCard gTcgCards[TCG_CARD_COUNT + 1] = {
 {.name="",.description="",.effect="NONE",.animation="ATK_ANIM_NONE",.cost={0},.damage=0,.category=TCG_DAMAGE_NORMAL},
 }
 },
-[954] = {.id=954, .name="Light Dragonite", .kind=TCG_POKEMON, .type=6, .rarity=2, .set=18, .set2=255, .dark=0, .holo=1, .flags=TCG_CF_LIGHT, .origin=18,
+[954] = {.id=954, .name="Light Dragonite", .kind=TCG_POKEMON, .type=6, .rarity=2, .set=18, .set2=255, .dark=0, .holo=1, .flags=TCG_CF_LIGHT|TCG_CF_READY, .origin=18,
 .hp=100, .stage=2, .species=149, .level=47, .retreat=2, .weakness=255, .resistance=4, .evolvesFrom="Light Dragonair", .description="It is said to fly constantly over the sea, looking for people in need of aid.", .attacks={
 {.name="Miraculous Wind",.description="As long as Light Dragonite is your Active Pokemon, each Special Energy card provides Colorless Energy instead of its usual type and its other effects stop working. This power stops working while Light Dragonite is Asleep, Confused, or Paralyzed.",.effect="neo4-14:p",.animation="ATK_ANIM_HIT",.cost={0,0,0,0,0,0,0,0,0},.damage=0,.category=TCG_POKEMON_POWER},
 {.name="Light Wave",.description="Prevent all effects of attacks, other than damage, done to Light Dragonite during your opponent's next turn.",.effect="neo4-14:a0",.animation="ATK_ANIM_HIT",.cost={0,0,0,0,0,0,3,0,0},.damage=40,.category=TCG_DAMAGE_NORMAL},
@@ -6027,7 +6027,7 @@ const struct TcgCard gTcgCards[TCG_CARD_COUNT + 1] = {
 {.name="",.description="",.effect="NONE",.animation="ATK_ANIM_NONE",.cost={0},.damage=0,.category=TCG_DAMAGE_NORMAL},
 }
 },
-[956] = {.id=956, .name="Miracle Energy", .kind=TCG_ENERGY, .type=6, .rarity=2, .set=18, .set2=255, .dark=0, .holo=1, .flags=TCG_CF_SPECIAL, .origin=18,
+[956] = {.id=956, .name="Miracle Energy", .kind=TCG_ENERGY, .type=6, .rarity=2, .set=18, .set2=255, .dark=0, .holo=1, .flags=TCG_CF_SPECIAL|TCG_CF_READY, .origin=18,
 .effect="neo4-16:t",.description="You can't have more than 1 Miracle Energy in your deck. Attach Miracle Energy to 1 of your Shining or Light Pokemon. At the end of your turn, discard Miracle Energy. While in play, Miracle Energy counts as every type of Energy but provides only 2 Energy at a time."
 },
 [957] = {.id=957, .name="Dark Ariados", .kind=TCG_POKEMON, .type=1, .rarity=2, .set=18, .set2=255, .dark=1, .holo=0, .flags=TCG_CF_READY, .origin=18,
@@ -6561,7 +6561,7 @@ const struct TcgCard gTcgCards[TCG_CARD_COUNT + 1] = {
 [1033] = {.id=1033, .name="EXP.ALL", .kind=TCG_TRAINER, .type=6, .rarity=2, .set=18, .set2=255, .dark=0, .holo=0, .flags=TCG_CF_TOOL, .origin=18,
 .effect="neo4-93:t",.description="Attach EXP.ALL to 1 of your Pokemon that doesn't have a Pokemon Tool attached to it. During your opponent's turn, if your Active Pokemon would be Knocked Out by your opponent's attack, you may take 1 of the basic Energy cards attached to your Active Pokemon and attach it to the Pokemon with EXP.ALL attached to it. If you do, discard EXP.ALL."
 },
-[1034] = {.id=1034, .name="Impostor Professor Oak's Invention", .kind=TCG_TRAINER, .type=6, .rarity=2, .set=18, .set2=255, .dark=0, .holo=0, .flags=0, .origin=18,
+[1034] = {.id=1034, .name="Impostor Professor Oak's Invention", .kind=TCG_TRAINER, .type=6, .rarity=2, .set=18, .set2=255, .dark=0, .holo=0, .flags=TCG_CF_READY, .origin=18,
 .effect="neo4-94:t",.description="Look at your opponent's Prize cards. You may have your opponent shuffle them into his or her deck. If you do, your opponent takes that many cards from the top of his or her deck and sets them aside as his or her new Prize cards (without looking at them)."
 },
 [1035] = {.id=1035, .name="Radio Tower", .kind=TCG_TRAINER, .type=6, .rarity=2, .set=18, .set2=255, .dark=0, .holo=0, .flags=TCG_CF_STADIUM|TCG_CF_READY, .origin=18,
@@ -7819,7 +7819,7 @@ const struct TcgCard gTcgCards[TCG_CARD_COUNT + 1] = {
 {.name="",.description="",.effect="NONE",.animation="ATK_ANIM_NONE",.cost={0},.damage=0,.category=TCG_DAMAGE_NORMAL},
 }
 },
-[1233] = {.id=1233, .name="Lanturn", .kind=TCG_POKEMON, .type=2, .rarity=2, .set=20, .set2=255, .dark=0, .holo=0, .flags=0, .origin=20,
+[1233] = {.id=1233, .name="Lanturn", .kind=TCG_POKEMON, .type=2, .rarity=2, .set=20, .set2=255, .dark=0, .holo=0, .flags=TCG_CF_READY, .origin=20,
 .hp=80, .stage=1, .species=171, .level=0, .retreat=1, .weakness=4, .resistance=255, .evolvesFrom="Chinchou", .description="", .attacks={
 {.name="Ion Coating",.description="You may use this power once during each of your turns (before your attack). All Lightning Energy attached to your Active Pokemon becomes Water Energy for the rest of the turn. (This effect ends if your Active Pokemon retreats or is returned to your hand.) This power can't be used if Lanturn is affected by a Special Condition.",.effect="ecard2-21:p",.animation="ATK_ANIM_HIT",.cost={0,0,0,0,0,0,0,0,0},.damage=0,.category=TCG_POKEMON_POWER},
 {.name="Electric Tackle",.description="This attack does 20 damage plus 10 damage for each Lightning Energy attached to Lanturn. Flip a coin. If tails, Lanturn does 10 damage to itself for each Lightning Energy attached to it.",.effect="ecard2-21:a0",.animation="ATK_ANIM_HIT",.cost={0,0,0,0,0,0,2,0,0},.damage=20,.category=TCG_DAMAGE_PLUS},
@@ -8008,7 +8008,7 @@ const struct TcgCard gTcgCards[TCG_CARD_COUNT + 1] = {
 {.name="",.description="",.effect="NONE",.animation="ATK_ANIM_NONE",.cost={0},.damage=0,.category=TCG_DAMAGE_NORMAL},
 }
 },
-[1260] = {.id=1260, .name="Furret", .kind=TCG_POKEMON, .type=6, .rarity=1, .set=20, .set2=255, .dark=0, .holo=0, .flags=0, .origin=20,
+[1260] = {.id=1260, .name="Furret", .kind=TCG_POKEMON, .type=6, .rarity=1, .set=20, .set2=255, .dark=0, .holo=0, .flags=TCG_CF_READY, .origin=20,
 .hp=70, .stage=1, .species=162, .level=0, .retreat=1, .weakness=4, .resistance=255, .evolvesFrom="Sentret", .description="", .attacks={
 {.name="Scavenger Hunt",.description="Once during your turn (before your attack), you may put 2 cards from your hand into your deck. Then, search your deck for an Energy card, show it to your opponent, and put it into your hand. Shuffle your deck afterward. This power can't be used if Furret is affected by a Special Condition.",.effect="ecard2-48:p",.animation="ATK_ANIM_HIT",.cost={0,0,0,0,0,0,0,0,0},.damage=0,.category=TCG_POKEMON_POWER},
 {.name="Spinning Attack",.description="",.effect="NONE",.animation="ATK_ANIM_HIT",.cost={0,0,0,0,0,0,2,0,0},.damage=30,.category=TCG_DAMAGE_NORMAL},
@@ -8747,7 +8747,7 @@ const struct TcgCard gTcgCards[TCG_CARD_COUNT + 1] = {
 {.name="",.description="",.effect="NONE",.animation="ATK_ANIM_NONE",.cost={0},.damage=0,.category=TCG_DAMAGE_NORMAL},
 }
 },
-[1377] = {.id=1377, .name="Lanturn", .kind=TCG_POKEMON, .type=2, .rarity=2, .set=20, .set2=255, .dark=0, .holo=1, .flags=0, .origin=20,
+[1377] = {.id=1377, .name="Lanturn", .kind=TCG_POKEMON, .type=2, .rarity=2, .set=20, .set2=255, .dark=0, .holo=1, .flags=TCG_CF_READY, .origin=20,
 .hp=80, .stage=1, .species=171, .level=0, .retreat=1, .weakness=4, .resistance=255, .evolvesFrom="Chinchou", .description="", .attacks={
 {.name="Ion Coating",.description="You may use this power once during each of your turns (before your attack). All Lightning Energy attached to your Active Pokemon becomes Water Energy for the rest of the turn. (This effect ends if your Active Pokemon retreats or is returned to your hand.) This power can't be used if Lanturn is affected by a Special Condition.",.effect="ecard2-H15:p",.animation="ATK_ANIM_HIT",.cost={0,0,0,0,0,0,0,0,0},.damage=0,.category=TCG_POKEMON_POWER},
 {.name="Electric Tackle",.description="This attack does 20 damage plus 10 damage for each Lightning Energy attached to Lanturn. Flip a coin. If tails, Lanturn does 10 damage to itself for each Lightning Energy attached to it.",.effect="ecard2-H15:a0",.animation="ATK_ANIM_HIT",.cost={0,0,0,0,0,0,2,0,0},.damage=20,.category=TCG_DAMAGE_PLUS},
@@ -8999,7 +8999,7 @@ const struct TcgCard gTcgCards[TCG_CARD_COUNT + 1] = {
 {.name="",.description="",.effect="NONE",.animation="ATK_ANIM_NONE",.cost={0},.damage=0,.category=TCG_DAMAGE_NORMAL},
 }
 },
-[1413] = {.id=1413, .name="Magneton", .kind=TCG_POKEMON, .type=2, .rarity=2, .set=21, .set2=255, .dark=0, .holo=0, .flags=0, .origin=21,
+[1413] = {.id=1413, .name="Magneton", .kind=TCG_POKEMON, .type=2, .rarity=2, .set=21, .set2=255, .dark=0, .holo=0, .flags=TCG_CF_READY, .origin=21,
 .hp=80, .stage=1, .species=82, .level=0, .retreat=1, .weakness=4, .resistance=255, .evolvesFrom="Magnemite", .description="", .attacks={
 {.name="Attract Energy",.description="When you play Magneton from your hand to evolve 1 of your Pokemon, you may move any number of basic Energy cards attached to your other Pokemon to Magneton.",.effect="ecard3-19:p",.animation="ATK_ANIM_HIT",.cost={0,0,0,0,0,0,0,0,0},.damage=0,.category=TCG_POKEMON_POWER},
 {.name="Electric Blast",.description="You may discard all Lightning Energy cards attached to Magneton when you use this attack. If you do, put damage counters equal to the amount of Energy cards removed in this way on any number of your opponent's Benched Pokemon in the way you like. (For example, if you discard 3 Lightning Energy cards, you can put 1 damage counter on 1 of your opponent's Benched Pokemon and 2 on another.)",.effect="ecard3-19:a0",.animation="ATK_ANIM_HIT",.cost={0,0,1,0,0,0,2,0,0},.damage=40,.category=TCG_DAMAGE_NORMAL},
@@ -9041,7 +9041,7 @@ const struct TcgCard gTcgCards[TCG_CARD_COUNT + 1] = {
 {.name="",.description="",.effect="NONE",.animation="ATK_ANIM_NONE",.cost={0},.damage=0,.category=TCG_DAMAGE_NORMAL},
 }
 },
-[1419] = {.id=1419, .name="Politoed", .kind=TCG_POKEMON, .type=3, .rarity=2, .set=21, .set2=255, .dark=0, .holo=0, .flags=0, .origin=21,
+[1419] = {.id=1419, .name="Politoed", .kind=TCG_POKEMON, .type=3, .rarity=2, .set=21, .set2=255, .dark=0, .holo=0, .flags=TCG_CF_READY, .origin=21,
 .hp=110, .stage=2, .species=186, .level=0, .retreat=2, .weakness=2, .resistance=255, .evolvesFrom="Poliwhirl", .description="", .attacks={
 {.name="Sudden Growth",.description="Attach any number of basic Energy cards from your hand to Politoed.",.effect="ecard3-25:a0",.animation="ATK_ANIM_HIT",.cost={0,0,0,0,0,0,1,0,0},.damage=0,.category=TCG_RESIDUAL},
 {.name="Frog Hop",.description="Flip a coin. If heads, this attack does 30 damage plus 20 more damage.",.effect="ecard3-25:a1",.animation="ATK_ANIM_HIT",.cost={0,0,0,1,0,0,2,0,0},.damage=30,.category=TCG_DAMAGE_PLUS},
@@ -9973,7 +9973,7 @@ const struct TcgCard gTcgCards[TCG_CARD_COUNT + 1] = {
 {.name="",.description="",.effect="NONE",.animation="ATK_ANIM_NONE",.cost={0},.damage=0,.category=TCG_DAMAGE_NORMAL},
 }
 },
-[1562] = {.id=1562, .name="Magneton", .kind=TCG_POKEMON, .type=2, .rarity=2, .set=21, .set2=255, .dark=0, .holo=1, .flags=0, .origin=21,
+[1562] = {.id=1562, .name="Magneton", .kind=TCG_POKEMON, .type=2, .rarity=2, .set=21, .set2=255, .dark=0, .holo=1, .flags=TCG_CF_READY, .origin=21,
 .hp=80, .stage=1, .species=82, .level=0, .retreat=1, .weakness=4, .resistance=255, .evolvesFrom="Magnemite", .description="", .attacks={
 {.name="Attract Energy",.description="When you play Magneton from your hand to evolve 1 of your Pokemon, you may move any number of basic Energy cards attached to your other Pokemon to Magneton.",.effect="ecard3-H18:p",.animation="ATK_ANIM_HIT",.cost={0,0,0,0,0,0,0,0,0},.damage=0,.category=TCG_POKEMON_POWER},
 {.name="Electric Blast",.description="You may discard all Lightning Energy cards attached to Magneton when you use this attack. If you do, put damage counters equal to the amount of Energy cards removed in this way on any number of your opponent's Benched Pokemon in the way you like. (For example, if you discard 3 Lightning Energy cards, you can put 1 damage counter on 1 of your opponent's Benched Pokemon and 2 on another.)",.effect="ecard3-H18:a0",.animation="ATK_ANIM_HIT",.cost={0,0,1,0,0,0,2,0,0},.damage=40,.category=TCG_DAMAGE_NORMAL},
@@ -10008,7 +10008,7 @@ const struct TcgCard gTcgCards[TCG_CARD_COUNT + 1] = {
 {.name="",.description="",.effect="NONE",.animation="ATK_ANIM_NONE",.cost={0},.damage=0,.category=TCG_DAMAGE_NORMAL},
 }
 },
-[1567] = {.id=1567, .name="Politoed", .kind=TCG_POKEMON, .type=3, .rarity=2, .set=21, .set2=255, .dark=0, .holo=1, .flags=0, .origin=21,
+[1567] = {.id=1567, .name="Politoed", .kind=TCG_POKEMON, .type=3, .rarity=2, .set=21, .set2=255, .dark=0, .holo=1, .flags=TCG_CF_READY, .origin=21,
 .hp=110, .stage=2, .species=186, .level=0, .retreat=2, .weakness=2, .resistance=255, .evolvesFrom="Poliwhirl", .description="", .attacks={
 {.name="Sudden Growth",.description="Attach any number of basic Energy cards from your hand to Politoed.",.effect="ecard3-H23:a0",.animation="ATK_ANIM_HIT",.cost={0,0,0,0,0,0,1,0,0},.damage=0,.category=TCG_RESIDUAL},
 {.name="Frog Hop",.description="Flip a coin. If heads, this attack does 30 damage plus 20 more damage.",.effect="ecard3-H23:a1",.animation="ATK_ANIM_HIT",.cost={0,0,0,1,0,0,2,0,0},.damage=30,.category=TCG_DAMAGE_PLUS},
@@ -10148,14 +10148,14 @@ const struct TcgCard gTcgCards[TCG_CARD_COUNT + 1] = {
 {.name="",.description="",.effect="NONE",.animation="ATK_ANIM_NONE",.cost={0},.damage=0,.category=TCG_DAMAGE_NORMAL},
 }
 },
-[1587] = {.id=1587, .name="Eevee", .kind=TCG_POKEMON, .type=6, .rarity=3, .set=4, .set2=255, .dark=0, .holo=0, .flags=0, .origin=22,
+[1587] = {.id=1587, .name="Eevee", .kind=TCG_POKEMON, .type=6, .rarity=3, .set=4, .set2=255, .dark=0, .holo=0, .flags=TCG_CF_READY, .origin=22,
 .hp=30, .stage=0, .species=133, .level=7, .retreat=0, .weakness=4, .resistance=5, .evolvesFrom="", .description="Its genetic code is irregular. It may mutate if it is exposed to radiation from elemental stones.", .attacks={
 {.name="Chain Reaction",.description="This power can only be used when a Pokemon evolves. Search your deck for a card that evolves from Eevee and attach it to Eevee. This counts as evolving Eevee. Shuffle your deck afterward. This power can't be used if Eevee is Asleep, Confused, or Paralyzed.",.effect="basep-11:p",.animation="ATK_ANIM_HIT",.cost={0,0,0,0,0,0,0,0,0},.damage=0,.category=TCG_POKEMON_POWER},
 {.name="Bite",.description="",.effect="NONE",.animation="ATK_ANIM_HIT",.cost={0,0,0,0,0,0,1,0,0},.damage=20,.category=TCG_DAMAGE_NORMAL},
 {.name="",.description="",.effect="NONE",.animation="ATK_ANIM_NONE",.cost={0},.damage=0,.category=TCG_DAMAGE_NORMAL},
 }
 },
-[1588] = {.id=1588, .name="Mewtwo", .kind=TCG_POKEMON, .type=5, .rarity=3, .set=4, .set2=255, .dark=0, .holo=0, .flags=0, .origin=22,
+[1588] = {.id=1588, .name="Mewtwo", .kind=TCG_POKEMON, .type=5, .rarity=3, .set=4, .set2=255, .dark=0, .holo=0, .flags=TCG_CF_READY, .origin=22,
 .hp=60, .stage=0, .species=150, .level=13, .retreat=2, .weakness=5, .resistance=255, .evolvesFrom="", .description="A scientist created this Pokemon after years of horrific gene-splicing and DNA engineering experiments.", .attacks={
 {.name="Energy Control",.description="Flip a coin. If heads, choose a basic Energy card attached to 1 of your opponent's Pokemon and attach it to another of your opponent's Pokemon of your choice.",.effect="basep-12:a0",.animation="ATK_ANIM_HIT",.cost={0,0,0,0,0,1,0,0,0},.damage=0,.category=TCG_RESIDUAL},
 {.name="Telekinesis",.description="Choose 1 of your opponent's Pokemon. This attack does 30 damage to that Pokemon. Don't apply Weakness and Resistance for this attack. (Any other effects that would happen after applying Weakness and Resistance still happen.)",.effect="basep-12:a1",.animation="ATK_ANIM_HIT",.cost={0,0,0,0,0,3,0,0,0},.damage=0,.category=TCG_RESIDUAL},
@@ -10176,7 +10176,7 @@ const struct TcgCard gTcgCards[TCG_CARD_COUNT + 1] = {
 {.name="",.description="",.effect="NONE",.animation="ATK_ANIM_NONE",.cost={0},.damage=0,.category=TCG_DAMAGE_NORMAL},
 }
 },
-[1591] = {.id=1591, .name="Cool Porygon", .kind=TCG_POKEMON, .type=6, .rarity=3, .set=4, .set2=255, .dark=0, .holo=0, .flags=0, .origin=22,
+[1591] = {.id=1591, .name="Cool Porygon", .kind=TCG_POKEMON, .type=6, .rarity=3, .set=4, .set2=255, .dark=0, .holo=0, .flags=TCG_CF_READY, .origin=22,
 .hp=50, .stage=0, .species=137, .level=15, .retreat=1, .weakness=4, .resistance=5, .evolvesFrom="", .description="A Pokemon that consists entirely of programming code. Capable of moving freely in cyberspace.", .attacks={
 {.name="Texture Magic",.description="You may change Cool Porygon's Resistance to a type of your choice other than Colorless. If the Defending Pokemon has a Weakness, you may change it to a type of your choice other than Colorless. (Benching either Pokemon ends the effect on that Pokemon.)",.effect="basep-15:a0",.animation="ATK_ANIM_HIT",.cost={0,0,0,0,0,0,3,0,0},.damage=0,.category=TCG_RESIDUAL},
 {.name="3-D Attack",.description="Flip 3 coins. This attack does 20 damage times the number of heads.",.effect="basep-15:a1",.animation="ATK_ANIM_HIT",.cost={0,0,0,0,0,0,3,0,0},.damage=20,.category=TCG_DAMAGE_X},
@@ -10614,7 +10614,7 @@ const struct TcgCard gTcgCards[TCG_CARD_COUNT + 1] = {
 [1656] = {.id=1656, .name="Tropical Tidal Wave", .kind=TCG_TRAINER, .type=6, .rarity=3, .set=4, .set2=255, .dark=0, .holo=0, .flags=TCG_CF_READY, .origin=23,
 .effect="np-27:t",.description="Flip a coin. If heads, discard all Trainer cards your opponent has in play. If tails, discard all Trainer (excluding Supporter cards) you have in play."
 },
-[1657] = {.id=1657, .name="Championship Arena", .kind=TCG_TRAINER, .type=6, .rarity=3, .set=4, .set2=255, .dark=0, .holo=0, .flags=TCG_CF_STADIUM, .origin=23,
+[1657] = {.id=1657, .name="Championship Arena", .kind=TCG_TRAINER, .type=6, .rarity=3, .set=4, .set2=255, .dark=0, .holo=0, .flags=TCG_CF_STADIUM|TCG_CF_READY, .origin=23,
 .effect="np-28:t",.description="This card stays in play when you play it. Discard this card if another Stadium card comes into play. If another card with the same name is in play, you can't play this card. At the end of each player's turn, if that player has 8 or more cards in his or her hand, that player discards a number of cards until that player has 7 cards left in his or her hand."
 },
 [1658] = {.id=1658, .name="Celebi", .kind=TCG_POKEMON, .type=1, .rarity=3, .set=4, .set2=255, .dark=0, .holo=0, .flags=TCG_CF_READY, .origin=23,
@@ -10624,7 +10624,7 @@ const struct TcgCard gTcgCards[TCG_CARD_COUNT + 1] = {
 {.name="",.description="",.effect="NONE",.animation="ATK_ANIM_NONE",.cost={0},.damage=0,.category=TCG_DAMAGE_NORMAL},
 }
 },
-[1659] = {.id=1659, .name="Suicune", .kind=TCG_POKEMON, .type=3, .rarity=3, .set=4, .set2=255, .dark=0, .holo=0, .flags=TCG_CF_BODY, .origin=23,
+[1659] = {.id=1659, .name="Suicune", .kind=TCG_POKEMON, .type=3, .rarity=3, .set=4, .set2=255, .dark=0, .holo=0, .flags=TCG_CF_BODY|TCG_CF_READY, .origin=23,
 .hp=70, .stage=0, .species=245, .level=0, .retreat=1, .weakness=2, .resistance=255, .evolvesFrom="", .description="", .attacks={
 {.name="Pure Body",.description="Whenever you attach a Water Energy card from your hand to Suicune, discard an Energy card attached to Suicune. (You can't attach a Water Energy card from your hand if Suicune has no Energy cards attached.)",.effect="np-30:p",.animation="ATK_ANIM_HIT",.cost={0,0,0,0,0,0,0,0,0},.damage=0,.category=TCG_POKEMON_POWER},
 {.name="Hypno Wave",.description="Flip a coin. If heads, this attack does 30 damage plus 20 more damage. If tails, this attack does 30 damage and the Defending Pokemon is now Asleep.",.effect="np-30:a0",.animation="ATK_ANIM_HIT",.cost={0,0,0,1,0,0,2,0,0},.damage=30,.category=TCG_DAMAGE_PLUS},
@@ -10690,7 +10690,7 @@ const struct TcgCard gTcgCards[TCG_CARD_COUNT + 1] = {
 {.name="Twister",.description="Flip 2 coins. If both are tails, this attack does nothing. For each heads, discard an Energy attached to the Defending Pokemon.",.effect="np-39:a1",.animation="ATK_ANIM_HIT",.cost={1,0,1,0,0,0,1,0,0},.damage=50,.category=TCG_DAMAGE_NORMAL},
 }
 },
-[1669] = {.id=1669, .name="Mew", .kind=TCG_POKEMON, .type=5, .rarity=3, .set=4, .set2=255, .dark=0, .holo=0, .flags=0, .origin=23,
+[1669] = {.id=1669, .name="Mew", .kind=TCG_POKEMON, .type=5, .rarity=3, .set=4, .set2=255, .dark=0, .holo=0, .flags=TCG_CF_READY, .origin=23,
 .hp=50, .stage=0, .species=151, .level=0, .retreat=1, .weakness=5, .resistance=255, .evolvesFrom="", .description="", .attacks={
 {.name="Psywave",.description="Does 10 damage times the amount of Energy attached to the Defending Pokemon.",.effect="np-40:a0",.animation="ATK_ANIM_HIT",.cost={0,0,0,0,0,0,1,0,0},.damage=10,.category=TCG_DAMAGE_X},
 {.name="Devolution Beam",.description="Flip a coin. If heads, choose 1 of either player's Evolved Pokemon, remove the highest stage Evolution card from that Pokemon, and put it into that player's hand.",.effect="np-40:a1",.animation="ATK_ANIM_HIT",.cost={0,0,0,0,0,1,0,0,0},.damage=0,.category=TCG_RESIDUAL},

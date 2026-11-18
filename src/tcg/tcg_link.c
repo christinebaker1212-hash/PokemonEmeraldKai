@@ -102,6 +102,7 @@ uint32_t TcgLink_Hash(const struct TcgDuel *g)
         H(p->supporterCard);
         H(p->stadium);
         H(p->turnBuffs);
+        H(p->convCard | p->convType << 8);
         H(p->stadiumUsed);
         H(p->benchShieldUntil);
         H(p->turnsTaken);

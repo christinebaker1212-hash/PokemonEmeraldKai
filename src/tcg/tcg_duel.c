@@ -37,10 +37,23 @@ void TcgDuel_Event(struct TcgDuel *g, unsigned type, unsigned player, unsigned s
         {
             g->players[player].field[slot].hpSet = g->players[player].field[slot].guardKeep = 0;
             g->players[player].field[slot].lockOnUntil = 0;
+            g->players[player].turnBuffs &= (uint8_t)~TCG_BUFF_ION;   /* (Ion Coating ends with that Active) */
             TcgPower_ToBench(g, player, slot); /* (Magma Pool) */
         }
         if (player == g->current && g->phase != TCG_SETUP)
             TcgPower_NewActive(g, player); /* (Spikes) */
+    }
+    if (type == TCG_EV_EVOLVE && player < 2 && player == g->current && g->phase == TCG_TURN)
+    {
+        /* Eevee's Chain Reaction: when a Pokemon evolves, a card from the deck that evolves from Eevee onto it */
+        unsigned s;
+        for (s = 0; s < TCG_FIELD_SIZE; s++)
+            if (s != slot && TcgPower_Working(g, player, s) == TCG_POWER_R_CHAIN_REACTION)
+            {
+                g->choiceData = (uint8_t)s;
+                TcgDuel_AskChoice(g, player, TCG_CHOICE_CHAIN_REACTION, TcgDuel_Field(g, player, s)->id, 1);
+                break;
+            }
     }
 }
 const struct TcgEvent *TcgDuel_GetEvent(const struct TcgDuel *g, uint32_t seq)
@@ -204,6 +217,13 @@ unsigned TcgDuel_Energy(const struct TcgDuel *g, unsigned player, unsigned slot,
         /* (Charizard's Energy Burn: all of it is Fire Energy this turn; the regional bodies: Dark Aura...) */
         unsigned amount = c->kind == TCG_ENERGY ? Tcg_EnergyProvides(c->id) : 0;
         unsigned kind = f->burn ? TCG_FIRE : TcgPower_EnergyType(g, player, slot, c->type, &amount);
+        if (c->kind == TCG_ENERGY && c->id > 6 && TcgPower_WindBlows(g))
+            kind = TCG_COLORLESS;   /* (Miraculous Wind) */
+        else if (c->kind == TCG_ENERGY && p->convCard == f->attached[i] + 1 && player == g->current &&
+                 TcgPower_InPlay(g, player, TCG_POWER_R_ENERGY_CONVERTER))
+            kind = p->convType;     /* (Energy Converter, while a Porygon2's power still works) */
+        else if (kind == TCG_LIGHTNING && !slot && player == g->current && (p->turnBuffs & TCG_BUFF_ION))
+            kind = TCG_WATER;       /* (Ion Coating) */
         if (c->kind == TCG_ENERGY && (type == TCG_NONE || type == kind))
             n += amount;
     }
@@ -422,10 +442,11 @@ static int EnergyPaidFor(const struct TcgDuel *g, unsigned player, const struct 
     unsigned t, total = 0, typed = 0, from = EnergySlot(g, player), rainbow = 0, short_ = 0, i, crystal = 0, shortBare = 0;
     const struct TcgFieldCard *f = &g->players[player].field[from];
     /* (Rainbow Energy: any one type each; Crystal Energy: one of the types of the basic Energy cards on it) */
-    for (i = 0; i < f->attachedSize; i++)
+    for (i = 0; i < f->attachedSize && !TcgPower_WindBlows(g); i++)
     {
-        rainbow += Tcg_EnergyRule(g->players[player].cards[f->attached[i]]) == TCG_ER_RAINBOW;
-        crystal += Tcg_EnergyRule(g->players[player].cards[f->attached[i]]) == TCG_ER_CRYSTAL;
+        unsigned rule = Tcg_EnergyRule(g->players[player].cards[f->attached[i]]);
+        rainbow += rule == TCG_ER_RAINBOW ? 1 : rule == TCG_ER_MIRACLE ? 2 : 0;   /* (Miracle Energy: every type, 2) */
+        crystal += rule == TCG_ER_CRYSTAL;
     }
     if (!a || !a->name[0] || a->category == TCG_POKEMON_POWER)
         return 0;
@@ -744,6 +765,9 @@ unsigned TcgDuel_AttachedRule(const struct TcgDuel *g, unsigned who, unsigned sl
         const struct TcgCard *c = Tcg_Card(p->cards[f->attached[i]]);
         n += c && c->kind == TCG_ENERGY && Tcg_EnergyRule(c->id) == rule;
     }
+    /* (Miraculous Wind: Special Energy only provides; Double Colorless's two is what it provides) */
+    if (n && rule != TCG_ER_BASIC && rule != TCG_ER_DOUBLE_COLORLESS && TcgPower_WindBlows(g))
+        return 0;
     return n;
 }
 int TcgDuel_EvolvesFrom(const struct TcgCard *evolution, const struct TcgCard *from)
@@ -773,6 +797,16 @@ static void EndTurn(struct TcgDuel *g)
 {
     unsigned who, s;
     struct TcgPlayer *p = &g->players[g->current];
+    if (g->phase == TCG_TURN && p->handSize > 7 && TcgDuel_Stadium(g, NULL) == TCG_CARD_NP_28)
+    {
+        /* Championship Arena: down to 7 in the hand first, the player's pick; then the turn ends (TcgDuel_Apply) */
+        TcgDuel_AskChoice(g, g->current, TCG_CHOICE_ARENA, TCG_CARD_NP_28, 1);
+        if (g->phase == TCG_CHOICE)
+        {
+            g->choiceEndTurn = 1;
+            return;
+        }
+    }
     if (p->field[0].stackSize && p->field[0].condition == TCG_PARALYZED)
     {
         p->field[0].condition = TCG_HEALTHY;
@@ -808,6 +842,7 @@ static void EndTurn(struct TcgDuel *g)
     }
     p->noTrainers = p->noSupporters = 0;
     p->turnBuffs = p->stadiumUsed = 0;
+    p->convCard = 0;   /* (Energy Converter: until the end of the turn) */
     /* (the turn's Supporter goes to the discard pile as the turn ends) */
     if (p->supporterCard)
     {
@@ -1613,13 +1648,16 @@ static int Apply(struct TcgDuel *g, const struct TcgAction *a)
             if (k == f->attachedSize)
                 return Error(g, "Bounce Energy goes only on a Pokemon with a basic Energy card.");
         }
+        if (Tcg_EnergyRule(c->id) == TCG_ER_MIRACLE &&
+            !(TcgDuel_Field(g, g->current, s)->flags & (TCG_CF_SHINING | TCG_CF_LIGHT)))
+            return Error(g, "Miracle Energy goes only on a Shining or Light Pokemon.");
         if (TcgPower_AttachBlock(g, g->current, s, c->id))
             return Error(g, "That Energy can't be attached to this Pokemon (its power).");
         if (!s && p->noAttachActive >= g->turn)
             return Error(g, "No Energy can be attached to your Active Pokemon this turn.");
         /* (Boost Energy: discarded at the end of the turn) */
-        if (Tcg_EnergyRule(c->id) == TCG_ER_BOOST)
-            p->attachmentExpires[p->hand[a->hand]] = g->turn;
+        if (Tcg_EnergyRule(c->id) == TCG_ER_BOOST || Tcg_EnergyRule(c->id) == TCG_ER_MIRACLE)
+            p->attachmentExpires[p->hand[a->hand]] = g->turn;   /* (Miracle Energy too) */
         f->attached[f->attachedSize++] = TcgPile_Remove(p->hand, &p->handSize, a->hand);
         /* (2: the first went to the Active Pokemon, Harvest Bounty may add one; 3: it did) */
         p->energyPlayed = p->energyPlayed ? 3 : s ? 1 : 2;

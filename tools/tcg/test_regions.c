@@ -1026,6 +1026,238 @@ static int Peeks(void)
     printf("PASS peeks: [Observe], Investigate's choice, Lt. Surge's Treaty, Lightning Rod, Sweet Scent\n");
     return 0;
 }
+/* Energy Control, Energy Splash, Electric Blast, Attract Current: choices asked again and again */
+static int MoreChoices(void)
+{
+    struct TcgDuel g;
+    struct TcgAction a;
+    unsigned seed, k, n;
+    if (!Tcg_Card(TCG_CARD_BASEP_12) || !Tcg_Card(TCG_CARD_ECARD3_25) || !Tcg_Card(TCG_CARD_ECARD3_19) ||
+        !Tcg_Card(TCG_CARD_NEO3_1))
+        return printf("FAIL more choices: a card isn't finished\n"), 1;
+    /* Energy Control (heads): their Active's Water Energy onto their Benched Machop */
+    for (seed = 1; seed < 40; seed++)
+    {
+        Stage(&g, TCG_CARD_BASEP_12, 0, seed);
+        memset(&a, 0, sizeof(a));
+        a.type = TCG_ATTACK;
+        if (TcgDuel_Apply(&g, &a) != TCG_OK)
+            return printf("FAIL Energy Control: %s\n", g.error), 1;
+        if (g.phase == TCG_CHOICE)
+            break;
+    }
+    if (g.phase != TCG_CHOICE || g.choiceKind != TCG_CHOICE_MOVE_THEIRS_FROM)
+        return printf("FAIL Energy Control: no choice in 40 coins\n"), 1;
+    n = g.players[1].field[0].attachedSize;
+    memset(&a, 0, sizeof(a));
+    a.type = TCG_CHOOSE;
+    a.target = 0;
+    a.selections[0] = g.players[1].field[0].attached[0];
+    a.selectionCount = 1;
+    if (TcgDuel_Apply(&g, &a) != TCG_OK || g.choiceKind != TCG_CHOICE_MOVE_THEIRS_TO)
+        return printf("FAIL Energy Control's card: %s\n", g.error), 1;
+    k = g.players[1].field[1].attachedSize;
+    memset(&a, 0, sizeof(a));
+    a.type = TCG_CHOOSE;
+    a.target = 1;
+    if (TcgDuel_Apply(&g, &a) != TCG_OK || g.players[1].field[0].attachedSize != n - 1 ||
+        g.players[1].field[1].attachedSize != k + 1 || g.phase == TCG_CHOICE)
+        return printf("FAIL Energy Control's move: %s\n", g.error), 1;
+    /* Energy Splash: 2 Water Energy to the Bench, one and then the other */
+    Stage(&g, TCG_CARD_ECARD3_25, 2, 1);
+    memset(&a, 0, sizeof(a));
+    a.type = TCG_ATTACK;
+    a.attack = 2;
+    if (TcgDuel_Apply(&g, &a) != TCG_OK || g.phase != TCG_CHOICE || g.choiceKind != TCG_CHOICE_WATER_TO_BENCH)
+        return printf("FAIL Energy Splash: %s (phase %u)\n", g.error, g.phase), 1;
+    k = g.players[0].field[1].attachedSize;
+    for (n = 0; n < 2; n++)
+    {
+        memset(&a, 0, sizeof(a));
+        a.type = TCG_CHOOSE;
+        a.target = 1;
+        if (TcgDuel_Apply(&g, &a) != TCG_OK)
+            return printf("FAIL Energy Splash's move %u: %s\n", n, g.error), 1;
+    }
+    if (g.players[0].field[1].attachedSize != k + 2 || g.phase == TCG_CHOICE)
+        return printf("FAIL Energy Splash: %u moved\n", g.players[0].field[1].attachedSize - k), 1;
+    /* Electric Blast (YES): its Lightning Energy discarded, a counter for each on their Bench */
+    Stage(&g, TCG_CARD_ECARD3_19, 1, 1);
+    Attach(&g, 0, 0, TCG_CARD_LIGHTNING_ENERGY, 1);
+    for (k = n = 0; k < g.players[0].field[0].attachedSize; k++)
+        n += Tcg_Card(g.players[0].cards[g.players[0].field[0].attached[k]])->type == TCG_LIGHTNING;
+    memset(&a, 0, sizeof(a));
+    a.type = TCG_ATTACK;
+    a.attack = 1;
+    a.option = 1;
+    if (TcgDuel_Apply(&g, &a) != TCG_OK || g.phase != TCG_CHOICE || g.choiceKind != TCG_CHOICE_COUNTER_BENCH ||
+        g.choiceData != n)
+        return printf("FAIL Electric Blast: %s (%u Lightning, %u asked)\n", g.error, n, g.choiceData), 1;
+    for (k = 0; k < n; k++)
+    {
+        memset(&a, 0, sizeof(a));
+        a.type = TCG_CHOOSE;
+        a.target = 1;
+        if (TcgDuel_Apply(&g, &a) != TCG_OK)
+            return printf("FAIL Electric Blast's counter %u: %s\n", k, g.error), 1;
+    }
+    if (g.players[1].field[1].stackSize && g.players[1].field[1].damage != 10 * n)
+        return printf("FAIL Electric Blast: %u damage\n", g.players[1].field[1].damage), 1;
+    /* Attract Current: a Lightning Energy for each heads onto a Lightning Pokemon (itself) */
+    for (seed = 1; seed < 40; seed++)
+    {
+        Stage(&g, TCG_CARD_NEO3_1, 0, seed);
+        {
+            int c = Relabel(&g, 0, TCG_CARD_LIGHTNING_ENERGY);   /* (back into the deck) */
+            if (c >= 0)
+                g.players[0].deck[g.players[0].deckSize++] = (uint8_t)c;
+        }
+        memset(&a, 0, sizeof(a));
+        a.type = TCG_ATTACK;
+        if (TcgDuel_Apply(&g, &a) != TCG_OK)
+            return printf("FAIL Attract Current: %s\n", g.error), 1;
+        if (g.phase == TCG_CHOICE)
+            break;
+    }
+    if (g.phase != TCG_CHOICE || g.choiceKind != TCG_CHOICE_ATTACH_LIGHTNING)
+        return printf("FAIL Attract Current: no choice\n"), 1;
+    n = g.players[0].field[0].attachedSize;
+    TcgDuel_AiChoose(&g, &a);
+    if (TcgDuel_Apply(&g, &a) != TCG_OK || g.players[0].field[0].attachedSize != n + 1)
+        return printf("FAIL Attract Current's attach: %s\n", g.error), 1;
+    /* Ion Coating: the Active's Lightning Energy is Water this turn, not once it retreats */
+    if (Tcg_Card(TCG_CARD_ECARD2_21) && Tcg_Card(TCG_CARD_NEO3_12) && Tcg_Card(TCG_CARD_NEO4_16))
+    {
+        Stage(&g, TCG_CARD_ECARD2_21, 1, 1);
+        g.players[0].field[0].poison = 0;
+        Attach(&g, 0, 0, TCG_CARD_LIGHTNING_ENERGY, 1);
+        k = TcgDuel_Energy(&g, 0, 0, TCG_WATER), n = TcgDuel_Energy(&g, 0, 0, TCG_LIGHTNING);
+        memset(&a, 0, sizeof(a));
+        a.type = TCG_USE_POWER;
+        if (TcgDuel_Apply(&g, &a) != TCG_OK || TcgDuel_Energy(&g, 0, 0, TCG_WATER) != k + n ||
+            TcgDuel_Energy(&g, 0, 0, TCG_LIGHTNING))
+            return printf("FAIL Ion Coating: %s\n", g.error), 1;
+        /* Energy Converter: a Water Energy of its is Metal this turn */
+        Stage(&g, TCG_CARD_NEO3_12, 1, 1);
+        g.players[0].field[0].poison = 0;
+        for (k = 0; k < g.players[0].field[0].attachedSize && g.players[0].cards[g.players[0].field[0].attached[k]] != TCG_CARD_WATER_ENERGY; k++)
+            ;
+        memset(&a, 0, sizeof(a));
+        a.type = TCG_USE_POWER;
+        a.selections[0] = g.players[0].field[0].attached[k];
+        a.selectionCount = 1;
+        a.target = TCG_METAL;
+        if (TcgDuel_Apply(&g, &a) != TCG_OK || TcgDuel_Energy(&g, 0, 0, TCG_METAL) != 1)
+            return printf("FAIL Energy Converter: %s (%u Metal)\n", g.error, TcgDuel_Energy(&g, 0, 0, TCG_METAL)), 1;
+        /* Miracle Energy: only on a Shining or Light Pokemon */
+        Stage(&g, TCG_CARD_MACHOP, 0, 1);
+        {
+            int c = Relabel(&g, 0, TCG_CARD_NEO4_16);
+            g.players[0].hand[g.players[0].handSize++] = (uint8_t)c;
+        }
+        g.players[0].energyPlayed = 0;
+        memset(&a, 0, sizeof(a));
+        a.type = TCG_ATTACH;
+        a.hand = (uint8_t)(g.players[0].handSize - 1);
+        if (TcgDuel_Apply(&g, &a) == TCG_OK)
+            return printf("FAIL Miracle Energy went on a Machop\n"), 1;
+    }
+    printf("PASS more choices: Energy Control, Energy Splash, Electric Blast, Attract Current, Ion Coating, Energy Converter, Miracle Energy\n");
+    return 0;
+}
+/* Texture Magic, Card-Flip Game, Championship Arena, Pure Body, Scavenger Hunt */
+static int MoreRules(void)
+{
+    struct TcgDuel g;
+    struct TcgAction a;
+    unsigned k, n;
+    int c;
+    if (!Tcg_Card(TCG_CARD_BASEP_15) || !Tcg_Card(TCG_CARD_NEO1_92) || !Tcg_Card(TCG_CARD_NP_28) ||
+        !Tcg_Card(TCG_CARD_NP_30) || !Tcg_Card(TCG_CARD_ECARD2_48))
+        return printf("FAIL more rules: a card isn't finished\n"), 1;
+    /* Texture Magic: its Resistance to Fighting, the Defending Machop's Weakness to Colorless? no: to Psychic */
+    Stage(&g, TCG_CARD_BASEP_15, 0, 1);
+    memset(&a, 0, sizeof(a));
+    a.type = TCG_ATTACK;
+    if (TcgDuel_Apply(&g, &a) != TCG_OK || g.phase != TCG_CHOICE || g.choiceKind != TCG_CHOICE_TEXTURE_RES)
+        return printf("FAIL Texture Magic: %s\n", g.error), 1;
+    memset(&a, 0, sizeof(a));
+    a.type = TCG_CHOOSE;
+    a.target = TCG_FIGHTING;
+    if (TcgDuel_Apply(&g, &a) != TCG_OK || g.choiceKind != TCG_CHOICE_TEXTURE_WEAK)
+        return printf("FAIL Texture Magic's Resistance: %s\n", g.error), 1;
+    memset(&a, 0, sizeof(a));
+    a.type = TCG_CHOOSE;
+    a.target = TCG_PSYCHIC;
+    if (TcgDuel_Apply(&g, &a) != TCG_OK || g.phase == TCG_CHOICE || TcgDuel_Weakness(&g, 1, 0) != TCG_PSYCHIC)
+        return printf("FAIL Texture Magic's Weakness: %s (%u)\n", g.error, TcgDuel_Weakness(&g, 1, 0)), 1;
+    /* Card-Flip Game: a guess at one of their Prizes; right, draw 2 */
+    Stage(&g, TCG_CARD_MACHOP, 0, 1);
+    while (g.players[1].prizeSize < 3)
+        g.players[1].prizes[g.players[1].prizeSize++] = g.players[1].deck[--g.players[1].deckSize];
+    c = Relabel(&g, 0, TCG_CARD_NEO1_92);
+    g.players[0].hand[g.players[0].handSize++] = (uint8_t)c;
+    memset(&a, 0, sizeof(a));
+    a.type = TCG_PLAY_TRAINER;
+    a.hand = (uint8_t)(g.players[0].handSize - 1);
+    if (TcgDuel_Apply(&g, &a) != TCG_OK || g.phase != TCG_CHOICE || g.choiceKind != TCG_CHOICE_CARD_FLIP)
+        return printf("FAIL Card-Flip Game: %s\n", g.error), 1;
+    {
+        const struct TcgCard *pz = Tcg_Card(g.players[1].cards[g.choiceData]);
+        n = g.players[0].handSize;
+        memset(&a, 0, sizeof(a));
+        a.type = TCG_CHOOSE;
+        a.target = pz->kind == TCG_ENERGY ? 0 : pz->kind == TCG_TRAINER ? 1 : 2;
+        if (TcgDuel_Apply(&g, &a) != TCG_OK || g.players[0].handSize != n + 2)
+            return printf("FAIL Card-Flip Game's right guess: %s\n", g.error), 1;
+    }
+    /* Championship Arena: 9 cards at the end of the turn, 2 discarded first */
+    Stage(&g, TCG_CARD_MACHOP, 0, 1);
+    c = Relabel(&g, 0, TCG_CARD_NP_28);
+    g.players[0].stadium = (uint8_t)(c + 1);
+    while (g.players[0].handSize < 9)
+        g.players[0].hand[g.players[0].handSize++] = g.players[0].deck[--g.players[0].deckSize];
+    memset(&a, 0, sizeof(a));
+    a.type = TCG_PASS;
+    if (TcgDuel_Apply(&g, &a) != TCG_OK || g.phase != TCG_CHOICE || g.choiceKind != TCG_CHOICE_ARENA || g.current != 0)
+        return printf("FAIL Championship Arena: %s (phase %u)\n", g.error, g.phase), 1;
+    TcgDuel_AiChoose(&g, &a);
+    if (TcgDuel_Apply(&g, &a) != TCG_OK || g.players[0].handSize != 7 || g.current != 1)
+        return printf("FAIL Championship Arena's discard: %s (hand %u, current %u)\n", g.error, g.players[0].handSize, g.current), 1;
+    /* Pure Body: a Water Energy onto Suicune, one of its Energy discarded */
+    Stage(&g, TCG_CARD_NP_30, 0, 1);
+    n = g.players[0].field[0].attachedSize;
+    c = Take(&g, 0, TCG_CARD_WATER_ENERGY);
+    if (c < 0)
+        c = Relabel(&g, 0, TCG_CARD_WATER_ENERGY);
+    g.players[0].hand[g.players[0].handSize++] = (uint8_t)c;
+    g.players[0].energyPlayed = 0;
+    memset(&a, 0, sizeof(a));
+    a.type = TCG_ATTACH;
+    a.hand = (uint8_t)(g.players[0].handSize - 1);
+    if (TcgDuel_Apply(&g, &a) != TCG_OK || g.phase != TCG_CHOICE || g.choiceKind != TCG_CHOICE_PURE_BODY)
+        return printf("FAIL Pure Body: %s\n", g.error), 1;
+    TcgDuel_AiChoose(&g, &a);
+    if (TcgDuel_Apply(&g, &a) != TCG_OK || g.players[0].field[0].attachedSize != n)
+        return printf("FAIL Pure Body's discard: %s\n", g.error), 1;
+    /* Scavenger Hunt: 2 hand cards into the deck, an Energy from the deck into the hand */
+    Stage(&g, TCG_CARD_ECARD2_48, 1, 1);
+    g.players[0].field[0].poison = 0;
+    for (k = 0; k < 2; k++)
+        g.players[0].hand[g.players[0].handSize++] = g.players[0].deck[--g.players[0].deckSize];
+    n = g.players[0].handSize;
+    memset(&a, 0, sizeof(a));
+    a.type = TCG_USE_POWER;
+    a.selections[0] = g.players[0].hand[0], a.selections[1] = g.players[0].hand[1];
+    for (k = 0; k < g.players[0].deckSize && Tcg_Card(g.players[0].cards[g.players[0].deck[k]])->kind != TCG_ENERGY; k++)
+        ;
+    a.selections[2] = g.players[0].deck[k];
+    a.selectionCount = 3;
+    if (TcgDuel_Apply(&g, &a) != TCG_OK || g.players[0].handSize != n - 1)
+        return printf("FAIL Scavenger Hunt: %s (hand %u -> %u)\n", g.error, n, g.players[0].handSize), 1;
+    printf("PASS more rules: Texture Magic, Card-Flip Game, Championship Arena, Pure Body, Scavenger Hunt\n");
+    return 0;
+}
 static int Choices(void)
 {
     struct TcgDuel g;
@@ -1941,7 +2173,7 @@ int main(void)
     }
     printf("PASS %u finished regional cards: %u attacks used %u times, then %u AI actions after them\n", ready, used, ok,
            steps);
-    if (SpecialEnergy() || EcardEnergy() || ScriptMechanics() || Anchors() || Guards() || MovePowers() || LookPowers() || SwitchesAndFire() || BorrowedAttacks() || Copies() || PowersOfFour() || Choices() || Peeks() || TechnicalMachines() || Babies())
+    if (SpecialEnergy() || EcardEnergy() || ScriptMechanics() || Anchors() || Guards() || MovePowers() || LookPowers() || SwitchesAndFire() || BorrowedAttacks() || Copies() || PowersOfFour() || Choices() || Peeks() || MoreChoices() || MoreRules() || TechnicalMachines() || Babies())
         return 1;
     if (PlayTrainers() || UsePowers() || UseStadiums() || AttackFlows())
         return 1;

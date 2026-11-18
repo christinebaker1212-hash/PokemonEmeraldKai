@@ -100,6 +100,13 @@ P('R_SEARCH_PRIZE', '[Search]', 'look at 1 of your Prize cards', 'USED', 'ONCE A
 P('R_TELL', '[Tell]', "look at your opponent's hand and show your hand", 'USED', 'ONCE ANY', 'c h.peek:2 h.showhand')
 P('R_INVESTIGATE', 'Investigate', "look at the top 2 cards of any player's deck", 'USED', 'ONCE', 'askch:17,1')
 P('R_CUNNING', 'Cunning', "look at the top card of your opponent's deck", 'USED', 'ONCE', 'c h.peek:1,1 h.askch:16,1')
+P('R_ION_COATING', 'Ion Coating', 'All Lightning Energy attached to your Active Pokemon becomes Water Energy', 'USED',
+  'ONCE', 'ion')
+P('R_ENERGY_CONVERTER', 'Energy Converter', 'Treat that Energy card as that type until the end of your turn', 'USED',
+  'ONCE', 'conv')
+P('R_SCAVENGER_HUNT', 'Scavenger Hunt', 'put 2 cards from your hand into your deck', 'USED', 'ONCE', 'scav')
+P('R_SPATIAL_DISTORTION', 'Spatial Distortion', 'choose a Stadium card from your discard pile and put it into play',
+  'USED', 'ONCE', 'c h.stadis')
 P('R_JOIN', '[Join]', 'search your deck for a Basic Pokemon or Evolution card', 'USED', 'ONCE BENCH', 'srchk:3')
 P('R_MAGNETIC_CALL', 'Magnetic Call', 'search your deck for a Metal Basic Pokemon', 'USED', 'ONCE',
   'needroom c h.dbench:2')
@@ -214,6 +221,10 @@ P('R_HERBAL_SCENT', 'Herbal Scent', 'all Grass Pokemon in play', 'PASSIVE')
 P('R_FLAME_VAPOR', 'Flame Vapor', 'discard an Energy card attached to the Defending', 'PASSIVE')
 # (played from the hand: tcg_rpowers.inc RegionOnPlay)
 P('R_FIRE_BOOST', 'Fire Boost', 'search your deck for up to 4 Fire Energy cards', 'PASSIVE')
+P('R_MIRACULOUS_WIND', 'Miraculous Wind', 'each Special Energy card provides Colorless Energy instead', 'PASSIVE')
+P('R_PURE_BODY_WATER', 'Pure Body', 'Whenever you attach a Water Energy card from your hand to', 'PASSIVE')
+P('R_CHAIN_REACTION', 'Chain Reaction', 'This power can only be used when a Pokemon evolves', 'PASSIVE')
+P('R_HYDROELECTRIC', 'Hydroelectric Power', 'You may make Floodlight do 10 more damage', 'PASSIVE')
 P('R_CALL_THE_BOSS', 'Call the Boss', 'the Trainer card named Giovanni', 'PASSIVE')
 P('R_INCREASE', '[Increase]', 'a card with Unown in its name and put it onto your Bench', 'PASSIVE')
 P('R_ENERGY_RECHARGE', 'Energy Recharge', 'choose a basic Energy card from your discard pile and attach it to', 'PASSIVE')

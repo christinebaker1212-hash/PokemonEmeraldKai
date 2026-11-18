@@ -115,6 +115,10 @@
  *             named as it | ddeh:n one of the Defending's Energy per heads, up to n picked | lockon Lock-on
  * After (1):  rodset a Lightning Rod marker on the chosen one of theirs | rodhit:x x to each of theirs with one (Weakness
  *             and Resistance) | char Quilava's Char counter (a coin) | color the type chosen (opt:10) as a Coloring counter
+ * After (1):  askn:K,n your TCG_CHOICE_K n times (0: once per heads) | blast every Lightning Energy card on it
+ *             discarded, that many damage counters on their Bench as you choose
+ * Powers (1): scav Scavenger Hunt | stadis Spatial Distortion | Conditions: pw its Pokemon Power works
+ * Powers (1): ion Ion Coating (TCG_BUFF_ION) | conv Energy Converter (the basic Energy picked, the type chosen)
  * Options (0): opt:12 how many damage counters (the most on one of theirs) | After (1): helph that many off the chosen
  *             one of theirs (at most what it has), a card drawn for each
  * After (1):  peek:Z,n the top n of a deck / n Prizes / their hand (0: all) shown to you (TCG_PEEK_Z) | showhand your
@@ -230,6 +234,8 @@ static int ScriptCond(const struct TcgDuel *g, const char *cond)
     }
     if (cond[0] == 'e' && cond[1] == 'n' && cond[2] >= '0' && cond[2] <= '9')
         return EnergyOfType(g, g->current, sScriptSelf, (unsigned)atoi(cond + 2)) > 0; /* it has Energy of type N */
+    if (!strcmp(cond, "pw"))
+        return TcgPower_Working(g, g->current, sScriptSelf) != TCG_POWER_NONE; /* (its power works: Hydroelectric) */
     if (!strcmp(cond, "dlt"))
         return sScriptDealt > 0; /* (the attack damaged the Defending Pokemon) */
     if (!strcmp(cond, "nah"))
@@ -1145,6 +1151,94 @@ static int ScriptRun(struct TcgDuel *g, const char *script, const struct TcgAtta
                     TcgDuel_Event(g, TCG_EV_DRAW, me, 0, TcgDuel_Draw(g, me, k), 0, 0);
                 }
             }
+        }
+        else if (ScriptIs(&o, "askn"))
+        {
+            /* askn:K,n your choice TCG_CHOICE_K asked n times (choiceData; n 0: one per heads) */
+            const struct TcgCard *it = TcgDuel_Field(g, me, sScriptSelf);
+            unsigned times = o.arg[1] ? (unsigned)o.arg[1] : g->scriptHeads;
+            if (times)
+            {
+                g->choiceData = (uint8_t)times;
+                TcgDuel_AskChoice(g, me, (unsigned)x, it ? it->id : 0, 1);
+            }
+        }
+        else if (ScriptIs(&o, "blast"))
+        {
+            /* Electric Blast: every Lightning Energy card on it discarded, a damage counter for each on their Bench
+             * as you like (TCG_CHOICE_COUNTER_BENCH) */
+            unsigned n = 0, k;
+            const struct TcgCard *it = TcgDuel_Field(g, me, sScriptSelf);
+            for (k = self->attachedSize; k-- > 0;)
+            {
+                const struct TcgCard *e = CardAt(g, me, self->attached[k]);
+                if (e->kind == TCG_ENERGY && e->type == TCG_LIGHTNING)
+                {
+                    p->discard[p->discardSize++] = TcgPile_Remove(self->attached, &self->attachedSize, k);
+                    n++;
+                }
+            }
+            if (n)
+            {
+                g->choiceData = (uint8_t)n;
+                TcgDuel_AskChoice(g, me, TCG_CHOICE_COUNTER_BENCH, it ? it->id : 0, 1);
+            }
+        }
+        else if (ScriptIs(&o, "ion"))
+            p->turnBuffs |= TCG_BUFF_ION;   /* (Ion Coating: tcg_duel.c TcgDuel_Energy) */
+        else if (ScriptIs(&o, "conv"))
+        {
+            /* Energy Converter: the basic Energy card picked on one of yours is of the type chosen (target) this turn */
+            unsigned s2, k;
+            if (!action || action->selectionCount != 1 || action->target >= TCG_TYPES || action->target == TCG_COLORLESS)
+                return TCG_INVALID;
+            for (s2 = 0; s2 < TCG_FIELD_SIZE; s2++)
+                for (k = 0; k < p->field[s2].attachedSize; k++)
+                    if (p->field[s2].attached[k] == action->selections[0] && p->cards[action->selections[0]] <= 6)
+                    {
+                        p->convCard = (uint8_t)(action->selections[0] + 1);
+                        p->convType = action->target;
+                        s2 = TCG_FIELD_SIZE;
+                        break;
+                    }
+            if (!p->convCard)
+                return TCG_INVALID;
+        }
+        else if (ScriptIs(&o, "scav"))
+        {
+            /* Scavenger Hunt: the 2 hand cards picked into the deck, then the Energy card picked from the deck (shown)
+             * into the hand, the deck shuffled */
+            int e = action && action->selectionCount > 2 ? Picked(action, 2, p->deck, p->deckSize) : -1;
+            unsigned k;
+            if (!action || action->selectionCount < 2 || Picked(action, 0, p->hand, p->handSize) < 0 ||
+                Picked(action, 1, p->hand, p->handSize) < 0 || action->selections[0] == action->selections[1] ||
+                (action->selectionCount > 2 && (e < 0 || CardAt(g, me, p->deck[e])->kind != TCG_ENERGY)))
+                return TCG_INVALID;
+            if (e >= 0)
+            {
+                TcgDuel_Log(g, "Shown: %s.", CardAt(g, me, p->deck[e])->name);
+                p->hand[p->handSize++] = TcgPile_Remove(p->deck, &p->deckSize, (unsigned)e);
+            }
+            for (k = 0; k < 2; k++)
+                p->deck[p->deckSize++] = TcgPile_Remove(p->hand, &p->handSize, (unsigned)Picked(action, k, p->hand, p->handSize));
+            TcgDuel_Shuffle(g, me);
+            TcgDuel_Event(g, TCG_EV_DECK_CHANGED, me, 0, 0, 0, 0);
+        }
+        else if (ScriptIs(&o, "stadis"))
+        {
+            /* Spatial Distortion: the Stadium picked in your discard pile into play (the one in play discarded) */
+            int at = action && action->selectionCount == 1 ? Picked(action, 0, p->discard, p->discardSize) : -1;
+            unsigned who;
+            if (at < 0 || !(CardAt(g, me, p->discard[at])->flags & TCG_CF_STADIUM))
+                return TCG_INVALID;
+            for (who = 0; who < 2; who++)
+                if (g->players[who].stadium)
+                {
+                    g->players[who].discard[g->players[who].discardSize++] = (uint8_t)(g->players[who].stadium - 1);
+                    g->players[who].stadium = 0;
+                }
+            p->stadium = (uint8_t)(TcgPile_Remove(p->discard, &p->discardSize, (unsigned)at) + 1);
+            TcgDuel_Event(g, TCG_EV_TRAINER, me, 0, 0, p->cards[p->stadium - 1], 0);
         }
         else if (ScriptIs(&o, "rodset"))
         {

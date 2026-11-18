@@ -3067,6 +3067,8 @@ int TcgDuel_AttackEffect(struct TcgDuel *g, const struct TcgAttack *a, const str
         if (after)
         {
             unsigned who = g->current ^ (action->option ? 1 : 0);
+            if (e->amount && !TcgDuel_Coin(g, g->current))
+                break;   /* (the Nintendo promo's: a coin first, tails nothing) */
             if (action->option > 1 || action->target >= TCG_FIELD_SIZE || g->players[who].field[action->target].stackSize < 2)
                 return TCG_INVALID;
             /* (the opponent's: not through Neutralizing Shield, Transparency, Agility...) */

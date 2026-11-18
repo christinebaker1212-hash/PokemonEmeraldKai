@@ -966,6 +966,38 @@ static int RegionTrainer(struct TcgDuel *g, const struct TcgAction *a, unsigned 
         TcgDuel_Shuffle(g, me);
         break;
     }
+    case TCG_CARD_NEO2_72: /* Fossil Egg: heads, the card picked (deck or hand) that evolves from Mysterious Fossil onto
+                            * the Bench as a Basic Pokemon */
+    {
+        int fromDeck = a->selectionCount == 1 && Index(p->deck, p->deckSize, a->selections[0]) >= 0;
+        const struct TcgCard *pick = a->selectionCount == 1 ? Tcg_Card(p->cards[a->selections[0]]) : NULL;
+        if (a->selectionCount > 1 || (pick && (pick->kind != TCG_POKEMON || strcmp(pick->evolvesFrom, "Mysterious Fossil"))))
+            return Fail(g, "Choose one card that evolves from Mysterious Fossil.");
+        if (TcgDuel_Coin(g, me) && pick)
+        {
+            if (!RtBench(g, me, fromDeck ? p->deck : p->hand, fromDeck ? &p->deckSize : &p->handSize, a->selections[0]))
+                return Fail(g, "Choose one card that evolves from Mysterious Fossil.");
+        }
+        if (fromDeck)
+            TcgDuel_Shuffle(g, me);
+        break;
+    }
+    case TCG_CARD_NEO1_92: /* Card-Flip Game: one of their face-down Prizes guessed at (tcg_choice.inc) */
+        if (!op->prizeSize)
+            return Fail(g, "They have no Prizes left.");
+        g->choiceData = op->prizes[Tcg_RandomBelow(&g->rng, op->prizeSize)];
+        TcgDuel_AskChoice(g, me, TCG_CHOICE_CARD_FLIP, id, 1);
+        break;
+    case TCG_CARD_NEO4_94: /* Impostor Professor Oak's Invention: their Prizes looked at, then YES / NO */
+    {
+        unsigned k;
+        if (!op->prizeSize)
+            return Fail(g, "They have no Prizes left.");
+        for (k = 0; k < op->prizeSize; k++)
+            TcgDuel_Event(g, TCG_EV_PEEK, me, 0, TCG_PEEK_THEIR_PRIZE, op->cards[op->prizes[k]], 0);
+        TcgDuel_AskChoice(g, me, TCG_CHOICE_IMPOSTOR, id, 1);
+        break;
+    }
     case TCG_CARD_GYM2_18: /* Giovanni: a Giovanni Pokemon may evolve whenever this turn */
         if (a->slot >= TCG_FIELD_SIZE || !RtNamed(TcgDuel_Field(g, me, a->slot), "Giovanni"))
             return Fail(g, "Choose a Pokemon with Giovanni in its name.");
@@ -984,6 +1016,7 @@ static int RegionTrainer(struct TcgDuel *g, const struct TcgAction *a, unsigned 
     case TCG_CARD_GYM2_119: /* Rocket's Minefield Gym (TcgPower_BenchedFromHand) */
     case TCG_CARD_ECARD2_131: /* Pokemon Park */
     case TCG_CARD_ECARD3_132: /* Mirage Stadium */
+    case TCG_CARD_NP_28:      /* Championship Arena (tcg_duel.c EndTurn) */
     /* (and the ones used during a turn: RegionStadiumUse) */
     case TCG_CARD_GYM1_107: case TCG_CARD_GYM2_114: case TCG_CARD_GYM2_122: case TCG_CARD_NEO3_61:
     case TCG_CARD_NEO4_95: case TCG_CARD_NEO4_99: case TCG_CARD_NEO4_100: case TCG_CARD_ECARD2_118:

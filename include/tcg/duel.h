@@ -187,7 +187,19 @@ enum
     TCG_CHOICE_PEEK_ZONE,        /* Noctowl: the top 2 of a deck or up to 2 Prizes of either player (TCG_PEEK_*) */
     TCG_CHOICE_TREATY,           /* Lt. Surge's Treaty: 0 everyone takes a Prize, 1 the other player draws a card */
     TCG_CHOICE_HEAL_MINE,        /* Sweet Scent: 2 damage counters off the one of yours chosen */
-    TCG_CHOICE_HEAL_THEIRS       /* Sweet Scent: 2 damage counters off the one of theirs chosen */
+    TCG_CHOICE_HEAL_THEIRS,      /* Sweet Scent: 2 damage counters off the one of theirs chosen */
+    TCG_CHOICE_MOVE_THEIRS_FROM, /* Energy Control: a basic Energy card of one of the other player's Pokemon... */
+    TCG_CHOICE_MOVE_THEIRS_TO,   /* ...onto another of theirs (the card choiceData) */
+    TCG_CHOICE_WATER_TO_BENCH,   /* Energy Splash: a Water Energy of your Active onto a Benched one (choiceData more) */
+    TCG_CHOICE_COUNTER_BENCH,    /* Electric Blast: a damage counter on one of their Benched (choiceData more) */
+    TCG_CHOICE_ATTACH_LIGHTNING, /* Ampharos: a Lightning Energy from the deck onto a Lightning Pokemon (choiceData more) */
+    TCG_CHOICE_CARD_FLIP,        /* Card-Flip Game: Energy, Trainer or Pokemon (their Prize choiceData) */
+    TCG_CHOICE_IMPOSTOR,         /* Impostor Professor Oak's Invention: YES has their Prizes shuffled in and new ones set */
+    TCG_CHOICE_TEXTURE_RES,      /* Texture Magic: its Resistance's new type (9 as it is) */
+    TCG_CHOICE_TEXTURE_WEAK,     /* Texture Magic: the Defending Pokemon's Weakness's new type (9 as it is) */
+    TCG_CHOICE_PURE_BODY,        /* Pure Body: which Energy card of the Pokemon in slot choiceData is discarded */
+    TCG_CHOICE_CHAIN_REACTION,   /* Chain Reaction: a card from the deck that evolves from the Eevee in slot choiceData */
+    TCG_CHOICE_ARENA             /* Championship Arena: the cards discarded down to 7 in the hand */
 };
 /* Pokemon Powers (src/tcg/tcg_powers.c), by the card's power. */
 enum TcgPowerId
@@ -312,6 +324,8 @@ struct TcgPlayer
     uint16_t skipDrawTurn, poisonMistUntil, strangeBeamUntil, noTrainersTurn;
     uint8_t prizesUp, poisonNext;
     uint16_t attachmentExpires[TCG_DECK_SIZE];
+    /* Energy Converter: this turn the basic Energy card convCard - 1 (attached) is of type convType */
+    uint8_t convCard, convType;
 };
 /* Presentation events: what happened, in order, so the duel screen can show
  * it (coin flips, damage, Knock Outs...). They never carry a hidden card id:
@@ -469,7 +483,8 @@ enum
     TCG_BUFF_PARK = 4,  /* Pokemon Park healed this turn */
     TCG_BUFF_TAILWIND = 8, /* Tailwind: the Active's Retreat Cost is 0 this turn */
     TCG_BUFF_NEIGHBOR = 16, /* a Good Neighbor used this turn */
-    TCG_BUFF_RECALL = 32   /* Recall: the Active may use its lower stages' attacks this turn */
+    TCG_BUFF_RECALL = 32,  /* Recall: the Active may use its lower stages' attacks this turn */
+    TCG_BUFF_ION = 64      /* Ion Coating: the Lightning Energy on the Active is Water Energy this turn */
 };
 /* That card (Tcg_Canon) attached to that Pokemon: its card, else -1 */
 int TcgDuel_AttachedCard(const struct TcgDuel *g, unsigned who, unsigned slot, unsigned canon);
@@ -588,6 +603,9 @@ int TcgDuel_RunPowerScript(struct TcgDuel *g, unsigned slot, const char *script,
 int TcgPower_AttachBlock(const struct TcgDuel *g, unsigned player, unsigned slot, unsigned energy);
 void TcgPower_AfterAttach(struct TcgDuel *g, unsigned player, unsigned slot, unsigned physical);
 unsigned TcgPower_EnergyType(const struct TcgDuel *g, unsigned player, unsigned slot, unsigned type, unsigned *amount);
+/* Light Dragonite's Miraculous Wind blows (an Active one's power works): every Special Energy card provides Colorless
+ * and its other rules stop */
+int TcgPower_WindBlows(const struct TcgDuel *g);
 void TcgPower_Damaged(struct TcgDuel *g, unsigned player, unsigned slot, unsigned damage);
 const char *TcgPower_Name(unsigned power);
 /* The power of the Pokemon in that slot, if it works now (Toxic Gas, Asleep / Confused /

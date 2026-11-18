@@ -81,7 +81,7 @@ Total 1,158 set cards (about 1,100 attacks with effect text, 250 Pokémon Powers
    (`mp cards mock 2`, tcg_board.c MockUnder / MockOver over a staged duel): the Stadium a plate on the centre line,
    the turn's Supporter face up beside its player's Active, Tools tucked under their Pokemon, a BRN badge, Darkness /
    Metal orbs. **Approved and built** (2026-11-18: docs/tcg_regions/board_table.png from a staged duel).
-   **Status (2026-11-18): 1,160 of 1,227 finished.** Where each part lives:
+   **Status (2026-11-18): 1,182 of 1,227 finished.** Where each part lives:
    - Attacks: tools/tcg/regions/families.py (regex families + EXACT, one script per wording; ops in
      src/tcg/tcg_script.inc, listed at its top and in each op's comment).
    - Trainers: src/tcg/tcg_rtrainers.inc (rules), tcg_rtrainers_flow.inc (steps, playability, menus),
@@ -102,6 +102,13 @@ Total 1,158 set cards (about 1,100 attacks with effect text, 250 Pokémon Powers
      (choicePlayer, choiceKind TCG_CHOICE_*), answered by TCG_CHOOSE; TcgDuel_AskChoice / TcgDuel_Choose / the AI's
      answer in src/tcg/tcg_choice.inc, the steps TcgFlow_ChoiceSteps (TCG_FLOW_CHOICE: the board and the phone begin
      it at once for the player asked); an attack's turn ends once it's answered (choiceEndTurn).
+   - Choices asked again (choiceData how many more: Energy Splash, Electric Blast, Attract Current) and in two steps
+     (Energy Control: the card, then where; Texture Magic: Resistance, then Weakness) through ChoiceAgain; asked by a
+     hook (Pure Body after an attach, Chain Reaction when a Pokemon evolves, Championship Arena as a turn ends:
+     EndTurn asks first and the turn ends once it's answered). Energy that changes type: TcgDuel_Energy (Ion Coating's
+     TCG_BUFF_ION, Energy Converter's TcgPlayer.convCard / convType, Miraculous Wind: TcgPower_WindBlows, also in
+     TcgDuel_AttachedRule and the cost check); Miracle Energy counts as 2 of any type, only on Shining or Light
+     Pokemon, discarded as the turn ends.
    - Looks ([Observe], [Search], [Tell], Investigate, Cunning): TCG_EV_PEEK events naming the cards (flags: the
      card's place from the top of a deck), shown only to the player looking (script ops peek / showhand). Markers that
      stay while a Pokemon is in play: TcgFieldCard.markers (TCG_MARK_ROD Lightning Rod, TCG_MARK_CHAR Char counters:

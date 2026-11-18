@@ -569,6 +569,11 @@ def _(m, d):
 
 # One wording, one script (the cards' words with SELF for the card's name; tcg_script.inc's ops)
 EXACT = {
+    "Flip a coin. If heads, choose a basic Energy card attached to 1 of your opponent's Pokemon and attach it to another of your opponent's Pokemon of your choice.": 'c h.askch:21,1',
+    "Flip a coin. If heads, choose 1 of either player's Evolved Pokemon, remove the highest stage Evolution card from that Pokemon, and put it into that player's hand.": ('DEVOLUTION_BEAM', 1, 0),
+    'Move 2 Water Energy cards attached to SELF to 1 or 2 of your Benched Pokemon. (You may put both on the same Pokemon or 1 each on 2 different Pokemon.) If you have no Benched Pokemon, ignore this effect.': 'askn:23,2',
+    "You may discard all Lightning Energy cards attached to SELF when you use this attack. If you do, put damage counters equal to the amount of Energy cards removed in this way on any number of your opponent's Benched Pokemon in the way you like. (For example, if you discard 3 Lightning Energy cards, you can put 1 damage counter on 1 of your opponent's Benched Pokemon and 2 on another.)": 'opt:0,2 o1.blast',
+    'Flip 3 coins. For each heads, you may search your deck for a Lightning Energy card and attach it to 1 of your Lightning Pokemon. Shuffle your deck afterward.': 'c:3 askn:25,0',
     "Choose 1 of your opponent's Pokemon. Remove any number of damage counters from that Pokemon, then draw that many cards.": 'opt:12 helph',
     "Flip a coin. If heads and if any of your Pokemon have any damage counters on them, then remove 2 damage counters from 1 of them (or 1 if it only has 1). If tails and if any of your opponent's Pokemon have any damage counters on them, choose 1 of them and remove 2 damage counters from it (or 1 if it only has 1).": 'c h.askch:19,1 t.askch:20,1',
     "Choose 1 of your opponent's Pokemon and put a Lightning Rod marker on it. (A Pokemon can have only 1 Lightning Rod marker on it at a time.)": 'rodset',
