@@ -1511,7 +1511,7 @@ unsigned TcgFlow_Begin(struct TcgFlow *f, const struct TcgDuel *g, unsigned me, 
     }
     case TCG_FLOW_ATTACK:
     {
-        if (g->phase != TCG_TURN || index > TCG_ATTACK_TM)
+        if (g->phase != TCG_TURN || index >= TCG_ATTACK_SLOTS)
             return Fail(f, "You can't attack now.");
         if (!TcgFlow_AttackReady(g, f->me, index, reason, sizeof(reason)))
             return Fail(f, reason);

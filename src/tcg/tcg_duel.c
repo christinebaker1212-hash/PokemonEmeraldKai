@@ -309,6 +309,59 @@ int TcgDuel_TmFits(const struct TcgDuel *g, unsigned who, unsigned slot, const s
     }
     return !named || fits;
 }
+/* The want-th borrowed attack of that player's Active Pokemon (TCG_ATTACK_BORROW + want) */
+static const struct TcgAttack *Borrowed(const struct TcgDuel *g, unsigned player, unsigned want, unsigned *card)
+{
+    const struct TcgPlayer *p = &g->players[player];
+    const struct TcgFieldCard *f = &p->field[0];
+    const struct TcgCard *top = TcgDuel_Field(g, player, 0);
+    unsigned n = 0, k, i, s, power;
+    if (!top || top->kind != TCG_POKEMON || EnergySlot(g, player) || want >= TCG_BORROW_MAX)
+        return NULL;
+    power = TcgPower_Working(g, player, 0);
+    /* Recall (this turn), Memory Berry, Prehistoric Memory (either side's): the attacks of the cards under it */
+    if (f->stackSize > 1 && ((p->turnBuffs & TCG_BUFF_RECALL) || TcgDuel_AttachedCard(g, player, 0, TCG_CARD_ECARD2_128) >= 0 ||
+                             TcgPower_InPlay(g, 2, TCG_POWER_R_PREHISTORIC_MEMORY)))
+        for (k = f->stackSize - 1; k-- > 0;)
+        {
+            const struct TcgCard *c = Tcg_Card(p->cards[f->stack[k]]);
+            for (i = 0; c && c->kind == TCG_POKEMON && i < TCG_ATTACKS; i++)
+                if (c->attacks[i].name[0] && c->attacks[i].category != TCG_POKEMON_POWER && n++ == want)
+                {
+                    if (card)
+                        *card = c->id | i << 16; /* (whose attack: for the board's banner) */
+                    return &c->attacks[i];
+                }
+        }
+    /* Psylink: your other Psychic Pokemon's attacks */
+    if (power == TCG_POWER_R_PSYLINK)
+        for (s = 1; s < TCG_FIELD_SIZE; s++)
+        {
+            const struct TcgCard *c = TcgDuel_Field(g, player, s);
+            if (!c || c->kind != TCG_POKEMON || TcgDuel_Type(g, player, s) != TCG_PSYCHIC)
+                continue;
+            for (i = 0; i < TCG_ATTACKS; i++)
+                if (c->attacks[i].name[0] && c->attacks[i].category != TCG_POKEMON_POWER && n++ == want)
+                {
+                    if (card)
+                        *card = c->id | i << 16; /* (whose attack: for the board's banner) */
+                    return &c->attacks[i];
+                }
+        }
+    /* Mimic: the Defending Pokemon's attacks */
+    if (power == TCG_POWER_R_MIMIC)
+    {
+        const struct TcgCard *c = TcgDuel_Field(g, player ^ 1, 0);
+        for (i = 0; c && c->kind == TCG_POKEMON && i < TCG_ATTACKS; i++)
+            if (c->attacks[i].name[0] && c->attacks[i].category != TCG_POKEMON_POWER && n++ == want)
+            {
+                if (card)
+                    *card = c->id | i << 16;
+                return &c->attacks[i];
+            }
+    }
+    return NULL;
+}
 const struct TcgAttack *TcgDuel_AttackOf(const struct TcgDuel *g, unsigned player, unsigned attack)
 {
     const struct TcgCard *c = TcgDuel_Attacker(g, player), *tm;
@@ -316,6 +369,8 @@ const struct TcgAttack *TcgDuel_AttackOf(const struct TcgDuel *g, unsigned playe
         return NULL;
     if (attack < TCG_ATTACKS)
         return &c->attacks[attack];
+    if (attack >= TCG_ATTACK_BORROW && attack < TCG_ATTACK_SLOTS)
+        return Borrowed(g, player, attack - TCG_ATTACK_BORROW, NULL);
     if (attack != TCG_ATTACK_TM || !(tm = Tcg_Card(TcgDuel_Tm(g, player, 0, NULL))) || !tm->attacks[0].name ||
         !tm->attacks[0].name[0])
         return NULL;
@@ -902,7 +957,7 @@ static int Apply(struct TcgDuel *g, const struct TcgAction *a)
         const char *blocked;
         int result, total;
         f = &p->field[0];
-        if (!attacker || !target || attacker->kind != TCG_POKEMON || a->attack > TCG_ATTACK_TM ||
+        if (!attacker || !target || attacker->kind != TCG_POKEMON || a->attack >= TCG_ATTACK_SLOTS ||
             !EnergyPaid(g, g->current, a->attack))
             return Error(g, "That attack cannot be used with the attached Energy.");
         attack = TcgDuel_AttackOf(g, g->current, a->attack); /* (TCG_ATTACK_TM: its Technical Machine's) */
@@ -946,7 +1001,13 @@ static int Apply(struct TcgDuel *g, const struct TcgAction *a)
             EndTurn(g);
             return TCG_OK;
         }
-        TcgDuel_Event(g, TCG_EV_ATTACK, g->current, a->attack, 0, attacker->id, 0);
+        {
+            /* (a borrowed attack: value its card's id, flags its index there) */
+            unsigned whose = 0;
+            if (a->attack >= TCG_ATTACK_BORROW)
+                Borrowed(g, g->current, a->attack - TCG_ATTACK_BORROW, &whose);
+            TcgDuel_Event(g, TCG_EV_ATTACK, g->current, a->attack, whose & 0xFFFF, attacker->id, whose >> 16);
+        }
         if (f->condition == TCG_CONFUSED && !TcgDuel_Coin(g, g->current))
         {
             TcgDuel_SelfDamage(g, TcgPower_Frenzy(g, g->current) ? 50 : 20); /* (Dark Primeape's Frenzy: 30 more) */
@@ -1181,9 +1242,12 @@ static int Apply(struct TcgDuel *g, const struct TcgAction *a)
                 TcgDuel_DiscardAttached(g, g->current ^ 1, 0, (unsigned)claws);
             }
         }
-        /* Crystal Shard: discarded at the end of a turn its Pokemon attacked */
+        /* Crystal Shard, Memory Berry: discarded at the end of a turn its Pokemon attacked */
         {
             int shard = TcgDuel_AttachedCard(g, g->current, 0, TCG_CARD_ECARD3_122);
+            if (shard >= 0)
+                g->players[g->current].attachmentExpires[shard] = g->turn;
+            shard = TcgDuel_AttachedCard(g, g->current, 0, TCG_CARD_ECARD2_128);
             if (shard >= 0)
                 g->players[g->current].attachmentExpires[shard] = g->turn;
         }

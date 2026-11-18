@@ -713,6 +713,76 @@ static int SwitchesAndFire(void)
     printf("PASS Drive Off, Major Tsunami, Lightning Burst, Baton Pass, Bonfire, Roaring Flames, Messenger, Sleight of Hand, Destructive Fire\n");
     return 0;
 }
+/* Borrowed attacks: Recall and Memory Berry (Machop's Low Kick from Machoke), Prehistoric Memory, Psylink, Mimic */
+static int BorrowedAttacks(void)
+{
+    struct TcgDuel g;
+    struct TcgAction a;
+    const struct TcgAttack *at;
+    int c;
+    unsigned k;
+    if (!Tcg_Card(TCG_CARD_GYM1_116) || !Tcg_Card(TCG_CARD_ECARD2_128) || !Tcg_Card(TCG_CARD_GYM2_16) ||
+        !Tcg_Card(TCG_CARD_NEO3_15) || !Tcg_Card(TCG_CARD_NEO3_26))
+        return printf("FAIL borrowed attacks: a card isn't finished\n"), 1;
+    /* (Machoke over a Machop) */
+    Stage(&g, TCG_CARD_MACHOP, 0, 1);
+    c = Relabel(&g, 0, TCG_CARD_MACHOKE);
+    g.players[0].field[0].stack[g.players[0].field[0].stackSize++] = (uint8_t)c;
+    if (TcgDuel_AttackOf(&g, 0, TCG_ATTACK_BORROW))
+        return printf("FAIL borrowed: Machoke has Low Kick without Recall\n"), 1;
+    c = Relabel(&g, 0, TCG_CARD_GYM1_116);
+    g.players[0].hand[g.players[0].handSize++] = (uint8_t)c;
+    memset(&a, 0, sizeof(a));
+    a.type = TCG_PLAY_TRAINER;
+    a.hand = (uint8_t)(g.players[0].handSize - 1);
+    if (TcgDuel_Apply(&g, &a) != TCG_OK)
+        return printf("FAIL Recall: %s\n", g.error), 1;
+    at = TcgDuel_AttackOf(&g, 0, TCG_ATTACK_BORROW);
+    if (!at || strcmp(at->name, Tcg_Card(TCG_CARD_MACHOP)->attacks[0].name))
+        return printf("FAIL Recall: borrowed %s\n", at ? at->name : "nothing"), 1;
+    k = g.players[1].field[0].damage;
+    memset(&a, 0, sizeof(a));
+    a.type = TCG_ATTACK;
+    a.attack = TCG_ATTACK_BORROW;
+    if (TcgDuel_Apply(&g, &a) != TCG_OK || g.players[1].field[0].damage <= k)
+        return printf("FAIL Recall's Low Kick: %s\n", g.error), 1;
+    /* Memory Berry: while attached, and discarded after the attack */
+    Stage(&g, TCG_CARD_MACHOP, 0, 1);
+    c = Relabel(&g, 0, TCG_CARD_MACHOKE);
+    g.players[0].field[0].stack[g.players[0].field[0].stackSize++] = (uint8_t)c;
+    c = Relabel(&g, 0, TCG_CARD_ECARD2_128);
+    g.players[0].field[0].attached[g.players[0].field[0].attachedSize++] = (uint8_t)c;
+    if (!TcgDuel_AttackOf(&g, 0, TCG_ATTACK_BORROW))
+        return printf("FAIL Memory Berry: no borrowed attack\n"), 1;
+    memset(&a, 0, sizeof(a));
+    a.type = TCG_ATTACK;
+    a.attack = TCG_ATTACK_BORROW;
+    if (TcgDuel_Apply(&g, &a) != TCG_OK || TcgDuel_AttachedCard(&g, 0, 0, TCG_CARD_ECARD2_128) >= 0)
+        return printf("FAIL Memory Berry: %s (still attached after the attack)\n", g.error), 1;
+    /* Prehistoric Memory: their Aerodactyl lets your Machoke use Low Kick too */
+    Stage(&g, TCG_CARD_MACHOP, 0, 1);
+    c = Relabel(&g, 0, TCG_CARD_MACHOKE);
+    g.players[0].field[0].stack[g.players[0].field[0].stackSize++] = (uint8_t)c;
+    g.players[1].cards[g.players[1].field[1].stack[0]] = TCG_CARD_NEO3_15;
+    if (!TcgDuel_AttackOf(&g, 0, TCG_ATTACK_BORROW))
+        return printf("FAIL Prehistoric Memory\n"), 1;
+    /* Psylink: a Benched Psychic Pokemon's attacks; Mimic: the Defending Pokemon's */
+    Stage(&g, TCG_CARD_GYM2_16, 1, 1);
+    g.players[0].field[0].condition = TCG_HEALTHY;
+    if (TcgDuel_AttackOf(&g, 0, TCG_ATTACK_BORROW))
+        return printf("FAIL Psylink with no Psychic Pokemon\n"), 1;
+    g.players[0].cards[g.players[0].field[1].stack[0]] = TCG_CARD_KADABRA;
+    at = TcgDuel_AttackOf(&g, 0, TCG_ATTACK_BORROW);
+    if (!at || strcmp(at->name, Tcg_Card(TCG_CARD_KADABRA)->attacks[at == &Tcg_Card(TCG_CARD_KADABRA)->attacks[0] ? 0 : 1].name))
+        return printf("FAIL Psylink: %s\n", at ? at->name : "nothing"), 1;
+    Stage(&g, TCG_CARD_NEO3_26, 1, 1);
+    g.players[0].field[0].condition = TCG_HEALTHY;
+    at = TcgDuel_AttackOf(&g, 0, TCG_ATTACK_BORROW);
+    if (!at || strcmp(at->name, Tcg_Card(TCG_CARD_MACHOP)->attacks[0].name))
+        return printf("FAIL Mimic: %s\n", at ? at->name : "nothing"), 1;
+    printf("PASS borrowed attacks: Recall, Memory Berry, Prehistoric Memory, Psylink, Mimic\n");
+    return 0;
+}
 static int ScriptMechanics(void)
 {
     struct TcgDuel g;
@@ -1528,7 +1598,7 @@ int main(void)
     }
     printf("PASS %u finished regional cards: %u attacks used %u times, then %u AI actions after them\n", ready, used, ok,
            steps);
-    if (SpecialEnergy() || EcardEnergy() || ScriptMechanics() || Anchors() || Guards() || MovePowers() || LookPowers() || SwitchesAndFire() || TechnicalMachines() || Babies())
+    if (SpecialEnergy() || EcardEnergy() || ScriptMechanics() || Anchors() || Guards() || MovePowers() || LookPowers() || SwitchesAndFire() || BorrowedAttacks() || TechnicalMachines() || Babies())
         return 1;
     if (PlayTrainers() || UsePowers() || UseStadiums() || AttackFlows())
         return 1;

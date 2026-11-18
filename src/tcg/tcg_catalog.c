@@ -3541,7 +3541,7 @@ const struct TcgCard gTcgCards[TCG_CARD_COUNT + 1] = {
 [557] = {.id=557, .name="Pewter City Gym", .kind=TCG_TRAINER, .type=6, .rarity=1, .set=13, .set2=255, .dark=0, .holo=0, .flags=TCG_CF_STADIUM|TCG_CF_READY, .origin=13,
 .effect="gym1-115:t",.description="This card stays in play when you play it. Discard this card if another Stadium card comes into play. Don't apply Resistance to any attacks made by Pokemon with Brock in their names."
 },
-[558] = {.id=558, .name="Recall", .kind=TCG_TRAINER, .type=6, .rarity=1, .set=13, .set2=255, .dark=0, .holo=0, .flags=0, .origin=13,
+[558] = {.id=558, .name="Recall", .kind=TCG_TRAINER, .type=6, .rarity=1, .set=13, .set2=255, .dark=0, .holo=0, .flags=TCG_CF_READY, .origin=13,
 .effect="gym1-116:t",.description="For your attack this turn, your Active Pokemon can use any attack from its Basic Pokemon card or any Evolution card attached to it. (You still have to pay for that attack's Energy cost.)"
 },
 [559] = {.id=559, .name="Sabrina's ESP", .kind=TCG_TRAINER, .type=6, .rarity=1, .set=13, .set2=255, .dark=0, .holo=0, .flags=0, .origin=13,
@@ -3679,7 +3679,7 @@ const struct TcgCard gTcgCards[TCG_CARD_COUNT + 1] = {
 {.name="",.description="",.effect="NONE",.animation="ATK_ANIM_NONE",.cost={0},.damage=0,.category=TCG_DAMAGE_NORMAL},
 }
 },
-[584] = {.id=584, .name="Sabrina's Alakazam", .kind=TCG_POKEMON, .type=5, .rarity=2, .set=14, .set2=255, .dark=0, .holo=1, .flags=TCG_CF_OWNER, .origin=14,
+[584] = {.id=584, .name="Sabrina's Alakazam", .kind=TCG_POKEMON, .type=5, .rarity=2, .set=14, .set2=255, .dark=0, .holo=1, .flags=TCG_CF_OWNER|TCG_CF_READY, .origin=14,
 .hp=80, .stage=2, .species=65, .level=44, .retreat=3, .weakness=5, .resistance=255, .evolvesFrom="Sabrina's Kadabra", .description="", .attacks={
 {.name="Psylink",.description="Sabrina's Alakazam always has a copy of every attack your Psychic Pokemon in play have (including their Energy costs and anything else required in order to use those attacks, such as discarding Energy cards). This power can't be used if Sabrina's Alakazam is Asleep, Confused, or Paralyzed.",.effect="gym2-16:p",.animation="ATK_ANIM_HIT",.cost={0,0,0,0,0,0,0,0,0},.damage=0,.category=TCG_POKEMON_POWER},
 {.name="Mega Burn",.description="You can't use this attack during your next turn.",.effect="gym2-16:a0",.animation="ATK_ANIM_HIT",.cost={0,0,0,0,0,1,3,0,0},.damage=60,.category=TCG_DAMAGE_NORMAL},
@@ -5578,7 +5578,7 @@ const struct TcgCard gTcgCards[TCG_CARD_COUNT + 1] = {
 {.name="",.description="",.effect="NONE",.animation="ATK_ANIM_NONE",.cost={0},.damage=0,.category=TCG_DAMAGE_NORMAL},
 }
 },
-[889] = {.id=889, .name="Aerodactyl", .kind=TCG_POKEMON, .type=4, .rarity=2, .set=17, .set2=255, .dark=0, .holo=0, .flags=0, .origin=17,
+[889] = {.id=889, .name="Aerodactyl", .kind=TCG_POKEMON, .type=4, .rarity=2, .set=17, .set2=255, .dark=0, .holo=0, .flags=TCG_CF_READY, .origin=17,
 .hp=60, .stage=1, .species=142, .level=27, .retreat=2, .weakness=1, .resistance=4, .evolvesFrom="Mysterious Fossil", .description="A vicious Pokemon from the distant past, it appears to have flown by spreading its wings and gliding.", .attacks={
 {.name="Prehistoric Memory",.description="Whenever an Evolved Pokemon attacks (even if it's your opponent's), it can use any attack from its Basic Pokemon card or any Evolution card attached to it. It still has to pay for that attack's Energy cost. This power stops working while Aerodactyl is Asleep, Confused, or Paralyzed.",.effect="neo3-15:p",.animation="ATK_ANIM_HIT",.cost={0,0,0,0,0,0,0,0,0},.damage=0,.category=TCG_POKEMON_POWER},
 {.name="Fly",.description="Flip a coin. If heads, during your opponent's next turn, prevent all effects of attacks, including damage, done to Aerodactyl. If tails, this attack does nothing (not even damage).",.effect="neo3-15:a0",.animation="ATK_ANIM_HIT",.cost={0,0,0,0,0,0,3,0,0},.damage=30,.category=TCG_DAMAGE_NORMAL},
@@ -5655,7 +5655,7 @@ const struct TcgCard gTcgCards[TCG_CARD_COUNT + 1] = {
 {.name="",.description="",.effect="NONE",.animation="ATK_ANIM_NONE",.cost={0},.damage=0,.category=TCG_DAMAGE_NORMAL},
 }
 },
-[900] = {.id=900, .name="Sudowoodo", .kind=TCG_POKEMON, .type=4, .rarity=2, .set=17, .set2=255, .dark=0, .holo=0, .flags=0, .origin=17,
+[900] = {.id=900, .name="Sudowoodo", .kind=TCG_POKEMON, .type=4, .rarity=2, .set=17, .set2=255, .dark=0, .holo=0, .flags=TCG_CF_READY, .origin=17,
 .hp=60, .stage=0, .species=185, .level=27, .retreat=3, .weakness=3, .resistance=255, .evolvesFrom="", .description="It disguises itself as a tree to avoid attack. It hates water, so it will disappear if it starts raining.", .attacks={
 {.name="Mimic",.description="As long as Sudowoodo is your Active Pokemon, it copies all of the Defending Pokemon's attacks, including their costs. This power can't be used if Sudowoodo is Asleep, Confused, or Paralyzed.",.effect="neo3-26:p",.animation="ATK_ANIM_HIT",.cost={0,0,0,0,0,0,0,0,0},.damage=0,.category=TCG_POKEMON_POWER},
 {.name="Slam",.description="Flip 2 coins. This attack does 20 damage times the number of heads.",.effect="neo3-26:a0",.animation="ATK_ANIM_HIT",.cost={0,0,0,0,0,0,2,0,0},.damage=20,.category=TCG_DAMAGE_X},
@@ -8553,7 +8553,7 @@ const struct TcgCard gTcgCards[TCG_CARD_COUNT + 1] = {
 {.name="",.description="",.effect="NONE",.animation="ATK_ANIM_NONE",.cost={0},.damage=0,.category=TCG_DAMAGE_NORMAL},
 }
 },
-[1340] = {.id=1340, .name="Memory Berry", .kind=TCG_TRAINER, .type=6, .rarity=1, .set=20, .set2=255, .dark=0, .holo=0, .flags=TCG_CF_TOOL, .origin=20,
+[1340] = {.id=1340, .name="Memory Berry", .kind=TCG_TRAINER, .type=6, .rarity=1, .set=20, .set2=255, .dark=0, .holo=0, .flags=TCG_CF_TOOL|TCG_CF_READY, .origin=20,
 .effect="ecard2-128:t",.description="Attach Memory Berry to 1 of your Pokemon that doesn't have a Pokemon Tool attached to it. If that Pokemon is Knocked Out, discard this card. The Pokemon this card is attached to can use any attack from its Basic Pokemon card or any Evolution card from which the Pokemon evolved. (You still have to pay for that attack's Energy cost.) Discard this card at the end of any turn the Pokemon attacks."
 },
 [1341] = {.id=1341, .name="Metal Cube 01", .kind=TCG_TRAINER, .type=6, .rarity=1, .set=20, .set2=255, .dark=0, .holo=0, .flags=TCG_CF_TM|TCG_CF_READY, .origin=20,

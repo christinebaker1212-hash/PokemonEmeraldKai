@@ -390,7 +390,11 @@ int TcgDuel_EvolvesFrom(const struct TcgCard *evolution, const struct TcgCard *f
  * attached to that Pokemon (0: none; physical, its card); TcgDuel_TmFits: may it be attached there (its card's words:
  * "your Darkness Pokemon", "your Evolved Fire, Lightning, or Fighting Pokemon")? */
 #define TCG_ATTACK_TM TCG_ATTACKS
-#define TCG_ATTACK_SLOTS (TCG_ATTACKS + 1)
+/* Borrowed attacks follow (TcgDuel_AttackOf): its Basic Pokemon's and Evolution cards' under it (Recall, Memory Berry,
+ * Prehistoric Memory), your other Psychic Pokemon's (Psylink), the Defending Pokemon's (Mimic) */
+#define TCG_ATTACK_BORROW (TCG_ATTACK_TM + 1)
+#define TCG_BORROW_MAX 6
+#define TCG_ATTACK_SLOTS (TCG_ATTACK_BORROW + TCG_BORROW_MAX)
 const struct TcgAttack *TcgDuel_AttackOf(const struct TcgDuel *g, unsigned player, unsigned attack);
 unsigned TcgDuel_Tm(const struct TcgDuel *g, unsigned who, unsigned slot, unsigned *physical);
 int TcgDuel_TmFits(const struct TcgDuel *g, unsigned who, unsigned slot, const struct TcgCard *tm);
@@ -419,7 +423,8 @@ enum
     TCG_BUFF_KOGA = 2,  /* Koga: a Koga Pokemon's damage Poisons */
     TCG_BUFF_PARK = 4,  /* Pokemon Park healed this turn */
     TCG_BUFF_TAILWIND = 8, /* Tailwind: the Active's Retreat Cost is 0 this turn */
-    TCG_BUFF_NEIGHBOR = 16 /* a Good Neighbor used this turn */
+    TCG_BUFF_NEIGHBOR = 16, /* a Good Neighbor used this turn */
+    TCG_BUFF_RECALL = 32   /* Recall: the Active may use its lower stages' attacks this turn */
 };
 /* That card (Tcg_Canon) attached to that Pokemon: its card, else -1 */
 int TcgDuel_AttachedCard(const struct TcgDuel *g, unsigned who, unsigned slot, unsigned canon);

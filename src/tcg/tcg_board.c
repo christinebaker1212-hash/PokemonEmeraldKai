@@ -705,6 +705,8 @@ static int StartEvent(const struct TcgEvent *e, int post)
         const struct TcgAttack *a = c && e->slot < TCG_ATTACKS ? &c->attacks[e->slot] : NULL;
         if (c && e->slot == TCG_ATTACK_TM)
             a = TcgDuel_AttackOf(&B.view, who, e->slot); /* (its Technical Machine's, while it's there) */
+        if (c && e->slot >= TCG_ATTACK_BORROW && Tcg_Card(e->value) && e->flags < TCG_ATTACKS)
+            a = &Tcg_Card(e->value)->attacks[e->flags]; /* (a borrowed attack: whose it is) */
         if (!a)
             return 0;
         se = AttackSe(a->animation, c->type, &color);
@@ -3792,19 +3794,23 @@ static void DrawMenu(void)
 static void DrawAttacks(void)
 {
     const struct TcgCard *c = TcgDuel_Attacker(&B.view, 0);
-    int i, rows = 0, row = 0, top;
+    int i, rows = 0, row = 0, top, step;
     if (!c)
         return;
     for (i = 0; i < TCG_ATTACK_SLOTS; i++)
         rows += TcgDuel_AttackOf(&B.view, 0, (unsigned)i) && TcgDuel_AttackOf(&B.view, 0, (unsigned)i)->name[0] != 0;
     /* (a third attack, or a Technical Machine's: the window grows upward, the description stays at the bottom) */
-    top = rows > 2 ? 98 - 15 * (rows - 2) : 98;
+    /* (borrowed attacks too: rows closer together past 6, so the window keeps to the screen) */
+    step = rows > 6 ? 11 : 15;
+    top = rows > 2 ? 98 - step * (rows - 2) : 98;
+    if (top < 2)
+        top = 2;
     G_Window(0, top, 240, 160 - top);
     for (i = 0; i < TCG_ATTACK_SLOTS; i++)
     {
         const struct TcgAttack *a = TcgDuel_AttackOf(&B.view, 0, (unsigned)i);
         char reason[80], dmg[16];
-        int y = top + 6 + row * 15, x = 16, t, ready;
+        int y = top + 6 + row * step, x = 16, t, ready;
         if (!a || !a->name[0])
             continue;
         row++;

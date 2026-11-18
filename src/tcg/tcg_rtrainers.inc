@@ -622,6 +622,10 @@ static int RegionTrainer(struct TcgDuel *g, const struct TcgAction *a, unsigned 
     case TCG_CARD_NEO4_97:    /* Counterattack Claws */
     case TCG_CARD_ECARD2_125: /* Healing Berry */
     case TCG_CARD_ECARD3_122: /* Crystal Shard */
+    case TCG_CARD_ECARD2_128: /* Memory Berry (its attacks: tcg_duel.c Borrowed) */
+        break;
+    case TCG_CARD_GYM1_116: /* Recall: the Active's lower stages' attacks this turn */
+        p->turnBuffs |= TCG_BUFF_RECALL;
         break;
     case TCG_CARD_ECARD2_120: /* Energy Switch: a basic Energy from one of yours to another */
     {
