@@ -181,5 +181,10 @@ Total 1,158 set cards (about 1,100 attacks with effect text, 250 Pokémon Powers
    decks and promos (UNOVA's too), CARD SCALING ratings rerun, the card guide rebuilt.
 6. Retroactive promos: a courier NPC brings each promo whose (newly special) trainer the save's card record shows as
    beaten (TcgCollection's records by the opponent's key; as mp_battleisland.c's courier / mp_tmrefund.c), once.
+   **Built (2026-11-18)**: src/mp/mp_cardcourier.c (a CARD CLUB member, the MANIAC sprite, walks up wherever the player
+   is free; SINNOH: a parcel; never on BATTLE ISLAND or in ORRE), tcg_field.c Tcg_CourierOwed / Tcg_CourierDeliver:
+   JOHTO's, KANTO's and SINNOH's 47 trainers kept their record keys (0xFE000000 | their place in sQzSpecials, never
+   renumbered), so a record with a win and no promo given is owed that trainer's promo; they're marked beaten too.
+   Scenario cards_courier (`mp cards record KEY WINS`).
 7. The GEN switch (POKéMON / MAGIC by set, YU-GI-OH! by summon type, FUSION the base): every set a GEN step from the
    catalogue's own set list, so a new set needs no switch code; mock-ups of where it's set first.

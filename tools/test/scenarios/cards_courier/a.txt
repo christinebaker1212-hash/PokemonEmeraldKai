@@ -1,0 +1,16 @@
+pressuntil A field 5000
+wait 60
+mp textspeed 2
+mp cards starter 0
+mp cards record FE000001 1
+mp cards record FE000000 2
+waitlog 900 card courier: on the way
+wait 40
+rendershot a_walkup
+pressuntillog A 1500 handed over
+wait 60
+rendershot a_cards
+mash A 10 30
+wait 120
+mp cards record FE000002 0
+quit

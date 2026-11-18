@@ -2462,6 +2462,10 @@ void MP_FrameUpdate(void)
         MP_HmRescue_Update();   // HMs a friend's progress made impossible to get (mp_hmrescue.c)
         MP_BattleIsland_Update();   // the BATTLE TICKET's courier (mp_battleisland.c)
         {
+            void MP_CardCourier_Update(void);
+            MP_CardCourier_Update();   // promo cards owed for special card trainers beaten before (mp_cardcourier.c)
+        }
+        {
             void MP_Ship_Update(void);
             MP_Ship_Update();   // a first arrival's scene in the town; the POKéMON kept at the lab comes back (mp_ship.c)
         }

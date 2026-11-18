@@ -30,6 +30,11 @@ void Tcg_AskFriend(unsigned id, unsigned kind); /* kind 0 duel, 1 trade */
 /* Shown over this player's name to friends: 0 none, 1 a card duel. */
 unsigned Tcg_DuelingNow(void);
 unsigned Tcg_Today(void);
+/* The card courier (src/mp/mp_cardcourier.c, tcg_field.c): promo cards owed to a save for the regional special trainers
+ * it beat before they had their own, and handing them over ("NAME: card" lines, two a page) */
+unsigned Tcg_CourierOwed(void);
+unsigned Tcg_CourierDeliver(char *out, size_t size);
+unsigned Tcg_GivePromoOf(unsigned special);
 /* A new duel's seed (all three card games): the collection's generator stirred with the clock, so a save loaded again
  * never deals the same hands (the scripted tests keep theirs) */
 uint32_t Tcg_DuelSeed(uint32_t *rng);

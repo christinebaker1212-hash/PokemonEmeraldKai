@@ -1728,3 +1728,59 @@ void Tcg_DebugVariety(void)
     printf("[test] tcgvariety: %u different decks for 140 card players, %u of them GB2's, %u the region's theme decks\n",
            total, gb2, themes);
 }
+
+// ---------------------------------------------------------------------------
+// The card courier (src/mp/mp_cardcourier.c): JOHTO's, KANTO's and SINNOH's special trainers played HOENN's decks before
+// they had decks and promo cards of their own; a save whose record shows a win over one (their record key,
+// 0xFE000000 | n, never renumbered) is owed that trainer's promo card, once. Wins after this are paid at the table.
+
+static bool8 CourierOwes(const struct TcgCollection *c, unsigned qi)
+{
+    unsigned special = TCG_SPECIAL_HOENN_COUNT + qi;
+    const struct TcgRecord *r = Tcg_Record(c, 0xFE000000u | qi);
+    return special < TCG_SPECIAL_COUNT && gTcgSpecialPromos[special] && r && r->wins && !Tcg_PromoGiven(c, special);
+}
+
+unsigned Tcg_CourierOwed(void)
+{
+    struct TcgCollection *c = Tcg_GetCollection();
+    unsigned qi, n = 0;
+    if (!c || !c->optedIn)
+        return 0;
+    for (qi = 0; qi < ARRAY_COUNT(sQzSpecials); qi++)
+        n += CourierOwes(c, qi);
+    return n;
+}
+
+// Hands every one over: "NAME: card" lines into out, two to a page (\f); how many
+unsigned Tcg_CourierDeliver(char *out, size_t size)
+{
+    struct TcgCollection *c = Tcg_GetCollection();
+    unsigned qi, n = 0;
+    size_t at = 0;
+    if (size)
+        out[0] = 0;
+    if (!c || !c->optedIn)
+        return 0;
+    for (qi = 0; qi < ARRAY_COUNT(sQzSpecials); qi++)
+    {
+        unsigned special = TCG_SPECIAL_HOENN_COUNT + qi, card;
+        if (!CourierOwes(c, qi))
+            continue;
+        card = Tcg_GivePromoOf(special);
+        if (!card)
+            continue;
+        if (!Tcg_SpecialBeaten(c, special))
+        {
+            Tcg_SetSpecialBeaten(c, special);
+            MP_Achieve_Count("cardspecial", 1);
+        }
+        MP_Achieve_Unlock("cardpromo");
+        if (at < size)
+            at += (size_t)snprintf(out + at, size - at, "%s%s: %s", n ? (n % 2 ? "\n" : "\f") : "", sQzSpecials[qi].name,
+                                   Tcg_Card(card)->name);
+        MPNet_Log("card courier: %s's promo %s", sQzSpecials[qi].name, Tcg_Card(card)->name);
+        n++;
+    }
+    return n;
+}

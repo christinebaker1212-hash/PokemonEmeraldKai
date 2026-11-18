@@ -1,0 +1,8 @@
+# The CARD CLUB's courier: a save whose card record shows wins over JOHTO's FALKNER and BUGSY (from before they had promo
+# cards of their own) is brought both promos once, by someone walking up (mp_cardcourier.c, tcg_field.c
+# Tcg_CourierDeliver); nothing more is owed after
+MODE=1
+TMO=150
+ENV_A="MOEMON_TEST_CARD_COURIER=1 MOEMON_DEBUG_REGION=1"
+EXPECT_A=("courier owes 2" "card courier: FALKNER's promo" "card courier: BUGSY's promo" "card courier: 2 promo card(s) handed over" "courier owes 0")
+UNEXPECT_A=("[crash]")

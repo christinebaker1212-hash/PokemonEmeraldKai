@@ -4930,6 +4930,17 @@ void Tcg_Debug(const char *command)
         c->dust = n;
         return;
     }
+    {
+        /* (a record: mp cards record KEY_HEX WINS; the card courier's tests) */
+        unsigned key;
+        if (sscanf(command, "record %x %u", &key, &n) == 2)
+        {
+            while (n--)
+                Tcg_RecordResult(c, key, 1, Tcg_Today());
+            printf("[tcg] courier owes %u\n", Tcg_CourierOwed());
+            return;
+        }
+    }
     /* (the milestone prizes: mp cards stats WINS PACKS SPECIAL_BITS) */
     {
         unsigned bits;
