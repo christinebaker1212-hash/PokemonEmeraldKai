@@ -786,17 +786,16 @@ static void Rewards(void)
     n += snprintf(line + n, sizeof(line) - n, "A booster pack went into your CARD CASE.");
     if (U.opp.special < TCG_SPECIAL_COUNT)
     {
-        uint32_t bit = 1u << U.opp.special;
-        if (!(c->specialBeaten & bit))
+        if (!Tcg_SpecialBeaten(c, U.opp.special))
         {
-            c->specialBeaten |= bit;
+            Tcg_SetSpecialBeaten(c, U.opp.special);
             MP_Achieve_Count("cardspecial", 1);
             if (U.opp.special < TCG_GYM_LEADERS)
                 MP_Achieve_Count("cardgyms", 1);
         }
-        if (U.opp.promo && !(c->promoGiven & bit))
+        if (U.opp.promo && !Tcg_PromoGiven(c, U.opp.special))
         {
-            c->promoGiven |= bit;
+            Tcg_SetPromoGiven(c, U.opp.special);
             AddCard(U.opp.promo);
             MP_Achieve_Unlock("cardpromo");
             snprintf(line + n, sizeof(line) - n, "\n%s handed you their promo card: %s!", U.opp.name,
@@ -1194,9 +1193,9 @@ unsigned Tcg_GivePromoOf(unsigned special)
 {
     struct TcgCollection *c = Tcg_GetCollection();
     unsigned card = Tcg_SpecialPromo(special);
-    if (!card || !c->optedIn || special >= 32 || (c->promoGiven & (1u << special)))
+    if (!card || !c->optedIn || special >= TCG_SPECIAL_COUNT || Tcg_PromoGiven(c, special))
         return 0;
-    c->promoGiven |= 1u << special;
+    Tcg_SetPromoGiven(c, special);
     AddCard(card);
     return card;
 }
@@ -1839,7 +1838,7 @@ static void ChallengeScreen(void)
         n += snprintf(line + n, sizeof(line) - n, " and one card from their deck, your pick.");
     else
         n += snprintf(line + n, sizeof(line) - n, ". (Their card again tomorrow.)");
-    if (U.opp.promo && U.opp.special < TCG_SPECIAL_COUNT && !(c->promoGiven & (1u << U.opp.special)))
+    if (U.opp.promo && U.opp.special < TCG_SPECIAL_COUNT && !Tcg_PromoGiven(c, U.opp.special))
     {
         snprintf(line + n, sizeof(line) - n, "\nFirst win: their promo card!");
         Strip(U.opp.promo, line);
@@ -1868,8 +1867,8 @@ static int RecipeCount(void)
 {
     struct TcgCollection *c = Tcg_GetCollection();
     unsigned i, n = 0;
-    for (i = 0; i < gTcgSpecialDeckCount && i < 32; i++)
-        n += (c->specialBeaten >> i) & 1;
+    for (i = 0; i < gTcgSpecialDeckCount && i < TCG_SPECIAL_COUNT; i++)
+        n += Tcg_SpecialBeaten(c, i);
     return RECIPE_FIXED + (int)n;
 }
 #define RECIPE_COUNT RecipeCount()
@@ -1889,14 +1888,15 @@ static int Recipe(int k, struct TcgRecipe *r)
         struct TcgCollection *c = Tcg_GetCollection();
         unsigned i, left = (unsigned)(k - RECIPE_FIXED);
         for (i = 0; i < gTcgSpecialDeckCount && i < TCG_SPECIAL_COUNT; i++)
-            if ((c->specialBeaten >> i) & 1 && !left--)
+            if (Tcg_SpecialBeaten(c, i) && !left--)
             {
-                static const char *const who[TCG_SPECIAL_COUNT] = {
+                static const char *const who[TCG_SPECIAL_HOENN_COUNT] = {
                     "ROXANNE", "BRAWLY", "WATTSON", "FLANNERY", "NORMAN", "WINONA", "TATE&LIZA", "JUAN", "SIDNEY",
                     "PHOEBE", "GLACIA", "DRAKE", "WALLACE", "STEVEN", "RIVAL", "WALLY", "MAXIE", "ARCHIE", "ANABEL",
                     "TUCKER", "SPENSER", "GRETA", "NOLAND", "LUCY"};
-                snprintf(sNames[i], sizeof(sNames[i]), "%s's deck", who[i]);
-                snprintf(sBlurbs[i], sizeof(sBlurbs[i]), "The deck %s duels with. You beat it!", who[i]);
+                const char *name = i < TCG_SPECIAL_HOENN_COUNT ? who[i] : gTcgSpecialRegionTitles[i - TCG_SPECIAL_HOENN_COUNT];
+                snprintf(sNames[i], sizeof(sNames[i]), "%s's deck", name);
+                snprintf(sBlurbs[i], sizeof(sBlurbs[i]), "The deck %s duels with. You beat it!", name);
                 r->name = sNames[i];
                 r->blurb = sBlurbs[i];
                 r->cards = gTcgSpecialDecks[i].cards;
@@ -2834,11 +2834,11 @@ static unsigned MilestoneHave(unsigned k)
         return c->packsOpened;
     case MS_SPECIALS:
         for (i = 0; i < TCG_SPECIAL_COUNT; i++)
-            n += (c->specialBeaten >> i) & 1;
+            n += Tcg_SpecialBeaten(c, i);
         return n;
     case MS_ELITE:
         for (i = TCG_SPECIAL_SIDNEY; i < TCG_SPECIAL_SIDNEY + 4; i++)
-            n += (c->specialBeaten >> i) & 1;
+            n += Tcg_SpecialBeaten(c, i);
         return n;
     case MS_ACHIEVEMENT:
         return MP_Achieve_IsDoneById(sMilestonePromos[k].achievement) ? 1 : 0;
@@ -2890,7 +2890,7 @@ static int PrizeState(unsigned row, char *what, size_t size)
     {
         unsigned i, beaten = 0;
         for (i = 0; i < TCG_GYM_LEADERS; i++)
-            beaten += (c->specialBeaten >> i) & 1;
+            beaten += Tcg_SpecialBeaten(c, i);
         snprintf(what, size, "Beat all 8 GYM LEADERS' decks (%u/8): a promo card", beaten);
         if (c->milestones & GYM_SWEEP_BIT)
             return 2;

@@ -3,8 +3,9 @@
  * 1. Every Game Boy deck and every special trainer's own deck play each other (both
  *    orders, ROUNDS times, the game's AI on both sides); a Bradley-Terry fit of the
  *    results (each deck also holding a draw against an average one), as Elo with the average deck at 1500.
- * 2. Each special trainer variant plays every one of those VARIANT_GAMES times and is
- *    rated against their ratings.
+ * 2. Each special trainer variant, and each regional special trainer's deck (JOHTO's, KANTO's, SINNOH's:
+ *    TCG_SPECIAL_HOENN_COUNT on, so the round robin doesn't grow with them), plays every one of those
+ *    VARIANT_GAMES times and is rated against their ratings.
  * 3. The reference decks the game rates a player's deck against: Game Boy decks spread
  *    evenly over the ratings. As a check, every Game Boy deck is rated the way the game
  *    rates a player's (TcgScale_RateDeck) and the difference printed.
@@ -25,6 +26,7 @@
 
 /* The tables this tool makes (the game's are in tcg_ratings.c): filled in before use */
 int16_t gTcgDeckRating[MAXD], gTcgSpecialRating[1], gTcgVariantRating[1];
+unsigned gTcgSpecialRatingCount;
 uint8_t gTcgRatingReferences[REFERENCES];
 unsigned gTcgRatingReferenceCount;
 
@@ -35,6 +37,25 @@ static unsigned sCount;
 static double sWins[MAXD][MAXD];
 static unsigned sGames[MAXD][MAXD];
 
+/* A deck outside the round robin, VARIANT_GAMES against each deck in it */
+static int16_t RateAgainst(const uint16_t *deck, const int16_t *elo, unsigned seed)
+{
+    int16_t ratings[MAXD];
+    unsigned games[MAXD], half[MAXD], i, r;
+    for (i = 0; i < sCount; i++)
+    {
+        ratings[i] = elo[i];
+        games[i] = VARIANT_GAMES;
+        half[i] = 0;
+        for (r = 0; r < VARIANT_GAMES; r++)
+        {
+            int w = TcgScale_Play(deck, sDeck[i], seed + i * 7919 + r * 104729);
+            half[i] += w < 0 ? 1 : w == 0 ? 2 : 0;
+        }
+    }
+    return TcgScale_Fit(ratings, games, half, sCount);
+}
+
 int main(void)
 {
     double strength[MAXD];
@@ -44,7 +65,7 @@ int main(void)
     for (i = 0; i < gTcgDeckDefinitionCount; i++)
         if (strcmp(gTcgDeckDefinitions[i].name, "Unnamed"))
             sDeck[sCount] = gTcgDeckDefinitions[i].cards, sGb[sCount++] = (int)i;
-    for (i = 0; i < gTcgSpecialDeckCount; i++)
+    for (i = 0; i < gTcgSpecialDeckCount && i < TCG_SPECIAL_HOENN_COUNT; i++)
         sDeck[sCount] = gTcgSpecialDecks[i].cards, sGb[sCount++] = -1 - (int)i;
     for (i = 0; i < sCount; i++)
         for (j = 0; j < sCount; j++)
@@ -100,11 +121,16 @@ int main(void)
            sCount * (sCount - 1) * ROUNDS, TCG_SCALE_MEAN);
     for (i = 0; i < gTcgDeckDefinitionCount; i++)
         printf("    %d, /* %s */\n", gTcgDeckRating[i], gTcgDeckDefinitions[i].name);
-    printf("};\n/* Each special trainer's own deck */\nconst int16_t gTcgSpecialRating[] = {\n");
+    printf("};\n/* Each special trainer's own deck (the regional ones, from %u on, rated as the variants are) */\n"
+           "const int16_t gTcgSpecialRating[] = {\n", TCG_SPECIAL_HOENN_COUNT);
     for (i = 0; i < sCount; i++)
         if (sGb[i] < 0)
             printf("    %d, /* %s */\n", elo[i], gTcgSpecialDecks[-1 - sGb[i]].name);
-    printf("};\n/* Their variants (gTcgSpecialVariants), each against all of the above %u times */\n"
+    for (k = TCG_SPECIAL_HOENN_COUNT; k < gTcgSpecialDeckCount; k++)
+        printf("    %d, /* %s */\n", RateAgainst(gTcgSpecialDecks[k].cards, elo, k * 2654435761u + 11),
+               gTcgSpecialDecks[k].name);
+    printf("};\nconst unsigned gTcgSpecialRatingCount = %u;\n", gTcgSpecialDeckCount);
+    printf("/* Their variants (gTcgSpecialVariants), each against all of the above %u times */\n"
            "const int16_t gTcgVariantRating[] = {\n", VARIANT_GAMES);
     for (k = 0; k < gTcgSpecialVariantCount; k++)
     {

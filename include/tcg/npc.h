@@ -32,10 +32,13 @@ enum
     TCG_SPECIAL_GRETA,
     TCG_SPECIAL_NOLAND,
     TCG_SPECIAL_LUCY,
+    /* the regional sets' (docs/TCG_REGIONS.md): KANTO's, JOHTO's and SINNOH's own decks and promos */
+#include "tcg/region_specials.h"
     TCG_SPECIAL_COUNT,
     TCG_SPECIAL_NONE = 0xFF
 };
 #define TCG_GYM_LEADERS 8 /* TCG_SPECIAL_ROXANNE..JUAN */
+#define TCG_SPECIAL_HOENN_COUNT (TCG_SPECIAL_LUCY + 1)
 
 struct TcgOpponent
 {
@@ -61,6 +64,7 @@ struct TcgOpponent
 extern const struct TcgDeckDefinition gTcgSpecialDecks[];
 extern const unsigned gTcgSpecialDeckCount;
 extern const uint16_t gTcgSpecialPromos[];
+extern const char *const gTcgSpecialRegionTitles[];
 /* Each special trainer's Pokemon and promo on the other Game Boy decks of their type, and whose. */
 extern const struct TcgDeckDefinition gTcgSpecialVariants[];
 extern const unsigned gTcgSpecialVariantCount;

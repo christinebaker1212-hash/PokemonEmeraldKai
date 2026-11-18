@@ -196,6 +196,7 @@ const int16_t gTcgSpecialRating[] = {
     1325, /* NOLAND */
     1461, /* LUCY */
 };
+const unsigned gTcgSpecialRatingCount = 24;
 /* Their variants (gTcgSpecialVariants), each against all of the above 10 times */
 const int16_t gTcgVariantRating[] = {
     1382, /* ROXANNE/BlisteringPokemon */

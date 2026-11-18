@@ -242,12 +242,12 @@ static const struct Special sSpecials[TCG_SPECIAL_COUNT] = {
     [TCG_SPECIAL_LUCY] = {OBJ_EVENT_GFX_LUCY, 0, REQ_NONE, 0, "LUCY", "PIKE QUEEN", 11, 0, MUS_VS_FRONTIER_BRAIN, sText_LucyYes, NULL},
 };
 
-// Moemon Kai: JOHTO's and KANTO's special trainers. Each stands in for one of HOENN's (slot): that one's deck, promo
-// card and "beaten" mark, so a promo is won the same way in every region - beat its trainer at cards once (it is
-// given once, wherever it was won first). Paired by role so HOENN's rules read the same (a region's eight leaders fill
-// the eight leader slots: "beat all eight GYM LEADERS" still means its own; Elite Four for Elite Four, CHAMPION,
-// rival), then by type within the role (FALKNER - WINONA's birds, JASMINE - WATTSON's MAGNEMITE, KOGA - SIDNEY's
-// GENGAR...); each wants its own region's badge, Elite Four win or League, as HOENN's do.
+// Moemon Kai: JOHTO's, KANTO's, SINNOH's and UNOVA's special trainers, each with a deck, promo and "beaten" mark of
+// their own (TCG_SPECIAL_HOENN_COUNT on, in this order: tools/tcg/regions/specials.py builds their decks from their
+// region's sets; docs/TCG_REGIONS.md). The HOENN one in their slot only lends its table and battle style, paired by
+// role (a region's eight leaders in the eight leader slots, Elite Four for Elite Four, CHAMPION, rival) then by type;
+// each wants its own region's badge, Elite Four win or League, as HOENN's do. Records and quotes stay keyed
+// 0xFE000000 | their place here: never reorder them.
 enum { REQ_FLAG = REQ_CHAMPION + 1, REQ_CLEARED };
 struct QzSpecial
 {
@@ -313,6 +313,31 @@ static const u8 sText_BarryYes[] = _("Cards?! I'm gonna win! And if I\ndon't, I'
 static const u8 sText_RowanYes[] = _("Hmm. A card duel. Very well.\nObserve, and learn something.");
 static const u8 sText_JasmineSYes[] = _("Oh, a card duel? Even here in\nSINNOH? I'd like that very much.");
 
+// UNOVA's (written for this game)
+static const u8 sText_CilanYes[] = _("A card duel? Allow me to evaluate\nyour deck's flavor. Bon appetit!");
+static const u8 sText_ChiliYes[] = _("Cards?! Yeah! My deck's burning\nhot! Let's go, let's go!");
+static const u8 sText_CressYes[] = _("A duel with cards. How refreshing.\nMy deck flows like water.");
+static const u8 sText_LenoraYes[] = _("Cards! I've researched every one\nin my deck. Let's see yours!");
+static const u8 sText_BurghYes[] = _("Ah, a card duel! A deck is a kind\nof art, you know. Let's paint!");
+static const u8 sText_ElesaYes[] = _("A card duel? How electrifying.\nI'll make you dizzy, too.");
+static const u8 sText_ClayYes[] = _("Cards, eh? I dig 'em! My deck's\nas tough as my mine. Let's go!");
+static const u8 sText_SkylaYes[] = _("A card duel? Ready for takeoff!\nMy deck flies high!");
+static const u8 sText_BrycenYes[] = _("Cards... a cold, still focus.\nVery well. Show me your resolve.");
+static const u8 sText_DraydenYes[] = _("A card duel. I accept. Let me see\nthe strength of your ideals.");
+static const u8 sText_ULeaderNo[] = _("Win my GYM's BADGE first.\nThen we'll duel with cards.");
+static const u8 sText_ShauntalYes[] = _("Ooh, a card duel! I'll write a\nstory about this. Let's begin!");
+static const u8 sText_GrimsleyYes[] = _("Cards are a gamble, and I never\nturn one down. Deal me in.");
+static const u8 sText_CaitlinYes[] = _("...A card duel? I'm awake now.\nDon't disappoint me.");
+static const u8 sText_MarshalYes[] = _("A card duel! My deck is trained\nlike my body. Prepare yourself!");
+static const u8 sText_AlderYes[] = _("Ha ha! Cards! Now that's how to\nmeet a new friend. Let's duel!");
+static const u8 sText_EliteUNo[] = _("Face me in the POKéMON LEAGUE\nfirst. Then we'll play cards.");
+static const u8 sText_NYes[] = _("Cards... their POKéMON can't speak\nto me. Still, I'll play.");
+static const u8 sText_NNo[] = _("I have no time for cards now.\nFind me when it's all over.");
+static const u8 sText_CherenYes[] = _("A card duel? I've been building a\nstrong deck. Let's test it.");
+static const u8 sText_BiancaYes[] = _("Ooh! Cards! I just got my deck\nand I really wanna try it!");
+static const u8 sText_JuniperYes[] = _("Cards? I'm researching those too!\nLet's duel, for science!");
+static const u8 sText_IrisYes[] = _("Cards! Yeah! My dragon deck is\nsuper strong, you know!");
+
 static const struct QzSpecial sQzSpecials[] = {
     // JOHTO: its eight leaders in HOENN's eight leader slots (badge flags 0x11B2-0x11B9), its ELITE FOUR in HOENN's
     // (once beaten), LANCE in the CHAMPION's, SILVER in the rival's; RED (MT. SILVER) stands in for STEVEN, ELM for WALLY
@@ -369,7 +394,32 @@ static const struct QzSpecial sQzSpecials[] = {
     {OBJ_EVENT_GFX_SINNOH_BARRY, TCG_SPECIAL_RIVAL, REQ_NONE, 0, "BARRY", "", MUS_SINNOH_VS_RIVAL, sText_BarryYes, NULL},
     {OBJ_EVENT_GFX_SINNOH_PROF_ROWAN, TCG_SPECIAL_STEVEN, REQ_NONE, 0, "PROF. ROWAN", "", MUS_SINNOH_VS_TRAINER, sText_RowanYes, NULL},
     {OBJ_EVENT_GFX_SINNOH_JASMINE, TCG_SPECIAL_WALLY, REQ_NONE, 0, "JASMINE", "", MUS_SINNOH_VS_TRAINER, sText_JasmineSYes, NULL},
+    // UNOVA: Black's by role (badge flags FLAG_UNOVA_BADGE01-08: STRIATON's three share the first); the ELITE FOUR,
+    // ALDER and N once UNOVA's LEAGUE is beaten; CHEREN and BIANCA rivals, PROF. JUNIPER and IRIS beside them.
+    // The sprite ids are Black's object codes (Black's own sheets: tools/unova/build_gfx.py)
+    {OBJ_EVENT_GFX_UNOVA_FIRST + 85, TCG_SPECIAL_JUAN, REQ_FLAG, FLAG_UNOVA_BADGE01, "CILAN", "LEADER", MUS_UNOVA_VS_GYMLEADER, sText_CilanYes, sText_ULeaderNo},
+    {OBJ_EVENT_GFX_UNOVA_FIRST + 179, TCG_SPECIAL_FLANNERY, REQ_FLAG, FLAG_UNOVA_BADGE01, "CHILI", "LEADER", MUS_UNOVA_VS_GYMLEADER, sText_ChiliYes, sText_ULeaderNo},
+    {OBJ_EVENT_GFX_UNOVA_FIRST + 178, TCG_SPECIAL_JUAN, REQ_FLAG, FLAG_UNOVA_BADGE01, "CRESS", "LEADER", MUS_UNOVA_VS_GYMLEADER, sText_CressYes, sText_ULeaderNo},
+    {OBJ_EVENT_GFX_UNOVA_FIRST + 86, TCG_SPECIAL_NORMAN, REQ_FLAG, FLAG_UNOVA_BADGE01 + 1, "LENORA", "LEADER", MUS_UNOVA_VS_GYMLEADER, sText_LenoraYes, sText_ULeaderNo},
+    {OBJ_EVENT_GFX_UNOVA_FIRST + 87, TCG_SPECIAL_WINONA, REQ_FLAG, FLAG_UNOVA_BADGE01 + 2, "BURGH", "LEADER", MUS_UNOVA_VS_GYMLEADER, sText_BurghYes, sText_ULeaderNo},
+    {OBJ_EVENT_GFX_UNOVA_FIRST + 88, TCG_SPECIAL_WATTSON, REQ_FLAG, FLAG_UNOVA_BADGE01 + 3, "ELESA", "LEADER", MUS_UNOVA_VS_GYMLEADER, sText_ElesaYes, sText_ULeaderNo},
+    {OBJ_EVENT_GFX_UNOVA_FIRST + 89, TCG_SPECIAL_ROXANNE, REQ_FLAG, FLAG_UNOVA_BADGE01 + 4, "CLAY", "LEADER", MUS_UNOVA_VS_GYMLEADER, sText_ClayYes, sText_ULeaderNo},
+    {OBJ_EVENT_GFX_UNOVA_FIRST + 90, TCG_SPECIAL_WINONA, REQ_FLAG, FLAG_UNOVA_BADGE01 + 5, "SKYLA", "LEADER", MUS_UNOVA_VS_GYMLEADER, sText_SkylaYes, sText_ULeaderNo},
+    {OBJ_EVENT_GFX_UNOVA_FIRST + 91, TCG_SPECIAL_JUAN, REQ_FLAG, FLAG_UNOVA_BADGE01 + 6, "BRYCEN", "LEADER", MUS_UNOVA_VS_GYMLEADER, sText_BrycenYes, sText_ULeaderNo},
+    {OBJ_EVENT_GFX_UNOVA_FIRST + 180, TCG_SPECIAL_NORMAN, REQ_FLAG, FLAG_UNOVA_BADGE01 + 7, "DRAYDEN", "LEADER", MUS_UNOVA_VS_GYMLEADER, sText_DraydenYes, sText_ULeaderNo},
+    {OBJ_EVENT_GFX_UNOVA_FIRST + 93, TCG_SPECIAL_PHOEBE, REQ_CLEARED, REGION_UNOVA, "SHAUNTAL", "ELITE FOUR", MUS_UNOVA_VS_SHITENNO, sText_ShauntalYes, sText_EliteUNo},
+    {OBJ_EVENT_GFX_UNOVA_FIRST + 94, TCG_SPECIAL_SIDNEY, REQ_CLEARED, REGION_UNOVA, "GRIMSLEY", "ELITE FOUR", MUS_UNOVA_VS_SHITENNO, sText_GrimsleyYes, sText_EliteUNo},
+    {OBJ_EVENT_GFX_UNOVA_FIRST + 96, TCG_SPECIAL_GLACIA, REQ_CLEARED, REGION_UNOVA, "CAITLIN", "ELITE FOUR", MUS_UNOVA_VS_SHITENNO, sText_CaitlinYes, sText_EliteUNo},
+    {OBJ_EVENT_GFX_UNOVA_FIRST + 95, TCG_SPECIAL_DRAKE, REQ_CLEARED, REGION_UNOVA, "MARSHAL", "ELITE FOUR", MUS_UNOVA_VS_SHITENNO, sText_MarshalYes, sText_EliteUNo},
+    {OBJ_EVENT_GFX_UNOVA_FIRST + 97, TCG_SPECIAL_WALLACE, REQ_CLEARED, REGION_UNOVA, "ALDER", "CHAMPION", MUS_UNOVA_VS_CHAMP, sText_AlderYes, sText_EliteUNo},
+    {OBJ_EVENT_GFX_UNOVA_FIRST + 103, TCG_SPECIAL_STEVEN, REQ_CLEARED, REGION_UNOVA, "N", "", MUS_UNOVA_VS_N, sText_NYes, sText_NNo},
+    {OBJ_EVENT_GFX_UNOVA_FIRST + 7, TCG_SPECIAL_RIVAL, REQ_NONE, 0, "CHEREN", "", MUS_UNOVA_VS_RIVAL, sText_CherenYes, NULL},
+    {OBJ_EVENT_GFX_UNOVA_FIRST + 134, TCG_SPECIAL_WALLY, REQ_NONE, 0, "BIANCA", "", MUS_UNOVA_VS_RIVAL, sText_BiancaYes, NULL},
+    {OBJ_EVENT_GFX_UNOVA_FIRST + 105, TCG_SPECIAL_STEVEN, REQ_NONE, 0, "PROF. JUNIPER", "", MUS_UNOVA_VS_TRAINER, sText_JuniperYes, NULL},
+    {OBJ_EVENT_GFX_UNOVA_FIRST + 92, TCG_SPECIAL_WALLY, REQ_NONE, 0, "IRIS", "", MUS_UNOVA_VS_TRAINER, sText_IrisYes, NULL},
 };
+// (one a regional special trainer, in tools/tcg/regions/specials.py's order: their decks and promos)
+STATIC_ASSERT(ARRAY_COUNT(sQzSpecials) == TCG_SPECIAL_COUNT - TCG_SPECIAL_HOENN_COUNT, sQzSpecialsEveryRegionalOne)
 
 unsigned Tcg_SpecialPromo(unsigned special)
 {
@@ -708,7 +758,7 @@ again:
     {
         list[n].deck = gTcgSpecialDecks[o->special].cards;
         list[n].gb2 = 0;
-        list[n++].rating = gTcgSpecialRating[o->special];
+        list[n++].rating = o->special < gTcgSpecialRatingCount ? gTcgSpecialRating[o->special] : TCG_SCALE_MEAN;
         // (off: their own deck, as it always was)
         for (i = 0; gMpConfig.cardScaling && i < gTcgSpecialVariantCount && n < ARRAY_COUNT(list); i++)
             if (gTcgSpecialVariantOwner[i] == o->special)
@@ -1152,11 +1202,14 @@ static const u8 *AskCards(struct ObjectEvent *npc, const u8 *script, u8 *answer,
         else
             sYgoLine = NULL;
     }
-    // Someone with a deck of their own: HOENN's special trainers, then JOHTO's and KANTO's in their slots
-    for (i = 0; i < TCG_SPECIAL_COUNT + ARRAY_COUNT(sQzSpecials); i++)
+    // Someone with a deck of their own: HOENN's special trainers, then JOHTO's, KANTO's and SINNOH's (each their own
+    // deck, promo and record: TCG_SPECIAL_HOENN_COUNT on, in sQzSpecials' order; the HOENN slot they stand by only
+    // lends its table and its rules)
+    for (i = 0; i < TCG_SPECIAL_HOENN_COUNT + ARRAY_COUNT(sQzSpecials); i++)
     {
         const struct Special *s;
-        const struct QzSpecial *q = i >= TCG_SPECIAL_COUNT ? &sQzSpecials[i - TCG_SPECIAL_COUNT] : NULL;
+        const struct QzSpecial *q = i >= TCG_SPECIAL_HOENN_COUNT ? &sQzSpecials[i - TCG_SPECIAL_HOENN_COUNT] : NULL;
+        unsigned qi = i - TCG_SPECIAL_HOENN_COUNT, special = q ? TCG_SPECIAL_HOENN_COUNT + qi : i;
         unsigned slot = q ? q->slot : i;
         u8 req;
         u16 reqArg;
@@ -1188,14 +1241,18 @@ static const u8 *AskCards(struct ObjectEvent *npc, const u8 *script, u8 *answer,
             snprintf(o->name, sizeof(o->name), "%s", s->name ? s->name
                      : OBJ_GFX_ID(npc) == OBJ_EVENT_GFX_RIVAL_MAY_NORMAL ? "MAY" : "BRENDAN");
         snprintf(o->title, sizeof(o->title), "%s", q ? q->title : s->title);
-        o->deck = gTcgSpecialDecks[slot].cards;
-        o->key = q ? 0xFE000000u | (i - TCG_SPECIAL_COUNT) : 0xFF000000u | slot;   // (records and quotes are the person's)
-        o->special = slot;
+        o->deck = gTcgSpecialDecks[special].cards;
+        o->key = q ? 0xFE000000u | qi : 0xFF000000u | slot;   // (records and quotes are the person's: never renumber)
+        o->special = special;
         o->mat = s->mat;
         o->matType = s->matType;
         o->music = q ? q->music : s->music;
-        o->promo = gTcgSpecialPromos[slot];
-        o->pack = slot % TCG_PACK_REGIONAL;
+        o->promo = gTcgSpecialPromos[special];
+        // (a pack of their region's sets: KANTO Gym Heroes / Challenge, JOHTO Neo, SINNOH the e-Card sets)
+        o->pack = !q ? slot % TCG_PACK_REGIONAL
+                : qi < TCG_SPECIAL_BROCK - TCG_SPECIAL_HOENN_COUNT ? TCG_PACK_REGIONAL + 2 + qi % 4
+                : qi < TCG_SPECIAL_ROARK - TCG_SPECIAL_HOENN_COUNT ? TCG_PACK_REGIONAL + qi % 2
+                : TCG_PACK_REGIONAL + 6 + qi % 3;
         o->pool = TCG_SCALE_POOL_SPECIAL;
         o->pick = h;
         o->prizes = 6;   // (the full game: LEADERS and the like)

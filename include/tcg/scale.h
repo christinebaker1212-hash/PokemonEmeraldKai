@@ -20,6 +20,7 @@
 #endif
 extern TCG_RATING_CONST int16_t gTcgDeckRating[];
 extern TCG_RATING_CONST int16_t gTcgSpecialRating[];
+extern TCG_RATING_CONST unsigned gTcgSpecialRatingCount;
 extern TCG_RATING_CONST int16_t gTcgVariantRating[];
 /* The Game Boy decks a deck is measured against in the game (gTcgDeckDefinitions indices). */
 extern TCG_RATING_CONST uint8_t gTcgRatingReferences[];
