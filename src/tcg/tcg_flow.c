@@ -190,6 +190,9 @@ const struct TcgStep *TcgFlow_PlaySteps(unsigned cardId, int *count)
         STEPS({TCG_ST_OPP_SLOT, TCG_F_OCCUPIED, 0, 0, 0, "If heads, which of theirs goes back to their hand?"});
     case TCG_POWER_R_VANISH:
         STEPS({TCG_ST_MY_SLOT, TCG_F_UNOWN_SLOT, 0, 0, 0, "If heads, which Unown goes back to your hand?"});
+    case TCG_POWER_R_ATTRACT_ENERGY:
+        STEPS({TCG_ST_PICK, TCG_F_BASIC_ENERGY, TCG_SRC_MY_FIELD_ATTACHED, 0, 60,
+               "ATTRACT ENERGY: move which basic Energy of your other Pokemon to it?"});
     case TCG_POWER_REEL_IN:
         STEPS({TCG_ST_PICK, TCG_F_POKEMON, TCG_SRC_MY_DISCARD, 0, 3, "REEL IN: take up to 3 Pokemon cards."});
     case TCG_POWER_SUMMON_MINIONS:
@@ -471,13 +474,14 @@ static int AttackPickSteps(const struct TcgDuel *g, unsigned me, const struct Tc
         for (i = 0; i < defender->attachedSize; i++)
         {
             const struct TcgCard *c = Tcg_Card(CardOf(g, me ^ 1, defender->attached[i]));
-            if (c->kind == TCG_ENERGY && c->id <= 6)
+            if (c->kind == TCG_ENERGY && (c->id <= 6 || count == 2))
                 break;
         }
         if (bench && i < defender->attachedSize)
         {
-            struct TcgStep st = {TCG_ST_PICK, TCG_F_BASIC_ENERGY, TCG_SRC_DEFENDER_ATTACHED, 1, 1,
-                                 "Move which of their basic Energy?"};
+            /* (count 2: any Energy card) */
+            struct TcgStep st = {TCG_ST_PICK, count == 2 ? TCG_F_ENERGY : TCG_F_BASIC_ENERGY, TCG_SRC_DEFENDER_ATTACHED, 1, 1,
+                                 count == 2 ? "If heads, move which of their Energy?" : "Move which of their basic Energy?"};
             out[n++] = st;
         }
         break;
@@ -1333,7 +1337,11 @@ static unsigned Next(struct TcgFlow *f, const struct TcgDuel *g)
         int n = st->max, all = st->source == TCG_SRC_TOP5 ||
                                ((st->source == TCG_SRC_TOP3_MINE || st->source == TCG_SRC_TOP3_THEIRS) && st->max >= 3);
         if (st->source == TCG_SRC_TOP5)
-            n = g->players[f->me].deckSize < 5 ? g->players[f->me].deckSize : 5;
+        {
+            /* (the top 5, or the top max: Terraforming's 4) */
+            int top = st->max ? st->max : 5;
+            n = g->players[f->me].deckSize < (unsigned)top ? (int)g->players[f->me].deckSize : top;
+        }
         if (st->source == TCG_SRC_TOP7 && !n)
             n = 1;
         if (st->source == TCG_SRC_TOP3_MINE || st->source == TCG_SRC_TOP3_THEIRS)

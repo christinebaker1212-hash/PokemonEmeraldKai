@@ -569,6 +569,8 @@ def _(m, d):
 
 # One wording, one script (the cards' words with SELF for the card's name; tcg_script.inc's ops)
 EXACT = {
+    "If the Defending Pokemon has any Energy cards attached to it, flip a coin. If heads, choose 1 of those Energy cards and move it to 1 of your opponent's Benched Pokemon. If your opponent has no Benched Pokemon, ignore this effect.": ('MAGNETIC_LINES', 0, 7),
+    "Flip a coin. If heads, choose 1 Energy card attached to the Defending Pokemon and 1 of your opponent's Benched Pokemon. Attach that Energy card to that Pokemon.": ('MAGNETIC_LINES', 0, 3),
     "Flip a coin. If heads, SELF does 40 damage to itself and 10 damage to each Pokemon on each player's Bench. Flip a coin. If tails, this attack does nothing (not even damage).": 'c:2 t2.none ah.rec:40 ah.bb:10',
     "If the Defending Pokemon is a Basic Pokemon, choose 1 of its attacks. That Pokemon can't use that attack during your opponent's next turn.": 'opt:11 amn',
     "If an attack does damage to SELF during your opponent's next turn (even if SELF is Knocked Out), flip a coin. If heads, prevent all damage done to SELF from that attack and do 20 damage to the attacking Pokemon.": 'guard:10',
@@ -603,7 +605,7 @@ EXACT = {
     "Search your deck for a Basic Pokemon card named SELF or Nidoran M and put it onto your Bench. Shuffle your deck afterward. (You can't use this attack if your Bench is full.)": ('CALL_FAMILY', 0, 0),
     "Choose an evolved Pokemon (your own or your opponent's). Return the highest Stage Evolution card on that Pokemon to its player's hand. That Pokemon is no longer Asleep, Confused, Paralyzed, or Poisoned, or anything else that might be the result of an attack (just as if you had evolved it).": ('DEVOLUTION_BEAM', 0, 0),
     'When you use this attack, you may discard any number of Fire Energy cards attached to your Pokemon in play. This attack does 10 damage plus 10 more damage for each Fire Energy card you discarded in this way.': ('BURNING_FIRE', 10, 0),
-    "If the Defending Pokemon has any basic Energy cards attached to it, flip a coin. If heads, choose 1 of those Energy cards and move it to 1 of your opponent's Benched Pokemon. If your opponent has no Benched Pokemon, ignore this effect.": ('MAGNETIC_LINES', 0, 1),
+    "If the Defending Pokemon has any basic Energy cards attached to it, flip a coin. If heads, choose 1 of those Energy cards and move it to 1 of your opponent's Benched Pokemon. If your opponent has no Benched Pokemon, ignore this effect.": ('MAGNETIC_LINES', 0, 5),
     'Your opponent switches each Defending Pokemon with his or her Benched Pokemon. If your opponent has only 1 Benched Pokemon, you choose the Defending Pokemon to switch.': 'osw',
     "If it's not your birthday, this attack does 30 damage. If it is your birthday, flip a coin. If heads, this attack does 30 damage plus 50 more damage; if tails, this attack does 30 damage.": 'nop',
     "Flip a coin. If heads, discard 1 Fire Energy card attached to SELF. If tails, discard all Energy cards attached to SELF. If you can't discard Energy cards, this attack does nothing.": 'c h.dsa:0,1 t.dsa:15,0',

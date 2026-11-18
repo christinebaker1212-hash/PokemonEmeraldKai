@@ -108,7 +108,8 @@
  * Powers (1): pull the Grass Energy picked (up to 2) from your other Pokemon onto it | emove:4 between Magnemite /
  *             Magneton / Dark Magneton (name group 6) | ctrin a counter from the Unown chosen onto it | spike:T,K (an
  *             Energy of type T; K 1 onto an Unown, 2 onto a Benched one) | mshift Miracle Shift | recon Reconstruction |
- *             nobody every Poke-Body ignored this turn */
+ *             nobody every Poke-Body ignored this turn | order:n the top n of your deck in the order picked | oattd
+ *             the Energy picked in their discard pile onto the Defending Pokemon | ohshuf Dark Moon */
 #define SCRIPT_TOKEN 48
 /* Which of the player's Pokemon "it" is: the attacker (0), or a Pokemon whose power runs a script (tcg_powers.c) */
 static unsigned sScriptSelf;
@@ -2427,6 +2428,59 @@ static int ScriptRun(struct TcgDuel *g, const char *script, const struct TcgAtta
                 return TCG_INVALID;
             p->deck[p->deckSize++] = TcgPile_Remove(p->hand, &p->handSize, (unsigned)e);
             TcgDuel_Shuffle(g, me);
+        }
+        else if (ScriptIs(&o, "order"))
+        {
+            /* Terraforming: the top x of your deck in the order picked, the first on top */
+            unsigned n = p->deckSize < (unsigned)x ? p->deckSize : (unsigned)x, k, j;
+            if (!action || action->selectionCount != n)
+                return TCG_INVALID;
+            for (k = 0; k < n; k++)
+            {
+                for (j = 0; j < n && p->deck[p->deckSize - 1 - j] != action->selections[k]; j++)
+                    ;
+                if (j == n)
+                    return TCG_INVALID;
+                for (j = 0; j < k; j++)
+                    if (action->selections[j] == action->selections[k])
+                        return TCG_INVALID;
+            }
+            for (k = 0; k < n; k++)
+                p->deck[p->deckSize - 1 - k] = action->selections[k];
+            TcgDuel_Event(g, TCG_EV_DECK_CHANGED, me, 0, 0, 0, 0);
+        }
+        else if (ScriptIs(&o, "oattd"))
+        {
+            /* Strange Tentacles: the Energy picked in their discard pile onto the Defending Pokemon */
+            int at = Picked(action, 0, op->discard, op->discardSize);
+            if (at < 0 || CardAt(g, them, op->discard[at])->kind != TCG_ENERGY || !foe->stackSize)
+                return TCG_INVALID;
+            foe->attached[foe->attachedSize++] = TcgPile_Remove(op->discard, &op->discardSize, (unsigned)at);
+            TcgDuel_Event(g, TCG_EV_ATTACH, them, 0, 0, op->cards[foe->attached[foe->attachedSize - 1]], 0);
+        }
+        else if (ScriptIs(&o, "ohshuf"))
+        {
+            /* Dark Moon: the cards picked in their hand (up to one per Darkness Energy on it) into their deck, then they
+             * draw as many */
+            unsigned k, n = action ? action->selectionCount : 0, dark = 0;
+            for (k = 0; k < self->attachedSize; k++)
+                dark += CardAt(g, me, self->attached[k])->kind == TCG_ENERGY && CardAt(g, me, self->attached[k])->type == TCG_DARKNESS;
+            if (n > dark)
+                return TCG_INVALID;
+            for (k = 0; k < n; k++)
+            {
+                int at = Picked(action, k, op->hand, op->handSize);
+                if (at < 0)
+                    return TCG_INVALID;
+                op->deck[op->deckSize++] = TcgPile_Remove(op->hand, &op->handSize, (unsigned)at);
+            }
+            if (n)
+            {
+                TcgDuel_Shuffle(g, them);
+                for (k = 0; k < n && op->deckSize; k++)
+                    op->hand[op->handSize++] = op->deck[--op->deckSize];
+                TcgDuel_Event(g, TCG_EV_DRAW, them, 0, k, 0, 0);
+            }
         }
         else if (ScriptIs(&o, "nobody"))
             g->bodiesOffTurn = g->turn; /* (Ancient Wind: every Poke-Body ignored this turn) */

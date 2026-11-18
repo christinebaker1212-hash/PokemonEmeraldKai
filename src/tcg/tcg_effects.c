@@ -647,6 +647,7 @@ unsigned TcgDuel_AttackPick(const struct TcgAttack *attack, unsigned *count)
     case FX_BURNING_FIRE:
         return TCG_APICK_FIELD_FIRE;
     case FX_MAGNETIC_LINES:
+        *count = e->extra & 2 ? 2 : 1; /* (2: any Energy card, not only basic) */
         return TCG_APICK_MOVE_FOE_ENERGY;
     }
     return TCG_APICK_NONE;
@@ -1876,21 +1877,31 @@ static int Gb2Effect(struct TcgDuel *g, const struct Effect *e, const struct Tcg
         }
         break;
     case FX_MAGNETIC_LINES:
+        /* (extra 1: on heads; 2: any Energy card, not only basic; 4: the coin only if the Defending has Energy) */
         if (!after)
-            g->coinResult = (uint8_t)(!e->extra || TcgDuel_Coin(g, me));
+        {
+            unsigned has = 0;
+            for (i = 0; i < foe->attachedSize; i++)
+                has += CardAt(g, them, foe->attached[i])->kind == TCG_ENERGY &&
+                       ((e->extra & 2) || CardAt(g, them, foe->attached[i])->id <= 6);
+            if ((e->extra & 4) && !has)
+                g->coinResult = 0; /* (no Energy on it: no coin, nothing) */
+            else
+                g->coinResult = (uint8_t)(!(e->extra & 1) || TcgDuel_Coin(g, me));
+        }
         else if (g->coinResult && foe->stackSize && !blocked && BenchCount(g, them))
         {
-            /* the player's pick of the Defending Pokemon's basic Energy, else the first */
+            /* the player's pick of the Defending Pokemon's basic Energy (any Energy: extra 2), else the first */
             int pick = Picked(action, 0, foe->attached, foe->attachedSize);
             if (!ValidTarget(g, them, action->target, 1))
                 return TCG_INVALID;
             if (pick >= 0 && (CardAt(g, them, foe->attached[pick])->kind != TCG_ENERGY ||
-                              CardAt(g, them, foe->attached[pick])->id > 6))
+                              (!(e->extra & 2) && CardAt(g, them, foe->attached[pick])->id > 6)))
                 pick = -1;
             for (i = 0; i < foe->attachedSize && pick < 0; i++)
             {
                 const struct TcgCard *c = CardAt(g, them, foe->attached[i]);
-                if (c->kind == TCG_ENERGY && c->id <= 6)
+                if (c->kind == TCG_ENERGY && (c->id <= 6 || (e->extra & 2)))
                     pick = (int)i;
             }
             if (pick >= 0)

@@ -168,6 +168,25 @@ static const char *RegionBlock(const struct TcgDuel *g, unsigned player, unsigne
         if (i == p->handSize)
             return "You have no basic Energy card in your hand.";
         break;
+    case TCG_POWER_R_STRANGE_TENTACLES:
+    {
+        unsigned mine = 0, theirs = 0;
+        for (i = 0; i < p->field[0].attachedSize; i++)
+            mine += Tcg_Card(p->cards[p->field[0].attached[i]])->kind == TCG_ENERGY;
+        for (i = 0; i < op->field[0].attachedSize; i++)
+            theirs += Tcg_Card(op->cards[op->field[0].attached[i]])->kind == TCG_ENERGY;
+        if (theirs >= mine)
+            return "The Defending Pokemon doesn't have fewer Energy cards than your Active Pokemon.";
+        for (i = 0; i < op->discardSize && Tcg_Card(op->cards[op->discard[i]])->kind != TCG_ENERGY; i++)
+            ;
+        if (i == op->discardSize)
+            return "There's no Energy card in their discard pile.";
+        break;
+    }
+    case TCG_POWER_R_DARK_MOON:
+        if (!TcgDuel_Energy(g, player, slot, TCG_DARKNESS))
+            return "It has no Darkness Energy.";
+        break;
     case TCG_POWER_R_ANCIENT_WIND:
         if (g->bodiesOffTurn == g->turn)
             return "Poke-Bodies are already ignored this turn.";
@@ -684,6 +703,26 @@ static void RegionOnPlay(struct TcgDuel *g, unsigned player, unsigned slot, unsi
             }
         TcgDuel_Shuffle(g, player);
         break;
+    case TCG_POWER_R_ATTRACT_ENERGY:
+    {
+        /* (evolving from the hand) the basic Energy cards picked on your other Pokemon onto it */
+        unsigned k, j, moved = 0;
+        if (!g->fromHand || !sPlay)
+            return;
+        for (k = 0; k < sPlay->selectionCount; k++)
+            for (s = 0; s < TCG_FIELD_SIZE; s++)
+                for (j = 0; s != slot && j < p->field[s].attachedSize; j++)
+                    if (p->field[s].attached[j] == sPlay->selections[k] && p->cards[p->field[s].attached[j]] <= 6)
+                    {
+                        if (!moved++)
+                            Announce(g, player, slot, power);
+                        f->attached[f->attachedSize++] = TcgPile_Remove(p->field[s].attached, &p->field[s].attachedSize, j);
+                        TcgDuel_Event(g, TCG_EV_ATTACH, player, slot, 0, p->cards[f->attached[f->attachedSize - 1]], 0);
+                        s = TCG_FIELD_SIZE - 1;
+                        break;
+                    }
+        break;
+    }
     case TCG_POWER_R_VANISH:
     {
         /* (played from the hand) a coin: heads, the Unown chosen back to the hand, its attached cards discarded */

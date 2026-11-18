@@ -1708,7 +1708,10 @@ static void ContinueTrainer(struct TcgAction *out, int *result)
     {
         int n = st->max, all = st->source == TCG_SRC_TOP5 || st->source == TCG_SRC_TOP3_MINE || st->source == TCG_SRC_TOP3_THEIRS;
         if (st->source == TCG_SRC_TOP5)
-            n = B.view.players[0].deckSize < 5 ? B.view.players[0].deckSize : 5;
+        {
+            int top = st->max ? st->max : 5; /* (the top 5, or the top max: Terraforming's 4) */
+            n = B.view.players[0].deckSize < (unsigned)top ? (int)B.view.players[0].deckSize : top;
+        }
         if (st->source == TCG_SRC_TOP7 && !n)
             n = 1;
         if (st->source == TCG_SRC_TOP3_MINE || st->source == TCG_SRC_TOP3_THEIRS)

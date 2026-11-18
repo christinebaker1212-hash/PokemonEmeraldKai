@@ -508,6 +508,79 @@ static int MovePowers(void)
     printf("PASS Soak Up, Electromagnetic Power, [Bear], Magma Pool, Ancient Wind, [Vanish]\n");
     return 0;
 }
+static void Give(struct TcgDuel *g, unsigned who, unsigned id, int toDiscard);
+/* Terraforming, Strange Tentacles, Dark Moon, Aqua Trick */
+static int LookPowers(void)
+{
+    struct TcgDuel g;
+    struct TcgAction a;
+    unsigned k, seed, seen = 0;
+    if (!Tcg_Card(TCG_CARD_ECARD1_16) || !Tcg_Card(TCG_CARD_ECARD2_38) || !Tcg_Card(TCG_CARD_ECARD2_41) ||
+        !Tcg_Card(TCG_CARD_ECARD3_33))
+        return printf("FAIL look powers: a card isn't finished\n"), 1;
+    /* Terraforming: the top 4 reversed */
+    Stage(&g, TCG_CARD_ECARD1_16, 0, 1);
+    g.players[0].field[0].poison = 0;
+    memset(&a, 0, sizeof(a));
+    a.type = TCG_USE_POWER;
+    for (k = 0; k < 4; k++)
+        a.selections[k] = g.players[0].deck[g.players[0].deckSize - 4 + k];
+    a.selectionCount = 4;
+    {
+        uint8_t was[4];
+        for (k = 0; k < 4; k++)
+            was[k] = g.players[0].deck[g.players[0].deckSize - 1 - k];
+        if (TcgDuel_Apply(&g, &a) != TCG_OK)
+            return printf("FAIL Terraforming: %s\n", g.error), 1;
+        for (k = 0; k < 4; k++)
+            if (g.players[0].deck[g.players[0].deckSize - 4 + k] != was[k])
+                return printf("FAIL Terraforming: card %u out of order\n", k), 1;
+    }
+    /* Strange Tentacles: an Energy from their discard pile onto the Defending Pokemon (it has fewer) */
+    Stage(&g, TCG_CARD_ECARD2_38, 0, 1);
+    Give(&g, 1, TCG_CARD_GRASS_ENERGY, 1);
+    k = g.players[1].field[0].attachedSize;
+    memset(&a, 0, sizeof(a));
+    a.type = TCG_USE_POWER;
+    a.selections[0] = g.players[1].discard[g.players[1].discardSize - 1];
+    a.selectionCount = 1;
+    if (TcgDuel_Apply(&g, &a) != TCG_OK || g.players[1].field[0].attachedSize != k + 1)
+        return printf("FAIL Strange Tentacles: %s\n", g.error), 1;
+    /* Dark Moon: one card from their hand per Darkness Energy, they draw as many */
+    Stage(&g, TCG_CARD_ECARD2_41, 0, 1);
+    Attach(&g, 0, 0, TCG_CARD_NEO1_104, 1);
+    k = g.players[1].handSize;
+    memset(&a, 0, sizeof(a));
+    a.type = TCG_USE_POWER;
+    a.selections[0] = g.players[1].hand[0], a.selections[1] = g.players[1].hand[1];
+    a.selectionCount = 2;
+    if (TcgDuel_Apply(&g, &a) == TCG_OK)
+        return printf("FAIL Dark Moon: 2 cards for 1 Darkness Energy\n"), 1;
+    a.selectionCount = 1;
+    if (TcgDuel_Apply(&g, &a) != TCG_OK || g.players[1].handSize != k)
+        return printf("FAIL Dark Moon: %s (%u cards)\n", g.error, g.players[1].handSize), 1;
+    /* Aqua Trick: heads, the Defending's Energy card picked to their Benched one chosen */
+    for (seed = 1; seed < 30; seed++)
+    {
+        unsigned before;
+        Stage(&g, TCG_CARD_ECARD3_33, 2, seed); /* (attack 0 is its Poke-Body) */
+        g.players[1].field[0].poison = 0;
+        before = g.players[1].field[1].attachedSize;
+        memset(&a, 0, sizeof(a));
+        a.type = TCG_ATTACK;
+        a.attack = 2;
+        a.target = 1;
+        a.selections[0] = g.players[1].field[0].attached[2];
+        a.selectionCount = 1;
+        if (TcgDuel_Apply(&g, &a) != TCG_OK)
+            return printf("FAIL Aqua Trick: %s\n", g.error), 1;
+        seen |= g.players[1].field[1].attachedSize == before + 1 ? 1 : 2;
+    }
+    if (seen != 3)
+        return printf("FAIL Aqua Trick: outcomes %u\n", seen), 1;
+    printf("PASS Terraforming, Strange Tentacles, Dark Moon, Aqua Trick\n");
+    return 0;
+}
 static int ScriptMechanics(void)
 {
     struct TcgDuel g;
@@ -1323,7 +1396,7 @@ int main(void)
     }
     printf("PASS %u finished regional cards: %u attacks used %u times, then %u AI actions after them\n", ready, used, ok,
            steps);
-    if (SpecialEnergy() || EcardEnergy() || ScriptMechanics() || Anchors() || Guards() || MovePowers() || TechnicalMachines() || Babies())
+    if (SpecialEnergy() || EcardEnergy() || ScriptMechanics() || Anchors() || Guards() || MovePowers() || LookPowers() || TechnicalMachines() || Babies())
         return 1;
     if (PlayTrainers() || UsePowers() || UseStadiums() || AttackFlows())
         return 1;

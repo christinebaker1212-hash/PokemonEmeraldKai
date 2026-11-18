@@ -259,6 +259,13 @@ static const struct TcgStep *RegionPowerSteps(unsigned power, int *count)
         STEPS({TCG_ST_PICK, TCG_F_EVOLVES_FROM_USER, TCG_SRC_DECK, 0, 1, "If heads: evolve it into which card?"});
     case TCG_POWER_R_EVOLUTION_HELPER:
         STEPS({TCG_ST_PICK, TCG_F_EVOLVES_FROM_ACTIVE, TCG_SRC_DECK, 1, 1, "Evolve your Active Pokemon into which card?"});
+    case TCG_POWER_R_TERRAFORMING:
+        STEPS({TCG_ST_PICK, TCG_F_ANY, TCG_SRC_TOP5, 0, 4, "Choose the order: the first is drawn next."});
+    case TCG_POWER_R_STRANGE_TENTACLES:
+        STEPS({TCG_ST_PICK, TCG_F_ENERGY, TCG_SRC_OPP_DISCARD, 1, 1, "Attach which Energy to the Defending Pokemon?"});
+    case TCG_POWER_R_DARK_MOON:
+        STEPS({TCG_ST_PICK, TCG_F_ANY, TCG_SRC_OPP_HAND, 0, 4,
+               "Shuffle which into their deck? (one for each Darkness Energy)"});
     case TCG_POWER_R_SOAK_UP:
         STEPS({TCG_ST_PICK, TCG_F_GRASS_ENERGY_OTHER, TCG_SRC_MY_FIELD_ATTACHED, 1, 2,
                "Take which Grass Energy (up to 2) from your other Pokemon?"});

@@ -84,6 +84,11 @@ P('R_MIRACLE_SHIFT', 'Miracle Shift', 'Then, choose a basic Energy card from you
 P('R_RECONSTRUCTION', 'Reconstruction', 'search your deck for an Omanyte or Kabuto card', 'USED', 'ONCE ANY', 'recon')
 P('R_ANCIENT_WIND', 'Ancient Wind', 'you may ignore all Poke-Bodies until the end of your turn', 'USED', 'ONCE ACTIVE',
   'nobody')
+P('R_TERRAFORMING', 'Terraforming', 'look at the top 4 cards of your deck and rearrange them', 'USED', 'ONCE',
+  'order:4')
+P('R_STRANGE_TENTACLES', 'Strange Tentacles', "in your opponent's discard pile and attach it to the Defending", 'USED',
+  'ONCE', 'oattd')
+P('R_DARK_MOON', 'Dark Moon', 'up to the number of Darkness Energy attached to SELF', 'USED', 'ONCE ACTIVE', 'ohshuf')
 P('R_JOIN', '[Join]', 'search your deck for a Basic Pokemon or Evolution card', 'USED', 'ONCE BENCH', 'srchk:3')
 P('R_MAGNETIC_CALL', 'Magnetic Call', 'search your deck for a Metal Basic Pokemon', 'USED', 'ONCE',
   'needroom c h.dbench:2')
@@ -175,6 +180,7 @@ P('R_SURPRISE_BITE', 'Surprise Bite', 'This power does 20 damage to that Pokemon
 P('R_ENERVATING_POLLEN', 'Enervating Pollen', 'only reduces damage by 10', 'PASSIVE')
 P('R_PSYCHIC_HP', 'Gaseous Form', 'gets +10 HP for each Psychic Energy card', 'PASSIVE', 'ANY')
 P('R_CONDUCTIVITY', 'Conductivity', 'attaches an Energy card from his or her hand', 'PASSIVE')
+P('R_ATTRACT_ENERGY', 'Attract Energy', 'move any number of basic Energy cards attached to your other Pokemon', 'PASSIVE')
 P('R_MAGMA_POOL', 'Magma Pool', 'remove 1 Fire Energy card attached to SELF', 'PASSIVE', 'ANY')
 P('R_VANISH', '[Vanish]', 'return 1 of your Pokemon with Unown in its name', 'PASSIVE')
 P('R_SPIKES', 'Spikes', 'Benched Pokemon becomes his or her Active Pokemon, SELF does 10 damage', 'PASSIVE')

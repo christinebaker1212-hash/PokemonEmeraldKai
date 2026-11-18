@@ -5328,7 +5328,7 @@ const struct TcgCard gTcgCards[TCG_CARD_COUNT + 1] = {
 {.name="",.description="",.effect="NONE",.animation="ATK_ANIM_NONE",.cost={0},.damage=0,.category=TCG_DAMAGE_NORMAL},
 }
 },
-[851] = {.id=851, .name="Xatu", .kind=TCG_POKEMON, .type=5, .rarity=1, .set=16, .set2=255, .dark=0, .holo=0, .flags=0, .origin=16,
+[851] = {.id=851, .name="Xatu", .kind=TCG_POKEMON, .type=5, .rarity=1, .set=16, .set2=255, .dark=0, .holo=0, .flags=TCG_CF_READY, .origin=16,
 .hp=70, .stage=1, .species=178, .level=38, .retreat=1, .weakness=5, .resistance=4, .evolvesFrom="Natu", .description="In South America, it is said that its right eye sees the future and its left eye views the past.", .attacks={
 {.name="Energy Cycle",.description="Flip a coin. If heads, choose 1 Energy card attached to the Defending Pokemon and 1 of your opponent's Benched Pokemon. Attach that Energy card to that Pokemon.",.effect="neo2-52:a0",.animation="ATK_ANIM_HIT",.cost={0,0,0,0,0,1,0,0,0},.damage=0,.category=TCG_RESIDUAL},
 {.name="Super Psy",.description="",.effect="NONE",.animation="ATK_ANIM_HIT",.cost={0,0,0,0,0,2,1,0,0},.damage=50,.category=TCG_DAMAGE_NORMAL},
@@ -6758,7 +6758,7 @@ const struct TcgCard gTcgCards[TCG_CARD_COUNT + 1] = {
 {.name="",.description="",.effect="NONE",.animation="ATK_ANIM_NONE",.cost={0},.damage=0,.category=TCG_DAMAGE_NORMAL},
 }
 },
-[1069] = {.id=1069, .name="Machamp", .kind=TCG_POKEMON, .type=4, .rarity=2, .set=19, .set2=255, .dark=0, .holo=1, .flags=0, .origin=19,
+[1069] = {.id=1069, .name="Machamp", .kind=TCG_POKEMON, .type=4, .rarity=2, .set=19, .set2=255, .dark=0, .holo=1, .flags=TCG_CF_READY, .origin=19,
 .hp=120, .stage=2, .species=68, .level=0, .retreat=2, .weakness=5, .resistance=255, .evolvesFrom="Machoke", .description="", .attacks={
 {.name="Terraforming",.description="Once during your turn (before your attack), you may look at the top 4 cards of your deck and rearrange them as you like. This power can't be used if Machamp is affected by a Special Condition.",.effect="ecard1-16:p",.animation="ATK_ANIM_HIT",.cost={0,0,0,0,0,0,0,0,0},.damage=0,.category=TCG_POKEMON_POWER},
 {.name="Iron Fist",.description="Count the number of Pokemon you have in play with damage counters on them. Flip a coin. If heads, this attack does 50 damage plus 10 more damage for each of those Pokemon.",.effect="ecard1-16:a0",.animation="ATK_ANIM_HIT",.cost={0,0,0,0,2,0,2,0,0},.damage=50,.category=TCG_DAMAGE_PLUS},
@@ -7003,7 +7003,7 @@ const struct TcgCard gTcgCards[TCG_CARD_COUNT + 1] = {
 {.name="",.description="",.effect="NONE",.animation="ATK_ANIM_NONE",.cost={0},.damage=0,.category=TCG_DAMAGE_NORMAL},
 }
 },
-[1104] = {.id=1104, .name="Machamp", .kind=TCG_POKEMON, .type=4, .rarity=2, .set=19, .set2=255, .dark=0, .holo=0, .flags=0, .origin=19,
+[1104] = {.id=1104, .name="Machamp", .kind=TCG_POKEMON, .type=4, .rarity=2, .set=19, .set2=255, .dark=0, .holo=0, .flags=TCG_CF_READY, .origin=19,
 .hp=120, .stage=2, .species=68, .level=0, .retreat=2, .weakness=5, .resistance=255, .evolvesFrom="Machoke", .description="", .attacks={
 {.name="Terraforming",.description="Once during your turn (before your attack), you may look at the top 4 cards of your deck and rearrange them as you like. This power can't be used if Machamp is affected by a Special Condition.",.effect="ecard1-51:p",.animation="ATK_ANIM_HIT",.cost={0,0,0,0,0,0,0,0,0},.damage=0,.category=TCG_POKEMON_POWER},
 {.name="Iron Fist",.description="Count the number of Pokemon you have in play with damage counters on them. Flip a coin. If heads, this attack does 50 damage plus 10 more damage for each of those Pokemon.",.effect="ecard1-51:a0",.animation="ATK_ANIM_HIT",.cost={0,0,0,0,2,0,2,0,0},.damage=50,.category=TCG_DAMAGE_PLUS},
@@ -7938,7 +7938,7 @@ const struct TcgCard gTcgCards[TCG_CARD_COUNT + 1] = {
 {.name="",.description="",.effect="NONE",.animation="ATK_ANIM_NONE",.cost={0},.damage=0,.category=TCG_DAMAGE_NORMAL},
 }
 },
-[1250] = {.id=1250, .name="Tentacruel", .kind=TCG_POKEMON, .type=3, .rarity=2, .set=20, .set2=255, .dark=0, .holo=0, .flags=0, .origin=20,
+[1250] = {.id=1250, .name="Tentacruel", .kind=TCG_POKEMON, .type=3, .rarity=2, .set=20, .set2=255, .dark=0, .holo=0, .flags=TCG_CF_READY, .origin=20,
 .hp=70, .stage=1, .species=73, .level=0, .retreat=0, .weakness=2, .resistance=255, .evolvesFrom="Tentacool", .description="", .attacks={
 {.name="Strange Tentacles",.description="Once during your turn (before your attack), as long as the number of Energy cards attached to the Defending Pokemon is less than the number of Energy cards attached to your Active Pokemon, you may choose an Energy card, if any, in your opponent's discard pile and attach it to the Defending Pokemon. This power can't be used if Tentacruel is affected by a Special Condition.",.effect="ecard2-38:p",.animation="ATK_ANIM_HIT",.cost={0,0,0,0,0,0,0,0,0},.damage=0,.category=TCG_POKEMON_POWER},
 {.name="Poison Sting",.description="Flip a coin. If heads, the Defending Pokemon is now Poisoned.",.effect="ecard2-38:a0",.animation="ATK_ANIM_HIT",.cost={0,0,0,1,0,0,1,0,0},.damage=20,.category=TCG_DAMAGE_NORMAL},
@@ -7959,7 +7959,7 @@ const struct TcgCard gTcgCards[TCG_CARD_COUNT + 1] = {
 {.name="Gigacrush",.description="Each player discards the top 3 cards from his or her deck.",.effect="ecard2-40:a2",.animation="ATK_ANIM_HIT",.cost={0,0,0,0,0,0,3,2,0},.damage=60,.category=TCG_DAMAGE_NORMAL},
 }
 },
-[1253] = {.id=1253, .name="Umbreon", .kind=TCG_POKEMON, .type=7, .rarity=2, .set=20, .set2=255, .dark=0, .holo=0, .flags=0, .origin=20,
+[1253] = {.id=1253, .name="Umbreon", .kind=TCG_POKEMON, .type=7, .rarity=2, .set=20, .set2=255, .dark=0, .holo=0, .flags=TCG_CF_READY, .origin=20,
 .hp=80, .stage=1, .species=197, .level=0, .retreat=1, .weakness=4, .resistance=5, .evolvesFrom="Eevee", .description="", .attacks={
 {.name="Dark Moon",.description="As long as Umbreon is your Active Pokemon and has a Darkness Energy attached to it, once during your turn (before your attack), you may look at your opponent's hand. Choose from it a number of cards up to the number of Darkness Energy attached to Umbreon and shuffle them into your opponent's deck. Your opponent then draws the same number of cards from his or her deck. This power can't be used if Umbreon is affected by a Special Condition.",.effect="ecard2-41:p",.animation="ATK_ANIM_HIT",.cost={0,0,0,0,0,0,0,0,0},.damage=0,.category=TCG_POKEMON_POWER},
 {.name="Shadow Bind",.description="The Defending Pokemon can't retreat during your opponent's next turn.",.effect="ecard2-41:a0",.animation="ATK_ANIM_HIT",.cost={0,0,0,0,0,0,3,0,0},.damage=30,.category=TCG_DAMAGE_NORMAL},
@@ -8824,7 +8824,7 @@ const struct TcgCard gTcgCards[TCG_CARD_COUNT + 1] = {
 {.name="",.description="",.effect="NONE",.animation="ATK_ANIM_NONE",.cost={0},.damage=0,.category=TCG_DAMAGE_NORMAL},
 }
 },
-[1388] = {.id=1388, .name="Tentacruel", .kind=TCG_POKEMON, .type=3, .rarity=2, .set=20, .set2=255, .dark=0, .holo=1, .flags=0, .origin=20,
+[1388] = {.id=1388, .name="Tentacruel", .kind=TCG_POKEMON, .type=3, .rarity=2, .set=20, .set2=255, .dark=0, .holo=1, .flags=TCG_CF_READY, .origin=20,
 .hp=70, .stage=1, .species=73, .level=0, .retreat=0, .weakness=2, .resistance=255, .evolvesFrom="Tentacool", .description="", .attacks={
 {.name="Strange Tentacles",.description="Once during your turn (before your attack), as long as the number of Energy cards attached to the Defending Pokemon is less than the number of Energy cards attached to your Active Pokemon, you may choose an Energy card, if any, in your opponent's discard pile and attach it to the Defending Pokemon. This power can't be used if Tentacruel is affected by a Special Condition.",.effect="ecard2-H26:p",.animation="ATK_ANIM_HIT",.cost={0,0,0,0,0,0,0,0,0},.damage=0,.category=TCG_POKEMON_POWER},
 {.name="Poison Sting",.description="Flip a coin. If heads, the Defending Pokemon is now Poisoned.",.effect="ecard2-H26:a0",.animation="ATK_ANIM_HIT",.cost={0,0,0,1,0,0,1,0,0},.damage=20,.category=TCG_DAMAGE_NORMAL},
@@ -8845,7 +8845,7 @@ const struct TcgCard gTcgCards[TCG_CARD_COUNT + 1] = {
 {.name="Gigacrush",.description="Each player discards the top 3 cards from his or her deck.",.effect="ecard2-H28:a2",.animation="ATK_ANIM_HIT",.cost={0,0,0,0,0,0,3,2,0},.damage=60,.category=TCG_DAMAGE_NORMAL},
 }
 },
-[1391] = {.id=1391, .name="Umbreon", .kind=TCG_POKEMON, .type=7, .rarity=2, .set=20, .set2=255, .dark=0, .holo=1, .flags=0, .origin=20,
+[1391] = {.id=1391, .name="Umbreon", .kind=TCG_POKEMON, .type=7, .rarity=2, .set=20, .set2=255, .dark=0, .holo=1, .flags=TCG_CF_READY, .origin=20,
 .hp=80, .stage=1, .species=197, .level=0, .retreat=1, .weakness=4, .resistance=5, .evolvesFrom="Eevee", .description="", .attacks={
 {.name="Dark Moon",.description="As long as Umbreon is your Active Pokemon and has a Darkness Energy attached to it, once during your turn (before your attack), you may look at your opponent's hand. Choose from it a number of cards up to the number of Darkness Energy attached to Umbreon and shuffle them into your opponent's deck. Your opponent then draws the same number of cards from his or her deck. This power can't be used if Umbreon is affected by a Special Condition.",.effect="ecard2-H29:p",.animation="ATK_ANIM_HIT",.cost={0,0,0,0,0,0,0,0,0},.damage=0,.category=TCG_POKEMON_POWER},
 {.name="Shadow Bind",.description="The Defending Pokemon can't retreat during your opponent's next turn.",.effect="ecard2-H29:a0",.animation="ATK_ANIM_HIT",.cost={0,0,0,0,0,0,3,0,0},.damage=30,.category=TCG_DAMAGE_NORMAL},
@@ -9097,7 +9097,7 @@ const struct TcgCard gTcgCards[TCG_CARD_COUNT + 1] = {
 {.name="",.description="",.effect="NONE",.animation="ATK_ANIM_NONE",.cost={0},.damage=0,.category=TCG_DAMAGE_NORMAL},
 }
 },
-[1427] = {.id=1427, .name="Vaporeon", .kind=TCG_POKEMON, .type=3, .rarity=2, .set=21, .set2=255, .dark=0, .holo=0, .flags=TCG_CF_BODY, .origin=21,
+[1427] = {.id=1427, .name="Vaporeon", .kind=TCG_POKEMON, .type=3, .rarity=2, .set=21, .set2=255, .dark=0, .holo=0, .flags=TCG_CF_BODY|TCG_CF_READY, .origin=21,
 .hp=70, .stage=1, .species=134, .level=0, .retreat=1, .weakness=2, .resistance=255, .evolvesFrom="Eevee", .description="", .attacks={
 {.name="Self-healing",.description="Whenever you attach a Water Energy card from your hand to Vaporeon, remove all Special Conditions affecting Vaporeon.",.effect="ecard3-33:p",.animation="ATK_ANIM_HIT",.cost={0,0,0,0,0,0,0,0,0},.damage=0,.category=TCG_POKEMON_POWER},
 {.name="Hypnosplash",.description="The Defending Pokemon is now Asleep.",.effect="ecard3-33:a0",.animation="ATK_ANIM_HIT",.cost={0,0,0,0,0,0,2,0,0},.damage=10,.category=TCG_DAMAGE_NORMAL},
@@ -10064,7 +10064,7 @@ const struct TcgCard gTcgCards[TCG_CARD_COUNT + 1] = {
 {.name="",.description="",.effect="NONE",.animation="ATK_ANIM_NONE",.cost={0},.damage=0,.category=TCG_DAMAGE_NORMAL},
 }
 },
-[1575] = {.id=1575, .name="Vaporeon", .kind=TCG_POKEMON, .type=3, .rarity=2, .set=21, .set2=255, .dark=0, .holo=1, .flags=TCG_CF_BODY, .origin=21,
+[1575] = {.id=1575, .name="Vaporeon", .kind=TCG_POKEMON, .type=3, .rarity=2, .set=21, .set2=255, .dark=0, .holo=1, .flags=TCG_CF_BODY|TCG_CF_READY, .origin=21,
 .hp=70, .stage=1, .species=134, .level=0, .retreat=1, .weakness=2, .resistance=255, .evolvesFrom="Eevee", .description="", .attacks={
 {.name="Self-healing",.description="Whenever you attach a Water Energy card from your hand to Vaporeon, remove all Special Conditions affecting Vaporeon.",.effect="ecard3-H31:p",.animation="ATK_ANIM_HIT",.cost={0,0,0,0,0,0,0,0,0},.damage=0,.category=TCG_POKEMON_POWER},
 {.name="Hypnosplash",.description="The Defending Pokemon is now Asleep.",.effect="ecard3-H31:a0",.animation="ATK_ANIM_HIT",.cost={0,0,0,0,0,0,2,0,0},.damage=10,.category=TCG_DAMAGE_NORMAL},
