@@ -341,6 +341,10 @@ void TcgDuel_EffectDamage(struct TcgDuel *g, unsigned player, unsigned slot, int
     /* (Transparent Walls: none to the Bench from attacks) */
     if (slot && p->benchShieldUntil && g->turn <= p->benchShieldUntil)
         return;
+    /* (Articuno's Aurora Veil, as the Active: none to the Bench from attacks) */
+    if (slot && player != g->current && TcgPower_Working(g, player, 0) == TCG_POWER_R_AURORA_VEIL &&
+        !p->field[0].poison && !p->field[0].burned)
+        return;
     /* (the Defending Pokemon's protection was settled as the attack began; Mew's
      * Neutralizing Shield and Haunter's Transparency cover the Bench too) */
     if (!slot && player != g->current)

@@ -171,6 +171,10 @@ unsigned TcgPower_Working(const struct TcgDuel *g, unsigned player, unsigned slo
                 !(TcgPower_Flags(id) & 8)) ||
         (id != TCG_POWER_TOXIC_GAS && ToxicGas(g)))
         return TCG_POWER_NONE;
+    /* Dark Feraligatr's Scare (their Active): a Baby's power stops working */
+    if ((TcgDuel_Field(g, player, slot)->flags & TCG_CF_BABY) && id != TCG_POWER_R_SCARE &&
+        TcgPower_Id(TcgDuel_Field(g, player ^ 1, 0)) == TCG_POWER_R_SCARE && TcgPower_Working(g, player ^ 1, 0) == TCG_POWER_R_SCARE)
+        return TCG_POWER_NONE;
     /* GB2's: Goop Gas Attack (every power), Dark Arbok's Stare (that Pokemon's) */
     if (g->goopGasUntil >= g->turn || g->players[player].field[slot].powerOffUntil >= g->turn)
         return TCG_POWER_NONE;
@@ -387,7 +391,7 @@ int TcgPower_Frenzy(const struct TcgDuel *g, unsigned player)
     return f->condition == TCG_CONFUSED && TcgPower_Id(TcgDuel_Field(g, player, 0)) == TCG_POWER_FRENZY &&
            !ToxicGas(g) && g->goopGasUntil < g->turn && f->powerOffUntil < g->turn;
 }
-int TcgPower_AttackBonus(struct TcgDuel *g, int amount)
+int TcgPower_AttackBonus(struct TcgDuel *g, int amount, const struct TcgAttack *attack)
 {
     unsigned me = g->current, s;
     int bonus = 0;
@@ -398,7 +402,7 @@ int TcgPower_AttackBonus(struct TcgDuel *g, int amount)
         Announce(g, me, 0, TCG_POWER_FRENZY);
         bonus += 30;
     }
-    bonus += RegionAttackBonus(g);
+    bonus += RegionAttackBonus(g, attack);
     /* GR's Mewtwo's Dark Wave: a Dark Pokemon's attack, heads then heads 20 / tails 10 more */
     if (IsDarkCard(TcgDuel_Field(g, me, 0)))
         for (s = 0; s < TCG_FIELD_SIZE; s++)

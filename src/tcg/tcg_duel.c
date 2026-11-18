@@ -203,7 +203,9 @@ int TcgDuel_BoundEffect(const struct TcgDuel *g, unsigned player, unsigned slot)
 int TcgDuel_NoAttack(const struct TcgDuel *g, unsigned player)
 {
     const struct TcgFieldCard *f = &g->players[player].field[0];
-    return f->noAttack == 1 || (f->noAttack == 2 && TcgDuel_BoundEffect(g, player, 0)) || f->noAttackAll;
+    const struct TcgCard *c = TcgDuel_Field(g, player, 0);
+    return f->noAttack == 1 || (f->noAttack == 2 && TcgDuel_BoundEffect(g, player, 0)) || f->noAttackAll ||
+           (c && (c->flags & TCG_CF_BABY) && TcgPower_Working(g, player ^ 1, 0) == TCG_POWER_R_SCARE);
 }
 int TcgDuel_Anchored(const struct TcgDuel *g, unsigned player)
 {
@@ -214,7 +216,7 @@ int TcgDuel_Anchored(const struct TcgDuel *g, unsigned player)
 int TcgDuel_Stuck(const struct TcgDuel *g, unsigned player)
 {
     const struct TcgFieldCard *f = &g->players[player].field[0], *them = &g->players[player ^ 1].field[0];
-    return f->stuck == 1 || TcgDuel_Anchored(g, player) ||
+    return f->stuck == 1 || TcgDuel_Anchored(g, player) || TcgPower_Working(g, player ^ 1, 0) == TCG_POWER_R_GUARD ||
            (f->stuck == 2 && them->stackSize && them->stack[them->stackSize - 1] == f->stuckBy - 1);
 }
 static int EnergyPaid(const struct TcgDuel *g, unsigned player, unsigned attack);
@@ -346,6 +348,25 @@ static int EnergyPaidFor(const struct TcgDuel *g, unsigned player, const struct 
         }
     }
     (void)typed;
+    if (TcgPower_Working(g, player, from) == TCG_POWER_R_PRISMATIC_BODY)
+    {
+        /* (Ditto's Prismatic Body: each basic Energy card any one type; the other Energy pay their own) */
+        unsigned basics = 0, need = 0, k;
+        for (k = 0; k < f->attachedSize; k++)
+            basics += g->players[player].cards[f->attached[k]] <= 6;
+        for (t = 0; t < TCG_TYPES; t++)
+            if (t != TCG_COLORLESS && a->cost[t])
+            {
+                unsigned special = 0;
+                for (k = 0; k < f->attachedSize; k++)
+                {
+                    const struct TcgCard *e = Tcg_Card(g->players[player].cards[f->attached[k]]);
+                    special += e->kind == TCG_ENERGY && e->id > 6 && e->type == t ? Tcg_EnergyProvides(e->id) : 0;
+                }
+                need += a->cost[t] > special ? a->cost[t] - special : 0;
+            }
+        return need <= basics + rainbow && TcgDuel_Energy(g, player, from, TCG_NONE) >= total;
+    }
     return short_ <= rainbow + crystal && shortBare <= rainbow && TcgDuel_Energy(g, player, from, TCG_NONE) >= total;
 }
 void TcgDuel_DiscardField(struct TcgDuel *g, unsigned player, unsigned slot)
@@ -540,7 +561,7 @@ int TcgDuel_CanEvolveNow(const struct TcgDuel *g, unsigned who, unsigned slot)
 {
     const struct TcgPlayer *p = &g->players[who];
     const struct TcgFieldCard *f = &p->field[slot];
-    return f->stackSize && f->noEvolveUntil < g->turn &&
+    return f->stackSize && f->noEvolveUntil < g->turn && !TcgPower_EvolveBlocked(g, who, slot) &&
            ((p->turnsTaken >= 2 && f->enteredTurn != g->turn) || f->freeEvolve == g->turn + 1u);
 }
 int TcgDuel_LaterStage(const struct TcgCard *evolution, const struct TcgCard *from)
@@ -691,7 +712,8 @@ static void EndTurn(struct TcgDuel *g)
             f->damage += 20;
             TcgDuel_Event(g, TCG_EV_DAMAGE, who, 0, 20, 0, TCG_DMG_POISON);
         }
-        if (f->condition == TCG_ASLEEP && TcgDuel_Coin(g, who))
+        if (f->condition == TCG_ASLEEP && TcgDuel_Coin(g, who) &&
+            (!TcgPower_InPlay(g, 2, TCG_POWER_R_DEEP_SLEEP) || TcgDuel_Coin(g, who))) /* (Deep Sleep: 2 coins) */
         {
             f->condition = TCG_HEALTHY;
             TcgDuel_Event(g, TCG_EV_STATUS, who, 0, TCG_HEALTHY, 0, f->poison);
@@ -937,7 +959,7 @@ static int Apply(struct TcgDuel *g, const struct TcgAction *a)
         {
             if (f->charged == 2)
                 total *= f->charge3 ? 3 : 2;
-            total += g->bonus + TcgPower_AttackBonus(g, total); /* (Frenzy, Dark Wave, Prehistoric Dream) */
+            total += g->bonus + TcgPower_AttackBonus(g, total, attack); /* (Frenzy, Dark Wave, Prehistoric Dream) */
             /* Metal Energy on a Pokemon that isn't Metal: its damage 10 less each (before Weakness, Resistance) */
             if (type != TCG_METAL)
                 total -= 10 * (int)TcgDuel_AttachedRule(g, g->current, 0, TCG_ER_METAL);
@@ -1314,6 +1336,7 @@ static int Apply(struct TcgDuel *g, const struct TcgAction *a)
         /* (Firegiver, Quickfreeze, Peal of Thunder: not during set-up) */
         if (g->phase != TCG_SETUP)
         {
+            TcgPower_BenchedFromHand(g, g->current, s); /* (Hot Plate) */
             g->fromHand = 1;
             TcgPower_OnPlayFrom(g, g->current, s, a);
             g->fromHand = 0;

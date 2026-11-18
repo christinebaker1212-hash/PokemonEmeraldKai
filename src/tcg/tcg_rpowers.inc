@@ -240,6 +240,8 @@ static int RegionImmune(struct TcgDuel *g, unsigned player, unsigned slot)
         return 0;
     if (power == TCG_POWER_R_IMMUNITY)
         return 1;
+    if (power == TCG_POWER_R_NEUTRAL_SHIELD && g->players[g->current].field[0].stackSize > 1)
+        return 1;
     if (power == TCG_POWER_R_FLUFF && g->players[player].field[slot].damage && TcgDuel_Coin(g, player))
         return 1;
     return 0;
@@ -429,6 +431,31 @@ void TcgPower_Damaged(struct TcgDuel *g, unsigned player, unsigned slot, unsigne
             TcgDuel_Log(g, "%s hangs on with 10 HP.", c->name);
         }
     }
+    if (power == TCG_POWER_R_POLLEN_DEFENSE && !slot && att->stackSize && TcgDuel_Coin(g, player))
+    {
+        Announce(g, player, slot, power);
+        att->condition = TCG_CONFUSED;
+        TcgDuel_Event(g, TCG_EV_STATUS, g->current, 0, att->condition, 0, att->poison);
+    }
+    if (power == TCG_POWER_R_FLUFFY_WOOL && !slot && att->stackSize && TcgDuel_Coin(g, player))
+    {
+        Announce(g, player, slot, power);
+        att->condition = TCG_ASLEEP;
+        TcgDuel_Event(g, TCG_EV_STATUS, g->current, 0, att->condition, 0, att->poison);
+    }
+    if (power == TCG_POWER_R_BOLT && f->damage < (c->kind == TCG_POKEMON ? c->hp : 10u) && TcgDuel_Coin(g, player))
+    {
+        /* (Entei and its cards into the deck: unless Knocked Out) */
+        struct TcgPlayer *q = &g->players[player];
+        unsigned k;
+        Announce(g, player, slot, power);
+        for (k = 0; k < f->stackSize + f->attachedSize; k++)
+            q->deck[q->deckSize++] = k < f->stackSize ? f->stack[k] : f->attached[k - f->stackSize];
+        memset(f, 0, sizeof(*f));
+        TcgDuel_Shuffle(g, player);
+        TcgDuel_Event(g, TCG_EV_DECK_CHANGED, player, 0, 0, 0, 0);
+        return;
+    }
     if (power == TCG_POWER_R_FORTITUDE && c->kind == TCG_POKEMON && f->damage >= c->hp && TcgDuel_Coin(g, player))
     {
         Announce(g, player, slot, power);
@@ -600,6 +627,19 @@ static void RegionOnPlay(struct TcgDuel *g, unsigned player, unsigned slot, unsi
 /* As the Defending Pokemon retreats (Suction Cups on the other Active: its Energy discarded) */
 static void RegionAfterRetreat(struct TcgDuel *g, unsigned player, unsigned benched)
 {
+    if (TcgPower_Working(g, player ^ 1, 0) == TCG_POWER_R_CHASE && TcgDuel_Coin(g, player ^ 1))
+    {
+        /* (a damage counter on the one that retreated, Weakness and Resistance applied) */
+        int amount = 10;
+        unsigned type = TcgDuel_Type(g, player ^ 1, 0);
+        Announce(g, player ^ 1, 0, TCG_POWER_R_CHASE);
+        if (TcgDuel_Weakness(g, player, benched) == type)
+            amount *= 2;
+        if (TcgDuel_Resistance(g, player, benched) == type)
+            amount -= 30;
+        if (amount > 0)
+            PlainDamage(g, player, benched, (unsigned)amount);
+    }
     if (g->players[player].field[benched].pursuitUntil >= g->turn)
     {
         /* (Pursuit: 10 to it as it retreats, no Weakness or Resistance) */
@@ -643,14 +683,51 @@ void TcgPower_BetweenTurns(struct TcgDuel *g)
         }
 }
 /* The regional attack bonuses before Weakness and Resistance: Frenzy (Kyogre ex, Groudon ex, Rayquaza ex: 40 more while
- * the opponent has one of the other two, ex or not, in play) */
-static int RegionAttackBonus(struct TcgDuel *g)
+ * the opponent has one of the other two, ex or not, in play); Final Blow (Megahorn's base damage 120 with 20 HP or less
+ * left); an Unown's Hidden Power: [Anger] (10 more a counter on Unown [A]), [XXXXX] (a coin until tails, 10 more a
+ * heads), [Perform] (Unown [P]'s own: what the last attack did to it) */
+static int RegionAttackBonus(struct TcgDuel *g, const struct TcgAttack *attack)
 {
     static const char *const weather[3] = {"Kyogre", "Groudon", "Rayquaza"};
     const struct TcgCard *it = TcgDuel_Field(g, g->current, 0);
-    unsigned k, s;
-    if (!it || TcgPower_Working(g, g->current, 0) != TCG_POWER_R_FRENZY_EX)
+    const struct TcgFieldCard *f = &g->players[g->current].field[0];
+    unsigned power = TcgPower_Working(g, g->current, 0), k, s;
+    int bonus = 0;
+    if (!it)
         return 0;
+    if (power == TCG_POWER_R_FINAL_BLOW && attack && !strcmp(attack->name, "Megahorn") && it->hp <= f->damage + 20u)
+    {
+        Announce(g, g->current, 0, power);
+        bonus += 120 - (int)attack->damage;
+    }
+    if (attack && !strcmp(attack->name, "Hidden Power") && strstr(it->name, "Unown"))
+    {
+        int anger = 0, x = 0;
+        for (s = 0; s < TCG_FIELD_SIZE; s++)
+        {
+            unsigned p2 = TcgPower_Working(g, g->current, s);
+            if (p2 == TCG_POWER_R_ANGER && !anger)
+            {
+                anger = 1;
+                Announce(g, g->current, s, p2);
+                bonus += (int)g->players[g->current].field[s].damage;
+            }
+            if (p2 == TCG_POWER_R_XXXXX && !x)
+            {
+                x = 1;
+                Announce(g, g->current, s, p2);
+                while (TcgDuel_Coin(g, g->current))
+                    bonus += 10;
+            }
+        }
+        if (power == TCG_POWER_R_PERFORM && f->mirrorDamage)
+        {
+            Announce(g, g->current, 0, power);
+            bonus += (int)f->mirrorDamage;
+        }
+    }
+    if (power != TCG_POWER_R_FRENZY_EX)
+        return bonus;
     for (k = 0; k < 3; k++)
     {
         size_t n = strlen(weather[k]);
@@ -662,9 +739,29 @@ static int RegionAttackBonus(struct TcgDuel *g)
             if (c && !strncmp(c->name, weather[k], n) && (!c->name[n] || !strcmp(c->name + n, " ex")))
             {
                 Announce(g, g->current, 0, TCG_POWER_R_FRENZY_EX);
-                return 40;
+                return bonus + 40;
             }
         }
     }
-    return 0;
+    return bonus;
+}
+/* Can't that Pokemon be evolved from the hand now: Primal Aura (either Active Kabutops: no Benched one), Primal Stare
+ * (their Active Omastar: not your Active one) */
+int TcgPower_EvolveBlocked(const struct TcgDuel *g, unsigned player, unsigned slot)
+{
+    if (slot && (TcgPower_Working(g, 0, 0) == TCG_POWER_R_PRIMAL_AURA || TcgPower_Working(g, 1, 0) == TCG_POWER_R_PRIMAL_AURA))
+        return 1;
+    return !slot && TcgPower_Working(g, player ^ 1, 0) == TCG_POWER_R_PRIMAL_STARE;
+}
+/* A Basic put onto the Bench from the hand: Hot Plate (either Active Dark Magcargo), 10 to it */
+void TcgPower_BenchedFromHand(struct TcgDuel *g, unsigned player, unsigned slot)
+{
+    unsigned who;
+    for (who = 0; who < 2; who++)
+        if (slot && TcgPower_Working(g, who, 0) == TCG_POWER_R_HOT_PLATE)
+        {
+            Announce(g, who, 0, TCG_POWER_R_HOT_PLATE);
+            PlainDamage(g, player, slot, 10);
+            break;
+        }
 }

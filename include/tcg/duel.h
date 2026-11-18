@@ -560,7 +560,11 @@ int TcgPower_NoResistance(const struct TcgDuel *g);
 unsigned TcgDuel_RetreatCost(const struct TcgDuel *g, unsigned player);
 const char *TcgPower_RetreatBlock(const struct TcgDuel *g, unsigned player);
 void TcgPower_AfterRetreat(struct TcgDuel *g, unsigned player, unsigned benched);
-int TcgPower_AttackBonus(struct TcgDuel *g, int amount);
+int TcgPower_AttackBonus(struct TcgDuel *g, int amount, const struct TcgAttack *attack);
+/* Can't that Pokemon be evolved from the hand now (Primal Aura, Primal Stare) */
+int TcgPower_EvolveBlocked(const struct TcgDuel *g, unsigned player, unsigned slot);
+/* A Basic put onto the Bench from the hand (Hot Plate) */
+void TcgPower_BenchedFromHand(struct TcgDuel *g, unsigned player, unsigned slot);
 /* The regional powers between turns (Rain Dish, Burning Aura) */
 void TcgPower_BetweenTurns(struct TcgDuel *g);
 int TcgPower_Frenzy(const struct TcgDuel *g, unsigned player);

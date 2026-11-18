@@ -2860,7 +2860,7 @@ const struct TcgCard gTcgCards[TCG_CARD_COUNT + 1] = {
 {.name="",.description="",.effect="NONE",.animation="ATK_ANIM_NONE",.cost={0},.damage=0,.category=TCG_DAMAGE_NORMAL},
 }
 },
-[447] = {.id=447, .name="Erika's Vileplume", .kind=TCG_POKEMON, .type=1, .rarity=2, .set=13, .set2=255, .dark=0, .holo=1, .flags=TCG_CF_OWNER, .origin=13,
+[447] = {.id=447, .name="Erika's Vileplume", .kind=TCG_POKEMON, .type=1, .rarity=2, .set=13, .set2=255, .dark=0, .holo=1, .flags=TCG_CF_OWNER|TCG_CF_READY, .origin=13,
 .hp=80, .stage=2, .species=45, .level=34, .retreat=2, .weakness=0, .resistance=255, .evolvesFrom="Erika's Gloom", .description="", .attacks={
 {.name="Pollen Defense",.description="If an attack does damage to Erika's Vileplume while it's your Active Pokemon (even if it's Knocked Out), flip a coin. If heads, your opponent's Active Pokemon is now Confused. This power works even while Erika's Vileplume is Asleep, Confused, or Paralyzed.",.effect="gym1-5:p",.animation="ATK_ANIM_HIT",.cost={0,0,0,0,0,0,0,0,0},.damage=0,.category=TCG_POKEMON_POWER},
 {.name="Mega Drain",.description="If Erika's Vileplume does damage to the Defending Pokemon (after applying Weakness and Resistance), remove a number of damage counters from Erika's Vileplume equal to half the damage done to the Defending Pokemon (rounded up to the nearest 10). If Erika's Vileplume has fewer damage counters than that, remove all of them.",.effect="gym1-5:a0",.animation="ATK_ANIM_HIT",.cost={0,3,0,0,0,0,0,0,0},.damage=30,.category=TCG_DAMAGE_NORMAL},
@@ -4367,7 +4367,7 @@ const struct TcgCard gTcgCards[TCG_CARD_COUNT + 1] = {
 {.name="",.description="",.effect="NONE",.animation="ATK_ANIM_NONE",.cost={0},.damage=0,.category=TCG_DAMAGE_NORMAL},
 }
 },
-[700] = {.id=700, .name="Heracross", .kind=TCG_POKEMON, .type=1, .rarity=2, .set=15, .set2=255, .dark=0, .holo=1, .flags=0, .origin=15,
+[700] = {.id=700, .name="Heracross", .kind=TCG_POKEMON, .type=1, .rarity=2, .set=15, .set2=255, .dark=0, .holo=1, .flags=TCG_CF_READY, .origin=15,
 .hp=60, .stage=0, .species=214, .level=28, .retreat=2, .weakness=0, .resistance=255, .evolvesFrom="", .description="This powerful Pokemon thrusts its prized horn under its enemies' bellies, then lifts and throws them.", .attacks={
 {.name="Final Blow",.description="If Heracross's remaining HP are 20 or less, you may make its Megahorn attack's base damage 120 instead of 60. This power can't be used if Heracross is Asleep, Confused, or Paralyzed.",.effect="neo1-6:p",.animation="ATK_ANIM_HIT",.cost={0,0,0,0,0,0,0,0,0},.damage=0,.category=TCG_POKEMON_POWER},
 {.name="Megahorn",.description="Flip a coin. If tails, this attack does nothing.",.effect="neo1-6:a0",.animation="ATK_ANIM_HIT",.cost={0,3,0,0,0,0,0,0,0},.damage=60,.category=TCG_DAMAGE_NORMAL},
@@ -5062,7 +5062,7 @@ const struct TcgCard gTcgCards[TCG_CARD_COUNT + 1] = {
 {.name="",.description="",.effect="NONE",.animation="ATK_ANIM_NONE",.cost={0},.damage=0,.category=TCG_DAMAGE_NORMAL},
 }
 },
-[813] = {.id=813, .name="Unown [A]", .kind=TCG_POKEMON, .type=5, .rarity=2, .set=16, .set2=255, .dark=0, .holo=1, .flags=0, .origin=16,
+[813] = {.id=813, .name="Unown [A]", .kind=TCG_POKEMON, .type=5, .rarity=2, .set=16, .set2=255, .dark=0, .holo=1, .flags=TCG_CF_READY, .origin=16,
 .hp=40, .stage=0, .species=201, .level=15, .retreat=1, .weakness=5, .resistance=255, .evolvesFrom="", .description="Their shapes look like hieroglyphs on ancient tablets. It is said that the two are somehow related.", .attacks={
 {.name="[Anger]",.description="Whenever 1 of your Pokemon with Unown in its name uses its Hidden Power attack, that attack does 10 more damage for each damage counter on Unown [A]. If you have more than 1 Unown [A] in play, use only 1 [Anger] for each attack.",.effect="neo2-14:p",.animation="ATK_ANIM_HIT",.cost={0,0,0,0,0,0,0,0,0},.damage=0,.category=TCG_POKEMON_POWER},
 {.name="Hidden Power",.description="",.effect="NONE",.animation="ATK_ANIM_HIT",.cost={0,0,0,0,0,1,0,0,0},.damage=10,.category=TCG_DAMAGE_NORMAL},
@@ -5195,7 +5195,7 @@ const struct TcgCard gTcgCards[TCG_CARD_COUNT + 1] = {
 {.name="",.description="",.effect="NONE",.animation="ATK_ANIM_NONE",.cost={0},.damage=0,.category=TCG_DAMAGE_NORMAL},
 }
 },
-[832] = {.id=832, .name="Unown [A]", .kind=TCG_POKEMON, .type=5, .rarity=2, .set=16, .set2=255, .dark=0, .holo=0, .flags=0, .origin=16,
+[832] = {.id=832, .name="Unown [A]", .kind=TCG_POKEMON, .type=5, .rarity=2, .set=16, .set2=255, .dark=0, .holo=0, .flags=TCG_CF_READY, .origin=16,
 .hp=40, .stage=0, .species=201, .level=15, .retreat=1, .weakness=5, .resistance=255, .evolvesFrom="", .description="Their shapes look like hieroglyphs on ancient tablets. It is said that the two are somehow related.", .attacks={
 {.name="[Anger]",.description="Whenever 1 of your Pokemon with Unown in its name uses its Hidden Power attack, that attack does 10 more damage for each damage counter on Unown [A]. If you have more than 1 Unown [A] in play, use only 1 [Anger] for each attack.",.effect="neo2-33:p",.animation="ATK_ANIM_HIT",.cost={0,0,0,0,0,0,0,0,0},.damage=0,.category=TCG_POKEMON_POWER},
 {.name="Hidden Power",.description="",.effect="NONE",.animation="ATK_ANIM_HIT",.cost={0,0,0,0,0,1,0,0,0},.damage=10,.category=TCG_DAMAGE_NORMAL},
@@ -5950,14 +5950,14 @@ const struct TcgCard gTcgCards[TCG_CARD_COUNT + 1] = {
 {.name="",.description="",.effect="NONE",.animation="ATK_ANIM_NONE",.cost={0},.damage=0,.category=TCG_DAMAGE_NORMAL},
 }
 },
-[945] = {.id=945, .name="Dark Feraligatr", .kind=TCG_POKEMON, .type=3, .rarity=2, .set=18, .set2=255, .dark=1, .holo=1, .flags=0, .origin=18,
+[945] = {.id=945, .name="Dark Feraligatr", .kind=TCG_POKEMON, .type=3, .rarity=2, .set=18, .set2=255, .dark=1, .holo=1, .flags=TCG_CF_READY, .origin=18,
 .hp=80, .stage=2, .species=160, .level=44, .retreat=3, .weakness=1, .resistance=255, .evolvesFrom="Dark Croconaw", .description="Its powerful muscles allow it to move at a speed that belies its bulk.", .attacks={
 {.name="Scare",.description="As long as Dark Feraligatr is your Active Pokemon, all of your opponent's Baby Pokemon Powers stop working and your opponent's Baby Pokemon can't attack. This power stops working while Dark Feraligatr is Asleep, Confused, or Paralyzed.",.effect="neo4-5:p",.animation="ATK_ANIM_HIT",.cost={0,0,0,0,0,0,0,0,0},.damage=0,.category=TCG_POKEMON_POWER},
 {.name="Crushing Blow",.description="If the Defending Pokemon has any Energy cards attached to it, flip a coin. If heads, choose 1 of those cards and discard it.",.effect="neo4-5:a0",.animation="ATK_ANIM_HIT",.cost={0,0,0,3,0,0,0,0,0},.damage=50,.category=TCG_DAMAGE_NORMAL},
 {.name="",.description="",.effect="NONE",.animation="ATK_ANIM_NONE",.cost={0},.damage=0,.category=TCG_DAMAGE_NORMAL},
 }
 },
-[946] = {.id=946, .name="Dark Gengar", .kind=TCG_POKEMON, .type=5, .rarity=2, .set=18, .set2=255, .dark=1, .holo=1, .flags=0, .origin=18,
+[946] = {.id=946, .name="Dark Gengar", .kind=TCG_POKEMON, .type=5, .rarity=2, .set=18, .set2=255, .dark=1, .holo=1, .flags=TCG_CF_READY, .origin=18,
 .hp=70, .stage=2, .species=94, .level=32, .retreat=2, .weakness=255, .resistance=4, .evolvesFrom="Dark Haunter", .description="It absorbs the heat in the air around it. If you suddenly feel cold, it's because a Gengar has appeared.", .attacks={
 {.name="Deep Sleep",.description="As long as any Dark Gengar are in play, a player flips 2 coins for each of his or her Pokemon that is Asleep at the end of each turn. If either of them is tails, that Pokemon is still Asleep. This power stops working if Dark Gengar is Asleep, Confused, or Paralyzed.",.effect="neo4-6:p",.animation="ATK_ANIM_HIT",.cost={0,0,0,0,0,0,0,0,0},.damage=0,.category=TCG_POKEMON_POWER},
 {.name="Pull In",.description="If your opponent has any Benched Pokemon, you may choose 1 of them and switch it with the Defending Pokemon (before doing damage or other effects of this attack). Either way, the Defending Pokemon is now Asleep.",.effect="neo4-6:a0",.animation="ATK_ANIM_HIT",.cost={0,0,0,0,0,3,0,0,0},.damage=30,.category=TCG_DAMAGE_NORMAL},
@@ -6037,7 +6037,7 @@ const struct TcgCard gTcgCards[TCG_CARD_COUNT + 1] = {
 {.name="",.description="",.effect="NONE",.animation="ATK_ANIM_NONE",.cost={0},.damage=0,.category=TCG_DAMAGE_NORMAL},
 }
 },
-[958] = {.id=958, .name="Dark Magcargo", .kind=TCG_POKEMON, .type=0, .rarity=2, .set=18, .set2=255, .dark=1, .holo=0, .flags=0, .origin=18,
+[958] = {.id=958, .name="Dark Magcargo", .kind=TCG_POKEMON, .type=0, .rarity=2, .set=18, .set2=255, .dark=1, .holo=0, .flags=TCG_CF_READY, .origin=18,
 .hp=60, .stage=1, .species=219, .level=36, .retreat=3, .weakness=3, .resistance=255, .evolvesFrom="Slugma", .description="The shell on its back comes off easily, exposing the flames running through its body.", .attacks={
 {.name="Hot Plate",.description="As long as Dark Magcargo is your Active Pokemon, whenever a player puts a Baby Pokemon or Basic Pokemon onto his or her Bench from his or her hand, this power does 10 damage to that Pokemon. (Don't apply Weakness and Resistance.) This power stops working if Dark Magcargo is Asleep, Confused, or Paralyzed.",.effect="neo4-18:p",.animation="ATK_ANIM_HIT",.cost={0,0,0,0,0,0,0,0,0},.damage=0,.category=TCG_POKEMON_POWER},
 {.name="Ball of Flame",.description="You may discard a Fire Energy card attached to Dark Magcargo when you use this attack. If you do and if your opponent has any Benched Pokemon, choose 1 of them and this attack does 20 damage to it. (Don't apply Weakness and Resistance for Benched Pokemon.)",.effect="neo4-18:a0",.animation="ATK_ANIM_HIT",.cost={2,0,0,0,0,0,0,0,0},.damage=20,.category=TCG_DAMAGE_NORMAL},
@@ -6093,7 +6093,7 @@ const struct TcgCard gTcgCards[TCG_CARD_COUNT + 1] = {
 {.name="",.description="",.effect="NONE",.animation="ATK_ANIM_NONE",.cost={0},.damage=0,.category=TCG_DAMAGE_NORMAL},
 }
 },
-[966] = {.id=966, .name="Light Piloswine", .kind=TCG_POKEMON, .type=3, .rarity=2, .set=18, .set2=255, .dark=0, .holo=0, .flags=TCG_CF_LIGHT, .origin=18,
+[966] = {.id=966, .name="Light Piloswine", .kind=TCG_POKEMON, .type=3, .rarity=2, .set=18, .set2=255, .dark=0, .holo=0, .flags=TCG_CF_LIGHT|TCG_CF_READY, .origin=18,
 .hp=90, .stage=1, .species=221, .level=43, .retreat=3, .weakness=1, .resistance=2, .evolvesFrom="Swinub", .description="Its legs are short, but its hooves are wide and flat, allowing it to easily walk over snow.", .attacks={
 {.name="Fluffy Wool",.description="During your opponent's turn, if Light Piloswine is your Active Pokemon and is damaged by your opponent's attack (even if it's Knocked Out), flip a coin. If heads, the attacking Pokemon is now Asleep. This power stops working if Light Piloswine is already Asleep, Confused, or Paralyzed when your opponent attacks.",.effect="neo4-26:p",.animation="ATK_ANIM_HIT",.cost={0,0,0,0,0,0,0,0,0},.damage=0,.category=TCG_POKEMON_POWER},
 {.name="Knock Over",.description="If there is a Stadium card in play, you may discard it.",.effect="neo4-26:a0",.animation="ATK_ANIM_HIT",.cost={0,0,0,0,0,0,3,0,0},.damage=30,.category=TCG_DAMAGE_NORMAL},
@@ -6121,7 +6121,7 @@ const struct TcgCard gTcgCards[TCG_CARD_COUNT + 1] = {
 {.name="",.description="",.effect="NONE",.animation="ATK_ANIM_NONE",.cost={0},.damage=0,.category=TCG_DAMAGE_NORMAL},
 }
 },
-[970] = {.id=970, .name="Unown [X]", .kind=TCG_POKEMON, .type=5, .rarity=2, .set=18, .set2=255, .dark=0, .holo=0, .flags=0, .origin=18,
+[970] = {.id=970, .name="Unown [X]", .kind=TCG_POKEMON, .type=5, .rarity=2, .set=18, .set2=255, .dark=0, .holo=0, .flags=TCG_CF_READY, .origin=18,
 .hp=50, .stage=0, .species=201, .level=22, .retreat=1, .weakness=5, .resistance=255, .evolvesFrom="", .description="It is believed that the variety of types of this Pokemon were created by evolutionary adaptation, as each possesses a different ability.", .attacks={
 {.name="[XXXXX]",.description="Whenever 1 of your Pokemon with Unown in its name uses its Hidden Power attack, flip a coin until you get tails. That attack does 10 more damage for each heads. If you have more than 1 Unown [X] in play, use only 1 [XXXXX] each turn.",.effect="neo4-30:p",.animation="ATK_ANIM_HIT",.cost={0,0,0,0,0,0,0,0,0},.damage=0,.category=TCG_POKEMON_POWER},
 {.name="Hidden Power",.description="",.effect="NONE",.animation="ATK_ANIM_HIT",.cost={0,0,0,0,0,1,0,0,0},.damage=10,.category=TCG_DAMAGE_NORMAL},
@@ -6310,14 +6310,14 @@ const struct TcgCard gTcgCards[TCG_CARD_COUNT + 1] = {
 {.name="",.description="",.effect="NONE",.animation="ATK_ANIM_NONE",.cost={0},.damage=0,.category=TCG_DAMAGE_NORMAL},
 }
 },
-[997] = {.id=997, .name="Unown [C]", .kind=TCG_POKEMON, .type=5, .rarity=1, .set=18, .set2=255, .dark=0, .holo=0, .flags=0, .origin=18,
+[997] = {.id=997, .name="Unown [C]", .kind=TCG_POKEMON, .type=5, .rarity=1, .set=18, .set2=255, .dark=0, .holo=0, .flags=TCG_CF_READY, .origin=18,
 .hp=40, .stage=0, .species=201, .level=11, .retreat=1, .weakness=5, .resistance=255, .evolvesFrom="", .description="It is believed that the variety of types of this Pokemon were created by evolutionary adaptation, as each possesses a different ability.", .attacks={
 {.name="[Chase]",.description="As long as Unown [C] is your Active Pokemon, whenever your opponent's Active Pokemon tries to retreat, flip a coin. If heads, put 1 damage counter on that Pokemon. Apply Weakness and Resistance.",.effect="neo4-57:p",.animation="ATK_ANIM_HIT",.cost={0,0,0,0,0,0,0,0,0},.damage=0,.category=TCG_POKEMON_POWER},
 {.name="Hidden Power",.description="",.effect="NONE",.animation="ATK_ANIM_HIT",.cost={0,0,0,0,0,1,0,0,0},.damage=10,.category=TCG_DAMAGE_NORMAL},
 {.name="",.description="",.effect="NONE",.animation="ATK_ANIM_NONE",.cost={0},.damage=0,.category=TCG_DAMAGE_NORMAL},
 }
 },
-[998] = {.id=998, .name="Unown [P]", .kind=TCG_POKEMON, .type=5, .rarity=1, .set=18, .set2=255, .dark=0, .holo=0, .flags=0, .origin=18,
+[998] = {.id=998, .name="Unown [P]", .kind=TCG_POKEMON, .type=5, .rarity=1, .set=18, .set2=255, .dark=0, .holo=0, .flags=TCG_CF_READY, .origin=18,
 .hp=40, .stage=0, .species=201, .level=13, .retreat=1, .weakness=5, .resistance=255, .evolvesFrom="", .description="It is believed that the variety of types of this Pokemon were created by evolutionary adaptation, as each possesses a different ability.", .attacks={
 {.name="[Perform]",.description="If an attack damaged Unown [P] during your opponent's last turn and Unown [P] was your Active Pokemon, Unown [P]'s Hidden Power attack does that much more damage to the Defending Pokemon. This power can be used even if Unown [P] is Confused.",.effect="neo4-58:p",.animation="ATK_ANIM_HIT",.cost={0,0,0,0,0,0,0,0,0},.damage=0,.category=TCG_POKEMON_POWER},
 {.name="Hidden Power",.description="",.effect="NONE",.animation="ATK_ANIM_HIT",.cost={0,0,0,0,0,1,0,0,0},.damage=10,.category=TCG_DAMAGE_NORMAL},
@@ -8964,7 +8964,7 @@ const struct TcgCard gTcgCards[TCG_CARD_COUNT + 1] = {
 {.name="Thunderspark",.description="This attack does 10 damage to each Benched Pokemon with at least 1 Energy card attached to it (yours and your opponent's).",.effect="ecard3-13:a1",.animation="ATK_ANIM_HIT",.cost={0,0,1,0,0,0,2,0,0},.damage=40,.category=TCG_DAMAGE_NORMAL},
 }
 },
-[1408] = {.id=1408, .name="Kabutops", .kind=TCG_POKEMON, .type=4, .rarity=2, .set=21, .set2=255, .dark=0, .holo=0, .flags=TCG_CF_BODY, .origin=21,
+[1408] = {.id=1408, .name="Kabutops", .kind=TCG_POKEMON, .type=4, .rarity=2, .set=21, .set2=255, .dark=0, .holo=0, .flags=TCG_CF_BODY|TCG_CF_READY, .origin=21,
 .hp=90, .stage=2, .species=141, .level=0, .retreat=2, .weakness=1, .resistance=255, .evolvesFrom="Kabuto", .description="", .attacks={
 {.name="Primal Aura",.description="As long as Kabutops is your Active Pokemon, neither player can play Basic Pokemon or Evolution cards from his or her hand to evolve Benched Pokemon.",.effect="ecard3-14:p",.animation="ATK_ANIM_HIT",.cost={0,0,0,0,0,0,0,0,0},.damage=0,.category=TCG_POKEMON_POWER},
 {.name="Dual Cut",.description="Flip 2 coins. This attack does 50 damage times the number of heads.",.effect="ecard3-14:a0",.animation="ATK_ANIM_HIT",.cost={0,0,0,0,2,0,1,0,0},.damage=50,.category=TCG_DAMAGE_X},
@@ -9027,7 +9027,7 @@ const struct TcgCard gTcgCards[TCG_CARD_COUNT + 1] = {
 {.name="",.description="",.effect="NONE",.animation="ATK_ANIM_NONE",.cost={0},.damage=0,.category=TCG_DAMAGE_NORMAL},
 }
 },
-[1417] = {.id=1417, .name="Omastar", .kind=TCG_POKEMON, .type=3, .rarity=2, .set=21, .set2=255, .dark=0, .holo=0, .flags=TCG_CF_BODY, .origin=21,
+[1417] = {.id=1417, .name="Omastar", .kind=TCG_POKEMON, .type=3, .rarity=2, .set=21, .set2=255, .dark=0, .holo=0, .flags=TCG_CF_BODY|TCG_CF_READY, .origin=21,
 .hp=90, .stage=2, .species=139, .level=0, .retreat=2, .weakness=2, .resistance=255, .evolvesFrom="Omanyte", .description="", .attacks={
 {.name="Primal Stare",.description="As long as Omastar is your Active Pokemon, your opponent can't play Basic Pokemon or Evolution cards from his or her hand to evolve his or her Active Pokemon.",.effect="ecard3-23:p",.animation="ATK_ANIM_HIT",.cost={0,0,0,0,0,0,0,0,0},.damage=0,.category=TCG_POKEMON_POWER},
 {.name="Spook",.description="The Defending Pokemon can't retreat during your opponent's next turn.",.effect="ecard3-23:a0",.animation="ATK_ANIM_HIT",.cost={0,0,0,2,0,0,1,0,0},.damage=50,.category=TCG_DAMAGE_NORMAL},
@@ -9223,7 +9223,7 @@ const struct TcgCard gTcgCards[TCG_CARD_COUNT + 1] = {
 {.name="",.description="",.effect="NONE",.animation="ATK_ANIM_NONE",.cost={0},.damage=0,.category=TCG_DAMAGE_NORMAL},
 }
 },
-[1445] = {.id=1445, .name="Ditto", .kind=TCG_POKEMON, .type=6, .rarity=0, .set=21, .set2=255, .dark=0, .holo=0, .flags=TCG_CF_BODY, .origin=21,
+[1445] = {.id=1445, .name="Ditto", .kind=TCG_POKEMON, .type=6, .rarity=0, .set=21, .set2=255, .dark=0, .holo=0, .flags=TCG_CF_BODY|TCG_CF_READY, .origin=21,
 .hp=50, .stage=0, .species=132, .level=0, .retreat=1, .weakness=4, .resistance=255, .evolvesFrom="", .description="", .attacks={
 {.name="Prismatic Body",.description="Each basic Energy card attached to Ditto provides every type of Energy but provides only 1 Energy at a time.",.effect="ecard3-51:p",.animation="ATK_ANIM_HIT",.cost={0,0,0,0,0,0,0,0,0},.damage=0,.category=TCG_POKEMON_POWER},
 {.name="Copy",.description="Choose 1 of the Defending Pokemon's attacks. Copy copies that attack. This attack does nothing if Ditto doesn't have the Energy necessary to use that attack. (You must still do anything else required in order to use that attack.)",.effect="ecard3-51:a0",.animation="ATK_ANIM_HIT",.cost={0,0,0,0,0,0,1,0,0},.damage=0,.category=TCG_RESIDUAL},
@@ -9938,7 +9938,7 @@ const struct TcgCard gTcgCards[TCG_CARD_COUNT + 1] = {
 {.name="Thunderspark",.description="This attack does 10 damage to each Benched Pokemon with at least 1 Energy card attached to it (yours and your opponent's).",.effect="ecard3-H12:a1",.animation="ATK_ANIM_HIT",.cost={0,0,1,0,0,0,2,0,0},.damage=40,.category=TCG_DAMAGE_NORMAL},
 }
 },
-[1557] = {.id=1557, .name="Kabutops", .kind=TCG_POKEMON, .type=4, .rarity=2, .set=21, .set2=255, .dark=0, .holo=1, .flags=TCG_CF_BODY, .origin=21,
+[1557] = {.id=1557, .name="Kabutops", .kind=TCG_POKEMON, .type=4, .rarity=2, .set=21, .set2=255, .dark=0, .holo=1, .flags=TCG_CF_BODY|TCG_CF_READY, .origin=21,
 .hp=90, .stage=2, .species=141, .level=0, .retreat=2, .weakness=1, .resistance=255, .evolvesFrom="Kabuto", .description="", .attacks={
 {.name="Primal Aura",.description="As long as Kabutops is your Active Pokemon, neither player can play Basic Pokemon or Evolution cards from his or her hand to evolve Benched Pokemon.",.effect="ecard3-H13:p",.animation="ATK_ANIM_HIT",.cost={0,0,0,0,0,0,0,0,0},.damage=0,.category=TCG_POKEMON_POWER},
 {.name="Dual Cut",.description="Flip 2 coins. This attack does 50 damage times the number of heads.",.effect="ecard3-H13:a0",.animation="ATK_ANIM_HIT",.cost={0,0,0,0,2,0,1,0,0},.damage=50,.category=TCG_DAMAGE_X},
@@ -10305,7 +10305,7 @@ const struct TcgCard gTcgCards[TCG_CARD_COUNT + 1] = {
 {.name="",.description="",.effect="NONE",.animation="ATK_ANIM_NONE",.cost={0},.damage=0,.category=TCG_DAMAGE_NORMAL},
 }
 },
-[1610] = {.id=1610, .name="Entei", .kind=TCG_POKEMON, .type=0, .rarity=3, .set=4, .set2=255, .dark=0, .holo=0, .flags=0, .origin=22,
+[1610] = {.id=1610, .name="Entei", .kind=TCG_POKEMON, .type=0, .rarity=3, .set=4, .set2=255, .dark=0, .holo=0, .flags=TCG_CF_READY, .origin=22,
 .hp=80, .stage=0, .species=244, .level=37, .retreat=1, .weakness=3, .resistance=255, .evolvesFrom="", .description="Volcanoes erupt when it barks. Unable to restrain its extreme power, it races headlong around the land.", .attacks={
 {.name="Bolt",.description="Whenever your opponent's attack damages Entei, unless that attack Knocks Out Entei, flip a coin. If heads, shuffle Entei and all cards attached to it into your deck. This power can't be used if Entei is already Asleep, Confused, or Paralyzed when it is damaged.",.effect="basep-34:p",.animation="ATK_ANIM_HIT",.cost={0,0,0,0,0,0,0,0,0},.damage=0,.category=TCG_POKEMON_POWER},
 {.name="Protective Flame",.description="During your opponent's next turn, prevent all effects of attacks, including damage, done to your Benched Pokemon.",.effect="basep-34:a0",.animation="ATK_ANIM_HIT",.cost={3,0,0,0,0,0,0,0,0},.damage=50,.category=TCG_DAMAGE_NORMAL},
@@ -10384,21 +10384,21 @@ const struct TcgCard gTcgCards[TCG_CARD_COUNT + 1] = {
 {.name="",.description="",.effect="NONE",.animation="ATK_ANIM_NONE",.cost={0},.damage=0,.category=TCG_DAMAGE_NORMAL},
 }
 },
-[1623] = {.id=1623, .name="Mew", .kind=TCG_POKEMON, .type=5, .rarity=3, .set=4, .set2=255, .dark=0, .holo=0, .flags=0, .origin=22,
+[1623] = {.id=1623, .name="Mew", .kind=TCG_POKEMON, .type=5, .rarity=3, .set=4, .set2=255, .dark=0, .holo=0, .flags=TCG_CF_READY, .origin=22,
 .hp=40, .stage=0, .species=151, .level=8, .retreat=1, .weakness=5, .resistance=255, .evolvesFrom="", .description="So rare that it is still said to be a mirage by many experts. Only a few people have seen it worldwide.", .attacks={
 {.name="Neutral Shield",.description="Prevent all effects of attacks, including damage, done to Mew by Evolved Pokemon. You can't use this power if Mew is Asleep, Confused, or Paralyzed.",.effect="basep-47:p",.animation="ATK_ANIM_HIT",.cost={0,0,0,0,0,0,0,0,0},.damage=0,.category=TCG_POKEMON_POWER},
 {.name="Psyshock",.description="Flip a coin. If heads, the Defending Pokemon is now Confused.",.effect="basep-47:a0",.animation="ATK_ANIM_HIT",.cost={0,0,0,0,0,1,0,0,0},.damage=10,.category=TCG_DAMAGE_NORMAL},
 {.name="",.description="",.effect="NONE",.animation="ATK_ANIM_NONE",.cost={0},.damage=0,.category=TCG_DAMAGE_NORMAL},
 }
 },
-[1624] = {.id=1624, .name="Articuno", .kind=TCG_POKEMON, .type=3, .rarity=3, .set=4, .set2=255, .dark=0, .holo=0, .flags=0, .origin=22,
+[1624] = {.id=1624, .name="Articuno", .kind=TCG_POKEMON, .type=3, .rarity=3, .set=4, .set2=255, .dark=0, .holo=0, .flags=TCG_CF_READY, .origin=22,
 .hp=80, .stage=0, .species=144, .level=34, .retreat=2, .weakness=255, .resistance=4, .evolvesFrom="", .description="A legendary bird Pokemon that is said to appear to doomed people who are lost in icy mountains.", .attacks={
 {.name="Aurora Veil",.description="As long as Articuno is your Active Pokemon, your Benched Pokemon do not take damage from and are not affected by attacks. This power cannot be used if Articuno is affected by a Special Condition.",.effect="basep-48:p",.animation="ATK_ANIM_HIT",.cost={0,0,0,0,0,0,0,0,0},.damage=0,.category=TCG_POKEMON_POWER},
 {.name="Ice Beam",.description="Flip a coin. If heads, the Defending Pokemon is now Paralyzed.",.effect="basep-48:a0",.animation="ATK_ANIM_HIT",.cost={0,0,0,2,0,0,2,0,0},.damage=30,.category=TCG_DAMAGE_NORMAL},
 {.name="",.description="",.effect="NONE",.animation="ATK_ANIM_NONE",.cost={0},.damage=0,.category=TCG_DAMAGE_NORMAL},
 }
 },
-[1625] = {.id=1625, .name="Snorlax", .kind=TCG_POKEMON, .type=6, .rarity=3, .set=4, .set2=255, .dark=0, .holo=0, .flags=0, .origin=22,
+[1625] = {.id=1625, .name="Snorlax", .kind=TCG_POKEMON, .type=6, .rarity=3, .set=4, .set2=255, .dark=0, .holo=0, .flags=TCG_CF_READY, .origin=22,
 .hp=90, .stage=0, .species=143, .level=35, .retreat=4, .weakness=4, .resistance=5, .evolvesFrom="", .description="Very lazy. Just eats and sleeps. As its rotund bulk builds, it becomes steadily more slothful.", .attacks={
 {.name="Guard",.description="As long as Snorlax is your Active Pokemon, the Defending Pokemon can't Retreat. This power stops working when Snorlax is affected by a Special Condition.",.effect="basep-49:p",.animation="ATK_ANIM_HIT",.cost={0,0,0,0,0,0,0,0,0},.damage=0,.category=TCG_POKEMON_POWER},
 {.name="Roll Over",.description="Snorlax is now Asleep. Flip a coin. If heads, the Defending Pokemon is now Asleep.",.effect="basep-49:a0",.animation="ATK_ANIM_HIT",.cost={0,0,0,0,0,0,4,0,0},.damage=30,.category=TCG_DAMAGE_NORMAL},
