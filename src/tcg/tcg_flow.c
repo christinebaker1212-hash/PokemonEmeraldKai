@@ -28,6 +28,22 @@ const char *TcgFlow_OwnerWord(unsigned owner)
                                                   "Giovanni", "Koga"};
     return owner < TCG_OWNERS ? words[owner] : "";
 }
+int TcgFlow_InNameGroup(const char *name, unsigned group)
+{
+    static const char *const groups[TCG_NAME_GROUPS][5] = {
+        {"Gyarados", "Dark Gyarados", "Shining Gyarados"},
+        {"Tentacool", "Tentacruel", "Misty's Tentacool", "Misty's Tentacruel"},
+        {"Sabrina's Gastly", "Sabrina's Haunter", "Sabrina's Gengar"},
+        {"Omanyte", "Omastar", "Kabuto", "Kabutops"},
+        {"Giovanni's Nidoking"},
+        {"Murkrow"},
+    };
+    unsigned i;
+    for (i = 0; group < TCG_NAME_GROUPS && i < 5 && groups[group][i]; i++)
+        if (!strcmp(name, groups[group][i]))
+            return 1;
+    return 0;
+}
 int TcgFlow_StepIsTarget(const struct TcgStep *st)
 {
     return st->kind == TCG_ST_OPP_SLOT || st->filter == TCG_F_OTHER_MINE ||
@@ -297,8 +313,11 @@ static int AttackPickSteps(const struct TcgDuel *g, unsigned me, const struct Tc
     }
     case TCG_APICK_TARGET_ENERGY:
     {
-        struct TcgStep st = {TCG_ST_PICK, TCG_F_ENERGY, TCG_SRC_OPP_ATTACHED, 0, 1,
-                             "If heads, discard which of its Energy?"};
+        /* (count: 1 a Special Energy, 2 a Trainer, to shuffle into their deck) */
+        struct TcgStep st = {TCG_ST_PICK, (uint8_t)(count == 2 ? TCG_F_TRAINER : count ? TCG_F_SPECIAL_ENERGY : TCG_F_ENERGY),
+                             TCG_SRC_OPP_ATTACHED, 0, 1,
+                             count == 2 ? "Shuffle which Trainer into their deck?"
+                             : count ? "If heads, shuffle which Special Energy into their deck?" : "If heads, discard which of its Energy?"};
         out[n++] = st;
         break;
     }
@@ -377,9 +396,24 @@ static int AttackPickSteps(const struct TcgDuel *g, unsigned me, const struct Tc
             {56, TCG_F_BASIC_ENERGY, TCG_SRC_MY_DISCARD, "Shuffle which basic Energy into your deck?"},
             {57, TCG_F_TRAINER, TCG_SRC_MY_DISCARD, "If heads, shuffle which Trainer into your deck?"},
             {58, TCG_F_EVOLVES_FROM_ACTIVE, TCG_SRC_HAND, "Evolve it into which card from your hand?"},
+            {80, TCG_F_SAME_NAME_BASIC, TCG_SRC_DECK, "Put which onto your Bench?"},
+            {81, TCG_F_BASIC, TCG_SRC_OPP_HAND, "Put which of theirs onto their Bench?"},
         };
         unsigned i;
         /* (count: the kind, and in the next byte how many may be picked: 1 if not given) */
+        /* (60 + a name group: cards of its names into the hand; 70 + an owner: a Basic with that name onto the Bench) */
+        if ((count & 255) >= 60 && (count & 255) < 60 + TCG_NAME_GROUPS)
+        {
+            struct TcgStep st = {TCG_ST_PICK, (uint8_t)(TCG_F_NAMED + (count & 255) - 60), TCG_SRC_DECK, 0,
+                                 (uint8_t)(count >> 8 ? count >> 8 : 1), "Take which cards?"};
+            out[n++] = st;
+        }
+        if ((count & 255) >= 70 && (count & 255) < 70 + TCG_OWNERS)
+        {
+            struct TcgStep st = {TCG_ST_PICK, (uint8_t)(TCG_F_OWNER_BASIC + (count & 255) - 70), TCG_SRC_DECK, 0, 1,
+                                 "Put which Basic Pokemon onto your Bench?"};
+            out[n++] = st;
+        }
         for (i = 0; i < sizeof(searches) / sizeof(searches[0]); i++)
             if (searches[i].kind == (count & 255))
             {
@@ -603,6 +637,10 @@ int TcgFlow_CardMatches(const struct TcgDuel *g, unsigned owner, unsigned physic
         return 0;
     }
     default:
+        if (filter >= TCG_F_OWNER_BASIC && filter < TCG_F_OWNER_BASIC + TCG_OWNERS)
+            return c->kind == TCG_POKEMON && !c->stage && strstr(c->name, TcgFlow_OwnerWord((unsigned)filter - TCG_F_OWNER_BASIC));
+        if (filter >= TCG_F_NAMED && filter < TCG_F_NAMED + TCG_NAME_GROUPS)
+            return TcgFlow_InNameGroup(c->name, (unsigned)filter - TCG_F_NAMED);
         if (filter >= TCG_F_OWNER_CARD && filter < TCG_F_OWNER_CARD + TCG_OWNERS)
             return c->kind == TCG_POKEMON && strstr(c->name, TcgFlow_OwnerWord((unsigned)filter - TCG_F_OWNER_CARD));
         return 1;
@@ -622,6 +660,11 @@ int TcgFlow_PickMatches(const struct TcgDuel *g, unsigned me, const struct TcgAc
         return TcgDuel_EvolvesFrom(Tcg_Card(CardOf(g, owner, physical)),
                                    Field(g, me, filter == TCG_F_EVOLVES_FROM_USER ? a->slot
                                                 : filter == TCG_F_EVOLVES_FROM_TARGET ? a->target : 0));
+    if (filter == TCG_F_SAME_NAME_BASIC)
+    {
+        const struct TcgCard *c = Tcg_Card(CardOf(g, owner, physical)), *active = Field(g, me, 0);
+        return c && active && c->kind == TCG_POKEMON && !c->stage && !strcmp(c->name, active->name);
+    }
     return TcgFlow_CardMatches(g, owner, physical, filter);
 }
 

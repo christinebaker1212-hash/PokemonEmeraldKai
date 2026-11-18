@@ -1,6 +1,7 @@
 #include "mp_version.h"
 #include "tcg/card_ids.h"
 #include "tcg/duel.h"
+#include "tcg/flow.h"
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>

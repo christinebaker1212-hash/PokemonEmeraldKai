@@ -107,12 +107,15 @@ enum
     TCG_F_TM_FITS,
     TCG_F_EVOLVES_FROM_USER,    /* a card that evolves from the Pokemon using the power (action.slot) */
     TCG_F_EVOLVES_FROM_ACTIVE,  /* a card that evolves from the Active Pokemon */
-    TCG_F_EVOLVES_FROM_TARGET,  /* a card that evolves from the Pokemon of yours chosen (action.target) */              /* (slot) a Pokemon the Technical Machine being played may go on (TcgDuel_TmFits) */
+    TCG_F_EVOLVES_FROM_TARGET,  /* a card that evolves from the Pokemon of yours chosen (action.target) */
+    TCG_F_SAME_NAME_BASIC,      /* a Basic Pokemon card named as your Active Pokemon (the attacker) */              /* (slot) a Pokemon the Technical Machine being played may go on (TcgDuel_TmFits) */
     /* "with Brock in its name" and the like (+ TCG_OWNER_*): a Pokemon card; one of yours in play (slot); another
      * one of yours than the first chosen (slot: the action's target) */
     TCG_F_OWNER_CARD = 100,
     TCG_F_OWNER_SLOT = 110,
-    TCG_F_OWNER_OTHER = 120
+    TCG_F_OWNER_OTHER = 120,
+    TCG_F_OWNER_BASIC = 130, /* (+ TCG_OWNER_*) a Basic Pokemon card with that name in it */
+    TCG_F_NAMED = 140        /* (+ a name group: TcgFlow_InNameGroup) a card of one of the group's names */
 };
 enum
 {
@@ -130,6 +133,11 @@ enum
 #define TCG_MIN_ALL 99
 /* The owner's word in a Pokemon's name ("Brock", "Lt. Surge"...) */
 const char *TcgFlow_OwnerWord(unsigned owner);
+/* Whether a card's name is one of a name group's (the regional attacks that name cards: "a card named Gyarados, Dark
+ * Gyarados, or Shining Gyarados"): 0 the Gyarados, 1 the Tentacool line and Misty's, 2 Sabrina's Gastly line, 3 the
+ * Omanyte and Kabuto lines, 4 Giovanni's Nidoking, 5 Murkrow */
+#define TCG_NAME_GROUPS 6
+int TcgFlow_InNameGroup(const char *name, unsigned group);
 
 struct TcgStep
 {
