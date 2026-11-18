@@ -101,7 +101,10 @@
  *             draw until n in the hand | shiftto:T its type T for the turn | srchk:3 a Pokemon card | dbench:2 a Metal
  *             Basic | react:k[,n] when an attack damages it through their next turn (n 2: your next too): TCG_REACT_k
  *             (TcgPower_Damaged) | pursuit / attpsn the Defending: 10 if it retreats / Poisoned when Energy is attached
- *             to it, through their turn */
+ *             to it, through their turn
+ * Conditions: hN / tN the Nth coin came up heads / tails | Options (0): opt:11 the Defending Pokemon's attacks if it's
+ *             a Basic Pokemon (else no menu) | After (1): amn that attack not next turn (Terrorize) | guard:10 Reflect
+ *             Shield | guardk:K TCG_GUARD_K kept until it takes damage, is Benched or evolves (Shadow Images: 11) */
 #define SCRIPT_TOKEN 48
 /* Which of the player's Pokemon "it" is: the attacker (0), or a Pokemon whose power runs a script (tcg_powers.c) */
 static unsigned sScriptSelf;
@@ -190,6 +193,12 @@ static int ScriptCond(const struct TcgDuel *g, const char *cond)
         return tails > 0;
     if (!strcmp(cond, "ah"))
         return g->scriptCoins && !tails;
+    if ((cond[0] == 'h' || cond[0] == 't') && cond[1] >= '1' && cond[1] <= '9' && !cond[2])
+    {
+        /* the Nth coin (h2: the second came up heads, t2: it came up tails) */
+        unsigned n = (unsigned)(cond[1] - '1');
+        return n < g->scriptCoins && ((g->scriptBits >> n & 1) != 0) == (cond[0] == 'h');
+    }
     if (!strcmp(cond, "at"))
         return !heads;
     if (!strncmp(cond, "ge", 2))
@@ -304,8 +313,11 @@ static void ScriptFlip(struct TcgDuel *g, unsigned n)
     unsigned i;
     for (i = 0; i < n && g->scriptCoins < 255; i++)
     {
+        unsigned heads = TcgDuel_Coin(g, g->current);
+        if (heads && g->scriptCoins < 32)
+            g->scriptBits |= 1u << g->scriptCoins;
         g->scriptCoins++;
-        g->scriptHeads += TcgDuel_Coin(g, g->current) ? 1 : 0;
+        g->scriptHeads += heads ? 1 : 0;
     }
 }
 /* Special Conditions by name ("par", "slp+psn"...) onto f */
@@ -388,8 +400,8 @@ static int ScriptRun(struct TcgDuel *g, const char *script, const struct TcgAtta
             const char *labels[TCG_MAX_OPTIONS];
             uint8_t ok[TCG_MAX_OPTIONS];
             unsigned n = ScriptOptions(g, me, script, labels, ok);
-            if (sScriptOption >= n || !ok[sScriptOption])
-                return TCG_INVALID;
+            if (n ? sScriptOption >= n || !ok[sScriptOption] : sScriptOption != 0)
+                return TCG_INVALID; /* (no menu: option 0) */
         }
         else if (ScriptIs(&o, "cop"))
             ScriptFlip(g, sScriptOption);
@@ -993,6 +1005,16 @@ static int ScriptRun(struct TcgDuel *g, const char *script, const struct TcgAtta
             self->barrier = (uint8_t)(x ? x : 1);
         else if (ScriptIs(&o, "guard"))
             self->guard = (uint8_t)x;
+        else if (ScriptIs(&o, "guardk"))
+            self->guardKeep = (uint8_t)x; /* (until it takes damage, is Benched or evolves) */
+        else if (ScriptIs(&o, "amn"))
+        {
+            /* Terrorize: the chosen attack of the Defending Pokemon (opt:11) can't be used next turn */
+            const struct TcgCard *d = TcgDuel_Field(g, them, 0);
+            if (!blocked && d && d->kind == TCG_POKEMON && !d->stage && sScriptOption < TCG_ATTACKS &&
+                RealAttack(&d->attacks[sScriptOption]))
+                Amnesia(g, sScriptOption);
+        }
         else if (ScriptIs(&o, "nort"))
         {
             if (!blocked && foe->stackSize)
@@ -2730,6 +2752,18 @@ static unsigned ScriptOptions(const struct TcgDuel *g, unsigned player, const ch
             labels[1] = "FIRE", ok[1] = EnergyOfType(g, player, 0, TCG_FIRE) != 0;
             labels[2] = "FIGHTING", ok[2] = EnergyOfType(g, player, 0, TCG_FIGHTING) != 0;
             return 3;
+        case 11: /* the Defending Pokemon's attacks, if it's a Basic Pokemon (else no menu) */
+        {
+            const struct TcgCard *d = TcgDuel_Field(g, player ^ 1, 0);
+            if (!d || d->kind != TCG_POKEMON || d->stage || !(RealAttack(&d->attacks[0]) || RealAttack(&d->attacks[1])))
+                return 0;
+            for (i = 0; i < AttackSlots(d); i++)
+            {
+                labels[i] = d->attacks[i].name[0] ? d->attacks[i].name : "---";
+                ok[i] = RealAttack(&d->attacks[i]);
+            }
+            return i;
+        }
         case 10: /* an Energy type other than Colorless */
         {
             static const char *const types[] = {"GRASS", "FIRE", "WATER", "LIGHTNING", "FIGHTING", "PSYCHIC", "DARKNESS",

@@ -294,6 +294,121 @@ static int Anchors(void)
     printf("PASS anchors: Jaw Clamp holds while Croconaw is Active, Earthdrill only after Lie Low, Fire Wall, Endure, maximum HP\n");
     return 0;
 }
+/* Burst's two coins, Terrorize, Reflect Shield, Shadow Images, Spikes, Crystal Body, Mirror Coat */
+static int Guards(void)
+{
+    struct TcgDuel g;
+    struct TcgAction a;
+    unsigned seed, seen = 0;
+    if (!Tcg_Card(TCG_CARD_NEO2_61) || !Tcg_Card(TCG_CARD_NEO3_38) || !Tcg_Card(TCG_CARD_NEO4_109) ||
+        !Tcg_Card(TCG_CARD_GYM1_13) || !Tcg_Card(TCG_CARD_NEO2_2) || !Tcg_Card(TCG_CARD_NEO3_14) ||
+        !Tcg_Card(TCG_CARD_ECARD3_45))
+        return printf("FAIL guards: a card isn't finished\n"), 1;
+    /* Burst: (heads, heads) 40 to itself and 10 to each Bench; (tails, heads) the damage only; second tails nothing */
+    for (seed = 1; seed < 60; seed++)
+    {
+        unsigned foe, bench, prizes;
+        Stage(&g, TCG_CARD_NEO2_61, 0, seed);
+        g.players[0].field[0].damage = 0;
+        g.players[1].field[0].damage = 0;
+        g.players[1].field[0].poison = 0;
+        memset(&a, 0, sizeof(a));
+        a.type = TCG_ATTACK;
+        if (TcgDuel_Apply(&g, &a) != TCG_OK)
+            return printf("FAIL Burst: %s\n", g.error), 1;
+        foe = g.players[1].field[0].damage, bench = g.players[1].field[1].damage, prizes = g.players[1].prizeSize;
+        if (!foe && !bench && prizes == 6)
+            seen |= 1;
+        else if (foe && bench == 10 && prizes < 6)
+            seen |= 2;
+        else if (foe && !bench && prizes == 6)
+            seen |= 4;
+        else
+            return printf("FAIL Burst (seed %u): %u to the Defending, %u to the Bench, %u Prizes\n", seed, foe, bench, prizes), 1;
+    }
+    if (seen != 7)
+        return printf("FAIL Burst: outcomes seen %u\n", seen), 1;
+    /* Terrorize: the Defending Basic's chosen attack can't be used next turn */
+    Stage(&g, TCG_CARD_NEO3_38, 0, 1);
+    memset(&a, 0, sizeof(a));
+    a.type = TCG_ATTACK;
+    if (TcgDuel_Apply(&g, &a) != TCG_OK || g.players[1].field[0].disabled != 1)
+        return printf("FAIL Terrorize: %s (disabled %u)\n", g.error, g.players[1].field[0].disabled), 1;
+    /* Reflect Shield (heads: no damage, 20 back) and Shadow Images (tails: no damage; kept until it's damaged) */
+    for (seen = 0, seed = 1; seed < 40; seed++)
+    {
+        unsigned k;
+        for (k = 0; k < 2; k++)
+        {
+            unsigned mine, theirs;
+            Stage(&g, k ? TCG_CARD_GYM1_13 : TCG_CARD_NEO4_109, 0, seed);
+            memset(&a, 0, sizeof(a));
+            a.type = TCG_ATTACK;
+            if (TcgDuel_Apply(&g, &a) != TCG_OK)
+                return printf("FAIL %s: %s\n", k ? "Shadow Images" : "Reflect Shield", g.error), 1;
+            if (k ? g.players[0].field[0].guardKeep != TCG_GUARD_TAILS : g.players[0].field[0].guard != TCG_GUARD_BLINK_HIT)
+                return printf("FAIL %s: no guard\n", k ? "Shadow Images" : "Reflect Shield"), 1;
+            if (k) /* (Rocket's Scyther resists Low Kick: the guard on a Pokemon that doesn't) */
+                g.players[0].cards[g.players[0].field[0].stack[0]] = TCG_CARD_NEO4_109;
+            /* their Machop's Low Kick */
+            g.current = 1, g.phase = TCG_TURN, g.needsTurnStart = 0;
+            g.players[1].field[0].condition = TCG_HEALTHY;
+            g.players[1].field[0].poison = g.players[1].field[0].burned = 0;
+            Attach(&g, 1, 0, TCG_CARD_FIGHTING_ENERGY, 1);
+            mine = g.players[0].field[0].damage, theirs = g.players[1].field[0].damage;
+            memset(&a, 0, sizeof(a));
+            a.type = TCG_ATTACK;
+            if (TcgDuel_Apply(&g, &a) != TCG_OK)
+                return printf("FAIL Low Kick into %s: %s\n", k ? "Shadow Images" : "Reflect Shield", g.error), 1;
+            if (g.players[0].field[0].damage == mine)
+            {
+                if (!k && g.players[1].field[0].damage != theirs + 20)
+                    return printf("FAIL Reflect Shield: no 20 back (%u, %u)\n", theirs, g.players[1].field[0].damage), 1;
+                if (k && g.players[0].field[0].guardKeep != TCG_GUARD_TAILS)
+                    return printf("FAIL Shadow Images ended without damage\n"), 1;
+                seen |= 1u << (k * 2);
+            }
+            else
+            {
+                if (k && g.players[0].field[0].guardKeep)
+                    return printf("FAIL Shadow Images lasts after damage\n"), 1;
+                seen |= 2u << (k * 2);
+            }
+        }
+    }
+    if (seen != 15)
+        return printf("FAIL Reflect Shield / Shadow Images: outcomes seen %u\n", seen), 1;
+    /* Spikes: their Benched Pokemon that becomes Active on their turn takes 10 */
+    Stage(&g, TCG_CARD_NEO2_2, 0, 1);
+    g.current = 1, g.phase = TCG_TURN, g.needsTurnStart = 0;
+    g.players[1].field[1].damage = 0;
+    memset(&a, 0, sizeof(a));
+    a.type = TCG_RETREAT;
+    a.slot = 1;
+    a.selections[0] = g.players[1].field[0].attached[0];
+    a.selectionCount = 1;
+    if (TcgDuel_Apply(&g, &a) != TCG_OK || g.players[1].field[0].damage != 10)
+        return printf("FAIL Spikes: %s (%u damage)\n", g.error, g.players[1].field[0].damage), 1;
+    /* Crystal Body: Poison Fang's damage but not its Poison; Mirror Coat: Poisoned, and the attacker too */
+    for (seed = 0; seed < 3; seed++)
+    {
+        static const unsigned ids[3] = {TCG_CARD_MACHOP, TCG_CARD_NEO3_14, TCG_CARD_ECARD3_45};
+        Stage(&g, TCG_CARD_ARBOK, 1, 1);
+        g.players[1].cards[g.players[1].field[0].stack[0]] = (uint16_t)ids[seed];
+        g.players[1].field[0].poison = 0;
+        memset(&a, 0, sizeof(a));
+        a.type = TCG_ATTACK;
+        a.attack = 1;
+        if (TcgDuel_Apply(&g, &a) != TCG_OK)
+            return printf("FAIL Poison Fang: %s\n", g.error), 1;
+        if (!g.players[1].field[0].damage || !g.players[1].field[0].poison != (seed == 1) ||
+            !g.players[0].field[0].poison != (seed != 2))
+            return printf("FAIL %s: damage %u, Poisoned %u, the attacker %u\n", Tcg_Card(ids[seed])->name,
+                          g.players[1].field[0].damage, g.players[1].field[0].poison, g.players[0].field[0].poison), 1;
+    }
+    printf("PASS Burst, Terrorize, Reflect Shield, Shadow Images, Spikes, Crystal Body, Mirror Coat\n");
+    return 0;
+}
 static int ScriptMechanics(void)
 {
     struct TcgDuel g;
@@ -1109,7 +1224,7 @@ int main(void)
     }
     printf("PASS %u finished regional cards: %u attacks used %u times, then %u AI actions after them\n", ready, used, ok,
            steps);
-    if (SpecialEnergy() || EcardEnergy() || ScriptMechanics() || Anchors() || TechnicalMachines() || Babies())
+    if (SpecialEnergy() || EcardEnergy() || ScriptMechanics() || Anchors() || Guards() || TechnicalMachines() || Babies())
         return 1;
     if (PlayTrainers() || UsePowers() || UseStadiums() || AttackFlows())
         return 1;

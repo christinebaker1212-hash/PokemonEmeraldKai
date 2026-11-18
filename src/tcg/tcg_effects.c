@@ -370,6 +370,7 @@ void TcgDuel_EffectDamage(struct TcgDuel *g, unsigned player, unsigned slot, int
     if (amount <= 0)
         return;
     f->damage += (unsigned)amount;
+    f->guardKeep = 0; /* (Shadow Images lasts until it takes damage) */
     TcgDuel_Event(g, TCG_EV_DAMAGE, player, slot, (unsigned)amount, 0, flags);
 }
 
@@ -1365,7 +1366,7 @@ int TcgDuel_RunPowerScript(struct TcgDuel *g, unsigned slot, const char *script,
     unsigned damage = 0;
     int result;
     sScriptSelf = slot;
-    g->scriptCoins = g->scriptHeads = 0;
+    g->scriptCoins = g->scriptHeads = 0, g->scriptBits = 0;
     g->attackFailed = 0;
     g->foeImmune = TCG_IMMUNE_NO;
     result = ScriptRun(g, script, NULL, action, &damage, 0);
@@ -1375,7 +1376,7 @@ int TcgDuel_RunPowerScript(struct TcgDuel *g, unsigned slot, const char *script,
         snprintf(g->error, sizeof(g->error), "That choice doesn't work for this power.");
     sScriptSelf = 0;
     g->attackFailed = 0;
-    g->scriptCoins = g->scriptHeads = 0;
+    g->scriptCoins = g->scriptHeads = 0, g->scriptBits = 0;
     return result;
 }
 static int Gb2Effect(struct TcgDuel *g, const struct Effect *e, const struct TcgAttack *a, const struct TcgAction *action,

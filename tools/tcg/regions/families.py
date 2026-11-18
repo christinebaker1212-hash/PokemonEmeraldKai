@@ -569,6 +569,10 @@ def _(m, d):
 
 # One wording, one script (the cards' words with SELF for the card's name; tcg_script.inc's ops)
 EXACT = {
+    "Flip a coin. If heads, SELF does 40 damage to itself and 10 damage to each Pokemon on each player's Bench. Flip a coin. If tails, this attack does nothing (not even damage).": 'c:2 t2.none ah.rec:40 ah.bb:10',
+    "If the Defending Pokemon is a Basic Pokemon, choose 1 of its attacks. That Pokemon can't use that attack during your opponent's next turn.": 'opt:11 amn',
+    "If an attack does damage to SELF during your opponent's next turn (even if SELF is Knocked Out), flip a coin. If heads, prevent all damage done to SELF from that attack and do 20 damage to the attacking Pokemon.": 'guard:10',
+    'Whenever SELF is attacked, your opponent flips a coin. If tails, that attack does no damage to SELF. (Any other effects of the attack still happen.) This effect lasts until SELF takes damage (or is Benched or is evolved).': 'guardk:11',
     "Flip a coin. If heads, SELF's maximum HP is now 80 and SELF's Pound attack's base damage is 30 instead of 10. (Benching SELF ends this effect.)": 'c h.hpset:80,1,30',
     "If an attack does damage to SELF during your opponent's next turn (even if SELF is Knocked Out), SELF attacks your opponent's Active Pokemon for 10 damage. (Apply Weakness and Resistance.)": 'react:1',
     "If an attack does damage to SELF during your opponent's next turn (even if SELF is Knocked Out), flip a coin. If heads, SELF attacks your opponent's Active Pokemon for double that amount of damage. (If SELF takes 20 damage, it does 40 damage to that Pokemon.)": 'react:2',

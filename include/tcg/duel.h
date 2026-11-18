@@ -71,6 +71,8 @@ struct TcgFieldCard
     uint8_t reactKind;
     /* (effect scripts: Giant Growth) its maximum HP while it stays Active (0: its card's) */
     uint8_t hpSet;
+    /* (effect scripts: Shadow Images) a TCG_GUARD_* kept until it takes damage, is Benched or evolves */
+    uint8_t guardKeep;
     /* (effect scripts, until it's Benched or evolves) stuck: it can't retreat (2: while the Pokemon stuckBy - 1, the
      * top card that did it, is its opponent's Active); blindAll: whenever it attacks, a coin, tails the attack does
      * nothing; noAttackAll: it can't attack */
@@ -107,7 +109,9 @@ enum
     TCG_GUARD_DOUBLE,        /* Double-Edged Pincers: damage to it is doubled */
     TCG_GUARD_BLINK,         /* Blink: a coin, heads prevents the damage */
     TCG_GUARD_REDUCE_10_LATE, /* Expand: 10 less after Weakness and Resistance */
-    TCG_GUARD_30_OR_MORE      /* Pulse Guard: 30 or more (after Weakness and Resistance) is prevented */
+    TCG_GUARD_30_OR_MORE,     /* Pulse Guard: 30 or more (after Weakness and Resistance) is prevented */
+    TCG_GUARD_BLINK_HIT,      /* Reflect Shield: a coin, heads prevents the damage and does 20 to the attacker */
+    TCG_GUARD_TAILS           /* Shadow Images (kept: guardKeep): a coin, tails prevents the damage */
 };
 enum
 {
@@ -334,6 +338,8 @@ struct TcgDuel
     uint8_t noWeakRes, attackFailed, coinResult;
     /* (within one attack: an effect script's coins, tcg_script.inc) */
     uint8_t scriptCoins, scriptHeads;
+    /* (within one attack) the first 32 of those coins, heads as bits (coin 1 the lowest) */
+    uint32_t scriptBits;
     /* (also within one attack) nothing it does reaches the Defending Pokemon: Agility and
      * the like, Neutralizing Shield, a heads for Transparency */
     uint8_t foeImmune; /* TCG_IMMUNE_* */
@@ -566,6 +572,8 @@ int TcgPower_NoResistance(const struct TcgDuel *g);
 unsigned TcgDuel_RetreatCost(const struct TcgDuel *g, unsigned player);
 const char *TcgPower_RetreatBlock(const struct TcgDuel *g, unsigned player);
 void TcgPower_AfterRetreat(struct TcgDuel *g, unsigned player, unsigned benched);
+/* A Benched Pokemon of player's became the Active one (any way: retreat, switch, promotion; tcg_duel.c's event hook) */
+void TcgPower_NewActive(struct TcgDuel *g, unsigned player);
 int TcgPower_AttackBonus(struct TcgDuel *g, int amount, const struct TcgAttack *attack);
 /* Can't that Pokemon be evolved from the hand now (Primal Aura, Primal Stare) */
 int TcgPower_EvolveBlocked(const struct TcgDuel *g, unsigned player, unsigned slot);

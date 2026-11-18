@@ -30,6 +30,14 @@ void TcgDuel_Event(struct TcgDuel *g, unsigned type, unsigned player, unsigned s
     e->value = value;
     e->card = card;
     e->flags = flags;
+    if ((type == TCG_EV_RETREAT || type == TCG_EV_SWITCH || type == TCG_EV_PROMOTE) && player < 2 && slot < TCG_FIELD_SIZE)
+    {
+        /* The one that went to the Bench loses what lasts only while it's Active (Giant Growth, Shadow Images) */
+        if (type != TCG_EV_PROMOTE)
+            g->players[player].field[slot].hpSet = g->players[player].field[slot].guardKeep = 0;
+        if (player == g->current && g->phase != TCG_SETUP)
+            TcgPower_NewActive(g, player); /* (Spikes) */
+    }
 }
 const struct TcgEvent *TcgDuel_GetEvent(const struct TcgDuel *g, uint32_t seq)
 {
@@ -504,7 +512,7 @@ static void ClearCondition(struct TcgFieldCard *f)
     f->condImmune = 0;
     f->anchorUntil = f->anchorBy = 0;
     f->reactUntil = f->reactKind = 0;
-    f->hpSet = 0;
+    f->hpSet = f->guardKeep = 0;
     if (f->boostTurn == 0xFFFF)
         f->boostTurn = f->boostAttack = f->boostValue = 0;
 }
@@ -886,7 +894,7 @@ static int Apply(struct TcgDuel *g, const struct TcgAction *a)
         const struct TcgCard *attacker = TcgDuel_Attacker(g, g->current), *target = TcgDuel_Field(g, g->current ^ 1, 0);
         const struct TcgAttack *attack;
         struct TcgFieldCard *foe = &g->players[g->current ^ 1].field[0], foeBefore;
-        unsigned damage, flags = 0, selfCondition, type, k;
+        unsigned damage, flags = 0, selfCondition, type, k, guard = 0, crystal, selfPoison, selfBurned;
         uint16_t struck[TCG_FIELD_SIZE];
         const char *blocked;
         int result, total;
@@ -926,7 +934,7 @@ static int Apply(struct TcgDuel *g, const struct TcgAction *a)
             snprintf(g->error, sizeof(g->error), "Effect not yet implemented: %s", attack->effect);
             return TCG_UNSUPPORTED;
         }
-        g->noWeakRes = g->attackFailed = g->coinResult = g->swift = g->bonus = g->scriptCoins = g->scriptHeads = 0;
+        g->noWeakRes = g->attackFailed = g->coinResult = g->swift = g->bonus = g->scriptCoins = g->scriptHeads = 0, g->scriptBits = 0;
         /* A Baby Pokemon as the Defending Pokemon: a coin before anything; tails, the turn ends without an attack */
         if ((target->flags & TCG_CF_BABY) && !TcgDuel_Coin(g, g->current))
         {
@@ -974,8 +982,12 @@ static int Apply(struct TcgDuel *g, const struct TcgAction *a)
             return result;
         if (!(target = TcgDuel_Field(g, g->current ^ 1, 0)))
             return Error(g, "There's no Defending Pokemon.");
+        /* Crystal Body: nothing but the damage reaches it, as barrier 3 (the effects undone after the attack) */
+        if ((crystal = !foe->barrier && TcgPower_Working(g, g->current ^ 1, 0) == TCG_POWER_R_CRYSTAL_BODY) != 0)
+            foe->barrier = 3;
         foeBefore = *foe;
         selfCondition = f->condition;
+        selfPoison = f->poison, selfBurned = f->burned;
         type = TcgDuel_Type(g, g->current, 0); /* (Venomoth's Shift) */
         for (k = 0; k < TCG_FIELD_SIZE; k++)
             struck[k] = g->players[g->current ^ 1].field[k].damage; /* (Machamp's Strikes Back) */
@@ -1053,6 +1065,7 @@ static int Apply(struct TcgDuel *g, const struct TcgAction *a)
                 total += foe->vulnBonus; /* (the regional sets: "that attack does 20 more damage") */
             if (!g->swift)
                 total -= 20 * (int)AttachedTrainerCount(g, g->current ^ 1, 0, TCG_CARD_DEFENDER);
+            guard = foe->guard ? foe->guard : foe->guardKeep;
             if (g->swift)
                 ;
             else if ((foe->barrier && foe->barrier != 3) || g->foeImmune == TCG_IMMUNE_YES)
@@ -1060,34 +1073,49 @@ static int Apply(struct TcgDuel *g, const struct TcgAction *a)
                 TcgDuel_Event(g, TCG_EV_NO_DAMAGE, g->current ^ 1, 0, 0, 0, 0);
                 total = 0;
             }
-            else if (foe->guard == TCG_GUARD_REDUCE_10)
+            else if (guard == TCG_GUARD_REDUCE_10)
                 total -= 10;
-            else if (foe->guard == TCG_GUARD_REDUCE_20)
+            else if (guard == TCG_GUARD_REDUCE_20)
                 total -= 20;
-            else if (foe->guard == TCG_GUARD_UNDER_40 && total < 40)
+            else if (guard == TCG_GUARD_UNDER_40 && total < 40)
             {
                 TcgDuel_Event(g, TCG_EV_NO_DAMAGE, g->current ^ 1, 0, 0, 0, 0);
                 total = 0;
             }
-            else if (foe->guard == TCG_GUARD_HALVE)
+            else if (guard == TCG_GUARD_HALVE)
                 total = total / 2 / 10 * 10;
             /* GB2's: Harden, Double-Edged Pincers, Blink, Expand */
-            else if (foe->guard == TCG_GUARD_UNDER_30 && total <= 20)
+            else if (guard == TCG_GUARD_UNDER_30 && total <= 20)
             {
                 TcgDuel_Event(g, TCG_EV_NO_DAMAGE, g->current ^ 1, 0, 0, 0, 0);
                 total = 0;
             }
-            else if (foe->guard == TCG_GUARD_DOUBLE)
+            else if (guard == TCG_GUARD_DOUBLE)
                 total *= 2;
-            else if (foe->guard == TCG_GUARD_BLINK && TcgDuel_Coin(g, g->current ^ 1))
+            else if (guard == TCG_GUARD_BLINK && TcgDuel_Coin(g, g->current ^ 1))
             {
                 TcgDuel_Event(g, TCG_EV_NO_DAMAGE, g->current ^ 1, 0, 0, 0, 0);
                 total = 0;
             }
-            else if (foe->guard == TCG_GUARD_REDUCE_10_LATE)
+            else if (guard == TCG_GUARD_REDUCE_10_LATE)
                 total -= 10;
-            else if (foe->guard == TCG_GUARD_30_OR_MORE && total >= 30)
+            else if (guard == TCG_GUARD_30_OR_MORE && total >= 30)
             {
+                TcgDuel_Event(g, TCG_EV_NO_DAMAGE, g->current ^ 1, 0, 0, 0, 0);
+                total = 0;
+            }
+            else if (guard == TCG_GUARD_BLINK_HIT && total > 0 && TcgDuel_Coin(g, g->current ^ 1))
+            {
+                /* Reflect Shield: heads, no damage, and 20 to the attacking Pokemon */
+                TcgDuel_Event(g, TCG_EV_NO_DAMAGE, g->current ^ 1, 0, 0, 0, 0);
+                total = 0;
+                f->damage += 20;
+                TcgDuel_Event(g, TCG_EV_DAMAGE, g->current, 0, 20, 0, 0);
+                TcgDuel_Log(g, "Reflect Shield: no damage, and 20 back.");
+            }
+            else if (guard == TCG_GUARD_TAILS && total > 0 && !TcgDuel_Coin(g, g->current))
+            {
+                /* Shadow Images: the attacker's coin, tails no damage */
                 TcgDuel_Event(g, TCG_EV_NO_DAMAGE, g->current ^ 1, 0, 0, 0, 0);
                 total = 0;
             }
@@ -1115,7 +1143,10 @@ static int Apply(struct TcgDuel *g, const struct TcgAction *a)
             TcgDuel_Log(g, "Destiny Bond: %s is Knocked Out too.", attacker->name);
         }
         if (damage)
+        {
+            foe->guardKeep = 0; /* (Shadow Images lasts until it takes damage) */
             TcgPower_Damaged(g, g->current ^ 1, 0, damage); /* (the regional powers: Fortitude, Restless Sleep...) */
+        }
         /* Koga (the Trainer): a Koga Pokemon's damage Poisons */
         if (damage && (g->players[g->current].turnBuffs & TCG_BUFF_KOGA) && Named(attacker, "Koga") && !foe->poison)
         {
@@ -1187,6 +1218,17 @@ static int Apply(struct TcgDuel *g, const struct TcgAction *a)
             foe->poison = foeBefore.poison;
             foe->burned = foeBefore.burned;
         }
+        if (crystal && foe->barrier == 3)
+            foe->barrier = 0;
+        if (foe->stackSize && foe->stack[0] == foeBefore.stack[0] && f->stackSize &&
+            TcgPower_Working(g, g->current ^ 1, 0) == TCG_POWER_R_MIRROR_COAT && foe->damage < TcgDuel_MaxHp(g, g->current ^ 1, 0))
+        {
+            /* Mirror Coat: Poisoned or Burned by this attack, and the attacker is too */
+            if (foe->poison && !foeBefore.poison)
+                f->poison = foe->poison;
+            if (foe->burned && !foeBefore.burned)
+                f->burned = foe->burned;
+        }
         TcgPower_Sanitize(g); /* (Snorlax, Clefairy Doll, Mysterious Fossil) */
         if (foe->stackSize && foe->stack[0] == foeBefore.stack[0])
         {
@@ -1208,11 +1250,11 @@ static int Apply(struct TcgDuel *g, const struct TcgAction *a)
         /* Effects change conditions as they resolve; show them after the hit. */
         if (foe->stackSize && (foe->condition != foeBefore.condition || foe->poison != foeBefore.poison))
             TcgDuel_Event(g, TCG_EV_STATUS, g->current ^ 1, 0, foe->condition, 0, foe->poison);
-        if (f->stackSize && f->condition != selfCondition)
+        if (f->stackSize && (f->condition != selfCondition || f->poison != selfPoison || f->burned != selfBurned))
             TcgDuel_Event(g, TCG_EV_STATUS, g->current, 0, f->condition, 0, f->poison);
         g->animationCard = attacker->id;
         g->animationKind = a->attack + 1;
-        g->noWeakRes = g->attackFailed = g->coinResult = g->foeImmune = g->swift = g->bonus = g->scriptCoins = g->scriptHeads = 0;
+        g->noWeakRes = g->attackFailed = g->coinResult = g->foeImmune = g->swift = g->bonus = g->scriptCoins = g->scriptHeads = 0, g->scriptBits = 0;
         if (g->switchPending)
         {
             /* Only if the Defending Pokemon is still there to be switched. It comes before any

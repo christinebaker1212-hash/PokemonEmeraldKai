@@ -2916,7 +2916,7 @@ const struct TcgCard gTcgCards[TCG_CARD_COUNT + 1] = {
 {.name="",.description="",.effect="NONE",.animation="ATK_ANIM_NONE",.cost={0},.damage=0,.category=TCG_DAMAGE_NORMAL},
 }
 },
-[455] = {.id=455, .name="Rocket's Scyther", .kind=TCG_POKEMON, .type=1, .rarity=2, .set=13, .set2=255, .dark=0, .holo=1, .flags=TCG_CF_OWNER, .origin=13,
+[455] = {.id=455, .name="Rocket's Scyther", .kind=TCG_POKEMON, .type=1, .rarity=2, .set=13, .set2=255, .dark=0, .holo=1, .flags=TCG_CF_OWNER|TCG_CF_READY, .origin=13,
 .hp=60, .stage=0, .species=123, .level=23, .retreat=1, .weakness=0, .resistance=4, .evolvesFrom="", .description="", .attacks={
 {.name="Shadow Images",.description="Whenever Rocket's Scyther is attacked, your opponent flips a coin. If tails, that attack does no damage to Rocket's Scyther. (Any other effects of the attack still happen.) This effect lasts until Rocket's Scyther takes damage (or is Benched or is evolved).",.effect="gym1-13:a0",.animation="ATK_ANIM_HIT",.cost={0,1,0,0,0,0,0,0,0},.damage=0,.category=TCG_RESIDUAL},
 {.name="Blinding Scythe",.description="",.effect="NONE",.animation="ATK_ANIM_HIT",.cost={0,1,0,0,0,0,2,0,0},.damage=40,.category=TCG_DAMAGE_NORMAL},
@@ -4978,7 +4978,7 @@ const struct TcgCard gTcgCards[TCG_CARD_COUNT + 1] = {
 {.name="",.description="",.effect="NONE",.animation="ATK_ANIM_NONE",.cost={0},.damage=0,.category=TCG_DAMAGE_NORMAL},
 }
 },
-[801] = {.id=801, .name="Forretress", .kind=TCG_POKEMON, .type=8, .rarity=2, .set=16, .set2=255, .dark=0, .holo=1, .flags=0, .origin=16,
+[801] = {.id=801, .name="Forretress", .kind=TCG_POKEMON, .type=8, .rarity=2, .set=16, .set2=255, .dark=0, .holo=1, .flags=TCG_CF_READY, .origin=16,
 .hp=80, .stage=1, .species=205, .level=40, .retreat=3, .weakness=0, .resistance=1, .evolvesFrom="Pineco", .description="Its entire body is shielded by a steel-hard shell. What lurks inside the armor is a total mystery.", .attacks={
 {.name="Spikes",.description="During your opponent's turn, whenever 1 of your opponent's Benched Pokemon becomes his or her Active Pokemon, Forretress does 10 damage to it. (Don't apply Weakness and Resistance.) This power stops working if Forretress is Asleep, Confused, or Paralyzed.",.effect="neo2-2:p",.animation="ATK_ANIM_HIT",.cost={0,0,0,0,0,0,0,0,0},.damage=0,.category=TCG_POKEMON_POWER},
 {.name="Rapid Spin",.description="If your opponent has any Benched Pokemon, he or she chooses 1 of them and switches it with his or her Active Pokemon, then, if you have any Benched Pokemon, you switch 1 of them with your Active Pokemon. (Do the damage before switching the Pokemon.)",.effect="neo2-2:a0",.animation="ATK_ANIM_HIT",.cost={0,0,0,0,0,0,2,0,1},.damage=30,.category=TCG_DAMAGE_NORMAL},
@@ -5111,7 +5111,7 @@ const struct TcgCard gTcgCards[TCG_CARD_COUNT + 1] = {
 {.name="",.description="",.effect="NONE",.animation="ATK_ANIM_NONE",.cost={0},.damage=0,.category=TCG_DAMAGE_NORMAL},
 }
 },
-[820] = {.id=820, .name="Forretress", .kind=TCG_POKEMON, .type=8, .rarity=2, .set=16, .set2=255, .dark=0, .holo=0, .flags=0, .origin=16,
+[820] = {.id=820, .name="Forretress", .kind=TCG_POKEMON, .type=8, .rarity=2, .set=16, .set2=255, .dark=0, .holo=0, .flags=TCG_CF_READY, .origin=16,
 .hp=80, .stage=1, .species=205, .level=40, .retreat=3, .weakness=0, .resistance=1, .evolvesFrom="Pineco", .description="Its entire body is shielded by a steel-hard shell. What lurks inside this shell is a total mystery.", .attacks={
 {.name="Spikes",.description="During your opponent's turn, whenever 1 of your opponent's Benched Pokemon becomes his or her Active Pokemon, Forretress does 10 damage to it. (Don't apply Weakness and Resistance.) This power stops working if Forretress is Asleep, Confused, or Paralyzed.",.effect="neo2-21:p",.animation="ATK_ANIM_HIT",.cost={0,0,0,0,0,0,0,0,0},.damage=0,.category=TCG_POKEMON_POWER},
 {.name="Rapid Spin",.description="If your opponent has any Benched Pokemon, he or she chooses 1 of them and switches it with his or her Active Pokemon, then, if you have any Benched Pokemon, you switch 1 of them with your Active Pokemon. (Do the damage before switching the Pokemon.)",.effect="neo2-21:a0",.animation="ATK_ANIM_HIT",.cost={0,0,0,0,0,0,2,0,1},.damage=30,.category=TCG_DAMAGE_NORMAL},
@@ -5391,7 +5391,7 @@ const struct TcgCard gTcgCards[TCG_CARD_COUNT + 1] = {
 {.name="",.description="",.effect="NONE",.animation="ATK_ANIM_NONE",.cost={0},.damage=0,.category=TCG_DAMAGE_NORMAL},
 }
 },
-[860] = {.id=860, .name="Pineco", .kind=TCG_POKEMON, .type=1, .rarity=0, .set=16, .set2=255, .dark=0, .holo=0, .flags=0, .origin=16,
+[860] = {.id=860, .name="Pineco", .kind=TCG_POKEMON, .type=1, .rarity=0, .set=16, .set2=255, .dark=0, .holo=0, .flags=TCG_CF_READY, .origin=16,
 .hp=40, .stage=0, .species=204, .level=15, .retreat=2, .weakness=0, .resistance=255, .evolvesFrom="", .description="It likes to make its shell thicker by adding layers of tree bark. The additional weight doesn't bother it.", .attacks={
 {.name="Burst",.description="Flip a coin. If heads, Pineco does 40 damage to itself and 10 damage to each Pokemon on each player's Bench. (Don't apply Weakness and Resistance for Benched Pokemon.) Flip a coin. If tails, this attack does nothing (not even damage).",.effect="neo2-61:a0",.animation="ATK_ANIM_HIT",.cost={0,1,0,0,0,0,0,0,0},.damage=40,.category=TCG_DAMAGE_NORMAL},
 {.name="",.description="",.effect="NONE",.animation="ATK_ANIM_NONE",.cost={0},.damage=0,.category=TCG_DAMAGE_NORMAL},
@@ -5571,7 +5571,7 @@ const struct TcgCard gTcgCards[TCG_CARD_COUNT + 1] = {
 {.name="",.description="",.effect="NONE",.animation="ATK_ANIM_NONE",.cost={0},.damage=0,.category=TCG_DAMAGE_NORMAL},
 }
 },
-[888] = {.id=888, .name="Suicune", .kind=TCG_POKEMON, .type=3, .rarity=2, .set=17, .set2=255, .dark=0, .holo=1, .flags=0, .origin=17,
+[888] = {.id=888, .name="Suicune", .kind=TCG_POKEMON, .type=3, .rarity=2, .set=17, .set2=255, .dark=0, .holo=1, .flags=TCG_CF_READY, .origin=17,
 .hp=70, .stage=0, .species=245, .level=33, .retreat=1, .weakness=2, .resistance=255, .evolvesFrom="", .description="Said to be the reincarnation of north winds, it can instantly purify filthy, murky water.", .attacks={
 {.name="Crystal Body",.description="Prevent all effects of your opponent's attacks, other than damage, done to Suicune. This power stops working while Suicune is Asleep, Confused, or Paralyzed.",.effect="neo3-14:p",.animation="ATK_ANIM_HIT",.cost={0,0,0,0,0,0,0,0,0},.damage=0,.category=TCG_POKEMON_POWER},
 {.name="Aurora Wave",.description="Flip 2 coins. If both are heads, the Defending Pokemon is now Paralyzed. If only 1 is heads, the Defending Pokemon is now Asleep.",.effect="neo3-14:a0",.animation="ATK_ANIM_HIT",.cost={0,0,0,3,0,0,0,0,0},.damage=30,.category=TCG_DAMAGE_NORMAL},
@@ -5739,7 +5739,7 @@ const struct TcgCard gTcgCards[TCG_CARD_COUNT + 1] = {
 {.name="",.description="",.effect="NONE",.animation="ATK_ANIM_NONE",.cost={0},.damage=0,.category=TCG_DAMAGE_NORMAL},
 }
 },
-[912] = {.id=912, .name="Stantler", .kind=TCG_POKEMON, .type=6, .rarity=1, .set=17, .set2=255, .dark=0, .holo=0, .flags=0, .origin=17,
+[912] = {.id=912, .name="Stantler", .kind=TCG_POKEMON, .type=6, .rarity=1, .set=17, .set2=255, .dark=0, .holo=0, .flags=TCG_CF_READY, .origin=17,
 .hp=60, .stage=0, .species=234, .level=27, .retreat=1, .weakness=4, .resistance=5, .evolvesFrom="", .description="Those who stare at its antlers will gradually lose control of their senses and be unable to stand.", .attacks={
 {.name="Terrorize",.description="If the Defending Pokemon is a Basic Pokemon, choose 1 of its attacks. That Pokemon can't use that attack during your opponent's next turn.",.effect="neo3-38:a0",.animation="ATK_ANIM_HIT",.cost={0,0,0,0,0,0,1,0,0},.damage=0,.category=TCG_RESIDUAL},
 {.name="Overhead Toss",.description="If you have any Benched Pokemon, flip a coin. If tails, this attack does 10 damage to 1 of them. (Don't apply Weakness and Resistance for Benched Pokemon.)",.effect="neo3-38:a1",.animation="ATK_ANIM_HIT",.cost={0,0,0,0,0,0,3,0,0},.damage=30,.category=TCG_DAMAGE_NORMAL},
@@ -6618,7 +6618,7 @@ const struct TcgCard gTcgCards[TCG_CARD_COUNT + 1] = {
 {.name="",.description="",.effect="NONE",.animation="ATK_ANIM_NONE",.cost={0},.damage=0,.category=TCG_DAMAGE_NORMAL},
 }
 },
-[1049] = {.id=1049, .name="Shining Mewtwo", .kind=TCG_POKEMON, .type=5, .rarity=2, .set=18, .set2=255, .dark=0, .holo=1, .flags=TCG_CF_SHINING, .origin=18,
+[1049] = {.id=1049, .name="Shining Mewtwo", .kind=TCG_POKEMON, .type=5, .rarity=2, .set=18, .set2=255, .dark=0, .holo=1, .flags=TCG_CF_SHINING|TCG_CF_READY, .origin=18,
 .hp=70, .stage=0, .species=150, .level=63, .retreat=2, .weakness=5, .resistance=255, .evolvesFrom="", .description="It uses its highly developed psychic powers to defeat its enemies before they even have time to think.", .attacks={
 {.name="Reflect Shield",.description="If an attack does damage to Shining Mewtwo during your opponent's next turn (even if Shining Mewtwo is Knocked Out), flip a coin. If heads, prevent all damage done to Shining Mewtwo from that attack (any other effects of attacks still happen) and do 20 damage to the attacking Pokemon.",.effect="neo4-109:a0",.animation="ATK_ANIM_HIT",.cost={0,0,1,0,0,1,0,0,0},.damage=0,.category=TCG_RESIDUAL},
 {.name="Psyburst",.description="Discard a Fire Energy card attached to Shining Mewtwo or this attack does nothing. This attack does 40 damage plus 10 damage for each Energy attached to the Defending Pokemon.",.effect="neo4-109:a1",.animation="ATK_ANIM_HIT",.cost={1,0,0,0,0,2,0,0,0},.damage=40,.category=TCG_DAMAGE_PLUS},
@@ -9181,7 +9181,7 @@ const struct TcgCard gTcgCards[TCG_CARD_COUNT + 1] = {
 {.name="",.description="",.effect="NONE",.animation="ATK_ANIM_NONE",.cost={0},.damage=0,.category=TCG_DAMAGE_NORMAL},
 }
 },
-[1439] = {.id=1439, .name="Wobbuffet", .kind=TCG_POKEMON, .type=5, .rarity=1, .set=21, .set2=255, .dark=0, .holo=0, .flags=TCG_CF_BODY, .origin=21,
+[1439] = {.id=1439, .name="Wobbuffet", .kind=TCG_POKEMON, .type=5, .rarity=1, .set=21, .set2=255, .dark=0, .holo=0, .flags=TCG_CF_BODY|TCG_CF_READY, .origin=21,
 .hp=70, .stage=0, .species=202, .level=0, .retreat=2, .weakness=5, .resistance=255, .evolvesFrom="", .description="", .attacks={
 {.name="Mirror Coat",.description="If Wobbuffet becomes Poisoned or Burned by the Defending Pokemon's attack during your opponent's turn, the Defending Pokemon becomes affected by the same Special Condition.",.effect="ecard3-45:p",.animation="ATK_ANIM_HIT",.cost={0,0,0,0,0,0,0,0,0},.damage=0,.category=TCG_POKEMON_POWER},
 {.name="Return Attack",.description="Flip 2 coins. If either is heads, this attack does 10 damage times the number of damage counters on Wobbuffet.",.effect="ecard3-45:a0",.animation="ATK_ANIM_HIT",.cost={0,0,0,0,0,1,1,0,0},.damage=10,.category=TCG_DAMAGE_X},

@@ -414,6 +414,20 @@ unsigned TcgPower_EnergyType(const struct TcgDuel *g, unsigned player, unsigned 
     }
     return type;
 }
+/* A Benched Pokemon of player's became the Active one during their own turn: Spikes (10 from each of the opponent's
+ * Forretress whose power works; no Weakness or Resistance) */
+void TcgPower_NewActive(struct TcgDuel *g, unsigned player)
+{
+    unsigned s;
+    if (player > 1 || !g->players[player].field[0].stackSize)
+        return;
+    for (s = 0; s < TCG_FIELD_SIZE; s++)
+        if (TcgPower_Working(g, player ^ 1, s) == TCG_POWER_R_SPIKES)
+        {
+            Announce(g, player ^ 1, s, TCG_POWER_R_SPIKES);
+            PlainDamage(g, player, 0, 10);
+        }
+}
 /* An opponent's attack damaged that Pokemon (before Knock Outs): Fortitude, Restless Sleep, Energy Drain, Shock
  * Blast */
 void TcgPower_Damaged(struct TcgDuel *g, unsigned player, unsigned slot, unsigned damage)
