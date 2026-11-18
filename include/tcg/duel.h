@@ -576,6 +576,9 @@ const char *TcgPower_RetreatBlock(const struct TcgDuel *g, unsigned player);
 void TcgPower_AfterRetreat(struct TcgDuel *g, unsigned player, unsigned benched);
 /* A Benched Pokemon of player's became the Active one (any way: retreat, switch, promotion; tcg_duel.c's event hook) */
 void TcgPower_NewActive(struct TcgDuel *g, unsigned player);
+/* who switches their Active with a Benched Pokemon of their own choice (a promotion; Drive Off, Lightning Burst, Major
+ * Tsunami): 0 when they have no Benched Pokemon or it can't be switched */
+int TcgDuel_OpponentSwitch(struct TcgDuel *g, unsigned who);
 /* player's Active Pokemon went to Bench slot (Magma Pool) */
 void TcgPower_ToBench(struct TcgDuel *g, unsigned player, unsigned slot);
 int TcgPower_AttackBonus(struct TcgDuel *g, int amount, const struct TcgAttack *attack);

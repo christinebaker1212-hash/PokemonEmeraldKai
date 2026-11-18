@@ -183,6 +183,13 @@ static const char *RegionBlock(const struct TcgDuel *g, unsigned player, unsigne
             return "There's no Energy card in their discard pile.";
         break;
     }
+    case TCG_POWER_R_DRIVE_OFF:
+    case TCG_POWER_R_MAJOR_TSUNAMI:
+        if (power == TCG_POWER_R_DRIVE_OFF && !RpBench(g, player ^ 1))
+            return "They have no Benched Pokemon.";
+        if (power == TCG_POWER_R_DRIVE_OFF && TcgDuel_Anchored(g, player ^ 1))
+            return "The Defending Pokemon can't be switched.";
+        break;
     case TCG_POWER_R_DARK_MOON:
         if (!TcgDuel_Energy(g, player, slot, TCG_DARKNESS))
             return "It has no Darkness Energy.";
@@ -452,6 +459,9 @@ void TcgPower_AfterAttach(struct TcgDuel *g, unsigned player, unsigned slot, uns
             TcgDuel_Event(g, TCG_EV_STATUS, player, slot, TCG_HEALTHY, 0, 0);
         }
     }
+    if (power == TCG_POWER_R_LIGHTNING_BURST && id == TCG_CARD_LIGHTNING_ENERGY && player == g->current &&
+        TcgDuel_OpponentSwitch(g, player ^ 1))
+        Announce(g, player, slot, power); /* (Lightning Burst: they choose who comes in) */
     if (power == TCG_POWER_R_HEALING_FIRE && id == TCG_CARD_FIRE_ENERGY && f->damage)
     {
         Announce(g, player, slot, power);

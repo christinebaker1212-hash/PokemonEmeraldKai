@@ -116,7 +116,9 @@ enum
     TCG_F_MAGNET_OTHER,         /* (slot) a Magnemite, Magneton or Dark Magneton, not the holder of the card picked */
     TCG_F_UNOWN_SLOT,           /* (slot) a Pokemon with Unown in its name */
     TCG_F_UNOWN_DAMAGED_OTHER,  /* (slot) a damaged Pokemon with Unown in its name, not the power's */
-    TCG_F_PSYCHIC_ENERGY,       /* a Psychic Energy card */              /* (slot) a Pokemon the Technical Machine being played may go on (TcgDuel_TmFits) */
+    TCG_F_PSYCHIC_ENERGY,       /* a Psychic Energy card */
+    TCG_F_POKEMON_OTHER_NAME,   /* a Pokemon card not named as your Active Pokemon (Messenger) */
+    TCG_F_GRASS_BENCH,          /* (slot) a Benched Grass Pokemon */              /* (slot) a Pokemon the Technical Machine being played may go on (TcgDuel_TmFits) */
     /* "with Brock in its name" and the like (+ TCG_OWNER_*): a Pokemon card; one of yours in play (slot); another
      * one of yours than the first chosen (slot: the action's target) */
     TCG_F_OWNER_CARD = 100,

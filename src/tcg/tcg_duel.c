@@ -1658,6 +1658,19 @@ int TcgDuel_Apply(struct TcgDuel *g, const struct TcgAction *action)
     return result;
 }
 
+int TcgDuel_OpponentSwitch(struct TcgDuel *g, unsigned who)
+{
+    unsigned k, bench = 0;
+    for (k = 1; k < TCG_FIELD_SIZE; k++)
+        bench += g->players[who].field[k].stackSize != 0;
+    if (!bench || !g->players[who].field[0].stackSize || TcgDuel_Anchored(g, who) || g->phase != TCG_TURN)
+        return 0;
+    g->switchPending = 1;
+    g->endAfterSwitch = 0;
+    g->phase = TCG_PROMOTION;
+    g->promotePlayer = (uint8_t)who;
+    return 1;
+}
 /* (flow.h's: the names cards are searched by; here, as every build of the rules links this file) */
 const char *TcgFlow_OwnerWord(unsigned owner)
 {

@@ -3463,7 +3463,7 @@ const struct TcgCard gTcgCards[TCG_CARD_COUNT + 1] = {
 {.name="",.description="",.effect="NONE",.animation="ATK_ANIM_NONE",.cost={0},.damage=0,.category=TCG_DAMAGE_NORMAL},
 }
 },
-[536] = {.id=536, .name="Sabrina's Mr. Mime", .kind=TCG_POKEMON, .type=5, .rarity=0, .set=13, .set2=255, .dark=0, .holo=0, .flags=TCG_CF_OWNER, .origin=13,
+[536] = {.id=536, .name="Sabrina's Mr. Mime", .kind=TCG_POKEMON, .type=5, .rarity=0, .set=13, .set2=255, .dark=0, .holo=0, .flags=TCG_CF_OWNER|TCG_CF_READY, .origin=13,
 .hp=50, .stage=0, .species=122, .level=20, .retreat=1, .weakness=5, .resistance=255, .evolvesFrom="", .description="", .attacks={
 {.name="Sleight of Hand",.description="Choose up to 3 cards from your hand and put them on top of your deck. Then search your deck for that many basic Energy cards. Show those cards to your opponent, then put them into your hand. Shuffle your deck afterward.",.effect="gym1-94:a0",.animation="ATK_ANIM_HIT",.cost={0,0,0,0,0,0,1,0,0},.damage=0,.category=TCG_RESIDUAL},
 {.name="Slap",.description="",.effect="NONE",.animation="ATK_ANIM_HIT",.cost={0,0,0,0,0,1,1,0,0},.damage=20,.category=TCG_DAMAGE_NORMAL},
@@ -3581,7 +3581,7 @@ const struct TcgCard gTcgCards[TCG_CARD_COUNT + 1] = {
 {.name="",.description="",.effect="NONE",.animation="ATK_ANIM_NONE",.cost={0},.damage=0,.category=TCG_DAMAGE_NORMAL},
 }
 },
-[570] = {.id=570, .name="Blaine's Charizard", .kind=TCG_POKEMON, .type=0, .rarity=2, .set=14, .set2=255, .dark=0, .holo=1, .flags=TCG_CF_OWNER, .origin=14,
+[570] = {.id=570, .name="Blaine's Charizard", .kind=TCG_POKEMON, .type=0, .rarity=2, .set=14, .set2=255, .dark=0, .holo=1, .flags=TCG_CF_OWNER|TCG_CF_READY, .origin=14,
 .hp=100, .stage=2, .species=6, .level=50, .retreat=3, .weakness=3, .resistance=4, .evolvesFrom="Blaine's Charmeleon", .description="", .attacks={
 {.name="Roaring Flames",.description="Discard all Fire Energy cards attached to Blaine's Charizard. If all Energy cards attached to Blaine's Charizard provide 2 Fire Energy, discard all of them. This attack does 20 damage plus 20 more damage for each Fire Energy discarded in this way.",.effect="gym2-2:a0",.animation="ATK_ANIM_HIT",.cost={1,0,0,0,0,0,0,0,0},.damage=20,.category=TCG_DAMAGE_PLUS},
 {.name="Flame Jet",.description="Flip a coin. If heads, choose 1 of your opponent's Pokemon. This attack does 40 damage to that Pokemon. Don't apply Weakness and Resistance for this attack. (Any other effects that would happen after applying Weakness and Resistance still happen.)",.effect="gym2-2:a1",.animation="ATK_ANIM_HIT",.cost={2,0,0,0,0,0,0,0,0},.damage=0,.category=TCG_RESIDUAL},
@@ -3768,7 +3768,7 @@ const struct TcgCard gTcgCards[TCG_CARD_COUNT + 1] = {
 {.name="",.description="",.effect="NONE",.animation="ATK_ANIM_NONE",.cost={0},.damage=0,.category=TCG_DAMAGE_NORMAL},
 }
 },
-[599] = {.id=599, .name="Blaine's Charmeleon", .kind=TCG_POKEMON, .type=0, .rarity=1, .set=14, .set2=255, .dark=0, .holo=0, .flags=TCG_CF_OWNER, .origin=14,
+[599] = {.id=599, .name="Blaine's Charmeleon", .kind=TCG_POKEMON, .type=0, .rarity=1, .set=14, .set2=255, .dark=0, .holo=0, .flags=TCG_CF_OWNER|TCG_CF_READY, .origin=14,
 .hp=70, .stage=1, .species=5, .level=29, .retreat=2, .weakness=3, .resistance=255, .evolvesFrom="Blaine's Charmander", .description="", .attacks={
 {.name="Fire Claws",.description="",.effect="NONE",.animation="ATK_ANIM_HIT",.cost={2,0,0,0,0,0,0,0,0},.damage=30,.category=TCG_DAMAGE_NORMAL},
 {.name="Bonfire",.description="Flip 3 coins. For each heads, discard 1 Fire Energy card attached to Blaine's Charmeleon. If you can't discard Energy cards, this attack does nothing. This attack does 10 damage times the number of heads to each of your opponent's Pokemon. Don't apply Weakness and Resistance for this attack. (Any other effects that would happen after applying Weakness and Resistance still happen.)",.effect="gym2-31:a1",.animation="ATK_ANIM_HIT",.cost={3,0,0,0,0,0,0,0,0},.damage=0,.category=TCG_RESIDUAL},
@@ -3894,7 +3894,7 @@ const struct TcgCard gTcgCards[TCG_CARD_COUNT + 1] = {
 {.name="",.description="",.effect="NONE",.animation="ATK_ANIM_NONE",.cost={0},.damage=0,.category=TCG_DAMAGE_NORMAL},
 }
 },
-[617] = {.id=617, .name="Koga's Pidgey", .kind=TCG_POKEMON, .type=6, .rarity=1, .set=14, .set2=255, .dark=0, .holo=0, .flags=TCG_CF_OWNER, .origin=14,
+[617] = {.id=617, .name="Koga's Pidgey", .kind=TCG_POKEMON, .type=6, .rarity=1, .set=14, .set2=255, .dark=0, .holo=0, .flags=TCG_CF_OWNER|TCG_CF_READY, .origin=14,
 .hp=40, .stage=0, .species=16, .level=9, .retreat=1, .weakness=2, .resistance=4, .evolvesFrom="", .description="", .attacks={
 {.name="Messenger",.description="Put Koga's Pidgey and all cards attached to it on top of your deck. Then search your deck for any Basic Pokemon or Evolution card not named Koga's Pidgey. Show that card to your opponent, then put it into your hand. Shuffle your deck afterward.",.effect="gym2-49:a0",.animation="ATK_ANIM_HIT",.cost={0,0,0,0,0,0,1,0,0},.damage=0,.category=TCG_RESIDUAL},
 {.name="Wing Attack",.description="",.effect="NONE",.animation="ATK_ANIM_HIT",.cost={0,0,0,0,0,0,2,0,0},.damage=20,.category=TCG_DAMAGE_NORMAL},
@@ -4594,7 +4594,7 @@ const struct TcgCard gTcgCards[TCG_CARD_COUNT + 1] = {
 {.name="",.description="",.effect="NONE",.animation="ATK_ANIM_NONE",.cost={0},.damage=0,.category=TCG_DAMAGE_NORMAL},
 }
 },
-[733] = {.id=733, .name="Ledian", .kind=TCG_POKEMON, .type=1, .rarity=1, .set=15, .set2=255, .dark=0, .holo=0, .flags=0, .origin=15,
+[733] = {.id=733, .name="Ledian", .kind=TCG_POKEMON, .type=1, .rarity=1, .set=15, .set2=255, .dark=0, .holo=0, .flags=TCG_CF_READY, .origin=15,
 .hp=60, .stage=1, .species=166, .level=32, .retreat=0, .weakness=0, .resistance=4, .evolvesFrom="Ledyba", .description="When the stars flicker in the night sky, Ledian flutters about, scattering a glowing powder.", .attacks={
 {.name="Baton Pass",.description="If you have any Grass Pokemon on your Bench, remove all Grass Energy cards from Ledian and attach them to 1 of those Pokemon, then switch Ledian with that Pokemon.",.effect="neo1-39:a0",.animation="ATK_ANIM_HIT",.cost={0,2,0,0,0,0,0,0,0},.damage=30,.category=TCG_DAMAGE_NORMAL},
 {.name="",.description="",.effect="NONE",.animation="ATK_ANIM_NONE",.cost={0},.damage=0,.category=TCG_DAMAGE_NORMAL},
@@ -5564,7 +5564,7 @@ const struct TcgCard gTcgCards[TCG_CARD_COUNT + 1] = {
 {.name="",.description="",.effect="NONE",.animation="ATK_ANIM_NONE",.cost={0},.damage=0,.category=TCG_DAMAGE_NORMAL},
 }
 },
-[887] = {.id=887, .name="Raikou", .kind=TCG_POKEMON, .type=2, .rarity=2, .set=17, .set2=255, .dark=0, .holo=1, .flags=0, .origin=17,
+[887] = {.id=887, .name="Raikou", .kind=TCG_POKEMON, .type=2, .rarity=2, .set=17, .set2=255, .dark=0, .holo=1, .flags=TCG_CF_READY, .origin=17,
 .hp=80, .stage=0, .species=243, .level=40, .retreat=1, .weakness=4, .resistance=255, .evolvesFrom="", .description="The rain clouds it carries let it fire thunderbolts at will. They say that it descended with lightning.", .attacks={
 {.name="Lightning Burst",.description="Whenever you attach a Lightning Energy card from your hand to Raikou, if your opponent has any Benched Pokemon, he or she chooses 1 of them and switches it with the Defending Pokemon. This power stops working while Raikou is Asleep, Confused, or Paralyzed.",.effect="neo3-13:p",.animation="ATK_ANIM_HIT",.cost={0,0,0,0,0,0,0,0,0},.damage=0,.category=TCG_POKEMON_POWER},
 {.name="Lightning Tackle",.description="Flip a coin. If tails, Raikou does 20 damage to itself.",.effect="neo3-13:a0",.animation="ATK_ANIM_HIT",.cost={0,0,3,0,0,0,0,0,0},.damage=50,.category=TCG_DAMAGE_NORMAL},
@@ -5999,7 +5999,7 @@ const struct TcgCard gTcgCards[TCG_CARD_COUNT + 1] = {
 {.name="",.description="",.effect="NONE",.animation="ATK_ANIM_NONE",.cost={0},.damage=0,.category=TCG_DAMAGE_NORMAL},
 }
 },
-[952] = {.id=952, .name="Light Arcanine", .kind=TCG_POKEMON, .type=0, .rarity=2, .set=18, .set2=255, .dark=0, .holo=1, .flags=TCG_CF_LIGHT, .origin=18,
+[952] = {.id=952, .name="Light Arcanine", .kind=TCG_POKEMON, .type=0, .rarity=2, .set=18, .set2=255, .dark=0, .holo=1, .flags=TCG_CF_LIGHT|TCG_CF_READY, .origin=18,
 .hp=100, .stage=1, .species=59, .level=47, .retreat=2, .weakness=3, .resistance=255, .evolvesFrom="Growlithe", .description="This legendary Chinese Pokemon is easily recognized by its large flowing mane.", .attacks={
 {.name="Drive Off",.description="As long as Light Arcanine is your Active Pokemon, once during your turn (before your attack), if your opponent has any Benched Pokemon, he or she chooses 1 of them and switches it with the Defending Pokemon. This power can't be used while Light Arcanine is Asleep, Confused, or Paralyzed.",.effect="neo4-12:p",.animation="ATK_ANIM_HIT",.cost={0,0,0,0,0,0,0,0,0},.damage=0,.category=TCG_POKEMON_POWER},
 {.name="Gentle Flames",.description="If the Defending Pokemon is a Baby Pokemon, this attack does 10 damage instead of 50. If the Defending Pokemon is a Basic Pokemon, this attack does 30 damage instead of 50.",.effect="neo4-12:a0",.animation="ATK_ANIM_HIT",.cost={2,0,0,0,0,0,1,0,0},.damage=50,.category=TCG_DAMAGE_NORMAL},
@@ -6646,7 +6646,7 @@ const struct TcgCard gTcgCards[TCG_CARD_COUNT + 1] = {
 {.name="",.description="",.effect="NONE",.animation="ATK_ANIM_NONE",.cost={0},.damage=0,.category=TCG_DAMAGE_NORMAL},
 }
 },
-[1053] = {.id=1053, .name="Shining Tyranitar", .kind=TCG_POKEMON, .type=7, .rarity=2, .set=18, .set2=255, .dark=0, .holo=1, .flags=TCG_CF_SHINING, .origin=18,
+[1053] = {.id=1053, .name="Shining Tyranitar", .kind=TCG_POKEMON, .type=7, .rarity=2, .set=18, .set2=255, .dark=0, .holo=1, .flags=TCG_CF_SHINING|TCG_CF_READY, .origin=18,
 .hp=80, .stage=0, .species=248, .level=41, .retreat=3, .weakness=255, .resistance=5, .evolvesFrom="", .description="It is so powerful, it can knock down a mountain with hust one arm.", .attacks={
 {.name="Mountain Crush",.description="Flip a coin until you get tails. For each heads, your opponent discards the top card from his or her deck.",.effect="neo4-113:a0",.animation="ATK_ANIM_HIT",.cost={0,0,0,0,2,0,0,1,0},.damage=30,.category=TCG_DAMAGE_NORMAL},
 {.name="Destructive Fire",.description="Flip a coin for each Fire Energy card attached to Shining Tyranitar. For each heads, discard a Fire Energy card attached to Shining Tyranitar or this attack does nothing. Then, for each heads, choose an Energy card attached to the Defending Pokemon and discard it. If it has fewer Energy cards than that, remove all of them.",.effect="neo4-113:a1",.animation="ATK_ANIM_HIT",.cost={3,0,0,0,0,0,0,1,0},.damage=50,.category=TCG_DAMAGE_NORMAL},
@@ -6730,7 +6730,7 @@ const struct TcgCard gTcgCards[TCG_CARD_COUNT + 1] = {
 {.name="",.description="",.effect="NONE",.animation="ATK_ANIM_NONE",.cost={0},.damage=0,.category=TCG_DAMAGE_NORMAL},
 }
 },
-[1065] = {.id=1065, .name="Feraligatr", .kind=TCG_POKEMON, .type=3, .rarity=2, .set=19, .set2=255, .dark=0, .holo=1, .flags=0, .origin=19,
+[1065] = {.id=1065, .name="Feraligatr", .kind=TCG_POKEMON, .type=3, .rarity=2, .set=19, .set2=255, .dark=0, .holo=1, .flags=TCG_CF_READY, .origin=19,
 .hp=120, .stage=2, .species=160, .level=0, .retreat=3, .weakness=2, .resistance=255, .evolvesFrom="Croconaw", .description="", .attacks={
 {.name="Major Tsunami",.description="Once during your turn (before your attack), if Feraligatr is your Active Pokemon and if your opponent has any Benched Pokemon, your opponent switches his or her Active Pokemon with 1 of his or her Benched Pokemon. Either way, if you have any Benched Pokemon, switch Feraligatr with 1 of them. This power can't be used if Feraligatr is affected by a Special Condition.",.effect="ecard1-12:p",.animation="ATK_ANIM_HIT",.cost={0,0,0,0,0,0,0,0,0},.damage=0,.category=TCG_POKEMON_POWER},
 {.name="Rending Jaws",.description="If here are no damage counters on the Defending Pokemon, this attack's base damage is 40 instead of 70.",.effect="ecard1-12:a0",.animation="ATK_ANIM_HIT",.cost={0,0,0,2,0,0,2,0,0},.damage=70,.category=TCG_DAMAGE_NORMAL},
@@ -6975,7 +6975,7 @@ const struct TcgCard gTcgCards[TCG_CARD_COUNT + 1] = {
 {.name="",.description="",.effect="NONE",.animation="ATK_ANIM_NONE",.cost={0},.damage=0,.category=TCG_DAMAGE_NORMAL},
 }
 },
-[1100] = {.id=1100, .name="Feraligatr", .kind=TCG_POKEMON, .type=3, .rarity=2, .set=19, .set2=255, .dark=0, .holo=0, .flags=0, .origin=19,
+[1100] = {.id=1100, .name="Feraligatr", .kind=TCG_POKEMON, .type=3, .rarity=2, .set=19, .set2=255, .dark=0, .holo=0, .flags=TCG_CF_READY, .origin=19,
 .hp=120, .stage=2, .species=160, .level=0, .retreat=3, .weakness=2, .resistance=255, .evolvesFrom="Croconaw", .description="", .attacks={
 {.name="Major Tsunami",.description="Once during your turn (before your attack), if Feraligatr is your Active Pokemon and if your opponent has any Benched Pokemon, your opponent switches his or her Active Pokemon with 1 of his or her Benched Pokemon. Either way, if you have any Benched Pokemon, switch Feraligatr with 1 of them. This power can't be used if Feraligatr is affected by a Special Condition.",.effect="ecard1-47:p",.animation="ATK_ANIM_HIT",.cost={0,0,0,0,0,0,0,0,0},.damage=0,.category=TCG_POKEMON_POWER},
 {.name="Rending Jaws",.description="If here are no damage counters on the Defending Pokemon, this attack's base damage is 40 instead of 70.",.effect="ecard1-47:a0",.animation="ATK_ANIM_HIT",.cost={0,0,0,2,0,0,2,0,0},.damage=70,.category=TCG_DAMAGE_NORMAL},

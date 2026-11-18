@@ -109,7 +109,10 @@
  *             Magneton / Dark Magneton (name group 6) | ctrin a counter from the Unown chosen onto it | spike:T,K (an
  *             Energy of type T; K 1 onto an Unown, 2 onto a Benched one) | mshift Miracle Shift | recon Reconstruction |
  *             nobody every Poke-Body ignored this turn | order:n the top n of your deck in the order picked | oattd
- *             the Energy picked in their discard pile onto the Defending Pokemon | ohshuf Dark Moon */
+ *             the Energy picked in their discard pile onto the Defending Pokemon | ohshuf Dark Moon
+ * After (1):  boh:x x per heads to each of their Benched | oswitch they switch their Active with a Benched one of their
+ *             choice (TcgDuel_OpponentSwitch) | gmove:T Baton Pass | mime Sleight of Hand | srchk:4 a Pokemon card not
+ *             named as it | ddeh:n one of the Defending's Energy per heads, up to n picked */
 #define SCRIPT_TOKEN 48
 /* Which of the player's Pokemon "it" is: the attacker (0), or a Pokemon whose power runs a script (tcg_powers.c) */
 static unsigned sScriptSelf;
@@ -534,7 +537,8 @@ static int ScriptRun(struct TcgDuel *g, const char *script, const struct TcgAtta
                 g->attackFailed = 1;
                 return TCG_OK;
             }
-            DiscardEnergy(g, me, sScriptSelf, (unsigned)x, g->scriptHeads);
+            if (g->scriptHeads) /* (DiscardEnergy's 0 is every one of them) */
+                DiscardEnergy(g, me, sScriptSelf, (unsigned)x, g->scriptHeads);
         }
         else if (ScriptIs(&o, "adddis"))
         {
@@ -839,6 +843,71 @@ static int ScriptRun(struct TcgDuel *g, const char *script, const struct TcgAtta
             BenchDamage(g, them, x);
         else if (ScriptIs(&o, "bm"))
             BenchDamage(g, me, x);
+        else if (ScriptIs(&o, "boh"))
+            BenchDamage(g, them, x * (int)g->scriptHeads); /* (x per heads to each of their Benched) */
+        else if (ScriptIs(&o, "oswitch"))
+            TcgDuel_OpponentSwitch(g, them); /* (they choose who comes in, as a promotion) */
+        else if (ScriptIs(&o, "gmove"))
+        {
+            /* Baton Pass: every Energy card of type x on it onto the Benched Pokemon of that type chosen, then they
+             * switch (none of that type on the Bench: nothing) */
+            const struct TcgCard *t = TcgDuel_Field(g, me, action ? action->target : 0);
+            unsigned k, any = 0;
+            for (k = 1; k < TCG_FIELD_SIZE; k++)
+                any |= TcgDuel_Field(g, me, k) && TcgDuel_Type(g, me, k) == (unsigned)x;
+            if (!any)
+                continue;
+            if (!action || !ValidTarget(g, me, action->target, 1) || !t || TcgDuel_Type(g, me, action->target) != (unsigned)x)
+                return TCG_INVALID;
+            for (k = self->attachedSize; k > 0; k--)
+            {
+                const struct TcgCard *e = CardAt(g, me, self->attached[k - 1]);
+                if (e->kind == TCG_ENERGY && e->id <= 6 && e->type == (unsigned)x)
+                {
+                    struct TcgFieldCard *to = &p->field[action->target];
+                    to->attached[to->attachedSize++] = TcgPile_Remove(self->attached, &self->attachedSize, k - 1);
+                    TcgDuel_Event(g, TCG_EV_ATTACH, me, action->target, 0, e->id, 0);
+                }
+            }
+            Switch(g, me, action->target);
+        }
+        else if (ScriptIs(&o, "mime"))
+        {
+            /* Sleight of Hand: the cards picked in the hand (up to 3) on top of the deck, then as many basic Energy
+             * cards picked from the deck (at most) into the hand; the deck shuffled */
+            unsigned k, fromHand = 0, fromDeck = 0;
+            uint8_t take[TCG_DECK_SIZE];
+            for (k = 0; action && k < action->selectionCount; k++)
+            {
+                int h = Picked(action, k, p->hand, p->handSize), d = Picked(action, k, p->deck, p->deckSize);
+                if (h >= 0)
+                {
+                    if (++fromHand > 3)
+                        return TCG_INVALID;
+                }
+                else if (d >= 0 && CardAt(g, me, p->deck[d])->kind == TCG_ENERGY && CardAt(g, me, p->deck[d])->id <= 6)
+                    take[fromDeck++] = action->selections[k];
+                else
+                    return TCG_INVALID;
+            }
+            if (fromDeck > fromHand)
+                return TCG_INVALID;
+            for (k = 0; action && k < action->selectionCount; k++)
+            {
+                int h = Picked(action, k, p->hand, p->handSize);
+                if (h >= 0)
+                    p->deck[p->deckSize++] = TcgPile_Remove(p->hand, &p->handSize, (unsigned)h);
+            }
+            for (k = 0; k < fromDeck; k++)
+            {
+                unsigned j;
+                for (j = 0; j < p->deckSize && p->deck[j] != take[k]; j++)
+                    ;
+                TcgDuel_Log(g, "Shown: %s.", CardAt(g, me, take[k])->name);
+                p->hand[p->handSize++] = TcgPile_Remove(p->deck, &p->deckSize, j);
+            }
+            TcgDuel_Shuffle(g, me);
+        }
         else if (ScriptIs(&o, "bb"))
         {
             BenchDamage(g, them, x);
@@ -932,6 +1001,8 @@ static int ScriptRun(struct TcgDuel *g, const char *script, const struct TcgAtta
                 const struct TcgCard *c = CardAt(g, me, card);
                 int ok = ScriptIs(&o, "srchk")
                              ? (x == 3 ? c->kind == TCG_POKEMON /* (srchk:3 a Basic Pokemon or Evolution card) */
+                                : x == 4 ? c->kind == TCG_POKEMON && TcgDuel_Field(g, me, sScriptSelf) &&
+                                               strcmp(c->name, TcgDuel_Field(g, me, sScriptSelf)->name) /* (4: not named as it) */
                                        : c->kind == TCG_TRAINER &&
                                              (x == 0 ? (c->flags & TCG_CF_SUPPORTER) != 0
                                               : x == 1 ? (c->flags & (TCG_CF_TM | TCG_CF_TOOL)) != 0 : 1))
@@ -2626,6 +2697,8 @@ static unsigned ScriptChoice(const char *script, int *required)
         }
         if (ScriptIs(&o, "evbench") || ScriptIs(&o, "healbd"))
             return 2;
+        if (ScriptIs(&o, "gmove"))
+            return 9; /* (one of your Benched Grass Pokemon, if any) */
         if (ScriptIs(&o, "hatt") && o.arg[2])
         {
             if (required)
@@ -2673,6 +2746,8 @@ static const char *ScriptPrompt(const char *script)
             return o.cond[0] ? "If heads, hit which Benched Pokemon?" : "Hit which of their Benched Pokemon?";
         if (ScriptIs(&o, "ssw"))
             return "Switch with which of yours?";
+        if (ScriptIs(&o, "gmove"))
+            return "Pass the Grass Energy to which Benched Grass Pokemon?";
         if (ScriptIs(&o, "m1"))
             return o.cond[0] ? "If tails, which of yours takes it?" : "Which of your Benched Pokemon takes it?";
         if (ScriptIs(&o, "healt"))
@@ -2714,7 +2789,7 @@ static unsigned ScriptPick(const char *script, unsigned *count)
             return TCG_APICK_FOE_ENERGY;
         if (ScriptIs(&o, "ddeh") || ScriptIs(&o, "dspe") || ScriptIs(&o, "dedeck"))
         {
-            *count = ScriptIs(&o, "dspe") ? 100 : ScriptIs(&o, "dedeck") ? (unsigned)o.arg[0] : 2;
+            *count = ScriptIs(&o, "dspe") ? 100 : ScriptIs(&o, "dedeck") || (o.args && ScriptIs(&o, "ddeh")) ? (unsigned)o.arg[0] : 2;
             return TCG_APICK_FOE_ENERGY;
         }
         if (ScriptIs(&o, "evdeck"))
@@ -2765,6 +2840,11 @@ static unsigned ScriptPick(const char *script, unsigned *count)
         {
             *count = ScriptIs(&o, "nsrch") ? (60u + (unsigned)o.arg[0]) | (unsigned)(o.arg[1] ? o.arg[1] : 60) << 8
                      : ScriptIs(&o, "dbown") ? 70u + (unsigned)o.arg[0] : 80u | 5u << 8;
+            return TCG_APICK_SEARCH;
+        }
+        if (ScriptIs(&o, "mime"))
+        {
+            *count = 59u | 3u << 8; /* (cards from the hand, then basic Energy from the deck) */
             return TCG_APICK_SEARCH;
         }
         if (ScriptIs(&o, "srchk") || ScriptIs(&o, "dbench") || ScriptIs(&o, "disbench") || ScriptIs(&o, "dishand"))

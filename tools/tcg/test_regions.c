@@ -581,6 +581,138 @@ static int LookPowers(void)
     printf("PASS Terraforming, Strange Tentacles, Dark Moon, Aqua Trick\n");
     return 0;
 }
+/* Drive Off, Major Tsunami, Lightning Burst (their choice), Baton Pass, Bonfire, Roaring Flames, Messenger, Sleight of
+ * Hand, Destructive Fire */
+static int SwitchesAndFire(void)
+{
+    struct TcgDuel g;
+    struct TcgAction a;
+    unsigned k, before, seed, seen = 0;
+    int c;
+    static const unsigned ids[] = {TCG_CARD_NEO4_12, TCG_CARD_NEO3_13, TCG_CARD_ECARD1_12, TCG_CARD_NEO1_39, TCG_CARD_GYM2_31,
+                                   TCG_CARD_GYM2_2, TCG_CARD_GYM2_49, TCG_CARD_GYM1_94, TCG_CARD_NEO4_113};
+    for (k = 0; k < sizeof(ids) / sizeof(ids[0]); k++)
+        if (!Tcg_Card(ids[k]))
+            return printf("FAIL switches and fire: card %u isn't finished\n", ids[k]), 1;
+    /* Drive Off: they choose who comes in (a promotion of theirs), then the turn goes on */
+    Stage(&g, TCG_CARD_NEO4_12, 1, 1);
+    g.players[0].field[0].poison = 0;
+    memset(&a, 0, sizeof(a));
+    a.type = TCG_USE_POWER;
+    if (TcgDuel_Apply(&g, &a) != TCG_OK || g.phase != TCG_PROMOTION || g.promotePlayer != 1)
+        return printf("FAIL Drive Off: %s (phase %u)\n", g.error, g.phase), 1;
+    before = g.players[1].field[2].stack[0];
+    memset(&a, 0, sizeof(a));
+    a.type = TCG_PROMOTE;
+    a.slot = 2;
+    if (TcgDuel_Apply(&g, &a) != TCG_OK || g.phase != TCG_TURN || g.current != 0 || g.players[1].field[0].stack[0] != before)
+        return printf("FAIL Drive Off's promotion: %s\n", g.error), 1;
+    /* Major Tsunami: theirs, and Feraligatr with the Benched one chosen */
+    Stage(&g, TCG_CARD_ECARD1_12, 1, 1);
+    before = g.players[0].field[2].stack[0];
+    memset(&a, 0, sizeof(a));
+    a.type = TCG_USE_POWER;
+    a.target = 2;
+    if (TcgDuel_Apply(&g, &a) != TCG_OK || g.phase != TCG_PROMOTION || g.players[0].field[0].stack[0] != before)
+        return printf("FAIL Major Tsunami: %s\n", g.error), 1;
+    /* Lightning Burst: a Lightning Energy from the hand onto Raikou */
+    Stage(&g, TCG_CARD_NEO3_13, 1, 1);
+    c = Relabel(&g, 0, TCG_CARD_LIGHTNING_ENERGY); /* (the deck's Lightning Energy are all on it) */
+    g.players[0].hand[g.players[0].handSize++] = (uint8_t)c;
+    memset(&a, 0, sizeof(a));
+    a.type = TCG_ATTACH;
+    a.hand = (uint8_t)(g.players[0].handSize - 1);
+    a.slot = 0;
+    if (TcgDuel_Apply(&g, &a) != TCG_OK || g.phase != TCG_PROMOTION || g.promotePlayer != 1)
+        return printf("FAIL Lightning Burst: %s\n", g.error), 1;
+    /* Baton Pass: its Grass Energy to the Benched Grass Pokemon, which comes in */
+    Stage(&g, TCG_CARD_NEO1_39, 0, 1);
+    g.players[0].cards[g.players[0].field[2].stack[0]] = TCG_CARD_NEO1_39;
+    before = g.players[0].field[2].stack[0];
+    memset(&a, 0, sizeof(a));
+    a.type = TCG_ATTACK;
+    a.attack = 0;
+    a.target = 1; /* (Machop: not Grass) */
+    if (TcgDuel_Apply(&g, &a) == TCG_OK)
+        return printf("FAIL Baton Pass to a Machop\n"), 1;
+    a.target = 2;
+    if (TcgDuel_Apply(&g, &a) != TCG_OK || g.players[0].field[0].stack[0] != before ||
+        TcgDuel_Energy(&g, 0, 0, TCG_GRASS) < 2)
+        return printf("FAIL Baton Pass: %s\n", g.error), 1;
+    /* Bonfire: 10 a heads to each of theirs, a Fire Energy discarded a heads */
+    for (seed = 1; seed < 12; seed++)
+    {
+        unsigned fire, heads;
+        Stage(&g, TCG_CARD_GYM2_31, 1, seed);
+        g.players[1].field[0].poison = 0;
+        g.players[1].field[0].damage = g.players[1].field[1].damage = 0;
+        fire = TcgDuel_Energy(&g, 0, 0, TCG_FIRE);
+        memset(&a, 0, sizeof(a));
+        a.type = TCG_ATTACK;
+        a.attack = 1;
+        if (TcgDuel_Apply(&g, &a) != TCG_OK)
+            return printf("FAIL Bonfire: %s\n", g.error), 1;
+        heads = g.players[1].field[1].damage / 10;
+        if (g.players[1].field[0].damage != heads * 10 || TcgDuel_Energy(&g, 0, 0, TCG_FIRE) != fire - heads)
+            return printf("FAIL Bonfire (seed %u): %u / %u, Fire %u -> %u\n", seed, g.players[1].field[0].damage,
+                          g.players[1].field[1].damage, fire, TcgDuel_Energy(&g, 0, 0, TCG_FIRE)), 1;
+    }
+    /* Roaring Flames: every Fire Energy discarded, 20 more for each */
+    Stage(&g, TCG_CARD_GYM2_2, 0, 1);
+    g.players[1].field[0].damage = 0;
+    k = TcgDuel_Energy(&g, 0, 0, TCG_FIRE);
+    memset(&a, 0, sizeof(a));
+    a.type = TCG_ATTACK;
+    if (TcgDuel_Apply(&g, &a) != TCG_OK || TcgDuel_Energy(&g, 0, 0, TCG_FIRE))
+        return printf("FAIL Roaring Flames: %s\n", g.error), 1;
+    if (g.players[1].field[0].stackSize && g.players[1].field[0].damage && g.players[1].field[0].damage < 20 + 20 * k)
+        return printf("FAIL Roaring Flames: %u damage for %u Fire\n", g.players[1].field[0].damage, k), 1;
+    /* Messenger: a Pokemon card not named Koga's Pidgey, and Pidgey into the deck */
+    Stage(&g, TCG_CARD_GYM2_49, 0, 1);
+    c = Relabel(&g, 0, TCG_CARD_MACHOP);
+    g.players[0].deck[g.players[0].deckSize++] = (uint8_t)c; /* (back into the deck) */
+    before = g.players[0].handSize;
+    memset(&a, 0, sizeof(a));
+    a.type = TCG_ATTACK;
+    a.selections[0] = (uint8_t)c;
+    a.selectionCount = 1;
+    if (TcgDuel_Apply(&g, &a) != TCG_OK || g.players[0].handSize != before + 1)
+        return printf("FAIL Messenger: %s\n", g.error), 1;
+    /* Sleight of Hand: 2 cards on top, 2 basic Energy into the hand (3 refused) */
+    Stage(&g, TCG_CARD_GYM1_94, 0, 1);
+    before = g.players[0].handSize;
+    memset(&a, 0, sizeof(a));
+    a.type = TCG_ATTACK;
+    a.selections[0] = g.players[0].hand[0], a.selections[1] = g.players[0].hand[1];
+    for (k = 0, a.selectionCount = 2; k < g.players[0].deckSize && a.selectionCount < 5; k++)
+        if (g.players[0].cards[g.players[0].deck[k]] >= 1 && g.players[0].cards[g.players[0].deck[k]] <= 6)
+            a.selections[a.selectionCount++] = g.players[0].deck[k];
+    if (TcgDuel_Apply(&g, &a) == TCG_OK)
+        return printf("FAIL Sleight of Hand took 3 for 2\n"), 1;
+    a.selectionCount = 4;
+    if (TcgDuel_Apply(&g, &a) != TCG_OK || g.players[0].handSize != before)
+        return printf("FAIL Sleight of Hand: %s (%u)\n", g.error, g.players[0].handSize), 1;
+    /* Destructive Fire: a Fire Energy of its and one of the Defending's a heads */
+    for (seed = 1; seed < 20; seed++)
+    {
+        unsigned fire, theirs, lost;
+        Stage(&g, TCG_CARD_NEO4_113, 1, seed);
+        fire = TcgDuel_Energy(&g, 0, 0, TCG_FIRE), theirs = g.players[1].field[0].attachedSize;
+        memset(&a, 0, sizeof(a));
+        a.type = TCG_ATTACK;
+        a.attack = 1;
+        if (TcgDuel_Apply(&g, &a) != TCG_OK)
+            return printf("FAIL Destructive Fire: %s\n", g.error), 1;
+        lost = fire - TcgDuel_Energy(&g, 0, 0, TCG_FIRE);
+        if (g.players[1].field[0].stackSize && theirs - g.players[1].field[0].attachedSize != (lost < theirs ? lost : theirs))
+            return printf("FAIL Destructive Fire: %u heads, %u of theirs gone\n", lost, theirs - g.players[1].field[0].attachedSize), 1;
+        seen |= lost ? 1 : 2;
+    }
+    if (seen != 3)
+        return printf("FAIL Destructive Fire: outcomes %u\n", seen), 1;
+    printf("PASS Drive Off, Major Tsunami, Lightning Burst, Baton Pass, Bonfire, Roaring Flames, Messenger, Sleight of Hand, Destructive Fire\n");
+    return 0;
+}
 static int ScriptMechanics(void)
 {
     struct TcgDuel g;
@@ -1396,7 +1528,7 @@ int main(void)
     }
     printf("PASS %u finished regional cards: %u attacks used %u times, then %u AI actions after them\n", ready, used, ok,
            steps);
-    if (SpecialEnergy() || EcardEnergy() || ScriptMechanics() || Anchors() || Guards() || MovePowers() || LookPowers() || TechnicalMachines() || Babies())
+    if (SpecialEnergy() || EcardEnergy() || ScriptMechanics() || Anchors() || Guards() || MovePowers() || LookPowers() || SwitchesAndFire() || TechnicalMachines() || Babies())
         return 1;
     if (PlayTrainers() || UsePowers() || UseStadiums() || AttackFlows())
         return 1;

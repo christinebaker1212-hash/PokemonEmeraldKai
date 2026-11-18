@@ -1701,6 +1701,14 @@ static void ContinueTrainer(struct TcgAction *out, int *result)
     st = &B.steps[B.step];
     if (st->kind == TCG_ST_MY_SLOT || st->kind == TCG_ST_OPP_SLOT)
     {
+        B.mode = M_TARGET;
+        if (st->min && !FocusFirstValid())
+        {
+            /* (a slot step with min set is skipped when nothing can be chosen) */
+            B.step++;
+            ContinueTrainer(out, result);
+            return;
+        }
         StartTarget();
         return;
     }

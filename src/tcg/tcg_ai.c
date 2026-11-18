@@ -1244,6 +1244,16 @@ static int Act(const struct TcgDuel *g, struct TcgAction *a)
         }
         else if (choice == 2)
             a->target = BestPokemon(g, g->current);
+        else if (choice == 9)
+        {
+            /* (Baton Pass: the first Benched Grass Pokemon) */
+            for (s = 1; s < TCG_FIELD_SIZE; s++)
+                if (TcgDuel_Field(g, g->current, s) && TcgDuel_Type(g, g->current, s) == TCG_GRASS)
+                {
+                    a->target = s;
+                    break;
+                }
+        }
         TcgDuel_AiAttackChoices(g, a); /* (Amnesia, Metronome, Conversion...) */
         if (TcgDuel_IsMetronome(TcgDuel_AttackOf(g, g->current, bestAttack)) && a->copy)
         {

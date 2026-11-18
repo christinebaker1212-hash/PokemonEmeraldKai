@@ -259,6 +259,8 @@ static const struct TcgStep *RegionPowerSteps(unsigned power, int *count)
         STEPS({TCG_ST_PICK, TCG_F_EVOLVES_FROM_USER, TCG_SRC_DECK, 0, 1, "If heads: evolve it into which card?"});
     case TCG_POWER_R_EVOLUTION_HELPER:
         STEPS({TCG_ST_PICK, TCG_F_EVOLVES_FROM_ACTIVE, TCG_SRC_DECK, 1, 1, "Evolve your Active Pokemon into which card?"});
+    case TCG_POWER_R_MAJOR_TSUNAMI:
+        STEPS({TCG_ST_MY_SLOT, TCG_F_BENCH, 0, 1, 0, "Then switch it with which of your Benched Pokemon?"});
     case TCG_POWER_R_TERRAFORMING:
         STEPS({TCG_ST_PICK, TCG_F_ANY, TCG_SRC_TOP5, 0, 4, "Choose the order: the first is drawn next."});
     case TCG_POWER_R_STRANGE_TENTACLES:

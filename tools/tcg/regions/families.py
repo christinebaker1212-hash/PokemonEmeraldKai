@@ -569,6 +569,12 @@ def _(m, d):
 
 # One wording, one script (the cards' words with SELF for the card's name; tcg_script.inc's ops)
 EXACT = {
+    'If you have any Grass Pokemon on your Bench, remove all Grass Energy cards from SELF and attach them to 1 of those Pokemon, then switch SELF with that Pokemon.': 'gmove:1',
+    "Flip 3 coins. For each heads, discard 1 Fire Energy card attached to SELF. If you can't discard Energy cards, this attack does nothing. This attack does 10 damage times the number of heads to each of your opponent's Pokemon. Don't apply Weakness and Resistance for this attack.": 'c:3 dsxh:0 mulh:10 nowr boh:10',
+    'Discard all Fire Energy cards attached to SELF. If all Energy cards attached to SELF provide 2 Fire Energy, discard all of them. This attack does 20 damage plus 20 more damage for each Fire Energy discarded in this way.': 'adde:0,20 dse:0,0',
+    'Put SELF and all cards attached to it on top of your deck. Then search your deck for any Basic Pokemon or Evolution card not named SELF. Show that card to your opponent, then put it into your hand. Shuffle your deck afterward.': 'srchk:4 selfdeck',
+    'Choose up to 3 cards from your hand and put them on top of your deck. Then search your deck for that many basic Energy cards. Show those cards to your opponent, then put them into your hand. Shuffle your deck afterward.': 'mime',
+    'Flip a coin for each Fire Energy card attached to SELF. For each heads, discard a Fire Energy card attached to SELF or this attack does nothing. Then, for each heads, choose an Energy card attached to the Defending Pokemon and discard it. If it has fewer Energy cards than that, remove all of them.': 'ce:0 dsxh:0 ddeh:6',
     "If the Defending Pokemon has any Energy cards attached to it, flip a coin. If heads, choose 1 of those Energy cards and move it to 1 of your opponent's Benched Pokemon. If your opponent has no Benched Pokemon, ignore this effect.": ('MAGNETIC_LINES', 0, 7),
     "Flip a coin. If heads, choose 1 Energy card attached to the Defending Pokemon and 1 of your opponent's Benched Pokemon. Attach that Energy card to that Pokemon.": ('MAGNETIC_LINES', 0, 3),
     "Flip a coin. If heads, SELF does 40 damage to itself and 10 damage to each Pokemon on each player's Bench. Flip a coin. If tails, this attack does nothing (not even damage).": 'c:2 t2.none ah.rec:40 ah.bb:10',

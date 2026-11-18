@@ -369,6 +369,9 @@ static int AttackPickSteps(const struct TcgDuel *g, unsigned me, const struct Tc
             {11, TCG_F_TM_TOOL, TCG_SRC_DECK, "Take which Technical Machine or Pokemon Tool?"},
             {12, TCG_F_TRAINER, TCG_SRC_DECK, "Take which Trainer?"},
             {13, TCG_F_POKEMON_CARD, TCG_SRC_DECK, "Take which Pokemon card?"},
+            {14, TCG_F_POKEMON_OTHER_NAME, TCG_SRC_DECK, "Take which Pokemon card?"},
+            {59, TCG_F_ANY, TCG_SRC_HAND, "Put which cards (up to 3) on top of your deck?"},
+            {59, TCG_F_BASIC_ENERGY, TCG_SRC_DECK, "Then take that many basic Energy cards (at most)."},
             {20, TCG_F_BASIC, TCG_SRC_DECK, "Put which Basic Pokemon onto your Bench?"},
             {21, TCG_F_BABY, TCG_SRC_DECK, "Put which Baby Pokemon onto your Bench?"},
             {22, TCG_F_METAL_BASIC, TCG_SRC_DECK, "If heads, put which Metal Basic Pokemon onto your Bench?"},
@@ -506,12 +509,24 @@ int TcgFlow_AttackSteps(const struct TcgDuel *g, unsigned me, const struct TcgAc
     }
     choice = attack ? TcgDuel_AttackChoice(attack, NULL) : 0;
     ask = attack ? TcgDuel_AttackAsk(attack) : TCG_ASK_NONE;
+    if (choice == 9)
+    {
+        /* (Baton Pass: only with a Benched Grass Pokemon) */
+        unsigned k;
+        for (k = 1; k < TCG_FIELD_SIZE && !TcgFlow_SlotMatches(g, me, a, 0, me, k, TCG_F_GRASS_BENCH); k++)
+            ;
+        if (k == TCG_FIELD_SIZE)
+            choice = 0;
+    }
     if ((choice == 1 && BenchOn(g, me ^ 1)) || (choice == 2 && BenchOn(g, me)) || choice == 3 || choice == 4 ||
-        (choice == 5 && BenchOn(g, me ^ 1)) || choice == 6 || (choice == 7 && EvolvedOn(g, me ^ 1)) || choice == 8)
+        (choice == 5 && BenchOn(g, me ^ 1)) || choice == 6 || (choice == 7 && EvolvedOn(g, me ^ 1)) || choice == 8 ||
+        choice == 9)
     {
         const char *words = TcgDuel_AttackTargetPrompt(attack);
-        struct TcgStep st = {choice == 1 || choice == 3 || (choice >= 5 && choice != 8) ? TCG_ST_OPP_SLOT : TCG_ST_MY_SLOT,
-                             choice == 8   ? TCG_F_HAS_ENERGY
+        struct TcgStep st = {choice == 1 || choice == 3 || (choice >= 5 && choice != 8 && choice != 9) ? TCG_ST_OPP_SLOT
+                                                                                                       : TCG_ST_MY_SLOT,
+                             choice == 9   ? TCG_F_GRASS_BENCH
+                             : choice == 8 ? TCG_F_HAS_ENERGY
                              : choice == 7 ? TCG_F_EVOLVED
                              : choice == 6 ? TCG_F_DAMAGED : choice == 5 ? TCG_F_BENCH_CLEAN : choice >= 3 ? TCG_F_OCCUPIED : TCG_F_BENCH,
                              0, 0, 0,
@@ -679,6 +694,11 @@ int TcgFlow_PickMatches(const struct TcgDuel *g, unsigned me, const struct TcgAc
                                                               : Field(g, me, s) && TcgFlow_InNameGroup(Field(g, me, s)->name, 6);
         return 0;
     }
+    if (filter == TCG_F_POKEMON_OTHER_NAME)
+    {
+        const struct TcgCard *c = Tcg_Card(CardOf(g, owner, physical)), *active = Field(g, me, 0);
+        return c && c->kind == TCG_POKEMON && (!active || strcmp(c->name, active->name));
+    }
     if (filter == TCG_F_SAME_NAME_BASIC)
     {
         const struct TcgCard *c = Tcg_Card(CardOf(g, owner, physical)), *active = Field(g, me, 0);
@@ -722,6 +742,8 @@ int TcgFlow_SlotMatches(const struct TcgDuel *g, unsigned me, const struct TcgAc
         const struct TcgCard *picked = a->selectionCount ? Tcg_Card(CardOf(g, me, a->selections[0])) : NULL;
         return c && (!picked || picked->type == c->type);
     }
+    case TCG_F_GRASS_BENCH:
+        return c && slot && c->kind == TCG_POKEMON && TcgDuel_Type(g, who, slot) == TCG_GRASS;
     case TCG_F_UNOWN_SLOT:
         return c && c->kind == TCG_POKEMON && strstr(c->name, "Unown") != NULL;
     case TCG_F_UNOWN_DAMAGED_OTHER:
@@ -1331,7 +1353,21 @@ static unsigned Next(struct TcgFlow *f, const struct TcgDuel *g)
         return Done(f);
     st = &f->steps[f->step];
     if (st->kind == TCG_ST_MY_SLOT || st->kind == TCG_ST_OPP_SLOT)
+    {
+        if (st->min)
+        {
+            /* (a slot step with min set is skipped when nothing can be chosen: Major Tsunami's own switch) */
+            unsigned who = st->kind == TCG_ST_OPP_SLOT ? f->me ^ 1 : f->me, s, any = 0;
+            for (s = 0; s < TCG_FIELD_SIZE; s++)
+                any |= TcgFlow_SlotMatches(g, f->me, &f->action, f->flowCard, who, s, st->filter);
+            if (!any)
+            {
+                f->step++;
+                return Next(f, g);
+            }
+        }
         return AskSlot(f, g, st->kind == TCG_ST_OPP_SLOT ? f->me ^ 1 : f->me, st->filter, st->prompt);
+    }
     if (st->kind == TCG_ST_PICK)
     {
         int n = st->max, all = st->source == TCG_SRC_TOP5 ||
