@@ -423,6 +423,8 @@ void MP_UiStyle_JournalReset(void)
 // A style that lays a menu out other than KAI does (RED's moves a list, PLATINUM's FIGHT above the other three, a
 // party in a list or two columns) moves its cursor as it's laid out: each entry's place on the style's own grid, the
 // D-pad going to the nearest entry that way. KAI's own layouts keep KAI's own code.
+static u8 PartyColumns(u8 style);
+
 static bool8 NavPlace(u8 style, u8 kind, u8 i, s8 *x, s8 *y)
 {
     switch (kind)
@@ -444,23 +446,32 @@ static bool8 NavPlace(u8 style, u8 kind, u8 i, s8 *x, s8 *y)
         }
         return FALSE;
     case MP_UINAV_PARTY:     // (0-5 the slots, 6 CONFIRM, 7 CANCEL)
+    {
+        // (a Double / Triple Battle party the style lays out in two columns: those in battle on the left)
+        u8 inBattle = PartyColumns(style);
         if (style == UISTYLE_RED || style == UISTYLE_CRYSTAL)
         {
             // (the Game Boy's list has no CANCEL: B closes it, and the cursor goes round the POKéMON)
             if (i == 7)
                 return FALSE;
-            *x = 0, *y = i;
+            if (inBattle && i < PARTY_SIZE)
+                *x = i < inBattle ? 0 : 2, *y = i < inBattle ? i : i - inBattle;
+            else
+                *x = 0, *y = i;
             return TRUE;
         }
         if (style == UISTYLE_PLATINUM || style == UISTYLE_BLACK)
         {
-            if (i < 6)
+            if (i < 6 && inBattle == 3)
+                *x = (i / 3) * 2, *y = i % 3;
+            else if (i < 6)
                 *x = (i & 1) * 2, *y = i / 2;
             else
                 *x = i == 6 ? 0 : 2, *y = 3;
             return TRUE;
         }
         return FALSE;
+    }
     }
     return FALSE;
 }
@@ -476,6 +487,8 @@ int MP_UiStyle_NavMove(u8 kind, int cur, u16 keys, u32 usable, bool8 wrap)
     u8 style = MP_UiStyle_Active();
     s8 cx, cy, x, y;
     int dx = 0, dy = 0, i, best = -1, bestMain = 0, bestSide = 0;
+    // (a party in two columns of different lengths: across to the nearest row there, as KAI's Double party)
+    bool8 loose = kind == MP_UINAV_PARTY && PartyColumns(style);
     if (!NavPlace(style, kind, cur, &cx, &cy))
         return cur;
     if (keys & DPAD_UP)
@@ -495,7 +508,9 @@ int MP_UiStyle_NavMove(u8 kind, int cur, u16 keys, u32 usable, bool8 wrap)
             continue;
         main = dx ? (x - cx) * dx : (y - cy) * dy;
         side = dx ? abs(y - cy) : abs(x - cx);
-        if (main <= 0 || (dx && side > 0))   // (left and right stay on their row)
+        if (main <= 0 || (dx && side > 0 && !loose))   // (left and right stay on their row)
+            continue;
+        if (loose && dy && side > 0 && i < PARTY_SIZE)   // (two columns: up and down stay in theirs, or go to CANCEL)
             continue;
         if (best < 0 || main < bestMain || (main == bestMain && side < bestSide))
             best = i, bestMain = main, bestSide = side;
@@ -510,7 +525,7 @@ int MP_UiStyle_NavMove(u8 kind, int cur, u16 keys, u32 usable, bool8 wrap)
                 continue;
             main = (cy - y) * dy;
             side = abs(x - cx);
-            if (main <= 0)
+            if (main <= 0 || (loose && side > 0))
                 continue;
             if (best < 0 || main > bestMain || (main == bestMain && side < bestSide))
                 best = i, bestMain = main, bestSide = side;
@@ -2445,11 +2460,60 @@ static void SlotSpan(struct UiPack *p, const struct UiSpec *sp, int *lo, int *hi
         *lo = *hi = 0;
 }
 
+// the party screen's spec WHAT ("" the screen, "0".."5" a slot, "over" drawn over the slots) for the battle's layout:
+// a style's own Double / Triple Battle party ("party2", "party3": as approved, 2026-11-18) where it has one, else its
+// single screen's ("party")
+static const struct UiSpec *PartySpec(const struct UiPack *p, const char *what)
+{
+    char name[24];
+    const char *lay = gPartyMenu.layout == PARTY_LAYOUT_DOUBLE ? "party2"
+                    : gPartyMenu.layout == PARTY_LAYOUT_TRIPLE ? "party3" : NULL;
+    const struct UiSpec *sp;
+    if (p == NULL)
+        return NULL;
+    if (lay)
+    {
+        snprintf(name, sizeof(name), *what ? "%s.%s" : "%s", lay, what);
+        if ((sp = FindSpec(p, name)) != NULL)
+            return sp;
+    }
+    if (strcmp(what, "over") == 0)
+        return NULL;
+    snprintf(name, sizeof(name), *what ? "party.%s" : "party", what);
+    return FindSpec(p, name);
+}
+
+// the style lays the battle's Double / Triple party out its own way (its "party2" / "party3" slots)
+static bool8 PartyOwnLayout(const struct UiPack *p)
+{
+    const char *lay = gPartyMenu.layout == PARTY_LAYOUT_DOUBLE ? "party2.0"
+                    : gPartyMenu.layout == PARTY_LAYOUT_TRIPLE ? "party3.0" : NULL;
+    return p != NULL && lay != NULL && FindSpec(p, lay) != NULL;
+}
+
+// the POKéMON in battle down a column of their own (0: the style's party is laid out otherwise): the Triple Battle's
+// three; the Double Battle's two where the style puts them in a column (RED's, CRYSTAL's, not PLATINUM's or BLACK's,
+// whose two are along the top)
+static u8 PartyColumns(u8 style)
+{
+    if (style == UISTYLE_KAI || !PartyOwnLayout(GetPack(style)))
+        return 0;
+    if (gPartyMenu.layout == PARTY_LAYOUT_TRIPLE)
+        return 3;
+    return (style == UISTYLE_RED || style == UISTYLE_CRYSTAL) ? 2 : 0;
+}
+
+bool8 MP_UiStyle_PartyOwnLayout(void)
+{
+    u8 style = MP_UiStyle_Active();
+    return style != UISTYLE_KAI && MP_UiStyle_PartyStyled() && PartyOwnLayout(GetPack(style));
+}
+
 static const struct UiSpec *PartySlotSpec(struct UiPack *p, u8 slot)
 {
-    char name[16];
-    snprintf(name, sizeof(name), "party.%d", slot);
-    return p ? FindSpec(p, name) : NULL;
+    char name[4];
+    snprintf(name, sizeof(name), "%d", slot);
+    return PartySpec(p, name);
 }
 
 // (pixels the slot moves at STEP: left-hand slots to the left, the rest to the right)
@@ -2518,7 +2582,7 @@ static void PartyScreen(struct UiPack *p, u16 *frame)
     u16 k;
     bool8 waiting;
 
-    if (!PartyScreenShown(&st) || (sp = FindSpec(p, "party")) == NULL)
+    if (!PartyScreenShown(&st) || (sp = PartySpec(p, "")) == NULL)
         return;
     memcpy(sKaiFrame, frame, sizeof(sKaiFrame));
     MP_FadeFit_FromPalette(&fit, BG_PLTT_ID(0));
@@ -2553,11 +2617,9 @@ static void PartyScreen(struct UiPack *p, u16 *frame)
                   sMax[PARTY_SIZE][6], sHp3[PARTY_SIZE][6], sMax3[PARTY_SIZE][6], sDesc[PARTY_SIZE][32];
         struct Pokemon *mon = &gPlayerParty[i];
         u16 species = GetMonData(mon, MON_DATA_SPECIES);
-        char name[16];
-        snprintf(name, sizeof(name), "party.%d", i);
         places[i][0][0] = NO_PLACE;
         slotSpec[i] = NULL;
-        if ((sp = FindSpec(p, name)) == NULL || (sPartyBlank & (1 << i)))
+        if ((sp = PartySlotSpec(p, i)) == NULL || (sPartyBlank & (1 << i)))
             continue;
         memset(&d, 0, sizeof(d));
         if (species == SPECIES_NONE)
@@ -2611,6 +2673,12 @@ static void PartyScreen(struct UiPack *p, u16 *frame)
             places[i][k][0] = places[i][k][0] < 0 ? NO_PLACE : places[i][k][0] + slideDx[i];   // (may go off the left edge)
         slotSpec[i] = sp;
         sSlotData[i] = d;
+    }
+    // (over the slots: a Double / Triple Battle party's rule between those in battle and the rest)
+    if ((sp = PartySpec(p, "over")) != NULL)
+    {
+        memset(&d, 0, sizeof(d));
+        DrawSpec(p, sp, &d, frame, 0, 0, &fit);
     }
     // the sprites: the POKé BALLS the style has its own of stay hidden; each slot's icon, item and status where the
     // style puts them

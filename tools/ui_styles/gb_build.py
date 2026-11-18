@@ -432,6 +432,47 @@ class GBPack:
             self.text(sp, '{%d}/{%d}' % (U.F_HP3, U.F_MAXHP3), 232, y + 11, align=1, unless=no_hp)
             self.text(sp, '{%d}' % (U.F_TEXT0 + 1), 48, y + 11, cond=U.P_DESC, unless=U.P_EMPTY)
             p.spec(sp)
+        # the Double / Triple Battle party (as approved, 2026-11-18): the POKéMON in battle in a framed box down the
+        # left, each as the status screens draw one (name, :L, HP: and its bar, the numbers under it), the rest down
+        # the right (name, :L and the numbers, the bar); the cursor goes between the columns as KAI's does
+        for n, nact in (('party2', 2), ('party3', 3)):
+            g = ground.copy()
+            st.window(g, (0, 0, 120, 136))
+            gsp = U.Spec(n)
+            gsp.add(U.OP_IMG, a=p.image('%s.ground' % n, g))
+            gsp.add(U.OP_MSG, x=8, y=144, a=0, h=16, n=1, w=224, font=self.font, ink=st.ink, shadow=st.mid)
+            p.spec(gsp)
+            for i in range(6):
+                if i < nact:
+                    x, y, act = 16, (8 + 40 * i) if nact == 3 else (12 + 56 * i), True
+                else:
+                    x, y, act = 128, 8 + 32 * (i - nact), False
+                sp = U.Spec('%s.%d' % (n, i))
+                off, no = U.P_EMPTY, U.P_EMPTY | U.P_EGG
+                no_hp = no | U.P_DESC
+                sp.add(U.OP_ICON, x=x + 8, y=y + 4, a=0, unless=off)
+                # (a status in the level's place, as the Game Boy's boxes print one)
+                sp.add(U.OP_ICON, x=x + 36, y=y + 12, a=2, cond=U.C_STATUS, unless=off)
+                self.text(sp, '▶', x - 8, y, cond=U.C_SEL0)
+                self.text(sp, '▶', x - 8, y, cond=U.P_SWITCH)
+                self.text(sp, '{%d}' % U.F_NAME, x + 20, y, unless=off)
+                sp.add(U.OP_IMG, x=x + 20, y=y + 8, a=lv, unless=U.C_LV3 | no | U.C_STATUS)
+                self.text(sp, '{%d}' % U.F_LEVEL, x + 28, y + 8, reg=2, unless=U.C_LV3 | no | U.C_STATUS)
+                self.text(sp, '{%d}' % U.F_LEVEL, x + 20, y + 8, reg=2, cond=U.C_LV3, unless=no | U.C_STATUS)
+                if not self.red:
+                    self.text(sp, '♂', 0, y + 8, MALE_INK, cond=U.C_MALE, rel=True, reg=2, unless=no | U.C_STATUS)
+                    self.text(sp, '♀', 0, y + 8, FEMALE_INK, cond=U.C_FEMALE, rel=True, reg=2,
+                              unless=no | U.C_STATUS)
+                # (the bar's picture is drawn from x 48 of its own: placed so its HP: sits at x + 12)
+                sp.add(U.OP_IMG, x=x + 12 - 48, y=y + 16, a=bar, unless=no_hp)
+                sp.add(U.OP_BAR, x=x + 12 - 48, y=y + 16, a=U.F_HPFRAC, b=fills[0], c=fills[1], d=fills[2],
+                       unless=no_hp)
+                if act:
+                    self.text(sp, '{%d}/{%d}' % (U.F_HP3, U.F_MAXHP3), x + 84, y + 24, align=1, unless=no_hp)
+                else:
+                    self.text(sp, '{%d}/{%d}' % (U.F_HP3, U.F_MAXHP3), x + 104, y + 8, align=1, unless=no_hp)
+                self.text(sp, '{%d}' % (U.F_TEXT0 + 1), x + 20, y + 16, cond=U.P_DESC, unless=off)
+                p.spec(sp)
 
     # ---------------------------------------------------------------------------------------------------- OPTION
     def options(self):

@@ -214,6 +214,20 @@ class Spec:
         return self
 
 
+def spec_variant(pack, spec, name, ground_name, ground):
+    """a copy of SPEC under NAME with its first picture (its ground) GROUND: a screen's other layout drawn the same
+    way (the party's Double / Triple Battle screens: "party2", "party3")"""
+    import copy
+    v = Spec(name, spec.w, spec.h, spec.canvas)
+    v.ops = [copy.copy(o) for o in spec.ops]
+    for o in v.ops:
+        if o.kind == OP_IMG:
+            o.a = pack.image(ground_name, ground)
+            break
+    pack.spec(v)
+    return v
+
+
 class Font:
     """a style's font as the game reads it: a glyph for each code of the game's charset"""
     def __init__(self, cell_h):

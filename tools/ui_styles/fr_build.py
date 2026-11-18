@@ -302,12 +302,15 @@ class FRPack:
             sel[48 + off] = pal[idx]
         sel_tiles = st._tiles(bg, sel, 48)
 
-        def slot(name, w, h, current):
+        def slot(name, w, h, current, rows=None, cols=None):
             d = open(os.path.join(st.g, 'party_menu', name), 'rb').read()
             ts = sel_tiles if current else tiles
-            im = I.new('RGBA', (w * 8, h * 8), (0, 0, 0, 0))
-            for k, t in enumerate(d[:w * h]):
-                im.alpha_composite(ts[t], ((k % w) * 8, (k // w) * 8))
+            rows = rows or list(range(h))
+            cols = cols or list(range(w))
+            im = I.new('RGBA', (len(cols) * 8, len(rows) * 8), (0, 0, 0, 0))
+            for j, r in enumerate(rows):
+                for k, c in enumerate(cols):
+                    im.alpha_composite(ts[d[r * w + c]], (k * 8, j * 8))
             return im
         ground = I.new('RGBA', (240, 160), (0, 0, 0, 255))
         ground.paste(a._tilemap('party_menu/bg.png', 'party_menu/bg.bin', pal, 32, 20), (0, 0))
@@ -325,25 +328,44 @@ class FRPack:
             t = st.elements[base + 8]
             return t.getpixel((2, 3))[:3], t.getpixel((2, 4))[:3]
         tiers = [((90, 213, 131), (115, 255, 172))] + [bar_rows(b) for b in (47, 56)]
-        for i in range(6):
-            sp = U.Spec('party.%d' % i)
-            if i == 0:
-                x, y, rect = 8, 24, (24, 11, 32, 20, 64, 20, 38, 36, 53, 36, 24, 35)
-                icon, status, desc = (16, 40), (50, 52), (12, 34)
-                art = [('main', slot('slot_main.bin', 10, 7, False), slot('slot_main.bin', 10, 7, True))]
-            else:
-                x, y, rect = 96, 8 + (i - 1) * 24, (22, 3, 32, 12, 64, 12, 102, 12, 117, 12, 88, 10)
-                icon, status, desc = (104, 18 + 24 * (i - 1)), (136, 27 + 24 * (i - 1)), (77, 4)
-                art = [('wide', slot('slot_wide.bin', 18, 3, False), slot('slot_wide.bin', 18, 3, True))]
-                self.img(sp, 'fr.slot.empty', slot('slot_wide_empty.bin', 18, 3, False), x, y, cond=U.P_EMPTY)
-            for name, plain, chosen in art:
-                self.img(sp, 'fr.slot.%s' % name, plain, x, y, unless=U.P_EMPTY | U.C_SEL0 | U.P_SWITCH)
-                self.img(sp, 'fr.slot.%s.sel' % name, chosen, x, y, cond=U.C_SEL0, unless=U.P_EMPTY)
-                self.img(sp, 'fr.slot.%s.sel' % name, chosen, x, y, cond=U.P_SWITCH, unless=U.P_EMPTY | U.C_SEL0)
+        fills = []
+        for t, (deep, lite) in zip('gyr', tiers):
+            im = I.new('RGBA', (48, 3), (0, 0, 0, 0))
+            for k, c in enumerate((deep, lite, lite)):
+                im.paste(c + (255,), (0, k, 48, k + 1))
+            fills.append(p.image('fr.partybar.%s' % t, im))
+        # each kind of slot: its art (plain, chosen), the words' places from its corner (party_menu.h's
+        # sPartyBoxInfoRects: name, Lv, gender, HP, max HP, the bar), the icon's and the status's middles, a line
+        # of words' place
+        NARROW = [c for c in range(18) if c not in (9, 10)]
+        COMPACT_ROWS, COMPACT_COLS = [0, 1, 4, 5, 6], [0, 1, 2, 3, 4, 5, 5, 5, 5, 6, 7, 8, 9]
+        kinds = {
+            'main': (lambda cur: slot('slot_main.bin', 10, 7, cur), None,
+                     (24, 11, 32, 20, 64, 20, 38, 36, 53, 36, 24, 35), (8, 16), (42, 28), (12, 34)),
+            'wide': (lambda cur: slot('slot_wide.bin', 18, 3, cur), lambda: slot('slot_wide_empty.bin', 18, 3, False),
+                     (22, 3, 32, 12, 64, 12, 102, 12, 117, 12, 88, 10), (8, 10), (40, 19), (77, 4)),
+            # (the Triple Battle's: the main slot three rows shorter and three columns wider, the name and Lv on one
+            # row; the wide slot two columns narrower)
+            'compact': (lambda cur: slot('slot_main.bin', 10, 7, cur, COMPACT_ROWS, COMPACT_COLS), None,
+                        (24, 2, 68, 2, 88, 2, 62, 24, 77, 24, 24, 19), (8, 10), (78, 6), (24, 14)),
+            'narrow': (lambda cur: slot('slot_wide.bin', 18, 3, cur, None, NARROW),
+                       lambda: slot('slot_wide_empty.bin', 18, 3, False, None, NARROW),
+                       (22, 3, 32, 12, 64, 12, 86, 12, 101, 12, 72, 10), (8, 10), (40, 19), (61, 4)),
+        }
+
+        def slot_spec(name, kind, x, y):
+            art, empty, rect, icon, status, desc = kinds[kind]
+            sp = U.Spec(name)
+            if empty:
+                self.img(sp, 'fr.slot.%s.empty' % kind, empty(), x, y, cond=U.P_EMPTY)
+            plain, chosen = art(False), art(True)
+            self.img(sp, 'fr.slot.%s' % kind, plain, x, y, unless=U.P_EMPTY | U.C_SEL0 | U.P_SWITCH)
+            self.img(sp, 'fr.slot.%s.sel' % kind, chosen, x, y, cond=U.C_SEL0, unless=U.P_EMPTY)
+            self.img(sp, 'fr.slot.%s.sel' % kind, chosen, x, y, cond=U.P_SWITCH, unless=U.P_EMPTY | U.C_SEL0)
             nx, ny, lx, ly, gx, gy, hx, hy, mx, my, bx, by = rect
             off = U.P_EMPTY
-            sp.add(U.OP_ICON, x=icon[0], y=icon[1], a=0, unless=off)
-            sp.add(U.OP_ICON, x=status[0], y=status[1], a=2, unless=off)
+            sp.add(U.OP_ICON, x=x + icon[0], y=y + icon[1], a=0, unless=off)
+            sp.add(U.OP_ICON, x=x + status[0], y=y + status[1], a=2, unless=off)
             self.text(sp, '{%d}' % U.F_NAME, x + nx, y + ny, ink, 's', unless=off)
             no = U.P_EMPTY | U.P_EGG
             # (Emerald's and FireRed's party: a status in the level's place)
@@ -353,15 +375,28 @@ class FRPack:
             no_hp = no | U.P_DESC
             self.text(sp, '{%d}/' % U.F_HP, x + hx + 20, y + hy, ink, 's', align=1, unless=no_hp)
             self.text(sp, '{%d}' % U.F_MAXHP, x + mx + 20, y + my, ink, 's', align=1, unless=no_hp)
-            fills = []
-            for t, (deep, lite) in zip('gyr', tiers):
-                im = I.new('RGBA', (48, 3), (0, 0, 0, 0))
-                for k, c in enumerate((deep, lite, lite)):
-                    im.paste(c + (255,), (0, k, 48, k + 1))
-                fills.append(p.image('fr.partybar.%s' % t, im))
             sp.add(U.OP_BAR, x=x + bx, y=y + by, a=U.F_HPFRAC, b=fills[0], c=fills[1], d=fills[2], unless=no_hp)
             self.text(sp, '{%d}' % (U.F_TEXT0 + 1), x + desc[0], y + desc[1], ink, 's', cond=U.P_DESC, unless=off)
             p.spec(sp)
+
+        for i in range(6):
+            if i == 0:
+                slot_spec('party.0', 'main', 8, 24)
+            else:
+                slot_spec('party.%d' % i, 'wide', 96, 8 + (i - 1) * 24)
+        # the Double / Triple Battle party (as approved, 2026-11-18): those in battle in main slots down the left, the
+        # rest in the wide slots on the right; the Double Battle's as FireRed's own (party_menu.h
+        # sDoublePartyMenuWindowTemplate: the main slots at tiles (1, 1) and (1, 8), the wide at (12, 1 + 4k))
+        for i in range(6):
+            if i < 2:
+                slot_spec('party2.%d' % i, 'main', 8, 8 + 56 * i)
+            else:
+                slot_spec('party2.%d' % i, 'wide', 96, 8 + 32 * (i - 2))
+        for i in range(6):
+            if i < 3:
+                slot_spec('party3.%d' % i, 'compact', 4, 4 + 40 * i)
+            else:
+                slot_spec('party3.%d' % i, 'narrow', 112, 8 + 32 * (i - 3))
 
     # ---------------------------------------------------------------------------------------------------- OPTION
     def options(self):

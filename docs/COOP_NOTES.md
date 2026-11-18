@@ -8320,3 +8320,18 @@ the ball and EFFECT in the left column, the words and buttons on the right; both
 box over the foot. FIRERED: tags BALL / - / COLOR / DECOR / EFFECT / -, the memo BALL MEMO with the buttons as FireRed's
 keypad icons. PLATINUM / BLACK keep Kai's lines (OP_LIST "sum.4.row"). A button written as letters ({A}OK) gets a space
 before a word that follows it (mp_uistyle.c KeyGap). Scenario ui_style_ballpage.
+
+### The Double / Triple Battle party in every UI STYLE (2026-11-18)
+Approved mock-up: docs/ui_styles/mockups/party_double_triple.png. A style's pack may hold the party's Double / Triple
+Battle screens beside its single one: "party2" / "party3" (the ground: message, CANCEL), "party2.N" / "party3.N" (the
+slots), "party2.over" / "party3.over" (drawn over the slots: PLATINUM's / BLACK's rule); any missing falls back to the
+single screen's "party" / "party.N" (mp_uistyle.c PartySpec). RED / CRYSTAL: those in battle in a framed box on the left
+drawn as the status screens draw one, the rest on the right (gb_build.py party); FIRERED: FRLG's own Double layout
+(party_menu.h sDoublePartyMenuWindowTemplate), the Triple's three main slots three rows shorter and three columns wider,
+its wide slots two columns narrower (fr_build.py slot_spec kinds main / wide / compact / narrow); PLATINUM / BLACK: the
+Double's two along the top under a rule, the Triple's three down the left column (pt_build.py / bw_build.py party).
+Moving: a style with its own layout moves as it's laid out (MP_UiStyle_NavMove with PartyColumns: across to the
+nearest row of the other column, up / down within a column or to CANCEL); FIRERED's (no NavPlace) takes KAI's own
+Double / Triple moves (party_menu.c UpdateCurrentPartySelection, MP_UiStyle_PartyOwnLayout). A solo Triple Battle
+(UNOVA's) now opens PARTY_LAYOUT_TRIPLE too, not the Double's (GetPartyLayoutFromBattleType), its slots never in the
+co-op partner's colour. Scenario ui_style_party_layouts.

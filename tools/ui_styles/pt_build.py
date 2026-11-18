@@ -549,9 +549,16 @@ class PTPack:
             for yy, c in enumerate((deep, lite, lite, deep)):
                 im.paste(c + (255,), (0, yy, 48, yy + 1))
             fills.append(p.image('pt.partybar.' + t, im))
-        for slot in range(6):
-            sp = U.Spec('party.%d' % slot)
-            px0, py0 = (slot % 2) * 120, 1 + (slot // 2) * 42
+        # (the Triple Battle's party, as approved 2026-11-18: those in battle down the left, the rest down the right)
+        for slot in range(18):
+            # (party.N; party2.N the same, the Double Battle's; party3.N the Triple Battle's)
+            layout, pos = slot // 6, slot % 6
+            sp = U.Spec(('party.%d', 'party2.%d', 'party3.%d')[layout] % pos)
+            if layout < 2:
+                px0, py0 = (pos % 2) * 120, 1 + (pos // 2) * 42
+            else:
+                px0, py0 = (pos // 3) * 120, 1 + (pos % 3) * 42
+            slot = pos
             kind = 0 if slot == 0 else 1
             self.img(sp, 'pt.panel.empty', panel(2, 1), px0, py0, cond=U.P_EMPTY)
             self.img(sp, 'pt.panel.%d' % kind, panel(kind, 3), px0, py0, unless=U.P_EMPTY | U.C_SEL0 | U.P_SWITCH)
@@ -574,6 +581,15 @@ class PTPack:
             self.text(sp, '{%d}/{%d}' % (U.F_HP3, U.F_MAXHP), px0 + X(60), ly, self.fdig, white, dark, unless=no_hp)
             self.text(sp, '{%d}' % (U.F_TEXT0 + 1), px0 + X(60), ly - 2, self.fn, white, dark, cond=U.P_DESC,
                       unless=off)
+            p.spec(sp)
+
+        # (as approved, 2026-11-18: a rule over the panels' edges, under the two in battle along the top or between
+        # the column in battle and the rest: the panels' white on their dark edge; "<layout>.over", drawn last)
+        for n, size, at in (('party2', (232, 3), (4, 41)), ('party3', (3, 122), (119, 4))):
+            r = Image.new('RGBA', size, white + (255,))
+            r.paste(dark + (255,), (0, 2, 232, 3) if n == 'party2' else (2, 0, 3, 122))
+            sp = U.Spec(n + '.over')
+            self.img(sp, 'pt.%s.rule' % n, r, *at)
             p.spec(sp)
 
     # ---------------------------------------------------------------------------------------------------- OPTIONS

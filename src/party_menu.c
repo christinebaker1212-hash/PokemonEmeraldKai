@@ -1323,7 +1323,8 @@ void MP_TripleFixPartyOrder(void)
 
 static bool8 PartyBoxPal_ParnterOrDisqualifiedInArena(u8 slot)
 {
-    if ((gPartyMenu.layout == PARTY_LAYOUT_MULTI || gPartyMenu.layout == PARTY_LAYOUT_TRIPLE) && MpIsAllySlot(slot))
+    if ((gPartyMenu.layout == PARTY_LAYOUT_MULTI || (gPartyMenu.layout == PARTY_LAYOUT_TRIPLE && gMpCoopBattle))
+     && MpIsAllySlot(slot))   // (a solo Triple Battle's party is all the player's own)
         return TRUE;
 
     if (slot < MULTI_PARTY_SIZE && (gBattleTypeFlags & BATTLE_TYPE_ARENA) && gMain.inBattle && (gBattleStruct->arenaLostPlayerMons >> GetPartyIdFromBattleSlot(slot) & 1))
@@ -1704,8 +1705,8 @@ static void UpdateCurrentPartySelection(s8 *slotPtr, s8 movementDir)
                                       : movementDir == MENU_DIR_DOWN ? DPAD_DOWN : movementDir == MENU_DIR_LEFT
                                       ? DPAD_LEFT : DPAD_RIGHT, usable, TRUE);
     }
-    else if (layout == PARTY_LAYOUT_SINGLE || styled)
-        UpdatePartySelectionSingleLayout(slotPtr, movementDir);
+    else if (layout == PARTY_LAYOUT_SINGLE || (styled && !MP_UiStyle_PartyOwnLayout()))
+        UpdatePartySelectionSingleLayout(slotPtr, movementDir);   // (a style's own Double / Triple party: KAI's moves)
     else if (layout == PARTY_LAYOUT_TRIPLE)
         UpdatePartySelectionTripleLayout(slotPtr, movementDir);
     else
@@ -6836,7 +6837,10 @@ void ChooseMonForWirelessMinigame(void)
 
 static u8 GetPartyLayoutFromBattleType(void)
 {
-    if (IS_TRIPLE_BATTLE() && gMpCoopBattle)   // Moemon Co-op: before the double check (a triple isn't one)
+    // Moemon Co-op: before the double check (a triple isn't one); a solo Triple Battle (UNOVA's) too, its three in
+    // battle down the left as a co-op one's (the user, 2026-11-18: the Double party's layout put the third among the
+    // rest)
+    if (IS_TRIPLE_BATTLE())
         return PARTY_LAYOUT_TRIPLE;
     if (IsDoubleBattle() == FALSE)
         return PARTY_LAYOUT_SINGLE;

@@ -64,6 +64,7 @@ struct MpPartyState
 };
 bool8 MP_PartyMenu_GetState(struct MpPartyState *st);
 bool8 MP_UiStyle_PartyStyled(void);   // (a style draws the party screen now, whatever its layout: it moves as the style's)
+bool8 MP_UiStyle_PartyOwnLayout(void);   // (... and has its own Double / Triple Battle party: it moves as KAI's layout)
 
 // OPTIONS (option_menu.c): its tabs or a page's title, its rows, the line under them
 struct MpOptionsView

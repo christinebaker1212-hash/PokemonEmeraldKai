@@ -1,0 +1,19 @@
+pressuntil A field 5000
+mp textspeed 2
+mp uistyle crystal
+wait 4
+mp triple 288:3 286:3 290:3
+pressuntil A action 4000
+wait 20
+press DOWN 1
+wait 8
+press A 1
+wait 90
+shot crystal_triple_0
+press RIGHT 1
+wait 12
+shot crystal_triple_r
+press DOWN 1
+wait 12
+shot crystal_triple_d
+quit

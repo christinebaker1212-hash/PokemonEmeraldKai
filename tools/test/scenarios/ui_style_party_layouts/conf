@@ -1,0 +1,7 @@
+# UI STYLE: a solo Triple Battle's party is the Triple layout (PARTY_LAYOUT_TRIPLE, as KAI's co-op one), and CRYSTAL
+# draws its own Double / Triple party (as approved 2026-11-18): the three in battle in the framed box on the left,
+# the rest on the right; RIGHT goes across to the first of the rest, DOWN stays in that column. Look at the shots.
+MODE=1
+TMO=180
+ENV_A="MOEMON_DEBUG_PARTY=280:30,283:22,277:20,25:12"
+UNEXPECT_A=("[crash]" "TIMEOUT")

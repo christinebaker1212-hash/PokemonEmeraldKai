@@ -614,9 +614,15 @@ class BWPack:
         bar_id = p.image('bw.partybar', empty_bar)
         plates = {k: p.image('bw.plate.' + k, st.plate(k, pw, ph)) for k in ('lead', 'other', 'empty')}
         mi, fi = st.MALE_INK, st.FEMALE_INK
-        for i in range(6):
-            sp = U.Spec('party.%d' % i)
-            x, y = (i % 2) * pw, (i // 2) * (ph + 1)
+        # (the Triple Battle's party, as approved 2026-11-18: those in battle down the left, the rest down the right)
+        for k in range(18):
+            # (party.N; party2.N the same, the Double Battle's; party3.N the Triple Battle's)
+            layout, i = k // 6, k % 6
+            sp = U.Spec(('party.%d', 'party2.%d', 'party3.%d')[layout] % i)
+            if layout < 2:
+                x, y = (i % 2) * pw, (i // 2) * (ph + 1)
+            else:
+                x, y = (i // 3) * pw, (i % 3) * (ph + 1)
             off, no = U.P_EMPTY, U.P_EMPTY | U.P_EGG
             no_hp = no | U.P_DESC
             sp.add(U.OP_IMG, x=x, y=y, a=plates['empty'], cond=U.P_EMPTY)
@@ -635,6 +641,13 @@ class BWPack:
             self.text(sp, '/', x + 77, y + 26, self.fs, pi, ps, unless=no_hp)
             self.text(sp, '{%d}' % U.F_MAXHP, x + 84, y + 26, self.fs, pi, ps, unless=no_hp)
             self.text(sp, '{%d}' % (U.F_TEXT0 + 1), x + 42, y + 24, self.fm, pi, ps, cond=U.P_DESC, unless=off)
+            p.spec(sp)
+
+        # (as approved, 2026-11-18: a rule in the plates' light cyan over their edges, under the two in battle along
+        # the top or between the column in battle and the rest; "<layout>.over", drawn last)
+        for n, size, at in (('party2', (232, 2), (4, 43)), ('party3', (2, 128), (119, 4))):
+            sp = U.Spec(n + '.over')
+            self.img(sp, 'bw.%s.rule' % n, Image.new('RGBA', size, (120, 232, 248, 255)), *at)
             p.spec(sp)
 
     # ---------------------------------------------------------------------------------------------------- OPTIONS
