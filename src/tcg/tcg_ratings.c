@@ -195,73 +195,73 @@ const int16_t gTcgSpecialRating[] = {
     1658, /* GRETA */
     1325, /* NOLAND */
     1461, /* LUCY */
-    1556, /* FALKNER */
-    1574, /* BUGSY */
-    1478, /* WHITNEY */
-    1542, /* MORTY */
-    1530, /* CHUCK */
-    1608, /* JASMINE */
-    1623, /* PRYCE */
-    1569, /* CLAIR */
-    1452, /* WILL */
-    1565, /* KOGA_J */
-    1505, /* BRUNO_J */
-    1560, /* KAREN */
-    1440, /* LANCE_J */
-    1606, /* SILVER */
-    1503, /* RED */
-    1456, /* ELM */
-    1453, /* BROCK */
-    1519, /* MISTY */
+    1541, /* FALKNER */
+    1523, /* BUGSY */
+    1398, /* WHITNEY */
+    1410, /* MORTY */
+    1556, /* CHUCK */
+    1512, /* JASMINE */
+    1583, /* PRYCE */
+    1532, /* CLAIR */
+    1530, /* WILL */
+    1562, /* KOGA_J */
+    1463, /* BRUNO_J */
+    1481, /* KAREN */
+    1529, /* LANCE_J */
+    1589, /* SILVER */
+    1513, /* RED */
+    1524, /* ELM */
+    1358, /* BROCK */
+    1402, /* MISTY */
     1360, /* SURGE */
-    1480, /* ERIKA */
-    1514, /* KOGA_K */
-    1462, /* SABRINA */
-    1550, /* BLAINE */
-    1294, /* GIOVANNI */
-    1482, /* LORELEI */
-    1374, /* BRUNO_K */
-    1561, /* AGATHA */
-    1541, /* LANCE_K */
-    1488, /* BLUE */
-    1402, /* OAK */
-    1563, /* BILL */
-    1549, /* ROARK */
-    1640, /* GARDENIA */
-    1563, /* MAYLENE */
-    1596, /* WAKE */
-    1275, /* FANTINA */
-    1680, /* BYRON */
-    1549, /* CANDICE */
-    1521, /* VOLKNER */
-    1484, /* AARON */
+    1540, /* ERIKA */
+    1638, /* KOGA_K */
+    1448, /* SABRINA */
+    1564, /* BLAINE */
+    1278, /* GIOVANNI */
+    1413, /* LORELEI */
+    1414, /* BRUNO_K */
+    1477, /* AGATHA */
+    1576, /* LANCE_K */
+    1384, /* BLUE */
+    1352, /* OAK */
+    1547, /* BILL */
+    1435, /* ROARK */
+    1493, /* GARDENIA */
+    1447, /* MAYLENE */
+    1586, /* WAKE */
+    1353, /* FANTINA */
+    1657, /* BYRON */
+    1538, /* CANDICE */
+    1433, /* VOLKNER */
+    1515, /* AARON */
     1510, /* BERTHA */
-    1653, /* FLINT */
-    1387, /* LUCIAN */
-    1504, /* CYNTHIA */
-    1594, /* BARRY */
+    1558, /* FLINT */
+    1330, /* LUCIAN */
+    1423, /* CYNTHIA */
+    1503, /* BARRY */
     1459, /* ROWAN */
-    1636, /* JASMINE_S */
+    1571, /* JASMINE_S */
     1510, /* CILAN */
-    1435, /* CHILI */
-    1673, /* CRESS */
-    1468, /* LENORA */
-    1640, /* BURGH */
-    1541, /* ELESA */
-    1684, /* CLAY */
-    1488, /* SKYLA */
-    1415, /* BRYCEN */
-    1490, /* DRAYDEN */
-    1300, /* SHAUNTAL */
-    1433, /* GRIMSLEY */
-    1403, /* CAITLIN */
-    1577, /* MARSHAL */
-    1487, /* ALDER */
-    1407, /* N */
-    1523, /* CHEREN */
-    1591, /* BIANCA */
-    1600, /* JUNIPER */
-    1429, /* IRIS */
+    1366, /* CHILI */
+    1563, /* CRESS */
+    1558, /* LENORA */
+    1562, /* BURGH */
+    1396, /* ELESA */
+    1612, /* CLAY */
+    1534, /* SKYLA */
+    1596, /* BRYCEN */
+    1445, /* DRAYDEN */
+    1349, /* SHAUNTAL */
+    1408, /* GRIMSLEY */
+    1342, /* CAITLIN */
+    1345, /* MARSHAL */
+    1450, /* ALDER */
+    1515, /* N */
+    1455, /* CHEREN */
+    1547, /* BIANCA */
+    1543, /* JUNIPER */
+    1481, /* IRIS */
 };
 const unsigned gTcgSpecialRatingCount = 91;
 /* Their variants (gTcgSpecialVariants), each against all of the above 10 times */
@@ -591,26 +591,26 @@ const int16_t gTcgVariantRating[] = {
 };
 /* The regional sets' theme decks (gTcgThemeDecks), as the regional special trainers' */
 const int16_t gTcgThemeRating[] = {
-    1500,
-    1500,
-    1500,
-    1500,
-    1500,
-    1500,
-    1500,
-    1500,
-    1500,
-    1500,
-    1500,
-    1500,
-    1500,
-    1500,
-    1500,
-    1500,
-    1500,
-    1500,
-    1500,
-    1500,
+    1366, /* Brock (Gym Heroes) */
+    1493, /* Misty (Gym Heroes) */
+    1489, /* Lt. Surge (Gym Heroes) */
+    1360, /* Erika (Gym Heroes) */
+    1427, /* Sabrina (Gym Challenge) */
+    1563, /* Koga (Gym Challenge) */
+    1516, /* Blaine (Gym Challenge) */
+    1407, /* Giovanni (Gym Challenge) */
+    1569, /* Hotfoot (Neo Genesis) */
+    1649, /* Cold Fusion (Neo Genesis) */
+    1593, /* BrainWave (Neo Discovery) */
+    1543, /* Wallop (Neo Discovery) */
+    1556, /* Light (Neo Destiny) */
+    1446, /* Dark (Neo Destiny) */
+    1249, /* Echo (Expedition) */
+    1514, /* Electric Garden (Expedition) */
+    1463, /* Rock Garden (Aquapolis) */
+    1533, /* Abyss (Aquapolis) */
+    1460, /* Eeveelution (Skyridge) */
+    1368, /* Mind Machine (Skyridge) */
 };
 /* The decks a player's deck is measured against in the game */
 const uint8_t gTcgRatingReferences[] = {131, 54, 38, 99, 98, 117, 130, 29, 49, 44, 144, 118};
