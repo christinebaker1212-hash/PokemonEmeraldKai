@@ -1264,6 +1264,17 @@ unsigned TcgFlow_TrainerChoices(const struct TcgDuel *g, unsigned me, unsigned c
         MenuAdd(m, "RE-FLIP ALL", 1, 1, NULL);
         return m->count;
     }
+    if (g->phase == TCG_CHOICE && g->choiceKind == TCG_CHOICE_PSY_COPY)
+    {
+        const struct TcgCard *d = Field(g, g->choicePlayer ^ 1, 0);
+        unsigned k;
+        memset(m, 0, sizeof(*m));
+        *reason = NULL;
+        for (k = 0; d && k < TCG_ATTACKS; k++)
+            if (d->attacks[k].name[0] && d->attacks[k].category != TCG_POKEMON_POWER)
+                MenuAdd(m, d->attacks[k].name, k, TcgDuel_EffectSupported(d->attacks[k].effect), "It can't be copied.");
+        return m->count;
+    }
     if (g->phase == TCG_CHOICE && g->choiceKind == TCG_CHOICE_CHARITY)
     {
         static const char *const less[] = {"FULL DAMAGE", "10 LESS", "20 LESS", "30 LESS", "40 LESS", "50 LESS", "60 LESS",
@@ -1276,12 +1287,13 @@ unsigned TcgFlow_TrainerChoices(const struct TcgDuel *g, unsigned me, unsigned c
         return m->count;
     }
     if (g->phase == TCG_CHOICE && (g->choiceKind == TCG_CHOICE_RETURN_MON || g->choiceKind == TCG_CHOICE_FLEE ||
-                                   g->choiceKind == TCG_CHOICE_NINJA))
+                                   g->choiceKind == TCG_CHOICE_NINJA || g->choiceKind == TCG_CHOICE_NARROW))
     {
         unsigned s2;
         memset(m, 0, sizeof(*m));
         *reason = NULL;
-        MenuAdd(m, g->choiceKind == TCG_CHOICE_RETURN_MON ? "DONE" : "STAY", 7, 1, NULL);
+        if (g->choiceKind != TCG_CHOICE_NARROW)   /* (Narrow Gym: one must go) */
+            MenuAdd(m, g->choiceKind == TCG_CHOICE_RETURN_MON ? "DONE" : "STAY", 7, 1, NULL);
         for (s2 = g->choiceKind != TCG_CHOICE_RETURN_MON; s2 < TCG_FIELD_SIZE; s2++)
             if (Field(g, g->choicePlayer, s2))
                 MenuAdd(m, Field(g, g->choicePlayer, s2)->name, s2, 1, NULL);

@@ -746,6 +746,7 @@
 {"gym2-88:a0", FX_SCRIPT,0,2,0,"c h.bar:2"},
 {"gym2-89:a0", FX_SCRIPT,0,2,0,"c t.lock"},
 {"gym2-89:a1", FX_AMNESIA,0,2,0,NULL},
+{"gym2-90:a0", FX_SCRIPT,0,2,0,"eq1.draw:1 eq2.set:20"},
 {"gym2-91:a0", FX_SCRIPT,0,2,0,"nort"},
 {"gym2-91:a1", FX_WEAKEN,3,2,0,NULL},
 {"gym2-92:a0", FX_SCRIPT,0,2,0,"c h.selfhand"},

@@ -425,6 +425,10 @@ const struct TcgStep *TcgFlow_ChoiceSteps(const struct TcgDuel *g, int *count)
         STEPS({TCG_ST_CHOICE, 0, 0, 0, 0, "Sabrina's ESP: keep these coins, or flip them all again?"});
     case TCG_CHOICE_CHARITY:
         STEPS({TCG_ST_CHOICE, 0, 0, 0, 0, "Charity: reduce the damage you just did?"});
+    case TCG_CHOICE_NARROW:
+        STEPS({TCG_ST_CHOICE, 0, 0, 0, 0, "Narrow Gym: which Benched Pokemon goes back to your hand?"});
+    case TCG_CHOICE_PSY_COPY:
+        STEPS({TCG_ST_CHOICE, 0, 0, 0, 0, "ESP, 3 heads: copy which of the Defending Pokemon's attacks?"});
     case TCG_CHOICE_QUIZ1:
         STEPS({TCG_ST_CHOICE, 0, 0, 0, 0, "Blaine's Quiz #1: how long is the Pokemon named?"});
     case TCG_CHOICE_QUIZ3:

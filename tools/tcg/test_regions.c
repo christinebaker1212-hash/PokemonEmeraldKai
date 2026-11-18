@@ -1760,7 +1760,65 @@ static int HeldAttacks(void)
         if (g.players[1].field[0].damage != dealt - 10 || g.players[0].handSize != base + 1 || g.current != 1)
             return printf("FAIL Charity: %u of %u, hand %u\n", g.players[1].field[0].damage, dealt, g.players[0].handSize), 1;
     }
-    printf("PASS held attacks: Koga's Ninja Trick, Vermilion City Gym (both coins), Sabrina's ESP (KEEP, RE-FLIP), Charity\n");
+    /* Narrow Gym: both Benches of 5 give one back (theirs first), then no fifth */
+    Stage(&g, TCG_CARD_MACHOP, 0, 1);
+    for (c = 0; c < 2; c++)
+    {
+        unsigned s;
+        for (s = 3; s < TCG_FIELD_SIZE; s++)
+        {
+            struct TcgPlayer *q = &g.players[c];
+            uint8_t card = q->deck[--q->deckSize];
+            q->cards[card] = TCG_CARD_DIGLETT;
+            q->field[s].stack[q->field[s].stackSize++] = card;
+        }
+    }
+    if (PlayHeld(&g, TCG_CARD_GYM1_124) != TCG_OK || g.choiceKind != TCG_CHOICE_NARROW || g.choicePlayer != 1)
+        return printf("FAIL Narrow Gym: not asked (%s)\n", g.error), 1;
+    Choose(&g, 3, -1);
+    if (g.choiceKind != TCG_CHOICE_NARROW || g.choicePlayer != 0 || g.players[1].field[3].stackSize)
+        return printf("FAIL Narrow Gym: their Bench or our turn to choose\n"), 1;
+    Choose(&g, 4, -1);
+    if (g.phase != TCG_TURN || g.players[0].field[4].stackSize)
+        return printf("FAIL Narrow Gym: our Bench\n"), 1;
+    c = Relabel(&g, 0, TCG_CARD_DIGLETT);
+    g.players[0].hand[g.players[0].handSize++] = (uint8_t)c;
+    memset(&a, 0, sizeof(a));
+    a.type = TCG_PLAY_BASIC;
+    a.hand = (uint8_t)(g.players[0].handSize - 1);
+    a.slot = 4;
+    if (TcgDuel_Apply(&g, &a) == TCG_OK)
+        return printf("FAIL Narrow Gym: a fifth Benched Pokemon\n"), 1;
+    /* Misty's Psyduck's ESP: 1 heads draws, 2 heads 20 damage, 3 heads copies the Defending Pokemon's attack */
+    for (seed = 1, seen = 0; seed < 200 && seen != 7; seed++)
+    {
+        unsigned hand, dmg;
+        Stage(&g, TCG_CARD_GYM2_90, 0, seed);
+        Prizes3(&g);
+        for (c = 0; c < 2; c++)
+            g.players[c].field[0].poison = g.players[c].field[0].burned = 0, g.players[c].field[0].condition = TCG_HEALTHY;
+        hand = g.players[0].handSize, dmg = g.players[1].field[0].damage;
+        memset(&a, 0, sizeof(a));
+        a.type = TCG_ATTACK;
+        if (TcgDuel_Apply(&g, &a) != TCG_OK)
+            return printf("FAIL Misty's Psyduck: %s\n", g.error), 1;
+        if (g.phase == TCG_CHOICE)
+        {
+            if (g.choiceKind != TCG_CHOICE_PSY_COPY)
+                return printf("FAIL Misty's Psyduck: the wrong question\n"), 1;
+            Choose(&g, 0, -1);
+            if (g.players[1].field[0].damage <= dmg)
+                return printf("FAIL Misty's Psyduck: the copied attack did nothing\n"), 1;
+            seen |= 4;
+        }
+        else if (g.players[1].field[0].damage == dmg + 20 || (g.players[1].field[0].damage > dmg && g.psyHeads == 2))
+            seen |= 2;
+        else if (g.players[0].handSize == hand + 1 && g.players[1].field[0].damage == dmg)
+            seen |= 1;
+    }
+    if (seen != 7)
+        return printf("FAIL Misty's Psyduck: outcomes %u\n", seen), 1;
+    printf("PASS held attacks: Koga's Ninja Trick, Vermilion City Gym (both coins), Sabrina's ESP (KEEP, RE-FLIP), Charity; Narrow Gym; Misty's Psyduck\n");
     return 0;
 }
 static int Choices(void)

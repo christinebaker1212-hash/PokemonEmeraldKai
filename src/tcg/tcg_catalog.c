@@ -3565,7 +3565,7 @@ const struct TcgCard gTcgCards[TCG_CARD_COUNT + 1] = {
 [565] = {.id=565, .name="Misty's Duel", .kind=TCG_TRAINER, .type=6, .rarity=0, .set=13, .set2=255, .dark=0, .holo=0, .flags=TCG_CF_READY, .origin=13,
 .effect="gym1-123:t",.description="You and your opponent play a game of Rock-Paper-Scissors. The winner shuffles his or her hand into his or her deck and draws a new hand of 5 cards. (If you don't know how to play Rock-Paper-Scissors, flip a coin to decide who's the winner.)"
 },
-[566] = {.id=566, .name="Narrow Gym", .kind=TCG_TRAINER, .type=6, .rarity=0, .set=13, .set2=255, .dark=0, .holo=0, .flags=TCG_CF_STADIUM, .origin=13,
+[566] = {.id=566, .name="Narrow Gym", .kind=TCG_TRAINER, .type=6, .rarity=0, .set=13, .set2=255, .dark=0, .holo=0, .flags=TCG_CF_STADIUM|TCG_CF_READY, .origin=13,
 .effect="gym1-124:t",.description="This card stays in play when you play it. Discard this card if another Stadium card comes into play. No player may have more than 4 Pokemon on his or her Bench. When this card is played, if a player has 5 Pokemon on his or her Bench, that player chooses 1 of them and returns it and all cards attached to it to his or her hand. (If both players have to return a Pokemon, your opponent returns a Pokemon first.)"
 },
 [567] = {.id=567, .name="Sabrina's Gaze", .kind=TCG_TRAINER, .type=6, .rarity=0, .set=13, .set2=255, .dark=0, .holo=0, .flags=TCG_CF_READY, .origin=13,
@@ -4181,7 +4181,7 @@ const struct TcgCard gTcgCards[TCG_CARD_COUNT + 1] = {
 {.name="",.description="",.effect="NONE",.animation="ATK_ANIM_NONE",.cost={0},.damage=0,.category=TCG_DAMAGE_NORMAL},
 }
 },
-[658] = {.id=658, .name="Misty's Psyduck", .kind=TCG_POKEMON, .type=3, .rarity=0, .set=14, .set2=255, .dark=0, .holo=0, .flags=TCG_CF_OWNER, .origin=14,
+[658] = {.id=658, .name="Misty's Psyduck", .kind=TCG_POKEMON, .type=3, .rarity=0, .set=14, .set2=255, .dark=0, .holo=0, .flags=TCG_CF_OWNER|TCG_CF_READY, .origin=14,
 .hp=60, .stage=0, .species=54, .level=18, .retreat=1, .weakness=1, .resistance=255, .evolvesFrom="", .description="", .attacks={
 {.name="ESP",.description="Flip 3 coins. If exactly 1 is heads, draw a card. If exactly 2 are heads, this attack does 20 damage. If all 3 are heads, choose 1 of the Defending Pokemon's attacks. Misty's Psyduck copies that attack except for its Energy costs. (No matter what type the Defending Pokemon is, Misty's Psyduck's type is still Water.)",.effect="gym2-90:a0",.animation="ATK_ANIM_HIT",.cost={0,0,0,0,0,1,0,0,0},.damage=0,.category=TCG_RESIDUAL},
 {.name="",.description="",.effect="NONE",.animation="ATK_ANIM_NONE",.cost={0},.damage=0,.category=TCG_DAMAGE_NORMAL},

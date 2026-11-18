@@ -1059,6 +1059,10 @@ static int RegionTrainer(struct TcgDuel *g, const struct TcgAction *a, unsigned 
     case TCG_CARD_NP_28:      /* Championship Arena (tcg_duel.c EndTurn) */
     case TCG_CARD_GYM2_101:   /* Brock's Protection, Ecogym, Pokemon Tower (tcg_duel.c Undo) */
     case TCG_CARD_GYM1_120:   /* Vermilion City Gym (tcg_duel.c HoldAttack) */
+        break;
+    case TCG_CARD_GYM1_124:   /* Narrow Gym: a Bench of 5 gives one back (theirs first); then no more than 4 (TcgDuel_Apply) */
+        TcgDuel_AskChoice(g, me ^ 1, TCG_CHOICE_NARROW, TCG_CARD_GYM1_124, 0);
+        break;
     case TCG_CARD_NEO1_84:
     case TCG_CARD_BASEP_42:
     case TCG_CARD_GYM1_103:   /* No Removal Gym (tcg_duel.c, TCG_PLAY_TRAINER) */

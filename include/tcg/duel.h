@@ -233,7 +233,7 @@ enum
     TCG_CHOICE_ESP,              /* Sabrina's ESP: the attack's coins kept (0) or all re-flipped (1) */
     TCG_CHOICE_CHARITY,          /* Charity: the attack's damage to the Defending Pokemon reduced by 10 x target */
     TCG_CHOICE_NARROW,           /* Narrow Gym: a Benched Pokemon of 5 back to the hand */
-    TCG_CHOICE_PSY_COPY,         /* Misty's Psyduck's ESP (3 heads): which of the Defending Pokemon's attacks */
+    TCG_CHOICE_PSY_COPY,         /* Misty's Psyduck's ESP (3 heads): which of the Defending Pokemon's attacks (target) */
     TCG_CHOICE_CONTROL_PICK,     /* Sabrina's Psychic Control: a Trainer from their discard pile to use (7: none) */
     TCG_CHOICE_CHAOS_USE         /* Chaos Gym (tails): the other player uses the Trainer instead (1) or not (0) */
 };
@@ -428,6 +428,7 @@ struct TcgAction
 #define TCG_HELD_NINJA 1
 #define TCG_HELD_VERMILION 2
 #define TCG_HELD_ESP 4
+#define TCG_HELD_PSY 8
 struct TcgDuel
 {
     struct TcgPlayer players[2];
@@ -461,6 +462,9 @@ struct TcgDuel
      * ESP looked at (heads as bits); coinCount / coinBits: the coins of the action so far */
     struct TcgAction heldAttack;
     uint8_t heldAsked, heldPending, heldResuming, vermilion, espCoins;
+    /* Misty's Psyduck's ESP: its 3 coins, flipped as it's held (psyHeads; psyFlipped: they were), the Defending
+     * Pokemon's attack it copies on 3 heads (psyCopy: its index + 1) */
+    uint8_t psyFlipped, psyHeads, psyBits, psyCopy;
     uint32_t espBits, coinBits;
     uint16_t coinCount;
     uint16_t choiceCard;

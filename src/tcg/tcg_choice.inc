@@ -213,6 +213,17 @@ static int ChoiceHasAny(const struct TcgDuel *g, unsigned player, unsigned kind)
         return 1;
     case TCG_CHOICE_CHARITY:
         return g->choiceData != 0;
+    case TCG_CHOICE_NARROW:
+        return BenchCount(g, player) >= TCG_FIELD_SIZE - 1;
+    case TCG_CHOICE_PSY_COPY:
+    {
+        const struct TcgCard *d = TcgDuel_Field(g, player ^ 1, 0);
+        for (k = 0; d && k < TCG_ATTACKS; k++)
+            if (d->attacks[k].name[0] && d->attacks[k].category != TCG_POKEMON_POWER &&
+                TcgDuel_EffectSupported(d->attacks[k].effect))
+                return 1;
+        return 0;
+    }
     case TCG_CHOICE_DISCARD2:
         return p->handSize != 0;
     case TCG_CHOICE_TEXTURE_WEAK:
@@ -321,6 +332,7 @@ static int ChoiceBoth(unsigned kind)
     case TCG_CHOICE_DISCARD_POKEMON: case TCG_CHOICE_DISCARD_TO_DECK: case TCG_CHOICE_DISCARD_ANY:
     case TCG_CHOICE_TIME_CAPSULE: case TCG_CHOICE_REDRAW4: case TCG_CHOICE_TOP3_ENERGY: case TCG_CHOICE_EVOLVE:
     case TCG_CHOICE_TOOL:
+    case TCG_CHOICE_NARROW:
         return 1;
     }
     return 0;
@@ -722,6 +734,32 @@ int TcgDuel_Choose(struct TcgDuel *g, const struct TcgAction *a)
         d->damage = (uint16_t)(d->damage > off ? d->damage - off : 0);
         if (off)
             TcgDuel_Log(g, "Charity: %u less damage.", off);
+        break;
+    }
+    case TCG_CHOICE_PSY_COPY:
+    {
+        const struct TcgCard *d = TcgDuel_Field(g, who ^ 1, 0);
+        if (!d || a->target >= TCG_ATTACKS || !d->attacks[a->target].name[0] ||
+            d->attacks[a->target].category == TCG_POKEMON_POWER || !TcgDuel_EffectSupported(d->attacks[a->target].effect))
+            return ChoiceFail(g, "Choose one of the Defending Pokemon's attacks.");
+        g->psyCopy = (uint8_t)(a->target + 1);
+        break;
+    }
+    case TCG_CHOICE_NARROW:
+    {
+        /* Narrow Gym: one of 5 Benched Pokemon and all its cards back to the hand */
+        struct TcgFieldCard *f = a->target >= 1 && a->target < TCG_FIELD_SIZE ? &p->field[a->target] : NULL;
+        if (!f || !f->stackSize)
+            return ChoiceFail(g, "Choose one of your Benched Pokemon.");
+        for (k = 0; k < f->stackSize; k++)
+            p->hand[p->handSize++] = f->stack[k];
+        for (k = 0; k < f->attachedSize; k++)
+        {
+            p->attachmentExpires[f->attached[k]] = 0;
+            p->hand[p->handSize++] = f->attached[k];
+        }
+        memset(f, 0, sizeof(*f));
+        TcgDuel_Event(g, TCG_EV_TO_HAND, who, a->target, 0, 0, 0);
         break;
     }
     case TCG_CHOICE_FLEE:
@@ -1308,6 +1346,31 @@ void TcgDuel_AiChoose(const struct TcgDuel *g, struct TcgAction *a)
     case TCG_CHOICE_CHARITY:
         a->target = 0;
         break;
+    case TCG_CHOICE_PSY_COPY:
+    {
+        /* (the one doing the most damage) */
+        const struct TcgCard *d = TcgDuel_Field(g, who ^ 1, 0);
+        unsigned best = 0;
+        for (k = 0; d && k < TCG_ATTACKS; k++)
+            if (d->attacks[k].name[0] && d->attacks[k].category != TCG_POKEMON_POWER &&
+                TcgDuel_EffectSupported(d->attacks[k].effect) &&
+                (d->attacks[best].category == TCG_POKEMON_POWER || !d->attacks[best].name[0] ||
+                 d->attacks[k].damage > d->attacks[best].damage))
+                best = k;
+        a->target = (uint8_t)best;
+        break;
+    }
+    case TCG_CHOICE_NARROW:
+    {
+        /* (the one with the fewest cards on it) */
+        unsigned s, best = 1;
+        for (s = 1; s < TCG_FIELD_SIZE; s++)
+            if (p->field[s].stackSize && p->field[s].stackSize + p->field[s].attachedSize <
+                                            p->field[best].stackSize + p->field[best].attachedSize)
+                best = s;
+        a->target = (uint8_t)best;
+        break;
+    }
     case TCG_CHOICE_FLEE:
     {
         /* (to the healthiest Benched one) */

@@ -910,7 +910,7 @@ static void EndTurn(struct TcgDuel *g)
     unsigned who, s;
     struct TcgPlayer *p = &g->players[g->current];
     g->attackTurn = 0;
-    g->heldAsked = g->heldPending = g->vermilion = 0;
+    g->heldAsked = g->heldPending = g->vermilion = g->psyFlipped = g->psyCopy = 0;
     for (s = 0; s < TCG_FIELD_SIZE && g->phase != TCG_FINISHED && g->phase != TCG_SETUP; s++)
     {
         /* Charity back to its player's hand, Sabrina's ESP discarded, as their turn ends */
@@ -1105,6 +1105,28 @@ static int HoldAttack(struct TcgDuel *g, const struct TcgAction *a)
     const struct TcgCard *attacker = TcgDuel_Field(g, me, 0);
     for (s = 1; s < TCG_FIELD_SIZE; s++)
         bench += g->players[foe].field[s].stackSize != 0;
+    if (!(g->heldAsked & TCG_HELD_PSY))
+    {
+        /* Misty's Psyduck's ESP: its 3 coins now (the script reads them: tcg_script.inc eq1 / eq2); 3 heads, one of the
+         * Defending Pokemon's attacks copied (TCG_CHOICE_PSY_COPY) */
+        const struct TcgAttack *at = TcgDuel_AttackOf(g, me, a->attack);
+        g->heldAsked |= TCG_HELD_PSY;
+        if (at && !strcmp(at->effect, "gym2-90:a0"))
+        {
+            unsigned k;
+            g->psyFlipped = 1, g->psyHeads = g->psyBits = 0;
+            for (k = 0; k < 3; k++)
+                if (TcgDuel_Coin(g, me))
+                    g->psyHeads++, g->psyBits |= (uint8_t)(1u << k);
+            if (g->psyHeads == 3)
+            {
+                g->heldAttack = *a;
+                TcgDuel_AskChoice(g, me, TCG_CHOICE_PSY_COPY, TCG_CARD_GYM2_90, 0);
+                if (g->phase == TCG_CHOICE)
+                    return g->heldPending = 1;
+            }
+        }
+    }
     if (!(g->heldAsked & TCG_HELD_NINJA))
     {
         g->heldAsked |= TCG_HELD_NINJA;
@@ -1315,11 +1337,26 @@ static int Apply(struct TcgDuel *g, const struct TcgAction *a)
             return TCG_UNSUPPORTED;
         }
         if (!g->heldResuming)
-            g->heldAsked = 0, g->vermilion = 0; /* (a new attack: everything asked again) */
+            g->heldAsked = 0, g->vermilion = 0, g->psyFlipped = 0, g->psyCopy = 0; /* (a new attack: everything asked again) */
         g->coinCount = 0, g->coinBits = 0;
         if (HoldAttack(g, a))
             return TCG_OK; /* (it waits for an answer: TCG_CHOICE) */
         g->noWeakRes = g->attackFailed = g->coinResult = g->swift = g->bonus = g->scriptCoins = g->scriptHeads = 0, g->scriptBits = 0, g->forceHeads = 0;
+        if (g->psyFlipped)
+            g->scriptCoins = 3, g->scriptHeads = g->psyHeads, g->scriptBits = g->psyBits; /* (Misty's Psyduck's coins) */
+        if (g->psyCopy)
+        {
+            /* (3 heads: the Defending Pokemon's attack chosen, without its Energy cost; its own type stays Water) */
+            const struct TcgCard *d = TcgDuel_Field(g, g->current ^ 1, 0);
+            if (!d || g->psyCopy > TCG_ATTACKS || !d->attacks[g->psyCopy - 1].name[0])
+                return Error(g, "There's no such attack to copy.");
+            attack = &d->attacks[g->psyCopy - 1];
+            if ((blocked = TcgDuel_EffectBlock(g, g->current, attack)))
+                return Error(g, blocked);
+            if (!TcgDuel_EffectSupported(attack->effect))
+                return Error(g, "That attack can't be copied.");
+            TcgDuel_Log(g, "Misty's Psyduck copies %s.", attack->name);
+        }
         /* A Baby Pokemon as the Defending Pokemon: a coin before anything; tails, the turn ends without an attack */
         if ((target->flags & TCG_CF_BABY) && !TcgDuel_Coin(g, g->current))
         {
@@ -2267,6 +2304,21 @@ int TcgDuel_Apply(struct TcgDuel *g, const struct TcgAction *action)
                         }
                 }
         Undo(g, &next);
+        {
+            /* Narrow Gym in play: no action may bring a Bench past 4 (its own play gives one back by a choice) */
+            unsigned w, s, before, after;
+            if (TcgDuel_Stadium(&next, NULL) == TCG_CARD_GYM1_124 && TcgDuel_Stadium(g, NULL) == TCG_CARD_GYM1_124)
+                for (w = 0; w < 2; w++)
+                {
+                    for (s = 1, before = after = 0; s < TCG_FIELD_SIZE; s++)
+                        before += g->players[w].field[s].stackSize != 0, after += next.players[w].field[s].stackSize != 0;
+                    if (after > 4 && after > before)
+                    {
+                        snprintf(g->error, sizeof(g->error), "Narrow Gym: no more than 4 Pokemon on a Bench.");
+                        return TCG_INVALID;
+                    }
+                }
+        }
         if (!TcgDuel_Conserved(&next))
         {
             snprintf(g->error, sizeof(g->error), "Internal error: card conservation failed.");
