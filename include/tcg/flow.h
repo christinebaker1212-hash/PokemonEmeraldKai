@@ -33,7 +33,8 @@ enum
     TCG_SRC_TOP3_THEIRS,
     TCG_SRC_OPP_BENCH,  /* Gigashock: their Benched Pokemon (each one's top card) */
     TCG_SRC_DEFENDER_ATTACHED, /* Magnetic Lines: the Defending Pokemon's cards (whatever the target) */
-    TCG_SRC_MY_FIELD_ATTACHED  /* Burning Fire: every one of your Pokemon's cards, the Active first */
+    TCG_SRC_MY_FIELD_ATTACHED, /* Burning Fire: every one of your Pokemon's cards, the Active first */
+    TCG_SRC_OPP_HAND           /* Rocket's Sneak Attack: their hand, looked at (min drops to what can be chosen) */
 };
 /* Which Pokemon in play (slot steps) or which cards (picks) can be chosen */
 enum
@@ -84,6 +85,9 @@ struct TcgStep
  * the second action.attack: tcg_powers.c TcgDuel_Power) */
 const struct TcgStep *TcgFlow_TrainerSteps(unsigned id, int *count);
 const struct TcgStep *TcgFlow_PowerSteps(unsigned power, int *count);
+/* A Pokemon played from the hand whose power asks when it comes into play (Sneak Attack, Power of Darkness: target;
+ * Reel In, Summon Minions: selections), after its space; the action gets TCG_PLAY_CHOSEN */
+const struct TcgStep *TcgFlow_PlaySteps(unsigned cardId, int *count);
 /* An attack's steps into out[4]: its menu first when it has one (TcgDuel_AttackOptions; prompt[64] gets the words),
  * else (or, afterOption, once the menu is answered: a->option / a->copy set) its target and what it asks for */
 int TcgFlow_AttackSteps(const struct TcgDuel *g, unsigned me, const struct TcgAction *a, const struct TcgAttack *attack,

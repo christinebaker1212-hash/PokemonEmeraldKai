@@ -877,6 +877,14 @@ int TcgDuel_Power(struct TcgDuel *g, const struct TcgAction *a)
 /* ------------------------------------------------------------------ */
 /* Into play                                                            */
 /* ------------------------------------------------------------------ */
+/* (the play that put it into play, while TcgPower_OnPlayFrom runs) */
+static const struct TcgAction *sPlay;
+void TcgPower_OnPlayFrom(struct TcgDuel *g, unsigned player, unsigned slot, const struct TcgAction *play)
+{
+    sPlay = play && (play->option & TCG_PLAY_CHOSEN) ? play : NULL;
+    TcgPower_OnPlay(g, player, slot);
+    sPlay = NULL;
+}
 void TcgPower_OnPlay(struct TcgDuel *g, unsigned player, unsigned slot)
 {
     struct TcgPlayer *p = &g->players[player], *op = &g->players[player ^ 1];
@@ -924,14 +932,16 @@ void TcgPower_OnPlay(struct TcgDuel *g, unsigned player, unsigned slot)
         }
         break;
     }
-    /* GB2's, played from the hand: the choices made for the player */
+    /* GB2's, played from the hand: the player's choices (sPlay), else as the AI would */
     case TCG_POWER_SNEAK_ATTACK:
     {
-        /* 10 to the one of theirs with the least HP left (no Weakness or Resistance) */
+        /* 10 to the one of theirs chosen, else the one with the least HP left (no Weakness or Resistance) */
         unsigned best = TCG_NONE;
         if (!g->fromHand)
             break;
-        for (s = 0; s < TCG_FIELD_SIZE; s++)
+        if (sPlay && sPlay->target < TCG_FIELD_SIZE && op->field[sPlay->target].stackSize)
+            best = sPlay->target;
+        for (s = 0; s < TCG_FIELD_SIZE && !sPlay; s++)
             if (op->field[s].stackSize &&
                 (best == TCG_NONE || MaxHp(g, player ^ 1, s) - op->field[s].damage <
                                          MaxHp(g, player ^ 1, best) - op->field[best].damage))
@@ -945,11 +955,24 @@ void TcgPower_OnPlay(struct TcgDuel *g, unsigned player, unsigned slot)
         break;
     }
     case TCG_POWER_REEL_IN:
-        /* up to 3 Pokemon cards from the discard pile into the hand (the last ones discarded) */
+        /* up to 3 Pokemon cards from the discard pile into the hand: those chosen, else the last ones discarded */
         if (!g->fromHand)
             break;
         Announce(g, player, slot, power);
-        for (i = p->discardSize, n = 0; i > 0 && n < 3; i--)
+        n = 0;
+        if (sPlay)
+        {
+            unsigned k;
+            for (k = 0; k < sPlay->selectionCount && n < 3; k++)
+                for (i = 0; i < p->discardSize; i++)
+                    if (p->discard[i] == sPlay->selections[k] && Tcg_Card(p->cards[p->discard[i]])->kind == TCG_POKEMON)
+                    {
+                        p->hand[p->handSize++] = TcgPile_Remove(p->discard, &p->discardSize, i);
+                        n++;
+                        break;
+                    }
+        }
+        for (i = p->discardSize; i > 0 && n < 3 && !sPlay; i--)
             if (Tcg_Card(p->cards[p->discard[i - 1]])->kind == TCG_POKEMON)
             {
                 p->hand[p->handSize++] = TcgPile_Remove(p->discard, &p->discardSize, i - 1);
@@ -967,7 +990,9 @@ void TcgPower_OnPlay(struct TcgDuel *g, unsigned player, unsigned slot)
         Announce(g, player, slot, power);
         if (!TcgDuel_Coin(g, player))
             break;
-        for (s = 0; s < TCG_FIELD_SIZE; s++)
+        if (sPlay && sPlay->target < TCG_FIELD_SIZE && op->field[sPlay->target].stackSize)
+            best = sPlay->target;
+        for (s = 0; s < TCG_FIELD_SIZE && !sPlay; s++)
             if (op->field[s].stackSize && (best == TCG_NONE || op->field[s].attachedSize + op->field[s].stackSize >
                                                                    op->field[best].attachedSize + op->field[best].stackSize))
                 best = s;
@@ -987,7 +1012,7 @@ void TcgPower_OnPlay(struct TcgDuel *g, unsigned player, unsigned slot)
         break;
     }
     case TCG_POWER_SUMMON_MINIONS:
-        /* up to 2 Basic Pokemon from the deck onto the Bench (the strongest) */
+        /* up to 2 Basic Pokemon from the deck onto the Bench: those chosen, else the strongest */
         if (!g->fromHand)
             break;
         Announce(g, player, slot, power);
@@ -998,9 +1023,13 @@ void TcgPower_OnPlay(struct TcgDuel *g, unsigned player, unsigned slot)
             for (s = 1; s < TCG_FIELD_SIZE && empty == TCG_NONE; s++)
                 if (!p->field[s].stackSize)
                     empty = s;
-            if (empty == TCG_NONE)
+            if (empty == TCG_NONE || (sPlay && n >= sPlay->selectionCount))
                 break;
-            for (i = 0; i < p->deckSize; i++)
+            for (i = 0; i < p->deckSize && sPlay; i++)
+                if (p->deck[i] == sPlay->selections[n] && Tcg_Card(p->cards[p->deck[i]])->kind == TCG_POKEMON &&
+                    !Tcg_Card(p->cards[p->deck[i]])->stage)
+                    best = (int)i;
+            for (i = 0; i < p->deckSize && !sPlay; i++)
             {
                 const struct TcgCard *c = Tcg_Card(p->cards[p->deck[i]]);
                 if (c->kind == TCG_POKEMON && !c->stage &&

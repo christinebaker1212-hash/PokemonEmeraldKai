@@ -15,6 +15,17 @@ Started 2026-11-18. **Start here** for the card game's regional sets, special du
 - Retroactive promos (the user, 2026-11-18): some NPCs players have already beaten at cards become special card
   trainers. Their win / loss record is kept already, so a special NPC (a courier) delivers the promos those players
   should have received, once.
+- A GEN switch for the card games (the user, 2026-11-18), built so every set added later gets its own place in the
+  GEN selection:
+  - POKéMON and MAGIC: chosen by set (each set a step in the GEN list; cards from the sets up to the one chosen).
+  - YU-GI-OH!: chosen by summon type: FUSION (the base, today's behaviour), then SYNCHRO, XYZ, PENDULUM, LINK as those
+    cards are added; at a step, every set released before the next summon type's first set is legal. No YU-GI-OH!
+    switch until a second summon type exists: at FUSION it behaves as now.
+  - It's the room host's setting online (the user, 2026-11-18). It changes how NPC decks are built (only cards inside
+    the GEN), but NOT which Prize cards (promos, rewards) are given. A card outside the host's GEN can't be used in a
+    deck; players are told before a duel when their deck holds such cards.
+  - Open (mock-ups before building): where it's set offline (OPTIONS row) and on HOST A GAME > GAME RULES; what the
+    warning before a duel looks like; packs and shops (not said: ask).
 
 ## Decisions (asked 2026-11-18; the user's answers)
 | # | Question | Answer |
@@ -57,7 +68,8 @@ Total 1,158 set cards (about 1,100 attacks with effect text, 250 Pokémon Powers
 1. Audit today's 442 cards: every place the engine picks for the player (tcg_effects.c: Energy Spike, Gigashock,
    Call for Family, Energy Conversion / Absorption, Hyper Beam / Whirlpool and DiscardFoeEnergy, DiscardEnergy's
    "any Energy" costs; then GB2's Gb2Effect, the Trainers and the Powers) becomes a choice on the board, the phone and
-   the AI. (Can ship with other fixes before the sets.)
+   the AI. (Can ship with other fixes before the sets.) **Done 2026-11-18 (1.204.6)**: COOP_NOTES "The card audit:
+   every choice is the player's".
 2. Data model: card count, types (Darkness, Metal), subtypes (Stadium, Tool, Supporter, TM, Baby, Owner's, Shining,
    Light / Dark, Crystal), Poké-Powers / Bodies, the collection format (migration), boosters per region.
 3. Importer (pokemon-tcg-data -> catalog), printed art (fetch_art.py / build_printed_art.py), a coverage report like
@@ -67,3 +79,5 @@ Total 1,158 set cards (about 1,100 attacks with effect text, 250 Pokémon Powers
    decks and promos (UNOVA's too), CARD SCALING ratings rerun, the card guide rebuilt.
 6. Retroactive promos: a courier NPC brings each promo whose (newly special) trainer the save's card record shows as
    beaten (TcgCollection's records by the opponent's key; as mp_battleisland.c's courier / mp_tmrefund.c), once.
+7. The GEN switch (POKéMON / MAGIC by set, YU-GI-OH! by summon type, FUSION the base): every set a GEN step from the
+   catalogue's own set list, so a new set needs no switch code; mock-ups of where it's set first.

@@ -1588,7 +1588,8 @@ static void OpenPick(int source, int filter, int min, int max, const char *title
 {
     const struct TcgPlayer *p;
     unsigned owner = source == TCG_SRC_OPP_DISCARD || source == TCG_SRC_OPP_ATTACHED || source == TCG_SRC_TOP3_THEIRS
-                  || source == TCG_SRC_OPP_BENCH || source == TCG_SRC_DEFENDER_ATTACHED, i, n = 0;
+                  || source == TCG_SRC_OPP_BENCH || source == TCG_SRC_DEFENDER_ATTACHED || source == TCG_SRC_OPP_HAND,
+             i, n = 0;
     const uint8_t *pile = NULL;
     unsigned count = 0;
     uint8_t sorted[TCG_DECK_SIZE];
@@ -1640,6 +1641,10 @@ static void OpenPick(int source, int filter, int min, int max, const char *title
         pile = p->field[0].attached;
         count = p->field[0].attachedSize;
         break;
+    case TCG_SRC_OPP_HAND: /* (Rocket's Sneak Attack: their hand, looked at) */
+        pile = p->hand;
+        count = p->handSize;
+        break;
     case TCG_SRC_MY_FIELD_ATTACHED: /* (Burning Fire: every Pokemon's, the Active first) */
     {
         unsigned k;
@@ -1673,6 +1678,15 @@ static void OpenPick(int source, int filter, int min, int max, const char *title
     }
     B.pickCount = (uint8_t)n;
     B.pickOwner = (uint8_t)owner;
+    if (source == TCG_SRC_OPP_HAND)
+    {
+        /* (none of theirs to choose: their hand is only looked at) */
+        unsigned valid = 0;
+        for (i = 0; i < n; i++)
+            valid += CardMatches(owner, B.pickCards[i], filter);
+        if (valid < (unsigned)min)
+            min = (int)valid;
+    }
     B.pickSource = source;
     B.pickFilter = filter;
     B.pickMin = min;
@@ -2619,6 +2633,22 @@ int TcgBoard_Step(unsigned pressed, unsigned held, struct TcgAction *out, unsign
                 B.mode = M_FREE;
                 RetreatCost(out, &result);
                 return result;
+            }
+            if ((B.flow == FLOW_BASIC || B.flow == FLOW_EVOLVE) && B.view.phase == TCG_TURN)
+            {
+                /* a power that asks as it comes into play: its steps as a Trainer's */
+                B.steps = TcgFlow_PlaySteps(B.flowCard, &B.nsteps);
+                B.step = 0;
+                if (B.nsteps)
+                {
+                    B.action.option |= TCG_PLAY_CHOSEN;
+                    B.flow = FLOW_TRAINER;
+                    B.mode = M_FREE;
+                    B.focusKind = T_THEIRS;
+                    B.focusIndex = 0;
+                    ContinueTrainer(out, &result);
+                    return result;
+                }
             }
             Submit(out, &result);
             return result;

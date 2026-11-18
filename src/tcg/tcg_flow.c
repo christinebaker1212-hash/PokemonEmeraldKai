@@ -106,6 +106,11 @@ const struct TcgStep *TcgFlow_TrainerSteps(unsigned id, int *count)
         STEPS({TCG_ST_PICK, TCG_F_EVOLUTION, TCG_SRC_MY_DISCARD, 1, 1, "Put which Evolution card on your deck?"});
     case TCG_CARD_MASTER_BALL:
         STEPS({TCG_ST_PICK, TCG_F_POKEMON, TCG_SRC_TOP7, 0, 1, "Take which Pokemon? (the rest are shuffled in)"});
+    case TCG_CARD_CHALLENGE:
+        STEPS({TCG_ST_PICK, TCG_F_BASIC, TCG_SRC_DECK, 0, TCG_FIELD_SIZE - 1,
+               "If they accept: put which Basic Pokemon on your Bench?"});
+    case TCG_CARD_ROCKETS_SNEAK_ATTACK:
+        STEPS({TCG_ST_PICK, TCG_F_TRAINER, TCG_SRC_OPP_HAND, 1, 1, "Shuffle which Trainer into their deck?"});
     case TCG_CARD_NIGHTLY_GARBAGE_RUN:
         STEPS({TCG_ST_PICK, TCG_F_GARBAGE, TCG_SRC_MY_DISCARD, 1, 3, "Shuffle up to 3 into your deck."});
     }
@@ -148,6 +153,23 @@ const struct TcgStep *TcgFlow_PowerSteps(unsigned power, int *count)
         STEPS({TCG_ST_PICK, TCG_F_EVOLUTION, TCG_SRC_DECK, 1, 1, "Take which Evolution card?"});
     case TCG_POWER_SPECIAL_DELIVERY:
         STEPS({TCG_ST_PICK, TCG_F_ANY, TCG_SRC_HAND, 0, 1, "Draw, then put which card on top? (none: the new one)"});
+    }
+    *count = 0;
+    return sNoSteps;
+}
+const struct TcgStep *TcgFlow_PlaySteps(unsigned cardId, int *count)
+{
+    const struct TcgCard *c = Tcg_Card(cardId);
+    switch (c && c->kind == TCG_POKEMON ? TcgPower_Id(c) : 0)
+    {
+    case TCG_POWER_SNEAK_ATTACK:
+        STEPS({TCG_ST_OPP_SLOT, TCG_F_OCCUPIED, 0, 0, 0, "SNEAK ATTACK: 10 damage to which of theirs?"});
+    case TCG_POWER_POWER_OF_DARKNESS:
+        STEPS({TCG_ST_OPP_SLOT, TCG_F_OCCUPIED, 0, 0, 0, "If heads, which of theirs goes back to their hand?"});
+    case TCG_POWER_REEL_IN:
+        STEPS({TCG_ST_PICK, TCG_F_POKEMON, TCG_SRC_MY_DISCARD, 0, 3, "REEL IN: take up to 3 Pokemon cards."});
+    case TCG_POWER_SUMMON_MINIONS:
+        STEPS({TCG_ST_PICK, TCG_F_BASIC, TCG_SRC_DECK, 0, 2, "SUMMON MINIONS: bench up to 2 Basic Pokemon."});
     }
     *count = 0;
     return sNoSteps;
@@ -831,6 +853,7 @@ static unsigned AskPick(struct TcgFlow *f, const struct TcgDuel *g, int source, 
 {
     unsigned owner = source == TCG_SRC_OPP_DISCARD || source == TCG_SRC_OPP_ATTACHED || source == TCG_SRC_TOP3_THEIRS
                           || source == TCG_SRC_OPP_BENCH || source == TCG_SRC_DEFENDER_ATTACHED
+                          || source == TCG_SRC_OPP_HAND
                          ? f->me ^ 1
                          : f->me,
              i, n = 0, count = 0, valid = 0;
@@ -877,6 +900,9 @@ static unsigned AskPick(struct TcgFlow *f, const struct TcgDuel *g, int source, 
     case TCG_SRC_DEFENDER_ATTACHED:
         pile = p->field[0].attached, count = p->field[0].attachedSize;
         break;
+    case TCG_SRC_OPP_HAND:
+        pile = p->hand, count = p->handSize;
+        break;
     case TCG_SRC_MY_FIELD_ATTACHED:
     {
         unsigned k;
@@ -907,6 +933,8 @@ static unsigned AskPick(struct TcgFlow *f, const struct TcgDuel *g, int source, 
     }
     for (i = 0; i < n; i++)
         valid += f->pickOk[i] = (uint8_t)TcgFlow_CardMatches(g, owner, f->pick[i], filter);
+    if (source == TCG_SRC_OPP_HAND && valid < (unsigned)min)
+        min = (int)valid; /* (none of theirs to choose: their hand is only looked at) */
     f->pickCount = (uint8_t)n;
     f->pickOwner = (uint8_t)owner;
     f->pickSource = (uint8_t)source;
@@ -1145,7 +1173,7 @@ unsigned TcgFlow_Slot(struct TcgFlow *f, const struct TcgDuel *g, unsigned slot)
             return q;
         }
     case TCG_FLOW_HAND:
-        if (f->action.type == TCG_PLAY_TRAINER)
+        if (f->action.type == TCG_PLAY_TRAINER || f->nsteps)
         {
             if (f->steps[f->step].kind == TCG_ST_OPP_SLOT)
                 f->action.target = (uint8_t)slot;
@@ -1155,6 +1183,17 @@ unsigned TcgFlow_Slot(struct TcgFlow *f, const struct TcgDuel *g, unsigned slot)
             return Next(f, g);
         }
         f->action.slot = (uint8_t)slot;
+        if (g->phase == TCG_TURN)
+        {
+            /* (a power that asks as it comes into play) */
+            f->steps = TcgFlow_PlaySteps(f->flowCard, &f->nsteps);
+            f->step = 0;
+            if (f->nsteps)
+            {
+                f->action.option |= TCG_PLAY_CHOSEN;
+                return Next(f, g);
+            }
+        }
         return Done(f);
     }
     return Fail(f, "That can't be done.");

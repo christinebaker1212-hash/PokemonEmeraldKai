@@ -362,6 +362,24 @@ static int TrainerAction(const struct TcgDuel *g, unsigned hand, struct TcgActio
             j += !p->field[i].stackSize;
         if (j < 3)
             return 0;
+        /* as many as there's room for, the most HP first */
+        while (a->selectionCount < j)
+        {
+            int best = -1;
+            unsigned k;
+            for (i = 0; i < p->deckSize; i++)
+            {
+                const struct TcgCard *c = Tcg_Card(p->cards[p->deck[i]]);
+                for (k = 0; k < a->selectionCount && a->selections[k] != p->deck[i]; k++)
+                    ;
+                if (k == a->selectionCount && c->kind == TCG_POKEMON && !c->stage &&
+                    (best < 0 || c->hp > Tcg_Card(p->cards[p->deck[best]])->hp))
+                    best = (int)i;
+            }
+            if (best < 0)
+                break;
+            a->selections[a->selectionCount++] = p->deck[best];
+        }
         break;
     case TCG_CARD_MOON_STONE:
     case TCG_CARD_THE_BOSSS_WAY:

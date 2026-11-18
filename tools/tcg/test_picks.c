@@ -32,10 +32,27 @@ static void Deck(uint16_t *cards, const unsigned *ids, unsigned n)
     for (i = 55; i < 59; i++)
         cards[i] = TCG_CARD_DIGLETT;
 }
+/* (a card dealt to the Prizes goes back to the deck, a deck card taking its place) */
+static void FromPrizes(struct TcgDuel *g, unsigned who, unsigned id)
+{
+    struct TcgPlayer *p = &g->players[who];
+    unsigned i, k;
+    for (i = 0; i < p->prizeSize; i++)
+        if (p->cards[p->prizes[i]] == id)
+            for (k = 0; k < p->deckSize; k++)
+                if (p->cards[p->deck[k]] != id)
+                {
+                    uint8_t t = p->deck[k];
+                    p->deck[k] = p->prizes[i];
+                    p->prizes[i] = t;
+                    break;
+                }
+}
 static unsigned Take(struct TcgDuel *g, unsigned who, unsigned id)
 {
     struct TcgPlayer *p = &g->players[who];
     unsigned i;
+    FromPrizes(g, who, id);
     for (i = 0; i < p->deckSize; i++)
         if (p->cards[p->deck[i]] == id)
             return TcgPile_Remove(p->deck, &p->deckSize, i);
@@ -99,6 +116,23 @@ static unsigned Count(const struct TcgDuel *g, unsigned who, unsigned slot, unsi
     for (i = 0; i < f->attachedSize; i++)
         n += g->players[who].cards[f->attached[i]] == id;
     return n;
+}
+static unsigned ToHand(struct TcgDuel *g, unsigned who, unsigned id)
+{
+    struct TcgPlayer *p = &g->players[who];
+    p->hand[p->handSize++] = (uint8_t)Take(g, who, id);
+    return p->handSize - 1;
+}
+static uint8_t InDeck(struct TcgDuel *g, unsigned who, unsigned id)
+{
+    const struct TcgPlayer *p = &g->players[who];
+    unsigned i;
+    FromPrizes(g, who, id);
+    for (i = 0; i < p->deckSize; i++)
+        if (p->cards[p->deck[i]] == id)
+            return p->deck[i];
+    assert(!"not in the deck");
+    return 0;
 }
 int main(void)
 {
@@ -213,6 +247,78 @@ int main(void)
         assert(Count(&g, 0, 0, TCG_CARD_GRASS_ENERGY) == 0 && p->discard[0] == grass);
     }
     {
+        /* Dark Golbat's SNEAK ATTACK: 10 damage to the Benched Pokemon chosen as it evolves */
+        unsigned mine[] = {TCG_CARD_ZUBAT, TCG_CARD_DARK_GOLBAT}, theirs[] = {TCG_CARD_RATTATA, TCG_CARD_MACHOP};
+        unsigned hand;
+        Stage(&g, mine, 2, theirs, 2);
+        Put(&g, 0, 0, TCG_CARD_ZUBAT);
+        hand = ToHand(&g, 0, TCG_CARD_DARK_GOLBAT);
+        Put(&g, 1, 0, TCG_CARD_RATTATA);
+        Put(&g, 1, 2, TCG_CARD_MACHOP);
+        assert(TcgFlow_Begin(&f, &g, 0, TCG_FLOW_HAND, hand) == TCG_Q_SLOT);
+        assert(TcgFlow_Slot(&f, &g, 0) == TCG_Q_SLOT && f.who == 1 && (f.slotMask & 4));
+        assert(TcgFlow_Slot(&f, &g, 2) == TCG_Q_DONE && (f.action.option & TCG_PLAY_CHOSEN));
+        assert(TcgDuel_Apply(&g, &f.action) == TCG_OK && TcgDuel_Conserved(&g));
+        assert(g.players[1].field[2].damage == 10 && g.players[1].field[0].damage == 0);
+    }
+    {
+        /* Dark Dragonite's SUMMON MINIONS: the Basic Pokemon chosen onto the Bench (one, though there's room for two) */
+        unsigned mine[] = {TCG_CARD_DARK_DRAGONAIR, TCG_CARD_DARK_DRAGONITE, TCG_CARD_MACHOP, TCG_CARD_RATTATA},
+                 theirs[] = {TCG_CARD_RATTATA};
+        unsigned hand;
+        uint8_t rattata;
+        Stage(&g, mine, 4, theirs, 1);
+        Put(&g, 0, 0, TCG_CARD_DARK_DRAGONAIR);
+        hand = ToHand(&g, 0, TCG_CARD_DARK_DRAGONITE);
+        Put(&g, 1, 0, TCG_CARD_RATTATA);
+        rattata = InDeck(&g, 0, TCG_CARD_RATTATA);
+        assert(TcgFlow_Begin(&f, &g, 0, TCG_FLOW_HAND, hand) == TCG_Q_SLOT);
+        assert(TcgFlow_Slot(&f, &g, 0) == TCG_Q_PICK && f.pickSource == TCG_SRC_DECK);
+        Offered(&f, rattata);
+        assert(TcgFlow_Pick(&f, &g, &rattata, 1) == TCG_Q_DONE);
+        assert(TcgDuel_Apply(&g, &f.action) == TCG_OK && TcgDuel_Conserved(&g));
+        assert(g.players[0].field[1].stackSize == 1 && g.players[0].field[1].stack[0] == rattata &&
+               !g.players[0].field[2].stackSize);
+    }
+    {
+        /* Rocket's Sneak Attack: their hand looked at, the Trainer chosen shuffled into their deck */
+        unsigned mine[] = {TCG_CARD_MACHOP, TCG_CARD_ROCKETS_SNEAK_ATTACK},
+                 theirs[] = {TCG_CARD_RATTATA, TCG_CARD_POTION, TCG_CARD_BILL};
+        unsigned hand;
+        uint8_t bill;
+        struct TcgPlayer *op = &g.players[1];
+        Stage(&g, mine, 2, theirs, 3);
+        Put(&g, 0, 0, TCG_CARD_MACHOP);
+        hand = ToHand(&g, 0, TCG_CARD_ROCKETS_SNEAK_ATTACK);
+        Put(&g, 1, 0, TCG_CARD_RATTATA);
+        ToHand(&g, 1, TCG_CARD_POTION);
+        bill = op->hand[ToHand(&g, 1, TCG_CARD_BILL)];
+        assert(TcgFlow_Begin(&f, &g, 0, TCG_FLOW_HAND, hand) == TCG_Q_PICK && f.pickSource == TCG_SRC_OPP_HAND &&
+               f.pickCount == 2 && f.pickMin == 1);
+        Offered(&f, bill);
+        assert(TcgFlow_Pick(&f, &g, &bill, 1) == TCG_Q_DONE);
+        assert(TcgDuel_Apply(&g, &f.action) == TCG_OK && TcgDuel_Conserved(&g));
+        assert(op->handSize == 1 && op->cards[op->hand[0]] == TCG_CARD_POTION);
+    }
+    {
+        /* Challenge!: only the Basic Pokemon chosen go on the Bench (they fill theirs) */
+        unsigned mine[] = {TCG_CARD_MACHOP, TCG_CARD_CHALLENGE, TCG_CARD_RATTATA, TCG_CARD_CHARMANDER},
+                 theirs[] = {TCG_CARD_RATTATA};
+        unsigned hand, s, mineBench = 0, theirBench = 0;
+        uint8_t rattata;
+        Stage(&g, mine, 4, theirs, 1);
+        Put(&g, 0, 0, TCG_CARD_MACHOP);
+        hand = ToHand(&g, 0, TCG_CARD_CHALLENGE);
+        Put(&g, 1, 0, TCG_CARD_RATTATA);
+        rattata = InDeck(&g, 0, TCG_CARD_RATTATA);
+        assert(TcgFlow_Begin(&f, &g, 0, TCG_FLOW_HAND, hand) == TCG_Q_PICK && f.pickSource == TCG_SRC_DECK);
+        assert(TcgFlow_Pick(&f, &g, &rattata, 1) == TCG_Q_DONE);
+        assert(TcgDuel_Apply(&g, &f.action) == TCG_OK && TcgDuel_Conserved(&g));
+        for (s = 1; s < TCG_FIELD_SIZE; s++)
+            mineBench += g.players[0].field[s].stackSize != 0, theirBench += g.players[1].field[s].stackSize != 0;
+        assert(mineBench == 1 && g.players[0].field[1].stack[0] == rattata && theirBench == 4);
+    }
+    {
         /* Every attack that asks: the AI's choices are accepted on a full board */
         static const char *const lists[] = {
             "ElectrodeEnergySpikeEffectCommands", "MagmarBurningFireEffectCommands",
@@ -246,7 +352,7 @@ int main(void)
             }
         }
     }
-    puts("PASS the card audit's choices: Energy Spike, Burning Fire, Magnetic Lines, Rapid Evolution, Third Eye, through "
-         "the flow, and the AI's");
+    puts("PASS the card audit's choices: Energy Spike, Burning Fire, Magnetic Lines, Rapid Evolution, Third Eye, "
+         "SNEAK ATTACK, SUMMON MINIONS, Rocket's Sneak Attack, Challenge!, through the flow, and the AI's");
     return 0;
 }

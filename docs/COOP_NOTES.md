@@ -2921,6 +2921,28 @@ TCG_LINK_VERSION 15.
   Energy, Full Heal on a condition, POKeMON CENTER only when 50+ is healed and two Energy or fewer are lost
   (tools/tcg/test_ai.c). Ratings rerun (tcg_ratings.c, tcg_levels.c, the Yu-Gi-Oh! decks and cards).
 
+## The card audit: every choice is the player's (1.204.6)
+The user (2026-11-18): "Audit all current cards to be certain that all card effects work properly" (Electrode's Energy
+Spike never let the player pick). Every place the rules chose cards or Pokemon for the player now asks, on the board
+(tcg_board.c) and the phone (tcg_flow.c, cpp/tcg_jni.c) alike; the AI makes its own choice (tcg_effects.c
+TcgDuel_AiAttackChoices, tcg_ai.c), and an action without the choice falls back to what the rules did before.
+- Attacks (TcgDuel_AttackPick, TCG_APICK_*; steps from tcg_flow.c AttackPickSteps after the target / menu): Energy Spike
+  (the basic Energy from the deck, then the Pokemon), Gigashock (3 Benched, TCG_SRC_OPP_BENCH), Call for Family /
+  Sprout / Scatter Spores, Energy Conversion / Absorption, Hyper Beam / Whirlpool / Dissolve / Psycho Blast, Microwave,
+  Fire Spin's "any Energy", Fireworks / Third Eye, Burning Fire (the Fire Energy from any of your Pokemon after the
+  number: TCG_SRC_MY_FIELD_ATTACHED, the picker says which Pokemon each is on), Magnetic Lines (the Defending's basic
+  Energy whatever the Bench target: TCG_SRC_DEFENDER_ATTACHED), Rapid Evolution (TCG_F_ATTACK_CARD*).
+- Trainers: Rocket's Sneak Attack (their hand looked at, the Trainer chosen: TCG_SRC_OPP_HAND, its minimum drops to 0
+  when they hold none), Challenge! (the player's Basic Pokemon; theirs are still the strongest: the opponent can't answer
+  inside the player's action).
+- Powers as they come into play (TcgFlow_PlaySteps after the space; the action's option has TCG_PLAY_CHOSEN;
+  tcg_powers.c TcgPower_OnPlayFrom): Dark Golbat's SNEAK ATTACK and Gengar's POWER OF DARKNESS (target), Dark Slowbro's
+  REEL IN and Dark Dragonite's SUMMON MINIONS (selections).
+- Kept as they are: the opponent's own choices (Whirlwind and the like, Vine Pull, Challenge!'s other side), random
+  ones, identical cards (Salt Water's Water Energy...), Computer Error (draws 5, leaving a card), Helping Hand (the
+  Special Condition first, then Poison), Trickery's face-down Prize.
+TCG_LINK_VERSION 16. Test tools/tcg/test_picks.c (each through the flow machine, then the rules; the AI's on a full board).
+
 ## Rare card foil (1.56.0)
 
 - src/tcg/tcg_foil.c (tcg_foil.h), shared by the three card games: G_Foil(kind, card rect, art rect, seed, frame) and

@@ -407,6 +407,11 @@ unsigned TcgDuel_Type(const struct TcgDuel *g, unsigned player, unsigned slot);
  * Pokemon (Kabuto Armor, Invisible Wall, Neutralizing Shield; Transparency flips);
  * conditions it can't have (Thick Skinned, Clefairy Doll, Mysterious Fossil). */
 void TcgPower_OnPlay(struct TcgDuel *g, unsigned player, unsigned slot);
+/* (TCG_PLAY_BASIC / TCG_EVOLVE) The play's own choices for a power put into play from the hand: Sneak Attack's and
+ * Power of Darkness's Pokemon (target), Reel In's and Summon Minions' cards (selections), when option has
+ * TCG_PLAY_CHOSEN (the player chose: tcg_flow.c TcgFlow_PlaySteps); without it the power chooses as the AI would */
+#define TCG_PLAY_CHOSEN 1
+void TcgPower_OnPlayFrom(struct TcgDuel *g, unsigned player, unsigned slot, const struct TcgAction *play);
 int TcgPower_AttackDamage(struct TcgDuel *g, unsigned player, unsigned slot, int amount, int defending);
 int TcgPower_Immune(struct TcgDuel *g, unsigned player, unsigned slot);
 void TcgPower_Sanitize(struct TcgDuel *g);

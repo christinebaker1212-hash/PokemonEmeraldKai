@@ -480,9 +480,10 @@ int TcgDuel_Trainer(struct TcgDuel *g, const struct TcgAction *a)
     }
     case TCG_CARD_CHALLENGE:
     {
-        /* They accept if they have room and Basic Pokemon to put down; then both fill their Benches with the
-         * strongest Basic Pokemon of their decks. Otherwise: draw 2. */
-        unsigned room[2] = {0, 0}, basics[2] = {0, 0};
+        /* They accept if they have room and Basic Pokemon to put down; then the player puts down the Basic Pokemon
+         * chosen (selections: any number, as many as there's room for), they fill their Bench with the strongest of
+         * their deck. Otherwise: draw 2. */
+        unsigned room[2] = {0, 0}, basics[2] = {0, 0}, k;
         for (who = 0; who < 2; who++)
         {
             struct TcgPlayer *q = &g->players[who];
@@ -504,17 +505,27 @@ int TcgDuel_Trainer(struct TcgDuel *g, const struct TcgAction *a)
             unsigned slot;
             who = g->current ^ n;
             q = &g->players[who];
-            for (slot = 1; slot < TCG_FIELD_SIZE; slot++)
+            for (slot = 1, k = 0; slot < TCG_FIELD_SIZE; slot++)
             {
                 int best = -1;
                 if (q->field[slot].stackSize)
                     continue;
-                for (i = 0; i < q->deckSize; i++)
+                if (!n)
                 {
-                    const struct TcgCard *c = Tcg_Card(q->cards[q->deck[i]]);
-                    if (c->kind == TCG_POKEMON && !c->stage && (best < 0 || c->hp > Tcg_Card(q->cards[q->deck[best]])->hp))
-                        best = (int)i;
+                    /* the player's next pick still in the deck */
+                    for (; k < a->selectionCount && best < 0; k++)
+                        for (i = 0; i < q->deckSize; i++)
+                            if (q->deck[i] == a->selections[k] && Tcg_Card(q->cards[q->deck[i]])->kind == TCG_POKEMON &&
+                                !Tcg_Card(q->cards[q->deck[i]])->stage)
+                                best = (int)i;
                 }
+                else
+                    for (i = 0; i < q->deckSize; i++)
+                    {
+                        const struct TcgCard *c = Tcg_Card(q->cards[q->deck[i]]);
+                        if (c->kind == TCG_POKEMON && !c->stage && (best < 0 || c->hp > Tcg_Card(q->cards[q->deck[best]])->hp))
+                            best = (int)i;
+                    }
                 if (best < 0)
                     break;
                 memset(&q->field[slot], 0, sizeof(q->field[slot]));
@@ -658,9 +669,17 @@ int TcgDuel_Trainer(struct TcgDuel *g, const struct TcgAction *a)
         break;
     case TCG_CARD_ROCKETS_SNEAK_ATTACK:
     {
-        /* their hand looked at: a Trainer there (the rarest) goes into their deck */
+        /* their hand looked at: the Trainer chosen there (selections[0]; none: the rarest) goes into their deck */
         int pick = -1;
-        for (i = 0; i < op->handSize; i++)
+        if (a->selectionCount)
+        {
+            for (i = 0; i < op->handSize; i++)
+                if (op->hand[i] == a->selections[0])
+                    pick = (int)i;
+            if (pick < 0 || Tcg_Card(op->cards[op->hand[pick]])->kind != TCG_TRAINER)
+                return Fail(g, "Choose a Trainer card in their hand.");
+        }
+        for (i = 0; i < op->handSize && !a->selectionCount; i++)
         {
             const struct TcgCard *c = Tcg_Card(op->cards[op->hand[i]]);
             if (c->kind == TCG_TRAINER && (pick < 0 || c->rarity > Tcg_Card(op->cards[op->hand[pick]])->rarity))

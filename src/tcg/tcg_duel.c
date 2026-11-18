@@ -876,7 +876,7 @@ static int Apply(struct TcgDuel *g, const struct TcgAction *a)
         if (g->phase != TCG_SETUP)
         {
             g->fromHand = 1;
-            TcgPower_OnPlay(g, g->current, s);
+            TcgPower_OnPlayFrom(g, g->current, s, a);
             g->fromHand = 0;
             TcgPower_Sanitize(g);
             TcgDuel_ResolveKnockouts(g);
@@ -896,7 +896,7 @@ static int Apply(struct TcgDuel *g, const struct TcgAction *a)
         TcgDuel_Event(g, TCG_EV_EVOLVE, g->current, s, 0, c->id, 0);
         TcgDuel_Log(g, "Evolved into %s.", c->name);
         g->fromHand = 1;
-        TcgPower_OnPlay(g, g->current, s); /* (Healing Wind) */
+        TcgPower_OnPlayFrom(g, g->current, s, a); /* (Healing Wind) */
         g->fromHand = 0;
         TcgPower_Sanitize(g);
         TcgDuel_ResolveKnockouts(g);
