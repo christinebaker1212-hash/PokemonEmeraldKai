@@ -113,6 +113,65 @@ static const char *RegionBlock(const struct TcgDuel *g, unsigned player, unsigne
         if (p->handSize > 2)
             return "You have more than 2 cards in your hand.";
         break;
+    case TCG_POWER_R_SOAK_UP:
+        for (s = 0; s < TCG_FIELD_SIZE; s++)
+            if (s != slot && RpEnergyOn(g, player, s, TCG_GRASS, 1) >= 0)
+                break;
+        if (s == TCG_FIELD_SIZE)
+            return "Your other Pokemon have no Grass Energy.";
+        break;
+    case TCG_POWER_R_ELECTROMAGNETIC:
+    {
+        unsigned holders = 0, magnets = 0;
+        for (s = 0; s < TCG_FIELD_SIZE; s++)
+            if (TcgDuel_Field(g, player, s) && TcgFlow_InNameGroup(TcgDuel_Field(g, player, s)->name, 6))
+                magnets++, holders += p->field[s].attachedSize != 0;
+        if (magnets < 2 || !holders)
+            return "You need two Magnemite or Magneton, one with Energy.";
+        break;
+    }
+    case TCG_POWER_R_BEAR:
+        if (p->field[slot].damage + 10u >= TcgDuel_MaxHp(g, player, slot))
+            return "It has 10 HP left.";
+        for (s = 0; s < TCG_FIELD_SIZE; s++)
+            if (s != slot && p->field[s].damage && TcgDuel_Field(g, player, s) && strstr(TcgDuel_Field(g, player, s)->name, "Unown"))
+                break;
+        if (s == TCG_FIELD_SIZE)
+            return "None of your other Unown has damage counters.";
+        break;
+    case TCG_POWER_R_HEAT_UP:
+    {
+        unsigned mine = 0, theirs = 0;
+        for (s = 0; s < TCG_FIELD_SIZE; s++)
+        {
+            unsigned k;
+            for (k = 0; k < p->field[s].attachedSize; k++)
+                mine += Tcg_Card(p->cards[p->field[s].attached[k]])->kind == TCG_ENERGY;
+            for (k = 0; k < op->field[s].attachedSize; k++)
+                theirs += Tcg_Card(op->cards[op->field[s].attached[k]])->kind == TCG_ENERGY;
+        }
+        if (theirs <= mine)
+            return "Your opponent doesn't have more Energy cards attached.";
+        if (!RpBench(g, player))
+            return "You have no Benched Pokemon.";
+        break;
+    }
+    case TCG_POWER_R_MIRACLE_SHIFT:
+        for (s = 0; s < TCG_FIELD_SIZE && RpEnergyOn(g, player, s, -1, 1) < 0; s++)
+            ;
+        if (s == TCG_FIELD_SIZE)
+            return "None of your Pokemon has basic Energy.";
+        break;
+    case TCG_POWER_R_RECONSTRUCTION:
+        for (i = 0; i < p->handSize && p->cards[p->hand[i]] > 6; i++)
+            ;
+        if (i == p->handSize)
+            return "You have no basic Energy card in your hand.";
+        break;
+    case TCG_POWER_R_ANCIENT_WIND:
+        if (g->bodiesOffTurn == g->turn)
+            return "Poke-Bodies are already ignored this turn.";
+        break;
     case TCG_POWER_R_MAGNETIC_CALL:
     case TCG_POWER_R_REVIVE_FRIENDS:
     case TCG_POWER_R_REVIVE_FOSSIL:
@@ -414,6 +473,25 @@ unsigned TcgPower_EnergyType(const struct TcgDuel *g, unsigned player, unsigned 
     }
     return type;
 }
+/* player's Active Pokemon went to Bench slot: Magma Pool (a Fire Energy card of its onto the new Active) */
+void TcgPower_ToBench(struct TcgDuel *g, unsigned player, unsigned slot)
+{
+    struct TcgFieldCard *f, *to;
+    unsigned k;
+    if (player > 1 || !slot || slot >= TCG_FIELD_SIZE || TcgPower_Working(g, player, slot) != TCG_POWER_R_MAGMA_POOL)
+        return;
+    f = &g->players[player].field[slot], to = &g->players[player].field[0];
+    if (!to->stackSize)
+        return;
+    for (k = 0; k < f->attachedSize; k++)
+        if (g->players[player].cards[f->attached[k]] == TCG_CARD_FIRE_ENERGY)
+        {
+            Announce(g, player, slot, TCG_POWER_R_MAGMA_POOL);
+            to->attached[to->attachedSize++] = TcgPile_Remove(f->attached, &f->attachedSize, k);
+            TcgDuel_Event(g, TCG_EV_ATTACH, player, 0, 0, TCG_CARD_FIRE_ENERGY, 0);
+            return;
+        }
+}
 /* A Benched Pokemon of player's became the Active one during their own turn: Spikes (10 from each of the opponent's
  * Forretress whose power works; no Weakness or Resistance) */
 void TcgPower_NewActive(struct TcgDuel *g, unsigned player)
@@ -606,6 +684,26 @@ static void RegionOnPlay(struct TcgDuel *g, unsigned player, unsigned slot, unsi
             }
         TcgDuel_Shuffle(g, player);
         break;
+    case TCG_POWER_R_VANISH:
+    {
+        /* (played from the hand) a coin: heads, the Unown chosen back to the hand, its attached cards discarded */
+        unsigned t = sPlay ? sPlay->target : TCG_FIELD_SIZE;
+        const struct TcgCard *c = t < TCG_FIELD_SIZE && t != slot ? TcgDuel_Field(g, player, t) : NULL;
+        struct TcgFieldCard *u;
+        if (!g->fromHand || !c || !strstr(c->name, "Unown"))
+            return;
+        Announce(g, player, slot, power);
+        if (!TcgDuel_Coin(g, player))
+            return;
+        u = &p->field[t];
+        while (u->attachedSize)
+            p->discard[p->discardSize++] = u->attached[--u->attachedSize];
+        while (u->stackSize)
+            p->hand[p->handSize++] = u->stack[--u->stackSize];
+        TcgDuel_Event(g, TCG_EV_TO_HAND, player, t, 0, 0, 0);
+        memset(u, 0, sizeof(*u)); /* (the Active gone: a Benched one comes in, as after a Knock Out) */
+        break;
+    }
     case TCG_POWER_R_INCREASE:
         /* (played from the hand) a card with Unown in its name from the deck onto the Bench */
         if (!g->fromHand)

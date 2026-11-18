@@ -5,6 +5,7 @@
 #include "mp_version.h"
 #include "tcg/card_ids.h"
 #include "tcg/duel.h"
+#include "tcg/flow.h"
 #include <stdio.h>
 #include <string.h>
 
@@ -177,6 +178,9 @@ unsigned TcgPower_Working(const struct TcgDuel *g, unsigned player, unsigned slo
         return TCG_POWER_NONE;
     /* GB2's: Goop Gas Attack (every power), Dark Arbok's Stare (that Pokemon's) */
     if (g->goopGasUntil >= g->turn || g->players[player].field[slot].powerOffUntil >= g->turn)
+        return TCG_POWER_NONE;
+    /* Ancient Wind: every Poke-Body ignored this turn */
+    if (g->bodiesOffTurn && g->bodiesOffTurn == g->turn && (TcgDuel_Field(g, player, slot)->flags & TCG_CF_BODY))
         return TCG_POWER_NONE;
     /* Dark Gaze (either Active): no Benched Pokemon's used power */
     if (slot && TcgPower_IsUsed(id) &&

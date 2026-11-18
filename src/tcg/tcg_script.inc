@@ -104,7 +104,11 @@
  *             to it, through their turn
  * Conditions: hN / tN the Nth coin came up heads / tails | Options (0): opt:11 the Defending Pokemon's attacks if it's
  *             a Basic Pokemon (else no menu) | After (1): amn that attack not next turn (Terrorize) | guard:10 Reflect
- *             Shield | guardk:K TCG_GUARD_K kept until it takes damage, is Benched or evolves (Shadow Images: 11) */
+ *             Shield | guardk:K TCG_GUARD_K kept until it takes damage, is Benched or evolves (Shadow Images: 11)
+ * Powers (1): pull the Grass Energy picked (up to 2) from your other Pokemon onto it | emove:4 between Magnemite /
+ *             Magneton / Dark Magneton (name group 6) | ctrin a counter from the Unown chosen onto it | spike:T,K (an
+ *             Energy of type T; K 1 onto an Unown, 2 onto a Benched one) | mshift Miracle Shift | recon Reconstruction |
+ *             nobody every Poke-Body ignored this turn */
 #define SCRIPT_TOKEN 48
 /* Which of the player's Pokemon "it" is: the attacker (0), or a Pokemon whose power runs a script (tcg_powers.c) */
 static unsigned sScriptSelf;
@@ -1555,7 +1559,7 @@ static int ScriptRun(struct TcgDuel *g, const char *script, const struct TcgAtta
             /* the Energy card picked, from one of yours: to the hand (ehand); onto the one chosen (emove 0), Lightning
              * from the Bench onto it (emove 1), basic from the Bench onto the Active (emove 2), basic from one onto the
              * other chosen (emove 3: an attack's, nothing picked when there was nothing to move) */
-            unsigned from = TCG_FIELD_SIZE, to = !x || x == 3 ? action->target : x == 1 ? sScriptSelf : 0, k;
+            unsigned from = TCG_FIELD_SIZE, to = !x || x == 3 || x == 4 ? action->target : x == 1 ? sScriptSelf : 0, k;
             int at = -1;
             const struct TcgCard *e;
             for (k = 0; k < TCG_FIELD_SIZE && at < 0; k++)
@@ -1563,6 +1567,11 @@ static int ScriptRun(struct TcgDuel *g, const char *script, const struct TcgAtta
                     from = k;
             if (x == 3 && (!action || !action->selectionCount))
                 continue;
+            /* (emove 4, Electromagnetic Power: from one Magnemite, Magneton or Dark Magneton to another) */
+            if (x == 4 && (from >= TCG_FIELD_SIZE || to >= TCG_FIELD_SIZE || !TcgDuel_Field(g, me, from) || !TcgDuel_Field(g, me, to) ||
+                           !TcgFlow_InNameGroup(TcgDuel_Field(g, me, from)->name, 6) ||
+                           !TcgFlow_InNameGroup(TcgDuel_Field(g, me, to)->name, 6)))
+                return TCG_INVALID;
             if (at < 0 || !(e = CardAt(g, me, p->field[from].attached[at])) || e->kind != TCG_ENERGY)
                 return TCG_INVALID;
             if (ScriptIs(&o, "ehand"))
@@ -2337,7 +2346,11 @@ static int ScriptRun(struct TcgDuel *g, const char *script, const struct TcgAtta
             if (at >= 0)
             {
                 struct TcgFieldCard *t;
-                if (CardAt(g, me, p->deck[at])->id > 6 || !ValidTarget(g, me, action->target, 0))
+                const struct TcgCard *e = CardAt(g, me, p->deck[at]), *to = TcgDuel_Field(g, me, action->target);
+                /* (spike:T,K: an Energy of type T; K 1 onto a Pokemon with Unown in its name, 2 onto a Benched one) */
+                if (e->kind != TCG_ENERGY || e->id > 6 || !ValidTarget(g, me, action->target, o.args > 1 && o.arg[1] == 2) ||
+                    (o.args && o.arg[0] != 15 && e->type != (unsigned)o.arg[0]) ||
+                    (o.args > 1 && o.arg[1] == 1 && (!to || !strstr(to->name, "Unown"))))
                     return TCG_INVALID;
                 t = &p->field[action->target];
                 t->attached[t->attachedSize++] = TcgPile_Remove(p->deck, &p->deckSize, (unsigned)at);
@@ -2347,6 +2360,76 @@ static int ScriptRun(struct TcgDuel *g, const char *script, const struct TcgAtta
         }
         else if (ScriptIs(&o, "tailwind"))
             p->turnBuffs |= TCG_BUFF_TAILWIND;
+        else if (ScriptIs(&o, "pull"))
+        {
+            /* Soak Up: the Grass Energy cards picked (up to 2) from your other Pokemon onto it */
+            unsigned k, s;
+            if (!action || !action->selectionCount || action->selectionCount > 2)
+                return TCG_INVALID;
+            for (k = 0; k < action->selectionCount; k++)
+            {
+                int at = -1;
+                for (s = 0; s < TCG_FIELD_SIZE && at < 0; s++)
+                    if (s != sScriptSelf)
+                        for (at = (int)p->field[s].attachedSize - 1; at >= 0 && p->field[s].attached[at] != action->selections[k]; at--)
+                            ;
+                if (at < 0 || CardAt(g, me, p->field[s - 1].attached[at])->id != TCG_CARD_GRASS_ENERGY)
+                    return TCG_INVALID;
+                self->attached[self->attachedSize++] = TcgPile_Remove(p->field[s - 1].attached, &p->field[s - 1].attachedSize, (unsigned)at);
+                TcgDuel_Event(g, TCG_EV_ATTACH, me, sScriptSelf, 0, TCG_CARD_GRASS_ENERGY, 0);
+            }
+        }
+        else if (ScriptIs(&o, "ctrin"))
+        {
+            /* [Bear]: a damage counter from the Unown chosen onto it */
+            const struct TcgCard *from = TcgDuel_Field(g, me, action ? action->target : 0);
+            if (!action || action->target == sScriptSelf || !from || !strstr(from->name, "Unown") ||
+                !p->field[action->target].damage || self->damage + 10u >= TcgDuel_MaxHp(g, me, sScriptSelf))
+                return TCG_INVALID;
+            p->field[action->target].damage -= 10;
+            self->damage += 10;
+            TcgDuel_Event(g, TCG_EV_HEAL, me, action->target, 10, 0, 0);
+            TcgDuel_Event(g, TCG_EV_DAMAGE, me, sScriptSelf, 10, 0, 0);
+        }
+        else if (ScriptIs(&o, "mshift"))
+        {
+            /* Miracle Shift: the basic Energy picked on one of yours discarded, then the one picked from the discard
+             * pile (none: that same card) attached to that Pokemon */
+            unsigned s;
+            int at = -1, back;
+            for (s = 0; s < TCG_FIELD_SIZE && at < 0; s++)
+                at = Picked(action, 0, p->field[s].attached, p->field[s].attachedSize);
+            if (at < 0 || CardAt(g, me, p->field[s - 1].attached[at])->id > 6)
+                return TCG_INVALID;
+            s--;
+            p->discard[p->discardSize++] = TcgPile_Remove(p->field[s].attached, &p->field[s].attachedSize, (unsigned)at);
+            back = action->selectionCount > 1 ? Picked(action, 1, p->discard, p->discardSize) : (int)p->discardSize - 1;
+            if (back < 0 || CardAt(g, me, p->discard[back])->kind != TCG_ENERGY || CardAt(g, me, p->discard[back])->id > 6)
+                return TCG_INVALID;
+            p->field[s].attached[p->field[s].attachedSize++] = TcgPile_Remove(p->discard, &p->discardSize, (unsigned)back);
+            TcgDuel_Event(g, TCG_EV_ATTACH, me, s, 0, p->cards[p->field[s].attached[p->field[s].attachedSize - 1]], 0);
+        }
+        else if (ScriptIs(&o, "recon"))
+        {
+            /* Reconstruction: the Omanyte or Kabuto picked from the deck into the hand, then the basic Energy picked in
+             * the hand into the deck */
+            int at = action && action->selectionCount > 1 ? Picked(action, 0, p->deck, p->deckSize) : -1, e;
+            const struct TcgCard *c = at >= 0 ? CardAt(g, me, p->deck[at]) : NULL;
+            if (at >= 0)
+            {
+                if (!c || c->kind != TCG_POKEMON || (strcmp(c->name, "Omanyte") && strcmp(c->name, "Kabuto")))
+                    return TCG_INVALID;
+                TcgDuel_Log(g, "Shown: %s.", c->name);
+                p->hand[p->handSize++] = TcgPile_Remove(p->deck, &p->deckSize, (unsigned)at);
+            }
+            e = action ? Picked(action, action->selectionCount - 1, p->hand, p->handSize) : -1;
+            if (e < 0 || CardAt(g, me, p->hand[e])->kind != TCG_ENERGY || CardAt(g, me, p->hand[e])->id > 6)
+                return TCG_INVALID;
+            p->deck[p->deckSize++] = TcgPile_Remove(p->hand, &p->handSize, (unsigned)e);
+            TcgDuel_Shuffle(g, me);
+        }
+        else if (ScriptIs(&o, "nobody"))
+            g->bodiesOffTurn = g->turn; /* (Ancient Wind: every Poke-Body ignored this turn) */
         else if (ScriptIs(&o, "hdis"))
         {
             /* the card picked in the hand (an Energy of type x) discarded */

@@ -72,6 +72,18 @@ P('R_SOLAR_POWER', 'Solar Power', 'Your Active Pokemon and the Defending Pokemon
   'cure4:0 cure4:1')
 P('R_BACKUP', 'Backup', 'draw cards from your deck until you have 3 cards', 'USED', 'ONCE', 'needhand:2 drawto:3')
 P('R_SUBMERGE', 'Submerge', "change SELF's type to Water", 'USED', 'ONCE', 'shiftto:3')
+P('R_SOAK_UP', 'Soak Up', 'take up to 2 Grass Energy cards attached to your other Pokemon', 'USED', 'ONCE', 'pull')
+P('R_ELECTROMAGNETIC', 'Electromagnetic Power', 'take 1 Energy card attached to 1 of your Magnemites', 'USED', '',
+  'emove:4')
+P('R_BEAR', '[Bear]', 'move 1 damage counter from 1 of your Pokemon with Unown in its name', 'USED', 'ONCE ANY',
+  'ctrin')
+P('R_YIELD', '[Yield]', 'search your deck for a Psychic Energy card and attach it to 1 of your Pokemon with Unown',
+  'USED', 'ONCE ANY', 'c h.spike:5,1')
+P('R_HEAT_UP', 'Heat Up', 'If your opponent has more total Energy cards attached', 'USED', 'ONCE', 'spike:0,2')
+P('R_MIRACLE_SHIFT', 'Miracle Shift', 'Then, choose a basic Energy card from your discard pile', 'USED', 'ONCE', 'mshift')
+P('R_RECONSTRUCTION', 'Reconstruction', 'search your deck for an Omanyte or Kabuto card', 'USED', 'ONCE ANY', 'recon')
+P('R_ANCIENT_WIND', 'Ancient Wind', 'you may ignore all Poke-Bodies until the end of your turn', 'USED', 'ONCE ACTIVE',
+  'nobody')
 P('R_JOIN', '[Join]', 'search your deck for a Basic Pokemon or Evolution card', 'USED', 'ONCE BENCH', 'srchk:3')
 P('R_MAGNETIC_CALL', 'Magnetic Call', 'search your deck for a Metal Basic Pokemon', 'USED', 'ONCE',
   'needroom c h.dbench:2')
@@ -163,6 +175,8 @@ P('R_SURPRISE_BITE', 'Surprise Bite', 'This power does 20 damage to that Pokemon
 P('R_ENERVATING_POLLEN', 'Enervating Pollen', 'only reduces damage by 10', 'PASSIVE')
 P('R_PSYCHIC_HP', 'Gaseous Form', 'gets +10 HP for each Psychic Energy card', 'PASSIVE', 'ANY')
 P('R_CONDUCTIVITY', 'Conductivity', 'attaches an Energy card from his or her hand', 'PASSIVE')
+P('R_MAGMA_POOL', 'Magma Pool', 'remove 1 Fire Energy card attached to SELF', 'PASSIVE', 'ANY')
+P('R_VANISH', '[Vanish]', 'return 1 of your Pokemon with Unown in its name', 'PASSIVE')
 P('R_SPIKES', 'Spikes', 'Benched Pokemon becomes his or her Active Pokemon, SELF does 10 damage', 'PASSIVE')
 P('R_CRYSTAL_BODY', 'Crystal Body', "Prevent all effects of your opponent's attacks, other than damage", 'PASSIVE')
 P('R_MIRROR_COAT', 'Mirror Coat', 'becomes Poisoned or Burned by the Defending', 'PASSIVE', 'ANY')

@@ -110,7 +110,13 @@ enum
     TCG_F_EVOLVES_FROM_TARGET,  /* a card that evolves from the Pokemon of yours chosen (action.target) */
     TCG_F_SAME_NAME_BASIC,      /* a Basic Pokemon card named as your Active Pokemon (the attacker) */
     TCG_F_METAL_BASIC,          /* a Metal Basic Pokemon card */
-    TCG_F_FOSSIL_KID,           /* a card that evolves from Mysterious Fossil */              /* (slot) a Pokemon the Technical Machine being played may go on (TcgDuel_TmFits) */
+    TCG_F_FOSSIL_KID,           /* a card that evolves from Mysterious Fossil */
+    TCG_F_GRASS_ENERGY_OTHER,   /* a Grass Energy card attached to another of yours than the power's (Soak Up) */
+    TCG_F_MAGNET_ENERGY,        /* an Energy card attached to a Magnemite, Magneton or Dark Magneton of yours */
+    TCG_F_MAGNET_OTHER,         /* (slot) a Magnemite, Magneton or Dark Magneton, not the holder of the card picked */
+    TCG_F_UNOWN_SLOT,           /* (slot) a Pokemon with Unown in its name */
+    TCG_F_UNOWN_DAMAGED_OTHER,  /* (slot) a damaged Pokemon with Unown in its name, not the power's */
+    TCG_F_PSYCHIC_ENERGY,       /* a Psychic Energy card */              /* (slot) a Pokemon the Technical Machine being played may go on (TcgDuel_TmFits) */
     /* "with Brock in its name" and the like (+ TCG_OWNER_*): a Pokemon card; one of yours in play (slot); another
      * one of yours than the first chosen (slot: the action's target) */
     TCG_F_OWNER_CARD = 100,
@@ -138,7 +144,7 @@ const char *TcgFlow_OwnerWord(unsigned owner);
 /* Whether a card's name is one of a name group's (the regional attacks that name cards: "a card named Gyarados, Dark
  * Gyarados, or Shining Gyarados"): 0 the Gyarados, 1 the Tentacool line and Misty's, 2 Sabrina's Gastly line, 3 the
  * Omanyte and Kabuto lines, 4 Giovanni's Nidoking, 5 Murkrow */
-#define TCG_NAME_GROUPS 6
+#define TCG_NAME_GROUPS 7 /* (6: Magnemite, Magneton, Dark Magneton) */
 int TcgFlow_InNameGroup(const char *name, unsigned group);
 
 struct TcgStep

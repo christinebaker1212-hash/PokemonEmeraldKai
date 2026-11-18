@@ -409,6 +409,105 @@ static int Guards(void)
     printf("PASS Burst, Terrorize, Reflect Shield, Shadow Images, Spikes, Crystal Body, Mirror Coat\n");
     return 0;
 }
+static int Relabel(struct TcgDuel *g, unsigned who, unsigned id);
+/* Soak Up, Electromagnetic Power, [Bear], Magma Pool, Ancient Wind, [Vanish] */
+static int MovePowers(void)
+{
+    struct TcgDuel g;
+    struct TcgAction a;
+    unsigned before, k, seed;
+    int c;
+    if (!Tcg_Card(TCG_CARD_GYM2_38) || !Tcg_Card(TCG_CARD_NEO3_10) || !Tcg_Card(TCG_CARD_NEO3_39) ||
+        !Tcg_Card(TCG_CARD_NEO3_33) || !Tcg_Card(TCG_CARD_ECARD3_1) || !Tcg_Card(TCG_CARD_NEO4_89))
+        return printf("FAIL move powers: a card isn't finished\n"), 1;
+    /* Soak Up: 2 Grass Energy from the Bench onto it */
+    Stage(&g, TCG_CARD_GYM2_38, 0, 1);
+    Attach(&g, 0, 1, TCG_CARD_GRASS_ENERGY, 2);
+    before = g.players[0].field[0].attachedSize;
+    memset(&a, 0, sizeof(a));
+    a.type = TCG_USE_POWER;
+    a.selections[0] = g.players[0].field[1].attached[0], a.selections[1] = g.players[0].field[1].attached[1];
+    a.selectionCount = 2;
+    if (TcgDuel_Apply(&g, &a) != TCG_OK || g.players[0].field[0].attachedSize != before + 2 || g.players[0].field[1].attachedSize)
+        return printf("FAIL Soak Up: %s\n", g.error), 1;
+    /* Electromagnetic Power: to another Magneton, not to Diglett; as often as you like */
+    Stage(&g, TCG_CARD_NEO3_10, 0, 1);
+    g.players[0].cards[g.players[0].field[1].stack[0]] = TCG_CARD_NEO3_10;
+    before = g.players[0].field[0].attachedSize;
+    memset(&a, 0, sizeof(a));
+    a.type = TCG_USE_POWER;
+    a.selections[0] = g.players[0].field[0].attached[0];
+    a.selectionCount = 1;
+    a.target = 2;
+    if (TcgDuel_Apply(&g, &a) == TCG_OK)
+        return printf("FAIL Electromagnetic Power onto Diglett\n"), 1;
+    for (k = 0; k < 2; k++)
+    {
+        a.selections[0] = g.players[0].field[0].attached[0];
+        a.target = 1;
+        if (TcgDuel_Apply(&g, &a) != TCG_OK)
+            return printf("FAIL Electromagnetic Power (%u): %s\n", k, g.error), 1;
+    }
+    if (g.players[0].field[0].attachedSize != before - 2 || g.players[0].field[1].attachedSize != 2)
+        return printf("FAIL Electromagnetic Power: %u / %u\n", g.players[0].field[0].attachedSize, g.players[0].field[1].attachedSize), 1;
+    /* [Bear]: a counter from another Unown onto it */
+    Stage(&g, TCG_CARD_NEO3_39, 0, 1);
+    g.players[0].cards[g.players[0].field[1].stack[0]] = TCG_CARD_NEO3_39;
+    g.players[0].field[0].damage = 0, g.players[0].field[1].damage = 20;
+    memset(&a, 0, sizeof(a));
+    a.type = TCG_USE_POWER;
+    a.target = 1;
+    if (TcgDuel_Apply(&g, &a) != TCG_OK || g.players[0].field[0].damage != 10 || g.players[0].field[1].damage != 10)
+        return printf("FAIL [Bear]: %s\n", g.error), 1;
+    /* Magma Pool: retreating, a Fire Energy follows onto the new Active */
+    Stage(&g, TCG_CARD_NEO3_33, 0, 1);
+    memset(&a, 0, sizeof(a));
+    a.type = TCG_RETREAT;
+    a.slot = 1;
+    for (k = 0; k < g.players[0].field[0].attachedSize && a.selectionCount < Tcg_Card(TCG_CARD_NEO3_33)->retreat; k++)
+        if (g.players[0].cards[g.players[0].field[0].attached[k]] != TCG_CARD_FIRE_ENERGY)
+            a.selections[a.selectionCount++] = g.players[0].field[0].attached[k];
+    if (TcgDuel_Apply(&g, &a) != TCG_OK || g.players[0].field[0].attachedSize != 1 ||
+        g.players[0].cards[g.players[0].field[0].attached[0]] != TCG_CARD_FIRE_ENERGY)
+        return printf("FAIL Magma Pool: %s (%u)\n", g.error, g.players[0].field[0].attachedSize), 1;
+    /* Ancient Wind: their Wobbuffet's Mirror Coat ignored this turn */
+    Stage(&g, TCG_CARD_ECARD3_1, 0, 1);
+    g.players[1].cards[g.players[1].field[0].stack[0]] = TCG_CARD_ECARD3_45;
+    if (TcgPower_Working(&g, 1, 0) != TCG_POWER_R_MIRROR_COAT)
+        return printf("FAIL Mirror Coat isn't working\n"), 1;
+    memset(&a, 0, sizeof(a));
+    a.type = TCG_USE_POWER;
+    if (TcgDuel_Apply(&g, &a) != TCG_OK || TcgPower_Working(&g, 1, 0))
+        return printf("FAIL Ancient Wind: %s\n", g.error), 1;
+    /* [Vanish]: heads, the Unown chosen back to the hand */
+    for (seed = 1, k = 0; seed < 20 && !k; seed++)
+    {
+        Stage(&g, TCG_CARD_MACHOP, 0, seed);
+        g.players[0].cards[g.players[0].field[1].stack[0]] = TCG_CARD_NEO3_39;
+        Attach(&g, 0, 1, TCG_CARD_GRASS_ENERGY, 1);
+        c = Relabel(&g, 0, TCG_CARD_NEO4_89);
+        g.players[0].hand[g.players[0].handSize++] = (uint8_t)c;
+        before = g.players[0].handSize;
+        memset(&a, 0, sizeof(a));
+        a.type = TCG_PLAY_BASIC;
+        a.hand = (uint8_t)(before - 1);
+        a.slot = 3;
+        a.target = 1;
+        a.option = TCG_PLAY_CHOSEN;
+        if (TcgDuel_Apply(&g, &a) != TCG_OK)
+            return printf("FAIL [Vanish]: %s\n", g.error), 1;
+        if (!g.players[0].field[1].stackSize)
+        {
+            if (g.players[0].handSize != before)
+                return printf("FAIL [Vanish]: hand %u\n", g.players[0].handSize), 1;
+            k = 1;
+        }
+    }
+    if (!k)
+        return printf("FAIL [Vanish] never returned the Unown\n"), 1;
+    printf("PASS Soak Up, Electromagnetic Power, [Bear], Magma Pool, Ancient Wind, [Vanish]\n");
+    return 0;
+}
 static int ScriptMechanics(void)
 {
     struct TcgDuel g;
@@ -1224,7 +1323,7 @@ int main(void)
     }
     printf("PASS %u finished regional cards: %u attacks used %u times, then %u AI actions after them\n", ready, used, ok,
            steps);
-    if (SpecialEnergy() || EcardEnergy() || ScriptMechanics() || Anchors() || Guards() || TechnicalMachines() || Babies())
+    if (SpecialEnergy() || EcardEnergy() || ScriptMechanics() || Anchors() || Guards() || MovePowers() || TechnicalMachines() || Babies())
         return 1;
     if (PlayTrainers() || UsePowers() || UseStadiums() || AttackFlows())
         return 1;

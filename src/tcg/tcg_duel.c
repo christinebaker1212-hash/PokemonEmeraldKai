@@ -34,7 +34,10 @@ void TcgDuel_Event(struct TcgDuel *g, unsigned type, unsigned player, unsigned s
     {
         /* The one that went to the Bench loses what lasts only while it's Active (Giant Growth, Shadow Images) */
         if (type != TCG_EV_PROMOTE)
+        {
             g->players[player].field[slot].hpSet = g->players[player].field[slot].guardKeep = 0;
+            TcgPower_ToBench(g, player, slot); /* (Magma Pool) */
+        }
         if (player == g->current && g->phase != TCG_SETUP)
             TcgPower_NewActive(g, player); /* (Spikes) */
     }
@@ -1671,6 +1674,7 @@ int TcgFlow_InNameGroup(const char *name, unsigned group)
         {"Omanyte", "Omastar", "Kabuto", "Kabutops"},
         {"Giovanni's Nidoking"},
         {"Murkrow"},
+        {"Magnemite", "Magneton", "Dark Magneton"},
     };
     unsigned i;
     for (i = 0; group < TCG_NAME_GROUPS && i < 5 && groups[group][i]; i++)

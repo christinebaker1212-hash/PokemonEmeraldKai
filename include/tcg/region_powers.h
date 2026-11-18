@@ -45,6 +45,14 @@
     X(R_SOLAR_POWER, "SOLAR POWER", 1, 1, "cure4:0 cure4:1") \
     X(R_BACKUP, "BACKUP", 1, 1, "needhand:2 drawto:3") \
     X(R_SUBMERGE, "SUBMERGE", 1, 1, "shiftto:3") \
+    X(R_SOAK_UP, "SOAK UP", 1, 1, "pull") \
+    X(R_ELECTROMAGNETIC, "ELECTROMAGNETIC POWER", 1, 0, "emove:4") \
+    X(R_BEAR, "[BEAR]", 1, 9, "ctrin") \
+    X(R_YIELD, "[YIELD]", 1, 9, "c h.spike:5,1") \
+    X(R_HEAT_UP, "HEAT UP", 1, 1, "spike:0,2") \
+    X(R_MIRACLE_SHIFT, "MIRACLE SHIFT", 1, 1, "mshift") \
+    X(R_RECONSTRUCTION, "RECONSTRUCTION", 1, 9, "recon") \
+    X(R_ANCIENT_WIND, "ANCIENT WIND", 1, 3, "nobody") \
     X(R_JOIN, "[JOIN]", 1, 5, "srchk:3") \
     X(R_MAGNETIC_CALL, "MAGNETIC CALL", 1, 1, "needroom c h.dbench:2") \
     X(R_GOOD_NEIGHBOR, "GOOD NEIGHBOR", 1, 5, "c h.healact:2") \
@@ -128,6 +136,8 @@
     X(R_ENERVATING_POLLEN, "ENERVATING POLLEN", 0, 0, NULL) \
     X(R_PSYCHIC_HP, "GASEOUS FORM", 0, 8, NULL) \
     X(R_CONDUCTIVITY, "CONDUCTIVITY", 0, 0, NULL) \
+    X(R_MAGMA_POOL, "MAGMA POOL", 0, 8, NULL) \
+    X(R_VANISH, "[VANISH]", 0, 0, NULL) \
     X(R_SPIKES, "SPIKES", 0, 0, NULL) \
     X(R_CRYSTAL_BODY, "CRYSTAL BODY", 0, 0, NULL) \
     X(R_MIRROR_COAT, "MIRROR COAT", 0, 8, NULL) \

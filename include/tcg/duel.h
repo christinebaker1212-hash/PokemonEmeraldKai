@@ -349,6 +349,8 @@ struct TcgDuel
     /* GB2's: Goop Gas Attack, every Pokemon Power off until the end of this turn (TcgDuel.turn); fromHand: the
      * Pokemon being put into play comes from the hand (Sneak Attack, Reel In...) */
     uint16_t goopGasUntil;
+    /* (Ancient Wind) the turn every Poke-Body is ignored */
+    uint16_t bodiesOffTurn;
     uint8_t fromHand;
     /* a Trainer ended the turn (Computer Error) */
     uint8_t turnOver;
@@ -574,6 +576,8 @@ const char *TcgPower_RetreatBlock(const struct TcgDuel *g, unsigned player);
 void TcgPower_AfterRetreat(struct TcgDuel *g, unsigned player, unsigned benched);
 /* A Benched Pokemon of player's became the Active one (any way: retreat, switch, promotion; tcg_duel.c's event hook) */
 void TcgPower_NewActive(struct TcgDuel *g, unsigned player);
+/* player's Active Pokemon went to Bench slot (Magma Pool) */
+void TcgPower_ToBench(struct TcgDuel *g, unsigned player, unsigned slot);
 int TcgPower_AttackBonus(struct TcgDuel *g, int amount, const struct TcgAttack *attack);
 /* Can't that Pokemon be evolved from the hand now (Primal Aura, Primal Stare) */
 int TcgPower_EvolveBlocked(const struct TcgDuel *g, unsigned player, unsigned slot);

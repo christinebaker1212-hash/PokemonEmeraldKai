@@ -188,6 +188,8 @@ const struct TcgStep *TcgFlow_PlaySteps(unsigned cardId, int *count)
         STEPS({TCG_ST_OPP_SLOT, TCG_F_OCCUPIED, 0, 0, 0, "SURPRISE BITE: 20 damage to which of theirs?"});
     case TCG_POWER_POWER_OF_DARKNESS:
         STEPS({TCG_ST_OPP_SLOT, TCG_F_OCCUPIED, 0, 0, 0, "If heads, which of theirs goes back to their hand?"});
+    case TCG_POWER_R_VANISH:
+        STEPS({TCG_ST_MY_SLOT, TCG_F_UNOWN_SLOT, 0, 0, 0, "If heads, which Unown goes back to your hand?"});
     case TCG_POWER_REEL_IN:
         STEPS({TCG_ST_PICK, TCG_F_POKEMON, TCG_SRC_MY_DISCARD, 0, 3, "REEL IN: take up to 3 Pokemon cards."});
     case TCG_POWER_SUMMON_MINIONS:
@@ -610,6 +612,8 @@ int TcgFlow_CardMatches(const struct TcgDuel *g, unsigned owner, unsigned physic
         return c->id == TCG_CARD_LIGHTNING_ENERGY;
     case TCG_F_GRASS_ENERGY:
         return c->id == TCG_CARD_GRASS_ENERGY;
+    case TCG_F_PSYCHIC_ENERGY:
+        return c->id == TCG_CARD_PSYCHIC_ENERGY;
     case TCG_F_SPECIAL_ENERGY:
         return c->kind == TCG_ENERGY && c->id > 6;
     case TCG_F_SUPPORTER:
@@ -657,6 +661,20 @@ int TcgFlow_PickMatches(const struct TcgDuel *g, unsigned me, const struct TcgAc
         return TcgDuel_EvolvesFrom(Tcg_Card(CardOf(g, owner, physical)),
                                    Field(g, me, filter == TCG_F_EVOLVES_FROM_USER ? a->slot
                                                 : filter == TCG_F_EVOLVES_FROM_TARGET ? a->target : 0));
+    if (filter == TCG_F_GRASS_ENERGY_OTHER || filter == TCG_F_MAGNET_ENERGY)
+    {
+        /* (an attached card: which of yours holds it) */
+        const struct TcgCard *c = Tcg_Card(CardOf(g, owner, physical));
+        unsigned s, k;
+        if (!c || owner != me || (filter == TCG_F_GRASS_ENERGY_OTHER ? c->id != TCG_CARD_GRASS_ENERGY : c->kind != TCG_ENERGY))
+            return 0;
+        for (s = 0; s < TCG_FIELD_SIZE; s++)
+            for (k = 0; k < g->players[me].field[s].attachedSize; k++)
+                if (g->players[me].field[s].attached[k] == physical)
+                    return filter == TCG_F_GRASS_ENERGY_OTHER ? s != a->slot
+                                                              : Field(g, me, s) && TcgFlow_InNameGroup(Field(g, me, s)->name, 6);
+        return 0;
+    }
     if (filter == TCG_F_SAME_NAME_BASIC)
     {
         const struct TcgCard *c = Tcg_Card(CardOf(g, owner, physical)), *active = Field(g, me, 0);
@@ -700,6 +718,14 @@ int TcgFlow_SlotMatches(const struct TcgDuel *g, unsigned me, const struct TcgAc
         const struct TcgCard *picked = a->selectionCount ? Tcg_Card(CardOf(g, me, a->selections[0])) : NULL;
         return c && (!picked || picked->type == c->type);
     }
+    case TCG_F_UNOWN_SLOT:
+        return c && c->kind == TCG_POKEMON && strstr(c->name, "Unown") != NULL;
+    case TCG_F_UNOWN_DAMAGED_OTHER:
+        return c && c->kind == TCG_POKEMON && strstr(c->name, "Unown") != NULL && f->damage && slot != a->slot;
+    case TCG_F_MAGNET_OTHER:
+        if (!c || !TcgFlow_InNameGroup(c->name, 6))
+            return 0;
+        /* fall through */
     case TCG_F_OTHER_HOLDER:
     {
         unsigned i;
@@ -1574,6 +1600,15 @@ unsigned TcgFlow_Slot(struct TcgFlow *f, const struct TcgDuel *g, unsigned slot)
             /* (a power that asks as it comes into play) */
             f->steps = TcgFlow_PlaySteps(f->flowCard, &f->nsteps);
             f->step = 0;
+            if (f->nsteps && f->steps[0].kind == TCG_ST_MY_SLOT)
+            {
+                /* ([Vanish]: nothing to choose, nothing asked) */
+                unsigned k, any = 0;
+                for (k = 0; k < TCG_FIELD_SIZE; k++)
+                    any |= k != slot && TcgFlow_SlotMatches(g, f->me, &f->action, f->flowCard, f->me, k, f->steps[0].filter);
+                if (!any)
+                    f->nsteps = 0;
+            }
             if (f->nsteps)
             {
                 f->action.option |= TCG_PLAY_CHOSEN;

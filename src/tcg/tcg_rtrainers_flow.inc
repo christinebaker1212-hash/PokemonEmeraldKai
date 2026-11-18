@@ -259,6 +259,27 @@ static const struct TcgStep *RegionPowerSteps(unsigned power, int *count)
         STEPS({TCG_ST_PICK, TCG_F_EVOLVES_FROM_USER, TCG_SRC_DECK, 0, 1, "If heads: evolve it into which card?"});
     case TCG_POWER_R_EVOLUTION_HELPER:
         STEPS({TCG_ST_PICK, TCG_F_EVOLVES_FROM_ACTIVE, TCG_SRC_DECK, 1, 1, "Evolve your Active Pokemon into which card?"});
+    case TCG_POWER_R_SOAK_UP:
+        STEPS({TCG_ST_PICK, TCG_F_GRASS_ENERGY_OTHER, TCG_SRC_MY_FIELD_ATTACHED, 1, 2,
+               "Take which Grass Energy (up to 2) from your other Pokemon?"});
+    case TCG_POWER_R_ELECTROMAGNETIC:
+        STEPS({TCG_ST_PICK, TCG_F_MAGNET_ENERGY, TCG_SRC_MY_FIELD_ATTACHED, 1, 1, "Move which Energy?"},
+              {TCG_ST_MY_SLOT, TCG_F_MAGNET_OTHER, 0, 0, 0, "Move it to which Magnemite or Magneton?"});
+    case TCG_POWER_R_BEAR:
+        STEPS({TCG_ST_MY_SLOT, TCG_F_UNOWN_DAMAGED_OTHER, 0, 0, 0, "Move a damage counter from which Unown?"});
+    case TCG_POWER_R_YIELD:
+        STEPS({TCG_ST_PICK, TCG_F_PSYCHIC_ENERGY, TCG_SRC_DECK, 0, 1, "If heads: attach which Psychic Energy?"},
+              {TCG_ST_MY_SLOT, TCG_F_UNOWN_SLOT, 0, 0, 0, "To which Unown?"});
+    case TCG_POWER_R_HEAT_UP:
+        STEPS({TCG_ST_PICK, TCG_F_FIRE_ENERGY, TCG_SRC_DECK, 0, 1, "Attach which Fire Energy?"},
+              {TCG_ST_MY_SLOT, TCG_F_BENCH, 0, 0, 0, "To which Benched Pokemon?"});
+    case TCG_POWER_R_MIRACLE_SHIFT:
+        STEPS({TCG_ST_PICK, TCG_F_BASIC_ENERGY, TCG_SRC_MY_FIELD_ATTACHED, 1, 1, "Discard which basic Energy?"},
+              {TCG_ST_PICK, TCG_F_BASIC_ENERGY, TCG_SRC_MY_DISCARD, 0, 1,
+               "Attach which basic Energy from your discard pile? (none: the one discarded)"});
+    case TCG_POWER_R_RECONSTRUCTION:
+        STEPS({TCG_ST_PICK, TCG_F_OMANYTE_KABUTO, TCG_SRC_DECK, 0, 1, "Take which Omanyte or Kabuto?"},
+              {TCG_ST_PICK, TCG_F_BASIC_ENERGY, TCG_SRC_HAND, 1, 1, "Put which basic Energy into your deck?"});
     case TCG_POWER_R_ENERGY_CONNECT:
         STEPS({TCG_ST_PICK, TCG_F_BASIC_ENERGY, TCG_SRC_MY_BENCH_ATTACHED, 1, 1, "Move which basic Energy to your Active?"});
     }

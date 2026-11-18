@@ -3817,7 +3817,7 @@ const struct TcgCard gTcgCards[TCG_CARD_COUNT + 1] = {
 {.name="",.description="",.effect="NONE",.animation="ATK_ANIM_NONE",.cost={0},.damage=0,.category=TCG_DAMAGE_NORMAL},
 }
 },
-[606] = {.id=606, .name="Erika's Bellsprout", .kind=TCG_POKEMON, .type=1, .rarity=1, .set=14, .set2=255, .dark=0, .holo=0, .flags=TCG_CF_OWNER, .origin=14,
+[606] = {.id=606, .name="Erika's Bellsprout", .kind=TCG_POKEMON, .type=1, .rarity=1, .set=14, .set2=255, .dark=0, .holo=0, .flags=TCG_CF_OWNER|TCG_CF_READY, .origin=14,
 .hp=40, .stage=0, .species=69, .level=13, .retreat=1, .weakness=0, .resistance=255, .evolvesFrom="", .description="", .attacks={
 {.name="Soak Up",.description="Once during your turn (before your attack), you may take up to 2 Grass Energy cards attached to your other Pokemon and attach them to Erika's Bellsprout. This power can't be used if Erika's Bellsprout is Asleep, Confused, or Paralyzed.",.effect="gym2-38:p",.animation="ATK_ANIM_HIT",.cost={0,0,0,0,0,0,0,0,0},.damage=0,.category=TCG_POKEMON_POWER},
 {.name="Stretch Vine",.description="Choose 1 of your opponent's Benched Pokemon, and this attack does 10 damage to it. (Don't apply Weakness and Resistance for Benched Pokemon.)",.effect="gym2-38:a0",.animation="ATK_ANIM_HIT",.cost={0,1,0,0,0,0,0,0,0},.damage=0,.category=TCG_RESIDUAL},
@@ -5543,7 +5543,7 @@ const struct TcgCard gTcgCards[TCG_CARD_COUNT + 1] = {
 {.name="",.description="",.effect="NONE",.animation="ATK_ANIM_NONE",.cost={0},.damage=0,.category=TCG_DAMAGE_NORMAL},
 }
 },
-[884] = {.id=884, .name="Magneton", .kind=TCG_POKEMON, .type=8, .rarity=2, .set=17, .set2=255, .dark=0, .holo=1, .flags=0, .origin=17,
+[884] = {.id=884, .name="Magneton", .kind=TCG_POKEMON, .type=8, .rarity=2, .set=17, .set2=255, .dark=0, .holo=1, .flags=TCG_CF_READY, .origin=17,
 .hp=80, .stage=1, .species=82, .level=37, .retreat=2, .weakness=0, .resistance=1, .evolvesFrom="Magnemite", .description="Three Magnemites are linked by a strong magnetic force. Earaches will occur if you get too close.", .attacks={
 {.name="Electromagnetic Power",.description="As often as you like during your turn (before your attack), you may take 1 Energy card attached to 1 of your Magnemites, Magnetons, or Dark Magnetons and attach it to a different 1 of your Magnemites, Magnetons, and Dark Magnetons. This power can't be used if Magneton is Asleep, Confused, or Paralyzed.",.effect="neo3-10:p",.animation="ATK_ANIM_HIT",.cost={0,0,0,0,0,0,0,0,0},.damage=0,.category=TCG_POKEMON_POWER},
 {.name="Plasma",.description="If there are any Lightning Energy cards in your discard pile, attach 1 of them to Magneton.",.effect="neo3-10:a0",.animation="ATK_ANIM_HIT",.cost={0,0,2,0,0,0,1,0,0},.damage=30,.category=TCG_DAMAGE_NORMAL},
@@ -5704,7 +5704,7 @@ const struct TcgCard gTcgCards[TCG_CARD_COUNT + 1] = {
 {.name="",.description="",.effect="NONE",.animation="ATK_ANIM_NONE",.cost={0},.damage=0,.category=TCG_DAMAGE_NORMAL},
 }
 },
-[907] = {.id=907, .name="Magcargo", .kind=TCG_POKEMON, .type=0, .rarity=1, .set=17, .set2=255, .dark=0, .holo=0, .flags=0, .origin=17,
+[907] = {.id=907, .name="Magcargo", .kind=TCG_POKEMON, .type=0, .rarity=1, .set=17, .set2=255, .dark=0, .holo=0, .flags=TCG_CF_READY, .origin=17,
 .hp=80, .stage=1, .species=219, .level=48, .retreat=3, .weakness=3, .resistance=255, .evolvesFrom="Slugma", .description="The shell on its back is just skin that has cooled and hardened. It breaks easily with a slight touch.", .attacks={
 {.name="Magma Pool",.description="If Magcargo is your Active Pokemon and moves to the Bench, remove 1 Fire Energy card attached to Magcargo, if any, and attach it to the new Active Pokemon. (You can't choose an Energy card that you used to pay the Retreat Cost.)",.effect="neo3-33:p",.animation="ATK_ANIM_HIT",.cost={0,0,0,0,0,0,0,0,0},.damage=0,.category=TCG_POKEMON_POWER},
 {.name="Lava Flow",.description="You may discard any number of Fire Energy cards attached to Magcargo when you use this attack. If you do, this attack does 40 damage plus 20 more damage for each Fire Energy card you discarded in this way.",.effect="neo3-33:a0",.animation="ATK_ANIM_HIT",.cost={3,0,0,0,0,0,0,0,0},.damage=40,.category=TCG_DAMAGE_PLUS},
@@ -5746,14 +5746,14 @@ const struct TcgCard gTcgCards[TCG_CARD_COUNT + 1] = {
 {.name="",.description="",.effect="NONE",.animation="ATK_ANIM_NONE",.cost={0},.damage=0,.category=TCG_DAMAGE_NORMAL},
 }
 },
-[913] = {.id=913, .name="Unown [B]", .kind=TCG_POKEMON, .type=5, .rarity=1, .set=17, .set2=255, .dark=0, .holo=0, .flags=0, .origin=17,
+[913] = {.id=913, .name="Unown [B]", .kind=TCG_POKEMON, .type=5, .rarity=1, .set=17, .set2=255, .dark=0, .holo=0, .flags=TCG_CF_READY, .origin=17,
 .hp=50, .stage=0, .species=201, .level=19, .retreat=1, .weakness=5, .resistance=255, .evolvesFrom="", .description="Their shapes look like hieroglyphs on ancient tablets. It is said that the two are somehow related.", .attacks={
 {.name="[Bear]",.description="Once during your turn (before your attack), you may move 1 damage counter from 1 of your Pokemon with Unown in its name to Unown [B]. This power can't be used if Unown [B] has 10 HP left. This power can be used even if Unown [B] is Asleep, Confused, or Paralyzed.",.effect="neo3-39:p",.animation="ATK_ANIM_HIT",.cost={0,0,0,0,0,0,0,0,0},.damage=0,.category=TCG_POKEMON_POWER},
 {.name="Hidden Power",.description="",.effect="NONE",.animation="ATK_ANIM_HIT",.cost={0,0,0,0,0,1,0,0,0},.damage=10,.category=TCG_DAMAGE_NORMAL},
 {.name="",.description="",.effect="NONE",.animation="ATK_ANIM_NONE",.cost={0},.damage=0,.category=TCG_DAMAGE_NORMAL},
 }
 },
-[914] = {.id=914, .name="Unown [Y]", .kind=TCG_POKEMON, .type=5, .rarity=1, .set=17, .set2=255, .dark=0, .holo=0, .flags=0, .origin=17,
+[914] = {.id=914, .name="Unown [Y]", .kind=TCG_POKEMON, .type=5, .rarity=1, .set=17, .set2=255, .dark=0, .holo=0, .flags=TCG_CF_READY, .origin=17,
 .hp=40, .stage=0, .species=201, .level=12, .retreat=1, .weakness=5, .resistance=255, .evolvesFrom="", .description="Their shapes look like hieroglyphs on ancient tablets. It is said that the two are somehow related.", .attacks={
 {.name="[Yield]",.description="Once during your turn (before your attack), you may flip a coin. If heads, search your deck for a Psychic Energy card and attach it to 1 of your Pokemon with Unown in its name. Shuffle your deck afterward. This power can be used even if Unown [Y] is Asleep, Confused, or Paralyzed.",.effect="neo3-40:p",.animation="ATK_ANIM_HIT",.cost={0,0,0,0,0,0,0,0,0},.damage=0,.category=TCG_POKEMON_POWER},
 {.name="Hidden Power",.description="",.effect="NONE",.animation="ATK_ANIM_HIT",.cost={0,0,0,0,0,1,0,0,0},.damage=10,.category=TCG_DAMAGE_NORMAL},
@@ -6534,7 +6534,7 @@ const struct TcgCard gTcgCards[TCG_CARD_COUNT + 1] = {
 {.name="",.description="",.effect="NONE",.animation="ATK_ANIM_NONE",.cost={0},.damage=0,.category=TCG_DAMAGE_NORMAL},
 }
 },
-[1029] = {.id=1029, .name="Unown [V]", .kind=TCG_POKEMON, .type=5, .rarity=0, .set=18, .set2=255, .dark=0, .holo=0, .flags=0, .origin=18,
+[1029] = {.id=1029, .name="Unown [V]", .kind=TCG_POKEMON, .type=5, .rarity=0, .set=18, .set2=255, .dark=0, .holo=0, .flags=TCG_CF_READY, .origin=18,
 .hp=40, .stage=0, .species=201, .level=10, .retreat=1, .weakness=5, .resistance=255, .evolvesFrom="", .description="It is believed that the variety of types of this Pokemon were created by evolutionary adaptation, as each possesses a different ability.", .attacks={
 {.name="[Vanish]",.description="When you play Unown [V] from your hand, you may flip a coin. If heads, return 1 of your Pokemon with Unown in its name (other than Unown [V]) to your hand. (Discard all cards attached to that card.)",.effect="neo4-89:p",.animation="ATK_ANIM_HIT",.cost={0,0,0,0,0,0,0,0,0},.damage=0,.category=TCG_POKEMON_POWER},
 {.name="Hidden Power",.description="",.effect="NONE",.animation="ATK_ANIM_HIT",.cost={0,0,0,0,0,1,0,0,0},.damage=10,.category=TCG_DAMAGE_NORMAL},
@@ -6842,7 +6842,7 @@ const struct TcgCard gTcgCards[TCG_CARD_COUNT + 1] = {
 {.name="",.description="",.effect="NONE",.animation="ATK_ANIM_NONE",.cost={0},.damage=0,.category=TCG_DAMAGE_NORMAL},
 }
 },
-[1081] = {.id=1081, .name="Typhlosion", .kind=TCG_POKEMON, .type=0, .rarity=2, .set=19, .set2=255, .dark=0, .holo=1, .flags=0, .origin=19,
+[1081] = {.id=1081, .name="Typhlosion", .kind=TCG_POKEMON, .type=0, .rarity=2, .set=19, .set2=255, .dark=0, .holo=1, .flags=TCG_CF_READY, .origin=19,
 .hp=100, .stage=2, .species=157, .level=0, .retreat=2, .weakness=3, .resistance=255, .evolvesFrom="Quilava", .description="", .attacks={
 {.name="Heat Up",.description="Once during your turn (before your attack), you may count the total number of Energy cards attached to all of your Pokemon and all of your opponent's Pokemon. If your opponent has more total Energy cards attached, you may search your deck for 1 Fire Energy card and attach it to 1 of your Benched Pokemon, if any. Shuffle your deck afterward. This power can't be used if Typhlosion is affected by a Special Condition.",.effect="ecard1-28:p",.animation="ATK_ANIM_HIT",.cost={0,0,0,0,0,0,0,0,0},.damage=0,.category=TCG_POKEMON_POWER},
 {.name="Super Singe",.description="Flip a coin. If heads, the Defending Pokemon is now Burned.",.effect="ecard1-28:a0",.animation="ATK_ANIM_HIT",.cost={2,0,0,0,0,0,2,0,0},.damage=50,.category=TCG_DAMAGE_NORMAL},
@@ -7101,7 +7101,7 @@ const struct TcgCard gTcgCards[TCG_CARD_COUNT + 1] = {
 {.name="",.description="",.effect="NONE",.animation="ATK_ANIM_NONE",.cost={0},.damage=0,.category=TCG_DAMAGE_NORMAL},
 }
 },
-[1118] = {.id=1118, .name="Typhlosion", .kind=TCG_POKEMON, .type=0, .rarity=2, .set=19, .set2=255, .dark=0, .holo=0, .flags=0, .origin=19,
+[1118] = {.id=1118, .name="Typhlosion", .kind=TCG_POKEMON, .type=0, .rarity=2, .set=19, .set2=255, .dark=0, .holo=0, .flags=TCG_CF_READY, .origin=19,
 .hp=100, .stage=2, .species=157, .level=0, .retreat=2, .weakness=3, .resistance=255, .evolvesFrom="Quilava", .description="", .attacks={
 {.name="Heat Up",.description="Once during your turn (before your attack), you may count the total number of Energy cards attached to all of your Pokemon and all of your opponent's Pokemon. If your opponent has more total Energy cards attached, you may search your deck for 1 Fire Energy card and attach it to 1 of your Benched Pokemon, if any. Shuffle your deck afterward. This power can't be used if Typhlosion is affected by a Special Condition.",.effect="ecard1-65:p",.animation="ATK_ANIM_HIT",.cost={0,0,0,0,0,0,0,0,0},.damage=0,.category=TCG_POKEMON_POWER},
 {.name="Super Singe",.description="Flip a coin. If heads, the Defending Pokemon is now Burned.",.effect="ecard1-65:a0",.animation="ATK_ANIM_HIT",.cost={2,0,0,0,0,0,2,0,0},.damage=50,.category=TCG_DAMAGE_NORMAL},
@@ -7945,7 +7945,7 @@ const struct TcgCard gTcgCards[TCG_CARD_COUNT + 1] = {
 {.name="",.description="",.effect="NONE",.animation="ATK_ANIM_NONE",.cost={0},.damage=0,.category=TCG_DAMAGE_NORMAL},
 }
 },
-[1251] = {.id=1251, .name="Togetic", .kind=TCG_POKEMON, .type=6, .rarity=2, .set=20, .set2=255, .dark=0, .holo=0, .flags=0, .origin=20,
+[1251] = {.id=1251, .name="Togetic", .kind=TCG_POKEMON, .type=6, .rarity=2, .set=20, .set2=255, .dark=0, .holo=0, .flags=TCG_CF_READY, .origin=20,
 .hp=60, .stage=1, .species=176, .level=0, .retreat=1, .weakness=2, .resistance=4, .evolvesFrom="Togepi", .description="", .attacks={
 {.name="Miracle Shift",.description="Once during your turn (before your attack), discard a basic Energy card attached to 1 of your Pokemon. Then, choose a basic Energy card from your discard pile and attach it to that Pokemon. This power can't be used if Togetic is affected by a Special Condition.",.effect="ecard2-39:p",.animation="ATK_ANIM_HIT",.cost={0,0,0,0,0,0,0,0,0},.damage=0,.category=TCG_POKEMON_POWER},
 {.name="Mini-Metronome",.description="Flip a coin. If heads, choose 1 of the Defending Pokemon's attacks. Mini-Metronome copies that attack except for its Energy cost. (You must still do anything else required in order to use that attack.) (No matter what type the Defending Pokemon is, Togetic is still Colorless.) Togetic performs that attack.",.effect="ecard2-39:a0",.animation="ATK_ANIM_HIT",.cost={0,0,0,0,0,0,1,0,0},.damage=0,.category=TCG_RESIDUAL},
@@ -8831,7 +8831,7 @@ const struct TcgCard gTcgCards[TCG_CARD_COUNT + 1] = {
 {.name="",.description="",.effect="NONE",.animation="ATK_ANIM_NONE",.cost={0},.damage=0,.category=TCG_DAMAGE_NORMAL},
 }
 },
-[1389] = {.id=1389, .name="Togetic", .kind=TCG_POKEMON, .type=6, .rarity=2, .set=20, .set2=255, .dark=0, .holo=1, .flags=0, .origin=20,
+[1389] = {.id=1389, .name="Togetic", .kind=TCG_POKEMON, .type=6, .rarity=2, .set=20, .set2=255, .dark=0, .holo=1, .flags=TCG_CF_READY, .origin=20,
 .hp=60, .stage=1, .species=176, .level=0, .retreat=1, .weakness=2, .resistance=4, .evolvesFrom="Togepi", .description="", .attacks={
 {.name="Miracle Shift",.description="Once during your turn (before your attack), discard a basic Energy card attached to 1 of your Pokemon. Then, choose a basic Energy card from your discard pile and attach it to that Pokemon. This power can't be used if Togetic is affected by a Special Condition.",.effect="ecard2-H27:p",.animation="ATK_ANIM_HIT",.cost={0,0,0,0,0,0,0,0,0},.damage=0,.category=TCG_POKEMON_POWER},
 {.name="Mini-Metronome",.description="Flip a coin. If heads, choose 1 of the Defending Pokemon's attacks. Mini-Metronome copies that attack except for its Energy cost. (You must still do anything else required in order to use that attack.) (No matter what type the Defending Pokemon is, Togetic is still Colorless.) Togetic performs that attack.",.effect="ecard2-H27:a0",.animation="ATK_ANIM_HIT",.cost={0,0,0,0,0,0,1,0,0},.damage=0,.category=TCG_RESIDUAL},
@@ -8873,7 +8873,7 @@ const struct TcgCard gTcgCards[TCG_CARD_COUNT + 1] = {
 {.name="Lightning Storm",.description="Flip a coin. If tails, put 2 damage counters on Zapdos.",.effect="ecard2-H32:a1",.animation="ATK_ANIM_HIT",.cost={0,0,2,0,0,0,2,0,0},.damage=60,.category=TCG_DAMAGE_NORMAL},
 }
 },
-[1395] = {.id=1395, .name="Aerodactyl", .kind=TCG_POKEMON, .type=4, .rarity=2, .set=21, .set2=255, .dark=0, .holo=0, .flags=0, .origin=21,
+[1395] = {.id=1395, .name="Aerodactyl", .kind=TCG_POKEMON, .type=4, .rarity=2, .set=21, .set2=255, .dark=0, .holo=0, .flags=TCG_CF_READY, .origin=21,
 .hp=70, .stage=1, .species=142, .level=0, .retreat=1, .weakness=3, .resistance=255, .evolvesFrom="Mysterious Fossil", .description="", .attacks={
 {.name="Ancient Wind",.description="Once during your turn (before your attack), if Aerodactyl is your Active Pokemon, you may ignore all Poke-Bodies until the end of your turn. This power can't be used if Aerodactyl is affected by a Special Condition.",.effect="ecard3-1:p",.animation="ATK_ANIM_HIT",.cost={0,0,0,0,0,0,0,0,0},.damage=0,.category=TCG_POKEMON_POWER},
 {.name="Rising Lunge",.description="Flip a coin. If heads, this attack does 20 damage plus 20 more damage.",.effect="ecard3-1:a0",.animation="ATK_ANIM_HIT",.cost={0,0,0,0,1,0,1,0,0},.damage=20,.category=TCG_DAMAGE_PLUS},
@@ -9195,7 +9195,7 @@ const struct TcgCard gTcgCards[TCG_CARD_COUNT + 1] = {
 {.name="",.description="",.effect="NONE",.animation="ATK_ANIM_NONE",.cost={0},.damage=0,.category=TCG_DAMAGE_NORMAL},
 }
 },
-[1441] = {.id=1441, .name="Buried Fossil", .kind=TCG_POKEMON, .type=6, .rarity=0, .set=21, .set2=255, .dark=0, .holo=0, .flags=0, .origin=21,
+[1441] = {.id=1441, .name="Buried Fossil", .kind=TCG_POKEMON, .type=6, .rarity=0, .set=21, .set2=255, .dark=0, .holo=0, .flags=TCG_CF_READY, .origin=21,
 .hp=30, .stage=0, .species=0, .level=0, .retreat=1, .weakness=255, .resistance=255, .evolvesFrom="", .description="", .attacks={
 {.name="Reconstruction",.description="Once during your turn (before your attack), if you have a basic Energy card in your hand, you may search your deck for an Omanyte or Kabuto card, show it to your opponent, and put it into your hand. Then put a basic Energy card from your hand into your deck. Shuffle your deck afterward.",.effect="ecard3-47:p",.animation="ATK_ANIM_HIT",.cost={0,0,0,0,0,0,0,0,0},.damage=0,.category=TCG_POKEMON_POWER},
 {.name="",.description="",.effect="NONE",.animation="ATK_ANIM_NONE",.cost={0},.damage=0,.category=TCG_DAMAGE_NORMAL},
