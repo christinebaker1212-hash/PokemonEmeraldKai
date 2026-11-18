@@ -3490,7 +3490,7 @@ const struct TcgCard gTcgCards[TCG_CARD_COUNT + 1] = {
 [540] = {.id=540, .name="Brock", .kind=TCG_TRAINER, .type=6, .rarity=2, .set=13, .set2=255, .dark=0, .holo=0, .flags=TCG_CF_READY, .origin=13, .canon=457,
 .effect="gym1-98:t",.description="Remove 1 damage counter from each of your Pokemon that has any damage counters on it."
 },
-[541] = {.id=541, .name="Charity", .kind=TCG_TRAINER, .type=6, .rarity=2, .set=13, .set2=255, .dark=0, .holo=0, .flags=0, .origin=13,
+[541] = {.id=541, .name="Charity", .kind=TCG_TRAINER, .type=6, .rarity=2, .set=13, .set2=255, .dark=0, .holo=0, .flags=TCG_CF_READY, .origin=13,
 .effect="gym1-99:t",.description="Attach Charity to your Active Pokemon. Unless that Pokemon gets Knocked Out, return Charity to your hand at the end of your turn. If that Pokemon attacks and does damage to the Defending Pokemon, you may reduce that damage by any amount (rounded to the nearest 10)."
 },
 [542] = {.id=542, .name="Erika", .kind=TCG_TRAINER, .type=6, .rarity=2, .set=13, .set2=255, .dark=0, .holo=0, .flags=TCG_CF_READY, .origin=13, .canon=458,
@@ -3544,7 +3544,7 @@ const struct TcgCard gTcgCards[TCG_CARD_COUNT + 1] = {
 [558] = {.id=558, .name="Recall", .kind=TCG_TRAINER, .type=6, .rarity=1, .set=13, .set2=255, .dark=0, .holo=0, .flags=TCG_CF_READY, .origin=13,
 .effect="gym1-116:t",.description="For your attack this turn, your Active Pokemon can use any attack from its Basic Pokemon card or any Evolution card attached to it. (You still have to pay for that attack's Energy cost.)"
 },
-[559] = {.id=559, .name="Sabrina's ESP", .kind=TCG_TRAINER, .type=6, .rarity=1, .set=13, .set2=255, .dark=0, .holo=0, .flags=0, .origin=13,
+[559] = {.id=559, .name="Sabrina's ESP", .kind=TCG_TRAINER, .type=6, .rarity=1, .set=13, .set2=255, .dark=0, .holo=0, .flags=TCG_CF_READY, .origin=13,
 .effect="gym1-117:t",.description="Attach Sabrina's ESP to 1 of your Pokemon with Sabrina in its name. At the end of your turn, discard Sabrina's ESP. If that Pokemon uses and attack that involves flipping coins, Sabrina's ESP lets you re-flip those coins once. If you do, re-flip all the coins."
 },
 [560] = {.id=560, .name="Secret Mission", .kind=TCG_TRAINER, .type=6, .rarity=1, .set=13, .set2=255, .dark=0, .holo=0, .flags=TCG_CF_READY, .origin=13,
@@ -3553,7 +3553,7 @@ const struct TcgCard gTcgCards[TCG_CARD_COUNT + 1] = {
 [561] = {.id=561, .name="Tickling Machine", .kind=TCG_TRAINER, .type=6, .rarity=1, .set=13, .set2=255, .dark=0, .holo=0, .flags=TCG_CF_RSM|TCG_CF_READY, .origin=13,
 .effect="gym1-119:t",.description="Flip a coin. If heads, your opponent sets aside all the cards in his or her hand face down. Nobody may look at those cards. At the end of your opponent's next turn, your opponent puts those cards back into his or her hand. If tails, your turn ends immediately (you can't attack this turn)."
 },
-[562] = {.id=562, .name="Vermilion City Gym", .kind=TCG_TRAINER, .type=6, .rarity=1, .set=13, .set2=255, .dark=0, .holo=0, .flags=TCG_CF_STADIUM, .origin=13,
+[562] = {.id=562, .name="Vermilion City Gym", .kind=TCG_TRAINER, .type=6, .rarity=1, .set=13, .set2=255, .dark=0, .holo=0, .flags=TCG_CF_STADIUM|TCG_CF_READY, .origin=13,
 .effect="gym1-120:t",.description="This card stays in play when you play it. Discard this card if another Stadium card comes into play. Whenever a player attacks with a Pokemon with Lt. Surge in its name, he or she may flip a coin. If heads, and if that Pokemon's attack does damage to the Defending Pokemon (after applying Weakness and Resistance), that attack does 10 more damage to the Defending Pokemon. If tails, the attacking Pokemon does 10 damage to itself in addition to whatever its attack usually does."
 },
 [563] = {.id=563, .name="Blaine's Gamble", .kind=TCG_TRAINER, .type=6, .rarity=0, .set=13, .set2=255, .dark=0, .holo=0, .flags=TCG_CF_READY, .origin=13,
@@ -4296,7 +4296,7 @@ const struct TcgCard gTcgCards[TCG_CARD_COUNT + 1] = {
 [682] = {.id=682, .name="Fuchsia City Gym", .kind=TCG_TRAINER, .type=6, .rarity=1, .set=14, .set2=255, .dark=0, .holo=0, .flags=TCG_CF_STADIUM|TCG_CF_READY, .origin=14,
 .effect="gym2-114:t",.description="This card stays in play after being played. Discard this card if another Stadium card comes into play. Once during each player's turn (before attacking), that player may flip a coin. If heads, that player may shuffle 1 of his or her Pokemon in play with Koga in its name and any cards attached to it into his or her deck."
 },
-[683] = {.id=683, .name="Koga's Ninja Trick", .kind=TCG_TRAINER, .type=6, .rarity=1, .set=14, .set2=255, .dark=0, .holo=0, .flags=0, .origin=14,
+[683] = {.id=683, .name="Koga's Ninja Trick", .kind=TCG_TRAINER, .type=6, .rarity=1, .set=14, .set2=255, .dark=0, .holo=0, .flags=TCG_CF_READY, .origin=14,
 .effect="gym2-115:t",.description="Attach Koga's Ninja Trick to your Active Pokemon with Koga in its name. If this Pokemon goes to your Bench, discard this card. When your opponent attacks, you may switch this Pokemon with 1 of your Benched Pokemon (before damage or other effects of attacks)."
 },
 [684] = {.id=684, .name="Master Ball", .kind=TCG_TRAINER, .type=6, .rarity=1, .set=14, .set2=255, .dark=0, .holo=0, .flags=TCG_CF_READY, .origin=14, .canon=437,

@@ -756,6 +756,8 @@ int TcgFlow_SlotMatches(const struct TcgDuel *g, unsigned me, const struct TcgAc
         return c && f->stackSize >= 2;
     case TCG_F_NO_TOOL:
         return c && c->kind == TCG_POKEMON && !TcgDuel_Tool(g, who, slot, NULL);
+    case TCG_F_ACTIVE_NO_TOOL:
+        return c && c->kind == TCG_POKEMON && slot == 0 && !TcgDuel_Tool(g, who, slot, NULL);
     case TCG_F_TM_FITS:
         return TcgDuel_TmFits(g, who, slot, Tcg_Card(flowCard));
     case TCG_F_OTHER_MINE:
@@ -1248,13 +1250,39 @@ unsigned TcgFlow_TrainerChoices(const struct TcgDuel *g, unsigned me, unsigned c
         }
         return m->count;
     }
-    if (g->phase == TCG_CHOICE && (g->choiceKind == TCG_CHOICE_RETURN_MON || g->choiceKind == TCG_CHOICE_FLEE))
+    if (g->phase == TCG_CHOICE && g->choiceKind == TCG_CHOICE_ESP)
+    {
+        /* (the coins it saw, then KEEP / RE-FLIP) */
+        static char keep[64];
+        unsigned k, n = 0;
+        memset(m, 0, sizeof(*m));
+        *reason = NULL;
+        n = (unsigned)snprintf(keep, sizeof(keep), "KEEP:");
+        for (k = 0; k < g->espCoins && k < 10 && n < sizeof(keep) - 3; k++)
+            n += (unsigned)snprintf(keep + n, sizeof(keep) - n, " %c", (g->espBits >> k) & 1 ? 'H' : 'T');
+        MenuAdd(m, keep, 0, 1, NULL);
+        MenuAdd(m, "RE-FLIP ALL", 1, 1, NULL);
+        return m->count;
+    }
+    if (g->phase == TCG_CHOICE && g->choiceKind == TCG_CHOICE_CHARITY)
+    {
+        static const char *const less[] = {"FULL DAMAGE", "10 LESS", "20 LESS", "30 LESS", "40 LESS", "50 LESS", "60 LESS",
+                                           "70 LESS", "80 LESS", "90 LESS", "100 LESS", "110 LESS", "120 LESS"};
+        unsigned k;
+        memset(m, 0, sizeof(*m));
+        *reason = NULL;
+        for (k = 0; k <= g->choiceData && k < sizeof(less) / sizeof(less[0]); k++)
+            MenuAdd(m, less[k], k, 1, NULL);
+        return m->count;
+    }
+    if (g->phase == TCG_CHOICE && (g->choiceKind == TCG_CHOICE_RETURN_MON || g->choiceKind == TCG_CHOICE_FLEE ||
+                                   g->choiceKind == TCG_CHOICE_NINJA))
     {
         unsigned s2;
         memset(m, 0, sizeof(*m));
         *reason = NULL;
-        MenuAdd(m, g->choiceKind == TCG_CHOICE_FLEE ? "STAY" : "DONE", 7, 1, NULL);
-        for (s2 = g->choiceKind == TCG_CHOICE_FLEE; s2 < TCG_FIELD_SIZE; s2++)
+        MenuAdd(m, g->choiceKind == TCG_CHOICE_RETURN_MON ? "DONE" : "STAY", 7, 1, NULL);
+        for (s2 = g->choiceKind != TCG_CHOICE_RETURN_MON; s2 < TCG_FIELD_SIZE; s2++)
             if (Field(g, g->choicePlayer, s2))
                 MenuAdd(m, Field(g, g->choicePlayer, s2)->name, s2, 1, NULL);
         return m->count;
@@ -1270,7 +1298,8 @@ unsigned TcgFlow_TrainerChoices(const struct TcgDuel *g, unsigned me, unsigned c
     if (Tcg_EnergyRule(cardId) == TCG_ER_RETRO ||
         (g->phase == TCG_CHOICE && (g->choiceKind == TCG_CHOICE_REDRAW4 || g->choiceKind == TCG_CHOICE_SHUFFLE_THEIRS ||
                                     g->choiceKind == TCG_CHOICE_IMPOSTOR || g->choiceKind == TCG_CHOICE_WISH_ASK ||
-                                    g->choiceKind == TCG_CHOICE_MANTLE_YES || g->choiceKind == TCG_CHOICE_HOWL_YES)))
+                                    g->choiceKind == TCG_CHOICE_MANTLE_YES || g->choiceKind == TCG_CHOICE_HOWL_YES ||
+                                    g->choiceKind == TCG_CHOICE_VERMILION)))
     {
         /* (Retro Energy: "you may") */
         memset(m, 0, sizeof(*m));

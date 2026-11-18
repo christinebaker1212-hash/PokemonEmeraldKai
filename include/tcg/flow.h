@@ -127,7 +127,8 @@ enum
     TCG_F_ON_DATA_SLOT,         /* an Energy card attached to the Pokemon of yours in slot choiceData */
     TCG_F_EVOLVES_FROM_DATA,    /* a card that evolves from the Pokemon of yours in slot choiceData */
     TCG_F_EEVEE_TYPE,           /* a card that evolves from Eevee in slot choiceData & 15, of the type choiceData >> 4 */
-    TCG_F_SPORE_SLOT,           /* (slot) a Hoppip or Skiploom not chosen yet (choiceData's bits) */              /* (slot) a Pokemon the Technical Machine being played may go on (TcgDuel_TmFits) */
+    TCG_F_SPORE_SLOT,           /* (slot) a Hoppip or Skiploom not chosen yet (choiceData's bits) */
+    TCG_F_ACTIVE_NO_TOOL,       /* (slot) the Active Pokemon, without a Pokemon Tool */              /* (slot) a Pokemon the Technical Machine being played may go on (TcgDuel_TmFits) */
     /* "with Brock in its name" and the like (+ TCG_OWNER_*): a Pokemon card; one of yours in play (slot); another
      * one of yours than the first chosen (slot: the action's target) */
     TCG_F_OWNER_CARD = 100,

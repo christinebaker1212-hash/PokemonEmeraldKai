@@ -1662,6 +1662,107 @@ static int LastRules(void)
     printf("PASS last rules: Flee, Bench Guard, Legendary Body, [Keep], Brock's Protection, Ecogym, Pokemon Tower, Allergic Pollen, Time Shard, EXP.ALL, Super Metronome\n");
     return 0;
 }
+/* Koga's Ninja Trick, Vermilion City Gym, Sabrina's ESP, Charity: answered before / after an attack (the attack held) */
+static int HeldAttacks(void)
+{
+    struct TcgDuel g;
+    struct TcgAction a;
+    unsigned seed, base = 0, baseSelf = 0, seen = 0;
+    int c;
+    /* Ninja Trick: their Koga's Grimer switches out first; the attack hits the Machop that came in */
+    Stage(&g, TCG_CARD_MACHOP, 0, 1);
+    Prizes3(&g);
+    g.players[0].field[0].poison = 0;
+    g.players[1].cards[g.players[1].field[0].stack[0]] = TCG_CARD_GYM2_78;
+    AttachTool(&g, 1, 0, TCG_CARD_GYM2_115);
+    memset(&a, 0, sizeof(a));
+    a.type = TCG_ATTACK;
+    if (TcgDuel_Apply(&g, &a) != TCG_OK || g.phase != TCG_CHOICE || g.choiceKind != TCG_CHOICE_NINJA || g.choicePlayer != 1)
+        return printf("FAIL Ninja Trick: not asked (%s)\n", g.error), 1;
+    Choose(&g, 1, -1);
+    if (g.players[1].cards[g.players[1].field[1].stack[0]] != TCG_CARD_GYM2_78 || g.players[1].field[1].damage ||
+        !g.players[1].field[0].damage || TcgDuel_AttachedCard(&g, 1, 1, TCG_CARD_GYM2_115) >= 0 || g.current != 1)
+        return printf("FAIL Ninja Trick: the switch or the attack\n"), 1;
+    /* Vermilion City Gym: NO, the attack as it is; YES, heads 10 more or tails 10 to the attacker */
+    for (seed = 1; seed < 40 && seen != 3; seed++)
+    {
+        unsigned yes;
+        for (yes = 0; yes < 2; yes++)
+        {
+            Stage(&g, TCG_CARD_GYM1_52, 0, seed);
+            Prizes3(&g);
+            for (c = 0; c < 2; c++)
+                g.players[c].field[0].poison = g.players[c].field[0].burned = 0, g.players[c].field[0].condition = TCG_HEALTHY,
+                g.players[c].field[0].damage = 0;
+            c = Relabel(&g, 0, TCG_CARD_GYM1_120);
+            g.players[0].stadium = (uint8_t)(c + 1);
+            memset(&a, 0, sizeof(a));
+            a.type = TCG_ATTACK;
+            if (TcgDuel_Apply(&g, &a) != TCG_OK || g.choiceKind != TCG_CHOICE_VERMILION || g.phase != TCG_CHOICE)
+                return printf("FAIL Vermilion City Gym: not asked (%s)\n", g.error), 1;
+            Choose(&g, yes, -1);
+            if (!yes)
+                base = g.players[1].field[0].damage, baseSelf = g.players[0].field[0].damage;
+            else if (g.players[1].field[0].damage == base + 10 && g.players[0].field[0].damage == baseSelf)
+                seen |= 1;
+            else if (g.players[1].field[0].damage == base && g.players[0].field[0].damage == baseSelf + 10)
+                seen |= 2;
+            else
+                return printf("FAIL Vermilion City Gym: %u / %u (base %u, seed %u, last log %s)\n", g.players[1].field[0].damage,
+                              g.players[0].field[0].damage, base, seed, g.error), 1;
+        }
+    }
+    if (seen != 3)
+        return printf("FAIL Vermilion City Gym: outcomes %u\n", seen), 1;
+    /* Sabrina's ESP: KEEP gives the coins it showed; RE-FLIP flips them anew */
+    for (seed = 1, seen = 0; seed < 60 && seen != 3; seed++)
+    {
+        unsigned again;
+        for (again = 0; again < 2; again++)
+        {
+            uint32_t shown;
+            Stage(&g, TCG_CARD_GYM2_94, 1, seed);
+            Prizes3(&g);
+            g.players[0].field[0].poison = 0;
+            AttachTool(&g, 0, 0, TCG_CARD_GYM1_117);
+            memset(&a, 0, sizeof(a));
+            a.type = TCG_ATTACK;
+            a.attack = 1;
+            if (TcgDuel_Apply(&g, &a) != TCG_OK || g.choiceKind != TCG_CHOICE_ESP || g.phase != TCG_CHOICE || !g.espCoins)
+                return printf("FAIL Sabrina's ESP: not asked (%s)\n", g.error), 1;
+            shown = g.espBits;
+            Choose(&g, again, -1);
+            if (g.phase == TCG_CHOICE)
+                return printf("FAIL Sabrina's ESP: still asking\n"), 1;
+            if (!again && g.coinBits != shown)
+                return printf("FAIL Sabrina's ESP: KEEP changed the coins\n"), 1;
+            if (again)
+                seen |= g.coinBits != shown ? 1 : 2;
+        }
+    }
+    if (!(seen & 1))
+        return printf("FAIL Sabrina's ESP: RE-FLIP never changed the coins\n"), 1;
+    if (TcgDuel_AttachedCard(&g, 0, 0, TCG_CARD_GYM1_117) >= 0)
+        return printf("FAIL Sabrina's ESP: not discarded as the turn ended\n"), 1;
+    /* Charity: 10 less of the damage done; back to the hand as the turn ends */
+    Stage(&g, TCG_CARD_MACHOP, 0, 1);
+    Prizes3(&g);
+    g.players[0].field[0].poison = 0;
+    AttachTool(&g, 0, 0, TCG_CARD_GYM1_99);
+    base = g.players[0].handSize;
+    memset(&a, 0, sizeof(a));
+    a.type = TCG_ATTACK;
+    if (TcgDuel_Apply(&g, &a) != TCG_OK || g.choiceKind != TCG_CHOICE_CHARITY || g.phase != TCG_CHOICE || !g.choiceData)
+        return printf("FAIL Charity: not asked (%s)\n", g.error), 1;
+    {
+        unsigned dealt = g.players[1].field[0].damage;
+        Choose(&g, 1, -1);
+        if (g.players[1].field[0].damage != dealt - 10 || g.players[0].handSize != base + 1 || g.current != 1)
+            return printf("FAIL Charity: %u of %u, hand %u\n", g.players[1].field[0].damage, dealt, g.players[0].handSize), 1;
+    }
+    printf("PASS held attacks: Koga's Ninja Trick, Vermilion City Gym (both coins), Sabrina's ESP (KEEP, RE-FLIP), Charity\n");
+    return 0;
+}
 static int Choices(void)
 {
     struct TcgDuel g;
@@ -2499,7 +2600,7 @@ int main(void)
     unsigned id, attack, used = 0, ok = 0, steps = 0, ready = 0;
     uint32_t seed;
     if (getenv("TCG_ONLY_LAST"))
-        return LastRules(); /* (the newest rules alone, while translating) */
+        return HeldAttacks() || LastRules(); /* (the newest rules alone, while translating) */
     for (id = TCG_CARD_GB_COUNT + 1; id <= TCG_CARD_COUNT; id++)
     {
         const struct TcgCard *c = Tcg_Card(id);
@@ -2579,7 +2680,7 @@ int main(void)
     }
     printf("PASS %u finished regional cards: %u attacks used %u times, then %u AI actions after them\n", ready, used, ok,
            steps);
-    if (SpecialEnergy() || EcardEnergy() || ScriptMechanics() || Anchors() || Guards() || MovePowers() || LookPowers() || SwitchesAndFire() || BorrowedAttacks() || Copies() || PowersOfFour() || Choices() || Peeks() || MoreChoices() || MoreRules() || EvenMoreRules() || QuizzesAndPlays() || LastRules() || TechnicalMachines() || Babies())
+    if (SpecialEnergy() || EcardEnergy() || ScriptMechanics() || Anchors() || Guards() || MovePowers() || LookPowers() || SwitchesAndFire() || BorrowedAttacks() || Copies() || PowersOfFour() || Choices() || Peeks() || MoreChoices() || MoreRules() || EvenMoreRules() || QuizzesAndPlays() || LastRules() || HeldAttacks() || TechnicalMachines() || Babies())
         return 1;
     if (PlayTrainers() || UsePowers() || UseStadiums() || AttackFlows())
         return 1;

@@ -63,6 +63,13 @@ int TcgDuel_Trainer(struct TcgDuel *g, const struct TcgAction *a)
         return Fail(g, "Attach it to one of your Pokemon without a Pokemon Tool.");
     if ((card->flags & TCG_CF_TM) && (a->slot >= TCG_FIELD_SIZE || !TcgDuel_TmFits(g, g->current, a->slot, card)))
         return Fail(g, "Attach it to one of your Pokemon it names.");
+    /* (Charity on the Active; Koga's Ninja Trick on an Active with Koga in its name; Sabrina's ESP on one with Sabrina) */
+    if ((id == TCG_CARD_GYM1_99 || id == TCG_CARD_GYM2_115) && a->slot != 0)
+        return Fail(g, "Attach it to your Active Pokemon.");
+    if (id == TCG_CARD_GYM2_115 && !strstr(TcgDuel_Field(g, g->current, 0)->name, "Koga"))
+        return Fail(g, "Attach it to your Active Pokemon with Koga in its name.");
+    if (id == TCG_CARD_GYM1_117 && !strstr(TcgDuel_Field(g, g->current, a->slot)->name, "Sabrina"))
+        return Fail(g, "Attach it to one of your Pokemon with Sabrina in its name.");
     /* The transactional caller restores all piles if any selection is invalid. */
     TcgPile_Remove(p->hand, &p->handSize, a->hand);
     TcgDuel_Event(g, TCG_EV_TRAINER, g->current, a->slot, 0, id, 0);

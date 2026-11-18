@@ -145,6 +145,11 @@ static const struct TcgStep *RegionTrainerSteps(unsigned id, int *count)
         STEPS({TCG_ST_PICK, TCG_F_BASIC_NOT_BABY, TCG_SRC_DECK, 0, 1, "Put which Basic Pokemon onto your Bench?"});
     case TCG_CARD_GYM2_18:
         STEPS({TCG_ST_MY_SLOT, TCG_F_OWNER_SLOT + TCG_OWNER_GIOVANNI, 0, 0, 0, "Which Giovanni Pokemon may evolve?"});
+    case TCG_CARD_GYM1_99:   /* Charity, Koga's Ninja Trick: on the Active */
+    case TCG_CARD_GYM2_115:
+        STEPS({TCG_ST_MY_SLOT, TCG_F_ACTIVE_NO_TOOL, 0, 0, 0, "Attach it to your Active Pokemon."});
+    case TCG_CARD_GYM1_117:
+        STEPS({TCG_ST_MY_SLOT, TCG_F_OWNER_SLOT + TCG_OWNER_SABRINA, 0, 0, 0, "Attach it to which Sabrina Pokemon?"});
     }
     if (Tcg_Card(id) && (Tcg_Card(id)->flags & TCG_CF_TOOL))
         STEPS({TCG_ST_MY_SLOT, TCG_F_NO_TOOL, 0, 0, 0, "Attach it to which Pokemon?"});
@@ -166,6 +171,14 @@ static int RegionTrainerPlayable(const struct TcgDuel *g, unsigned me, const str
         return snprintf(reason, size, "That Stadium is already in play."), 0;
     switch (id)
     {
+    case TCG_CARD_GYM2_115:
+        if (!p->field[0].stackSize || !strstr(TcgDuel_Field(g, me, 0)->name, "Koga") || TcgDuel_Tool(g, me, 0, NULL))
+            return snprintf(reason, size, "Your Active Pokemon must have Koga in its name and no Tool."), 0;
+        return 1;
+    case TCG_CARD_GYM1_99:
+        if (TcgDuel_Tool(g, me, 0, NULL))
+            return snprintf(reason, size, "Your Active Pokemon already has a Pokemon Tool."), 0;
+        return 1;
     case TCG_CARD_GYM1_17:
     case TCG_CARD_NEO2_74:
     case TCG_CARD_ECARD2_130:
@@ -404,6 +417,14 @@ const struct TcgStep *TcgFlow_ChoiceSteps(const struct TcgDuel *g, int *count)
         STEPS({TCG_ST_PICK, TCG_F_EVOLVES_FROM_DATA, TCG_SRC_DECK, 0, 1, "Star Piece: evolve it into which card?"});
     case TCG_CHOICE_FLEE:
         STEPS({TCG_ST_CHOICE, 0, 0, 0, 0, "Flee: switch Misty's Tentacruel with which Benched Pokemon?"});
+    case TCG_CHOICE_NINJA:
+        STEPS({TCG_ST_CHOICE, 0, 0, 0, 0, "Koga's Ninja Trick: switch before their attack?"});
+    case TCG_CHOICE_VERMILION:
+        STEPS({TCG_ST_CHOICE, 0, 0, 0, 0, "Vermilion City Gym: flip? Heads, 10 more damage; tails, 10 to yours."});
+    case TCG_CHOICE_ESP:
+        STEPS({TCG_ST_CHOICE, 0, 0, 0, 0, "Sabrina's ESP: keep these coins, or flip them all again?"});
+    case TCG_CHOICE_CHARITY:
+        STEPS({TCG_ST_CHOICE, 0, 0, 0, 0, "Charity: reduce the damage you just did?"});
     case TCG_CHOICE_QUIZ1:
         STEPS({TCG_ST_CHOICE, 0, 0, 0, 0, "Blaine's Quiz #1: how long is the Pokemon named?"});
     case TCG_CHOICE_QUIZ3:

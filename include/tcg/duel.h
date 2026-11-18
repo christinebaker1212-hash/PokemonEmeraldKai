@@ -227,7 +227,15 @@ enum
     TCG_CHOICE_STAR_PIECE,       /* Star Piece: an evolution from the deck for the Benched one in slot choiceData */
     TCG_CHOICE_QUIZ1,            /* Blaine's Quiz #1: the length of their card (choiceData) guessed among 4 */
     TCG_CHOICE_QUIZ3,            /* Blaine's Quiz #3: the name of their card (choiceData) guessed among 4 */
-    TCG_CHOICE_FLEE              /* Misty's Tentacruel's Flee: switch it with one of the Bench (7: stay) */
+    TCG_CHOICE_FLEE,             /* Misty's Tentacruel's Flee: switch it with one of the Bench (7: stay) */
+    TCG_CHOICE_NINJA,            /* Koga's Ninja Trick, before their attack: switch with one of the Bench (7: stay) */
+    TCG_CHOICE_VERMILION,        /* Vermilion City Gym: flip a coin for the Lt. Surge Pokemon's attack (1 yes, 0 no) */
+    TCG_CHOICE_ESP,              /* Sabrina's ESP: the attack's coins kept (0) or all re-flipped (1) */
+    TCG_CHOICE_CHARITY,          /* Charity: the attack's damage to the Defending Pokemon reduced by 10 x target */
+    TCG_CHOICE_NARROW,           /* Narrow Gym: a Benched Pokemon of 5 back to the hand */
+    TCG_CHOICE_PSY_COPY,         /* Misty's Psyduck's ESP (3 heads): which of the Defending Pokemon's attacks */
+    TCG_CHOICE_CONTROL_PICK,     /* Sabrina's Psychic Control: a Trainer from their discard pile to use (7: none) */
+    TCG_CHOICE_CHAOS_USE         /* Chaos Gym (tails): the other player uses the Trainer instead (1) or not (0) */
 };
 /* Pokemon Powers (src/tcg/tcg_powers.c), by the card's power. */
 enum TcgPowerId
@@ -407,6 +415,19 @@ struct TcgEvent
     uint16_t value, card;
 };
 #define TCG_EVENT_RING 64
+struct TcgAction
+{
+    uint8_t type, hand, slot, attack, target;
+    /* An attack's choice from a list (TcgDuel_AttackOptions): Amnesia's attack, Wildfire's count, Conversion's
+     * type, Prophecy's and Devolution Beam's side (0 yours, 1 theirs); copy: Metronome's attack + 1 */
+    uint8_t option, copy;
+    /* Caller-selected physical cards used for discards/search/retrieval.
+     * Selections are validated; no hidden target is silently chosen for a player. */
+    uint8_t selections[TCG_DECK_SIZE], selectionCount;
+};
+#define TCG_HELD_NINJA 1
+#define TCG_HELD_VERMILION 2
+#define TCG_HELD_ESP 4
 struct TcgDuel
 {
     struct TcgPlayer players[2];
@@ -434,6 +455,14 @@ struct TcgDuel
      * Tower: tcg_duel.c Undo); attackTurn: the turn an attack is resolving in (Time Shard, EXP.ALL) */
     uint8_t effectFrom;
     uint16_t attackTurn;
+    /* An attack held while a player answers before it resolves (Koga's Ninja Trick, Vermilion City Gym, Sabrina's ESP):
+     * the action; heldAsked what was asked already (TCG_HELD_*), heldPending: waiting, heldResuming: resuming it now;
+     * vermilion: Vermilion City Gym's coin for it (0 none, 1 heads, 2 tails); espCoins / espBits: the coins Sabrina's
+     * ESP looked at (heads as bits); coinCount / coinBits: the coins of the action so far */
+    struct TcgAction heldAttack;
+    uint8_t heldAsked, heldPending, heldResuming, vermilion, espCoins;
+    uint32_t espBits, coinBits;
+    uint16_t coinCount;
     uint16_t choiceCard;
     /* (also within one attack) nothing it does reaches the Defending Pokemon: Agility and
      * the like, Neutralizing Shield, a heads for Transparency */
@@ -456,16 +485,6 @@ struct TcgDuel
     uint8_t animationKind;
     uint32_t eventSeq;
     struct TcgEvent events[TCG_EVENT_RING];
-};
-struct TcgAction
-{
-    uint8_t type, hand, slot, attack, target;
-    /* An attack's choice from a list (TcgDuel_AttackOptions): Amnesia's attack, Wildfire's count, Conversion's
-     * type, Prophecy's and Devolution Beam's side (0 yours, 1 theirs); copy: Metronome's attack + 1 */
-    uint8_t option, copy;
-    /* Caller-selected physical cards used for discards/search/retrieval.
-     * Selections are validated; no hidden target is silently chosen for a player. */
-    uint8_t selections[TCG_DECK_SIZE], selectionCount;
 };
 int TcgDuel_Init(struct TcgDuel *g, const uint16_t a[60], const uint16_t b[60], uint32_t seed, unsigned prizes);
 int TcgDuel_Apply(struct TcgDuel *g, const struct TcgAction *action);

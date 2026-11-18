@@ -206,6 +206,13 @@ static int ChoiceHasAny(const struct TcgDuel *g, unsigned player, unsigned kind)
         return ChoiceInPlay(g, player) != 0;
     case TCG_CHOICE_FLEE:
         return BenchCount(g, player) && !TcgDuel_Anchored(g, player);
+    case TCG_CHOICE_NINJA:
+        return BenchCount(g, player) != 0;
+    case TCG_CHOICE_VERMILION:
+    case TCG_CHOICE_ESP:
+        return 1;
+    case TCG_CHOICE_CHARITY:
+        return g->choiceData != 0;
     case TCG_CHOICE_DISCARD2:
         return p->handSize != 0;
     case TCG_CHOICE_TEXTURE_WEAK:
@@ -674,6 +681,47 @@ int TcgDuel_Choose(struct TcgDuel *g, const struct TcgAction *a)
             Evolve(g, who, g->choiceData, (unsigned)at);
         }
         TcgDuel_Shuffle(g, who);
+        break;
+    }
+    case TCG_CHOICE_NINJA:
+    {
+        /* Koga's Ninja Trick: switched with a Benched one before the attack (7: it stays); on the Bench, it's discarded */
+        int trick;
+        if (a->target == 7)
+            break;
+        if (a->target < 1 || a->target >= TCG_FIELD_SIZE || !p->field[a->target].stackSize)
+            return ChoiceFail(g, "Choose one of your Benched Pokemon.");
+        Switch(g, who, a->target);
+        TcgDuel_Event(g, TCG_EV_SWITCH, who, a->target, 0, 0, 0);
+        if ((trick = TcgDuel_AttachedCard(g, who, a->target, TCG_CARD_GYM2_115)) >= 0)
+            TcgDuel_DiscardAttached(g, who, a->target, (unsigned)trick);
+        TcgDuel_Log(g, "Koga's Ninja Trick: a switch before the attack.");
+        break;
+    }
+    case TCG_CHOICE_VERMILION:
+        /* (1: flip; heads 10 more after Weakness and Resistance, tails 10 to the attacker: tcg_duel.c) */
+        if (a->target > 1)
+            return ChoiceFail(g, "Choose YES or NO.");
+        if (a->target)
+            g->vermilion = TcgDuel_Coin(g, who) ? 1 : 2;
+        break;
+    case TCG_CHOICE_ESP:
+        /* (1: every coin flipped again: the coins the look used are skipped) */
+        if (a->target > 1)
+            return ChoiceFail(g, "Choose KEEP or RE-FLIP.");
+        if (a->target)
+            for (k = 0; k < g->espCoins; k++)
+                Tcg_RandomBelow(&g->rng, 2);
+        TcgDuel_Log(g, a->target ? "Sabrina's ESP: the coins are flipped again." : "Sabrina's ESP: the coins stand.");
+        break;
+    case TCG_CHOICE_CHARITY:
+    {
+        /* Charity: the damage just done to the Defending Pokemon, 10 x target less */
+        struct TcgFieldCard *d = &g->players[who ^ 1].field[0];
+        unsigned off = 10u * (a->target > g->choiceData ? g->choiceData : a->target);
+        d->damage = (uint16_t)(d->damage > off ? d->damage - off : 0);
+        if (off)
+            TcgDuel_Log(g, "Charity: %u less damage.", off);
         break;
     }
     case TCG_CHOICE_FLEE:
@@ -1238,6 +1286,27 @@ void TcgDuel_AiChoose(const struct TcgDuel *g, struct TcgAction *a)
     case TCG_CHOICE_QUIZ1:
     case TCG_CHOICE_QUIZ3:
         a->target = (uint8_t)(g->turn % 4);   /* (a guess) */
+        break;
+    case TCG_CHOICE_NINJA:
+    {
+        /* (out of the way when the Active has 30 HP or less left: the healthiest Benched one in) */
+        unsigned s, best = 7;
+        if (TcgDuel_MaxHp(g, who, 0) - p->field[0].damage <= 30)
+            for (s = 1; s < TCG_FIELD_SIZE; s++)
+                if (p->field[s].stackSize &&
+                    (best == 7 || TcgDuel_MaxHp(g, who, s) - p->field[s].damage > TcgDuel_MaxHp(g, who, best) - p->field[best].damage))
+                    best = s;
+        a->target = (uint8_t)best;
+        break;
+    }
+    case TCG_CHOICE_VERMILION:
+        a->target = TcgDuel_MaxHp(g, who, 0) - p->field[0].damage > 10;   /* (unless tails would Knock it Out) */
+        break;
+    case TCG_CHOICE_ESP:
+        a->target = (unsigned)__builtin_popcount(g->espBits) * 2 < g->espCoins;   /* (fewer heads than tails: again) */
+        break;
+    case TCG_CHOICE_CHARITY:
+        a->target = 0;
         break;
     case TCG_CHOICE_FLEE:
     {

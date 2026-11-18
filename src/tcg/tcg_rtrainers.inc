@@ -625,6 +625,9 @@ static int RegionTrainer(struct TcgDuel *g, const struct TcgAction *a, unsigned 
     case TCG_CARD_ECARD2_128: /* Memory Berry (its attacks: tcg_duel.c Borrowed) */
     case TCG_CARD_ECARD3_139: /* Star Piece (between turns: tcg_duel.c EndTurn) */
     case TCG_CARD_ECARD2_135: /* Time Shard (tcg_duel.c KnockedOutByAttack) */
+    case TCG_CARD_GYM1_99:    /* Charity, Sabrina's ESP, Koga's Ninja Trick (tcg_duel.c HoldAttack, EndTurn) */
+    case TCG_CARD_GYM1_117:
+    case TCG_CARD_GYM2_115:
     case TCG_CARD_NEO4_93:    /* EXP.ALL (tcg_duel.c KnockedOutByAttack) */
         break;
     case TCG_CARD_NEO1_100: /* Double Gust: theirs you chose comes in; then they choose which of yours does */
@@ -1055,6 +1058,7 @@ static int RegionTrainer(struct TcgDuel *g, const struct TcgAction *a, unsigned 
     case TCG_CARD_ECARD3_132: /* Mirage Stadium */
     case TCG_CARD_NP_28:      /* Championship Arena (tcg_duel.c EndTurn) */
     case TCG_CARD_GYM2_101:   /* Brock's Protection, Ecogym, Pokemon Tower (tcg_duel.c Undo) */
+    case TCG_CARD_GYM1_120:   /* Vermilion City Gym (tcg_duel.c HoldAttack) */
     case TCG_CARD_NEO1_84:
     case TCG_CARD_BASEP_42:
     case TCG_CARD_GYM1_103:   /* No Removal Gym (tcg_duel.c, TCG_PLAY_TRAINER) */

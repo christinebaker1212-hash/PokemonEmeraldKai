@@ -76,6 +76,9 @@ unsigned TcgDuel_Coin(struct TcgDuel *g, unsigned player)
     if (g->forceHeads && player == g->current)
         heads = 1; /* (Lock-on: tails are heads) */
     TcgDuel_Event(g, TCG_EV_COIN, player, 0, heads, 0, 0);
+    if (g->coinCount < 32)
+        g->coinBits |= (uint32_t)heads << g->coinCount;
+    g->coinCount++;
     return heads;
 }
 uint8_t TcgPile_Remove(uint8_t *pile, uint8_t *count, unsigned index)
@@ -907,6 +910,26 @@ static void EndTurn(struct TcgDuel *g)
     unsigned who, s;
     struct TcgPlayer *p = &g->players[g->current];
     g->attackTurn = 0;
+    g->heldAsked = g->heldPending = g->vermilion = 0;
+    for (s = 0; s < TCG_FIELD_SIZE && g->phase != TCG_FINISHED && g->phase != TCG_SETUP; s++)
+    {
+        /* Charity back to its player's hand, Sabrina's ESP discarded, as their turn ends */
+        int at;
+        struct TcgFieldCard *f = &p->field[s];
+        if ((at = TcgDuel_AttachedCard(g, g->current, s, TCG_CARD_GYM1_99)) >= 0)
+        {
+            unsigned k;
+            for (k = 0; k < f->attachedSize; k++)
+                if (f->attached[k] == (uint8_t)at)
+                {
+                    p->hand[p->handSize++] = TcgPile_Remove(f->attached, &f->attachedSize, k);
+                    TcgDuel_Log(g, "Charity goes back to the hand.");
+                    break;
+                }
+        }
+        if ((at = TcgDuel_AttachedCard(g, g->current, s, TCG_CARD_GYM1_117)) >= 0)
+            TcgDuel_DiscardAttached(g, g->current, s, (unsigned)at);
+    }
     if (g->phase == TCG_TURN)
     {
         /* Star Piece (between turns): on a Benched Pokemon with 2 or more damage counters, an evolution of it from the
@@ -1071,6 +1094,67 @@ static int Error(struct TcgDuel *g, const char *s)
     snprintf(g->error, sizeof(g->error), "%s", s);
     return TCG_INVALID;
 }
+static int Apply(struct TcgDuel *g, const struct TcgAction *a);
+/* Before an attack resolves, a player may answer (each asked once an attack): Koga's Ninja Trick (the defender's player:
+ * switch it out first), Vermilion City Gym (a Lt. Surge Pokemon's player: flip for it), Sabrina's ESP (the attack is
+ * tried on a copy to see its coins; keep them or re-flip them all). The attack waits in heldAttack (TcgDuel_Apply
+ * resumes it once answered); 1: it waits. */
+static int HoldAttack(struct TcgDuel *g, const struct TcgAction *a)
+{
+    unsigned me = g->current, foe = me ^ 1, s, bench = 0;
+    const struct TcgCard *attacker = TcgDuel_Field(g, me, 0);
+    for (s = 1; s < TCG_FIELD_SIZE; s++)
+        bench += g->players[foe].field[s].stackSize != 0;
+    if (!(g->heldAsked & TCG_HELD_NINJA))
+    {
+        g->heldAsked |= TCG_HELD_NINJA;
+        if (bench && TcgDuel_AttachedCard(g, foe, 0, TCG_CARD_GYM2_115) >= 0)
+        {
+            g->heldAttack = *a;
+            TcgDuel_AskChoice(g, foe, TCG_CHOICE_NINJA, TCG_CARD_GYM2_115, 0);
+            if (g->phase == TCG_CHOICE)
+                return g->heldPending = 1;
+        }
+    }
+    if (!(g->heldAsked & TCG_HELD_VERMILION))
+    {
+        g->heldAsked |= TCG_HELD_VERMILION;
+        if (TcgDuel_Stadium(g, NULL) == TCG_CARD_GYM1_120 && Named(attacker, "Lt. Surge"))
+        {
+            g->heldAttack = *a;
+            TcgDuel_AskChoice(g, me, TCG_CHOICE_VERMILION, TCG_CARD_GYM1_120, 0);
+            if (g->phase == TCG_CHOICE)
+                return g->heldPending = 1;
+        }
+    }
+    if (!(g->heldAsked & TCG_HELD_ESP))
+    {
+        g->heldAsked |= TCG_HELD_ESP;
+        if (TcgDuel_AttachedCard(g, me, 0, TCG_CARD_GYM1_117) >= 0)
+        {
+            struct TcgDuel *look = (struct TcgDuel *)malloc(sizeof(*look));
+            if (look)
+            {
+                *look = *g;
+                look->heldAsked = TCG_HELD_NINJA | TCG_HELD_VERMILION | TCG_HELD_ESP;
+                look->heldResuming = 1;
+                look->coinCount = 0, look->coinBits = 0;
+                Apply(look, a);
+                g->espCoins = (uint8_t)(look->coinCount > 32 ? 32 : look->coinCount);
+                g->espBits = look->coinBits;
+                free(look);
+                if (g->espCoins)
+                {
+                    g->heldAttack = *a;
+                    TcgDuel_AskChoice(g, me, TCG_CHOICE_ESP, TCG_CARD_GYM1_117, 0);
+                    if (g->phase == TCG_CHOICE)
+                        return g->heldPending = 1;
+                }
+            }
+        }
+    }
+    return 0;
+}
 static int Apply(struct TcgDuel *g, const struct TcgAction *a)
 {
     struct TcgPlayer *p = &g->players[g->current];
@@ -1096,6 +1180,17 @@ static int Apply(struct TcgDuel *g, const struct TcgAction *a)
             return result;
         if (g->phase == TCG_CHOICE)
             return TCG_OK; /* (the next stage of it) */
+        if (g->heldPending && g->phase == TCG_TURN)
+        {
+            /* (an attack held for an answer: now it resolves) */
+            struct TcgAction held = g->heldAttack;
+            g->heldPending = 0;
+            g->heldResuming = 1;
+            result = Apply(g, &held);
+            g->heldResuming = 0;
+            return result;
+        }
+        g->heldPending = 0;
         TcgDuel_ResolveKnockouts(g);
         if (g->choiceEndTurn && (g->phase == TCG_TURN || g->phase == TCG_PROMOTION))
         {
@@ -1219,6 +1314,11 @@ static int Apply(struct TcgDuel *g, const struct TcgAction *a)
             snprintf(g->error, sizeof(g->error), "Effect not yet implemented: %s", attack->effect);
             return TCG_UNSUPPORTED;
         }
+        if (!g->heldResuming)
+            g->heldAsked = 0, g->vermilion = 0; /* (a new attack: everything asked again) */
+        g->coinCount = 0, g->coinBits = 0;
+        if (HoldAttack(g, a))
+            return TCG_OK; /* (it waits for an answer: TCG_CHOICE) */
         g->noWeakRes = g->attackFailed = g->coinResult = g->swift = g->bonus = g->scriptCoins = g->scriptHeads = 0, g->scriptBits = 0, g->forceHeads = 0;
         /* A Baby Pokemon as the Defending Pokemon: a coin before anything; tails, the turn ends without an attack */
         if ((target->flags & TCG_CF_BABY) && !TcgDuel_Coin(g, g->current))
@@ -1331,6 +1431,8 @@ static int Apply(struct TcgDuel *g, const struct TcgAction *a)
                 total -= stadium == TCG_CARD_GYM2_109 || TcgPower_InPlay(g, 2, TCG_POWER_R_ENERVATING_POLLEN) ? 10 : 30;
                 flags |= TCG_DMG_RESIST;
             }
+            if (g->vermilion == 1 && total > 0)
+                total += 10; /* (Vermilion City Gym, heads: 10 more after Weakness and Resistance) */
             total += 10 * (int)AttachedTrainerCount(g, g->current, 0, TCG_CARD_PLUSPOWER);
             /* Darkness Energy: 10 more each, if it does damage; Expedition's Metal Energy on a non-Metal attacker 10
              * less each, and any Metal Energy on the Defending Pokemon 10 less each (after Weakness, Resistance) */
@@ -1594,6 +1696,25 @@ static int Apply(struct TcgDuel *g, const struct TcgAction *a)
                 return TCG_OK;
             }
             g->switchPending = 0;
+        }
+        if (g->vermilion == 2)
+        {
+            /* (Vermilion City Gym, tails: 10 damage to the attacker too; no Weakness or Resistance on its own) */
+            f->damage += 10;
+            TcgDuel_Event(g, TCG_EV_DAMAGE, g->current, 0, 10, 0, TCG_DMG_SELF);
+            g->vermilion = 0;
+        }
+        if (TcgDuel_AttachedCard(g, g->current, 0, TCG_CARD_GYM1_99) >= 0 && foe->stackSize &&
+            foe->stack[foe->stackSize - 1] == fleeTop && foe->damage > fleeDamage)
+        {
+            /* Charity: its player may reduce the damage just done to the Defending Pokemon (tcg_choice.inc) */
+            g->choiceData = (uint8_t)((foe->damage - fleeDamage) / 10);
+            TcgDuel_AskChoice(g, g->current, TCG_CHOICE_CHARITY, TCG_CARD_GYM1_99, 0);
+            if (g->phase == TCG_CHOICE)
+            {
+                g->choiceEndTurn = 1;
+                return TCG_OK;
+            }
         }
         if (flee && foe->stackSize && foe->stack[foe->stackSize - 1] == fleeTop && foe->damage > fleeDamage &&
             foe->damage < TcgDuel_MaxHp(g, g->current ^ 1, 0))
