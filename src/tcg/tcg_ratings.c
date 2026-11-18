@@ -212,7 +212,7 @@ const int16_t gTcgSpecialRating[] = {
     1513, /* RED */
     1524, /* ELM */
     1358, /* BROCK */
-    1402, /* MISTY */
+    1421, /* MISTY */
     1360, /* SURGE */
     1540, /* ERIKA */
     1638, /* KOGA_K */
@@ -223,7 +223,7 @@ const int16_t gTcgSpecialRating[] = {
     1414, /* BRUNO_K */
     1477, /* AGATHA */
     1576, /* LANCE_K */
-    1384, /* BLUE */
+    1493, /* BLUE */
     1352, /* OAK */
     1547, /* BILL */
     1435, /* ROARK */
@@ -593,9 +593,9 @@ const int16_t gTcgVariantRating[] = {
 const int16_t gTcgThemeRating[] = {
     1366, /* Brock (Gym Heroes) */
     1493, /* Misty (Gym Heroes) */
-    1489, /* Lt. Surge (Gym Heroes) */
+    1473, /* Lt. Surge (Gym Heroes) */
     1360, /* Erika (Gym Heroes) */
-    1427, /* Sabrina (Gym Challenge) */
+    1417, /* Sabrina (Gym Challenge) */
     1563, /* Koga (Gym Challenge) */
     1516, /* Blaine (Gym Challenge) */
     1407, /* Giovanni (Gym Challenge) */
