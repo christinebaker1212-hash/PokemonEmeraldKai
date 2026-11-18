@@ -88,6 +88,14 @@ struct ScriptOp
     unsigned args;
 };
 /* The next op from *s (0: none left) */
+/* (a bounded copy: longer words are cut, as no op or condition is that long) */
+static void ScriptCopy(char *to, size_t size, const char *from)
+{
+    size_t n = 0;
+    while (from[n] && n + 1 < size)
+        to[n] = from[n], n++;
+    to[n] = 0;
+}
 static int ScriptNext(const char **s, struct ScriptOp *op)
 {
     char tok[SCRIPT_TOKEN], *name, *colon, *dot;
@@ -104,7 +112,7 @@ static int ScriptNext(const char **s, struct ScriptOp *op)
     if ((dot = strchr(tok, '.')) != NULL)
     {
         *dot = 0;
-        strncpy(op->cond, tok, sizeof(op->cond) - 1);
+        ScriptCopy(op->cond, sizeof(op->cond), tok);
         name = dot + 1;
     }
     if ((colon = strchr(name, ':')) != NULL)
@@ -120,7 +128,7 @@ static int ScriptNext(const char **s, struct ScriptOp *op)
                 break;
         }
     }
-    strncpy(op->name, name, sizeof(op->name) - 1);
+    ScriptCopy(op->name, sizeof(op->name), name);
     return 1;
 }
 static int ScriptIs(const struct ScriptOp *op, const char *name) { return !strcmp(op->name, name); }
@@ -268,7 +276,7 @@ static int ScriptRun(struct TcgDuel *g, const char *script, const struct TcgAtta
     struct TcgPlayer *p = &g->players[g->current], *op = &g->players[g->current ^ 1];
     struct TcgFieldCard *self = &p->field[sScriptSelf], *foe = &op->field[0];
     unsigned me = g->current, them = g->current ^ 1, s;
-    int blocked = g->foeImmune == TCG_IMMUNE_YES;
+    int blocked = g->foeImmune == TCG_IMMUNE_YES || (foe->barrier == 3 && after == 1);
     struct ScriptOp o;
     const char *at = script;
     sScriptOption = action ? action->option : 0;
@@ -1430,6 +1438,111 @@ static int ScriptRun(struct TcgDuel *g, const char *script, const struct TcgAtta
                 TcgDuel_Event(g, TCG_EV_DECK_CHANGED, them, 0, 0, 0, 0);
             }
         }
+        else if (ScriptIs(&o, "evdeck"))
+        {
+            /* the card picked from the deck that evolves from it: onto it (x 0: evolving it) or into the hand (1) */
+            const struct TcgCard *it = TcgDuel_Field(g, me, sScriptSelf);
+            int at = Picked(action, 0, p->deck, p->deckSize);
+            if (at >= 0 && !EvolvesFrom(CardAt(g, me, p->deck[at]), it))
+                return TCG_INVALID;
+            if (at >= 0 && !x)
+                Evolve(g, me, sScriptSelf, (unsigned)at);
+            else if (at >= 0)
+            {
+                TcgDuel_Log(g, "Shown: %s.", CardAt(g, me, p->deck[at])->name);
+                p->hand[p->handSize++] = TcgPile_Remove(p->deck, &p->deckSize, (unsigned)at);
+            }
+            TcgDuel_Shuffle(g, me);
+        }
+        else if (ScriptIs(&o, "srche"))
+        {
+            /* the basic Energy cards picked from the deck into the hand: up to x (0: one per heads) */
+            unsigned k, max = x ? (unsigned)x : g->scriptHeads, n = action ? action->selectionCount : 0;
+            for (k = 0; k < n; k++)
+            {
+                int at = Picked(action, k, p->deck, p->deckSize);
+                if (at < 0 || CardAt(g, me, p->deck[at])->kind != TCG_ENERGY || CardAt(g, me, p->deck[at])->id > 6)
+                    return TCG_INVALID;
+            }
+            for (k = 0; k < n && k < max; k++)
+            {
+                int at = Picked(action, k, p->deck, p->deckSize);
+                TcgDuel_Log(g, "Shown: %s.", CardAt(g, me, p->deck[at])->name);
+                p->hand[p->handSize++] = TcgPile_Remove(p->deck, &p->deckSize, (unsigned)at);
+            }
+            TcgDuel_Shuffle(g, me);
+        }
+        else if (ScriptIs(&o, "top3h"))
+        {
+            /* one of the top 3 of the deck into the hand, the rest shuffled in */
+            int at = Picked(action, 0, p->deck, p->deckSize);
+            if (at >= 0 && (unsigned)at + 3 < p->deckSize)
+                return TCG_INVALID;
+            if (at >= 0)
+                p->hand[p->handSize++] = TcgPile_Remove(p->deck, &p->deckSize, (unsigned)at);
+            TcgDuel_Shuffle(g, me);
+        }
+        else if (ScriptIs(&o, "hdraw"))
+        {
+            /* up to x cards picked from the hand discarded, then as many drawn */
+            unsigned k, n = action ? action->selectionCount : 0;
+            if (n > (unsigned)x)
+                return TCG_INVALID;
+            for (k = 0; k < n; k++)
+                if (Picked(action, k, p->hand, p->handSize) < 0)
+                    return TCG_INVALID;
+            for (k = 0; k < n; k++)
+                p->discard[p->discardSize++] = TcgPile_Remove(p->hand, &p->handSize,
+                                                              (unsigned)Picked(action, k, p->hand, p->handSize));
+            if (n)
+                TcgDuel_Event(g, TCG_EV_DRAW, me, sScriptSelf, TcgDuel_Draw(g, me, n), 0, 0);
+        }
+        else if (ScriptIs(&o, "noconds"))
+            self->condImmune = (uint16_t)(g->turn + 1);
+        else if (ScriptIs(&o, "rt1"))
+        {
+            if (!blocked && foe->stackSize)
+            {
+                foe->retreatPlus = (uint8_t)(x ? x : 1);
+                foe->retreatUntil = (uint16_t)(g->turn + 1);
+            }
+        }
+        else if (ScriptIs(&o, "boost"))
+        {
+            /* next turn its attack x does y base damage (0: double) */
+            self->boostTurn = (uint16_t)(g->turn + 2);
+            self->boostAttack = (uint8_t)(x + 1);
+            self->boostValue = (uint8_t)y;
+        }
+        else if (ScriptIs(&o, "dspe") || ScriptIs(&o, "ddeh"))
+        {
+            /* a Special Energy of the Defending's picked (dspe), or one of its Energy per heads (ddeh) discarded */
+            unsigned k, n = ScriptIs(&o, "dspe") ? 1 : g->scriptHeads;
+            for (k = 0; k < n && !blocked && foe->stackSize; k++)
+            {
+                int at = Picked(action, k, foe->attached, foe->attachedSize);
+                uint8_t list[TCG_DECK_SIZE];
+                unsigned i, have = Attached(g, them, 0, TCG_ENERGY, list), pick;
+                if (ScriptIs(&o, "dspe"))
+                {
+                    for (i = 0, pick = TCG_DECK_SIZE; i < have; i++)
+                        if (CardAt(g, them, foe->attached[list[i]])->id > 6)
+                            pick = list[i];
+                    if (pick == TCG_DECK_SIZE)
+                        break;
+                    if (at >= 0 && CardAt(g, them, foe->attached[at])->kind == TCG_ENERGY &&
+                        CardAt(g, them, foe->attached[at])->id > 6)
+                        pick = (unsigned)at;
+                }
+                else
+                {
+                    if (!have)
+                        break;
+                    pick = at >= 0 && CardAt(g, them, foe->attached[at])->kind == TCG_ENERGY ? (unsigned)at : list[0];
+                }
+                op->discard[op->discardSize++] = TcgPile_Remove(foe->attached, &foe->attachedSize, pick);
+            }
+        }
         else if (ScriptIs(&o, "swapdmg"))
         {
             if (foe->stackSize && !blocked)
@@ -1736,6 +1849,19 @@ static unsigned ScriptPick(const char *script, unsigned *count)
     {
         if (ScriptIs(&o, "dde"))
             return TCG_APICK_FOE_ENERGY;
+        if (ScriptIs(&o, "ddeh") || ScriptIs(&o, "dspe"))
+        {
+            *count = ScriptIs(&o, "dspe") ? 100 : 2;
+            return TCG_APICK_FOE_ENERGY;
+        }
+        if (ScriptIs(&o, "evdeck"))
+            return TCG_APICK_EVOLUTION;
+        if (ScriptIs(&o, "srche") || ScriptIs(&o, "top3h") || ScriptIs(&o, "hdraw"))
+        {
+            *count = ScriptIs(&o, "srche") ? 50u | (unsigned)(o.arg[1] ? o.arg[1] : o.arg[0] ? o.arg[0] : 3) << 8
+                     : ScriptIs(&o, "top3h") ? 51u : 52u | (unsigned)o.arg[0] << 8;
+            return TCG_APICK_SEARCH;
+        }
         if (ScriptIs(&o, "srchp"))
             return TCG_APICK_DECK_BASIC;
         if (ScriptIs(&o, "emove") && o.arg[0] == 3)
@@ -2004,4 +2130,42 @@ static void ScriptAi(const struct TcgDuel *g, struct TcgAction *a, const char *s
             if (pick >= 0)
                 a->selections[a->selectionCount++] = p->deck[pick];
         }
+        else if (ScriptIs(&o, "evdeck"))
+        {
+            /* the evolution with the most HP */
+            int pick = -1;
+            unsigned i;
+            for (i = 0; i < p->deckSize; i++)
+                if (EvolvesFrom(CardAt(g, g->current, p->deck[i]), self) &&
+                    (pick < 0 || CardAt(g, g->current, p->deck[i])->hp > CardAt(g, g->current, p->deck[pick])->hp))
+                    pick = (int)i;
+            a->selectionCount = 0;
+            if (pick >= 0)
+                a->selections[a->selectionCount++] = p->deck[pick];
+        }
+        else if (ScriptIs(&o, "srche"))
+        {
+            /* basic Energy, its own type first */
+            unsigned i, pass, max = o.arg[1] ? (unsigned)o.arg[1] : o.arg[0] ? (unsigned)o.arg[0] : 3;
+            a->selectionCount = 0;
+            for (pass = 0; pass < 2; pass++)
+                for (i = 0; i < p->deckSize && a->selectionCount < max; i++)
+                {
+                    const struct TcgCard *c = CardAt(g, g->current, p->deck[i]);
+                    unsigned k, dup = 0;
+                    for (k = 0; k < a->selectionCount; k++)
+                        dup |= a->selections[k] == p->deck[i];
+                    if (!dup && c->kind == TCG_ENERGY && c->id <= 6 && (pass || (self && c->type == self->type)))
+                        a->selections[a->selectionCount++] = p->deck[i];
+                }
+        }
+        else if (ScriptIs(&o, "top3h"))
+        {
+            /* the top card */
+            a->selectionCount = 0;
+            if (p->deckSize)
+                a->selections[a->selectionCount++] = p->deck[p->deckSize - 1];
+        }
+        else if (ScriptIs(&o, "hdraw"))
+            a->selectionCount = 0;
 }

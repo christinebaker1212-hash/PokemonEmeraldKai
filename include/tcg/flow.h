@@ -96,13 +96,14 @@ enum
     TCG_F_SAME_TYPE_PICK,       /* (slot) of the type of the card picked first (Friend Ball) */
     TCG_F_LATER_STAGE,          /* an Evolution card of a later Stage of one of yours in play, not a Baby */
     TCG_F_OMANYTE_KABUTO,       /* an Omanyte or Kabuto card */
-    TCG_F_BASIC_TYPE_PICK,
+    TCG_F_BASIC_TYPE_PICK,      /* a Basic Pokemon card of the type of the card picked first (Apricorn Forest) */
     TCG_F_FIRE_POKEMON,         /* (slot) a Fire Pokemon */
     TCG_F_BENCH_CLEAN,          /* (slot) a Benched Pokemon with no damage counters */
     TCG_F_GRASS_ENERGY,         /* a Grass Energy card */
     TCG_F_SUPPORTER,            /* a Supporter */
     TCG_F_BABY,                 /* a Baby Pokemon card */
-    TCG_F_HAS_POWER,            /* (slot) a Pokemon with a Pokemon Power, on the Bench */      /* a Basic Pokemon card of the type of the card picked first (Apricorn Forest) */
+    TCG_F_HAS_POWER,            /* (slot) a Pokemon with a Pokemon Power, on the Bench */
+    TCG_F_SPECIAL_ENERGY,       /* a Special Energy card */
     /* "with Brock in its name" and the like (+ TCG_OWNER_*): a Pokemon card; one of yours in play (slot); another
      * one of yours than the first chosen (slot: the action's target) */
     TCG_F_OWNER_CARD = 100,

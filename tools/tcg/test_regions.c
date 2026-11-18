@@ -229,6 +229,54 @@ static int Babies(void)
     printf("PASS Baby Pokemon: Pikachu on Pichu, %u of %u attacks on a Baby stopped by tails\n", stopped, attacked);
     return 0;
 }
+/* Effect scripts' turn-spanning mechanics: Focus Energy's boost next turn (Machoke's Mega Punch 80), "can't become
+ * affected by a Special Condition", "pays Colorless more to retreat" */
+static int ScriptMechanics(void)
+{
+    struct TcgDuel g;
+    struct TcgAction a;
+    unsigned id, big = 0, run;
+    for (id = 1; id <= TCG_CARD_GB_COUNT && !big; id++)
+        if (Tcg_Card(id) && Tcg_Card(id)->kind == TCG_POKEMON && Tcg_Card(id)->hp >= 100 &&
+            Tcg_Card(id)->weakness != TCG_FIGHTING && Tcg_Card(id)->resistance != TCG_FIGHTING)
+            big = id;
+    if (!Tcg_Card(TCG_CARD_ECARD3_38) || !big)
+        return printf("PASS script mechanics (Machoke not finished)\n"), 0;
+    for (run = 0; run < 2; run++)
+    {
+        Stage(&g, TCG_CARD_ECARD3_38, 0, 11);
+        g.players[1].cards[g.players[1].field[0].stack[0]] = (uint16_t)big;
+        if (run == 0)
+        {
+            memset(&a, 0, sizeof(a));
+            a.type = TCG_ATTACK;
+            if (TcgDuel_Apply(&g, &a) != TCG_OK)
+                return printf("FAIL Focus Energy: %s\n", g.error), 1;
+            if (g.players[0].field[0].boostTurn != 5)
+                return printf("FAIL Focus Energy's boost: turn %u (5)\n", g.players[0].field[0].boostTurn), 1;
+            g.current = 0;
+            g.turn = 5;
+        }
+        g.players[1].field[0].damage = 0;
+        g.players[1].field[0].condition = TCG_HEALTHY;
+        memset(&a, 0, sizeof(a));
+        a.type = TCG_ATTACK;
+        a.attack = 1;
+        if (TcgDuel_Apply(&g, &a) != TCG_OK)
+            return printf("FAIL Mega Punch: %s\n", g.error), 1;
+        if (g.players[1].field[0].damage != (run == 0 ? 80u : 40u))
+            return printf("FAIL Mega Punch %s Focus Energy: %u\n", run ? "without" : "after", g.players[1].field[0].damage), 1;
+    }
+    /* noconds: an attack's Special Condition doesn't take; rt1: one more to retreat */
+    Stage(&g, TCG_CARD_MACHOP, 0, 5);
+    g.players[1].field[0].condImmune = (uint16_t)g.turn;
+    g.players[0].field[0].retreatPlus = 1;
+    g.players[0].field[0].retreatUntil = (uint16_t)g.turn;
+    if (TcgDuel_RetreatCost(&g, 0) != (unsigned)Tcg_Card(TCG_CARD_MACHOP)->retreat + 1)
+        return printf("FAIL rt1: Retreat Cost %u\n", TcgDuel_RetreatCost(&g, 0)), 1;
+    printf("PASS script mechanics: Focus Energy's boost next turn (and only then), Retreat Cost + 1\n");
+    return 0;
+}
 static int SpecialEnergy(void)
 {
     struct TcgDuel g;
@@ -764,7 +812,7 @@ int main(void)
     }
     printf("PASS %u finished regional cards: %u attacks used %u times, then %u AI actions after them\n", ready, used, ok,
            steps);
-    if (SpecialEnergy() || Babies())
+    if (SpecialEnergy() || ScriptMechanics() || Babies())
         return 1;
     if (PlayTrainers() || UsePowers() || UseStadiums() || AttackFlows())
         return 1;

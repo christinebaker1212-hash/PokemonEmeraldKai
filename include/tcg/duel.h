@@ -53,6 +53,10 @@ struct TcgFieldCard
     uint16_t vulnUntil;
     /* freeEvolve: turn + 1 it may evolve whenever (Giovanni: even just played or evolved, even on the first turn) */
     uint16_t freeEvolve;
+    /* (effect scripts) condImmune: no Special Condition through that turn; retreatPlus more Retreat Cost through turn
+     * retreatUntil; boostTurn: on that turn its attack boostAttack - 1 does boostValue base damage (0: double) */
+    uint16_t condImmune, retreatUntil, boostTurn;
+    uint8_t retreatPlus, boostAttack, boostValue;
 };
 enum
 {

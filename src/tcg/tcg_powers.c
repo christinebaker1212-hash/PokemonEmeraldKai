@@ -327,6 +327,8 @@ unsigned TcgDuel_RetreatCost(const struct TcgDuel *g, unsigned player)
         if (stadium == TCG_CARD_GYM1_108 && strstr(c->name, "Misty") && cost)
             cost--;
     }
+    if (g->players[player].field[0].retreatUntil >= g->turn)
+        cost += g->players[player].field[0].retreatPlus; /* (an effect script's rt1) */
     {
         int c2 = (int)cost + RegionRetreat(g, player); /* (the regional sets' bodies) */
         cost = c2 < 0 ? 0 : (unsigned)c2;
@@ -1236,7 +1238,7 @@ void TcgPower_Sanitize(struct TcgDuel *g)
                       (TcgPower_Id(c) == TCG_POWER_THICK_SKINNED && !ToxicGas(g))))
             {
                 f->condition = TCG_HEALTHY;
-                f->poison = 0;
+                f->poison = f->burned = 0;
             }
             /* (Poison Resistance) */
             if (c && f->poison && TcgPower_Working(g, who, s) == TCG_POWER_R_POISON_RESISTANCE)

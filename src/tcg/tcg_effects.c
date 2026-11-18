@@ -349,7 +349,7 @@ void TcgDuel_EffectDamage(struct TcgDuel *g, unsigned player, unsigned slot, int
         return;
     if (!slot && player != g->current)
     {
-        if (f->barrier)
+        if (f->barrier && f->barrier != 3)
             amount = 0;
         for (i = 0; i < g->players[g->current].field[0].attachedSize; i++)
             amount += 10 * (g->players[g->current].cards[g->players[g->current].field[0].attached[i]] ==
@@ -643,7 +643,7 @@ static int EvolvesFrom(const struct TcgCard *c, const struct TcgCard *from)
 int TcgDuel_AttackCardOk(const struct TcgCard *attacker, const struct TcgAttack *attack, unsigned cardId)
 {
     const struct Effect *e = attack ? Effect(attack->effect) : NULL;
-    if (e && e->kind == FX_RAPID_EVOLUTION)
+    if (e && (e->kind == FX_RAPID_EVOLUTION || (e->kind == FX_SCRIPT && strstr(e->script, "evdeck"))))
         return EvolvesFrom(Tcg_Card(cardId), attacker);
     return e && e->kind == FX_CALL_FAMILY && FamilyMatch(e, Tcg_Card(cardId));
 }
@@ -1368,7 +1368,7 @@ static int Gb2Effect(struct TcgDuel *g, const struct Effect *e, const struct Tcg
     struct TcgPlayer *p = &g->players[g->current], *op = &g->players[g->current ^ 1];
     struct TcgFieldCard *self = &p->field[0], *foe = &op->field[0];
     unsigned me = g->current, them = g->current ^ 1, n = 0, i, s;
-    int blocked = g->foeImmune == TCG_IMMUNE_YES;
+    int blocked = g->foeImmune == TCG_IMMUNE_YES || (foe->barrier == 3 && after == 1);
     switch (e->kind)
     {
     case FX_STATUS_HT:

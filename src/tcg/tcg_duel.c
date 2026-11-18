@@ -811,6 +811,8 @@ static int Apply(struct TcgDuel *g, const struct TcgAction *a)
         else if (attack->damage || TcgDuel_EffectTouchesDefender(attack))
             g->foeImmune = TcgPower_Immune(g, g->current ^ 1, 0) ? TCG_IMMUNE_YES : TCG_IMMUNE_NO;
         damage = attack->damage;
+        if (f->boostTurn == g->turn && f->boostAttack == a->attack + 1)   /* (an effect script's boost: "during your next turn") */
+            damage = f->boostValue ? f->boostValue : damage * 2;
         result = TcgDuel_AttackEffect(g, attack, a, &damage, 0);
         if (result != TCG_OK)
             return result;
@@ -876,7 +878,7 @@ static int Apply(struct TcgDuel *g, const struct TcgAction *a)
                 total -= 20 * (int)AttachedTrainerCount(g, g->current ^ 1, 0, TCG_CARD_DEFENDER);
             if (g->swift)
                 ;
-            else if (foe->barrier || g->foeImmune == TCG_IMMUNE_YES)
+            else if ((foe->barrier && foe->barrier != 3) || g->foeImmune == TCG_IMMUNE_YES)
             {
                 TcgDuel_Event(g, TCG_EV_NO_DAMAGE, g->current ^ 1, 0, 0, 0, 0);
                 total = 0;
@@ -982,15 +984,24 @@ static int Apply(struct TcgDuel *g, const struct TcgAction *a)
         result = TcgDuel_AttackEffect(g, attack, a, &damage, 1);
         if (result != TCG_OK)
             return result;
-        if (foeBefore.barrier == 2 || g->foeImmune == TCG_IMMUNE_YES)
+        if (foeBefore.barrier >= 2 || g->foeImmune == TCG_IMMUNE_YES)
         {
-            /* Agility, Fly, Barrier (and the powers above): no effect of the attack reaches it. */
+            /* Agility, Fly, Barrier (and the powers above): no effect of the attack reaches it (barrier 3: but its
+             * damage does). */
             foe->condition = foeBefore.condition;
             foe->poison = foeBefore.poison;
+            foe->burned = foeBefore.burned;
             foe->noAttack = foeBefore.noAttack;
             foe->noRetreat = foeBefore.noRetreat;
             foe->weaken = foeBefore.weaken;
             foe->effectBy = foeBefore.effectBy;
+        }
+        else if (foeBefore.condImmune >= g->turn && foe->stackSize && foe->stack[0] == foeBefore.stack[0])
+        {
+            /* (an effect script's noconds: it can't become affected by a Special Condition this turn) */
+            foe->condition = foeBefore.condition;
+            foe->poison = foeBefore.poison;
+            foe->burned = foeBefore.burned;
         }
         TcgPower_Sanitize(g); /* (Snorlax, Clefairy Doll, Mysterious Fossil) */
         if (foe->stackSize && foe->stack[0] == foeBefore.stack[0])

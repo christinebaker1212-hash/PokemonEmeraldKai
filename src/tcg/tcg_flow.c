@@ -268,8 +268,20 @@ static int AttackPickSteps(const struct TcgDuel *g, unsigned me, const struct Tc
                 break;
         if (i < defender->attachedSize)
         {
-            struct TcgStep st = {TCG_ST_PICK, TCG_F_ENERGY, TCG_SRC_OPP_ATTACHED, 1, 1,
-                                 onHeads ? "If heads, discard which of their Energy?" : "Discard which of their Energy?"};
+            /* (count: 2 for one each heads of 2 coins; TCG_F_SPECIAL_ENERGY + 100: a Special Energy) */
+            unsigned k, have = 0, special = count >= 100;
+            for (k = 0; k < defender->attachedSize; k++)
+            {
+                const struct TcgCard *e = Tcg_Card(CardOf(g, me ^ 1, defender->attached[k]));
+                have += e->kind == TCG_ENERGY && (!special || e->id > 6);
+            }
+            struct TcgStep st = {TCG_ST_PICK, (uint8_t)(special ? TCG_F_SPECIAL_ENERGY : TCG_F_ENERGY), TCG_SRC_OPP_ATTACHED,
+                                 (uint8_t)(have ? 1 : 0), (uint8_t)(count > 1 && count < 100 && have > 1 ? 2 : 1),
+                                 special ? "If heads, discard which Special Energy?"
+                                 : count > 1 && count < 100 ? "For each heads, discard which of their Energy?"
+                                 : onHeads ? "If heads, discard which of their Energy?" : "Discard which of their Energy?"};
+            if (!have)
+                break;
             out[n++] = st;
         }
         break;
@@ -327,8 +339,9 @@ static int AttackPickSteps(const struct TcgDuel *g, unsigned me, const struct Tc
     }
     case TCG_APICK_EVOLUTION:
     {
+        int hand = strstr(attack->description ? attack->description : "", "hand") != NULL;
         struct TcgStep st = {TCG_ST_PICK, (uint8_t)(a->attack ? TCG_F_ATTACK_CARD1 : TCG_F_ATTACK_CARD0), TCG_SRC_DECK, 0,
-                             1, "Evolve it into which card?"};
+                             1, hand ? "Take which card that evolves from it?" : "Evolve it into which card?"};
         out[n++] = st;
         break;
     }
@@ -346,12 +359,17 @@ static int AttackPickSteps(const struct TcgDuel *g, unsigned me, const struct Tc
             {21, TCG_F_BABY, TCG_SRC_DECK, "Put which Baby Pokemon onto your Bench?"},
             {30, TCG_F_BASIC, TCG_SRC_MY_DISCARD, "Put which Basic Pokemon onto your Bench?"},
             {40, TCG_F_GARBAGE, TCG_SRC_MY_DISCARD, "Put which card into your hand?"},
+            {50, TCG_F_BASIC_ENERGY, TCG_SRC_DECK, "Take which basic Energy cards?"},
+            {51, TCG_F_ANY, TCG_SRC_TOP3_MINE, "Put which card into your hand?"},
+            {52, TCG_F_ANY, TCG_SRC_HAND, "Discard which cards to draw as many?"},
         };
         unsigned i;
+        /* (count: the kind, and in the next byte how many may be picked: 1 if not given) */
         for (i = 0; i < sizeof(searches) / sizeof(searches[0]); i++)
-            if (searches[i].kind == count)
+            if (searches[i].kind == (count & 255))
             {
-                struct TcgStep st = {TCG_ST_PICK, searches[i].filter, searches[i].source, 0, 1, searches[i].prompt};
+                struct TcgStep st = {TCG_ST_PICK, searches[i].filter, searches[i].source, 0,
+                                     (uint8_t)(count >> 8 ? count >> 8 : 1), searches[i].prompt};
                 out[n++] = st;
             }
         break;
@@ -548,6 +566,8 @@ int TcgFlow_CardMatches(const struct TcgDuel *g, unsigned owner, unsigned physic
         return c->id == TCG_CARD_LIGHTNING_ENERGY;
     case TCG_F_GRASS_ENERGY:
         return c->id == TCG_CARD_GRASS_ENERGY;
+    case TCG_F_SPECIAL_ENERGY:
+        return c->kind == TCG_ENERGY && c->id > 6;
     case TCG_F_SUPPORTER:
         return c->kind == TCG_TRAINER && (c->flags & TCG_CF_SUPPORTER);
     case TCG_F_BABY:
@@ -1210,7 +1230,8 @@ static unsigned Next(struct TcgFlow *f, const struct TcgDuel *g)
         return AskSlot(f, g, st->kind == TCG_ST_OPP_SLOT ? f->me ^ 1 : f->me, st->filter, st->prompt);
     if (st->kind == TCG_ST_PICK)
     {
-        int n = st->max, all = st->source == TCG_SRC_TOP5 || st->source == TCG_SRC_TOP3_MINE || st->source == TCG_SRC_TOP3_THEIRS;
+        int n = st->max, all = st->source == TCG_SRC_TOP5 ||
+                               ((st->source == TCG_SRC_TOP3_MINE || st->source == TCG_SRC_TOP3_THEIRS) && st->max >= 3);
         if (st->source == TCG_SRC_TOP5)
             n = g->players[f->me].deckSize < 5 ? g->players[f->me].deckSize : 5;
         if (st->source == TCG_SRC_TOP7 && !n)
@@ -1219,6 +1240,8 @@ static unsigned Next(struct TcgFlow *f, const struct TcgDuel *g)
         {
             n = g->players[st->source == TCG_SRC_TOP3_THEIRS ? f->me ^ 1 : f->me].deckSize;
             n = n < 3 ? n : 3;
+            if (!all)   /* (one of the top 3 into the hand: the rest only looked at) */
+                return AskPick(f, g, st->source, st->filter, n ? 1 : 0, n ? 1 : 0, st->prompt);
         }
         return AskPick(f, g, st->source, st->filter, all ? n : st->min, n, st->prompt);
     }
