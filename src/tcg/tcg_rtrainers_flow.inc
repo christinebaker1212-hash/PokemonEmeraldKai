@@ -432,6 +432,10 @@ const struct TcgStep *TcgFlow_ChoiceSteps(const struct TcgDuel *g, int *count)
         STEPS({TCG_ST_CHOICE, 0, 0, 0, 0, "Narrow Gym: which Benched Pokemon goes back to your hand?"});
     case TCG_CHOICE_PSY_COPY:
         STEPS({TCG_ST_CHOICE, 0, 0, 0, 0, "ESP, 3 heads: copy which of the Defending Pokemon's attacks?"});
+    case TCG_CHOICE_CONTROL_PICK:
+        STEPS({TCG_ST_PICK, TCG_F_BORROWABLE, TCG_SRC_OPP_DISCARD, 0, 1, "Use which of their Trainers? (none: B)"});
+    case TCG_CHOICE_CHAOS_USE:
+        STEPS({TCG_ST_CHOICE, 0, 0, 0, 0, "Chaos Gym: use that Trainer yourself?"});
     case TCG_CHOICE_QUIZ1:
         STEPS({TCG_ST_CHOICE, 0, 0, 0, 0, "Blaine's Quiz #1: how long is the Pokemon named?"});
     case TCG_CHOICE_QUIZ3:

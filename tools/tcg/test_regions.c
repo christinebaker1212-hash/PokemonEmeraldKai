@@ -1846,7 +1846,75 @@ static int HeldAttacks(void)
     TcgPower_Sanitize(&g);
     if (g.players[0].field[0].shape || TcgDuel_Field(&g, 0, 0)->id != TCG_CARD_GYM2_3)
         return printf("FAIL Shapeshift: Paralyzed, still Machoke\n"), 1;
-    printf("PASS held attacks: Koga's Ninja Trick, Vermilion City Gym (both coins), Sabrina's ESP (KEEP, RE-FLIP), Charity; Narrow Gym; Misty's Psyduck; Shapeshift\n");
+    /* Sabrina's Psychic Control (heads): their Bill used as this card; then it's Psychic Control again in our discard */
+    for (seed = 1; seed < 60; seed++)
+    {
+        struct TcgPlayer *q;
+        uint8_t bill;
+        unsigned hand;
+        Stage(&g, TCG_CARD_MACHOP, 0, seed);
+        q = &g.players[1];
+        bill = q->deck[--q->deckSize];
+        q->cards[bill] = TCG_CARD_BILL;
+        q->discard[q->discardSize++] = bill;
+        if (PlayHeld(&g, TCG_CARD_GYM2_121) != TCG_OK)
+            return printf("FAIL Psychic Control: %s\n", g.error), 1;
+        if (g.phase != TCG_CHOICE)
+            continue;
+        if (g.choiceKind != TCG_CHOICE_CONTROL_PICK)
+            return printf("FAIL Psychic Control: the wrong question\n"), 1;
+        Choose(&g, 0, bill);
+        if (!g.proxyOn || g.players[0].cards[g.players[0].hand[g.players[0].handSize - 1]] != TCG_CARD_BILL)
+            return printf("FAIL Psychic Control: no Bill to use\n"), 1;
+        hand = g.players[0].handSize;
+        memset(&a, 0, sizeof(a));
+        a.type = TCG_PLAY_TRAINER;
+        a.hand = (uint8_t)(hand - 1);
+        if (TcgDuel_Apply(&g, &a) != TCG_OK)
+            return printf("FAIL Psychic Control: Bill: %s\n", g.error), 1;
+        if (g.proxyOn || g.players[0].handSize != hand + 1 ||
+            g.players[0].cards[g.players[0].discard[g.players[0].discardSize - 1]] != TCG_CARD_GYM2_121 ||
+            q->cards[q->discard[q->discardSize - 1]] != TCG_CARD_BILL)
+            return printf("FAIL Psychic Control: after Bill (hand %u)\n", g.players[0].handSize), 1;
+        break;
+    }
+    if (seed == 60)
+        return printf("FAIL Psychic Control: never heads\n"), 1;
+    /* Chaos Gym (tails): our Bill fails; they use it (one of their cards as it), then it's our turn again */
+    for (seed = 1; seed < 60; seed++)
+    {
+        unsigned theirs;
+        Stage(&g, TCG_CARD_MACHOP, 0, seed);
+        c = Relabel(&g, 0, TCG_CARD_GYM2_102);
+        g.players[0].stadium = (uint8_t)(c + 1);
+        theirs = g.players[1].handSize;
+        if (PlayHeld(&g, TCG_CARD_BILL) != TCG_OK)
+            return printf("FAIL Chaos Gym: %s\n", g.error), 1;
+        if (g.phase != TCG_CHOICE)
+            continue;
+        if (g.choiceKind != TCG_CHOICE_CHAOS_USE || g.choicePlayer != 1)
+            return printf("FAIL Chaos Gym: the wrong question\n"), 1;
+        Choose(&g, 1, -1);
+        if (g.current != 1 || !g.proxyTurn)
+            return printf("FAIL Chaos Gym: not their use\n"), 1;
+        memset(&a, 0, sizeof(a));
+        a.type = TCG_PASS;
+        a.type = TCG_ATTACK;
+        if (TcgDuel_Apply(&g, &a) == TCG_OK)
+            return printf("FAIL Chaos Gym: they could attack\n"), 1;
+        memset(&a, 0, sizeof(a));
+        a.type = TCG_PLAY_TRAINER;
+        a.hand = (uint8_t)(g.players[1].handSize - 1);
+        if (TcgDuel_Apply(&g, &a) != TCG_OK)
+            return printf("FAIL Chaos Gym: their Bill: %s\n", g.error), 1;
+        if (g.current != 0 || g.proxyOn || g.players[1].handSize != theirs + 2 ||
+            g.players[0].cards[g.players[0].discard[g.players[0].discardSize - 1]] != TCG_CARD_BILL)
+            return printf("FAIL Chaos Gym: after their Bill\n"), 1;
+        break;
+    }
+    if (seed == 60)
+        return printf("FAIL Chaos Gym: never tails\n"), 1;
+    printf("PASS held attacks: Koga's Ninja Trick, Vermilion City Gym (both coins), Sabrina's ESP (KEEP, RE-FLIP), Charity; Narrow Gym; Misty's Psyduck; Shapeshift; Psychic Control; Chaos Gym\n");
     return 0;
 }
 static int Choices(void)

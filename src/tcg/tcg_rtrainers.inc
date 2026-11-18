@@ -1060,6 +1060,15 @@ static int RegionTrainer(struct TcgDuel *g, const struct TcgAction *a, unsigned 
     case TCG_CARD_GYM2_101:   /* Brock's Protection, Ecogym, Pokemon Tower (tcg_duel.c Undo) */
     case TCG_CARD_GYM1_120:   /* Vermilion City Gym (tcg_duel.c HoldAttack) */
         break;
+    case TCG_CARD_GYM2_102:   /* Chaos Gym (tcg_duel.c, TCG_PLAY_TRAINER) */
+        break;
+    case TCG_CARD_GYM2_121:   /* Sabrina's Psychic Control: heads, a Trainer of their discard pile used as this card */
+        if (TcgDuel_Coin(g, me))
+        {
+            g->choiceData = (uint8_t)played;
+            TcgDuel_AskChoice(g, me, TCG_CHOICE_CONTROL_PICK, TCG_CARD_GYM2_121, 1);
+        }
+        break;
     case TCG_CARD_GYM1_124:   /* Narrow Gym: a Bench of 5 gives one back (theirs first); then no more than 4 (TcgDuel_Apply) */
         TcgDuel_AskChoice(g, me ^ 1, TCG_CHOICE_NARROW, TCG_CARD_GYM1_124, 0);
         break;

@@ -915,12 +915,14 @@ unsigned TcgDuel_QuizOptions(const struct TcgDuel *g, uint16_t out[4])
     }
     return truth;
 }
+static void ProxyRestore(struct TcgDuel *g);
 static void EndTurn(struct TcgDuel *g)
 {
     unsigned who, s;
     struct TcgPlayer *p = &g->players[g->current];
     g->attackTurn = 0;
     g->heldAsked = g->heldPending = g->vermilion = g->psyFlipped = g->psyCopy = 0;
+    ProxyRestore(g); /* (Sabrina's Psychic Control's Trainer not played: itself again) */
     for (s = 0; s < TCG_FIELD_SIZE && g->phase != TCG_FINISHED && g->phase != TCG_SETUP; s++)
     {
         /* Charity back to its player's hand, Sabrina's ESP discarded, as their turn ends */
@@ -1104,6 +1106,82 @@ static int Error(struct TcgDuel *g, const char *s)
     snprintf(g->error, sizeof(g->error), "%s", s);
     return TCG_INVALID;
 }
+/* ------------------------------------------------------------------------------------------------ cards as others
+ * (Sabrina's Psychic Control, Chaos Gym: TcgDuel.proxy*) */
+int TcgDuel_Borrowable(const struct TcgCard *c)
+{
+    unsigned id;
+    if (!c || c->kind != TCG_TRAINER || (c->flags & (TCG_CF_TOOL | TCG_CF_STADIUM | TCG_CF_TM)))
+        return 0;
+    id = Tcg_Canon(c->id);
+    return id != TCG_CARD_PLUSPOWER && id != TCG_CARD_DEFENDER && id != TCG_CARD_MYSTERIOUS_FOSSIL &&
+           id != TCG_CARD_CLEFAIRY_DOLL && id != TCG_CARD_GYM2_121;
+}
+static int PilePos(const uint8_t *pile, unsigned n, unsigned card)
+{
+    unsigned i;
+    for (i = 0; i < n; i++)
+        if (pile[i] == card)
+            return (int)i;
+    return -1;
+}
+int TcgDuel_ProxyStart(struct TcgDuel *g, unsigned who, unsigned physical, unsigned trainer, unsigned from)
+{
+    struct TcgPlayer *p = &g->players[who];
+    int at = from ? PilePos(p->deck, p->deckSize, physical) : PilePos(p->discard, p->discardSize, physical);
+    if (at < 0 || g->proxyOn)
+        return 0;
+    if (from)
+        TcgPile_Remove(p->deck, &p->deckSize, (unsigned)at);
+    else
+        TcgPile_Remove(p->discard, &p->discardSize, (unsigned)at);
+    g->proxyOn = 1, g->proxyPlayer = (uint8_t)who, g->proxyCard = (uint8_t)physical, g->proxyFrom = (uint8_t)from;
+    g->proxyId = p->cards[physical];
+    p->cards[physical] = (uint16_t)trainer;
+    p->hand[p->handSize++] = (uint8_t)physical;
+    TcgDuel_Event(g, TCG_EV_DECK_CHANGED, who, 0, 0, 0, 0);
+    return 1;
+}
+/* The card played as another back to itself, where it came from; Chaos Gym's turn back to its player */
+static void ProxyRestore(struct TcgDuel *g)
+{
+    struct TcgPlayer *p = &g->players[g->proxyPlayer];
+    unsigned card = g->proxyCard, s;
+    int at;
+    if (!g->proxyOn)
+        return;
+    if ((at = PilePos(p->hand, p->handSize, card)) >= 0)
+        TcgPile_Remove(p->hand, &p->handSize, (unsigned)at);
+    else if ((at = PilePos(p->discard, p->discardSize, card)) >= 0)
+        TcgPile_Remove(p->discard, &p->discardSize, (unsigned)at);
+    else if ((at = PilePos(p->deck, p->deckSize, card)) >= 0)
+        TcgPile_Remove(p->deck, &p->deckSize, (unsigned)at);
+    else if ((at = PilePos(p->aside, p->asideSize, card)) >= 0)
+        TcgPile_Remove(p->aside, &p->asideSize, (unsigned)at);
+    else
+        for (s = 0; s < TCG_FIELD_SIZE; s++)
+            if ((at = PilePos(p->field[s].attached, p->field[s].attachedSize, card)) >= 0)
+            {
+                TcgPile_Remove(p->field[s].attached, &p->field[s].attachedSize, (unsigned)at);
+                break;
+            }
+    p->cards[card] = g->proxyId;
+    if (g->proxyFrom)
+    {
+        memmove(p->deck + 1, p->deck, p->deckSize);
+        p->deck[0] = (uint8_t)card;
+        p->deckSize++;
+    }
+    else
+        p->discard[p->discardSize++] = (uint8_t)card;
+    g->proxyOn = 0;
+    if (g->proxyTurn)
+    {
+        g->proxyTurn = 0;
+        g->current = g->proxyBack;
+    }
+    TcgDuel_Event(g, TCG_EV_DECK_CHANGED, g->proxyPlayer, 0, 0, 0, 0);
+}
 static int Apply(struct TcgDuel *g, const struct TcgAction *a);
 /* Before an attack resolves, a player may answer (each asked once an attack): Koga's Ninja Trick (the defender's player:
  * switch it out first), Vermilion City Gym (a Lt. Surge Pokemon's player: flip for it), Sabrina's ESP (the attack is
@@ -1234,6 +1312,18 @@ static int Apply(struct TcgDuel *g, const struct TcgAction *a)
     }
     if (a->type == TCG_CHOOSE)
         return Error(g, "There is nothing to choose.");
+    if (g->proxyTurn && g->phase == TCG_TURN)
+    {
+        /* Chaos Gym: the other player may only play the Trainer that failed, or pass (and the turn goes back) */
+        if (a->type == TCG_PASS)
+        {
+            TcgDuel_Log(g, "Chaos Gym: the Trainer isn't used.");
+            ProxyRestore(g);
+            return TCG_OK;
+        }
+        if (a->type != TCG_PLAY_TRAINER || a->hand >= p->handSize || p->hand[a->hand] != g->proxyCard)
+            return Error(g, "Chaos Gym: play that Trainer, or pass.");
+    }
     if (g->phase == TCG_PROMOTION)
     {
         unsigned who = g->promotePlayer;
@@ -1920,6 +2010,33 @@ static int Apply(struct TcgDuel *g, const struct TcgAction *a)
             (Tcg_Canon(c->id) == TCG_CARD_ENERGY_REMOVAL || Tcg_Canon(c->id) == TCG_CARD_SUPER_ENERGY_REMOVAL) &&
             p->handSize < 3)
             return Error(g, "No Removal Gym: discard 2 other cards from your hand to play it.");
+        if (TcgDuel_Stadium(g, NULL) == TCG_CARD_GYM2_102 && !(c->flags & TCG_CF_STADIUM) && !g->proxyOn)
+        {
+            /* Chaos Gym: a coin first (a Trainer the rules accept); tails, it isn't played: to the discard pile, and the
+             * other player may use it instead (TCG_CHOICE_CHAOS_USE) */
+            struct TcgDuel *test = malloc(sizeof(*test));
+            int ok = 0;
+            if (test)
+            {
+                *test = *g;
+                ok = TcgDuel_Trainer(test, a) == TCG_OK;
+                if (!ok)
+                    snprintf(g->error, sizeof(g->error), "%s", test->error);
+                free(test);
+            }
+            if (!ok)
+                return TCG_INVALID;
+            if (!TcgDuel_Coin(g, g->current))
+            {
+                g->chaosCard = c->id;
+                TcgDuel_Event(g, TCG_EV_TRAINER, g->current, 0, 0, c->id, 0);
+                p->discard[p->discardSize++] = TcgPile_Remove(p->hand, &p->handSize, a->hand);
+                TcgDuel_Log(g, "Chaos Gym: tails, %s can't be played.", c->name);
+                if (TcgDuel_Borrowable(c))
+                    TcgDuel_AskChoice(g, g->current ^ 1, TCG_CHOICE_CHAOS_USE, TCG_CARD_GYM2_102, 0);
+                return TCG_OK;
+            }
+        }
         {
             unsigned s2;
             for (s2 = 0; s2 < TCG_FIELD_SIZE; s2++)
@@ -2316,6 +2433,9 @@ int TcgDuel_Apply(struct TcgDuel *g, const struct TcgAction *action)
                         }
                 }
         Undo(g, &next);
+        if (next.proxyOn && next.phase != TCG_CHOICE &&
+            PilePos(next.players[next.proxyPlayer].hand, next.players[next.proxyPlayer].handSize, next.proxyCard) < 0)
+            ProxyRestore(&next); /* (the card played as another: played, so itself again) */
         {
             /* Narrow Gym in play: no action may bring a Bench past 4 (its own play gives one back by a choice) */
             unsigned w, s, before, after;

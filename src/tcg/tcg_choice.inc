@@ -215,6 +215,16 @@ static int ChoiceHasAny(const struct TcgDuel *g, unsigned player, unsigned kind)
         return g->choiceData != 0;
     case TCG_CHOICE_NARROW:
         return BenchCount(g, player) >= TCG_FIELD_SIZE - 1;
+    case TCG_CHOICE_CONTROL_PICK:
+    {
+        const struct TcgPlayer *op = &g->players[player ^ 1];
+        for (k = 0; k < op->discardSize; k++)
+            if (TcgDuel_Borrowable(CardAt(g, player ^ 1, op->discard[k])))
+                return 1;
+        return 0;
+    }
+    case TCG_CHOICE_CHAOS_USE:
+        return p->discardSize || p->deckSize;
     case TCG_CHOICE_PSY_COPY:
     {
         const struct TcgCard *d = TcgDuel_Field(g, player ^ 1, 0);
@@ -734,6 +744,40 @@ int TcgDuel_Choose(struct TcgDuel *g, const struct TcgAction *a)
         d->damage = (uint16_t)(d->damage > off ? d->damage - off : 0);
         if (off)
             TcgDuel_Log(g, "Charity: %u less damage.", off);
+        break;
+    }
+    case TCG_CHOICE_CONTROL_PICK:
+    {
+        /* Sabrina's Psychic Control: the Trainer picked in their discard pile, played as the Psychic Control card
+         * (choiceData) in your hand (none picked: nothing) */
+        const struct TcgPlayer *op = &g->players[who ^ 1];
+        int at;
+        if (!n)
+            break;
+        if (n > 1 || (at = Picked(a, 0, op->discard, op->discardSize)) < 0 ||
+            !TcgDuel_Borrowable(CardAt(g, who ^ 1, op->discard[at])))
+            return ChoiceFail(g, "Choose a Trainer in their discard pile that isn't put in play.");
+        if (!TcgDuel_ProxyStart(g, who, g->choiceData, CardAt(g, who ^ 1, op->discard[at])->id, 0))
+            return ChoiceFail(g, "That can't be used now.");
+        TcgDuel_Log(g, "Sabrina's Psychic Control: %s can be used.", CardAt(g, who ^ 1, op->discard[at])->name);
+        break;
+    }
+    case TCG_CHOICE_CHAOS_USE:
+    {
+        /* Chaos Gym: YES, they use the Trainer that failed: one of their own cards (the top of their discard pile, else
+         * the bottom of their deck) as it, in their hand, while they act; then the turn goes back */
+        unsigned from = p->discardSize ? 0 : 1, card;
+        if (a->target > 1)
+            return ChoiceFail(g, "Choose YES or NO.");
+        if (!a->target)
+            break;
+        card = from ? p->deck[0] : p->discard[p->discardSize - 1];
+        if (!TcgDuel_ProxyStart(g, who, card, g->chaosCard, from))
+            break;
+        g->proxyTurn = 1;
+        g->proxyBack = g->current;
+        g->current = (uint8_t)who;
+        TcgDuel_Log(g, "Chaos Gym: player %u may use %s.", who + 1, Tcg_Card(g->chaosCard)->name);
         break;
     }
     case TCG_CHOICE_PSY_COPY:
@@ -1344,6 +1388,21 @@ void TcgDuel_AiChoose(const struct TcgDuel *g, struct TcgAction *a)
         a->target = (unsigned)__builtin_popcount(g->espBits) * 2 < g->espCoins;   /* (fewer heads than tails: again) */
         break;
     case TCG_CHOICE_CHARITY:
+        a->target = 0;
+        break;
+    case TCG_CHOICE_CONTROL_PICK:
+    {
+        /* (the first Trainer there that may be used) */
+        const struct TcgPlayer *op = &g->players[who ^ 1];
+        for (k = 0; k < op->discardSize; k++)
+            if (TcgDuel_Borrowable(CardAt(g, who ^ 1, op->discard[k])))
+            {
+                a->selections[0] = op->discard[k], a->selectionCount = 1;
+                break;
+            }
+        break;
+    }
+    case TCG_CHOICE_CHAOS_USE:
         a->target = 0;
         break;
     case TCG_CHOICE_PSY_COPY:

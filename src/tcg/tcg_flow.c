@@ -756,6 +756,8 @@ int TcgFlow_SlotMatches(const struct TcgDuel *g, unsigned me, const struct TcgAc
         return c && f->stackSize >= 2;
     case TCG_F_NO_TOOL:
         return c && c->kind == TCG_POKEMON && !TcgDuel_Tool(g, who, slot, NULL);
+    case TCG_F_BORROWABLE:
+        return TcgDuel_Borrowable(c);
     case TCG_F_ACTIVE_NO_TOOL:
         return c && c->kind == TCG_POKEMON && slot == 0 && !TcgDuel_Tool(g, who, slot, NULL);
     case TCG_F_TM_FITS:
@@ -1311,7 +1313,7 @@ unsigned TcgFlow_TrainerChoices(const struct TcgDuel *g, unsigned me, unsigned c
         (g->phase == TCG_CHOICE && (g->choiceKind == TCG_CHOICE_REDRAW4 || g->choiceKind == TCG_CHOICE_SHUFFLE_THEIRS ||
                                     g->choiceKind == TCG_CHOICE_IMPOSTOR || g->choiceKind == TCG_CHOICE_WISH_ASK ||
                                     g->choiceKind == TCG_CHOICE_MANTLE_YES || g->choiceKind == TCG_CHOICE_HOWL_YES ||
-                                    g->choiceKind == TCG_CHOICE_VERMILION)))
+                                    g->choiceKind == TCG_CHOICE_VERMILION || g->choiceKind == TCG_CHOICE_CHAOS_USE)))
     {
         /* (Retro Energy: "you may") */
         memset(m, 0, sizeof(*m));

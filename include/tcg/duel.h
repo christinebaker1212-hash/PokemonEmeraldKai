@@ -468,6 +468,13 @@ struct TcgDuel
     /* Misty's Psyduck's ESP: its 3 coins, flipped as it's held (psyHeads; psyFlipped: they were), the Defending
      * Pokemon's attack it copies on 3 heads (psyCopy: its index + 1) */
     uint8_t psyFlipped, psyHeads, psyBits, psyCopy;
+    /* A card played as another Trainer (Sabrina's Psychic Control: a Trainer of their discard pile; Chaos Gym: the
+     * other player using a Trainer that failed): proxyPlayer's physical card proxyCard is that Trainer in their hand
+     * until it's played or the turn ends, then its own card (proxyId) again where it came from (proxyFrom 0 the
+     * discard pile, 1 the bottom of the deck); proxyTurn: Chaos Gym's, the other player acting now (proxyBack: whose
+     * turn it is); chaosCard: the Trainer that failed */
+    uint8_t proxyOn, proxyPlayer, proxyCard, proxyFrom, proxyTurn, proxyBack;
+    uint16_t proxyId, chaosCard;
     uint32_t espBits, coinBits;
     uint16_t coinCount;
     uint16_t choiceCard;
@@ -499,6 +506,10 @@ int TcgDuel_Conserved(const struct TcgDuel *g);
 const struct TcgCard *TcgDuel_Field(const struct TcgDuel *g, unsigned player, unsigned slot);
 /* The card whose Pokemon Power a Pokemon in play has: its own (TcgDuel_Field, but not a Shapeshift's Evolution card) */
 const struct TcgCard *TcgDuel_PowerCard(const struct TcgDuel *g, unsigned player, unsigned slot);
+/* A Trainer another player may use as their own (Sabrina's Psychic Control, Chaos Gym): not one put in play */
+int TcgDuel_Borrowable(const struct TcgCard *c);
+/* proxyPlayer's own card (in the discard pile: from 0; the bottom of the deck: 1) into their hand as that Trainer */
+int TcgDuel_ProxyStart(struct TcgDuel *g, unsigned who, unsigned physical, unsigned trainer, unsigned from);
 unsigned TcgDuel_Energy(const struct TcgDuel *g, unsigned player, unsigned slot, unsigned type);
 int TcgDuel_CanAttack(const struct TcgDuel *g, unsigned player, unsigned attack);
 /* Is the effect on this Pokemon tied to its opponent's Active (effectBy) still in force? */
