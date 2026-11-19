@@ -7595,6 +7595,13 @@ bool8 MP_PartyMenu_GetState(struct MpPartyState *st)
         st->statusSprite[i] = sPartyMenuBoxes[i].statusSpriteId;
         st->desc[i] = sMpSlotDesc[i];
         st->window[i] = sPartyMenuBoxes[i].windowId;
+        // (as PartyBoxPal_ParnterOrDisqualifiedInArena: a co-op battle's partners' slots; a Triple's two partners by
+        // MpIsAllySlot's order, the actives 0 / 1 / 2 and their reserves 3 / 4 / 5)
+        st->owner[i] = 0;
+        if (gPartyMenu.layout == PARTY_LAYOUT_MULTI && MpIsAllySlot(i))
+            st->owner[i] = 1;
+        else if (gPartyMenu.layout == PARTY_LAYOUT_TRIPLE && gMpCoopBattle && MpIsAllySlot(i))
+            st->owner[i] = i % 3;
     }
     return TRUE;
 }

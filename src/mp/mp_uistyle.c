@@ -162,6 +162,8 @@ enum { OP_IMG = 1, OP_TEXT, OP_BAR, OP_FILL, OP_MSG, OP_LONG, OP_BACKING, OP_IMG
 #define C_HELD0 (1u << 14)     // b.moves: the move held to swap (SELECT), C_HELD0 << its row (C_SEL0's rows 4-7)
 #define C_CAUGHT (1u << 27)    // a battle box: a wild foe whose kind the POKéDEX has caught (the ball by its name)
 #define C_NOBG (1u << 28)      // a battle box: OPTIONS > DISPLAY > WHITE BG OFF (RED / CRYSTAL: no paper behind it)
+#define P_ALLY (1u << 11)      // a party slot: a co-op partner's POKéMON (KAI's partner colour)
+#define P_TEAMTOP (1u << 12)   // ... the first of another player's in its column (a Double / Triple party's rule)
 #define P_EMPTY (1u << 27)     // a party slot: nobody in it
 #define P_EGG (1u << 28)       // ... an EGG (its name only)
 #define P_DESC (1u << 29)      // ... its description in its HP's place (ABLE, NOT ABLE...)
@@ -2683,6 +2685,16 @@ static void PartyScreen(struct UiPack *p, u16 *frame)
             d.flags |= C_SEL0;
         if (st.action == PARTY_ACTION_SWITCH && st.slot2 == i && st.slot != i)
             d.flags |= P_SWITCH;
+        if (st.owner[i])
+            d.flags |= P_ALLY;
+        {
+            // (a style's own Double / Triple party: those in battle down one column, the rest down the other; a slot
+            // that isn't its column's first and isn't the same player's as the one above it starts another's)
+            u8 nact = gPartyMenu.layout == PARTY_LAYOUT_TRIPLE ? 3 : 2;
+            if (PartyOwnLayout(p) && i != 0 && i != nact && st.owner[i] != st.owner[i - 1]
+             && GetMonData(&gPlayerParty[i], MON_DATA_SPECIES) != SPECIES_NONE)
+                d.flags |= P_TEAMTOP;
+        }
         slideDx[i] = SlideDx(p, i, sPartySlide[i]);
         DrawSpec(p, sp, &d, frame, slideDx[i], 0, &fit);
         IconPlaces(sp, d.flags, places[i]);

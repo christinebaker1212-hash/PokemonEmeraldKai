@@ -301,10 +301,19 @@ class FRPack:
         for off, idx in zip((4, 5, 6, 1, 7, 8), (116, 117, 118, 97, 103, 104)):
             sel[48 + off] = pal[idx]
         sel_tiles = st._tiles(bg, sel, 48)
+        # a co-op partner's slot in FireRed's own partner colours (party_menu.c sPartyBoxMultiPalIds1 / 2, chosen:
+        # sPartyBoxCurrSelectionMultiPalIds and the chosen border), as KAI draws them in its own
+        ally, ally_sel = list(pal), list(pal)
+        for off, idx in zip((4, 5, 6, 1, 7, 8), (68, 69, 70, 65, 71, 72)):
+            ally[48 + off] = pal[idx]
+        for off, idx in zip((4, 5, 6, 1, 7, 8), (132, 133, 134, 97, 103, 104)):
+            ally_sel[48 + off] = pal[idx]
+        ally_tiles, ally_sel_tiles = st._tiles(bg, ally, 48), st._tiles(bg, ally_sel, 48)
 
-        def slot(name, w, h, current, rows=None, cols=None):
+        def slot(name, w, h, current, rows=None, cols=None, partner=False):
             d = open(os.path.join(st.g, 'party_menu', name), 'rb').read()
-            ts = sel_tiles if current else tiles
+            ts = ((ally_sel_tiles if current else ally_tiles) if partner
+                  else sel_tiles if current else tiles)
             rows = rows or list(range(h))
             cols = cols or list(range(w))
             im = I.new('RGBA', (len(cols) * 8, len(rows) * 8), (0, 0, 0, 0))
@@ -340,15 +349,16 @@ class FRPack:
         NARROW = [c for c in range(18) if c not in (9, 10)]
         COMPACT_ROWS, COMPACT_COLS = [0, 1, 4, 5, 6], [0, 1, 2, 3, 4, 5, 5, 5, 5, 6, 7, 8, 9]
         kinds = {
-            'main': (lambda cur: slot('slot_main.bin', 10, 7, cur), None,
+            'main': (lambda cur, pt=False: slot('slot_main.bin', 10, 7, cur, partner=pt), None,
                      (24, 11, 32, 20, 64, 20, 38, 36, 53, 36, 24, 35), (8, 16), (42, 28), (12, 34)),
-            'wide': (lambda cur: slot('slot_wide.bin', 18, 3, cur), lambda: slot('slot_wide_empty.bin', 18, 3, False),
+            'wide': (lambda cur, pt=False: slot('slot_wide.bin', 18, 3, cur, partner=pt),
+                     lambda: slot('slot_wide_empty.bin', 18, 3, False),
                      (22, 3, 32, 12, 64, 12, 102, 12, 117, 12, 88, 10), (8, 10), (40, 19), (77, 4)),
             # (the Triple Battle's: the main slot three rows shorter and three columns wider, the name and Lv on one
             # row; the wide slot two columns narrower)
-            'compact': (lambda cur: slot('slot_main.bin', 10, 7, cur, COMPACT_ROWS, COMPACT_COLS), None,
+            'compact': (lambda cur, pt=False: slot('slot_main.bin', 10, 7, cur, COMPACT_ROWS, COMPACT_COLS, pt), None,
                         (24, 2, 68, 2, 88, 2, 62, 24, 77, 24, 24, 19), (8, 10), (78, 6), (24, 14)),
-            'narrow': (lambda cur: slot('slot_wide.bin', 18, 3, cur, None, NARROW),
+            'narrow': (lambda cur, pt=False: slot('slot_wide.bin', 18, 3, cur, None, NARROW, pt),
                        lambda: slot('slot_wide_empty.bin', 18, 3, False, None, NARROW),
                        (22, 3, 32, 12, 64, 12, 86, 12, 101, 12, 72, 10), (8, 10), (40, 19), (61, 4)),
         }
@@ -359,9 +369,15 @@ class FRPack:
             if empty:
                 self.img(sp, 'fr.slot.%s.empty' % kind, empty(), x, y, cond=U.P_EMPTY)
             plain, chosen = art(False), art(True)
-            self.img(sp, 'fr.slot.%s' % kind, plain, x, y, unless=U.P_EMPTY | U.C_SEL0 | U.P_SWITCH)
-            self.img(sp, 'fr.slot.%s.sel' % kind, chosen, x, y, cond=U.C_SEL0, unless=U.P_EMPTY)
+            self.img(sp, 'fr.slot.%s' % kind, plain, x, y, unless=U.P_EMPTY | U.C_SEL0 | U.P_SWITCH | U.P_ALLY)
+            self.img(sp, 'fr.slot.%s.sel' % kind, chosen, x, y, cond=U.C_SEL0, unless=U.P_EMPTY | U.P_ALLY)
             self.img(sp, 'fr.slot.%s.sel' % kind, chosen, x, y, cond=U.P_SWITCH, unless=U.P_EMPTY | U.C_SEL0)
+            if name.startswith(('party2.', 'party3.')):
+                # (a co-op partner's: FireRed's partner colours, chosen in its chosen partner colours)
+                self.img(sp, 'fr.slot.%s.ally' % kind, art(False, True), x, y, cond=U.P_ALLY,
+                         unless=U.P_EMPTY | U.C_SEL0 | U.P_SWITCH)
+                self.img(sp, 'fr.slot.%s.ally.sel' % kind, art(True, True), x, y, cond=U.C_SEL0 | U.P_ALLY,
+                         unless=U.P_EMPTY)
             nx, ny, lx, ly, gx, gy, hx, hy, mx, my, bx, by = rect
             off = U.P_EMPTY
             sp.add(U.OP_ICON, x=x + icon[0], y=y + icon[1], a=0, unless=off)

@@ -8362,6 +8362,12 @@ A co-op Double Battle's party (PARTY_LAYOUT_MULTI: yours and your partner's in b
 takes the style's Double screen too (mp_uistyle.c PartyDouble; it fell back to the single screen, the user
 2026-11-19); a co-op Triple's is PARTY_LAYOUT_TRIPLE already. The layout drawn is logged ("party: style layout ...").
 Scenario ui_style_party_coop.
+Whose each slot is (MpPartyState.owner: 0 the player's, 1 / 2 a partner's, as PartyBoxPal_ParnterOrDisqualifiedInArena)
+reaches the styles as P_ALLY and P_TEAMTOP (the first of another player's in its column; mp_uistyle.c PartyScreen; the
+user, 2026-11-19): FIRERED draws a partner's slots in FireRed's own partner colours (sPartyBoxMultiPalIds1 / 2, chosen
+sPartyBoxCurrSelectionMultiPalIds: fr_build.py party, "fr.slot.KIND.ally"), as KAI does in its own; RED / CRYSTAL
+draw a 1-pixel rule in the ink's light shade across the column where another player's begin (gb_build.py
+"party2.teamrule" / "party3.teamrule"). Solo battles have no partners: nothing changes there.
 
 ### A Game Boy catch's jingle and its kept ball (1.204.6)
 "Gotcha!"'s {WAIT_SE} also waits for a Game Boy sound (text.c RENDER_STATE_WAIT_SE: MP_LegacySfx_Playing; its voices

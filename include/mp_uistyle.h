@@ -61,6 +61,7 @@ struct MpPartyState
     u8 cancelBall, confirmBall;
     u8 monSprite[6], itemSprite[6], ballSprite[6], statusSprite[6], window[6];
     const u8 *desc[6];   // (a slot's description in place of its HP: ABLE, NOT ABLE...)
+    u8 owner[6];         // whose POKéMON: 0 the player's, 1 / 2 a co-op partner's (KAI draws those in the partner colour)
 };
 bool8 MP_PartyMenu_GetState(struct MpPartyState *st);
 bool8 MP_UiStyle_PartyStyled(void);   // (a style draws the party screen now, whatever its layout: it moves as the style's)

@@ -448,6 +448,14 @@ class GBPack:
                 else:
                     x, y, act = 128, 8 + 32 * (i - nact), False
                 sp = U.Spec('%s.%d' % (n, i))
+                if i not in (0, nact):
+                    # (a co-op battle: a line where another player's POKéMON begin, across the column in the gap
+                    # above the slot, the ink's light shade, as the status screens' rules)
+                    gap = (12 if nact == 2 else 4) if act else 4
+                    left, right = (8, 112) if act else (120, 232)
+                    rule = Image.new('RGBA', (right - left, 1), st.mid + (255,))
+                    sp.add(U.OP_IMG, x=left, y=y - gap, a=p.image('%s.teamrule.%d' % (n, right - left), rule),
+                           cond=U.P_TEAMTOP)
                 off, no = U.P_EMPTY, U.P_EMPTY | U.P_EGG
                 no_hp = no | U.P_DESC
                 sp.add(U.OP_ICON, x=x + 8, y=y + 4, a=0, unless=off)

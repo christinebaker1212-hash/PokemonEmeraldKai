@@ -138,6 +138,8 @@ OP_BLEND = 10     # image A over (x, y) blended as the DS's BLDALPHA: each pixel
 OP_ICON = 11      # where Kai's sprite A (0 a party slot's POKéMON icon, 1 its held item, 2 its status) goes: its middle
 #                   at (x, y) (the game draws it there; nothing is drawn by the op)
 P_EMPTY, P_EGG, P_DESC, P_FAINT, P_SWITCH = 1 << 27, 1 << 28, 1 << 29, 1 << 30, 1 << 31   # (a party slot's spec)
+P_ALLY = 1 << 11        # (a party slot's spec) a co-op partner's POKéMON
+P_TEAMTOP = 1 << 12     # ... the first of another player's in its column of a Double / Triple party
 F_EXP = 64
 F_HPFRAC = 65
 F_ICON0 = 70           # a list row's icon (START's: the style's map.start of each entry)
