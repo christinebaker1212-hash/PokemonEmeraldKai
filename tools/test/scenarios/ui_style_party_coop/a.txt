@@ -1,0 +1,8 @@
+pressuntil A field 5000
+mp uistyle firered
+mp godmode 1
+waitfor online 6000
+waitfor battle 3000
+waitfor action 4000
+wait 900
+quit

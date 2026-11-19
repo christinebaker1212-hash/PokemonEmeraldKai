@@ -8358,6 +8358,10 @@ nearest row of the other column, up / down within a column or to CANCEL); FIRERE
 Double / Triple moves (party_menu.c UpdateCurrentPartySelection, MP_UiStyle_PartyOwnLayout). A solo Triple Battle
 (UNOVA's) now opens PARTY_LAYOUT_TRIPLE too, not the Double's (GetPartyLayoutFromBattleType), its slots never in the
 co-op partner's colour. Scenario ui_style_party_layouts.
+A co-op Double Battle's party (PARTY_LAYOUT_MULTI: yours and your partner's in battle in slots 0 and 1, as a Double's)
+takes the style's Double screen too (mp_uistyle.c PartyDouble; it fell back to the single screen, the user
+2026-11-19); a co-op Triple's is PARTY_LAYOUT_TRIPLE already. The layout drawn is logged ("party: style layout ...").
+Scenario ui_style_party_coop.
 
 ### A Game Boy catch's jingle and its kept ball (1.204.6)
 "Gotcha!"'s {WAIT_SE} also waits for a Game Boy sound (text.c RENDER_STATE_WAIT_SE: MP_LegacySfx_Playing; its voices

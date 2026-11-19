@@ -1,0 +1,11 @@
+# The party in a co-op Double Battle (PARTY_LAYOUT_MULTI) in a UI STYLE: the style's own Double Battle party (FIRERED's
+# two in battle down the left), not its single screen (mp_uistyle.c PartyDouble; the user, 2026-11-19). Shots party,
+# party_menu
+MODE=2
+WARP=0,16,12,11
+WARP_B=0,16,14,11
+TMO=240
+UNEXPECT_A=("[crash]")
+UNEXPECT_B=("[crash]")
+ENV_B="MOEMON_DEBUG_PARTY=277:12,280:12,283:12"
+EXPECT_B=("action menu at frame" "party: style layout party2")

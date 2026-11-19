@@ -2460,17 +2460,35 @@ static void SlotSpan(struct UiPack *p, const struct UiSpec *sp, int *lo, int *hi
         *lo = *hi = 0;
 }
 
+// a Double Battle's party, a co-op one's too (PARTY_LAYOUT_MULTI: the two in battle, yours and your partner's, in
+// slots 0 and 1 as a Double Battle's; it fell back to the style's single screen, the user 2026-11-19)
+static bool8 PartyDouble(void)
+{
+    return gPartyMenu.layout == PARTY_LAYOUT_DOUBLE || gPartyMenu.layout == PARTY_LAYOUT_MULTI;
+}
+
 // the party screen's spec WHAT ("" the screen, "0".."5" a slot, "over" drawn over the slots) for the battle's layout:
 // a style's own Double / Triple Battle party ("party2", "party3": as approved, 2026-11-18) where it has one, else its
 // single screen's ("party")
 static const struct UiSpec *PartySpec(const struct UiPack *p, const char *what)
 {
     char name[24];
-    const char *lay = gPartyMenu.layout == PARTY_LAYOUT_DOUBLE ? "party2"
-                    : gPartyMenu.layout == PARTY_LAYOUT_TRIPLE ? "party3" : NULL;
+    const char *lay = PartyDouble() ? "party2" : gPartyMenu.layout == PARTY_LAYOUT_TRIPLE ? "party3" : NULL;
     const struct UiSpec *sp;
     if (p == NULL)
         return NULL;
+    {
+        // (the layout the screen is drawn in, logged as it changes: tests read it)
+        static const char *sLogged;
+        char first[24];
+        const char *shown = "party";
+        snprintf(first, sizeof(first), "%s.0", lay ? lay : "");
+        if (lay && FindSpec(p, first))
+            shown = lay;
+        if (shown != sLogged)
+            MPNet_Log("party: style layout %s (party menu layout %u)", shown, gPartyMenu.layout);
+        sLogged = shown;
+    }
     if (lay)
     {
         snprintf(name, sizeof(name), *what ? "%s.%s" : "%s", lay, what);
@@ -2486,8 +2504,7 @@ static const struct UiSpec *PartySpec(const struct UiPack *p, const char *what)
 // the style lays the battle's Double / Triple party out its own way (its "party2" / "party3" slots)
 static bool8 PartyOwnLayout(const struct UiPack *p)
 {
-    const char *lay = gPartyMenu.layout == PARTY_LAYOUT_DOUBLE ? "party2.0"
-                    : gPartyMenu.layout == PARTY_LAYOUT_TRIPLE ? "party3.0" : NULL;
+    const char *lay = PartyDouble() ? "party2.0" : gPartyMenu.layout == PARTY_LAYOUT_TRIPLE ? "party3.0" : NULL;
     return p != NULL && lay != NULL && FindSpec(p, lay) != NULL;
 }
 
