@@ -554,8 +554,9 @@ enum {
     MP_GB_KAI_BALLS = 1 << 2,  // BALL THROWS: KAI's throws (unset: Red's / Crystal's own for every ball: mp_legacy_anim.c)
     MP_GB_PAL_SHIFT = 4,       // COLORS, 3 bits (mp_gbpal.c: RED 0 DMG 1 POCKET 2 LIGHT 3 COLOR 4 GBA 5 KAI; CRYSTAL 0 COLOR 1 GBA 2 KAI)
     MP_GB_PAL_MASK = 7,
-    MP_GB_KAI_TRANS = 1 << 3,
-    MP_GB_KAI_MOVES = 1 << 7,  // MOVES: KAI's animations and sounds (unset: Red's / Crystal's over KAI's, fitted: mp_gb_moves.c)  // TRANSITIONS: KAI's (unset: Red's / Crystal's over KAI's, fitted to its time: mp_gb_trans.c)
+    MP_GB_KAI_TRANS = 1 << 3,  // TRANSITIONS: KAI's (unset: Red's / Crystal's over KAI's, fitted to its time: mp_gb_trans.c)
+    MP_GB_KAI_MOVES = 1 << 7,  // MOVES: KAI's animations and sounds (unset: Red's / Crystal's over KAI's, fitted: mp_gb_moves.c)
+    MP_GB_DAYNIGHT = 1 << 8,   // RED: DAY / NIGHT, Kai's time of day tint back on (Red had none: off; mp_daytint.c; the user 2026-11-19)
 };
 #define MP_GB_DEFAULTS_RED     0
 #define MP_GB_DEFAULTS_CRYSTAL MP_GB_CAUGHT
@@ -563,6 +564,7 @@ bool8 MP_Gb_On(u16 bit);   // (mp_uistyle.c: the style showing is RED or CRYSTAL
 bool8 MP_Gb_Off(u16 bit);  // (... RED or CRYSTAL without it)
 u8 MP_GbPal_Setting(void);  // GB OPTIONS > COLORS as set for the style showing (mp_gbpal.c; MP_GB_PAL_SHIFT)
 bool8 MP_GbPal_Active(void);  // ... and it draws the picture now (RED / CRYSTAL showing, not KAI)
+bool8 MP_GbPal_RedNight(u16 c, u8 step, u16 *out);   // (RED's DAY / NIGHT: a colour by whole shades darker, mp_daytint.c)
 void MP_GbTrans_Begin(u8 transitionId);   // (mp_gb_trans.c: GB OPTIONS > TRANSITIONS over KAI's)
 void MP_GbTrans_End(void);
 #define MP_BATTLE_WEATHER_STATE 5                 // B_COMM_MP_WEATHER: the battle's weather, the field's, settled

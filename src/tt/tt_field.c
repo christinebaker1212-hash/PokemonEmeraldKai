@@ -80,7 +80,11 @@ static unsigned RegionOfMapsec(unsigned mapsec)
 }
 unsigned Tt_CurrentRegion(void)
 {
-    unsigned r = MP_Region_Current() == REGION_SINNOH ? TT_REGION_SINNOH   // Moemon Kai: all of SINNOH
+    // Moemon Kai: JOHTO, KANTO, SINNOH and UNOVA by the region the player is in, each one TRIPLE TRIAD region (their
+    // map sections aren't HOENN's: the user, 2026-11-19, "Hoenn's rules are always shown"); HOENN's eight by the town
+    u8 game = MP_Region_Current();
+    unsigned r = game == REGION_SINNOH ? TT_REGION_SINNOH : game == REGION_UNOVA ? TT_REGION_UNOVA
+               : game == REGION_JOHTO ? TT_REGION_JOHTO : game == REGION_KANTO ? TT_REGION_KANTO
                : RegionOfMapsec(gMapHeader.regionMapSectionId);
     if (r < TT_REGIONS)
         sLastRegion = r;

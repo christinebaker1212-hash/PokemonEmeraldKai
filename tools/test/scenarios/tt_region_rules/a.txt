@@ -1,0 +1,19 @@
+pressuntil A field 5000
+wait 30
+mp warp 36,4,31,9
+wait 200
+mp tt starter
+mp tt region
+mp cards case
+wait 60
+rendershot home
+press DOWN 2
+wait 4
+press DOWN 2
+wait 4
+press DOWN 2
+wait 4
+press A 2
+wait 20
+rendershot rules
+quit

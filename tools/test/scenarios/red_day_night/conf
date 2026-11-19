@@ -1,0 +1,10 @@
+# RED's GB OPTIONS > DAY / NIGHT (the user, 2026-11-19): RED shows no time of day unless it's turned on; then ROUTE 101
+# at 22:00 is drawn darker (src/mp/mp_daytint.c Wanted). Needs the SINNOH pack built.
+# RED's own shades darken by whole shades as its fades do, never mixed (that left one dark shade). Shots red_off, red_on,
+# red_color (COLORS: COLOR).
+MODE=1
+TMO=60
+HOUR=22
+ENV_A="MOEMON_DAYTINT=1 MOEMON_DEBUG_PARTY=280:10"
+EXPECT_A=("ui style: RED" "daytint: loaded, on 0," "gboptions red 100" "daytint: loaded, on 1, mul 132 132 196, red step 2" "gboptions red 130")
+UNEXPECT_A=("[crash]")

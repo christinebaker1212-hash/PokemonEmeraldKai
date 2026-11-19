@@ -138,6 +138,7 @@ enum
     OPT_GB,           // Moemon Kai: DISPLAY > GB OPTIONS (RED / CRYSTAL; A: its page, MP_GB_*)
     OPT_GB_SCENERY,   // its BATTLE SCENERY: the battle intro's grass / water / cave strips
     OPT_GB_CAUGHT,    // its CAUGHT MARK (RED)
+    OPT_GB_DAYNIGHT,  // RED: Kai's time of day back on (Red had none)
     OPT_GB_BALLS,     // its BALL THROWS: RED's / CRYSTAL's own, or KAI's (mp_legacy_anim.c)
     OPT_GB_TRANS,     // its TRANSITIONS (mp_gb_trans.c)
     OPT_GB_MOVES,     // its MOVES: animations and sounds (mp_gb_moves.c)
@@ -329,6 +330,7 @@ static const u8 sText_MenuMons[] = _("MENU POKéMON");
 static const u8 sText_GbOptions[] = _("GB OPTIONS");
 static const u8 sText_GbScenery[] = _("BATTLE SCENERY");
 static const u8 sText_GbCaught[] = _("CAUGHT MARK");
+static const u8 sText_GbDayNight[] = _("DAY / NIGHT");
 static const u8 sText_GbBalls[] = _("BALL THROWS");
 static const u8 sText_GbTrans[] = _("TRANSITIONS");
 static const u8 sText_GbMoves[] = _("MOVES");
@@ -493,7 +495,10 @@ static void BuildRows(void)
         AddRow(OPT_GB_COLORS, 0);
         AddRow(OPT_GB_SCENERY, 0);
         if (gMpConfig.uiStyle == UISTYLE_RED)
+        {
             AddRow(OPT_GB_CAUGHT, 0);   // (CRYSTAL always shows it, as Crystal did)
+            AddRow(OPT_GB_DAYNIGHT, 0); // (CRYSTAL had a time of day: always on)
+        }
         AddRow(OPT_WHITEBG, 0);
         AddRow(OPT_MENUMONS, 0);
         AddRow(OPT_GB_BACK, 0);
@@ -670,7 +675,7 @@ static u8 Choices(u8 row, const u8 **names, u8 *buf)
         return 3;
     case OPT_TYPEICONS: case OPT_FULLSCREEN: case OPT_VSYNC: case OPT_ANALOGRUN: case OPT_RUMBLE: case OPT_SPECPANEL:
     case OPT_FR_SHOW: case OPT_BIKEMUSIC: case OPT_SURFMUSIC: case OPT_INSTANTTEXT: case OPT_CARDSCALE: case OPT_SHADOWS: case OPT_CARDTITLE: case OPT_BGMUTE:
-    case OPT_WHITEBG: case OPT_GB_SCENERY: case OPT_GB_CAUGHT:
+    case OPT_WHITEBG: case OPT_GB_SCENERY: case OPT_GB_CAUGHT: case OPT_GB_DAYNIGHT:
         names[0] = sText_Off, names[1] = sText_On;
         return 2;
     case OPT_GB_BALLS: case OPT_GB_TRANS: case OPT_GB_MOVES:   // (KAI's, or the style's own game's)
@@ -1022,6 +1027,7 @@ static u8 Current(u8 row)
     case OPT_GB:          return 0;
     case OPT_GB_SCENERY:  return (GbOptions() & MP_GB_SCENERY) != 0;
     case OPT_GB_CAUGHT:   return (GbOptions() & MP_GB_CAUGHT) != 0;
+    case OPT_GB_DAYNIGHT: return (GbOptions() & MP_GB_DAYNIGHT) != 0;
     case OPT_GB_BALLS:    return !(GbOptions() & MP_GB_KAI_BALLS);
     case OPT_GB_TRANS:    return !(GbOptions() & MP_GB_KAI_TRANS);
     case OPT_GB_MOVES:    return !(GbOptions() & MP_GB_KAI_MOVES);
@@ -1174,10 +1180,12 @@ static void Change(u8 row, int dir)
     case OPT_GB:          break;   // A opens its page
     case OPT_GB_SCENERY:
     case OPT_GB_CAUGHT:
+    case OPT_GB_DAYNIGHT:
     case OPT_GB_BALLS:
     case OPT_GB_TRANS:
     case OPT_GB_MOVES:
         GbOptions() ^= sRows[row].opt == OPT_GB_SCENERY ? MP_GB_SCENERY : sRows[row].opt == OPT_GB_CAUGHT ? MP_GB_CAUGHT
+                     : sRows[row].opt == OPT_GB_DAYNIGHT ? MP_GB_DAYNIGHT
                      : sRows[row].opt == OPT_GB_BALLS ? MP_GB_KAI_BALLS : sRows[row].opt == OPT_GB_MOVES ? MP_GB_KAI_MOVES
                      : MP_GB_KAI_TRANS;
         MPNet_Log("gb options: %s %x", gMpConfig.uiStyle == UISTYLE_RED ? "red" : "crystal", GbOptions());
@@ -1344,6 +1352,7 @@ static const u8 *RowLabel(u8 row, u8 *buf)
     case OPT_GB:       return sText_GbOptions;
     case OPT_GB_SCENERY: return sText_GbScenery;
     case OPT_GB_CAUGHT: return sText_GbCaught;
+    case OPT_GB_DAYNIGHT: return sText_GbDayNight;
     case OPT_GB_BALLS: return sText_GbBalls;
     case OPT_GB_TRANS: return sText_GbTrans;
     case OPT_GB_MOVES: return sText_GbMoves;
@@ -1604,6 +1613,9 @@ static bool8 HintText(u8 *buf)
     else if (opt == OPT_GB_CAUGHT)
         snprintf(ascii, sizeof(ascii), "%s", (GbOptions() & MP_GB_CAUGHT) ? "A BALL BY A WILD POKEMON YOU HAVE CAUGHT"
                                                                            : "NO CAUGHT MARK, AS IN RED");
+    else if (opt == OPT_GB_DAYNIGHT)
+        snprintf(ascii, sizeof(ascii), "%s", (GbOptions() & MP_GB_DAYNIGHT) ? "DAWN, DUSK AND NIGHT DARKEN THE WORLD BY SHADES"
+                                                                             : "NO TIME OF DAY SHOWN, AS IN RED");
     else if (opt == OPT_MENUMONS)
         snprintf(ascii, sizeof(ascii), "%s", gMpConfig.uiMenuMons == MP_MENU_MONS_KAI ? "THE PARTY'S POKEMON AS KAI DRAWS THEM"
                                              : gMpConfig.uiMenuMons == MP_MENU_MONS_EXTENDED ? "THE PARTY'S POKEMON AS CRYSTAL CLEAR DRAWS THEM"

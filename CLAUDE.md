@@ -196,7 +196,7 @@ GB OPTIONS (the user, 2026-11-17: OPTIONS > DISPLAY > GB OPTIONS with RED / CRYS
 changes timing fitted to Kai's, real GBC colour rules; built in stages: COOP_NOTES "GB OPTIONS (RED / CRYSTAL)"; all
 five built 2026-11-17: balls, TRANSITIONS src/mp/mp_gb_trans.c, COLORS mp_gbpal.c, MOVES mp_gb_moves.c with
 graphics/moemon/legacy/gbmoves.bin from tools/moemon_legacy/move_bake.py + move_pack.py (sprites that touch move as one
-object, as the GENESIS / EPOCH throws; scenarios gb_*)).
+object, as the GENESIS / EPOCH throws; scenarios gb_*)); RED's DAY / NIGHT (1.208.1: whole shades darker, never mixed: mp_gbpal.c MP_GbPal_RedNight; COOP_NOTES "1.208.1").
 **No release until every GB OPTIONS stage is done** (the user, 2026-11-17): push the work to the default branch without
 raising MOEMON_VERSION; one release at the end.
 

@@ -1,0 +1,10 @@
+pressuntil A field 5000
+mp textspeed 2
+mp uistyle firered
+wait 20
+press UP 2
+wait 10
+rendershotburst t 700 10
+mash A 40 15
+wait 100
+quit

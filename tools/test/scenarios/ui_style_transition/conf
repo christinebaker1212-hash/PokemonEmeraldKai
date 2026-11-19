@@ -1,0 +1,8 @@
+# UI STYLE through a trainer's battle transition: YOUNGSTER CALVIN's challenge in the style's message box, and the box
+# kept the style's while the transition runs (shots by hand)
+MODE=1
+WARP=0,17,33,15
+TMO=200
+ENV_A="MOEMON_DEBUG_PARTY=280:12"
+EXPECT_A=("ui style: FIRERED")
+UNEXPECT_A=("[crash]")

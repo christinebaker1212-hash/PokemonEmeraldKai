@@ -1,0 +1,15 @@
+pressuntil A field 5000
+mp uistyle red
+wait 30
+mp warp 0,16,10,10
+wait 120
+mp daytint
+shot red_off
+mp gboptions red 100
+wait 10
+mp daytint
+shot red_on
+mp gboptions red 130
+wait 10
+shot red_color
+quit

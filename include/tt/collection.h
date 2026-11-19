@@ -25,10 +25,12 @@ enum
     TT_REGION_JOHTO,       /* Moemon Kai: all of JOHTO */
     TT_REGION_KANTO,       /* Moemon Kai: all of KANTO and the SEVII ISLANDS */
     TT_REGION_SINNOH,      /* Moemon Kai: all of SINNOH (the .tt file keeps its count: older files read as before) */
+    TT_REGION_UNOVA,       /* Moemon Kai: all of UNOVA (2026-11-19) */
     TT_REGIONS,
     TT_REGION_NONE = 0xFF
 };
 const char *Tt_RegionName(unsigned region);
+const char *Tt_WorldName(unsigned region);   /* the game's region it's in: HOENN for HOENN's eight, else its own name */
 uint32_t Tt_RegionStartRules(unsigned region);
 unsigned Tt_RegionStartTrade(unsigned region);
 

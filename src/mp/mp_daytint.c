@@ -42,9 +42,14 @@ static void Load(void)
     fclose(f);
 }
 
+static u8 sRedStep;   // RED's DAY / NIGHT: 0 day, 1 the lightest shade a step darker (dawn, dusk), 2 every shade (night)
+
 static u16 DayTintPixel(u16 c, int x, int y, bool8 sprite)
 {
+    u16 out;
     u32 r = c & 0x1F, g = (c >> 5) & 0x1F, b = (c >> 10) & 0x1F;
+    if (sRedStep != 0xFF && MP_GbPal_RedNight(c, sRedStep, &out))
+        return (c & 0x8000) | out;   // (RED's own shades: darkened by whole shades, as Red's fades)
     r = r * sMul[0] >> 8;
     g = g * sMul[1] >> 8;
     b = b * sMul[2] >> 8;
@@ -56,8 +61,8 @@ static bool8 Wanted(void)
     // (CB2_OverworldBasic: the field drawn under a battle's opening flash and transition, the tint stays on it)
     if ((gMain.callback2 != CB2_Overworld && gMain.callback2 != CB2_OverworldBasic) || gMain.inBattle)
         return FALSE;
-    if (MP_UiStyle_Active() == UISTYLE_RED)
-        return FALSE;   // (Red had no time of day: none is drawn in its style, the user 2026-11-18)
+    if (MP_UiStyle_Active() == UISTYLE_RED && !MP_Gb_On(MP_GB_DAYNIGHT))
+        return FALSE;   // (Red had no time of day: none is drawn in its style, the user 2026-11-18, unless GB OPTIONS > DAY / NIGHT)
     return IsMapTypeOutdoors(gMapHeader.mapType);
 }
 
@@ -83,6 +88,12 @@ void MP_DayTint_Update(void)
     next = (half + 1) % 48;
     for (ch = 0; ch < 3; ch++)   // (eased between half hours; 128 in the table = all of it)
         sMul[ch] = (sTable[half][ch] * (30 - mins % 30) + sTable[next][ch] * (mins % 30)) * 2 / 30;
+    sRedStep = 0xFF;
+    if (MP_UiStyle_Active() == UISTYLE_RED)
+    {
+        u32 dark = 256 - ((sMul[0] * 77 + sMul[1] * 151 + sMul[2] * 28) >> 8);   // (Platinum's night ~117, dusk ~80)
+        sRedStep = dark >= 96 ? 2 : dark >= 56 ? 1 : 0;
+    }
     memset(gMpSceneObjPal, 0, sizeof(gMpSceneObjPal));
     for (i = 0; i < MAX_SPRITES; i++)
         if (gSprites[i].inUse && !gSprites[i].invisible && gSprites[i].oam.priority >= 1)
@@ -98,6 +109,6 @@ void MP_DayTint_Debug(void)
 {
     if (!sTried)
         Load();
-    printf("[test] daytint: %s, on %d, mul %u %u %u\n", sLoaded ? "loaded" : "none", gMpScenePixel == DayTintPixel,
-           sMul[0], sMul[1], sMul[2]);
+    printf("[test] daytint: %s, on %d, mul %u %u %u, red step %d\n", sLoaded ? "loaded" : "none", gMpScenePixel == DayTintPixel,
+           sMul[0], sMul[1], sMul[2], sRedStep == 0xFF ? -1 : sRedStep);
 }

@@ -559,6 +559,31 @@ static void BuildLut(void)
     sLutFor = want;
 }
 
+// RED's GB OPTIONS > DAY / NIGHT (mp_daytint.c): a colour on a layer as one of the mode's four shades, darkened by whole
+// shades as Red's own fades shift its palettes (BGP E4 -> F9), never by mixing (that left one dark shade: the user's
+// picture went black). STEP 1 darkens only the lightest shade (BGP E5: dawn, dusk), 2 each shade one (F9: night).
+// FALSE: RED isn't drawing its own shades (COLORS KAI)
+bool8 MP_GbPal_RedNight(u16 c, u8 step, u16 *out)
+{
+    const u16 *four;
+    u32 k;
+    if (sKind != KIND_MONO && sKind != KIND_RED_GBC)
+        return FALSE;
+    BuildLut();
+    c = sLut[c & 0x7FFF];
+    four = sKind == KIND_MONO ? sMono[sMonoIdx] : sRedGbcBg;
+    for (k = 0; k < 4 && four[k] != c; k++)
+        ;
+    if (k == 4 && sKind == KIND_RED_GBC)
+        for (four = sRedGbcObj, k = 0; k < 4 && four[k] != c; k++)
+            ;
+    if (k == 4)
+        *out = c;
+    else
+        *out = four[step >= 2 ? (k < 3 ? k + 1 : 3) : step == 1 && k == 0 ? 1 : k];
+    return TRUE;
+}
+
 // CRYSTAL: a colour palette RAM didn't give (a blend, a full-colour picture, an effect drawn over the frame) becomes
 // the nearest of the colours it did give this frame, pixel by pixel. Never by 8x8 cells: a cell's four colours of its
 // own drew blocks round every sprite, tint and effect (the user, 2026-11-18: "I don't want to see those palette

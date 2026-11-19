@@ -929,7 +929,7 @@ static void DuelStep(unsigned pressed, unsigned keys)
 /* ------------------------------------------------------------------ */
 /* Screens                                                              */
 /* ------------------------------------------------------------------ */
-static const char *const sHomeRows[] = {"DECKS", "CARD LIST", "CARD PACKS", "RULES OF HOENN", "PRACTICE GAME",
+static const char *const sHomeRows[] = {"DECKS", "CARD LIST", "CARD PACKS", "RULES" /* (drawn as RULES OF the region you are in) */, "PRACTICE GAME",
                                         "GAME SPEED", "CLOSE CASE"};
 static const char *const sHomeHelp[] = {
     "Five cards make a hand. Pick the deck you play with.", "Every card, sorted by stars.",
@@ -948,7 +948,7 @@ static void HomeScreen(void)
 {
     struct TtCollection *c = C();
     unsigned i, packs = PacksHeld(), total, have = Tt_OwnedCount(c, 0, &total), face = c->optedIn ? DeckFace(c->activeDeck) : 0;
-    char line[160];
+    char line[160], rulesRow[32];
     /* the deck's card floats as the other two games' do: whole pixels over a still shadow */
     int bob = (int)(sinf(U.frame * 0.06f) * 1.5f);
     TcgUi_Background();
@@ -968,6 +968,7 @@ static void HomeScreen(void)
         G_TextAlign(52, 97, TA_CENTER, 0x405060, G_NO_SHADOW, line, TF_NARROW);
     }
     TcgUi_ListBox(LIST_X, 4, LIST_W, 104);
+    snprintf(rulesRow, sizeof(rulesRow), "RULES OF %s", Tt_WorldName(Tt_CurrentRegion()));   /* (the region you're in's) */
     for (i = 0; i < HOME_ROWS; i++)
     {
         const char *right = NULL;
@@ -977,7 +978,7 @@ static void HomeScreen(void)
         if (i == 5)
             right = Tcg_GetCollection()->fastAnimations ? "FAST" : "NORMAL";
         TcgUi_Row(LIST_X + 2, 6 + (int)i * 14, LIST_W - 4, U.cursor == (int)i, enabled && (i != 2 || packs),
-                  sHomeRows[i], right);
+                  i == 3 ? rulesRow : sHomeRows[i], right);
     }
     if (!c->optedIn)
         Strip(0, "No TRIPLE TRIAD cards yet. A TRIPLE TRIAD seller in a POKeMON CENTER hands out a first hand!");
@@ -1342,7 +1343,8 @@ static void RevealScreen(void)
     }
 }
 
-/* RULES OF HOENN: each region's rules, where the CARD QUEEN is, the rules you carry */
+/* RULES OF HOENN (or of the region you're in: KANTO...): each region's rules, where the CARD QUEEN is, the rules you
+ * carry; it opens on the region you're in */
 static void RulesScreen(void)
 {
     struct TtCollection *c = C();
@@ -1351,23 +1353,41 @@ static void RulesScreen(void)
     char line[200];
     TcgUi_Background();
     G_RoundFill(0, 0, 240, 17, 0x203040, 230);
-    G_Text(6, 1, G_WHITE, 0x101820, "RULES OF HOENN", 0, TF_NORMAL);
+    snprintf(line, sizeof(line), "RULES OF %s", Tt_WorldName(here));
+    G_Text(6, 1, G_WHITE, 0x101820, line, 0, TF_NORMAL);
     if (c->carriedFrom < TT_REGIONS)
         snprintf(line, sizeof(line), "CARRYING %s'S", Tt_RegionName(c->carriedFrom));
     else
         snprintf(line, sizeof(line), "CARRYING NONE YET");
     G_TextAlign(236, 3, TA_RIGHT, 0xf8d878, G_NO_SHADOW, line, TF_NARROW);
-    /* the regions down the left */
-    for (r = 0; r < TT_REGIONS; r++)
+    /* the regions down the left: eight show, the list scrolls to keep the cursor in view (JOHTO, KANTO, SINNOH and
+     * UNOVA were under the strip: the user, 2026-11-19, "Hoenn's rules are always shown") */
     {
-        int on = U.cursor == (int)r;
-        y = 19 + (int)r * 11;
-        G_RoundFill(2, y, 94, 10, on ? TT_THEME : 0x203448, on ? 255 : 200);
-        if (on)
-            G_RoundFrame(2, y, 94, 10, TT_GOLD, 255);
-        G_Text(6, y, r == here ? 0xf8e070 : G_WHITE, G_NO_SHADOW, Tt_RegionName(r), 0, TF_NARROW);
-        if (c->queenRegion == r)
-            Tt_DrawStar(84, (float)y, 9, 255);
+        static int sTop;
+        enum { RULES_ROWS = 8 };
+        if (U.cursor < sTop)
+            sTop = U.cursor;
+        if (U.cursor >= sTop + RULES_ROWS)
+            sTop = U.cursor - RULES_ROWS + 1;
+        if (sTop > TT_REGIONS - RULES_ROWS)
+            sTop = TT_REGIONS - RULES_ROWS;
+        if (sTop < 0)
+            sTop = 0;
+        for (r = (unsigned)sTop; r < TT_REGIONS && r < (unsigned)(sTop + RULES_ROWS); r++)
+        {
+            int on = U.cursor == (int)r;
+            y = 19 + ((int)r - sTop) * 11;
+            G_RoundFill(2, y, 94, 10, on ? TT_THEME : 0x203448, on ? 255 : 200);
+            if (on)
+                G_RoundFrame(2, y, 94, 10, TT_GOLD, 255);
+            G_Text(6, y, r == here ? 0xf8e070 : G_WHITE, G_NO_SHADOW, Tt_RegionName(r), 0, TF_NARROW);
+            if (c->queenRegion == r)
+                Tt_DrawStar(84, (float)y, 9, 255);
+        }
+        if (sTop > 0)
+            G_Arrow(72, 14, 0, 0xf8d878);
+        if (sTop + RULES_ROWS < TT_REGIONS)
+            G_Arrow(72, 107, 1, 0xf8d878);
     }
     /* the chosen one's rules */
     r = (unsigned)U.cursor;

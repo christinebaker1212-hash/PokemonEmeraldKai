@@ -1870,6 +1870,14 @@ static bool8 InField(void)
     return !gMain.inBattle && gMain.callback2 == CB2_Overworld;
 }
 
+// A battle's transition on the field (battle_transition.c runs the field as CB2_OverworldBasic): the message still up
+// is the style's until the screen closes over it (the user, 2026-11-19: "During the battle transitions, message windows
+// return to the original style")
+static bool8 InTransition(void)
+{
+    return !gMain.inBattle && gMain.callback2 == CB2_OverworldBasic;
+}
+
 // FIGHT BAG / POKéMON RUN as the game printed them: its words split at its CLEAR_TOs and new lines
 static void SplitMenu(const u8 *t, int len, u8 out[4][24])
 {
@@ -2129,7 +2137,7 @@ static void StartMenu(struct UiPack *p, u16 *frame)
 static bool8 FieldMessageShown(void)
 {
     const struct WindowTemplate *w = &gWindows[0].window;
-    if (!InField() || !sFramed[0] || w->bg != 0 || w->tilemapTop != 15 || w->width != 27)
+    if (!(InField() || InTransition()) || !sFramed[0] || w->bg != 0 || w->tilemapTop != 15 || w->width != 27)
         return FALSE;
     return TRUE;
 }
@@ -3838,7 +3846,7 @@ void MP_UiStyle_PreFrame(void)
         }
         return;
     }
-    if (InField())
+    if (InField() || InTransition())
     {
         u8 actions[16], count, cursor;
         const u8 *names[16];
@@ -3882,7 +3890,8 @@ static bool8 InWindow(u16 h, u16 v, int x, int y)
 static bool8 BattleWindowClips(void)
 {
     u16 cnt = REG_DISPCNT;
-    return InBattle() && (cnt & (DISPCNT_WIN0_ON | DISPCNT_WIN1_ON)) && !(REG_WINOUT & 1);
+    // (and a battle's transition on the field: its closing windows cut the style's message box as they cut Kai's)
+    return (InBattle() || InTransition()) && (cnt & (DISPCNT_WIN0_ON | DISPCNT_WIN1_ON)) && !(REG_WINOUT & 1);
 }
 
 static void ClipToBattleWindow(u16 *frame, const u16 *before)

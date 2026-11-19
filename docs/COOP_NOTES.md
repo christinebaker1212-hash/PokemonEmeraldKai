@@ -8468,3 +8468,21 @@ res/moves/chatter/anim.s).
   chatter_online (a friend's saying heard and played in a versus battle), chatter_realmic (SDL's own recording path
   through its disk driver: the same saying as the stand-in). `mp chatter` (the saying), `mp chatter cry`, `mp chatter
   record` (a second from the microphone, no script).
+
+## 1.208.1: the transition's message box, RED's DAY / NIGHT, TRIPLE TRIAD's rules by region (2026-11-19)
+- UI STYLE through a battle's transition (the user: "message windows return to the original style"): the field runs as
+  CB2_OverworldBasic under battle_transition.c, which InField() didn't count, so Kai's box showed for the transition's
+  frames. mp_uistyle.c InTransition() (not in battle, CB2_OverworldBasic) counts as the field for the message box
+  (FieldMessageShown, the hide block), and the style's box is clipped by the transition's windows like the battle's
+  (BattleWindowClips). Scenario ui_style_transition (YOUNGSTER CALVIN on ROUTE 102, a burst of shots by hand).
+- RED's GB OPTIONS > DAY / NIGHT (MP_GB_DAYNIGHT 1 << 8, RED only, off by default as Red had none): Kai's time of day
+  back on in RED (mp_daytint.c Wanted). RED's own shades (COLORS DMG / POCKET / LIGHT / COLOR / GBA) are never mixed
+  with the light (a mixed four collapsed into the darkest: the screen went black): mp_gbpal.c MP_GbPal_RedNight darkens
+  by whole shades as Red's fades shift BGP: dawn / dusk (the light's darkness 56-95 of 256) the lightest shade a step
+  (E4 -> E5), night (96 and up) every shade a step (F9). COLORS KAI takes the tint as any style. Scenario red_day_night.
+- TRIPLE TRIAD's rules by the region the player is in (the user: "Hoenn's rules are always shown"): tt_field.c
+  Tt_CurrentRegion goes by MP_Region_Current for JOHTO / KANTO / SINNOH / UNOVA (UNOVA a TRIPLE TRIAD region now:
+  TT_REGION_UNOVA, OPEN / SAME / RANDOM, TRADE DIFF, SLATEPORT's pool; the .tt file and the online world rules carry
+  TT_REGIONS, MP_PROTOCOL_VERSION 90), HOENN's eight by the town. The case's row and the rules screen say RULES OF the
+  region (Tt_WorldName: HOENN for HOENN's eight), and the rules screen's list shows eight and scrolls to the cursor
+  (JOHTO, KANTO, SINNOH were under the strip, so it opened on a row nobody could see). Scenario tt_region_rules.
