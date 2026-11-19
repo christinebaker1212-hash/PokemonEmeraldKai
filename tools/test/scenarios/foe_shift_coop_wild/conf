@@ -1,0 +1,10 @@
+# A co-op wild Double Battle with only one wild POKéMON (BOB's encounter pulls ALICE in): the one foe stands in a
+# Single Battle's spot with its box in the first row from the start, in every UI STYLE (mp_foeshift.c)
+MODE=2
+WARP=0,16,12,11
+WARP_B=0,16,14,11
+TMO=200
+EXPECT_A=("action menu at frame" "foe shift: 1 on the field (mask 2)")
+EXPECT_B=("action menu at frame" "foe shift: 1 on the field (mask 2)")
+UNEXPECT_A=("[crash]")
+UNEXPECT_B=("[crash]")
