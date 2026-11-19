@@ -7723,6 +7723,15 @@ GAME RULES, the host's online (MP_SCALE_EXP, the sixth number of `level_scaling_
 - LUCKY EGG +50% (was +100%), its EXP Share and Shadow paths too.
 - Test: `mp expcurve` (area, frontier, floor, ceiling, each slot's %); scenario exp_curve.
 
+SCALED (1.207.0, the user's design, 2026-11-19; the default): players overleveled by the earlier bugs were cut so hard
+that trainers stopped being worth fighting ("100 exp is not enough EXP to feel good for a trainer battle"). The user:
+trainer battles should still be worth it and wild battles still give good EXP. MP_SCALE_EXP 3: no cut and no boost by
+the ceiling (MP_ExpCurve_Apply returns the EXP as it is); a beaten POKeMON's EXP is worked out 5 levels under the level
+LEVEL SCALING set it to (MP_ExpCurve_FoeLevel in Cmd_getexp: yield x (level - 5) / 7). The catch-up stays. A config
+still on GENTLE (the old default) moves to SCALED once (exp_curve_rev = 2 marks a config written since); the canonical
+list for a new game has it. OPTIONS > GAME > LEVEL SCALING > EXP CURVE: OFF / GENTLE / STRONG / SCALED; online the
+host's (protocol 88). Tests set GENTLE with MOEMON_LEVEL_RULES=2,2,0,1,0,1 (commas or spaces). Scenario exp_curve_scaled.
+
 LEVEL SCALING in every region (the user: "HOENN cannot be assumed to be the default"): MP_Badges() is the badges of
 the region the player is in (MP_Region_ScaleBadges; ORRE 8), the cap's "after the LEAGUE" that region's
 (MP_Region_ClearedHere; ORRE always), the Garden's and BERRY farm's growth the best region's (MP_Region_MostBadges).

@@ -1149,7 +1149,7 @@ static void RuleValue(u8 row, char *out, int len)
     static const char *const sWild[] = {"OFF", "LOW", "MEDIUM", "HIGH"};
     static const char *const sTrainers[] = {"OFF", "BELOW", "EVEN", "ABOVE"};
     static const char *const sPast8[] = {"TO LEAGUE", "FREE", "ALWAYS CAPPED"};
-    static const char *const sExp[] = {"OFF", "GENTLE", "STRONG"};
+    static const char *const sExp[] = {"OFF", "GENTLE", "STRONG", "SCALED"};
     u8 v;
     if (row == RULE_PADDING)
         snprintf(out, len, "%s", gMpConfig.trainerPadding ? "ON" : "OFF");
@@ -1181,7 +1181,7 @@ static void RuleValue(u8 row, char *out, int len)
         case MP_SCALE_WILD:     snprintf(out, len, "%s", sWild[v & 3]); break;
         case MP_SCALE_TRAINERS: snprintf(out, len, "%s", sTrainers[v & 3]); break;
         case MP_SCALE_BOSS:     if (v == 0) snprintf(out, len, "AUTO"); else snprintf(out, len, "+%d", v - 1); break;
-        case MP_SCALE_EXP:      snprintf(out, len, "%s", sExp[v % 3]); break;
+        case MP_SCALE_EXP:      snprintf(out, len, "%s", sExp[v % 4]); break;
         default:                snprintf(out, len, "%s", sPast8[v % 3]); break;
         }
     }

@@ -504,6 +504,8 @@ void MP_GameOptions_Capture(void)
     gMpConfig.gameOptSet = (1 << MP_GAMEOPT_COUNT) - 1;
 }
 
+static bool8 sExpCurveRev;   // the config was written since the EXP CURVE's SCALED (exp_curve_rev = 2)
+
 static void LoadConfig(void)
 {
     FILE *f;
@@ -523,7 +525,7 @@ static void LoadConfig(void)
     gMpConfig.scale[MP_SCALE_BOSS - 1] = 0;       // AUTO
     gMpConfig.scale[MP_SCALE_CAPS - 1] = 1;
     gMpConfig.scale[MP_SCALE_PAST8 - 1] = 0;
-    gMpConfig.scale[MP_SCALE_EXP - 1] = 1;        // the EXP CURVE: GENTLE (mp_expcurve.c)
+    gMpConfig.scale[MP_SCALE_EXP - 1] = 3;        // the EXP CURVE: SCALED (mp_expcurve.c; GENTLE before 1.207.0)
     gMpConfig.animSpeed = 30;
     gMpConfig.spectateScale = 1;
     gMpConfig.bikeMusic = TRUE;
@@ -544,6 +546,7 @@ static void LoadConfig(void)
     f = fopen(ConfigPath(), "r");
     if (!f)
         return;
+    sExpCurveRev = FALSE;
     while (fgets(line, sizeof(line), f))
     {
         char *eq, *key, *val;
@@ -621,6 +624,7 @@ static void LoadConfig(void)
                               : strcmp(val, "full_card") == 0 ? MP_CARD_ART_FULL_CARD
                                                               : MP_CARD_ART_PRINTED_ART;
         else if (strcmp(key, "card_scaling") == 0) gMpConfig.cardScaling = atoi(val) != 0;
+        else if (strcmp(key, "exp_curve_rev") == 0) sExpCurveRev = atoi(val) >= 2;
         else if (strcmp(key, "card_gen") == 0) gMpConfig.cardGen = atoi(val) >= 0 && atoi(val) <= 255 ? atoi(val) : 0;
         else if (strcmp(key, "magic_gen") == 0) gMpConfig.mtgGen = atoi(val) >= 0 && atoi(val) <= 255 ? atoi(val) : 0;
         else if (strcmp(key, "battle_anims") == 0) gMpConfig.battleAnims = strcmp(val, "modern") == 0;
@@ -714,6 +718,9 @@ static void LoadConfig(void)
         }
     }
     fclose(f);
+    // (1.207.0, the user: SCALED the default, and a config still on GENTLE, the old default, moves to it once)
+    if (!sExpCurveRev && gMpConfig.scale[MP_SCALE_EXP - 1] == 1)
+        gMpConfig.scale[MP_SCALE_EXP - 1] = 3;
 }
 
 static void LowerName(char *dst, const char *src)
@@ -779,6 +786,8 @@ void MP_SaveConfig(void)
         "; its settings: wild (0 off, 1 low, 2 medium, 3 high), trainers (0 off, 1 below, 2 even, 3 above), boss margin\n"
         "; (0 auto, 1-9 = +0 to +8), badge caps (0 / 1), past 8 badges (0 capped until the League, 1 free, 2 always capped)\n"
         "level_scaling_rules = %d %d %d %d %d %d\n"
+        "; (the EXP CURVE, the sixth: 0 off, 1 gentle, 2 strong, 3 scaled; written since SCALED)\n"
+        "exp_curve_rev = 2\n"
         "; servers you host (and playing alone): battle animations this much faster, 0, 25 or 30 (percent)\n"
         "battle_anim_speed = %d\n"
         "; CO-OP > SPECTATE: friends' screens in a panel under yours (0 / 1), each this many times (1-4)\n"
@@ -1971,7 +1980,7 @@ bool8 MP_LevelScalingIsOurs(void)   // not a joiner who heard the host's rules
 
 u8 MP_LevelScaleRuleCount(u8 which)
 {
-    static const u8 sCounts[MP_SCALE_COUNT] = {2, 4, 4, 10, 2, 3, 3};
+    static const u8 sCounts[MP_SCALE_COUNT] = {2, 4, 4, 10, 2, 3, 4};
     return which < MP_SCALE_COUNT ? sCounts[which] : 1;
 }
 
@@ -1984,7 +1993,9 @@ static void LevelRulesFromEnv(void)
         return;
     sDone = TRUE;
     v[MP_SCALE_EXP - 1] = gMpConfig.scale[MP_SCALE_EXP - 1];   // (a sixth number: the EXP CURVE)
-    if (getenv("MOEMON_LEVEL_RULES") && sscanf(getenv("MOEMON_LEVEL_RULES"), "%d %d %d %d %d %d", &v[0], &v[1], &v[2], &v[3], &v[4], &v[5]) >= 5)
+    // (commas or spaces between them: a test's ENV_A is split at spaces)
+    if (getenv("MOEMON_LEVEL_RULES") && sscanf(getenv("MOEMON_LEVEL_RULES"), "%d%*[ ,]%d%*[ ,]%d%*[ ,]%d%*[ ,]%d%*[ ,]%d",
+                                               &v[0], &v[1], &v[2], &v[3], &v[4], &v[5]) >= 5)
         for (k = 0; k < MP_SCALE_COUNT - 1; k++)
             if (v[k] >= 0 && v[k] < MP_LevelScaleRuleCount(k + 1))
                 gMpConfig.scale[k] = v[k];

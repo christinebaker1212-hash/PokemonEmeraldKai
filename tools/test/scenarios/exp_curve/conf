@@ -6,6 +6,6 @@
 MODE=1
 WARP=0,16,10,11
 TMO=200
-ENV_A="MOEMON_DEBUG_PARTY=6:25,280:2 MOEMON_LEVEL_SCALING=1"
-EXPECT_A=("expcurve: active 1 region 0 badges 0" "expcurve: slot 0 Lv25 -> 10%" "expcurve: slot 1 Lv2 -> 1" "exp curve: Lv25, ceiling" "region 0 badges 8" "region 3 badges 0" "region 4 badges 0")
+ENV_A="MOEMON_DEBUG_PARTY=6:25,280:2 MOEMON_LEVEL_SCALING=1 MOEMON_LEVEL_RULES=2,2,0,1,0,1"
+EXPECT_A=("expcurve: active 1 mode 1 region 0 badges 0" "expcurve: slot 0 Lv25 -> 10%" "expcurve: slot 1 Lv2 -> 1" "exp curve: Lv25, ceiling" "region 0 badges 8" "region 3 badges 0" "region 4 badges 0")
 UNEXPECT_A=("[crash]" "TIMEOUT")

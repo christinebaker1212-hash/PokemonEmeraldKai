@@ -221,7 +221,8 @@ enum
     MP_SCALE_BOSS,      // 0 AUTO (+2 to +5 by badges; the ELITE FOUR +5), 1-9: +0 to +8
     MP_SCALE_CAPS,      // badge level caps: 1 on, 0 off
     MP_SCALE_PAST8,     // with all eight badges: 0 capped until the League then free, 1 free, 2 always capped (80 after it)
-    MP_SCALE_EXP,       // the EXP CURVE (mp_expcurve.c): 0 OFF, 1 GENTLE (x0.85 a level past the area), 2 STRONG (x0.75)
+    MP_SCALE_EXP,       // the EXP CURVE (mp_expcurve.c): 0 OFF, 1 GENTLE (x0.85 a level past the area), 2 STRONG (x0.75),
+                        // 3 SCALED (no cut: a beaten foe's EXP as if 5 levels under its scaled level; the default)
     MP_SCALE_COUNT
 };
 struct MpConfig
@@ -383,7 +384,9 @@ u16 MP_ExpCurve_Percent(u8 level, u8 ceiling);
 u32 MP_ExpCurve_Apply(u32 exp, u8 level, u8 ceiling, bool8 *boosted);
 u16 MP_ExpCurve_CatchUp(void);
 void MP_ExpCurve_Debug(void);
-u8 MP_Coop_ExpCeilingFor(u8 partySlot);   // co-op master: the ceiling of the slot's owner (MPR_COOP_BONUS)
+u8 MP_Coop_ExpCeilingFor(u8 partySlot);
+bool8 MP_ExpCurve_Scaled(void);      // the EXP CURVE is SCALED (mp_expcurve.c)
+u8 MP_ExpCurve_FoeLevel(u8 level);   // ... the level a beaten POKeMON's EXP is worked out from   // co-op master: the ceiling of the slot's owner (MPR_COOP_BONUS)
 u8 MP_LevelScale_TrainerMon(u16 trainerId, u8 normal, u8 partyMax);
 void MP_LevelScale_LogTrainer(u16 trainerId, u8 partyMax);
 u8 MP_LevelScale_Wild(u8 normal);

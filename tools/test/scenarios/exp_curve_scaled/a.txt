@@ -1,0 +1,13 @@
+pressuntil A field 5000
+wait 30
+mp expcurve
+mp teach 0 129
+mp wild 288:20
+pressuntil A action 4000
+wait 20
+press A 1
+wait 20
+press A 1
+pressuntil A field 4000
+wait 30
+quit

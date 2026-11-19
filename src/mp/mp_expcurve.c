@@ -175,10 +175,25 @@ u16 MP_ExpCurve_Percent(u8 level, u8 ceiling)
         u32 up = (ceiling - level) * BOOST_PER_LEVEL;
         return 100 + (up > BOOST_MAX ? BOOST_MAX : up);
     }
-    keep = MP_LevelScaleRule(MP_SCALE_EXP) >= 2 ? 75 : 85;
+    keep = MP_LevelScaleRule(MP_SCALE_EXP) == 2 ? 75 : 85;
     for (i = 0; i < (u32)(level - ceiling) && pct > FLOOR_PERCENT; i++)
         pct = pct * keep / 100;
     return pct < FLOOR_PERCENT ? FLOOR_PERCENT : pct;
+}
+
+// SCALED (the user, 2026-11-19: trainer battles still worth fighting, wild ones good EXP): no cut and no boost by the
+// ceiling; a beaten POKeMON gives the EXP it would give at the level LEVEL SCALING set it to, 5 levels lower
+bool8 MP_ExpCurve_Scaled(void)
+{
+    return MP_ExpCurve_Active() && MP_LevelScaleRule(MP_SCALE_EXP) == 3;
+}
+
+// battle_script_commands.c Cmd_getexp: the level a beaten POKeMON's EXP is worked out from
+u8 MP_ExpCurve_FoeLevel(u8 level)
+{
+    if (!MP_ExpCurve_Scaled())
+        return level;
+    return level > 5 ? level - 5 : 1;
 }
 
 // battle_script_commands.c Cmd_getexp: EXP for a POKeMON at LEVEL (after every other bonus). *BOOSTED: it got more
@@ -187,7 +202,7 @@ u32 MP_ExpCurve_Apply(u32 exp, u8 level, u8 ceiling, bool8 *boosted)
     u16 pct;
     if (boosted)
         *boosted = FALSE;
-    if (exp == 0 || !MP_ExpCurve_Active())
+    if (exp == 0 || !MP_ExpCurve_Active() || MP_ExpCurve_Scaled())
         return exp;
     pct = MP_ExpCurve_Percent(level, ceiling);
     if (pct == 100)
@@ -220,11 +235,11 @@ u16 MP_ExpCurve_CatchUp(void)
 void MP_ExpCurve_Debug(void)
 {
     u8 i, c = MP_ExpCurve_Ceiling(), r = MP_Region_Current();
-    printf("[test] expcurve: active %d region %d badges %d wild %d trainers %d frontier %d floor %d top %d ceiling %d base %d catchup %d\n",
-           MP_ExpCurve_Active(), r, MP_Region_ScaleBadges(), sAreaWild, sAreaTrainers,
+    printf("[test] expcurve: active %d mode %d region %d badges %d wild %d trainers %d frontier %d floor %d top %d ceiling %d base %d catchup %d\n",
+           MP_ExpCurve_Active(), MP_LevelScaleRule(MP_SCALE_EXP), r, MP_Region_ScaleBadges(), sAreaWild, sAreaTrainers,
            r < REGION_COUNT ? gRegionState.expFrontier[r] : 0, BadgeFloor(), Top(), c, MP_BaseScaling(), MP_ExpCurve_CatchUp());
     for (i = 0; i < PARTY_SIZE; i++)
         if (GetMonData(&gPlayerParty[i], MON_DATA_SPECIES) && !GetMonData(&gPlayerParty[i], MON_DATA_IS_EGG))
             printf("[test] expcurve: slot %d Lv%d -> %d%%\n", i, GetMonData(&gPlayerParty[i], MON_DATA_LEVEL),
-                   MP_ExpCurve_Percent(GetMonData(&gPlayerParty[i], MON_DATA_LEVEL), c));
+                   MP_ExpCurve_Scaled() ? 100 : MP_ExpCurve_Percent(GetMonData(&gPlayerParty[i], MON_DATA_LEVEL), c));
 }

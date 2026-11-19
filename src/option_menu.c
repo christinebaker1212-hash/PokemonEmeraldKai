@@ -269,6 +269,7 @@ static const u8 sText_ScPast8[] = _("PAST 8 BADGES");
 static const u8 sText_ScExp[] = _("EXP CURVE");
 static const u8 sText_ScGentle[] = _("GENTLE");
 static const u8 sText_ScStrong[] = _("STRONG");
+static const u8 sText_ScScaled[] = _("SCALED");
 static const u8 sText_ScLow[] = _("LOW");
 static const u8 sText_ScMedium[] = _("MEDIUM");
 static const u8 sText_ScHigh[] = _("HIGH");
@@ -775,8 +776,8 @@ static u8 Choices(u8 row, const u8 **names, u8 *buf)
         names[0] = sText_ScToLeague, names[1] = sText_ScFree, names[2] = sText_ScCapped;
         return 3;
     case OPT_SC_EXP:
-        names[0] = sText_Off, names[1] = sText_ScGentle, names[2] = sText_ScStrong;
-        return 3;
+        names[0] = sText_Off, names[1] = sText_ScGentle, names[2] = sText_ScStrong, names[3] = sText_ScScaled;
+        return 4;
     }
     // one free-form value
     buf[0] = EOS;
@@ -1642,7 +1643,8 @@ static bool8 HintText(u8 *buf)
                  "ALWAYS A CAP (80 AFTER THE LEAGUE)"}[MP_LevelScaleRule(MP_SCALE_PAST8) % 3]);
     else if (opt == OPT_SC_EXP)
         snprintf(ascii, sizeof(ascii), "%s", (const char *[]){"EXP AS THE GAME GIVES IT",
-                 "LESS EXP FAR PAST THE AREA, MORE BELOW IT", "MUCH LESS EXP FAR PAST THE AREA"}[MP_LevelScaleRule(MP_SCALE_EXP) % 3]);
+                 "LESS EXP FAR PAST THE AREA, MORE BELOW IT", "MUCH LESS EXP FAR PAST THE AREA",
+                 "EXP OF A FOE 5 LEVELS UNDER ITS SCALED ONE"}[MP_LevelScaleRule(MP_SCALE_EXP) % 4]);
     else if (opt == OPT_MOVESPLIT)
         snprintf(ascii, sizeof(ascii), MP_Lobby_InRoom() && !MP_LevelScalingIsOurs() ? "ONLINE, THE HOST'S IS USED: %s"
                  : "GEN 4: EACH MOVE PHYSICAL OR SPECIAL", MP_MoveSplit() ? "GEN 4" : "GEN 3");

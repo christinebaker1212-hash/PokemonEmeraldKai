@@ -1,0 +1,10 @@
+# The EXP CURVE's SCALED (the user, 2026-11-19; the default): no cut for being past the area. A beaten POKeMON gives the
+# EXP it would give 5 levels under the level LEVEL SCALING set it to. A Lv30 team (no badges) on ROUTE 101 beats a
+# wild POKeMON there: the log shows the foe's level and its EXP worked out from 5 levels less; no "exp curve" cut line
+MODE=1
+WARP=0,16,10,11
+TMO=150
+ENV_A="MOEMON_DEBUG_PARTY=6:30 MOEMON_LEVEL_SCALING=1"
+EXPECT_A=("expcurve: active 1 mode 3" "expcurve: slot 0 Lv30 -> 100%" "exp: ")
+UNEXPECT_A=("[crash]" "TIMEOUT" "exp curve: Lv30")
+CHECK="python3 tools/test/scenarios/exp_curve_scaled/check.py"

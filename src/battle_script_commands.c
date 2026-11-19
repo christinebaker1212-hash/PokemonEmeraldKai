@@ -3740,7 +3740,9 @@ static void Cmd_getexp(void)
                     viaExpShare++;
             }
 
-            calculatedExp = gSpeciesInfo[gBattleMons[gBattlerFainted].species].expYield * gBattleMons[gBattlerFainted].level / 7;
+            // (Moemon Co-op: the EXP CURVE's SCALED works it out 5 levels under the foe's scaled level: mp_expcurve.c)
+            calculatedExp = gSpeciesInfo[gBattleMons[gBattlerFainted].species].expYield
+                          * MP_ExpCurve_FoeLevel(gBattleMons[gBattlerFainted].level) / 7;
             // Moemon Co-op: a caught Pokemon is worth the share of its HP that was knocked off
             if (sMpCatchExpPercent)
                 calculatedExp = max(1, (u32)calculatedExp * sMpCatchExpPercent / 100);
@@ -3761,8 +3763,10 @@ static void Cmd_getexp(void)
                 *exp = 1;
             gExpShareExp = viaExpShare ? MpExpShareFor(viaSentIn ? *exp : calculatedExp, sentIn, 0, PARTY_SIZE) : 0;
             if (!gMpCoopBattle)
-                MPNet_Log("exp: %d from the foe, %d each of %d that fought (unsplit %d), EXP Share %d", calculatedExp,
-                          *exp, (int)viaSentIn, MpExpUnsplit(), gExpShareExp);
+                MPNet_Log("exp: %d from the foe (species %d Lv%d, worked out at Lv%d), %d each of %d that fought (unsplit %d), EXP Share %d",
+                          calculatedExp, gBattleMons[gBattlerFainted].species, gBattleMons[gBattlerFainted].level,
+                          MP_ExpCurve_FoeLevel(gBattleMons[gBattlerFainted].level), *exp, (int)viaSentIn, MpExpUnsplit(),
+                          gExpShareExp);
 
             gBattleScripting.getexpState++;
             gBattleStruct->expGetterMonId = 0;
