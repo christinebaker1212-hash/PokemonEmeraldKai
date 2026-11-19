@@ -1,0 +1,41 @@
+pressuntil A field 5000
+mp setmon 0 466 30
+mp partymenu
+wait 90
+press A 4
+wait 30
+shot actions
+press DOWN 4
+wait 8
+press A 4
+wait 240
+shot press_a
+pressuntillog A 900 microphone: recording
+waitlog 300 chatter: a new saying
+wait 90
+shot learned
+mp chatter
+waitlog 300 chatter: CHATOT's saying
+wait 120
+press A 4
+wait 60
+mp chatter cry
+wait 90
+mp partymenu
+wait 90
+press A 4
+wait 30
+press DOWN 4
+wait 8
+press A 4
+wait 300
+shot forget
+press A 4
+wait 30
+press DOWN 4
+wait 8
+press A 4
+wait 60
+shot kept
+log chatter record done
+quit

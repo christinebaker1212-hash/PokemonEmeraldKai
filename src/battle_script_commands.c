@@ -3048,6 +3048,16 @@ static void Cmd_seteffectwithchance(void)
         gBattleCommunication[MOVE_EFFECT_BYTE] &= ~MOVE_EFFECT_CERTAIN;
         SetMoveEffect(FALSE, MOVE_EFFECT_CERTAIN);
     }
+    else if (gCurrentMove == MOVE_CHATTER)
+    {
+        // Moemon Kai: CHATTER confuses by CHATOT's saying, as Platinum (1%, 11% or 31%; mp_chatter.c)
+        bool8 MP_Chatter_Confuses(u8 attacker, u8 target, u16 random);
+        if (MP_Chatter_Confuses(gBattlerAttacker, gBattlerTarget, Random())
+         && gBattleCommunication[MOVE_EFFECT_BYTE] && !(gMoveResultFlags & MOVE_RESULT_NO_EFFECT))
+            SetMoveEffect(FALSE, 0);
+        else
+            gBattlescriptCurrInstr++;
+    }
     else if (Random() % 100 < percentChance
              && gBattleCommunication[MOVE_EFFECT_BYTE]
              && !(gMoveResultFlags & MOVE_RESULT_NO_EFFECT))

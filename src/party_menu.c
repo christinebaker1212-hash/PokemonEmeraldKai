@@ -139,6 +139,7 @@ enum {
     FIELD_MOVE_SWEET_SCENT,
     FIELD_MOVE_ROCK_CLIMB,  // Moemon Kai: SINNOH's (src/sinnoh/s3d_misc.c)
     FIELD_MOVE_DEFOG,
+    FIELD_MOVE_CHATTER,     // Moemon Kai: CHATOT learns a saying (src/mp/mp_chatter.c)
     FIELD_MOVES_COUNT
 };
 

@@ -1,0 +1,13 @@
+# CHATTER online: ALICE's CHATOT learns a saying; it reaches BOB's game (MP_BLOB_CHATTER), and in their versus battle
+# BOB hears ALICE's saying for her CHATOT (battler 0 in both games: a link battle numbers them alike), as Platinum's link battles carry each trainer's
+# (BattleSystem_GetChatotCry); ALICE hears it as her own.
+MODE=2
+WARP=0,16,12,11
+WARP_B=0,16,14,11
+TMO=240
+ENV_A="MOEMON_DEBUG_PARTY=466:30 MOEMON_MIC_WAV=$(pwd)/tools/test/scenarios/chatter_record/voice.wav"
+ENV_B="MOEMON_DEBUG_PARTY=280:12"
+EXPECT_A=("chatter: a new saying (byte 15 = 120)" "starting PvP battle against player 2" "chatter: CHATOT's saying (ours, battler 0" "the battle: ")
+EXPECT_B=("chatter: player 1's saying heard" "[test] chatter: player 1's saying, byte 15 = 120" "starting PvP battle against player 1" "chatter: CHATOT's saying (player 1's, battler 0" "the battle: ")
+UNEXPECT_A=("crash" "out of memory")
+UNEXPECT_B=("crash" "out of memory")

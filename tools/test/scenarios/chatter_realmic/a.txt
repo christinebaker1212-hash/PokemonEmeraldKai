@@ -1,0 +1,7 @@
+pressuntil A field 5000
+mp setmon 0 466 30
+mp chatter record
+waitlog 60000 chatter: a new saying
+mp chatter
+log chatter real microphone done
+quit

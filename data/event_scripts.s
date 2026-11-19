@@ -712,6 +712,7 @@ EventScript_BackupMrBrineyLocation::
 	return
 
 	.include "data/scripts/surf.inc"
+	.include "data/scripts/chatter.inc"   @ Moemon Kai: CHATOT's CHATTER from the party menu (src/mp/mp_chatter.c)
 	.include "data/scripts/rival_graphics.inc"
 	.include "data/scripts/set_gym_trainers.inc"
 

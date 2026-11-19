@@ -1,0 +1,8 @@
+# CHATTER in battle as Platinum: our CHATOT's cry is our saying when it comes out and when it uses CHATTER (its own
+# animation plays the cry), CHATTER's chance to confuse comes from the saying (byte 15 = 120: level 2, 31%), and a wild
+# CHATOT keeps its own cry (never our saying).
+MODE=1
+TMO=300
+ENV_A="MOEMON_MIC_WAV=$(pwd)/tools/test/scenarios/chatter_record/voice.wav"
+EXPECT_A=("chatter: a new saying (byte 15 = 120)" "chatter: CHATOT's saying (ours, battler 0, mode" "chatter: CHATTER's level 2 (31%)" "chatter battle done")
+UNEXPECT_A=("crash" "out of memory" "saying (battler 1" "TIMEOUT")

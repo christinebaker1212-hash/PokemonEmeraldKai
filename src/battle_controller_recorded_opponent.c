@@ -1,4 +1,5 @@
 #include "global.h"
+#include "mp_chatter.h"
 #include "mp_life_battle.h"
 #include "battle.h"
 #include "battle_ai_script_commands.h"
@@ -1617,6 +1618,8 @@ static void RecordedOpponentHandlePlayFanfareOrBGM(void)
 static void RecordedOpponentHandleFaintingCry(void)
 {
     u16 species = GetMonData(&gEnemyParty[gBattlerPartyIndexes[gActiveBattler]], MON_DATA_SPECIES);
+
+    MP_Chatter_ForBattler(gActiveBattler);   // Moemon Kai: a CHATOT's saying is its trainer's (mp_chatter.c)
 
     PlayCry_ByMode(species, 25, CRY_MODE_FAINT);
     RecordedOpponentBufferExecCompleted();

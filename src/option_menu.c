@@ -5,6 +5,7 @@
 // (friends' screens with a page per friend online, new friends' size, autosave, the BATTLE FLAG's range).
 // L / R switch tabs. Values change live with Left / Right (or A); B or CLOSE saves and leaves.
 #include "global.h"
+#include "mic.h"
 #include "battle_gimmick.h"
 #include "mp_region.h"
 #include "option_menu.h"
@@ -88,6 +89,7 @@ enum
     OPT_CARDBACK,
     OPT_BATTLEANIMS,
     OPT_PADSELECT,
+    OPT_MICROPHONE,   // Moemon Kai: CONTROLS > MICROPHONE, for CHATOT's CHATTER (src/platform/mic.c)
     OPT_PADLAYOUT,
     OPT_ANALOGRUN,
     OPT_RUMBLE,
@@ -225,6 +227,9 @@ static const u8 sText_BattleAnims[] = _("BATTLE ANIMS");
 static const u8 sText_AnimsClassic[] = _("CLASSIC");
 static const u8 sText_AnimsModern[] = _("MODERN");
 static const u8 sText_Controller[] = _("CONTROLLER");
+static const u8 sText_Microphone[] = _("MICROPHONE");
+static const u8 sText_MicDefault[] = _("DEFAULT");
+static const u8 sText_MicSpeak[] = _("SPEAK INTO IT");
 static const u8 sText_PadButtons[] = _("PAD BUTTONS");
 static const u8 sText_StickRun[] = _("STICK RUN");
 static const u8 sText_Rumble[] = _("RUMBLE");
@@ -586,6 +591,7 @@ static void BuildRows(void)
         AddRow(OPT_RUMBLE, 0);
         AddRow(OPT_BUTTONICONS, 0);
         AddRow(OPT_FIGHTKEYS, 0);
+        AddRow(OPT_MICROPHONE, 0);
         break;
     case TAB_COOP:
         AddRow(OPT_SPECPANEL, 0);
@@ -851,6 +857,14 @@ static u8 Choices(u8 row, const u8 **names, u8 *buf)
         else
             MP_AsciiToGame(buf, Gamepad_SelectedName(), 12);
         break;
+    case OPT_MICROPHONE:
+        if (Mic_IsPicking())
+            StringCopy(buf, sText_MicSpeak);
+        else if (Mic_SelectedName()[0] == 0)
+            StringCopy(buf, sText_MicDefault);
+        else
+            MP_AsciiToGame(buf, Mic_SelectedName(), 20);   // (a longer name in full on the line below)
+        break;
     case OPT_PADLAYOUT:
         if (Gamepad_GetLayout() == GAMEPAD_LAYOUT_STANDARD)
             StringCopy(buf, sText_ABottom);
@@ -1081,6 +1095,7 @@ static void Change(u8 row, int dir)
     case OPT_BATTLEANIMS: gMpConfig.battleAnims = !gMpConfig.battleAnims; break;
     case OPT_CARDSCALE:   gMpConfig.cardScaling = !gMpConfig.cardScaling; break;
     case OPT_PADSELECT:   Gamepad_CycleSelected(dir); break;
+    case OPT_MICROPHONE:  if (dir != 0) Mic_CycleSelected(dir); break;
     case OPT_PADLAYOUT:   Gamepad_SetLayout(Gamepad_GetLayout() + dir); break;
     case OPT_ANALOGRUN:   Gamepad_SetAnalogRun(!Gamepad_GetAnalogRun()); break;
     case OPT_RUMBLE:
@@ -1309,6 +1324,7 @@ static const u8 *RowLabel(u8 row, u8 *buf)
     case OPT_CARDGEN:     return sText_CardGen;
     case OPT_MTGGEN:      return sText_MtgGen;
     case OPT_PADSELECT:   return sText_Controller;
+    case OPT_MICROPHONE:  return sText_Microphone;
     case OPT_PADLAYOUT:   return sText_PadButtons;
     case OPT_ANALOGRUN:   return sText_StickRun;
     case OPT_RUMBLE:      return sText_Rumble;
@@ -1497,6 +1513,12 @@ static bool8 HintText(u8 *buf)
         snprintf(ascii, sizeof(ascii), "WINDOW TOO SMALL FOR THE FILTER");
     else if (opt == OPT_PADSELECT)
         snprintf(ascii, sizeof(ascii), "%s", Gamepad_IsConnected() ? "A: PICK THE CONTROLLER TO USE" : "NO CONTROLLER CONNECTED");
+    else if (opt == OPT_MICROPHONE)
+        snprintf(ascii, sizeof(ascii), "%s", Mic_IsPicking() ? "SPEAK INTO THE MICROPHONE TO USE. B: STOP"
+                                          : Mic_Count() == 0 ? "NO MICROPHONE CONNECTED"
+                                          : !Mic_IsAvailable() ? "NOT CONNECTED NOW: LEFT / RIGHT TO CHANGE"
+                                          : strlen(Mic_SelectedName()) > 20 ? Mic_SelectedName()
+                                                               : "A: SPEAK INTO THE ONE CHATTER USES");
     else if (opt == OPT_PADLAYOUT || opt == OPT_ANALOGRUN || opt == OPT_RUMBLE)
         snprintf(ascii, sizeof(ascii), "%.40s", Gamepad_IsConnected() ? Gamepad_Name() : "NO CONTROLLER CONNECTED");
     else if (opt == OPT_FULLSCREEN || opt == OPT_WINSCALE)
@@ -1786,7 +1808,7 @@ static void HighlightRow(void)
 // A number for everything the rows show, to redraw when something changes elsewhere (F11, a controller, a friend)
 static u32 ShownKey(void)
 {
-    u32 key = 5381 + sRowCount * 7 + sTab * 131 + sFriendPage * 977 + sScalePage * 31 + Gamepad_IsSelecting()
+    u32 key = 5381 + sRowCount * 7 + sTab * 131 + sFriendPage * 977 + sScalePage * 31 + Gamepad_IsSelecting() + Mic_IsPicking() * 7
             + sFightPage * 53 + sSpritePage * 61 + sStadiumPage * 67 + sGbPage * 71 + Fight_BindListening() * 3001;
     u8 i, j;
     for (i = 0; i < sRowCount; i++)
@@ -1985,6 +2007,15 @@ static void Task_OptionMenuProcessInput(u8 taskId)
     }
     else if (sFightQuiet)
         sFightQuiet--;
+    else if (Mic_IsPicking())
+    {
+        // listening for the microphone spoken into (src/platform/mic.c); B stops
+        if (JOY_NEW(B_BUTTON | START_BUTTON))
+        {
+            Mic_StopPick();
+            PlaySE(SE_SELECT);
+        }
+    }
     else if (Gamepad_IsSelecting())
     {
         // waiting for a controller button; the keyboard can cancel
@@ -2159,6 +2190,12 @@ static void Task_OptionMenuProcessInput(u8 taskId)
     {
         Gamepad_StartSelect();
         PlaySE(SE_SELECT);
+    }
+    else if (JOY_NEW(A_BUTTON) && opt == OPT_MICROPHONE)
+    {
+        PlaySE(SE_SELECT);
+        if (Mic_Count() > 0)
+            Mic_StartPick();
     }
     else if (JOY_NEW(DPAD_LEFT | DPAD_RIGHT | A_BUTTON) && opt != OPT_SPECFRIEND && opt != OPT_FIGHTKEYS && opt != OPT_FB_BIND
           && opt != OPT_FB_DEFAULTS)

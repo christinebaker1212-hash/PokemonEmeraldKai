@@ -175,6 +175,25 @@ void SoundTask_PlayCryHighPitch(u8 taskId)
     DestroyAnimVisualTask(taskId);
 }
 
+// Moemon Kai: CHATTER's cry, the attacker's own (its saying, when it has one: as Platinum's chatter/anim.s
+// PlayPokemonCry; mp_chatter.c)
+void SoundTask_PlayChatterCry(u8 taskId)
+{
+    u16 species;
+    s8 pan = BattleAnimAdjustPanning(SOUND_PAN_ATTACKER);
+    if (IsContest())
+        species = gContestResources->moveAnim->species;
+    else
+    {
+        void MP_Chatter_ForBattler(u8 battler);
+        species = gAnimBattlerSpecies[gBattleAnimAttacker];
+        MP_Chatter_ForBattler(gBattleAnimAttacker);
+    }
+    if (species != SPECIES_NONE)
+        PlayCry_ByMode(species, pan, CRY_MODE_NORMAL);
+    DestroyAnimVisualTask(taskId);
+}
+
 void SoundTask_PlayDoubleCry(u8 taskId)
 {
     u16 species = 0;

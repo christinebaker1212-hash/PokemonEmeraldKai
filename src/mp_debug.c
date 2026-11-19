@@ -3800,6 +3800,19 @@ void MP_TestCommand(const char *cmd, const char *arg)
                        (unsigned)GetMonData(&gEnemyParty[i], MON_DATA_LEVEL));
         printf("\n");
     }
+    else if (strcmp(cmd, "chatter") == 0)
+    {
+        // chatter: CHATOT's saying (mp_chatter.c); chatter cry: a CHATOT cry now; chatter record: a second from the
+        // microphone kept as the saying, without the party menu (online tests)
+        void MP_Chatter_Debug(void);
+        void MP_Chatter_DebugRecord(void);
+        if (strncmp(arg, "cry", 3) == 0)
+            PlayCry_Normal(SPECIES_CHATOT, 0);
+        else if (strncmp(arg, "record", 6) == 0)
+            MP_Chatter_DebugRecord();
+        else
+            MP_Chatter_Debug();
+    }
     else if (strcmp(cmd, "announcer") == 0)
     {
         // announcer: POKeMON STADIUM's announcer, what it learned of the battle's pace (mp_stadium_announcer.c);

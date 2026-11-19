@@ -195,9 +195,9 @@ struct MpPlayer
     u8 *customGfx;            // custom sprite data or NULL
     u32 customGfxSize;
     u32 appearanceVersion;    // bumped whenever appearance/custom gfx changes
-    u8 *blobBuf[1];           // big data being received (MP_BLOB_KINDS)
-    u32 blobTotal[1];
-    u32 blobHave[1];
+    u8 *blobBuf[2];           // big data being received (MP_BLOB_KINDS: custom sprites, CHATOT's saying)
+    u32 blobTotal[2];
+    u32 blobHave[2];
 };
 
 // CO-OP > SPECTATE: how one friend's screen shows (mp_spectate.c), remembered by their name

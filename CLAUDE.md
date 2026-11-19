@@ -335,6 +335,10 @@ people by Crystal's (tools/quetzal_port/fix_sprites.py), SINNOH's model objects 
 books: s3d_signs.c) and crowds (sprite kind 5), UNOVA's object code table (gen_maps.py obj_index) and Black's 3D
 objects (u3d.c ObjModelsDraw); COOP_NOTES "Objects as the original games draw them"; tests kanto_sprite_audit,
 sinnoh_model_objects, unova_sprite_audit).
+Also CHATOT's CHATTER as Platinum had it (after 1.207.0: OPTIONS > CONTROLS > MICROPHONE, A takes the device spoken
+into: src/platform/mic.c; the saying in "<save>.chatter", recorded by CHATTER in the party menu with Platinum's script,
+played for CHATOT's cries by whose CHATOT it is, friends' online by MP_BLOB_CHATTER, CHATTER's 1 / 11 / 31% by byte 15:
+src/mp/mp_chatter.c; COOP_NOTES "CHATTER as it was in Platinum"; tests chatter_*; MOEMON_MIC_WAV stands in for a mic).
 Also fishing as Gen 1 had it (1.97.0: cast, then a bite and the battle or no nibble; no dots or timing: field_player_avatar.c;
 COOP_NOTES "Fishing as Gen 1 had it"; test fishing_gen1).
 Also breeding by Gen 9's rules (1.166.0: NIDORAN / VOLBEAT either kind from any pair, no incense, egg moves from both

@@ -1,4 +1,5 @@
 #include "global.h"
+#include "mp_chatter.h"
 #include "mp.h"
 #include "battle.h"
 #include "battle_anim.h"
@@ -738,6 +739,7 @@ static void Task_PlayCryWhenReleasedFromBall(u8 taskId)
         break;
     case 1:
         // Play single cry
+        MP_Chatter_ForBattler(battler);   // Moemon Kai: a CHATOT's saying is its trainer's (mp_chatter.c)
         if (ShouldPlayNormalMonCry(mon) == TRUE)
             PlayCry_ByMode(species, pan, CRY_MODE_NORMAL);
         else
@@ -754,6 +756,7 @@ static void Task_PlayCryWhenReleasedFromBall(u8 taskId)
         if (gTasks[taskId].tCryTaskFrames == 0)
         {
             // Play first doubles cry
+            MP_Chatter_ForBattler(battler);
             if (ShouldPlayNormalMonCry(mon) == TRUE)
                 PlayCry_ReleaseDouble(species, pan, CRY_MODE_DOUBLES);
             else
@@ -794,6 +797,7 @@ static void Task_PlayCryWhenReleasedFromBall(u8 taskId)
             break;
         }
         // Play second doubles cry
+        MP_Chatter_ForBattler(battler);
         if (ShouldPlayNormalMonCry(mon) == TRUE)
             PlayCry_ReleaseDouble(species, pan, CRY_MODE_NORMAL);
         else

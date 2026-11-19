@@ -10,6 +10,7 @@
 #include "pokemon.h"
 #include "constants/songs.h"
 #include "task.h"
+#include "mp_chatter.h"
 
 struct Fanfare
 {
@@ -412,6 +413,14 @@ void PlayCryInternal(u16 species, s8 pan, s8 volume, u8 priority, u8 mode)
     u8 table;
     u16 mpSpecies = species;   // Moemon Co-op: (for the battle intro diagnostics)
 
+    // Moemon Kai: CHATOT's saying in place of its cry, as Platinum (mp_chatter.c)
+    if (mpSpecies == SPECIES_CHATOT && MP_Chatter_TryCry(mode, pan, volume))
+    {
+        if (gMPlay_PokemonCry)
+            m4aMPlayStop(gMPlay_PokemonCry);
+        return;
+    }
+
     species--;
 
     // Set default values
@@ -561,6 +570,7 @@ bool8 IsCryFinished(void)
 
 void StopCryAndClearCrySongs(void)
 {
+    MP_Chatter_Stop();   // Moemon Kai: CHATOT's saying too
     if (!gMPlay_PokemonCry)
         return;
     m4aMPlayStop(gMPlay_PokemonCry);
@@ -569,13 +579,14 @@ void StopCryAndClearCrySongs(void)
 
 void StopCry(void)
 {
+    MP_Chatter_Stop();   // Moemon Kai: CHATOT's saying too
     if (gMPlay_PokemonCry)
         m4aMPlayStop(gMPlay_PokemonCry);
 }
 
 bool8 IsCryPlayingOrClearCrySongs(void)
 {
-    if (IsPokemonCryPlaying(gMPlay_PokemonCry))
+    if (MP_Chatter_Playing() || IsPokemonCryPlaying(gMPlay_PokemonCry))   // Moemon Kai: CHATOT's saying too
     {
         return TRUE;
     }
@@ -588,7 +599,7 @@ bool8 IsCryPlayingOrClearCrySongs(void)
 
 bool8 IsCryPlaying(void)
 {
-    if (IsPokemonCryPlaying(gMPlay_PokemonCry))
+    if (MP_Chatter_Playing() || IsPokemonCryPlaying(gMPlay_PokemonCry))   // Moemon Kai: CHATOT's saying too
         return TRUE;
     else
         return FALSE;
@@ -602,7 +613,7 @@ static void Task_DuckBGMForPokemonCry(u8 taskId)
         return;
     }
 
-    if (!IsPokemonCryPlaying(gMPlay_PokemonCry))
+    if (!IsPokemonCryPlaying(gMPlay_PokemonCry) && !MP_Chatter_Playing())   // Moemon Kai: the music stays low under a saying
     {
         m4aMPlayVolumeControl(&gMPlayInfo_BGM, TRACKS_ALL, 256);
         DestroyTask(taskId);

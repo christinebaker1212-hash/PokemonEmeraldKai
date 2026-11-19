@@ -1,0 +1,9 @@
+# OPTIONS > CONTROLS > MICROPHONE (src/platform/mic.c): the row shows the microphone CHATTER uses; A listens to every
+# device and takes the one spoken into (here MOEMON_MIC_WAV's stand-in, "TEST MICROPHONE"); LEFT / RIGHT go round
+# DEFAULT and each device; moemon_coop.ini keeps it (microphone =).
+MODE=1
+TMO=200
+ENV_A="MOEMON_MIC_WAV=$(pwd)/tools/test/scenarios/chatter_record/voice.wav"
+EXPECT_A=("microphone: listening to" "microphone: picked TEST MICROPHONE" "microphone: the default" "microphone: TEST MICROPHONE" "chatter microphone done")
+UNEXPECT_A=("crash" "out of memory" "TIMEOUT")
+CHECK=tools/test/check_mic_ini.sh

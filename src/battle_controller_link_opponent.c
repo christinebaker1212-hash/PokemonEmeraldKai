@@ -1,4 +1,5 @@
 #include "global.h"
+#include "mp_chatter.h"
 void S3D_Gfx_BattleTrainerPic(struct Sprite *sprite, u8 battler, u16 standIn);   // Moemon Kai (src/sinnoh/s3d_gfx.c)
 void U3D_Gfx_BattleTrainerPic(struct Sprite *sprite, u8 battler, u16 standIn);   // Moemon Kai (src/unova/u3d_gfx.c)
 void Orre_People_BattleTrainerPic(struct Sprite *sprite, u8 battler, u16 standIn);   // Moemon Kai (src/orre/orre_people.c)
@@ -1703,6 +1704,8 @@ static void LinkOpponentHandlePlayFanfareOrBGM(void)
 static void LinkOpponentHandleFaintingCry(void)
 {
     u16 species = GetMonData(&gEnemyParty[gBattlerPartyIndexes[gActiveBattler]], MON_DATA_SPECIES);
+
+    MP_Chatter_ForBattler(gActiveBattler);   // Moemon Kai: a CHATOT's saying is its trainer's (mp_chatter.c)
 
     PlayCry_ByMode(species, 25, CRY_MODE_FAINT);
     LinkOpponentBufferExecCompleted();

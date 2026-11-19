@@ -1,0 +1,17 @@
+pressuntil A field 5000
+mp setmon 0 466 30
+mp chatter record
+waitlog 300 chatter: a new saying
+mp wild 466:30 33
+pressuntil A action 6000
+mp bmove 448
+press A 4
+wait 20
+press A 4
+waitlog 900 saying (ours, battler 0, mode 0
+wait 20
+shot chatter_anim
+waitlog 900 CHATTER's level
+wait 200
+log chatter battle done
+quit

@@ -8412,3 +8412,59 @@ OPTIONS > GAME > POKeMON CARD GEN and MAGIC GEN, and HOST A GAME > GAME RULES (t
 set; MAGIC: by its sets' release). Card players only bring decks inside it (tcg_field.c Tcg_FitOpponent,
 Tcg_DeckInGen; mtg_club.c), challenge screens list only those. Everything in docs/TCG_REGIONS.md step 7; scenario
 cards_gen.
+
+## CHATTER as it was in Platinum (after 1.207.0)
+
+The user (2026-11-19): "allow Chatot's Chatter move to function as it originally did. In the settings, the user will
+select or define a Microphone device that's polled from all the user's input methods. Chatter will function as it did
+in Platinum, playing back exactly the sound that was recorded, and all players can hear what it sounds like online."
+Everything is from pret/pokeplatinum (chatot_cry.c, sound_chatot.c, scrcmd_sound.c, battle_script.c
+BtlCmd_CheckChatterActivation, res/field/scripts/scripts_record_chatot_cry.s, res/text/record_chatot_cry.json,
+res/moves/chatter/anim.s).
+
+- The microphone (src/platform/mic.c, include/mic.h): SDL's recording devices, open only while the game listens.
+  OPTIONS > CONTROLS > MICROPHONE: DEFAULT (the PC's own) or a device by name, LEFT / RIGHT going round them; A listens
+  to every device at once and takes the first spoken into (a peak of 6000 / 32768; 15 seconds, B stops), as A on
+  CONTROLLER takes the pad a button is pressed on (option_menu.c OPT_MICROPHONE; ini `microphone =`, empty = DEFAULT;
+  a name over 20 letters shows in full on the hint line). A recording is one second heard at 8000 samples a second,
+  each four averaged into one: 2000 signed 8-bit samples at 2000 Hz, Platinum's MIC sampling
+  (CHATOT_CRY_SAMPLING_RATE). A device that stops sending for 3 seconds (by the clock) ends it: no saying.
+- The saying (src/mp/mp_chatter.c): kept as Platinum keeps it, 1000 bytes of two 4-bit samples (ChatotCry_StoreAudio:
+  sample / 16 + 8, the first in the low half), one per save in "<save>.chatter" (magic CHAT, version 1, the trainer ID,
+  the 1000 bytes; written through AwFile; another player's save at the same path isn't read).
+- Recording: CHATTER in a CHATOT's party menu (party_menu.c FIELD_MOVE_CHATTER, SetUpFieldMove_Chatter), always usable;
+  Platinum's script and words (data/scripts/chatter.inc EventScript_RecordChatotCry): CHATOT's picture, "It will
+  forget the saying it now knows. Is that OK?" when it has one, "Press the A or B Button, then speak into the
+  microphone." (the music lowered to a third, Platinum's FadeOutBGM 42), the second heard, "CHATOT learned a new
+  saying!" and its cry, or "failed to learn a new saying" / "Would you like to try again?" when no microphone opens.
+  Platinum's unused "unable to concentrate" line isn't used.
+- Playing: every CHATOT cry of Platinum's kinds (Sound_CanPlayChatotCry: normal, short / double, fainting, unwell; here
+  also the static encounter's) is the saying when there is one (sound.c PlayCryInternal -> MP_Chatter_TryCry); HOWL,
+  HYPER VOICE, ROAR and GROWL keep Chatot's own cry. Upsampled as ChatotCry_GetUpsampledAudio ((nibble - 8) * 16),
+  played at 2000 Hz times 1 + a random 0-8191 / 32768 (CHATOT_CRY_SPEED_VARIANCE; its own little random numbers, never
+  the game's), with the cry's volume and pan, mixed after the game's sound (music_player.c MP_Chatter_Mix); IsCryPlaying
+  / StopCry / the music's ducking count it.
+- Whose: outside battle the player's own (Platinum's SOUND_SYSTEM_PARAM_CHATOT_CRY); in battle the trainer's whose
+  CHATOT it is (BattleSystem_GetChatotCry): ours, a co-op partner's (MP_Coop_BattlerPlayer), a versus opponent's
+  (MP_Battle_PeerId), never a wild one's, an NPC trainer's or STEVEN-like partners' (Chatot's own cry). The cries name
+  their battler (MP_Chatter_ForBattler: pokeball.c's send-out cries, every controller's faint cry, the wild intro in
+  battle_main.c, CHATTER's animation); a cry without one takes the CHATOT out in the battle. A link battle numbers
+  battlers alike in both games. The log says whose ("chatter: CHATOT's saying (ours / player N's, battler B, mode M,
+  speed S)").
+- Online: the saying is a blob (MP_BLOB_CHATTER 1: a byte 1, then the 1000 bytes; MP_PROTOCOL_VERSION 89), sent when
+  it's recorded and on joining (mp_main.c SendLocalBlobs); the room's server keeps each player's blobs and hands them to
+  whoever joins later (mp_server.c), so every game in the room plays a friend's CHATOT with the friend's saying, and the
+  master's engine rolls CHATTER's chance with it.
+- In battle: CHATTER confuses by the saying (battle_script_commands.c Cmd_seteffectwithchance -> MP_Chatter_Confuses):
+  a CHATOT that isn't transformed against a target still standing, its saying's byte 15 below -30 level 1, 30 and up
+  level 2, else (or no saying) 0; chance 0 / 10 / 30 and "random % 100 > chance" skips it, so 1%, 11%, 31% (Platinum's,
+  whatever the GENERATION). Its animation is Platinum's (data/battle_anim_scripts_gen4.inc Move_CHATTER): the
+  attacker's cry (SoundTask_PlayChatterCry), the attacker swaying (AnimTask_ShakeMon2 8 px, 4 times, 8 frames) and
+  notes from it, then the cry waited for.
+- Tests: MOEMON_MIC_WAV=file.wav stands in for a microphone ("TEST MICROPHONE", fed a frame's worth at a time); the
+  scenarios' voice (tools/test/scenarios/chatter_record/voice.wav / voice.raw) gives byte 15 = 120 (level 2).
+  chatter_record (the party menu, the script, the saying, asking again), chatter_battle (ours in battle, the wild one's
+  own, level 2), chatter_microphone (the row, A picks, LEFT / RIGHT, the ini: tools/test/check_mic_ini.sh),
+  chatter_online (a friend's saying heard and played in a versus battle), chatter_realmic (SDL's own recording path
+  through its disk driver: the same saying as the stand-in). `mp chatter` (the saying), `mp chatter cry`, `mp chatter
+  record` (a second from the microphone, no script).

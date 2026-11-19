@@ -1,0 +1,9 @@
+# CHATTER through a real SDL recording device (src/platform/mic.c's own path, not the MOEMON_MIC_WAV stand-in): SDL's
+# disk driver plays chatter_record's voice (voice.raw: 8000 Hz, 16-bit) as the PC's default microphone, and the saying
+# comes out the same as the stand-in's (byte 15 = 120). (The harness runs faster than real time: the device's second
+# takes many frames.)
+MODE=1
+TMO=300
+ENV_A="SDL_AUDIODRIVER=disk SDL_DISKAUDIOFILEIN=$(pwd)/tools/test/scenarios/chatter_record/voice.raw SDL_DISKAUDIOFILE=/dev/null"
+EXPECT_A=("microphone: recording from the default" "chatter: a new saying (byte 15 = 120)" "[test] chatter: own yes, byte 15 = 120, level 2" "chatter real microphone done")
+UNEXPECT_A=("crash" "out of memory" "TIMEOUT" "went quiet")

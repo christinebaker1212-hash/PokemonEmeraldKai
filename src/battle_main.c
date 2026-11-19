@@ -3091,6 +3091,8 @@ static void SpriteCB_WildMonAnimate(struct Sprite *sprite)
 {
     if (!gPaletteFade.active)
     {
+        void MP_Chatter_ForBattler(u8 battler);
+        MP_Chatter_ForBattler(sprite->sBattler);   // Moemon Kai: a wild CHATOT's own cry (mp_chatter.c)
         BattleAnimateFrontSprite(sprite, sprite->sSpeciesId, FALSE, 1);
     }
 }

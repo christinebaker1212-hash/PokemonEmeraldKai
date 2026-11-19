@@ -1,0 +1,33 @@
+pressuntil A field 5000
+mp options
+wait 60
+mp optionstab 3
+wait 20
+press DOWN 4
+wait 4
+press DOWN 4
+wait 4
+press DOWN 4
+wait 4
+press DOWN 4
+wait 4
+press DOWN 4
+wait 4
+press DOWN 4
+wait 10
+shot mic_row
+press A 4
+wait 4
+shot mic_listening
+wait 30
+wait 10
+shot mic_picked
+press LEFT 4
+wait 10
+shot mic_default
+press RIGHT 4
+wait 10
+mp saveconfig
+wait 10
+log chatter microphone done
+quit

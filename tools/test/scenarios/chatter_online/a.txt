@@ -1,0 +1,10 @@
+pressuntil A field 5000
+waitfor online 6000
+mp chatter record
+waitlog 300 chatter: a new saying
+waitlog 4000 starting PvP battle
+pressuntil A action 9000
+mp bmove 448
+pressuntillog A 9000 the battle: 
+wait 300
+quit

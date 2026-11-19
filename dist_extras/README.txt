@@ -1170,6 +1170,10 @@ CONTROLS
                 you want for it (one already used by another punch or kick
                 swaps with it). Esc or Back keeps it as it was. DEFAULTS
                 puts them all back.
+  MICROPHONE    the microphone CHATOT's CHATTER listens to: DEFAULT (the
+                PC's own) or any recording device, with Left/Right. Or
+                press A and speak: the microphone that hears you is used
+                from then on (B stops listening).
 CO-OP
   FRIENDS' SCREENS and a row for each friend online: see FRIENDS' SCREENS.
   NEW FRIENDS   the screen size for friends you haven't set up yet

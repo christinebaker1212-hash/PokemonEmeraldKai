@@ -1,4 +1,5 @@
 #include "global.h"
+#include "mp_chatter.h"
 #include "mp.h"
 #include "constants/trainers.h"
 #include "battle.h"
@@ -623,6 +624,8 @@ static void SafariHandlePlayFanfareOrBGM(void)
 static void SafariHandleFaintingCry(void)
 {
     u16 species = GetMonData(&gPlayerParty[gBattlerPartyIndexes[gActiveBattler]], MON_DATA_SPECIES);
+
+    MP_Chatter_ForBattler(gActiveBattler);   // Moemon Kai: a CHATOT's saying is its trainer's (mp_chatter.c)
 
     PlayCry_Normal(species, 25);
     SafariBufferExecCompleted();

@@ -14,6 +14,8 @@
 #include "save_slots.h"
 #include "mp_region.h"
 #include "mp.h"
+#include "mp_chatter.h"
+#include "mic.h"
 #include "mp_uistyle.h"
 #include "mp_tcard.h"
 #include "text_window.h"
@@ -640,6 +642,7 @@ static void LoadConfig(void)
         else if (strcmp(key, "mute_in_background") == 0) gMpConfig.muteInBackground = atoi(val) != 0;
         else if (strcmp(key, "stadium_announcer") == 0) gMpConfig.noAnnouncer = atoi(val) == 0;
         else if (strcmp(key, "stadium_announcer_jp") == 0) gMpConfig.announcerJp = atoi(val) != 0;
+        else if (strcmp(key, "microphone") == 0) Mic_SetSelected(val);   // (CHATTER: src/platform/mic.c)
         else if (strcmp(key, "stadium_style") == 0)
             gMpConfig.stadiumStyle = strcmp(val, "pokestadium") == 0 ? MP_STADIUM_STYLE_STADIUM1
                                    : strcmp(val, "pokestadium2") == 0 ? MP_STADIUM_STYLE_STADIUM2 : MP_STADIUM_STYLE_ORIGINAL;
@@ -842,6 +845,8 @@ void MP_SaveConfig(void)
         "stadium_announcer_jp = %d\n"
         "; OPTIONS > BATTLE > STADIUM SETTINGS > STYLE: original, pokestadium (the first STADIUM's look), pokestadium2\n"
         "stadium_style = %s\n"
+        "; OPTIONS > CONTROLS > MICROPHONE: the recording device CHATOT's CHATTER listens to (empty = the PC's default)\n"
+        "microphone = %s\n"
         "; advanced: use a different online lobby server (address or address:port)\n"
         "lobby = %s\n"
         "; your 32 CO-OP phrases (made in CO-OP menu > EMOTES; word codes, ffff = empty)\n",
@@ -866,7 +871,7 @@ void MP_SaveConfig(void)
         gMpConfig.cardBack == MP_CARD_BACK_PIXEL ? "pixel" : "printed", gMpConfig.cardScaling,
         gMpConfig.battleAnims ? "modern" : "classic", !gMpConfig.noShadows, gMpConfig.menuTheme == MP_MENU_THEME_DARK ? "dark" : "default", MP_UiStyle_Key(gMpConfig.uiStyle), !gMpConfig.uiNoWhiteBg, gMpConfig.uiMenuMons == MP_MENU_MONS_KAI ? "kai" : gMpConfig.uiMenuMons == MP_MENU_MONS_EXTENDED ? "extended" : "original", gMpConfig.muteInBackground, !gMpConfig.noAnnouncer, gMpConfig.announcerJp,
         gMpConfig.stadiumStyle == MP_STADIUM_STYLE_STADIUM1 ? "pokestadium" : gMpConfig.stadiumStyle == MP_STADIUM_STYLE_STADIUM2 ? "pokestadium2" : "original",
-        gMpConfig.lobby);
+        Mic_SelectedName(), gMpConfig.lobby);
     {
         int i;
         for (i = 0; i < MP_NUM_PHRASES; i++)
@@ -1327,6 +1332,7 @@ static void SendLocalBlobs(void)
 {
     if (MP_Avatar_LocalCustomBlob())
         MP_SendBlob(MP_BLOB_SPRITES, MP_Avatar_LocalCustomBlob(), MP_Avatar_LocalCustomBlobSize());
+    MP_Chatter_SendOwn();   // CHATOT's saying, for friends' ears (mp_chatter.c)
 }
 
 void MP_SendAppearance(void)
@@ -1371,6 +1377,7 @@ static void HandlePlayerLeft(u8 id)
     MP_Emote_OnPlayerLeft(id);
     MP_Piggy_OnPlayerLeft(id);
     MP_Rhythm_OnPlayerLeft(id);
+    MP_Chatter_OnPlayerLeft(id);
     MP_Linkx_OnPlayerLeft(id);
     MP_Minigame_OnPlayerLeft(id);
     MP_Group_OnPlayerLeft(id);
@@ -1430,6 +1437,8 @@ static void OnBlobComplete(u8 id, u8 kind)
         p->appearanceVersion++;
         MP_Overworld_OnAppearanceChanged(id);
     }
+    else if (kind == MP_BLOB_CHATTER)
+        MP_Chatter_OnBlob(id, p->blobBuf[kind], p->blobTotal[kind]);   // (the buffer stays for the next one)
 }
 
 static void HandleBlobChunk(const u8 *data, u16 len)
@@ -2515,6 +2524,7 @@ void MP_FrameUpdate(void)
             MP_StadiumAnnouncer_Update();   // POKéMON STADIUM's announcer (mp_stadium_announcer.c)
         }
     }
+    Mic_Update();   // CHATTER's microphone: the pick listening, a recording filling (src/platform/mic.c)
     if (sFollowRegion && MP_IsInOverworld() && MP_IsLocalFree())
     {
         // Moemon Kai: the host's trip: everyone in the room follows (docs/REGIONS_PLAN.md "Co-op")

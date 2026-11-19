@@ -36,6 +36,7 @@ bool8 FldEff_UseStrength(void);
 bool8 SetUpFieldMove_SweetScent(void);
 bool8 SetUpFieldMove_RockClimb(void);   // Moemon Kai: SINNOH (src/sinnoh/s3d_misc.c)
 bool8 SetUpFieldMove_Defog(void);
+bool8 SetUpFieldMove_Chatter(void);   // Moemon Kai: src/mp/mp_chatter.c
 bool8 FldEff_SweetScent(void);
 
 // teleport

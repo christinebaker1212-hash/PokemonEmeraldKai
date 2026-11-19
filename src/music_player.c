@@ -799,6 +799,10 @@ void m4aSoundVSync(void)
                 void MP_StadiumAnnouncer_Mix(float *buffer, s32 count);
                 MP_StadiumAnnouncer_Mix(audioBuffer, samplesPerFrame);   // Moemon Kai: POKéMON STADIUM's announcer
             }
+            {
+                void MP_Chatter_Mix(float *buffer, s32 count);
+                MP_Chatter_Mix(audioBuffer, samplesPerFrame);   // Moemon Kai: CHATOT's saying (mp_chatter.c)
+            }
         }
 
         gAudioBufferLen = samplesPerFrame;

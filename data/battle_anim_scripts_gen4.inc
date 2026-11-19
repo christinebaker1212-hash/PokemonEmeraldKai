@@ -1266,8 +1266,24 @@ Move_STEALTH_ROCK:
 Move_GRASS_KNOT:
 	goto Move_VINE_WHIP
 
+@ Moemon Kai: as Platinum's (res/moves/chatter/anim.s): the attacker's cry (CHATOT's saying: mp_chatter.c) while it
+@ sways side to side and notes fly from it
 Move_CHATTER:
-	goto Move_UPROAR
+	loadspritegfx ANIM_TAG_JAGGED_MUSIC_NOTE
+	createvisualtask SoundTask_PlayChatterCry, 2
+	createvisualtask AnimTask_ShakeMon2, 2, ANIM_ATTACKER, 8, 0, 4, 8
+	createsprite gJaggedMusicNoteSpriteTemplate, ANIM_ATTACKER, 2, 0, 29, -12, 0
+	createsprite gJaggedMusicNoteSpriteTemplate, ANIM_ATTACKER, 2, 0, -12, -29, 1
+	delay 16
+	createsprite gJaggedMusicNoteSpriteTemplate, ANIM_ATTACKER, 2, 0, 12, -29, 1
+	createsprite gJaggedMusicNoteSpriteTemplate, ANIM_ATTACKER, 2, 0, -29, -12, 0
+	delay 16
+	createsprite gJaggedMusicNoteSpriteTemplate, ANIM_ATTACKER, 2, 0, 24, -24, 1
+	createsprite gJaggedMusicNoteSpriteTemplate, ANIM_ATTACKER, 2, 0, -24, -24, 0
+	waitforvisualfinish
+	createvisualtask SoundTask_WaitForCry, 5
+	waitforvisualfinish
+	end
 
 Move_JUDGMENT:
 	goto Move_HYPER_BEAM

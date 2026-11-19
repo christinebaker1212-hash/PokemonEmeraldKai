@@ -1,4 +1,5 @@
 #include "global.h"
+#include "mp_chatter.h"
 #include "mp.h"
 #include "battle.h"
 #include "battle_anim.h"
@@ -1436,6 +1437,7 @@ static void WallyHandleFaintingCry(void)
 
     // Seems that it doesn't bother using CRY_MODE_FAINT because
     // Wally's Pokémon during the tutorial is never intended to faint.
+    MP_Chatter_ForBattler(gActiveBattler);   // Moemon Kai: a CHATOT's saying is its trainer's (mp_chatter.c)
     PlayCry_Normal(species, 25);
     WallyBufferExecCompleted();
 }

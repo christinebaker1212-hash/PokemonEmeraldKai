@@ -854,3 +854,6 @@ gSpecials::
 	def_special U3D_VmDoorOpen   @ Moemon Kai: UNOVA: a door walked at opens
 	def_special U3D_VmCannonFly   @ Moemon Kai: UNOVA: ... the shot and the flight
 	def_special U3D_VmIceSlide   @ Moemon Kai: UNOVA: BRYCEN's gym's ice slides (Black's script hands the player to one)
+	def_special MP_ChatterField_Prepare   @ Moemon Kai: CHATTER from the party menu: the CHATOT's picture, a saying to forget (mp_chatter.c)
+	def_special MP_ChatterField_Start   @ Moemon Kai: ... the microphone listens (FALSE: none)
+	def_special MP_ChatterField_Wait   @ Moemon Kai: ... the second heard becomes the saying (waitstate)
