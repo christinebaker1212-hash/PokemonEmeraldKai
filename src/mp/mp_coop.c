@@ -1437,17 +1437,22 @@ static void Task_JoinCheck(u8 taskId)
 
 // The EXP bonus percent for a Pokémon in the master's battle party: party slots
 // 0-2 are the master's own, 3-5 the partner's (their own bonus, MPR_COOP_BONUS).
-// The EXP CURVE's ceiling for a party slot's owner (mp_expcurve.c): the master's own, a friend's as they sent it
+// The EXP CURVE's ceiling in a co-op battle (mp_expcurve.c): the group's, the highest of the players' in it (the
+// master's own, each friend's as they sent it), the same for every POKeMON. Each player's own was capped by their own
+// badges there, so a friend with fewer of the region's badges had Lv30 POKeMON cut to a tenth beside the host's
+// boosted ones in the same battle (the user, 2026-11-19: "I got 100, he got 1000"); one group goes one pace
 u8 MP_Coop_ExpCeilingFor(u8 partySlot)
 {
-    u8 seat;
-    if (gMpCoopBattle && sCoop.isMaster && partySlot < PARTY_SIZE && (seat = SeatOfSlot(partySlot)) != 0 && seat < sCoop.count)
-    {
-        u8 player = sCoop.seatPlayer[seat];
-        if (player < MP_MAX_PLAYERS && (sCoop.playerBonusHeard & (1 << player)) && sCoop.playerCeiling[player])
-            return sCoop.playerCeiling[player];
-    }
-    return MP_ExpCurve_Ceiling();
+    u8 best = MP_ExpCurve_Ceiling(), seat;
+    (void)partySlot;
+    if (gMpCoopBattle && sCoop.isMaster)
+        for (seat = 1; seat < sCoop.count; seat++)
+        {
+            u8 player = sCoop.seatPlayer[seat];
+            if (player < MP_MAX_PLAYERS && (sCoop.playerBonusHeard & (1 << player)) && sCoop.playerCeiling[player] > best)
+                best = sCoop.playerCeiling[player];
+        }
+    return best;
 }
 
 u16 MP_Coop_ExpBonusFor(u8 partySlot)
@@ -2577,6 +2582,18 @@ static void CB2_MpCoopFinish(void)
               sCoop.mode, sCoop.trainerId, sCoop.twoTrainers ? sCoop.trainerIdB : 0, sCoop.isMaster ? ", master" : "");
     gSpecialVar_Result = sCoop.outcome;
     gBattleOutcome = sCoop.outcome;
+    if (!sCoop.isMaster && sCoop.mode != MODE_WILD)
+    {
+        // the EXP CURVE's ANALYZE (mp_expcurve.c): the trainers fought here count on a friend's game too, not only on
+        // the master's, which builds their teams (MP_LevelScale_LogTrainer); a friend's frontier lagged the host's
+        u8 i, top = 0, lv;
+        for (i = 0; i < PARTY_SIZE; i++)
+            if (GetMonData(&gEnemyParty[i], MON_DATA_SPECIES) != SPECIES_NONE
+             && (lv = GetMonData(&gEnemyParty[i], MON_DATA_LEVEL)) > top)
+                top = lv;
+        if (top)
+            MP_ExpCurve_NoteTrainer(top < MP_LevelScale_BadgeCap(MP_Badges()) ? top : MP_LevelScale_BadgeCap(MP_Badges()));
+    }
     if (sCoop.outcome == B_OUTCOME_WON)
     {
         MP_TCard_NoteCoopWin(sCoop.seatPlayer, sCoop.count, MP_Coop_Seat());   // the TRAINER CARD's "won together"

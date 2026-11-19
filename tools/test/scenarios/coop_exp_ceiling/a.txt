@@ -1,0 +1,10 @@
+pressuntil A field 5000
+mp godmode 1
+mp teach 0 53
+waitfor online 6000
+wait 30
+mp expcurve
+waitfor battle 8000
+pressuntillog A 20000 co-op: battle over
+wait 120
+quit

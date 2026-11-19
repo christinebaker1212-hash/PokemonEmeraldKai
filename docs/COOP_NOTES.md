@@ -8041,6 +8041,12 @@ tools/ui_styles/check_specs.py.
   ~2000 EXP at Lv30 by NUGGET BRIDGE came from KANTO's water (Lv34-36) counted because SURF was owned (a MoeGatcha
   prize) and the frontier was never lowered. Debug: `mp expfrontier N`; the log prints "top T ceiling C".
   Test exp_curve_cap.
+- (2026-11-19) A co-op battle's ceiling is the group's: the highest of the players' own (MP_Coop_ExpCeilingFor), the
+  same for every POKeMON in it. Each player's own came from their own save's frontier, which on a friend's game lagged
+  the host's: the trainers' teams are built (and noted, MP_LevelScale_LogTrainer) only on the master's game, and the
+  water only counts for a party with SURF. With the same badges a friend's Lv30 team was cut to ~11% beside the host's
+  boosted one in the same battle ("I got 100, he got 1000"). A friend's game now notes the trainers it fought in co-op
+  too (mp_coop.c CB2_MpCoopFinish). Scenario coop_exp_ceiling (before: slot 0 +124, slot 3 +11; now both +124).
 - Whole (unsplit) EXP only where LEVEL SCALING is on and this region's LEAGUE is beaten (battle_script_commands.c
   MpExpUnsplit: MP_Region_ClearedHere).
 - Field moves' badges: MP_Region_FieldMoveBadge's tables are in FIELD_MOVE order (0 CUT, 1 FLASH, 2 ROCK SMASH, 3

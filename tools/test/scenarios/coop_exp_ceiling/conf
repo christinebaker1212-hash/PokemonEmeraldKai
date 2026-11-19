@@ -1,0 +1,14 @@
+# A co-op battle's EXP CURVE ceiling is the group's (the user, 2026-11-19: "I got 100, he got 1000"): on ROUTE 101,
+# ALICE and BOB have the same badges (none) and both teams are Lv15, but BOB has reached a Lv18 area and ALICE hasn't.
+# Each player's own ceiling used to differ (the frontier, SURF's water, the trainer teams only the host's game notes),
+# so ALICE's POKeMON were cut while BOB's were boosted in the same battle. Now every POKeMON goes by the higher of the two
+MODE=2
+WARP=0,16,12,11
+WARP_B=0,16,14,11
+TMO=240
+ENV_A="MOEMON_DEBUG_PARTY=280:15 MOEMON_LEVEL_SCALING=1"
+ENV_B="MOEMON_DEBUG_PARTY=283:15 MOEMON_LEVEL_SCALING=1"
+EXPECT_A=("co-op: battle over")
+EXPECT_B=("co-op: battle over" "co-op exp: slot 0 +124" "co-op exp: slot 3 +124")
+UNEXPECT_A=("[crash]")
+UNEXPECT_B=("[crash]" "exp curve: Lv15, ceiling 3:")
