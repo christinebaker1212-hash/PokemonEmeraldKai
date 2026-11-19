@@ -451,7 +451,9 @@ class GBPack:
                 if i not in (0, nact):
                     # (a co-op battle: a line where another player's POKéMON begin, across the column in the gap
                     # above the slot, the ink's light shade, as the status screens' rules)
-                    gap = (12 if nact == 2 else 4) if act else 4
+                    # (the middle of the gap between the slot above's last row of ink and this one's first, as
+                    # drawn: RED's right-hand rows sit a pixel higher than CRYSTAL's)
+                    gap = (14 if nact == 2 else 6) if act else (7 if self.red else 6)
                     left, right = (8, 112) if act else (120, 232)
                     rule = Image.new('RGBA', (right - left, 1), st.mid + (255,))
                     sp.add(U.OP_IMG, x=left, y=y - gap, a=p.image('%s.teamrule.%d' % (n, right - left), rule),
