@@ -826,6 +826,47 @@ static int HandCount(int player)
 }
 
 // static abilities (mtg_static.c): lords, anthems, keywords and protection granted, the layers
+// Shadow (Keyword.SHADOW): blocks and is blocked only by creatures with shadow
+static void TestShadow(void)
+{
+    int knight, wraith, bears;
+    printf("shadow: only shadow blocks shadow\n");
+    Table();
+    knight = Put(0, "Dauthi Slayer", MTG_ZONE_BATTLEFIELD);
+    wraith = Put(1, "Dauthi Horror", MTG_ZONE_BATTLEFIELD);
+    bears = Put(1, "Grizzly Bears", MTG_ZONE_BATTLEFIELD);
+    CHECK(!Mtg_CanBlock(&sD, bears, knight), "the bears can't block a shadow creature");
+    CHECK(Mtg_CanBlock(&sD, wraith, knight), "a shadow creature blocks one");
+    CHECK(!Mtg_CanBlock(&sD, knight, bears), "a shadow creature can't block one without");
+
+    // Flanking: a blocker without it gets -1/-1 (a 1-toughness one dies before damage)
+    printf("flanking: the blocker gets -1/-1\n");
+    Table();
+    knight = Put(0, "Suq'Ata Lancer", MTG_ZONE_BATTLEFIELD);
+    bears = Put(1, "Llanowar Elves", MTG_ZONE_BATTLEFIELD);
+    Attack(1);
+    Block(bears, knight);
+    GoTo(0, MTG_STEP_COMBAT_END);
+    CHECK(Zone(bears) == MTG_ZONE_GRAVEYARD && Zone(knight) == MTG_ZONE_BATTLEFIELD,
+          "flanking: the 1/1 elves die before they deal damage");
+
+    // Fading: enters with N fade counters, one off each upkeep, sacrificed when it can't
+    printf("fading: counters off, then sacrificed\n");
+    Table();
+    knight = Put(0, "Blastoderm", MTG_ZONE_HAND);
+    Mtg_MoveTo(&sD, knight, MTG_ZONE_BATTLEFIELD);   /* (entering as it would: its counters) */
+    CHECK(Mtg_Counters(&sD, knight, Mtg_CounterKind("FADE")) == 3, "blastoderm: 3 fade counters (%d)",
+          Mtg_Counters(&sD, knight, Mtg_CounterKind("FADE")));
+    {
+        int t;
+        for (t = 0; t < 4 && Zone(knight) == MTG_ZONE_BATTLEFIELD; t++) {
+            GoToTurn(1, MTG_STEP_DRAW);
+            GoToTurn(0, MTG_STEP_DRAW);   /* (its controller's upkeep passed) */
+        }
+        CHECK(Zone(knight) == MTG_ZONE_GRAVEYARD && t == 4, "sacrificed at the fourth upkeep (%d)", t);
+    }
+}
+
 static void TestStatics(void)
 {
     int lord, lord2, merfolk, bears, goblin, moon, island, law, bolt, black;
@@ -2912,6 +2953,7 @@ int main(int argc, char **argv)
     TestMana();
     TestSpells();
     TestStatics();
+    TestShadow();
     TestAuras();
     TestCosts();
     TestRegenerate();

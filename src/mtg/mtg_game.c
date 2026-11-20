@@ -1371,6 +1371,9 @@ int Mtg_CanBlock(const MtgDuel *d, int blocker, int attacker)
         return 0;
     if ((akw & MTG_KW_BIT(MTG_KW_FEAR)) && !(bc->types & MTG_T_ARTIFACT) && !(bc->colors & MTG_COLOR_BIT(MTG_B)))
         return 0;
+    // (shadow: "can block or be blocked by only creatures with shadow", both ways)
+    if (((akw ^ bkw) & MTG_KW_BIT(MTG_KW_SHADOW)) != 0)
+        return 0;
     uint8_t walk = Mtg_Landwalk(d, attacker);
     (void)ac;
     if (Mtg_Protection(d, attacker) & bc->colors)
@@ -1589,9 +1592,25 @@ static void BlocksDeclared(MtgDuel *d)
             if (d->objs[j].blocking == i) {
                 if (first == MTG_NO_OBJ)
                     first = j;
+                // Flanking (Keyword.FLANKING's trigger, resolved at once: nothing can answer it that matters): a blocker
+                // without flanking gets -1/-1 until end of turn
+                if ((Mtg_Keywords(d, i) & MTG_KW_BIT(MTG_KW_FLANKING)) && !(Mtg_Keywords(d, j) & MTG_KW_BIT(MTG_KW_FLANKING))) {
+                    d->objs[j].tempPower--;
+                    d->objs[j].tempToughness--;
+                }
                 TrigEvent(d, MTG_TRIG_ATTACKER_BLOCKED_BY, i, j, def);
             }
         TrigEvent(d, MTG_TRIG_ATTACKER_BLOCKED, i, first, def);
+        // Rampage N (its "becomes blocked" trigger, resolved at once): +N/+N for each blocker past the first
+        if (Mtg_Card(d->objs[i].def)->rampage) {
+            int blockers = 0;
+            for (j = 0; j < d->objCount; j++)
+                blockers += d->objs[j].blocking == i;
+            if (blockers > 1) {
+                d->objs[i].tempPower += (int8_t)(Mtg_Card(d->objs[i].def)->rampage * (blockers - 1));
+                d->objs[i].tempToughness += (int8_t)(Mtg_Card(d->objs[i].def)->rampage * (blockers - 1));
+            }
+        }
     }
 }
 
@@ -1624,6 +1643,17 @@ static int StartStep(MtgDuel *d)
                 d->objs[i].sick = 0;
             }
         PruneEffects(d, MTG_EFF_AFTER_UNTAP, d->active);   // ("doesn't untap during your next untap step": done)
+        break;
+    case MTG_STEP_UPKEEP:
+        // Fading (its upkeep trigger, done as the step begins): a fade counter off, or sacrificed when there's none
+        for (i = 0; i < d->objCount; i++)
+            if (d->objs[i].controller == d->active && d->objs[i].zone == MTG_ZONE_BATTLEFIELD && Mtg_Card(d->objs[i].def)->fading) {
+                int kind = Mtg_Card(d->objs[i].def)->etbKind;
+                if (Mtg_Counters(d, i, kind) > 0)
+                    Mtg_AddCountersKind(d, i, kind, -1);
+                else
+                    Mtg_Sacrifice(d, i);
+            }
         break;
     case MTG_STEP_DRAW:
         if (d->turn > 1)   // the starting player skips the first draw

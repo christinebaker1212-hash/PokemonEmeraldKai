@@ -30,6 +30,8 @@ enum { MTG_W, MTG_U, MTG_B, MTG_R, MTG_G, MTG_C, MTG_MANA_KINDS };   // mana and
 enum {
     MTG_KW_FLYING, MTG_KW_REACH, MTG_KW_HASTE, MTG_KW_VIGILANCE, MTG_KW_DEFENDER, MTG_KW_FIRST_STRIKE,
     MTG_KW_DOUBLE_STRIKE, MTG_KW_TRAMPLE, MTG_KW_SHROUD, MTG_KW_FEAR, MTG_KW_FLASH, MTG_KW_LIFELINK,
+    MTG_KW_SHADOW,   // (Keyword.SHADOW: it blocks and is blocked only by creatures with shadow)
+    MTG_KW_FLANKING, // (Keyword.FLANKING: a creature without flanking blocking it gets -1/-1 until end of turn)
     MTG_KW_COUNT
 };
 #define MTG_KW_BIT(k) (1u << (k))
@@ -72,6 +74,8 @@ typedef struct MtgCardDef {
     uint8_t starPT;                          // PT:*/* (bit 1 power, 2 toughness): a characteristic-defining static sets it
     uint16_t altCost;                        // S:Mode$ AlternativeCost: gMtgAltCosts index + 1 (0: none; mtg_static.c)
     uint8_t etbKind, etbNum, etbX;           // K:etbCounter:TYPE:N: enters with N (etbX: X, as paid) counters of a kind
+    uint8_t fading;                          // K:Fading:N: enters with N fade counters (etbKind / etbNum), loses one each upkeep
+    uint8_t rampage;                         // K:Rampage:N: +N/+N for each creature blocking it past the first
     uint8_t staticCount;
     uint16_t statics[4];                     // indexes into the static table (S: lines; mtg_static.c)
     uint16_t svarFirst, svarCount;           // the card's SVar: lines

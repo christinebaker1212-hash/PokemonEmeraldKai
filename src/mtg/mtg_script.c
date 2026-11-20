@@ -748,7 +748,7 @@ static const struct { const char *name; int kw; } sKeywords[] = {
     {"Flying", MTG_KW_FLYING}, {"Reach", MTG_KW_REACH}, {"Haste", MTG_KW_HASTE}, {"Vigilance", MTG_KW_VIGILANCE},
     {"Defender", MTG_KW_DEFENDER}, {"First Strike", MTG_KW_FIRST_STRIKE}, {"Double Strike", MTG_KW_DOUBLE_STRIKE},
     {"Trample", MTG_KW_TRAMPLE}, {"Shroud", MTG_KW_SHROUD}, {"Fear", MTG_KW_FEAR}, {"Flash", MTG_KW_FLASH},
-    {"Lifelink", MTG_KW_LIFELINK},
+    {"Lifelink", MTG_KW_LIFELINK}, {"Shadow", MTG_KW_SHADOW}, {"Flanking", MTG_KW_FLANKING},
 };
 static const char *const sColorNames[5] = {"white", "blue", "black", "red", "green"};
 static const char *const sBasicTypes[5] = {"Plains", "Island", "Swamp", "Mountain", "Forest"};
@@ -798,6 +798,17 @@ static void ParseKeyword(MtgCardDef *c, const char *k)
             }
         }
         Unsupported(c, "etbCounter");
+        return;
+    }
+    if (strncmp(k, "Fading:", 7) == 0 && k[7] >= '1' && k[7] <= '9' && strspn(k + 7, "0123456789") == strlen(k + 7)
+        && !c->etbKind) {   // (Keyword.FADING: N fade counters as it enters; mtg_game.c StartStep's upkeep)
+        c->etbKind = (uint8_t)Mtg_CounterKind("FADE");
+        c->etbNum = (uint8_t)atoi(k + 7);
+        c->fading = 1;
+        return;
+    }
+    if (strncmp(k, "Rampage:", 8) == 0 && k[8] >= '1' && k[8] <= '9' && !k[9]) {   // (Keyword.RAMPAGE: mtg_game.c BlocksDeclared)
+        c->rampage = (uint8_t)(k[8] - '0');
         return;
     }
     if (strncmp(k, "Cycling:", 8) == 0) {   // (Forge's CardFactoryUtil: an ability from the hand, made once the lines are read)

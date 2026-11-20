@@ -715,7 +715,7 @@ int MtgGfx_Cost(int card, int x, int y, int right, int big)
 void MtgGfx_KeywordLine(int card, uint32_t kw, char *out, unsigned cap)
 {
     static const char *const words[MTG_KW_COUNT] = {"FLYING", "REACH", "HASTE", "VIGILANCE", "DEFENDER", "FIRST STRIKE",
-                                                    "DOUBLE STRIKE", "TRAMPLE", "SHROUD", "FEAR", "FLASH", "LIFELINK"};
+                                                    "DOUBLE STRIKE", "TRAMPLE", "SHROUD", "FEAR", "FLASH", "LIFELINK", "SHADOW", "FLANKING"};
     static const char *const walks[5] = {"PLAINSWALK", "ISLANDWALK", "SWAMPWALK", "MOUNTAINWALK", "FORESTWALK"};
     static const char *const colors[5] = {"WHITE", "BLUE", "BLACK", "RED", "GREEN"};
     const MtgCardDef *c = card >= 0 ? Mtg_Card(card) : NULL;

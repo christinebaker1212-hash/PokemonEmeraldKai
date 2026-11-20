@@ -3,6 +3,23 @@
 The user's decisions: `docs/MTG_DECISIONS.md` (keep to them). How much of the pool plays: `docs/MTG_SCOPE.md`
 (generated: `tools/mtg/scope.py`). This file: what is built, how it is built, what comes next.
 
+## Pick up here (2026-11-20: "finish up work on Magic ... incorporating all planned cards")
+The user (2026-11-20) asked for every planned card: the whole Premodern pool (docs/MTG_SCOPE.md). This session:
+Shadow (MTG_KW_SHADOW, mtg_game.c Mtg_CanBlock), Flanking (MTG_KW_FLANKING) and Rampage (MtgCardDef.rampage) in
+BlocksDeclared, Fading (MtgCardDef.fading: etbKind FADE, StartStep's upkeep): 2793 -> 2850 playable; tests in
+tools/mtg/test_rules.c TestShadow. (The three combat ones resolve as blocks are declared rather than as triggers on
+the stack: nothing in the pool answers them in a way that matters.)
+How to find the next piece: tools/mtg/scope.py's table, and for "static ability" an instrumented copy of
+mtg_static.c ParseOne (each `goto unknown` noting its line) shows which check fails: most are values not yet known
+(AddKeyword's Banding / Phasing / Menace / Cumulative upkeep..., Affected$ specs like Card.MostProminentColor), the
+keys SetColor / AddType / RemoveLandTypes / MayLookAt (colors and types worked out at run time: a layer system the
+engine doesn't have yet), and modes CantAttackUnless (Propaganda's attack tax), AssignCombatDamageAsUnblocked, MinMaxBlocker.
+Next, by cards unlocked: Morph (94), Kicker (64: an additional cost; the alternative-cost path in mtg_game.c
+AddAltCasts / MTG_ACT_CAST alt=1 is the model, with a menu label and the AI), Cumulative upkeep (56: pay or
+sacrifice each upkeep, a choice), Flashback (52), Echo (34), Buyback (28), Banding (20), Phasing (12), Storm (12),
+Madness (10), Amplify (9). Each: translate, a test in test_rules.c, scope.py, then tools/mtg/fetch_art.py &&
+build_printed.py for the new cards (test.sh fails while a playable card has no art).
+
 ## Pick up here (2026-11-07, 1.167.0: the CARD SHOP counter and structure decks)
 **The user's rules from this session (keep them):**
 - **MOSSDEEP's CARD CLUB maps are the user's** (they're editing them): change only the scripts that point there
