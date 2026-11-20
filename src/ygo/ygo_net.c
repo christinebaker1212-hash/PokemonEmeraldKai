@@ -100,6 +100,7 @@ void YgoNet_Cancel(struct YgoNet *l, const char *reason)
 }
 static void Begin(struct YgoNet *l)
 {
+    /* (gYgoDuelEmz: the game's screens keep it to the GEN, the host's online: ygo_ui.c) */
     if (!YgoDuel_Init(&l->game, l->main[0], l->extra[0], l->main[1], l->extra[1], l->session,
                       YgoNet_First(l->session)))
     {

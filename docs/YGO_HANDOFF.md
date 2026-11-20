@@ -16,9 +16,8 @@ The user (2026-11-20): every card to today, the GEN by summon type, NPC decks on
 - OPTIONS > GAME > YU-GI-OH! GEN and HOST A GAME's rule (gMpConfig.ygoGen, "yugioh_gen", MPR_RULES byte 25 +
   MP_SCALE_COUNT, protocol 92); a deck past it is refused before a duel (ygo_ui.c GenOk).
 Next:
-1. **The table** (waiting on the user's approval of docs/ygo/table_mockup.png, `mp ygo mock`): the Extra Monster
-   Zones (the duel's DUEL_EMZONE flag, the bridge's zones 5-6, the board's EmzRect), Pendulum Scales on the outer
-   Spell & Trap Zones, Xyz materials under their monster, Link Arrows.
+1. ~~The table~~ built (COOP_NOTES "YU-GI-OH! to today"). Left: the phone app still shows five Monster Zones a side
+   (ygo_jni.c serializes monsters[0-4]; its duels run without the Extra Monster Zones).
 2. **Art**: tools/ygo/fetch_art.py --from 2312, then build_printed.py (a Pendulum card's illustration window differs).
 3. **The later Starter / Structure Decks' lists with copies** (Yugipedia, as fetch_wc2006.py does): sold by region
    once known (Ygo_SetIsClassicDeck keeps the GAME CENTER to 2002-2006's).

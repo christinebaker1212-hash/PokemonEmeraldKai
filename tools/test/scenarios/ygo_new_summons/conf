@@ -1,0 +1,9 @@
+# YU-GI-OH!'s newer summon types on the table (the user's approved mock-up, 2026-11-20): at YU-GI-OH! GEN ALL the duel
+# has the Extra Monster Zones; the AI plays the player's side of a stacked duel: two MARAUDING CAPTAINs (Level 3) make
+# an Xyz Summon (LEVIAIR THE SEA DRAGON, its materials' count), CELTIC GUARDIAN a Link Summon (LINK SPIDER into an
+# Extra Monster Zone, its arrows), STARGAZER / TIMEGAZER MAGICIAN the Pendulum Scales. Shots t1-t4.
+MODE=1
+TMO=200
+ENV_A="MOEMON_YUGIOH_GEN=0"
+EXPECT_A=("ygo] extra set: 2 cards")
+UNEXPECT_A=("[crash]" "TIMEOUT")

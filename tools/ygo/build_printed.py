@@ -27,6 +27,7 @@ ROOT = Path(__file__).resolve().parents[2]
 SCAN_W, SCAN_H = 813, 1185
 STORE_W, STORE_H = 160, 233
 ART = (100, 218, 713, 831)
+ART_PENDULUM = (55, 214, 757, 733)   # (a Pendulum Monster's illustration: wider, above the Pendulum Effect box)
 
 cards = json.load(open(ROOT / 'tools/ygo/catalog.json'))['cards']
 count = max(c['id'] for c in cards)
@@ -34,8 +35,12 @@ byid = {c['id']: c for c in cards}
 blobs, table = [], []
 missing = []
 sx, sy = STORE_W / SCAN_W, STORE_H / SCAN_H
-x0, y0 = round(ART[0] * sx) + 1, round(ART[1] * sy) + 1
-x1, y1 = round(ART[2] * sx) - 1, round(ART[3] * sy) - 1
+def art_rect(card):
+    a = ART_PENDULUM if card and 'scale' in card else ART
+    return round(a[0] * sx) + 1, round(a[1] * sy) + 1, round(a[2] * sx) - 1, round(a[3] * sy) - 1
+
+
+x0, y0, x1, y1 = art_rect(None)
 old = None
 if '--keep-cards' in sys.argv[1:]:
     old = (ROOT / 'graphics/ygo/printed.bin').read_bytes()
@@ -77,10 +82,11 @@ head = 8 + (count + 1) * 16
 offset = head
 body = bytearray()
 entries = bytearray()
-for data in table:
+for cid, data in enumerate(table, 1):
     if data is None:
         entries += struct.pack('<IIHHHH', 0, 0, 0, 0, 0, 0)
         continue
+    x0, y0, x1, y1 = art_rect(byid.get(cid))
     entries += struct.pack('<IIHHHH', offset + len(body), len(data), x0, y0, x1 - x0, y1 - y0)
     body += data
 entries += struct.pack('<IIHHHH', offset + len(body), len(back), 0, 0, STORE_W, STORE_H)

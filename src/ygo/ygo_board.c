@@ -75,14 +75,63 @@ static struct Rect R(int x, int y, int w, int h)
     return r;
 }
 /* side 0: the bottom (this screen's player), 1: the top */
+/* The Extra Monster Zones: in the middle band over the 2nd and 4th columns (the mock-up the user approved, 2026-11-20),
+ * which: 0 the left one on this screen, 1 the right */
+static struct Rect EmzRect(int which)
+{
+    return R(ZX + (which ? 3 : 1) * CELL + (CELL - CW) / 2, GAP_Y - 1, CW, CH);
+}
 static struct Rect ZoneRect(unsigned side, unsigned spell, unsigned seq)
 {
     int x, y;
+    if (!spell && seq >= YGO_EMZ_LEFT && seq < YGO_MZONES)   /* (their left one is this screen's right) */
+        return EmzRect(side ? seq == YGO_EMZ_LEFT : seq != YGO_EMZ_LEFT);
     if (seq == YGO_FIELD_ZONE)
         return side ? R(RCOL + 4, ROW_OPP_M, CW, CH) : R(LCOL + 4, ROW_MY_M, CW, CH);
     x = ZX + (int)(side ? 4 - seq : seq) * CELL + (CELL - CW) / 2;
     y = side ? (spell ? ROW_OPP_ST : ROW_OPP_M) : (spell ? ROW_MY_ST : ROW_MY_M);
     return R(x, y, CW, CH);
+}
+/* A Link Monster's arrows round its card (lit where it points), as the card prints them */
+static void LinkArrow(struct Rect r, int dx, int dy, int lit)
+{
+    unsigned c = lit ? 0xff4038 : 0x403838;
+    int cx = r.x + r.w / 2 + dx * (r.w / 2 + 1), cy = r.y + r.h / 2 + dy * (r.h / 2 + 1), i;
+    for (i = 0; i < 3; i++)   /* a small triangle pointing out */
+    {
+        if (dx && !dy)
+            G_Fill(cx + dx * i, cy - (2 - i), 1, 2 * (2 - i) + 1, c);
+        else if (dy && !dx)
+            G_Fill(cx - (2 - i), cy + dy * i, 2 * (2 - i) + 1, 1, c);
+        else
+            G_Fill(cx + dx * i, cy + dy * i, 2 - i + 1, 2 - i + 1, c);
+    }
+}
+static void LinkArrows(struct Rect r, unsigned markers, int turned)
+{
+    static const signed char dirs[8][2] = {{-1, -1}, {0, -1}, {1, -1}, {-1, 0}, {1, 0}, {-1, 1}, {0, 1}, {1, 1}};
+    unsigned k;
+    for (k = 0; k < 8; k++)   /* (YGO_LINK_TOP_LEFT .. BOTTOM_RIGHT; the other side's turned to face them) */
+        LinkArrow(r, turned ? -dirs[k][0] : dirs[k][0], turned ? -dirs[k][1] : dirs[k][1], (markers >> k) & 1);
+}
+/* A Pendulum Scale: blue on the left Pendulum Zone, red on the right */
+static void ScaleBadge(struct Rect r, int right, unsigned n)
+{
+    char t[4];
+    unsigned c = right ? 0xd04040 : 0x3870d8;
+    int x = right ? r.x + r.w - 9 : r.x - 1;
+    snprintf(t, sizeof(t), "%u", n);
+    G_RoundFill(x, r.y + r.h - 10, 10, 10, c, 240);
+    G_RoundFrame(x, r.y + r.h - 10, 10, 10, 0xffffff, 200);
+    G_TextAlign(x + 5, r.y + r.h - 11, 1, 0xffffff, G_NO_SHADOW, t, TF_NARROW);
+}
+/* The Xyz Materials under a monster: their count in a gold badge at its top left */
+static void MaterialBadge(struct Rect r, unsigned n)
+{
+    char t[4];
+    snprintf(t, sizeof(t), "%u", n);
+    G_RoundFill(r.x - 3, r.y - 3, 9, 9, 0xf0c040, 255);
+    G_TextAlign(r.x + 1, r.y - 4, 1, 0x302010, G_NO_SHADOW, t, TF_NARROW);
 }
 enum
 {
@@ -227,6 +276,7 @@ static u16 sNextMusic;
 static int sNextTutorial;
 
 static const struct YgoState *T(void) { return &B.d->s; }
+unsigned char MP_YgoGen(void);   /* (mp_main.c: OPTIONS > GAME > YU-GI-OH! GEN, 0 ALL .. 4 PENDULUM) */
 static unsigned SideOf(unsigned player) { return player == B.me ? 0 : 1; }
 static unsigned PlayerOf(unsigned side) { return side ? B.me ^ 1 : B.me; }
 static const struct YgoCard *ObjCard(unsigned o) { return o < B.objCount ? Ygo_Card(T()->objs[o].card) : NULL; }
@@ -1738,7 +1788,7 @@ static int CanAttackSoon(void)
     const struct YgoState *s = T();
     const struct YgoPlayer *pl = &s->players[B.me];
     unsigned i;
-    for (i = 0; i < YGO_ZONES; i++)
+    for (i = 0; i < YGO_MZONES; i++)
         if (pl->monsters[i] && s->objs[pl->monsters[i] - 1].attackPos && !s->objs[pl->monsters[i] - 1].attacked)
             return 1;
     return 0;
@@ -2520,6 +2570,13 @@ static void Mat(void)
     G_FillA(0, GAP_Y, 240, 22, 0x0c1018, 150);
     G_FillA(0, GAP_Y, 240, 1, 0x6070a0, 120);
     G_FillA(0, GAP_Y + 21, 240, 1, 0x6070a0, 120);
+    if (T()->emz)   /* the Extra Monster Zones: faint frames behind the band's words while empty */
+        for (side = 0; side < 2; side++)
+        {
+            struct Rect e = EmzRect(side);
+            G_RoundFrame(e.x - 3, e.y, e.w + 6, e.h, 0xb0a0e0, 110);
+            G_FillA(e.x - 2, e.y + 1, e.w + 4, e.h - 2, 0x9080c0, 28);
+        }
     for (side = 0; side < 2; side++)
     {
         unsigned line = side ? 0xc07888 : 0x7898c8;
@@ -2530,8 +2587,15 @@ static void Mat(void)
             G_RoundFrame(s.x - 1, s.y, s.w + 2, s.h, line, 55);
         }
         {
-            struct Rect f = ZoneRect((unsigned)side, 0, YGO_FIELD_ZONE);
+            struct Rect f = ZoneRect((unsigned)side, 1, YGO_FIELD_ZONE);
             G_RoundFrame(f.x - 1, f.y, f.w + 2, f.h, 0x70c090, 70);
+        }
+        /* (the outer Spell & Trap Zones are the Pendulum Zones: a green line under them where a duel can have them) */
+        if (T()->emz || MP_YgoGen() == 4)
+        {
+            struct Rect a = ZoneRect((unsigned)side, 1, 0), b = ZoneRect((unsigned)side, 1, 4);
+            G_FillA(a.x, a.y + a.h, a.w, 1, 0x40b080, 90);
+            G_FillA(b.x, b.y + b.h, b.w, 1, 0x40b080, 90);
         }
         for (i = 0; i < PILES; i++)
         {
@@ -2832,6 +2896,18 @@ static void Cards(void)
                 Stats(o, r);
                 /* its counters: a badge at the top right corner */
                 YgoBoard_CounterBadge(r.x + r.w - 3, r.y - 3, B.shown[o].counters, B.shown[o].counterType);
+                {
+                    const struct YgoCard *c = Ygo_Card(T()->objs[o].card);
+                    unsigned side = SideOf(B.shown[o].controller), seq = B.shown[o].seq;
+                    if (B.shown[o].loc == YGO_LOC_MZONE && seq < YGO_MZONES &&
+                        T()->players[B.shown[o].controller].materials[seq])
+                        MaterialBadge(r, T()->players[B.shown[o].controller].materials[seq]);
+                    if (B.shown[o].faceUp && c && c->frame == YGO_LINK && B.shown[o].loc == YGO_LOC_MZONE)
+                        LinkArrows(r, c->markers, side != 0);
+                    if (B.shown[o].faceUp && c && (c->abilities & YGO_ABILITY_PENDULUM) &&
+                        B.shown[o].loc == YGO_LOC_SZONE && (seq == 0 || seq == 4))
+                        ScaleBadge(r, side ? seq == 0 : seq == 4, c->scale);
+                }
             }
         }
     /* the hand: the card under the cursor a little higher */
@@ -2899,22 +2975,38 @@ static void Chain(void)
         G_Digits(x - G_DigitsWidth(line, 0, 1) / 2, y - 3, line, 0, 1, 0x301800, 255);
     }
 }
+/* An Extra Monster Zone of this screen (0 left, 1 right) holds a monster */
+static int EmzTaken(int which)
+{
+    unsigned p;
+    for (p = 0; p < 2; p++)
+    {
+        unsigned seq = (SideOf(p) ? which == 0 : which != 0) ? YGO_EMZ_LEFT + 1 : YGO_EMZ_LEFT;
+        if (T()->players[p].monsters[seq])
+            return 1;
+    }
+    return 0;
+}
 static void Gap(void)
 {
     static const char *const phases[] = {"DP", "SP", "M1", "BP", "M2", "EP"};
     const struct YgoQuery *q = &B.d->query;
     char line[128], prompt[64];
-    int i, x = 152, cur = CurrentSpot();
+    int i, x = 160, cur = CurrentSpot();
     unsigned id = 0;
-    /* the phases */
+    /* (the Extra Monster Zones in the band: the words stay left of the left one while it holds a monster, the hint
+       short while the right one does) */
+    int leftTaken = T()->emz && EmzTaken(0), rightTaken = T()->emz && EmzTaken(1);
+    int width1 = leftTaken ? EmzRect(0).x - 8 : 146, width2 = leftTaken ? EmzRect(0).x - 8 : 112;
+    /* the phases (shifted right, clear of the right Extra Monster Zone: the user, 2026-11-20) */
     for (i = 0; i < 6 && B.mode != M_OVER; i++)
     {
         int on = i == B.phase;
         unsigned c = on ? (B.turnPlayer == B.me ? 0x60a0ff : 0xff7070) : 0x606878;
         if (on)
-            G_RoundFill(x - 1, GAP_Y + 2, 14, 9, c, 200);
+            G_RoundFill(x - 1, GAP_Y + 2, 13, 9, c, 200);
         G_Text(x + 1, GAP_Y, on ? G_WHITE : c, G_NO_SHADOW, phases[i], 0, TF_NARROW);
-        x += 14;
+        x += 13;
     }
     /* line 1: the question, what just happened, or the card under the cursor; line 2: about that card
        (nothing once the duel is over: the result's banner is there) */
@@ -2979,9 +3071,9 @@ static void Gap(void)
         float fade = B.mode == M_PICK_FIELD || B.mode == M_PICK_GRID || B.mode == M_ZONE || B.mode == M_PILE ? 1 : B.infoFade;
         G_TextAlpha((unsigned)(255 * fade));
         if (first && fade > 0)
-            Line(4, GAP_Y, firstColor, first, 146);
+            Line(4, GAP_Y, firstColor, first, width1);
         if (line[0] && fade > 0)
-            Line(4, GAP_Y + 10, 0xc8d0e0, line, 112);
+            Line(4, GAP_Y + 10, 0xc8d0e0, line, width2);
         G_TextAlpha(255);
     }
     /* hints */
@@ -2999,7 +3091,8 @@ static void Gap(void)
             else if (onDeck)
                 hint = "{A}CONCEDE {B}MENU";
             else
-                hint = B.mode == M_FREE ? "{A}ACT {INSPECT}LOOK {B}MENU" : "{INSPECT}LOOK {B}MENU";
+                hint = rightTaken ? (B.mode == M_FREE ? "{A}ACT {B}MENU" : "{B}MENU")
+                       : B.mode == M_FREE ? "{A}ACT {INSPECT}LOOK {B}MENU" : "{INSPECT}LOOK {B}MENU";
             break;
         }
         case M_PICK_FIELD:
@@ -3596,105 +3689,6 @@ static void Grid(void)
     }
 }
 
-/* ------------------------------------------------------------------ */
-/* The table with the newer summon types (a mock-up for the user, 2026-11-20: `mp ygo mock`): the two Extra Monster
- * Zones in the middle band over the 2nd and 4th columns (faint frames behind the band's words while empty, a monster
- * in one drawn over the band, the words kept left of it), the outer Spell & Trap Zones as Pendulum Zones with their
- * Scales, an Xyz Monster's materials under it, a Link Monster's arrows. Drawn over a real duel, the newer frames
- * painted on cards of today's catalog. */
-static int sMock;
-void YgoBoard_Mock(int on) { sMock = on; }
-static struct Rect EmzRect(int which)
-{
-    return R(ZX + (which ? 3 : 1) * CELL + (CELL - CW) / 2, GAP_Y - 1, CW, CH);
-}
-static void MockKind(struct Rect r, unsigned frame, unsigned lower)
-{
-    G_Frame(r.x, r.y, r.w, r.h, frame, 255);
-    G_Frame(r.x + 1, r.y + 1, r.w - 2, r.h - 2, frame, 255);
-    if (lower)   /* a Pendulum card: its lower half the Spell's green */
-    {
-        G_Fill(r.x, r.y + r.h / 2, 2, r.h - r.h / 2, lower);
-        G_Fill(r.x + r.w - 2, r.y + r.h / 2, 2, r.h - r.h / 2, lower);
-        G_Fill(r.x, r.y + r.h - 2, r.w, 2, lower);
-    }
-}
-static void MockLinkArrow(struct Rect r, int dx, int dy, int lit)
-{
-    unsigned c = lit ? 0xff4038 : 0x403838;
-    int cx = r.x + r.w / 2 + dx * (r.w / 2 + 1), cy = r.y + r.h / 2 + dy * (r.h / 2 + 1), i;
-    for (i = 0; i < 3; i++)   /* a small triangle pointing out */
-    {
-        if (dx && !dy)
-            G_Fill(cx + dx * i - (dx < 0 ? 0 : 0), cy - (2 - i), 1, 2 * (2 - i) + 1, c);
-        else if (dy && !dx)
-            G_Fill(cx - (2 - i), cy + dy * i, 2 * (2 - i) + 1, 1, c);
-        else
-            G_Fill(cx + dx * i, cy + dy * i, 2 - i + 1, 2 - i + 1, c);
-    }
-}
-static void MockScale(struct Rect r, int right, int n)
-{
-    char t[4];
-    unsigned c = right ? 0xd04040 : 0x3870d8;
-    int x = right ? r.x + r.w - 9 : r.x - 1;
-    snprintf(t, sizeof(t), "%d", n);
-    G_RoundFill(x, r.y + r.h - 10, 10, 10, c, 240);
-    G_RoundFrame(x, r.y + r.h - 10, 10, 10, G_WHITE, 200);
-    G_TextAlign(x + 5, r.y + r.h - 11, 1, G_WHITE, G_NO_SHADOW, t, TF_NARROW);
-}
-static void MockOver(void)
-{
-    struct Rect e0 = EmzRect(0), e1 = EmzRect(1), p0 = ZoneRect(0, 1, 0), p4 = ZoneRect(0, 1, 4);
-    struct Rect x2 = ZoneRect(0, 0, 2), s2 = ZoneRect(1, 0, 1), op0 = ZoneRect(1, 1, 4);
-    if (!sMock)
-        return;
-    /* the band's words kept left of an occupied Extra Monster Zone */
-    G_Text(4, GAP_Y, G_WHITE, G_NO_SHADOW, "Link Spider", 0, TF_NARROW);
-    G_Text(4, GAP_Y + 10, 0xc8d0e0, G_NO_SHADOW, "LINK-1  ATK 1000", 0, TF_NARROW);
-    {
-        static const char *const phases[] = {"DP", "SP", "M1", "BP", "M2", "EP"};
-        int i, x = 156;
-        for (i = 0; i < 6; i++, x += 13)
-        {
-            if (i == 2)
-                G_RoundFill(x - 1, GAP_Y + 2, 13, 9, 0x60a0ff, 200);
-            G_Text(x + 1, GAP_Y, i == 2 ? G_WHITE : 0x606878, G_NO_SHADOW, phases[i], 0, TF_NARROW);
-        }
-        G_Hint(238 - G_Hint(0, 0, 0, 0, "{A}ACT {B}MENU", TF_NARROW, 0), GAP_Y + 11, 0xc0c8e0, G_NO_SHADOW,
-               "{A}ACT {B}MENU", TF_NARROW, 1);
-    }
-    /* the two Extra Monster Zones: faint while empty, one holding a Link Monster with its arrows */
-    G_RoundFrame(e0.x - 3, e0.y, e0.w + 6, e0.h, 0xb0a0e0, 110);
-    G_RoundFrame(e1.x - 3, e1.y, e1.w + 6, e1.h, 0xb0a0e0, 110);
-    G_FillA(e1.x - 2, e1.y + 1, e1.w + 4, e1.h - 2, 0x9080c0, 28);
-    Ygo_DrawCard(YGO_CARD_MYSTICAL_ELF, (float)e0.x, (float)e0.y, (float)e0.w, (float)e0.h, 0, 255, 0);
-    MockKind(e0, 0x1c3c90, 0);
-    MockLinkArrow(e0, 0, -1, 1);
-    MockLinkArrow(e0, -1, 1, 0);
-    MockLinkArrow(e0, 1, 1, 0);
-    /* an Xyz Monster with two materials under it, its count */
-    Ygo_DrawCard(YGO_CARD_GEMINI_ELF, (float)x2.x + 2, (float)x2.y - 2, (float)x2.w, (float)x2.h, 0, 255, 0);
-    Ygo_DrawCard(YGO_CARD_GEMINI_ELF, (float)x2.x + 1, (float)x2.y - 1, (float)x2.w, (float)x2.h, 0, 255, 0);
-    Ygo_DrawCard(YGO_CARD_SUMMONED_SKULL, (float)x2.x, (float)x2.y, (float)x2.w, (float)x2.h, 0, 255, 0);
-    MockKind(x2, 0x202024, 0);
-    G_RoundFill(x2.x + x2.w - 7, x2.y - 3, 9, 9, 0xf0c040, 255);
-    G_TextAlign(x2.x + x2.w - 3, x2.y - 4, 1, 0x302010, G_NO_SHADOW, "2", TF_NARROW);
-    /* their Synchro Monster */
-    Ygo_DrawCard(YGO_CARD_BLUE_EYES_WHITE_DRAGON, (float)s2.x, (float)s2.y, (float)s2.w, (float)s2.h, 0, 255, 0);
-    MockKind(s2, 0xe8e8f0, 0);
-    /* Pendulum Zones: the outer Spell & Trap Zones, each with its Scale */
-    Ygo_DrawCard(YGO_CARD_DARK_MAGICIAN, (float)p0.x, (float)p0.y, (float)p0.w, (float)p0.h, 0, 255, 0);
-    MockKind(p0, 0xc07830, 0x30a070);
-    MockScale(p0, 0, 1);
-    Ygo_DrawCard(YGO_CARD_DARK_MAGICIAN, (float)p4.x, (float)p4.y, (float)p4.w, (float)p4.h, 0, 255, 0);
-    MockKind(p4, 0xc07830, 0x30a070);
-    MockScale(p4, 1, 8);
-    Ygo_DrawCard(YGO_CARD_FLAME_SWORDSMAN, (float)op0.x, (float)op0.y, (float)op0.w, (float)op0.h, 0, 255, 0);
-    MockKind(op0, 0x9060b0, 0x30a070);
-    MockScale(op0, 0, 4);
-}
-
 void YgoBoard_Render(void)
 {
     int shakeX, shakeY;
@@ -3713,11 +3707,7 @@ void YgoBoard_Render(void)
     Cards();
     Chain();
     Lp();
-    if (!sMock)
-        Gap();
-    else
-        G_FillA(0, GAP_Y + 1, 240, 20, 0x0c1018, 255);
-    MockOver();   /* (`mp ygo mock`: the newer summon types' table, for the user to see) */
+    Gap();
     Attackers();
     Highlights();
     Fxs();

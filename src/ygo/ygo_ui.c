@@ -23,6 +23,7 @@
 #include "tcg/tcg.h"
 #include "ygo/card_ids.h"
 #include "ygo/duel.h"
+unsigned char MP_YgoGen(void);   /* (mp_main.c) */
 #include "ygo/integration.h"
 #include "mtg/integration.h"   // (Mtg_Unlocked: the CARD CASE goes round to MAGIC)
 #include "ygo/net.h"
@@ -785,6 +786,7 @@ static int StartDuel(const uint16_t *main, const uint16_t *extra, const uint16_t
     if (Y.duelShown)
         Y.duel.edo = NULL;   /* (the online duel's own engine) */
     Y.duelShown = 0;
+    gYgoDuelEmz = MP_YgoGen() == 0;   /* (the Extra Monster Zones when the GEN allows LINK; online the host's) */
     if (!YgoDuel_Init(&Y.duel, main, extra, theirMain, theirExtra, seed,
                       sForceFirst >= 0 ? (unsigned)sForceFirst : Tcg_RandomBelow(&C()->rng, 2)))
     {
@@ -2988,6 +2990,7 @@ int YgoUi_Step(unsigned keys)
     struct YgoCollection *c = C();
     unsigned pressed = keys & ~Y.previousKeys;
     Y.previousKeys = keys;
+    gYgoDuelEmz = MP_YgoGen() == 0;   /* (duels begun here or online: the Extra Monster Zones when the GEN allows LINK) */
     if (!YgoUi_Active())
         return 0;
     Y.age++;
@@ -3818,6 +3821,26 @@ void Ygo_Debug(const char *command)
         printf("[ygo] decktop set\n");
         return;
     }
+    if (!strncmp(command, "extra ", 6))
+    {
+        /* extra ID...: the active deck's Extra Deck becomes these (owned) (tests: Synchro / Xyz / Link Summons) */
+        uint16_t *extra = Deck(c->activeDeck)->extra;
+        unsigned n = 0, id;
+        const char *p = command + 6;
+        int used;
+        memset(extra, 0, sizeof(Deck(c->activeDeck)->extra));
+        while (n < YGO_FUSION_MAX && sscanf(p, "%u%n", &id, &used) == 1)
+        {
+            p += used;
+            if (!id || id > YGO_CARD_COUNT)
+                continue;
+            extra[n++] = (uint16_t)id;
+            if (c->owned[id] < 3)
+                c->owned[id] = 3;
+        }
+        printf("[ygo] extra set: %u cards\n", n);
+        return;
+    }
     if (!strncmp(command, "search ", 7))
     {
         TcgSearch_Register(SEARCH_YUGIOH, &sSearchGame);
@@ -3857,13 +3880,6 @@ void Ygo_Debug(const char *command)
         /* the next duels' Decks unshuffled: the last cards of the list are drawn first (tests) */
         extern int gYgoEdoNoShuffle;
         gYgoEdoNoShuffle = 1;
-        return;
-    }
-    if (!strcmp(command, "mock"))   /* the table with the newer summon types' zones (ygo_board.c MockOver) */
-    {
-        void YgoBoard_Mock(int on);
-        YgoBoard_Mock(1);
-        printf("[test] ygo mock on\n");
         return;
     }
     if (!strcmp(command, "practice"))

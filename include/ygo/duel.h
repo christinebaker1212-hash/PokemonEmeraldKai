@@ -15,6 +15,9 @@
 #define YGO_OBJS 200          /* physical cards: both decks, both Fusion Decks, tokens */
 #define YGO_ZONES 5
 #define YGO_FIELD_ZONE 5      /* spells[5]: the Field Spell zone */
+#define YGO_MZONES 7          /* monsters[5], [6]: the Extra Monster Zones (the engine's player 0's left, right) */
+#define YGO_EMZ_LEFT 5
+extern int gYgoDuelEmz;       /* (ygo_edo.c: the Extra Monster Zones in duels begun from now) */
 #define YGO_HAND_MAX 60
 #define YGO_CHAIN_MAX 16
 #define YGO_QUERY_MAX 128
@@ -83,7 +86,8 @@ struct YgoPlayer
     uint8_t deck[YGO_DECK_MAX + 20], hand[YGO_HAND_MAX], grave[YGO_OBJS / 2], banished[YGO_OBJS / 2],
         extra[YGO_FUSION_MAX + 20];
     uint8_t deckCount, handCount, graveCount, banishedCount, extraCount;
-    uint8_t monsters[YGO_ZONES];        /* object + 1, 0 empty */
+    uint8_t monsters[YGO_MZONES];       /* object + 1, 0 empty; 5-6 the Extra Monster Zones */
+    uint8_t materials[YGO_MZONES];      /* the Xyz Materials under each */
     uint8_t spells[YGO_ZONES + 1];
     uint8_t normalSummoned;             /* (as far as the events tell) */
 };
@@ -240,6 +244,7 @@ struct YgoState
     struct YgoPlayer players[2];
     uint16_t turn;
     uint8_t current, first, phase, winner, winReason, over;
+    uint8_t emz;                        /* the table has the Extra Monster Zones (gYgoDuelEmz when it began) */
     /* Battle */
     uint8_t attacker, attackTarget; /* object + 1 */
     /* Chain */

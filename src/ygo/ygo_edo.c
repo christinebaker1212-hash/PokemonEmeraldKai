@@ -48,6 +48,7 @@ struct YgoEdoDuel
     uint16_t decks[2][YGO_DECK_MAX], extras[2][YGO_FUSION_MAX];
     uint32_t seed;
     uint8_t first;
+    uint8_t emz;                     /* the Extra Monster Zones (gYgoDuelEmz when it began) */
     /* objects where the engine has them */
     struct List lists[2][LISTS];
     uint8_t mz[2][7], sz[2][8];      /* object + 1 */
@@ -415,6 +416,10 @@ static void Rebuild(struct YgoDuel *d);
 unsigned gYgoEdoRebuilds;   /* (tests: times the objects had to be put back from the engine) */
 unsigned gYgoEdoRetries;     /* (tests: answers the engine refused: none should be) */
 int gYgoEdoNoShuffle;        /* (tests: the Decks stay in the order given, the last card on top) */
+/* The Extra Monster Zones (Master Rule 5 whole): on when the YU-GI-OH! GEN allows LINK (the game sets it before a duel
+ * from MP_YgoGen(): every machine in a duel the same); off, today's table of five Monster Zones a side, as the
+ * FUSION to PENDULUM eras had */
+int gYgoDuelEmz;
 /* Reads every location back; 0 when what the engine has isn't what the messages said (then Rebuild) */
 static int Sync(struct YgoDuel *d, int fix)
 {
@@ -633,8 +638,11 @@ static void Mirror(struct YgoDuel *d)
         memcpy(pl->banished, l[LI_REMOVED].o, pl->banishedCount);
         pl->extraCount = (uint8_t)(l[LI_EXTRA].n < sizeof(pl->extra) ? l[LI_EXTRA].n : sizeof(pl->extra));
         memcpy(pl->extra, l[LI_EXTRA].o, pl->extraCount);
-        for (i = 0; i < YGO_ZONES; i++)
+        for (i = 0; i < YGO_MZONES; i++)
+        {
             pl->monsters[i] = e->mz[cp][i];
+            pl->materials[i] = (uint8_t)e->overlay[cp][i].n;   /* (an Xyz Monster's materials under it) */
+        }
         for (i = 0; i < YGO_ZONES + 1; i++)
             pl->spells[i] = e->sz[cp][i];
     }
@@ -1734,7 +1742,8 @@ static int Ask(struct YgoDuel *d)
         for (side = 0; side < 2; side++)
             for (z = 0; z < 13; z++)
             {
-                unsigned spell = z >= 5, seq = spell ? z - 5 : z;
+                /* (Monster Zones 0-6: 5-6 the Extra Monster Zones; Spell & Trap Zones 0-5: 5 the Field Zone) */
+                unsigned spell = z >= YGO_MZONES, seq = spell ? z - YGO_MZONES : z;
                 uint32_t bit = (spell ? 0x100u << seq : 1u << seq) << (side ? 16 : 0);
                 struct YgoChoice *c;
                 if (spell && seq > 5)
@@ -2268,8 +2277,8 @@ static int Start(struct YgoDuel *d)
     o.seed[1] = (uint64_t)e->seed * 0xBF58476D1CE4E5B9ULL + 1;
     o.seed[2] = (uint64_t)e->seed * 0x94D049BB133111EBULL + 2;
     o.seed[3] = (uint64_t)e->seed << 17 ^ 0x2545F4914F6CDD1DULL;
-    /* today's rules (Master Rule 5) without the Extra Monster Zones: the table has five zones a side */
-    o.flags = (DUEL_MODE_MR5) & ~(uint64_t)(DUEL_EMZONE | DUEL_FSX_MMZONE);
+    /* today's rules (Master Rule 5): with the Extra Monster Zones when the GEN allows LINK, else five zones a side */
+    o.flags = e->emz ? (uint64_t)DUEL_MODE_MR5 : (DUEL_MODE_MR5) & ~(uint64_t)(DUEL_EMZONE | DUEL_FSX_MMZONE);
     if (gYgoEdoNoShuffle)
         o.flags |= DUEL_PSEUDO_SHUFFLE;
     o.team1.startingLP = o.team2.startingLP = YGO_LP;
@@ -2363,6 +2372,7 @@ int YgoDuel_Init(struct YgoDuel *d, const uint16_t main0[YGO_DECK_MAX], const ui
     }
     d->edo = e;
     e->seed = seed;
+    e->emz = (uint8_t)(gYgoDuelEmz != 0);
     e->first = (uint8_t)(first & 1);
     e->swap = e->first;
     memcpy(e->decks[0], main0, sizeof(e->decks[0]));
@@ -2373,6 +2383,7 @@ int YgoDuel_Init(struct YgoDuel *d, const uint16_t main0[YGO_DECK_MAX], const ui
         memcpy(e->extras[1], extra1, sizeof(e->extras[1]));
     d->s.first = e->first;
     d->s.current = e->first;
+    d->s.emz = e->emz;
     d->s.players[0].lp = d->s.players[1].lp = YGO_LP;
     if (!Start(d))
     {
@@ -2390,8 +2401,14 @@ int YgoDuel_Copy(struct YgoDuel *dst, const struct YgoDuel *src)
         return 1;
     if (!e)
         return 0;
-    if (!YgoDuel_Init(dst, e->decks[0], e->extras[0], e->decks[1], e->extras[1], e->seed, e->first))
-        return 0;
+    {
+        int keep = gYgoDuelEmz, ok;
+        gYgoDuelEmz = e->emz;   /* (the copy as the duel began) */
+        ok = YgoDuel_Init(dst, e->decks[0], e->extras[0], e->decks[1], e->extras[1], e->seed, e->first);
+        gYgoDuelEmz = keep;
+        if (!ok)
+            return 0;
+    }
     for (i = 0; i < e->logCount; i++)
         if (!YgoDuel_Answer(dst, &e->log[i]))
             return 0;
@@ -2424,10 +2441,16 @@ int YgoDuel_Rewind(struct YgoDuel *d, unsigned answers)
     memcpy(extras, e->extras, sizeof(extras));
     seed = e->seed;
     first = e->first;
-    if (!YgoDuel_Init(d, decks[0], extras[0], decks[1], extras[1], seed, first))
     {
-        free(log);
-        return 0;
+        int keep = gYgoDuelEmz, ok;
+        gYgoDuelEmz = e->emz;
+        ok = YgoDuel_Init(d, decks[0], extras[0], decks[1], extras[1], seed, first);
+        gYgoDuelEmz = keep;
+        if (!ok)
+        {
+            free(log);
+            return 0;
+        }
     }
     for (i = 0; i < answers; i++)
         if (!YgoDuel_Answer(d, &log[i]))

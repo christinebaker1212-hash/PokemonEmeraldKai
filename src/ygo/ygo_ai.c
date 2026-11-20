@@ -109,7 +109,7 @@ static int TheirBest(const struct YgoState *s, unsigned me, int *count)
     const struct YgoPlayer *pl = &s->players[me ^ 1];
     int best = 0, n = 0;
     unsigned i;
-    for (i = 0; i < YGO_ZONES; i++)
+    for (i = 0; i < YGO_MZONES; i++)
         if (pl->monsters[i])
         {
             unsigned o = pl->monsters[i] - 1;
@@ -128,7 +128,7 @@ static int MyBest(const struct YgoState *s, unsigned me)
     const struct YgoPlayer *pl = &s->players[me];
     int best = 0;
     unsigned i;
-    for (i = 0; i < YGO_ZONES; i++)
+    for (i = 0; i < YGO_MZONES; i++)
         if (pl->monsters[i] && s->objs[pl->monsters[i] - 1].faceUp && Atk(s, pl->monsters[i] - 1) > best)
             best = Atk(s, pl->monsters[i] - 1);
     return best;
@@ -136,7 +136,7 @@ static int MyBest(const struct YgoState *s, unsigned me)
 static unsigned CardsOn(const struct YgoState *s, unsigned p)
 {
     unsigned i, n = 0;
-    for (i = 0; i < YGO_ZONES; i++)
+    for (i = 0; i < YGO_MZONES; i++)
         n += s->players[p].monsters[i] != 0;
     for (i = 0; i <= YGO_FIELD_ZONE; i++)
         n += s->players[p].spells[i] != 0;
@@ -199,7 +199,7 @@ static int MonsterWorth(const struct YgoState *s, unsigned me, unsigned p)
 {
     unsigned i;
     int v = 0;
-    for (i = 0; i < YGO_ZONES; i++)
+    for (i = 0; i < YGO_MZONES; i++)
         if (s->players[p].monsters[i])
             v += Value(s, me, s->players[p].monsters[i] - 1);
     return v;
@@ -214,7 +214,7 @@ static unsigned SpellTraps(const struct YgoState *s, unsigned p, unsigned except
 static int FaceUpMonster(const struct YgoState *s, unsigned p)
 {
     unsigned i;
-    for (i = 0; i < YGO_ZONES; i++)
+    for (i = 0; i < YGO_MZONES; i++)
         if (s->players[p].monsters[i] && s->objs[s->players[p].monsters[i] - 1].faceUp)
             return 1;
     return 0;
@@ -275,7 +275,7 @@ static int Pointless(const struct YgoState *s, unsigned me, unsigned o, const st
         unsigned i;
         if (s->phase != YGO_PHASE_MAIN1)
             return 1;
-        for (i = 0; i < YGO_ZONES; i++)
+        for (i = 0; i < YGO_MZONES; i++)
         {
             unsigned m = s->players[me].monsters[i];
             if (m && s->objs[m - 1].faceUp && s->objs[m - 1].attackPos && Atk(s, m - 1) <= theirBest &&
@@ -293,7 +293,7 @@ static int BestTarget(const struct YgoState *s, unsigned me, unsigned attacker, 
     const struct YgoPlayer *pl = &s->players[me ^ 1];
     int atk = Atk(s, attacker), best = -1, bestScore = 0;
     unsigned i, monsters = 0;
-    for (i = 0; i < YGO_ZONES; i++)
+    for (i = 0; i < YGO_MZONES; i++)
     {
         unsigned o;
         int stat, score;
@@ -458,7 +458,7 @@ static void Idle(const struct YgoDuel *d, struct YgoAnswer *out)
     if (toBattle >= 0)
     {
         const struct YgoPlayer *pl = &s->players[me];
-        for (i = 0; i < YGO_ZONES; i++)
+        for (i = 0; i < YGO_MZONES; i++)
             if (pl->monsters[i] && s->objs[pl->monsters[i] - 1].faceUp && s->objs[pl->monsters[i] - 1].attackPos &&
                 BestTarget(s, me, pl->monsters[i] - 1, 0) != -1)
             {

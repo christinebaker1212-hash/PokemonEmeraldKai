@@ -7,6 +7,7 @@
 #include "mp.h"
 #include "ygo/integration.h"
 #include "ygo/net.h"
+#include "ygo/duel.h"
 extern char gPlatformSavePath[512];
 static struct YgoCollection sCollection;
 static int sLoaded;
@@ -62,6 +63,7 @@ struct YgoNet *Ygo_Online(void)
 }
 void Ygo_OnlineReceive(unsigned from, const unsigned char *data, unsigned len, int willing)
 {
+    gYgoDuelEmz = MP_YgoGen() == 0;   /* (a duel begun by what arrives: the Extra Monster Zones as the host's GEN says) */
     YgoNet_Receive(Ygo_Online(), from, data, len, willing, SDL_GetTicks());
 }
 void Ygo_OnlineTick(void)

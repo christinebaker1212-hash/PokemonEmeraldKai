@@ -8542,4 +8542,26 @@ res/moves/chatter/anim.s).
 - EDOPro: tools/ygo/edo/build_pack.py merges cards.cdb with release-*.cdb and prerelease-*.cdb (not Rush) and reads
   pre-release/ scripts; dist_extras/EDOPRO_CREDITS.txt names the commits. The engine (ocgcore) is unchanged: every
   test passes with today's scripts.
-- The table mock-up: `mp ygo mock` (ygo_board.c MockOver), docs/ygo/table_mockup.png.
+- The table (the mock-up the user approved, docs/ygo/table_mockup.png, "shift the DP SP M1 BP M2 EP slightly to the
+  right"): the Extra Monster Zones only when the GEN is ALL (gYgoDuelEmz: Master Rule 5 whole, DUEL_EMZONE and
+  DUEL_FSX_MMZONE; FUSION to PENDULUM keep five zones a side as those eras had), kept in the duel (YgoEdoDuel.emz,
+  YgoState.emz) so copies and rewinds rebuild alike; the game sets it from MP_YgoGen() every frame (ygo_ui.c
+  YgoUi_Step) and as a friend's message arrives (ygo_integration.c), so both games of an online duel agree.
+  YgoPlayer.monsters[7] (5-6: the Extra Monster Zones, the engine's player 0's left and right) and materials[7] (the
+  Xyz Materials under each). The board: EmzRect in the middle band over the 2nd and 4th columns (their left one is
+  this screen's right), faint frames behind the band's words while empty; the card's words stop left of an occupied
+  left one, the hint goes short while the right one holds a monster; the phases start at x 160 (13 apart). Pendulum
+  Scales as blue / red badges on the outer Spell & Trap Zones (a green line under them where a duel can have them),
+  the materials' count in a gold badge, Link Arrows round a Link Monster (lit where it points, turned for the other
+  side). The zone question offers the Extra Monster Zones (the bridge's MSG_SELECT_PLACE reads Monster Zones 0-6).
+  `mp ygo extra ID...` sets the active deck's Extra Deck (tests); scenario ygo_new_summons (an Xyz, a Link Summon and
+  the Scales, played by the AI).
+
+## MAGIC: Shadow, Flanking, Rampage, Fading (2026-11-20)
+- The user: "finish up work on Magic ... incorporating all planned cards" (the whole Premodern pool). This batch:
+  Shadow (MTG_KW_SHADOW: Mtg_CanBlock refuses a block when exactly one of the two has shadow), Flanking
+  (MTG_KW_FLANKING) and Rampage N (MtgCardDef.rampage) applied in mtg_game.c BlocksDeclared (-1/-1 to each blocker
+  without flanking; +N/+N per blocker past the first), Fading N (MtgCardDef.fading: enters with N FADE counters through
+  etbKind / etbNum; StartStep's upkeep takes one off or sacrifices it). Those "triggers" resolve at once, not on the
+  stack. Keyword words on the card: MtgGfx_KeywordLine's SHADOW / FLANKING. Playable: 2793 -> 2850 (docs/MTG_SCOPE.md).
+  Tests: tools/mtg/test_rules.c TestShadow (shadow, flanking, fading). What comes next: docs/MTG_HANDOFF.md.

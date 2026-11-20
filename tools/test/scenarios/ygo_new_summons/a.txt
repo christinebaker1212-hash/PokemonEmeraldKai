@@ -1,0 +1,17 @@
+pressuntil A field 5000
+wait 30
+mp ygo starter 0
+mp ygo extra 8225 4753
+mp ygo decktop 8 6333 6334 656 656
+mp ygo stack
+mp ygo auto
+mp ygo practice
+wait 300
+rendershot t1
+wait 300
+rendershot t2
+wait 300
+rendershot t3
+wait 600
+rendershot t4
+quit
