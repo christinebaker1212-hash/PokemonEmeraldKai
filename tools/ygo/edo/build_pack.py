@@ -30,8 +30,28 @@ def deflate(data):
     return c.compress(data) + c.flush()
 
 
+def merged_cdb(babel):
+    """cards.cdb with the newest sets' (release-*.cdb) and the pre-release cards (prerelease-*.cdb, not Rush Duel's): every card to today (the user,
+    2026-11-20), the newest sets' cards included before they reach cards.cdb"""
+    db = sqlite3.connect(':memory:')
+    main = os.path.join(babel, 'cards.cdb')
+    db.execute('attach database ? as m', (main,))
+    db.execute('create table datas as select * from m.datas')
+    db.execute('create table texts as select * from m.texts')
+    db.execute('detach database m')
+    for extra in sorted(glob.glob(os.path.join(babel, 'release-*.cdb'))) + sorted(glob.glob(os.path.join(babel, 'prerelease-*.cdb'))):
+        if 'rush' in os.path.basename(extra):
+            continue
+        db.execute('attach database ? as p', (extra,))
+        db.execute('insert into datas select * from p.datas where id not in (select id from datas)')
+        db.execute('insert into texts select * from p.texts where id not in (select id from texts)')
+        db.commit()
+        db.execute('detach database p')
+    return db
+
+
 def cards_bin(cdb):
-    db = sqlite3.connect(cdb)
+    db = merged_cdb(cdb) if os.path.isdir(cdb) else sqlite3.connect(cdb)
     rows = db.execute('select d.id, d.alias, d.setcode, d.type, d.level, d.attribute, d.race, d.atk, d.def, d.ot, '
                       't.name, t.desc, ' + ', '.join('t.str%d' % i for i in range(1, 17)) +
                       ' from datas d join texts t on d.id = t.id order by d.id').fetchall()
@@ -47,18 +67,19 @@ def cards_bin(cdb):
 
 def main():
     if len(sys.argv) == 3 and sys.argv[1] == '--codes':
-        write_codes(sqlite3.connect(os.path.join(sys.argv[2], 'cards.cdb')))
+        write_codes(merged_cdb(sys.argv[2]))
         return
     if len(sys.argv) != 5:
         sys.exit(__doc__)
     babel, scripts, lflists, strings = sys.argv[1:]
     files = {}
-    blob, db = cards_bin(os.path.join(babel, 'cards.cdb'))
+    blob, db = cards_bin(babel)
     files['cards.bin'] = blob
     files['strings.conf'] = open(strings, 'rb').read()
     for p in sorted(glob.glob(os.path.join(lflists, '*.lflist.conf'))):
         files['lflist/' + os.path.basename(p)] = open(p, 'rb').read()
-    for p in sorted(glob.glob(os.path.join(scripts, '*.lua')) + glob.glob(os.path.join(scripts, 'official', '*.lua'))):
+    for p in sorted(glob.glob(os.path.join(scripts, '*.lua')) + glob.glob(os.path.join(scripts, 'official', '*.lua')) +
+                    glob.glob(os.path.join(scripts, 'pre-release', '*.lua'))):
         name = os.path.basename(p)
         if name in files:
             continue   # (the root's own wins)

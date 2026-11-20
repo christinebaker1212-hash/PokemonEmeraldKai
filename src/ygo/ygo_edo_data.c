@@ -234,7 +234,8 @@ static unsigned RaceOf(uint64_t r)
         {0x20, YGO_MACHINE}, {0x40, YGO_AQUA}, {0x80, YGO_PYRO}, {0x100, YGO_ROCK}, {0x200, YGO_WINGED_BEAST},
         {0x400, YGO_PLANT}, {0x800, YGO_INSECT}, {0x1000, YGO_THUNDER}, {0x2000, YGO_DRAGON}, {0x4000, YGO_BEAST},
         {0x8000, YGO_BEAST_WARRIOR}, {0x10000, YGO_DINOSAUR}, {0x20000, YGO_FISH}, {0x40000, YGO_SEA_SERPENT},
-        {0x80000, YGO_REPTILE}};
+        {0x80000, YGO_REPTILE}, {0x100000, YGO_PSYCHIC}, {0x200000, YGO_DIVINE_BEAST}, {0x400000, YGO_CREATOR_GOD},
+        {0x800000, YGO_WYRM}, {0x1000000, YGO_CYBERSE}, {0x2000000, YGO_ILLUSION}};
     unsigned i;
     for (i = 0; i < sizeof(sRaces) / sizeof(sRaces[0]); i++)
         if (r & sRaces[i].bit)
@@ -256,7 +257,8 @@ static void MakeExtra(unsigned i)
     c->attribute = (uint8_t)AttributeOf(r->attribute);
     c->race = (uint8_t)RaceOf(r->race);
     c->frame = t & EDO_TYPE_TOKEN ? YGO_TOKEN : t & EDO_TYPE_SPELL ? YGO_SPELL : t & EDO_TYPE_TRAP ? YGO_TRAP
-             : t & (EDO_TYPE_FUSION | EDO_TYPE_SYNCHRO | EDO_TYPE_XYZ | EDO_TYPE_LINK) ? YGO_FUSION
+             : t & EDO_TYPE_FUSION ? YGO_FUSION : t & EDO_TYPE_SYNCHRO ? YGO_SYNCHRO : t & EDO_TYPE_XYZ ? YGO_XYZ
+             : t & EDO_TYPE_LINK ? YGO_LINK
              : t & EDO_TYPE_RITUAL ? YGO_RITUAL : t & EDO_TYPE_EFFECT ? YGO_EFFECT : YGO_NORMAL;
     c->property = t & EDO_TYPE_CONTINUOUS ? YGO_PROP_CONTINUOUS : t & EDO_TYPE_EQUIP ? YGO_PROP_EQUIP
                 : t & EDO_TYPE_FIELD ? YGO_PROP_FIELD : t & EDO_TYPE_QUICKPLAY ? YGO_PROP_QUICK

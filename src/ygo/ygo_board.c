@@ -2948,7 +2948,11 @@ static void Gap(void)
                 if (cur >= 0 && B.mode != M_PICK_GRID && B.mode != M_PILE && B.spots[cur].obj < B.objCount &&
                     B.shown[B.spots[cur].obj].loc == YGO_LOC_MZONE && B.shown[B.spots[cur].obj].faceUp)
                     atk = YgoDuel_Atk(T(), B.spots[cur].obj), def = YgoDuel_Def(T(), B.spots[cur].obj);
-                snprintf(stats, sizeof(stats), "LV%u  ATK %d  DEF %d", c->level, atk < 0 ? 0 : atk, def < 0 ? 0 : def);
+                if (c->frame == YGO_LINK)   /* (a Link Monster has no DEF) */
+                    snprintf(stats, sizeof(stats), "LINK-%u  ATK %d", c->level, atk < 0 ? 0 : atk);
+                else
+                    snprintf(stats, sizeof(stats), "%s%u  ATK %d  DEF %d", Ygo_LevelWord(c), c->level, atk < 0 ? 0 : atk,
+                             def < 0 ? 0 : def);
             }
             else
                 snprintf(stats, sizeof(stats), "%s", c->frame == YGO_SPELL ? "SPELL CARD" : "TRAP CARD");
@@ -3577,8 +3581,8 @@ static void Grid(void)
             G_FillA(0, 112, 240, 48, 0x5848c8, 255);
             G_Text(8, 114, G_WHITE, 0x302878, c->name, 226, TF_NORMAL);
             if (Ygo_IsMonster(c) || c->frame == YGO_TOKEN)
-                snprintf(line, sizeof(line), "%s  %s  LV%u  ATK %d  DEF %d", Ygo_AttributeName(c->attribute),
-                         Ygo_RaceName(c->race), c->level, c->atk, c->def);
+                snprintf(line, sizeof(line), c->frame == YGO_LINK ? "%s  %s  %s%u  ATK %d" : "%s  %s  %s%u  ATK %d  DEF %d",
+                         Ygo_AttributeName(c->attribute), Ygo_RaceName(c->race), Ygo_LevelWord(c), c->level, c->atk, c->def);
             else
                 snprintf(line, sizeof(line), "%s", c->frame == YGO_SPELL ? "SPELL CARD" : "TRAP CARD");
             G_Text(8, 129, 0xd8d8f8, 0x302878, line, 226, TF_SMALL);
@@ -3591,6 +3595,106 @@ static void Grid(void)
         }
     }
 }
+
+/* ------------------------------------------------------------------ */
+/* The table with the newer summon types (a mock-up for the user, 2026-11-20: `mp ygo mock`): the two Extra Monster
+ * Zones in the middle band over the 2nd and 4th columns (faint frames behind the band's words while empty, a monster
+ * in one drawn over the band, the words kept left of it), the outer Spell & Trap Zones as Pendulum Zones with their
+ * Scales, an Xyz Monster's materials under it, a Link Monster's arrows. Drawn over a real duel, the newer frames
+ * painted on cards of today's catalog. */
+static int sMock;
+void YgoBoard_Mock(int on) { sMock = on; }
+static struct Rect EmzRect(int which)
+{
+    return R(ZX + (which ? 3 : 1) * CELL + (CELL - CW) / 2, GAP_Y - 1, CW, CH);
+}
+static void MockKind(struct Rect r, unsigned frame, unsigned lower)
+{
+    G_Frame(r.x, r.y, r.w, r.h, frame, 255);
+    G_Frame(r.x + 1, r.y + 1, r.w - 2, r.h - 2, frame, 255);
+    if (lower)   /* a Pendulum card: its lower half the Spell's green */
+    {
+        G_Fill(r.x, r.y + r.h / 2, 2, r.h - r.h / 2, lower);
+        G_Fill(r.x + r.w - 2, r.y + r.h / 2, 2, r.h - r.h / 2, lower);
+        G_Fill(r.x, r.y + r.h - 2, r.w, 2, lower);
+    }
+}
+static void MockLinkArrow(struct Rect r, int dx, int dy, int lit)
+{
+    unsigned c = lit ? 0xff4038 : 0x403838;
+    int cx = r.x + r.w / 2 + dx * (r.w / 2 + 1), cy = r.y + r.h / 2 + dy * (r.h / 2 + 1), i;
+    for (i = 0; i < 3; i++)   /* a small triangle pointing out */
+    {
+        if (dx && !dy)
+            G_Fill(cx + dx * i - (dx < 0 ? 0 : 0), cy - (2 - i), 1, 2 * (2 - i) + 1, c);
+        else if (dy && !dx)
+            G_Fill(cx - (2 - i), cy + dy * i, 2 * (2 - i) + 1, 1, c);
+        else
+            G_Fill(cx + dx * i, cy + dy * i, 2 - i + 1, 2 - i + 1, c);
+    }
+}
+static void MockScale(struct Rect r, int right, int n)
+{
+    char t[4];
+    unsigned c = right ? 0xd04040 : 0x3870d8;
+    int x = right ? r.x + r.w - 9 : r.x - 1;
+    snprintf(t, sizeof(t), "%d", n);
+    G_RoundFill(x, r.y + r.h - 10, 10, 10, c, 240);
+    G_RoundFrame(x, r.y + r.h - 10, 10, 10, G_WHITE, 200);
+    G_TextAlign(x + 5, r.y + r.h - 11, 1, G_WHITE, G_NO_SHADOW, t, TF_NARROW);
+}
+static void MockOver(void)
+{
+    struct Rect e0 = EmzRect(0), e1 = EmzRect(1), p0 = ZoneRect(0, 1, 0), p4 = ZoneRect(0, 1, 4);
+    struct Rect x2 = ZoneRect(0, 0, 2), s2 = ZoneRect(1, 0, 1), op0 = ZoneRect(1, 1, 4);
+    if (!sMock)
+        return;
+    /* the band's words kept left of an occupied Extra Monster Zone */
+    G_Text(4, GAP_Y, G_WHITE, G_NO_SHADOW, "Link Spider", 0, TF_NARROW);
+    G_Text(4, GAP_Y + 10, 0xc8d0e0, G_NO_SHADOW, "LINK-1  ATK 1000", 0, TF_NARROW);
+    {
+        static const char *const phases[] = {"DP", "SP", "M1", "BP", "M2", "EP"};
+        int i, x = 156;
+        for (i = 0; i < 6; i++, x += 13)
+        {
+            if (i == 2)
+                G_RoundFill(x - 1, GAP_Y + 2, 13, 9, 0x60a0ff, 200);
+            G_Text(x + 1, GAP_Y, i == 2 ? G_WHITE : 0x606878, G_NO_SHADOW, phases[i], 0, TF_NARROW);
+        }
+        G_Hint(238 - G_Hint(0, 0, 0, 0, "{A}ACT {B}MENU", TF_NARROW, 0), GAP_Y + 11, 0xc0c8e0, G_NO_SHADOW,
+               "{A}ACT {B}MENU", TF_NARROW, 1);
+    }
+    /* the two Extra Monster Zones: faint while empty, one holding a Link Monster with its arrows */
+    G_RoundFrame(e0.x - 3, e0.y, e0.w + 6, e0.h, 0xb0a0e0, 110);
+    G_RoundFrame(e1.x - 3, e1.y, e1.w + 6, e1.h, 0xb0a0e0, 110);
+    G_FillA(e1.x - 2, e1.y + 1, e1.w + 4, e1.h - 2, 0x9080c0, 28);
+    Ygo_DrawCard(YGO_CARD_MYSTICAL_ELF, (float)e0.x, (float)e0.y, (float)e0.w, (float)e0.h, 0, 255, 0);
+    MockKind(e0, 0x1c3c90, 0);
+    MockLinkArrow(e0, 0, -1, 1);
+    MockLinkArrow(e0, -1, 1, 0);
+    MockLinkArrow(e0, 1, 1, 0);
+    /* an Xyz Monster with two materials under it, its count */
+    Ygo_DrawCard(YGO_CARD_GEMINI_ELF, (float)x2.x + 2, (float)x2.y - 2, (float)x2.w, (float)x2.h, 0, 255, 0);
+    Ygo_DrawCard(YGO_CARD_GEMINI_ELF, (float)x2.x + 1, (float)x2.y - 1, (float)x2.w, (float)x2.h, 0, 255, 0);
+    Ygo_DrawCard(YGO_CARD_SUMMONED_SKULL, (float)x2.x, (float)x2.y, (float)x2.w, (float)x2.h, 0, 255, 0);
+    MockKind(x2, 0x202024, 0);
+    G_RoundFill(x2.x + x2.w - 7, x2.y - 3, 9, 9, 0xf0c040, 255);
+    G_TextAlign(x2.x + x2.w - 3, x2.y - 4, 1, 0x302010, G_NO_SHADOW, "2", TF_NARROW);
+    /* their Synchro Monster */
+    Ygo_DrawCard(YGO_CARD_BLUE_EYES_WHITE_DRAGON, (float)s2.x, (float)s2.y, (float)s2.w, (float)s2.h, 0, 255, 0);
+    MockKind(s2, 0xe8e8f0, 0);
+    /* Pendulum Zones: the outer Spell & Trap Zones, each with its Scale */
+    Ygo_DrawCard(YGO_CARD_DARK_MAGICIAN, (float)p0.x, (float)p0.y, (float)p0.w, (float)p0.h, 0, 255, 0);
+    MockKind(p0, 0xc07830, 0x30a070);
+    MockScale(p0, 0, 1);
+    Ygo_DrawCard(YGO_CARD_DARK_MAGICIAN, (float)p4.x, (float)p4.y, (float)p4.w, (float)p4.h, 0, 255, 0);
+    MockKind(p4, 0xc07830, 0x30a070);
+    MockScale(p4, 1, 8);
+    Ygo_DrawCard(YGO_CARD_FLAME_SWORDSMAN, (float)op0.x, (float)op0.y, (float)op0.w, (float)op0.h, 0, 255, 0);
+    MockKind(op0, 0x9060b0, 0x30a070);
+    MockScale(op0, 0, 4);
+}
+
 void YgoBoard_Render(void)
 {
     int shakeX, shakeY;
@@ -3609,7 +3713,11 @@ void YgoBoard_Render(void)
     Cards();
     Chain();
     Lp();
-    Gap();
+    if (!sMock)
+        Gap();
+    else
+        G_FillA(0, GAP_Y + 1, 240, 20, 0x0c1018, 255);
+    MockOver();   /* (`mp ygo mock`: the newer summon types' table, for the user to see) */
     Attackers();
     Highlights();
     Fxs();

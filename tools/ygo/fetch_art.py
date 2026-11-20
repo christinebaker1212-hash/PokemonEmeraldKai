@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """Download the printed Yu-Gi-Oh! cards for tools/ygo/build_printed.py: tools/ygo/metadata/images/<password>.jpg.
 
-usage: tools/ygo/fetch_art.py
+usage: tools/ygo/fetch_art.py [--from ID]   (--from: only the cards from that id on, the rest being in printed.bin)
 
 From YGOPRODeck's card images (each card's default printing, 813x1185), at most a few requests a second as their
 API asks; images already there are skipped. The English card back (CARD BACKS: PRINTED), a 927x1353 scan, comes from
@@ -19,7 +19,11 @@ OUT.mkdir(parents=True, exist_ok=True)
 cards = json.load(open(ROOT / 'tools/ygo/catalog.json'))['cards']
 db = {c['id']: c for c in json.load(open(ROOT / 'tools/ygo/metadata/cardinfo.json'))['data']}
 missing = 0
+import sys
+first = int(sys.argv[sys.argv.index('--from') + 1]) if '--from' in sys.argv else 1   # (--from ID: only cards from ID on)
 for c in cards:
+    if c['id'] < first:
+        continue
     path = OUT / ('%d.jpg' % c['password'])
     if path.exists() and path.stat().st_size > 1000:
         continue

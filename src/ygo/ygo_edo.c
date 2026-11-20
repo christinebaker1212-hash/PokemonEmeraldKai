@@ -1018,7 +1018,7 @@ static void Message(struct YgoDuel *d, unsigned type, const uint8_t *data, uint3
         }
         else if (type == MSG_FLIPSUMMONING)
             how = YGO_SUMMON_FLIP;
-        else if (c && c->frame == YGO_FUSION && from == YGO_LOC_EXTRA)
+        else if (c && c->frame == YGO_FUSION && from == YGO_LOC_EXTRA)   /* (Synchro / Xyz / Link: special) */
             how = YGO_SUMMON_FUSION;
         else if (c && c->frame == YGO_RITUAL && from == YGO_LOC_HAND)
             how = YGO_SUMMON_RITUAL;

@@ -1136,11 +1136,13 @@ static void ShowPatchReader(bool8 on)
 // playing alone, OPTIONS > GAME has the level scaling ones)
 
 enum { RULE_PADDING, RULE_ANIM, RULE_SCALE_FIRST, RULE_GEN = RULE_SCALE_FIRST + MP_SCALE_COUNT, RULE_MEGA, RULE_ZMOVES,
-       RULE_DYNAMAX, RULE_TERA, RULE_CARDGEN, RULE_MTGGEN, RULE_BACK, RULE_ROWS };
+       RULE_DYNAMAX, RULE_TERA, RULE_CARDGEN, RULE_MTGGEN, RULE_YGOGEN, RULE_BACK, RULE_ROWS };
 unsigned Tcg_GenCount(void);              // the card GEN steps (tcg_collection.c, mtg_sets.c)
 const char *Tcg_GenName(unsigned gen);
 unsigned Mtg_GenCount(void);
 const char *Mtg_GenName(unsigned gen);
+const char *Ygo_GenName(unsigned gen);    // (ygo_collection.c: 0 ALL, 1 FUSION .. 4 PENDULUM)
+#define YGO_GEN_STEPS 4
 #define RULE_LINE_H 10
 #define RULE_VISIBLE 11   // rows on screen at once (the list scrolls)
 
@@ -1159,6 +1161,8 @@ static void RuleValue(u8 row, char *out, int len)
         snprintf(out, len, "GEN %d", gMpConfig.generation >= 3 && gMpConfig.generation <= 9 ? gMpConfig.generation : 3);
     else if (row == RULE_CARDGEN)
         snprintf(out, len, "%s", Tcg_GenName(gMpConfig.cardGen));
+    else if (row == RULE_YGOGEN)
+        snprintf(out, len, "%s", Ygo_GenName(gMpConfig.ygoGen));
     else if (row == RULE_MTGGEN)
     {
         // (a long set name as far as the row has room: "CLASSIC SIXTH EDITION" is "CLASSIC SIXTH ED.")
@@ -1194,7 +1198,7 @@ static void DrawRules(void)
     static const char *const labels[RULE_ROWS] = {"TEAM PADDING", "ANIM SPEED", "LEVEL SCALING", "  WILD", "  TRAINERS",
                                                   "  BOSS MARGIN", "  BADGE CAPS", "  PAST 8 BADGES", "  EXP CURVE", "GENERATION",
                                                   "MEGA EVOLUTION", "Z-MOVES", "DYNAMAX", "TERASTALLIZE", "POKeMON CARD GEN",
-                                                  "MAGIC GEN", "BACK"};
+                                                  "MAGIC GEN", "YU-GI-OH! GEN", "BACK"};
     static const char *const help[RULE_ROWS] = {
         "ON: trainers get one extra Moemon when friends team up.",
         "How much faster battle animations play, for everyone.",
@@ -1212,6 +1216,7 @@ static void DrawRules(void)
         "AUTO: on from GEN 9. START in battle.",
         "The POKeMON card sets decks may use, card players' and yours.",
         "The MAGIC card sets decks may use, card players' and yours.",
+        "The YU-GI-OH! summon types decks may use, duelists' and yours.",
         "Back to HOST A GAME.",
     };
     u8 i;
@@ -1279,6 +1284,8 @@ static void HandleRules(void)
             unsigned n = (row == RULE_CARDGEN ? Tcg_GenCount() : Mtg_GenCount()) + 1;
             *v = (u8)((*v % n + n + dir) % n);
         }
+        else if (row == RULE_YGOGEN)
+            gMpConfig.ygoGen = (u8)((gMpConfig.ygoGen % (YGO_GEN_STEPS + 1) + YGO_GEN_STEPS + 1 + dir) % (YGO_GEN_STEPS + 1));
         else if (row >= RULE_MEGA && row <= RULE_TERA)
         {
             u8 sh = 2 * (row - RULE_MEGA), v = (gMpConfig.gimmicks >> sh) & 3;

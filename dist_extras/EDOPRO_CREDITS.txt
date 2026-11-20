@@ -4,9 +4,9 @@ Yu-Gi-Oh! duels in Moemon Emerald Kai Co-op are played by EDOPro's duel engine a
                                   2017-2026 Edoardo Lolletti (edo9300) and contributors
                                   https://github.com/edo9300/ygopro-core  (commit 6864373c24d7313c8e451df17877c12c4f713c46)
   Lua 5.4                         Copyright (C) 1994-2025 Lua.org, PUC-Rio (MIT license)  https://www.lua.org
-  CardScripts (card effects)      Project Ignis  https://github.com/ProjectIgnis/CardScripts  (commit 6a8f512ef953df5342b56a77732afb07302da96a)
-  BabelCdb (card database)        Project Ignis  https://github.com/ProjectIgnis/BabelCdb  (commit 2e6f985a5537d9b16ec7396787b5279d94af419d)
-  LFLists (Forbidden & Limited)   Project Ignis  https://github.com/ProjectIgnis/LFLists  (commit 481fec58eb5ef6237466559a0f9939f31daed9aa)
+  CardScripts (card effects)      Project Ignis  https://github.com/ProjectIgnis/CardScripts  (commit a236044e8b7ba0a5b2915bf5f3479c6fab5ae7b6)
+  BabelCdb (card database)        Project Ignis  https://github.com/ProjectIgnis/BabelCdb  (commit 3d673dfe3b90471022cf11898e8ebe53443c8f17)
+  LFLists (Forbidden & Limited)   Project Ignis  https://github.com/ProjectIgnis/LFLists  (commit 336ec7e282c3a6e8c0b621108a050fdeb98ababc)
   strings.conf (system strings)   Project Ignis  https://github.com/ProjectIgnis/Distribution
 
 ygopro-core and CardScripts are free software under the GNU Affero General Public License, version 3 or later.

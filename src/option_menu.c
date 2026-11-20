@@ -78,6 +78,7 @@ enum
     OPT_CARDSCALE,
     OPT_CARDGEN,      // Moemon Kai: GAME > POKeMON CARD GEN / MAGIC GEN (0 ALL; the host's online)
     OPT_MTGGEN,
+    OPT_YGOGEN,       // ... and YU-GI-OH! GEN by summon type (0 ALL, FUSION .. PENDULUM)
     OPT_FULLSCREEN,
     OPT_WINSCALE,
     OPT_SCALING,
@@ -218,10 +219,13 @@ static const u8 sText_CardBacks[] = _("CARD BACKS");
 static const u8 sText_CardScaling[] = _("CARD SCALING");
 static const u8 sText_CardGen[] = _("POKéMON CARD GEN");
 static const u8 sText_MtgGen[] = _("MAGIC GEN");
+static const u8 sText_YgoGen[] = _("YU-GI-OH! GEN");
 unsigned Tcg_GenCount(void);              // the card GEN steps (tcg_collection.c, mtg_sets.c)
 const char *Tcg_GenName(unsigned gen);
 unsigned Mtg_GenCount(void);
 const char *Mtg_GenName(unsigned gen);
+const char *Ygo_GenName(unsigned gen);    // (ygo_collection.c: 0 ALL, 1 FUSION .. 4 PENDULUM)
+#define YGO_GEN_STEPS 4
 static const u8 sText_CardBackPrinted[] = _("PRINTED");
 static const u8 sText_CardBackPixel[] = _("PIXEL");
 static const u8 sText_BattleAnims[] = _("BATTLE ANIMS");
@@ -554,6 +558,7 @@ static void BuildRows(void)
         AddRow(OPT_CARDSCALE, 0);
         AddRow(OPT_CARDGEN, 0);
         AddRow(OPT_MTGGEN, 0);
+        AddRow(OPT_YGOGEN, 0);
         AddRow(OPT_CARDART, 0);
         AddRow(OPT_CARDBACK, 0);
         if (gMain.savedCallback == CB2_ReturnToFieldWithOpenMenu)   // (from the field's START menu only)
@@ -913,6 +918,9 @@ static u8 Choices(u8 row, const u8 **names, u8 *buf)
     case OPT_MTGGEN:
         MP_AsciiToGame(buf, opt == OPT_CARDGEN ? Tcg_GenName(MP_CardGen()) : Mtg_GenName(MP_MtgGen()), 30);
         break;
+    case OPT_YGOGEN:
+        MP_AsciiToGame(buf, Ygo_GenName(MP_YgoGen()), 30);
+        break;
     case OPT_FLAGRANGE:
         {
             char ascii[16];
@@ -1252,6 +1260,13 @@ static void Change(u8 row, int dir)
         MP_SendRoomRules();
         break;
     }
+    case OPT_YGOGEN:
+        if (MP_Lobby_InRoom() && !MP_LevelScalingIsOurs())
+            break;   // online, the host's
+        gMpConfig.ygoGen = (u8)((gMpConfig.ygoGen % (YGO_GEN_STEPS + 1) + YGO_GEN_STEPS + 1 + dir) % (YGO_GEN_STEPS + 1));
+        MPNet_Log("card gen: yugioh %d (%s)", gMpConfig.ygoGen, Ygo_GenName(gMpConfig.ygoGen));
+        MP_SendRoomRules();
+        break;
     case OPT_GENERATION:
         if (MP_Lobby_InRoom() && !MP_LevelScalingIsOurs())
             break;   // online, the host's
@@ -1331,6 +1346,7 @@ static const u8 *RowLabel(u8 row, u8 *buf)
     case OPT_CARDSCALE:   return sText_CardScaling;
     case OPT_CARDGEN:     return sText_CardGen;
     case OPT_MTGGEN:      return sText_MtgGen;
+    case OPT_YGOGEN:      return sText_YgoGen;
     case OPT_PADSELECT:   return sText_Controller;
     case OPT_MICROPHONE:  return sText_Microphone;
     case OPT_PADLAYOUT:   return sText_PadButtons;
@@ -1560,6 +1576,16 @@ static bool8 HintText(u8 *buf)
             snprintf(ascii, sizeof(ascii), "DECKS FROM EVERY SET");
         else
             snprintf(ascii, sizeof(ascii), "DECKS FROM THE SETS UP TO %s", name);
+    }
+    else if (opt == OPT_YGOGEN)
+    {
+        unsigned g = MP_YgoGen();
+        if (MP_Lobby_InRoom() && !MP_LevelScalingIsOurs())
+            snprintf(ascii, sizeof(ascii), "ONLINE, THE HOST'S IS USED: %s", Ygo_GenName(g));
+        else if (!g)
+            snprintf(ascii, sizeof(ascii), "DECKS OF EVERY CARD");
+        else
+            snprintf(ascii, sizeof(ascii), "DECKS OF THE CARDS UP TO THE %s ERA", Ygo_GenName(g));
     }
     else if (opt == OPT_CARDBACK)
         snprintf(ascii, sizeof(ascii), "%s", gMpConfig.cardBack ? "A PIXEL-ART CARD BACK" : "THE REAL CARD BACK");

@@ -23,6 +23,9 @@ IDS = ROOT / 'tools/ygo/ids.json'
 OUT = ROOT / 'tools/ygo/catalog.json'
 
 WC6 = ROOT / 'tools/ygo/wc2006.json'
+KEPT = set()
+# Promos with passwords of their own that EDOPro's database hasn't got (no script: they couldn't be played)
+NO_SCRIPT = {111000561, 501000006, 501000007, 662853, 662857, 662854, 662855}
 
 # The English releases up to World Championship 2006, in order (North American first editions)
 SETS = [
@@ -60,8 +63,77 @@ SETS = [
     ('SD7', 'Structure Deck: Invincible Fortress', '2006-05-15', 'structure'),
     ('SD8', 'Structure Deck: Lord of the Storm', '2006-07-12', 'structure'),
 ]
+# Every English set after them, to today (the user, 2026-11-20: "every set to today"), from YGOPRODeck's set list
+# (tools/ygo/metadata/cardsets.json): each set's kind, a booster sold in its era's region, a Starter / Structure Deck,
+# or 'other' (tins, promos, reprint and collector's sets: their cards sold as singles)
+CARDSETS = ROOT / 'tools/ygo/metadata/cardsets.json'
+LAST_OLD = '2006-07-12'
+OTHER_WORDS = ('promo', 'tin', 'duelist league', 'collector', 'prize', 'participation', 'tournament', 'sneak',
+               'championship', 'premiere', 'mega', 'calendar', 'advent', 'special edition', 'deluxe', 'bundle',
+               'magazine', 'book', 'jump', 'speed duel', 'gold', 'duel terminal', 'star pack', 'battle pack',
+               'legendary', 'duelist pack', 'retro', 'box', 'collection', 'chronicles', 'winner', 'set', 'kit',
+               'anniversary', 'reinforcements', 'round 2', 'dark revelation', 'dark legends', 'hidden arsenal',
+               'complete series', 'quarter century', 'ghosts from the past', 'battles of legend', 'world superstars',
+               'millennium pack', 'premium', 'value', 'pack', 'edition', 'demo', 'sample', 'game', 'movie', 'power-up',
+               'gift', 'sampler', 'exclusive', 'event')
+
+
+def later_sets(db):
+    """The English sets after SD8, oldest first: (code, name, date, kind), the code made unique (a set split in two
+    keeps its code with a letter: DT05A, DT05B)"""
+    out, seen = [], {}
+    printed = set()
+    for c in db:
+        for p in c.get('card_sets', []):
+            printed.add(p['set_name'])
+    for st in sorted(json.load(open(CARDSETS)), key=lambda st: (st.get('tcg_date') or '9999', st['set_name'])):
+        date, name, code = st.get('tcg_date'), st['set_name'], st['set_code']
+        if not date or date <= LAST_OLD or name not in printed:
+            continue
+        low = name.lower()
+        if 'structure deck' in low:
+            kind = 'structure'
+        elif 'starter deck' in low or 'super starter:' in low:
+            kind = 'starter' if 'speed duel' not in low else 'other'
+        elif st['num_of_cards'] >= 50 and not any(w in low for w in OTHER_WORDS):
+            kind = 'booster'
+        else:
+            kind = 'other'
+        key = re.sub('[^A-Z0-9]', '', code.upper()) or 'X'
+        seen[key] = seen.get(key, 0) + 1
+        out.append([key, name, date, kind, code])
+    # (codes used twice: a letter each, so every set has its own YGO_SET_*)
+    oldcodes = {code for code, *_ in SETS}
+    for o in out:
+        if o[0] in oldcodes:
+            o[0] += 'R'   # (a later reprint of an old set's code: LOB's 25th anniversary edition is LOBR)
+    counts = Counter(o[0] for o in out)
+    n = Counter()
+    for o in out:
+        base = o[0]
+        if counts[base] > 1:
+            n[base] += 1
+            o[0] = '%s_%d' % (base, n[base])
+    return out
+
+
 OLD_SETS = ['LOB', 'SDY', 'SDK', 'MRD', 'SRL', 'PSV', 'LON', 'SDJ', 'SDP', 'LOD', 'PGD', 'MFC', 'DCR']   # (the pool before 1.56.0)
 RARITIES = ['Common', 'Short Print', 'Super Short Print', 'Rare', 'Super Rare', 'Ultra Rare', 'Secret Rare']
+# The later sets' rarities as the game's seven (a rarity only as a second printing is skipped there)
+LATER_RARITY = {'Ultimate Rare': 'Ultra Rare', 'Ghost Rare': 'Secret Rare', 'Gold Rare': 'Ultra Rare',
+                'Gold Secret Rare': 'Secret Rare', 'Premium Gold Rare': 'Ultra Rare', 'Platinum Rare': 'Ultra Rare',
+                'Platinum Secret Rare': 'Secret Rare', 'Starfoil Rare': 'Rare', 'Shatterfoil Rare': 'Rare',
+                'Mosaic Rare': 'Rare', 'Starlight Rare': None, "Collector's Rare": None, 'Quarter Century Secret Rare': None,
+                'Prismatic Secret Rare': 'Secret Rare', 'Extra Secret Rare': 'Secret Rare', '10000 Secret Rare': None,
+                'Duel Terminal Normal Parallel Rare': 'Common', 'Duel Terminal Rare Parallel Rare': 'Rare',
+                'Duel Terminal Super Parallel Rare': 'Super Rare', 'Duel Terminal Ultra Parallel Rare': 'Ultra Rare',
+                'Duel Terminal Secret Parallel Rare': 'Secret Rare', 'Normal Parallel Rare': 'Common',
+                'Super Parallel Rare': 'Super Rare', 'Ultra Parallel Rare': 'Ultra Rare', 'Ultra Secret Rare': 'Secret Rare',
+                'Secret Parallel Rare': 'Secret Rare', 'Platinum Rare ': 'Ultra Rare', 'Ghost/Gold Rare': 'Secret Rare',
+                'Ultra Rare (Pharaoh\'s Rare)': 'Ultra Rare', 'Super Rare (Pharaoh\'s Rare)': 'Super Rare',
+                'Rare (Pharaoh\'s Rare)': 'Rare', 'Common (Pharaoh\'s Rare)': 'Common', 'Starlight Rare ': None,
+                'Holographic Rare': 'Secret Rare', 'Ultra Pharaoh\'s Rare': 'Ultra Rare', 'Short Print ': 'Short Print',
+                'Super Short Print ': 'Super Short Print'}
 # Stairway's older names
 ALIASES = {'Dark Magic Ritual': 'Black Magic Ritual', 'B. Skull Dragon': 'Black Skull Dragon',
            'Meteor B. Dragon': 'Meteor Black Dragon'}
@@ -79,10 +151,10 @@ def frame(c):
         return 'spell'
     if t == 'Trap Card':
         return 'trap'
-    for k in ('Fusion', 'Ritual'):
+    for k in ('Fusion', 'Ritual', 'Synchro', 'XYZ', 'Link'):
         if k in t:
             return k.lower()
-    return 'normal' if t == 'Normal Monster' else 'effect'
+    return 'normal' if t in ('Normal Monster', 'Pendulum Normal Monster', 'Normal Tuner Monster') else 'effect'
 
 
 def main():
@@ -128,23 +200,51 @@ def main():
                 limits[cid] = n
     # North American first editions: "LOB-001" up to 2004, then "SOD-EN001" (the "-EN" codes of the early sets are
     # Europe's printings)
-    printings = {code: [] for code, *_ in SETS}
+    later = later_sets(db)
+    allsets = SETS + [tuple(l[:4]) for l in later]
+    bylatername = {l[1]: l[0] for l in later}
+    shown = {l[0]: l[4] for l in later}   # (the code printed on the cards, shown to players)
+    printings = {code: [] for code, *_ in allsets}
     plain = {m.group(1) for c in db for p in c.get('card_sets', []) for m in [re.match(r'^([A-Z0-9]+)-\d+$', p['set_code'])] if m}
     for c in db:
+        if c['type'] == 'Skill Card' or c['id'] in NO_SCRIPT:
+            continue   # (Speed Duel's own, or a promo EDOPro hasn't got: not a card of this game)
         for p in c.get('card_sets', []):
-            m = re.match(r'^([A-Z0-9]+)-(EN)?(\d+)$', p['set_code'])
-            if m and m.group(1) in printings and (m.group(2) is None) == (m.group(1) in plain):
+            m = re.match(r'^([A-Z0-9]+)-(EN)?([A-Z]?\d+)$', p['set_code'])
+            later_key = bylatername.get(p['set_name'])
+            if later_key and m:
+                pre, num = later_key, m.group(3)
+            elif m and m.group(1) in printings and m.group(1) not in bylatername.values() and \
+                    (m.group(2) is None) == (m.group(1) in plain):
                 pre, num = m.group(1), m.group(3)
+            else:
+                continue
+            if True:
                 rarity = p['set_rarity']
                 if rarity == 'Ultimate Rare':
                     if any(q['set_code'] == p['set_code'] and q['set_rarity'] != rarity for q in c['card_sets']):
                         continue   # (the same card's second printing)
                     rarity = 'Ultra Rare'
                 if rarity not in RARITIES:
-                    raise SystemExit('unknown rarity %s for %s' % (rarity, p['set_code']))
+                    if pre in bylatername.values():
+                        rarity = LATER_RARITY.get(rarity)
+                        if rarity is None:
+                            continue   # (a second, rarer printing of a card the set also has: Starlight, Collector's...)
+                        if any(q['set_code'] == p['set_code'] and q['set_rarity'] in RARITIES for q in c['card_sets']):
+                            continue
+                    else:
+                        raise SystemExit('unknown rarity %s for %s' % (rarity, p['set_code']))
                 printings[pre].append((num, c['id'], rarity))
+    # The sets up to 2006 keep what the catalog had, card for card (YGOPRODeck has since listed their North American
+    # printings with "-EN" codes, so they can't be read the old way again; saves hold these cards)
+    old = json.load(open(OUT))
+    pw = {c['id']: c['password'] for c in old['cards']}
+    for st in old['sets']:
+        if st['code'] in printings and st['code'] not in bylatername.values():
+            printings[st['code']] = [('%05d%d' % (i, k), byid[pw[e[0]]]['id'], e[1])
+                                     for i, e in enumerate(st['cards']) for k in range(e[2] if st['kind'] == 'booster' else 1)]
     order = []
-    for code, *_ in SETS:
+    for code, *_ in allsets:
         for num, cid, rarity in sorted(set(printings[code])):
             if cid not in order:
                 order.append(cid)
@@ -157,6 +257,8 @@ def main():
             order.append(cid)
     order += [t for t in tokens if t not in order]
     ids = json.load(open(IDS)) if IDS.exists() else {}
+    global KEPT
+    KEPT = set(ids)   # (the cards the catalog had: their limits stay as they were)
     nextid = max(ids.values(), default=0) + 1
     for cid in order:
         if str(cid) not in ids:
@@ -175,13 +277,22 @@ def main():
         if f in ('spell', 'trap'):
             card['property'] = c['race']
         else:
-            card.update(race=c['race'], attribute=c.get('attribute'), level=c.get('level', 0),
-                        atk=c.get('atk', 0), defense=c.get('def', 0))
+            card.update(race=c['race'], attribute=c.get('attribute'),
+                        level=c.get('linkval', 0) if f == 'link' else c.get('level', 0),
+                        atk=c.get('atk', 0), defense=0 if f == 'link' else c.get('def', 0))
+            if 'Pendulum' in c['type']:
+                card['scale'] = c.get('scale', 0)
+            if f == 'link':
+                card['markers'] = c.get('linkmarkers', [])
+        if cid not in limits and cid not in insdd and str(cid) not in KEPT:
+            # (a card new to the catalog: today's TCG list)
+            ban = (c.get('banlist_info') or {}).get('ban_tcg')
+            limits[cid] = {'Forbidden': 0, 'Limited': 1, 'Semi-Limited': 2}.get(ban, 3)
         card['sets'] = []
         cards.append(card)
     byours = {c['password']: c for c in cards}
     sets = []
-    for code, name, date, kind in SETS:
+    for code, name, date, kind in allsets:
         rows = Counter()
         rar = {}
         for num, cid, rarity in sorted(set(printings[code])):
@@ -202,7 +313,8 @@ def main():
                 continue
             entries.append([ids[str(cid)], rar[cid], rows[cid]])
             byours[cid]['sets'].append(code)
-        sets.append({'code': code, 'name': name, 'date': date, 'kind': kind, 'cards': entries})
+        sets.append({'code': code, 'shown': shown.get(code, code), 'name': name, 'date': date, 'kind': kind,
+                     'cards': entries})
     json.dump({'source': 'tools/ygo/sdd.json + tools/ygo/wc2006.json + YGOPRODeck (db.ygoprodeck.com)', 'sets': sets, 'cards': cards},
               open(OUT, 'w'), indent=1, ensure_ascii=False)
     print('%d cards (%d from Stairway), %d sets -> %s' % (len(cards), sum(1 for c in cards if c['sdd']), len(sets), OUT))

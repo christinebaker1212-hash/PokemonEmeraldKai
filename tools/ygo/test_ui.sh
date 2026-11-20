@@ -191,7 +191,7 @@ cat > "$OUT/codes.txt" <<'SCRIPT'
 pressuntil A field 5000
 wait 60
 mp ygo starter 1
-mp ygo code ydke://ryPeAIDfbgU=!!!
+mp ygo code ydke://40F1HoDfbgU=!!!
 wait 20
 rendershot code-bad
 press A 2

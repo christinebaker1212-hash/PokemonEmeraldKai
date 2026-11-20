@@ -29,9 +29,9 @@ int Ygo_NpcDeckCards(unsigned index, uint16_t main[YGO_DECK_MAX], uint16_t extra
             have += extra[k] == id;
         if (have >= Ygo_GameLimit(id))
             continue;   // (the game's own list)
-        if (c->frame == YGO_FUSION && x < YGO_FUSION_MAX)
+        if (Ygo_IsExtra(c) && x < YGO_FUSION_MAX)
             extra[x++] = (uint16_t)id;
-        else if (c->frame != YGO_FUSION && m < YGO_DECK_MAX)
+        else if (!Ygo_IsExtra(c) && m < YGO_DECK_MAX)
             main[m++] = (uint16_t)id;
     }
     // the game's list took some out: more copies of the deck's own cards it allows (Monsters first)
@@ -40,7 +40,7 @@ int Ygo_NpcDeckCards(unsigned index, uint16_t main[YGO_DECK_MAX], uint16_t extra
         {
             unsigned id = d->cards[i], k, have = 0;
             const struct YgoCard *c = Ygo_Card(id);
-            if (!c || !Ygo_CardReady(id) || c->frame == YGO_FUSION || (pass == 0) != Ygo_IsMonster(c))
+            if (!c || !Ygo_CardReady(id) || Ygo_IsExtra(c) || (pass == 0) != Ygo_IsMonster(c))
                 continue;
             for (k = 0; k < m; k++)
                 have += main[k] == id;

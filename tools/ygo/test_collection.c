@@ -48,7 +48,7 @@ int main(void)
     /* every Starter Deck is a legal deck of cards that work */
     for (i = 0; i < YGO_SET_COUNT; i++)
     {
-        if (!gYgoSets[i].starter)
+        if (!Ygo_SetIsClassicDeck(i))   /* (the later decks' copies aren't known yet: never sold) */
             continue;
         Ygo_CollectionInit(&c, 7);
         CHECK(Ygo_ChooseStarter(&c, i));
@@ -203,8 +203,8 @@ int main(void)
         CHECK(Ygo_ReadYdk(ydk, m, x, &bad) && !bad);
         CHECK(!memcmp(m, k.decks[0].main, sizeof(m)) && !memcmp(x, k.decks[0].extra, sizeof(x)));
         CHECK(Ygo_DeckMissing(&k, m, x) == 0);
-        /* "Ash Blossom & Joyous Spring" (14558127): not in the game */
-        CHECK(Ygo_ReadYdk("#main\n14558127\n46986414\n#extra\n!side\n", m, x, &bad) && bad == 1 && m[0] && !m[1]);
+        /* "Ash Blossom & Joyous Spring" (511001059): not in the game */
+        CHECK(Ygo_ReadYdk("#main\n511001059\n46986414\n#extra\n!side\n", m, x, &bad) && bad == 1 && m[0] && !m[1]);
         CHECK(!strcmp(Ygo_Card(m[0])->name, "Dark Magician"));   /* (46986414: the catalog has another printing) */
         CHECK(!Ygo_ReadYdke("hello", m, x, &bad));
         CHECK(Ygo_ReadYdke("ydke://r9H3AA==!!!", m, x, &bad) && bad == 1);   /* (14608815... any unknown) */

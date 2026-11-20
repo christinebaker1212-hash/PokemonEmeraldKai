@@ -8515,3 +8515,31 @@ res/moves/chatter/anim.s).
   mp_uistyle.c TransitionCells compares BG0's screen in VRAM with the game's tilemap buffer (what it last copied there)
   cell by cell each frame of a transition: only the cells still Kai's box are hidden (gMpUiHideBg0Cells, read by
   gba_easy_draw.c for BG0 and the sprites under it) and drawn in the style; the rest show the transition.
+
+## YU-GI-OH! to today: the catalog, the summon-type GEN, boosters by region (after 1.209.0, in progress)
+- The user (2026-11-20): "finish up work on Magic and Yugioh, incorporating all planned cards, incorporating full Gen
+  settings and all Yugioh special summon Gen settings"; their answers in docs/YGO_DECISIONS.md, the steps in
+  docs/YGO_HANDOFF.md "What's left (2026-11-20)".
+- Catalog: tools/ygo/fetch_db.py (cardinfo.json), cardsets.json from YGOPRODeck's cardsets.php into tools/ygo/metadata/,
+  then build_catalog.py and gen_catalog.py. The sets up to SD8 (2006) come from the committed catalog card for card
+  (today's data lists their North American printings as "-EN" and would read differently); later sets' codes never take
+  an old one (LOB's 25th anniversary edition is LOBR) and repeats get numbers (JUMP_1...), the printed code shown
+  (YgoSet.code). Rarities past the seven: LATER_RARITY (Starlight / Collector's / Quarter Century second printings
+  skipped). Skill Cards (Speed Duel) aren't cards of this game. Cards new to the catalog take today's TCG list.
+- C: YgoFrame SYNCHRO / XYZ / LINK after TOKEN (Ygo_IsMonster / Ygo_IsExtra cover them; deck splits use Ygo_IsExtra),
+  YGO_ABILITY_TUNER / PENDULUM, YgoCard.scale / markers (YGO_LINK_*), setFirst / setCount into gYgoCardSets
+  (Ygo_CardInSet), era; YgoSet.date / era, YGO_SET_OTHER (never a pack); Ygo_SetIsDeck / Ygo_SetIsClassicDeck. Set
+  numbers are u16 everywhere (YgoOpponent.set, the screens' lists). The .ygo file already keeps card and set counts.
+- Eras (gen_catalog.py, from the first set printing each kind): SYNCHRO 2008-08-05, XYZ 2011-07-08, PENDULUM
+  2014-07-10, LINK 2017-07-20. A card's era is its first printing's.
+- Boosters by era, by region: 2002-2006's everywhere as before; later FUSION-era HOENN, SYNCHRO JOHTO / KANTO, XYZ
+  SINNOH, PENDULUM / LINK UNOVA (Ygo_SetSoldIn; the phone and tools: every set).
+- YU-GI-OH! GEN (OPTIONS > GAME, HOST A GAME > GAME RULES; 0 ALL, 1 FUSION, 2 SYNCHRO, 3 XYZ, 4 PENDULUM; LINK is
+  ALL): Ygo_CardInGen / Ygo_DeckInGen; ygo_ui.c GenOk refuses a deck past it before a duel (practice, challenges,
+  friends). Duelists' decks are all FUSION-era today (changing them waits on the user).
+- The card's words: Rank (black stars) / Link Rating ("LINK-2", no DEF), Tuner / Pendulum and its SCALE on the INSPECT
+  page; the BINDER's FUSION tab is EXTRA; SEARCH's Types include the six newer ones.
+- EDOPro: tools/ygo/edo/build_pack.py merges cards.cdb with release-*.cdb and prerelease-*.cdb (not Rush) and reads
+  pre-release/ scripts; dist_extras/EDOPRO_CREDITS.txt names the commits. The engine (ocgcore) is unchanged: every
+  test passes with today's scripts.
+- The table mock-up: `mp ygo mock` (ygo_board.c MockOver), docs/ygo/table_mockup.png.

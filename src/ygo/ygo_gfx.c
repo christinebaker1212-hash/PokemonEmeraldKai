@@ -29,6 +29,9 @@ static const struct
     [YGO_SPELL] = {0x30a890, 0x98dcc8, 0x0e5848},
     [YGO_TRAP] = {0xc04888, 0xeaa4cc, 0x6c1846},
     [YGO_TOKEN] = {0xa0a0a0, 0xd8d8d8, 0x505050},
+    [YGO_SYNCHRO] = {0xe0e0e8, 0xf8f8ff, 0x80808c},
+    [YGO_XYZ] = {0x383840, 0x787880, 0x101014},
+    [YGO_LINK] = {0x2858b0, 0x80a8e8, 0x102c60},
 };
 unsigned Ygo_FrameColor(unsigned id, int shade)
 {
@@ -50,7 +53,8 @@ const char *Ygo_RaceName(unsigned race)
 {
     static const char *const names[] = {"", "Aqua", "Beast", "Beast-Warrior", "Dinosaur", "Dragon", "Fairy", "Fiend",
                                         "Fish", "Insect", "Machine", "Plant", "Pyro", "Reptile", "Rock",
-                                        "Sea Serpent", "Spellcaster", "Thunder", "Warrior", "Winged Beast", "Zombie"};
+                                        "Sea Serpent", "Spellcaster", "Thunder", "Warrior", "Winged Beast", "Zombie",
+                                        "Psychic", "Divine-Beast", "Creator God", "Wyrm", "Cyberse", "Illusion"};
     return race < YGO_RACE_COUNT ? names[race] : "";
 }
 const char *Ygo_RarityName(unsigned rarity)
@@ -335,7 +339,7 @@ static void Face(struct GSurface *s, const struct YgoCard *c)
     }
     y = b + nameH + 1;
     /* Level stars */
-    if (c->frame <= YGO_RITUAL && w >= 26)
+    if (Ygo_IsMonster(c) && w >= 26)
     {
         int star = w >= 40 ? 3 : 2, n = c->level, x = w - b - 2 - n * (star + 1);
         for (i = 0; i < n && x + i * (star + 1) > b; i++)
@@ -503,7 +507,7 @@ void Ygo_CardArtRect(unsigned id, int w, int h, int *ax, int *ay, int *aw, int *
     b = tw >= 40 ? 3 : tw >= 26 ? 2 : 1;
     nameH = tw >= 40 ? 6 : tw >= 26 ? 4 : 2;
     y = b + nameH + 1;
-    if (c && c->frame <= YGO_RITUAL && tw >= 26)
+    if (c && Ygo_IsMonster(c) && tw >= 26)
         y += (tw >= 40 ? 3 : 2) + 1;
     *aw = tw - 2 * b - 2;
     *ah = *aw;

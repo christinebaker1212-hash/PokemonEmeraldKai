@@ -3,6 +3,28 @@
 Trigger: when the user says **"Continue Yugioh"**, read this file and pick up at "What's left (2026-11-04)".
 Also read docs/YGO_DECISIONS.md (the user's 30 answers and the choices since) and COOP_NOTES "Yu-Gi-Oh! card duels".
 
+## What's left (2026-11-20): the cards to today and the summon-type GEN
+The user (2026-11-20): every card to today, the GEN by summon type, NPC decks only after asking them
+(docs/YGO_DECISIONS.md "The summon-type GEN and the cards to today"). Done so far (COOP_NOTES "YU-GI-OH! to today"):
+- The catalog: 14,070 cards and 919 English sets (tools/ygo/build_catalog.py: the 2002-2006 sets kept card for card
+  from the committed catalog, every later set from YGOPRODeck's set list; gen_catalog.py: frames SYNCHRO / XYZ / LINK,
+  Pendulum Scales, Link Arrows, Tuner, the newer Types, each card's sets as a list (gYgoCardSets), each set's and card's
+  era (YGO_ERA_*), set kinds booster / starter / structure / other).
+- EDOPro's pack rebuilt from today's CardScripts / BabelCdb / LFLists with the newest sets (release-*.cdb) and
+  pre-release cards; every catalog card has its code (7 promos EDOPro lacks left out: build_catalog.py NO_SCRIPT).
+- Boosters by era, by region (ygo_collection.c Ygo_SetSoldIn, gYgoShopRegion set by ygo_ui.c).
+- OPTIONS > GAME > YU-GI-OH! GEN and HOST A GAME's rule (gMpConfig.ygoGen, "yugioh_gen", MPR_RULES byte 25 +
+  MP_SCALE_COUNT, protocol 92); a deck past it is refused before a duel (ygo_ui.c GenOk).
+Next:
+1. **The table** (waiting on the user's approval of docs/ygo/table_mockup.png, `mp ygo mock`): the Extra Monster
+   Zones (the duel's DUEL_EMZONE flag, the bridge's zones 5-6, the board's EmzRect), Pendulum Scales on the outer
+   Spell & Trap Zones, Xyz materials under their monster, Link Arrows.
+2. **Art**: tools/ygo/fetch_art.py --from 2312, then build_printed.py (a Pendulum card's illustration window differs).
+3. **The later Starter / Structure Decks' lists with copies** (Yugipedia, as fetch_wc2006.py does): sold by region
+   once known (Ygo_SetIsClassicDeck keeps the GAME CENTER to 2002-2006's).
+4. **NPC decks: ask the user first.** The AI with Synchro / Xyz / Link Summons (EDOPro offers them as Special Summons).
+5. The "Fusion Deck" words where the GEN allows later Extra Deck monsters ("Extra Deck").
+
 ## What's left (2026-11-04)
 Since 1.48.0 (2026-10-29) the duels run on EDOPro's engine (edopro/ocgcore with every card's script in
 graphics/ygo/edo.pak; COOP_NOTES "Yu-Gi-Oh! on EDOPro"): every card works with every effect. The card-writing plan

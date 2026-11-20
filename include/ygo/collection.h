@@ -67,6 +67,17 @@ int Ygo_CollectionSave(const struct YgoCollection *c, const char *path);   /* ne
 int Ygo_ChooseStarter(struct YgoCollection *c, unsigned set);
 /* A booster set the shop and the opponents can hand out now: most of its cards work (Ygo_CardReady) */
 int Ygo_SetAvailable(unsigned set);
+/* ... in the region the player is in (gYgoShopRegion, mp_region.h's REGION_*, set by the game; 0xFF every set) */
+extern unsigned gYgoShopRegion;
+int Ygo_SetSoldIn(unsigned set, unsigned region);
+/* The YU-GI-OH! GEN switch (OPTIONS > GAME > YU-GI-OH! GEN; online the host's): 0 ALL, then a step per summon type,
+ * FUSION (today's 2002-2008 cards) to PENDULUM (LINK is every card: ALL); a step allows every card first printed
+ * before the next summon type's first set (YgoCard.era) */
+#define YGO_GEN_STEPS 4
+const char *Ygo_GenName(unsigned gen);
+int Ygo_CardInGen(unsigned card, unsigned gen);
+/* a deck's cards inside the GEN; *outside the first that isn't (0 none) */
+int Ygo_DeckInGen(const uint16_t *main, const uint16_t *extra, unsigned gen, unsigned *outside);
 /* Opens one of the boosters held of set: 9 cards (8 commons, the rare slot last) into result; 0 when none */
 int Ygo_OpenPack(struct YgoCollection *c, unsigned set, uint16_t result[YGO_PACK_SIZE]);
 int Ygo_AwardPack(struct YgoCollection *c, unsigned set);

@@ -69,3 +69,15 @@ The user's answers to the 30 design questions (keep to them), then the choices m
   cards not owned are kept, gray, and the deck waits for them.
 - Opponents' decks: the opponents of the Game Boy Advance games (2002-2004) from Yugipedia, never tournament lists;
   rated by AI duels so a duelist's deck matches how far the player has come.
+
+## The summon-type GEN and the cards to today (the user, 2026-11-20)
+The user: "finish up work on Magic and Yugioh, incorporating all planned cards, incorporating full Gen settings and all
+Yugioh special summon Gen settings. Yugioh will require special handling for decks, so please check back with me
+before changing NPC decks." Their answers:
+- The pool: **every set to today** (FUSION, SYNCHRO, XYZ, PENDULUM, LINK: the GEN's last step is today's game; at a
+  step, every set released before the next summon type's first set is legal: docs/TCG_REGIONS.md step 7).
+- Printed art: **in the game's zip**, as now (about 150 MB more).
+- PENDULUM Zones and the Extra Monster Zones: **a mock-up of the table first**, approved before building.
+- Packs: **boosters by era, by region** (SYNCHRO-era sets in KANTO / JOHTO, XYZ in SINNOH, PENDULUM / LINK in UNOVA;
+  the GEN limits decks, not packs).
+- **NPC decks: ask the user before changing any** (special handling).

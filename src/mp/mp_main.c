@@ -145,7 +145,7 @@ static bool8 sRoomLevelScaling;
 static bool8 sRoomMoveSplit = TRUE;   // Moemon Kai: MPR_RULES byte 4
 static u8 sRoomGeneration = 3;        // Moemon Kai: the room's GENERATION (MPR_RULES byte 5 + MP_SCALE_COUNT)
 static u8 sRoomGimmicks = 0;         // Moemon Kai: the room's GIMMICKS (MPR_RULES byte 6 + MP_SCALE_COUNT)
-static u8 sRoomCardGen, sRoomMtgGen;  // Moemon Kai: the room's card GENs (MPR_RULES bytes 23-24 + MP_SCALE_COUNT; 0 ALL)
+static u8 sRoomCardGen, sRoomMtgGen, sRoomYgoGen;  // Moemon Kai: the room's card GENs (MPR_RULES bytes 23-24 + MP_SCALE_COUNT; 0 ALL)
 static u8 sRoomRivalName[8];         // Moemon Kai: the host's JOHTO rival's name (MPR_RULES bytes 7-14 + MP_SCALE_COUNT)
 static u8 sRoomKantoRivalName[8];    // ... and KANTO's (bytes 15-22 + MP_SCALE_COUNT, from 1.89.0: older hosts send none)
 // Moemon Kai: the JOHTO rival's name this player gave (7 letters, EOS-padded; qz_specials.c)
@@ -629,6 +629,7 @@ static void LoadConfig(void)
         else if (strcmp(key, "exp_curve_rev") == 0) sExpCurveRev = atoi(val) >= 2;
         else if (strcmp(key, "card_gen") == 0) gMpConfig.cardGen = atoi(val) >= 0 && atoi(val) <= 255 ? atoi(val) : 0;
         else if (strcmp(key, "magic_gen") == 0) gMpConfig.mtgGen = atoi(val) >= 0 && atoi(val) <= 255 ? atoi(val) : 0;
+        else if (strcmp(key, "yugioh_gen") == 0) gMpConfig.ygoGen = atoi(val) >= 0 && atoi(val) <= 4 ? atoi(val) : 0;
         else if (strcmp(key, "battle_anims") == 0) gMpConfig.battleAnims = strcmp(val, "modern") == 0;
         else if (strcmp(key, "shadows") == 0) gMpConfig.noShadows = atoi(val) == 0;
         else if (strcmp(key, "ui_style") == 0) gMpConfig.uiStyle = MP_UiStyle_FromKey(val);
@@ -879,6 +880,8 @@ void MP_SaveConfig(void)
                 gMpConfig.phrases[i][2], gMpConfig.phrases[i][3]);
         fprintf(f, "; OPTIONS > GAME > POKEMON CARD GEN / MAGIC GEN: 0 = every set, n = the first n sets (online, the host's)\n"
                    "card_gen = %d\nmagic_gen = %d\n", gMpConfig.cardGen, gMpConfig.mtgGen);
+        fprintf(f, "; OPTIONS > GAME > YU-GI-OH! GEN: 0 = every card, 1 FUSION, 2 SYNCHRO, 3 XYZ, 4 PENDULUM (online, the host's)\n"
+                   "yugioh_gen = %d\n", gMpConfig.ygoGen);
         fprintf(f, "; ready-made phrases R2 offers for empty phrase slots (0-%d)\nquick_stock = %d %d %d %d\n",
             MP_Emote_QuickPhraseCount() - 1, gMpConfig.quickStock[0], gMpConfig.quickStock[1],
             gMpConfig.quickStock[2], gMpConfig.quickStock[3]);
@@ -1655,6 +1658,7 @@ void MP_DispatchRelay(u8 from, const u8 *data, u16 len)
                 memcpy(sRoomKantoRivalName, data + 15 + MP_SCALE_COUNT, 7);
             sRoomCardGen = len >= 25 + MP_SCALE_COUNT ? data[23 + MP_SCALE_COUNT] : 0;   // Moemon Kai: the card GENs
             sRoomMtgGen = len >= 25 + MP_SCALE_COUNT ? data[24 + MP_SCALE_COUNT] : 0;
+            sRoomYgoGen = len >= 26 + MP_SCALE_COUNT ? data[25 + MP_SCALE_COUNT] : 0;
             sRoomRulesHeard = TRUE;
             sRoomHostId = from;
             MPNet_Log("room rules from player %d: team padding %s, anim speed +%d%%, level scaling %s", from + 1,
@@ -1799,7 +1803,7 @@ static void SendWelcome(u8 id)
     if (sLobby.creator)
     {
         // the room's settings first (the host decides them for everyone)
-        u8 rules[25 + MP_SCALE_COUNT] = {MPR_RULES, OwnPadding(), OwnAnimSpeed(), OwnLevelScaling()};
+        u8 rules[26 + MP_SCALE_COUNT] = {MPR_RULES, OwnPadding(), OwnAnimSpeed(), OwnLevelScaling()};
         LevelRulesFromEnv();
         memcpy(rules + 4, gMpConfig.scale, MP_SCALE_COUNT - 1);
         rules[3 + MP_SCALE_COUNT] = OwnMoveSplit();
@@ -1811,6 +1815,7 @@ static void SendWelcome(u8 id)
         OwnKantoRivalName(rules + 15 + MP_SCALE_COUNT);
         rules[23 + MP_SCALE_COUNT] = gMpConfig.cardGen;
         rules[24 + MP_SCALE_COUNT] = gMpConfig.mtgGen;
+        rules[25 + MP_SCALE_COUNT] = gMpConfig.ygoGen;
         MP_SendRelay(id, rules, sizeof(rules));
         SendClock(id);
     }
@@ -1966,6 +1971,14 @@ u8 MP_CardGen(void)
         return sRoomCardGen;
     return gMpConfig.cardGen;
 }
+u8 MP_YgoGen(void)
+{
+    if (getenv("MOEMON_YUGIOH_GEN"))   // tests
+        return atoi(getenv("MOEMON_YUGIOH_GEN"));
+    if (!sLobby.creator && sRoomRulesHeard)
+        return sRoomYgoGen;
+    return gMpConfig.ygoGen;
+}
 u8 MP_MtgGen(void)
 {
     if (getenv("MOEMON_MAGIC_GEN"))   // tests
@@ -2052,7 +2065,7 @@ bool8 MP_LevelScaling(void)
 // The host changed a room setting (OPTIONS): everyone hears it again
 void MP_SendRoomRules(void)
 {
-    u8 rules[25 + MP_SCALE_COUNT];
+    u8 rules[26 + MP_SCALE_COUNT];
     u8 i;
     if (!sLobby.creator || sLobby.state != MP_LOBBY_IN_ROOM)
         return;
@@ -2070,6 +2083,7 @@ void MP_SendRoomRules(void)
     OwnKantoRivalName(rules + 15 + MP_SCALE_COUNT);
     rules[23 + MP_SCALE_COUNT] = gMpConfig.cardGen;
     rules[24 + MP_SCALE_COUNT] = gMpConfig.mtgGen;
+    rules[25 + MP_SCALE_COUNT] = gMpConfig.ygoGen;
     for (i = 0; i < MP_MAX_PLAYERS; i++)
         if (i != gMpLocalId && gMpPlayers[i].present)
             MP_SendRelay(i, rules, sizeof(rules));

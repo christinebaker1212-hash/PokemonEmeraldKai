@@ -12,7 +12,8 @@ struct YgoOpponent
     uint16_t main[YGO_DECK_MAX], extra[YGO_FUSION_MAX];   /* 0-terminated */
     uint32_t key;           /* the daily reward's (map + person, or the special duelist) */
     uint16_t music, signature;   /* signature: the card a first win hands over (0 none) */
-    uint8_t special, set, online, lesson;   /* set: the booster a win gives (YGO_SET_COUNT: any) */
+    uint8_t special, online, lesson;
+    uint16_t set;                          /* the booster a win gives (YGO_SET_COUNT: any) */
     uint8_t tcgSpecial;     /* the ELITE FOUR: their old Pokemon card deck (TCG_SPECIAL_*), whose promo a win hands over */
     /* how they play and what they may bring (CARD SCALING: Ygo_FitOpponent) */
     uint8_t level;          /* the AI's level: 0 a beginner .. 3 the best */

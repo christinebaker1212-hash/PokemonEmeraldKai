@@ -15,7 +15,11 @@ CAT = json.load(open(ROOT / 'tools/ygo/catalog.json'))
 RARITY = {'Common': 0, 'Short Print': 1, 'Super Short Print': 2, 'Rare': 3, 'Super Rare': 4, 'Ultra Rare': 5,
           'Secret Rare': 6}
 FRAME = {'normal': 'YGO_NORMAL', 'effect': 'YGO_EFFECT', 'fusion': 'YGO_FUSION', 'ritual': 'YGO_RITUAL',
-         'spell': 'YGO_SPELL', 'trap': 'YGO_TRAP', 'token': 'YGO_TOKEN'}
+         'spell': 'YGO_SPELL', 'trap': 'YGO_TRAP', 'token': 'YGO_TOKEN', 'synchro': 'YGO_SYNCHRO', 'xyz': 'YGO_XYZ',
+         'link': 'YGO_LINK'}
+# Link Arrows as bits (include/ygo/ygo.h YGO_LINK_*)
+MARKERS = {'Top-Left': 1, 'Top': 2, 'Top-Right': 4, 'Left': 8, 'Right': 16, 'Bottom-Left': 32, 'Bottom': 64,
+           'Bottom-Right': 128}
 ATTR = {None: 'YGO_ATTR_NONE', 'LIGHT': 'YGO_LIGHT', 'DARK': 'YGO_DARK', 'WATER': 'YGO_WATER', 'FIRE': 'YGO_FIRE',
         'EARTH': 'YGO_EARTH', 'WIND': 'YGO_WIND', 'DIVINE': 'YGO_DIVINE'}
 PROP = {'Normal': 'YGO_PROP_NORMAL', 'Continuous': 'YGO_PROP_CONTINUOUS', 'Equip': 'YGO_PROP_EQUIP',
@@ -27,9 +31,15 @@ def race(r):
     return 'YGO_' + re.sub('[^A-Z]', '_', r.upper()) if r else 'YGO_RACE_NONE'
 
 
+def setsym(code):
+    return 'YGO_SET_' + re.sub('[^A-Z0-9]', '_', code.upper())
+
+
 def text(s):
     s = s.replace('\r\n', '\n').replace('\r', '\n')
     s = re.sub(r'\s*\n\s*', ' ', s).replace('●', '\xb7').replace('α', 'Alpha').replace('#', 'No.').strip()
+    # (the newer cards' marks: stars spelled as the font can, the katakana dot as the font's bullet)
+    s = s.replace('★', '*').replace('☆', '*').replace('・', '\xb7').replace('Ω', 'Omega').replace('‘', "'")
     return s
 
 
@@ -66,44 +76,73 @@ def main():
            '#ifndef MOEMON_YGO_CARD_IDS_H', '#define MOEMON_YGO_CARD_IDS_H',
            '#define YGO_CARD_COUNT %d' % len(cards), '',
            '/* the real sets, oldest first (gYgoSets) */', 'enum YgoSetId', '{'] + \
-          ['    YGO_SET_%s,' % s['code'] for s in CAT['sets']] + ['    YGO_SET_COUNT', '};', '']
+          ['    %s,' % setsym(s['code']) for s in CAT['sets']] + ['    YGO_SET_COUNT', '};', '']
     rows = []
+    # Each set's era by summon type (the GEN switch and where its boosters are sold): FUSION, then SYNCHRO, XYZ,
+    # PENDULUM, LINK from the first set printing a card of that kind (docs/TCG_REGIONS.md step 7); a card's era is
+    # its first printing's
+    bycard = {c['id']: c for c in cards}
+    firsts = []
+    for test in (lambda c: c['frame'] == 'synchro', lambda c: c['frame'] == 'xyz', lambda c: 'scale' in c,
+                 lambda c: c['frame'] == 'link'):
+        firsts.append(min(st['date'] for st in CAT['sets'] if any(test(bycard[e[0]]) for e in st['cards'])))
+    print('  eras begin:', ', '.join(firsts))
+    def era(st):
+        return sum(1 for f in firsts if st['date'] >= f)
+    setera = {st['code']: era(st) for st in CAT['sets']}
+    rarest = {}
+    for st in CAT['sets']:
+        for e in st['cards']:
+            rarest[e[0]] = max(rarest.get(e[0], 0), RARITY[e[1]])
+    setlist, setoff = [], {}
+    setindex = {st['code']: i for i, st in enumerate(CAT['sets'])}
+    for c in cards:
+        setoff[c['id']] = len(setlist)
+        setlist += [setindex[x] for x in c['sets']]
     for c in cards:
         sym = symbol(c['name'], used)
         ids.append('#define YGO_CARD_%s %d' % (sym, c['id']))
         abil = []
         tl = c.get('typeline', '')
         for word, flag in (('Flip', 'YGO_ABILITY_FLIP'), ('Toon', 'YGO_ABILITY_TOON'), ('Spirit', 'YGO_ABILITY_SPIRIT'),
-                           ('Union', 'YGO_ABILITY_UNION'), ('Gemini', 'YGO_ABILITY_GEMINI')):
+                           ('Union', 'YGO_ABILITY_UNION'), ('Gemini', 'YGO_ABILITY_GEMINI'), ('Tuner', 'YGO_ABILITY_TUNER'),
+                           ('Pendulum', 'YGO_ABILITY_PENDULUM')):
             if word in tl:
                 abil.append(flag)
-        rar = max([RARITY[e[1]] for s in CAT['sets'] for e in s['cards'] if e[0] == c['id']] or [0])
-        bits = ' | '.join('YGO_SET_BIT(YGO_SET_%s)' % s for s in c['sets']) or '0'
+        rar = rarest.get(c['id'], 0)
+        marks = sum(MARKERS[m] for m in c.get('markers', []))
         def stat(v):
             return 'YGO_STAT_UNKNOWN' if v is None or v < 0 else str(v)
         mon = c['frame'] not in ('spell', 'trap')
-        rows.append('    [YGO_CARD_%s] = {%s, %s, %d, %d, %s, %s, %s, %s, %s, %d, %s, %s, %d, %d, %d, %s},' % (
+        rows.append('    [YGO_CARD_%s] = {%s, %s, %d, %d, %s, %s, %s, %s, %s, %d, %s, %s, %d, %d, %d, %d, %d, %d, %d, %d},' % (
             sym, cstr(text(c['name'])), cstr(text(c['text'])), c['password'], c['id'],
             stat(c.get('atk')) if mon else '0', stat(c.get('defense')) if mon else '0', FRAME[c['frame']],
             ATTR[c.get('attribute')] if mon else 'YGO_ATTR_NONE', race(c.get('race')) if mon else 'YGO_RACE_NONE',
             c.get('level') or 0, PROP[c['property']] if not mon else '0', ' | '.join(abil) or '0',
-            c['limit'], rar, c['sdd'] or 0, bits))
+            c['limit'], rar, c['sdd'] or 0, c.get('scale', 0), marks, setoff[c['id']], len(c['sets']),
+            min([setera[x] for x in c['sets']] or [0])))
     ids.append('#endif')
     (ROOT / 'include/ygo/card_ids.h').write_text('\n'.join(ids) + '\n')
     out = ['/* Generated by tools/ygo/gen_catalog.py from tools/ygo/catalog.json: do not edit. */',
            '#include "ygo/ygo.h"', '',
-           '/* name, text, password, id, atk, def, frame, attribute, race, level, property, abilities, limit, rarity,',
-           ' * Stairway card, sets */',
-           'const struct YgoCard gYgoCards[YGO_CARD_COUNT + 1] = {'] + rows + ['};', '']
+           '/* name, text, password, id, atk, def, frame, attribute, race, level (Rank, Link Rating), property,',
+           ' * abilities, limit, rarity, Stairway card, Pendulum Scale, Link Arrows, its sets (where in gYgoCardSets, how many),',
+           ' * its era (its first printing\'s) */',
+           'const struct YgoCard gYgoCards[YGO_CARD_COUNT + 1] = {'] + rows + ['};', '',
+           '/* each card\'s sets (YGO_SET_*), oldest first */',
+           'const uint16_t gYgoCardSets[] = {'] + \
+          ['    ' + ', '.join(str(v) for v in setlist[i:i + 24]) + ',' for i in range(0, len(setlist), 24)] + ['    0', '};', '']
     for s in CAT['sets']:
-        out.append('static const struct YgoSetCard sSet%s[] = {' % s['code'])
+        out.append('static const struct YgoSetCard sSet%s[] = {' % re.sub('[^A-Za-z0-9]', '_', s['code']))
         out += ['    {%d, %d, %d},' % (e[0], RARITY[e[1]], e[2]) for e in s['cards']]
         out.append('};')
     out.append('const struct YgoSet gYgoSets[YGO_SET_COUNT] = {')
     for s in CAT['sets']:
-        kind = {'booster': '0', 'starter': 'YGO_DECK_STARTER', 'structure': 'YGO_DECK_STRUCTURE'}[s['kind']]
-        out.append('    [YGO_SET_%s] = {%s, %s, %s, %d, sSet%s},' % (s['code'], cstr(s['code']), cstr(s['name']), kind,
-                                                                  len(s['cards']), s['code']))
+        kind = {'booster': '0', 'starter': 'YGO_DECK_STARTER', 'structure': 'YGO_DECK_STRUCTURE',
+                'other': 'YGO_SET_OTHER'}[s['kind']]
+        out.append('    [%s] = {%s, %s, %s, %d, sSet%s, %s, %d},' % (setsym(s['code']), cstr(s.get('shown', s['code'])), cstr(text(s['name'])), kind,
+                                                            len(s['cards']), re.sub('[^A-Za-z0-9]', '_', s['code']),
+                                                            cstr(s['date']), era(s)))
     out += ['};', '', 'const struct YgoCard *Ygo_Card(unsigned id)', '{',
             '    return id >= 1 && id <= YGO_CARD_COUNT ? &gYgoCards[id] : Ygo_EdoCard(id);', '}', '']
     (ROOT / 'src/ygo/ygo_catalog.c').write_text('\n'.join(out))

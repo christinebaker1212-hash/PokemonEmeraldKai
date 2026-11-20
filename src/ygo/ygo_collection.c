@@ -91,9 +91,9 @@ int Ygo_DeckValidate(const uint16_t *main, const uint16_t *extra, const uint16_t
             snprintf(reason, size, "%s can't be played yet.", c ? c->name : "A card");
             return 0;
         }
-        if ((i < n) == (c->frame == YGO_FUSION))
+        if ((i < n) == Ygo_IsExtra(c))
         {
-            snprintf(reason, size, "%s belongs in the %s.", c->name, c->frame == YGO_FUSION ? "Fusion Deck" : "Deck");
+            snprintf(reason, size, "%s belongs in the %s.", c->name, Ygo_IsExtra(c) ? "Extra Deck" : "Deck");
             return 0;
         }
         copies = Copies(main, extra, card);
@@ -141,7 +141,7 @@ int Ygo_DeckAdd(struct YgoCollection *c, unsigned deck, unsigned card, char *rea
         snprintf(reason, size, "You have %u %s.", c->owned[card], k->name);
         return 0;
     }
-    if (k->frame == YGO_FUSION)
+    if (Ygo_IsExtra(k))
     {
         unsigned n = Ygo_DeckCount(d->extra, YGO_FUSION_MAX);
         if (n >= YGO_FUSION_MAX)
@@ -279,7 +279,7 @@ int Ygo_ChooseStarter(struct YgoCollection *c, unsigned set)
     const struct YgoSet *s;
     struct YgoSavedDeck *d = &c->decks[0];
     unsigned i, k, n = 0, e = 0;
-    if (set >= YGO_SET_COUNT || !gYgoSets[set].starter || c->starter)
+    if (!Ygo_SetIsDeck(set) || c->starter)
         return 0;
     s = &gYgoSets[set];
     memset(d, 0, sizeof(*d));
@@ -293,9 +293,9 @@ int Ygo_ChooseStarter(struct YgoCollection *c, unsigned set)
                 c->owned[card->id]++;
             if (!Ygo_CardReady(card->id))
                 continue;
-            if (card->frame == YGO_FUSION && e < YGO_FUSION_MAX)
+            if (Ygo_IsExtra(card) && e < YGO_FUSION_MAX)
                 d->extra[e++] = card->id;
-            else if (card->frame != YGO_FUSION && n < YGO_DECK_MAX)
+            else if (!Ygo_IsExtra(card) && n < YGO_DECK_MAX)
                 d->main[n++] = card->id;
         }
     }
@@ -306,11 +306,51 @@ int Ygo_ChooseStarter(struct YgoCollection *c, unsigned set)
 }
 
 /* ---- packs */
+/* Boosters by era, by region (the user, 2026-11-20): the sets of 2002-2006 everywhere as they always were; the later
+ * FUSION era's in HOENN, SYNCHRO's in JOHTO and KANTO, XYZ's in SINNOH, PENDULUM's and LINK's in UNOVA. The game says
+ * which region the player is in (ygo_ui.c: mp_region.h's REGION_*); 0xFF (the phone, the tools): every set */
+unsigned gYgoShopRegion = 0xFF;
+const char *Ygo_GenName(unsigned gen)
+{
+    static const char *const names[YGO_GEN_STEPS + 1] = {"ALL", "FUSION", "SYNCHRO", "XYZ", "PENDULUM"};
+    return names[gen <= YGO_GEN_STEPS ? gen : 0];
+}
+int Ygo_CardInGen(unsigned card, unsigned gen)
+{
+    const struct YgoCard *c = card >= 1 && card <= YGO_CARD_COUNT ? Ygo_Card(card) : NULL;
+    return !gen || gen > YGO_GEN_STEPS || !c || c->era < gen;
+}
+int Ygo_DeckInGen(const uint16_t *main, const uint16_t *extra, unsigned gen, unsigned *outside)
+{
+    unsigned i;
+    if (outside)
+        *outside = 0;
+    for (i = 0; i < YGO_DECK_MAX + YGO_FUSION_MAX; i++)
+    {
+        unsigned id = i < YGO_DECK_MAX ? (main ? main[i] : 0) : (extra ? extra[i - YGO_DECK_MAX] : 0);
+        if (id && !Ygo_CardInGen(id, gen))
+        {
+            if (outside)
+                *outside = id;
+            return 0;
+        }
+    }
+    return 1;
+}
+int Ygo_SetSoldIn(unsigned set, unsigned region)
+{
+    static const uint8_t sEraRegion[YGO_ERAS][2] = {{0, 0}, {1, 2}, {3, 3}, {4, 4}, {4, 4}};
+    const struct YgoSet *s = set < YGO_SET_COUNT ? &gYgoSets[set] : NULL;
+    if (!s || region == 0xFF || strcmp(s->date, "2006-07-12") <= 0)
+        return 1;
+    return region == sEraRegion[s->era][0] || region == sEraRegion[s->era][1] ||
+           (region > 4 && s->era == YGO_ERA_FUSION);   /* (ORRE and anywhere else: HOENN's) */
+}
 int Ygo_SetAvailable(unsigned set)
 {
     const struct YgoSet *s;
     unsigned i, ready = 0;
-    if (set >= YGO_SET_COUNT || gYgoSets[set].starter)
+    if (set >= YGO_SET_COUNT || gYgoSets[set].starter || !Ygo_SetSoldIn(set, gYgoShopRegion))
         return 0;
     s = &gYgoSets[set];
     for (i = 0; i < s->count; i++)
@@ -424,10 +464,10 @@ unsigned Ygo_PointCost(unsigned card)
     const struct YgoCard *c = Ygo_Card(card);
     if (!c || !Ygo_CardReady(card) || c->frame == YGO_TOKEN)
         return 0;
-    if (!c->sets)
+    if (!c->setCount)
     {
         /* cards no real set had (Stairway's and World Championship 2006's own): by how strong they are */
-        if (c->frame <= YGO_RITUAL && (c->level >= 7 || (c->atk != YGO_STAT_UNKNOWN && c->atk >= 2500)))
+        if (Ygo_IsMonster(c) && (c->level >= 7 || (c->atk != YGO_STAT_UNKNOWN && c->atk >= 2500)))
             return 50;
         return c->frame == YGO_NORMAL ? 5 : 15;
     }
@@ -729,7 +769,7 @@ int Ygo_CollectionLoad(struct YgoCollection *c, const char *path)
         c->skill = (int16_t)(skill > YGO_SKILL_MAX ? YGO_SKILL_MAX : skill < -YGO_SKILL_MAX ? -YGO_SKILL_MAX : skill);
         c->rated = (uint16_t)Get(&p, 2);
     }
-    if (c->starter > YGO_SET_COUNT)
+    if (c->starter && !Ygo_SetIsDeck(c->starter - 1u))
         c->starter = 0;
     /* sanity: ids in range */
     for (i = 0; i < YGO_SAVED_DECKS; i++)
@@ -801,11 +841,11 @@ static void Place(const uint32_t *codes, unsigned n, uint16_t *mainOut, uint16_t
             (*notHere)++;
             continue;
         }
-        if (c->frame == YGO_FUSION || extraPart)
+        if (Ygo_IsExtra(c) || extraPart)
         {
-            if (c->frame == YGO_FUSION && *extras < YGO_FUSION_MAX)
+            if (Ygo_IsExtra(c) && *extras < YGO_FUSION_MAX)
                 extraOut[(*extras)++] = (uint16_t)id;
-            else if (c->frame != YGO_FUSION && *mains < YGO_DECK_MAX)
+            else if (!Ygo_IsExtra(c) && *mains < YGO_DECK_MAX)
                 mainOut[(*mains)++] = (uint16_t)id;
         }
         else if (*mains < YGO_DECK_MAX)

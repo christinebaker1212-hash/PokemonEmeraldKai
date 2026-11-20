@@ -95,6 +95,148 @@ static const struct YgoFusion sFusions[] = {
     {2251, {1992, 1921}}, /* Elemental HERO Mudballman */
     {2268, {1125, 1396}}, /* Dragon Master Knight */
     {2290, {1920, 1992}}, /* Elemental HERO Steam Healer */
+    {2341, {2304, 2313}}, /* Elemental HERO Aqua Neos */
+    {2342, {2304, 2314}}, /* Elemental HERO Flare Neos */
+    {2343, {2304, 2315}}, /* Elemental HERO Dark Neos */
+    {2344, {1993}}, /* Chimeratech Overdragon */
+    {2345, {2321, 2319}}, /* Ambulance Rescueroid */
+    {2346, {1986, 1987, 2318}}, /* Super Vehicroid Jumbo Drill */
+    {2414, {2380, 2381, 2382}}, /* Cyberdark Dragon */
+    {2415, {2383, 2383}}, /* Cyber Ogre 2 */
+    {2461, {1919, 1920}}, /* Elemental HERO Phoenix Enforcer */
+    {2462, {2461, 1922}}, /* Elemental HERO Shining Phoenix Enforcer */
+    {2476, {2052, 1919}}, /* Elemental HERO Wild Wingman */
+    {2520, {2304, 2491}}, /* Elemental HERO Grand Neos */
+    {2521, {2304, 2492}}, /* Elemental HERO Glow Neos */
+    {2677, {2313, 2686}}, /* Neo-Spacian Marine Dolphin */
+    {2678, {2304, 2677}}, /* Elemental HERO Marine Neos */
+    {2679, {1922, 2302}}, /* Elemental HERO Darkbright */
+    {2680, {2304, 2314, 2491}}, /* Elemental HERO Magma Neos */
+    {2764, {1992, 1919}}, /* Elemental HERO Mariner */
+    {2765, {2052, 2302}}, /* Elemental HERO Necroid Shaman */
+    {2811, {2304, 2315, 2492}}, /* Elemental HERO Chaos Neos */
+    {2812, {1922, 2051}}, /* Elemental HERO Plasma Vice */
+    {2813, {1919, 1920}}, /* Evil HERO Inferno Wing */
+    {2814, {1922, 1921}}, /* Evil HERO Lightning Golem */
+    {2816, {2790, 2635, 1987, 2791}}, /* Super Vehicroid - Stealth Union */
+    {2878, {1919, 2052}}, /* Evil HERO Wild Cyclone */
+    {2879, {1921, 1920}}, /* Evil HERO Infernal Sniper */
+    {2880, {2779}}, /* Evil HERO Malicious Fiend */
+    {2934, {2492, 2686}}, /* Neo-Spacian Twinkle Moss */
+    {2935, {2304, 2490, 2313}}, /* Elemental HERO Storm Neos */
+    {3035, {2728, 2324}}, /* Destiny End Dragoon */
+    {3036, {1924, 2116}}, /* Ultimate Ancient Gear Golem */
+    {3092, {2632, 3087}}, /* Elemental HERO Terra Firma */
+    {3093, {3090, 3091}}, /* Elemental HERO Inferno */
+    {3161, {3131, 3130}}, /* Multiple Piece Golem */
+    {3333, {1993}}, /* Chimeratech Fortress Dragon */
+    {3649, {2109, 2110, 2111}}, /* Armityle the Chaos Phantasm */
+    {4311, {3117}}, /* Gaia Drake, the Universal Force */
+    {4434, {4070, 4234}}, /* Naturia Exterio */
+    {4642, {2304}}, /* Elemental HERO Neos Knight */
+    {4805, {4807}}, /* Masked HERO Vapor */
+    {5056, {2929, 3536}}, /* Koalo-Koala */
+    {5112, {4807}}, /* Masked HERO Acid */
+    {6177, {6}}, /* Amulet Dragon */
+    {6178, {847}}, /* Dark Magician Girl the Dragon Knight */
+    {6516, {6484, 6486}}, /* Frightfur Bear */
+    {6618, {6361}}, /* Rune-Eyes Pendulum Dragon */
+    {6679, {4807}}, /* Masked HERO Divine Wind */
+    {6680, {4807}}, /* Masked HERO Dark Law */
+    {6896, {6175, 6897, 6903}}, /* Timaeus the Knight of Destiny */
+    {6898, {6901, 1227}}, /* Doom Virus Dragon */
+    {6899, {6901, 6902}}, /* Tyrant Burst Dragon */
+    {6900, {6901, 313}}, /* Mirror Force Dragon */
+    {6904, {6908}}, /* Time Magic Hammer */
+    {6905, {6908}}, /* Rocket Hermos Cannon */
+    {6906, {6908}}, /* Goddess Bow */
+    {6907, {6908}}, /* Red-Eyes Black Dragon Sword */
+    {7249, {473}}, /* Buster Blader, the Dragon Destroyer Swordsman */
+    {7297, {1993}}, /* Chimeratech Rampage Dragon */
+    {7373, {7}}, /* Sky Galloping Gaia the Dragon Champion */
+    {7480, {2, 2}}, /* Blue-Eyes Twin Burst Dragon */
+    {7500, {2, 2, 2}}, /* Neo Blue-Eyes Ultimate Dragon */
+    {7539, {7538}}, /* Crimson Nova Trinity the Dark Cubic Lord */
+    {7716, {4807}}, /* Masked HERO Blast */
+    {7724, {7725, 899}}, /* A-to-Z-Dragon Buster Cannon */
+    {7725, {7717, 7718, 7719}}, /* ABC-Dragon Buster */
+    {7734, {1223, 7729}}, /* Imperion Magnum the Superconductive Battlebot */
+    {7924, {2116}}, /* Chaos Ancient Gear Giant */
+    {7925, {2116}}, /* Ancient Gear Howitzer */
+    {7997, {7996}}, /* Invoked Caliga */
+    {7998, {7996}}, /* Invoked Raidjin */
+    {7999, {7996}}, /* Invoked Cocytus */
+    {8000, {7996}}, /* Invoked Purgatrio */
+    {8001, {7996}}, /* Invoked Magellanica */
+    {8002, {7996}}, /* Invoked Mechaba */
+    {8357, {6}}, /* Dark Magician the Dragon Knight */
+    {8358, {1993}}, /* Chimeratech Megafleet Dragon */
+    {8617, {348}}, /* Millennium-Eyes Restrict */
+    {8627, {2075, 1749}}, /* Armed Dragon Catapult Cannon */
+    {8632, {2116}}, /* Ancient Gear Megaton Golem */
+    {8642, {6901, 739}}, /* Destruction Dragon */
+    {8825, {8824}}, /* Shura the Combat Star */
+    {8975, {2304, 2491, 2315}}, /* Elemental HERO Nebula Neos */
+    {8991, {1993}}, /* Cyber Eternity Dragon */
+    {9050, {9017}}, /* Cyberse Clock Dragon */
+    {9052, {272}}, /* Thunder Dragon Titan */
+    {9053, {272}}, /* Thunder Dragon Colossus */
+    {9142, {9138, 9139, 9137}}, /* Prank-Kids Battle Butler */
+    {9228, {2304}}, /* Elemental HERO Brave Neos */
+    {9347, {6}}, /* Dark Cavalry */
+    {9685, {129}}, /* Archfiend's Manifestation */
+    {9700, {2, 2, 2}}, /* Blue-Eyes Alternative Ultimate Dragon */
+    {9878, {6, 847}}, /* The Dark Magicians */
+    {10148, {7996}}, /* Invoked Augoeides */
+    {10328, {7}}, /* Gaia the Magical Knight of Dragons */
+    {10329, {10304}}, /* Titaniklad the Ash Dragon */
+    {10394, {6, 71}}, /* Red-Eyes Dark Dragoon */
+    {10399, {242}}, /* Time Wizard of Tomorrow */
+    {10457, {10304}}, /* Brigrand the Glory Dragon */
+    {10461, {2109, 2110, 2111}}, /* Armityle the Chaos Phantasm - Phantom of Fury */
+    {10604, {10304}}, /* Sprind the Irondash Dragon */
+    {10794, {10304}}, /* Albion the Branded Dragon */
+    {11006, {2414, 2014}}, /* Cyberdark End Dragon */
+    {11269, {2}}, /* Blue-Eyes Tyrant Dragon */
+    {11344, {10304}}, /* Mirrorjade the Iceblade Dragon */
+    {11345, {10304}}, /* Lubellion the Searing Dragon */
+    {11348, {2304, 2898}}, /* Elemental HERO Neos Kluger */
+    {11426, {10304}}, /* Alba-Lenatus the Abyss Dragon */
+    {11559, {11531}}, /* Tearlaments Kaleido-Heart */
+    {11838, {4852}}, /* Grapha, Dragon Overlord of Dark World */
+    {11910, {11681}}, /* Granguignol the Dusk Dragon */
+    {11911, {10304}}, /* Rindbrumm the Striking Dragon */
+    {11986, {206, 207, 208}}, /* Gate Guardians Combined */
+    {11987, {206, 207}}, /* Gate Guardian of Thunder and Wind */
+    {11988, {207, 208}}, /* Gate Guardian of Wind and Water */
+    {11989, {208, 206}}, /* Gate Guardian of Water and Thunder */
+    {12049, {10304}}, /* Albion the Sanctifire Dragon */
+    {12050, {11399}}, /* Vicious Astraloud */
+    {12145, {6}}, /* Dark Magician the Knight of Dragon Magic */
+    {12230, {1478}}, /* Chimera the Illusion Beast */
+    {12280, {5752, 6347}}, /* Storagepod */
+    {12360, {12238}}, /* Gaia Prominence, the Fierce Force */
+    {12471, {4, 12472}}, /* Ultimate Flame Swordsman */
+    {12480, {12479}}, /* Horned Saurus */
+    {12481, {2502}}, /* Clorless, Chaos King of Dark World */
+    {12544, {2898}}, /* Yubel - The Loving Defender Forever */
+    {12643, {3019, 8254}}, /* Enlightenment Dragon */
+    {12697, {12596}}, /* Veidos the Dragon of Endless Darkness */
+    {12753, {2898}}, /* Phantom of Yubel */
+    {12790, {12771}}, /* Fiendsmith's Desirae */
+    {13018, {2304}}, /* Evil HERO Neos Lord */
+    {13100, {2220}}, /* Divine Serpent Apophis */
+    {13110, {13109, 13235, 13236}}, /* XYZ-Hyper Dragon Cannon */
+    {13111, {13235, 13236}}, /* Union Controller */
+    {13170, {12996}}, /* Azamina */
+    {13171, {10090}}, /* Fallen Angel of the Golden Land */
+    {13319, {10304}}, /* Alba System Dogmatikalamity */
+    {13583, {7996}}, /* Invoked Magistus Omega */
+    {13596, {6}}, /* Dark Magician of Destruction */
+    {13597, {6, 847}}, /* Timaeus the United Magical Dragon */
+    {13746, {13576}}, /* Evolved Daneen */
+    {13956, {71, 13972}}, /* Red-Eyes Black Dragon Exceed */
+    {14058, {9325}}, /* Witchcrafter Madame Rilliona */
 };
 
 const struct YgoFusion *Ygo_FusionOf(unsigned card)

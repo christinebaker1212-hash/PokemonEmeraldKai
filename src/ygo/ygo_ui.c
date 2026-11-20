@@ -11,6 +11,7 @@
 #include <math.h>   // (floorf, lroundf: the booster carousel; MinGW needs it said)
 #include "global.h"
 #include "mp.h"
+#include "mp_region.h"
 #include "money.h"
 #include "script.h"
 #include "sound.h"
@@ -113,7 +114,7 @@ enum
 #define GC_STARTER_PRICE 10000     /* the GAME CENTER clerk's Starter Decks */
 #define GC_STRUCTURE_PRICE 12000   /* and Structure Decks, a bit more */
 #define FILTERS 7
-static const char *const sFilterNames[FILTERS] = {"ALL", "NORMAL", "EFFECT", "FUSION", "RITUAL", "SPELL", "TRAP"};
+static const char *const sFilterNames[FILTERS] = {"ALL", "NORMAL", "EFFECT", "EXTRA", "RITUAL", "SPELL", "TRAP"};
 #define YGO_THEME 0x6848b8   /* the case's YU-GI-OH! side: a deep violet */
 #define YGO_STARTERS 4
 static const uint8_t sStarters[YGO_STARTERS] = {YGO_SET_SDY, YGO_SET_SDK, YGO_SET_SDJ, YGO_SET_SDP};
@@ -474,6 +475,8 @@ static int Filter(unsigned id, int filter)
     static const uint8_t frames[FILTERS] = {0, YGO_NORMAL, YGO_EFFECT, YGO_FUSION, YGO_RITUAL, YGO_SPELL, YGO_TRAP};
     if (!c || c->frame == YGO_TOKEN)
         return 0;
+    if (frames[filter] == YGO_FUSION)   /* (EXTRA: every Extra Deck monster, Fusion to Link) */
+        return Ygo_IsExtra(c);
     return !filter || c->frame == frames[filter];
 }
 /* The cards a list shows: the binder (owned, or every card there is to get), the builder (owned and working) */
@@ -490,17 +493,19 @@ static int Listed(unsigned id)
         return Ygo_MoneyPrice(id) != 0;
     return Y.showAll ? Ygo_CardReady(id) || C()->owned[id] : C()->owned[id] > 0;
 }
-/* SEARCH & SORT: what the binder and the builder can filter and sort by (src/tcg/tcg_search.c). The catalog stops at
-   2003: Levels only (no Ranks or Link ratings to offer). */
+/* SEARCH & SORT: what the binder and the builder can filter and sort by (src/tcg/tcg_search.c). LEVEL is the number
+   printed: a Level, a Rank or a Link Rating. */
 enum { YK_CARD = SEARCH_KEY_GAME, YK_RACE, YK_ATTR, YK_LEVEL, YK_ATK, YK_DEF, YK_LIMIT };
 static const char *const sSearchCards[] = {"MONSTER", "SPELL", "TRAP"};
 static const char *const sSearchRaces[] = {"AQUA", "BEAST", "BEAST-WARRIOR", "DINOSAUR", "DRAGON", "FAIRY", "FIEND", "FISH",
                                            "INSECT", "MACHINE", "PLANT", "PYRO", "REPTILE", "ROCK", "SEA SERPENT",
-                                           "SPELLCASTER", "THUNDER", "WARRIOR", "WINGED BEAST", "ZOMBIE"};
+                                           "SPELLCASTER", "THUNDER", "WARRIOR", "WINGED BEAST", "ZOMBIE", "PSYCHIC",
+                                           "DIVINE-BEAST", "CREATOR GOD", "WYRM", "CYBERSE", "ILLUSION"};
 static const int16_t sSearchRaceValues[] = {YGO_AQUA, YGO_BEAST, YGO_BEAST_WARRIOR, YGO_DINOSAUR, YGO_DRAGON, YGO_FAIRY,
                                             YGO_FIEND, YGO_FISH, YGO_INSECT, YGO_MACHINE, YGO_PLANT, YGO_PYRO, YGO_REPTILE,
                                             YGO_ROCK, YGO_SEA_SERPENT, YGO_SPELLCASTER, YGO_THUNDER, YGO_WARRIOR,
-                                            YGO_WINGED_BEAST, YGO_ZOMBIE};
+                                            YGO_WINGED_BEAST, YGO_ZOMBIE, YGO_PSYCHIC, YGO_DIVINE_BEAST, YGO_CREATOR_GOD,
+                                            YGO_WYRM, YGO_CYBERSE, YGO_ILLUSION};
 static const char *const sSearchAttrs[] = {"LIGHT", "DARK", "WATER", "FIRE", "EARTH", "WIND", "DIVINE"};
 static const int16_t sSearchAttrValues[] = {YGO_LIGHT, YGO_DARK, YGO_WATER, YGO_FIRE, YGO_EARTH, YGO_WIND, YGO_DIVINE};
 static const char *const sSearchLevels[] = {"1", "2", "3", "4", "5", "6", "7", "8", "9", "10", "11", "12"};
@@ -508,7 +513,7 @@ static const int16_t sSearchLevelValues[] = {1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 
 static const char *const sSearchLimits[] = {"FORBIDDEN", "LIMITED", "SEMI-LIMITED", "UNLIMITED"};
 static const struct SearchFilter sSearchFilters[] = {
     {"CARD", SF_CHOICE, YK_CARD, 3, sSearchCards, NULL, 0, 0, NULL},
-    {"MONSTER TYPE", SF_CHOICE, YK_RACE, 20, sSearchRaces, sSearchRaceValues, 0, 0, NULL},
+    {"MONSTER TYPE", SF_CHOICE, YK_RACE, 26, sSearchRaces, sSearchRaceValues, 0, 0, NULL},
     {"ATTRIBUTE", SF_CHOICE, YK_ATTR, 7, sSearchAttrs, sSearchAttrValues, 0, 0, NULL},
     {"LEVEL", SF_CHOICE, YK_LEVEL, 12, sSearchLevels, sSearchLevelValues, 0, 0, NULL},
     {"MIN ATK", SF_MIN, YK_ATK, 9, NULL, NULL, 0, 500, NULL},
@@ -667,14 +672,14 @@ static unsigned GcDeckCount(void)
 {
     unsigned i, n = 0;
     for (i = 0; i < YGO_SET_COUNT; i++)
-        n += gYgoSets[i].starter != 0;
+        n += Ygo_SetIsClassicDeck(i);
     return n;
 }
 static unsigned GcDeckSet(unsigned k)
 {
     unsigned i;
     for (i = 0; i < YGO_SET_COUNT; i++)
-        if (gYgoSets[i].starter && !k--)
+        if (Ygo_SetIsClassicDeck(i) && !k--)
             return i;
     return YGO_SET_SDY;
 }
@@ -809,9 +814,9 @@ static void StarterDeckOf(unsigned set, uint16_t *main, uint16_t *extra)
             const struct YgoCard *c = Ygo_Card(s->cards[i].card);
             if (!Ygo_CardReady(c->id))
                 continue;
-            if (c->frame == YGO_FUSION && e < YGO_FUSION_MAX)
+            if (Ygo_IsExtra(c) && e < YGO_FUSION_MAX)
                 extra[e++] = c->id;
-            else if (c->frame != YGO_FUSION && n < YGO_DECK_MAX)
+            else if (!Ygo_IsExtra(c) && n < YGO_DECK_MAX)
                 main[n++] = c->id;
         }
 }
@@ -826,7 +831,9 @@ static void Rewards(void)
     struct YgoCollection *c = C();
     char line[320] = "";
     int n = 0;
-    unsigned set = Y.opp.set < YGO_SET_COUNT && Ygo_SetAvailable(Y.opp.set) ? Y.opp.set : Ygo_RandomSet(&c->rng);
+    unsigned set;
+    gYgoShopRegion = MP_Region_Current();   /* (a win's booster: one sold here) */
+    set = Y.opp.set < YGO_SET_COUNT && Ygo_SetAvailable(Y.opp.set) ? Y.opp.set : Ygo_RandomSet(&c->rng);
     c->wins++;
     MP_Achieve_Count("ygowin", 1);
     if (Y.duel.s.players[0].lp == YGO_LP)
@@ -1920,7 +1927,8 @@ static void InspectScreen(void)
     }
     if (Ygo_IsMonster(card) || card->frame == YGO_TOKEN)   /* a TOKEN shows as the monster it is */
     {
-        static const char *const kinds[] = {"Normal", "Effect", "Fusion", "Ritual", "Spell", "Trap", "Token"};
+        static const char *const kinds[] = {"Normal", "Effect", "Fusion", "Ritual", "Spell", "Trap", "Token",
+                                            "Synchro", "Xyz", "Link"};
         int n = snprintf(line, sizeof(line), "%s  %s / ", Ygo_AttributeName(card->attribute), Ygo_RaceName(card->race));
         if (card->abilities & YGO_ABILITY_FLIP)
             n += snprintf(line + n, sizeof(line) - n, "Flip / ");
@@ -1928,10 +1936,25 @@ static void InspectScreen(void)
             n += snprintf(line + n, sizeof(line) - n, "Toon / ");
         if (card->abilities & YGO_ABILITY_SPIRIT)
             n += snprintf(line + n, sizeof(line) - n, "Spirit / ");
-        snprintf(line + n, sizeof(line) - n, "%s", kinds[card->frame]);
+        if (card->abilities & YGO_ABILITY_TUNER)
+            n += snprintf(line + n, sizeof(line) - n, "Tuner / ");
+        if (card->abilities & YGO_ABILITY_PENDULUM)
+            n += snprintf(line + n, sizeof(line) - n, "Pendulum / ");
+        snprintf(line + n, sizeof(line) - n, "%s", card->frame < sizeof(kinds) / sizeof(kinds[0]) ? kinds[card->frame] : "");
         y = G_Text(94, y, 0x586878, G_NO_SHADOW, line, 136, TF_NARROW);
-        for (i = 0; i < card->level && i < 12; i++)
-            G_FillA(94 + i * 7, y + 2, 5, 5, 0xe85818, 255);
+        if (card->frame == YGO_LINK)
+        {
+            snprintf(line, sizeof(line), "LINK-%u", card->level);
+            G_Text(94, y, 0x2858b0, G_NO_SHADOW, line, 136, TF_NARROW);
+        }
+        else   /* (its stars: a Level's orange, a Rank's black) */
+            for (i = 0; i < card->level && i < 13; i++)
+                G_FillA(94 + i * 7, y + 2, 5, 5, card->frame == YGO_XYZ ? 0x202028 : 0xe85818, 255);
+        if (card->abilities & YGO_ABILITY_PENDULUM)
+        {
+            snprintf(line, sizeof(line), "SCALE %u", card->scale);
+            G_TextAlign(230, y, TA_RIGHT, 0x30a070, G_NO_SHADOW, line, TF_NARROW);
+        }
         y += 9;
     }
     else
@@ -1963,7 +1986,10 @@ static void InspectScreen(void)
             snprintf(def, sizeof(def), "?");
         else
             snprintf(def, sizeof(def), "%u", card->def);
-        snprintf(line, sizeof(line), "ATK/%s  DEF/%s", atk, def);
+        if (card->frame == YGO_LINK)
+            snprintf(line, sizeof(line), "ATK/%s  LINK-%u", atk, card->level);
+        else
+            snprintf(line, sizeof(line), "ATK/%s  DEF/%s", atk, def);
         G_TextAlign(230, y + 1, TA_RIGHT, G_INK, G_INK_SHADOW, line, TF_SMALL);
         y += 13;
     }
@@ -1980,11 +2006,12 @@ static void InspectScreen(void)
         y = G_Text(94, y, 0xc07020, G_NO_SHADOW, "(This card can't be played yet.)", 136, TF_NARROW);
     }
     {
-        int n = snprintf(line, sizeof(line), "%s", card->sets ? "" : "Not in a booster");
+        int n = snprintf(line, sizeof(line), "%s", card->setCount ? "" : "Not in a booster");
         unsigned s;
-        for (s = 0; s < YGO_SET_COUNT; s++)
-            if (card->sets >> s & 1)
-                n += snprintf(line + n, sizeof(line) - n, "%s%s", n ? " " : "", gYgoSets[s].code);
+        for (s = 0; s < card->setCount && s < 6; s++)   /* (the first six; a card reprinted often has dozens) */
+            n += snprintf(line + n, sizeof(line) - n, "%s%s", n ? " " : "", gYgoSets[gYgoCardSets[card->setFirst + s]].code);
+        if (card->setCount > 6 && n < (int)sizeof(line))
+            n += snprintf(line + n, sizeof(line) - n, " and %u more", card->setCount - 6);
         if (card->rarity >= YGO_RARE)
             snprintf(line + n, sizeof(line) - n, "  %s", RarityLabel(card->rarity));
         y = G_Text(94, y, 0x707878, G_NO_SHADOW, line, 136, TF_NARROW);
@@ -2061,17 +2088,18 @@ static void PackArt(int x, int y, unsigned set, int focus)
     }
 }
 /* The boosters held, and every set that can be had, in release order */
-static unsigned PackSets(uint8_t *out)
+static unsigned PackSets(uint16_t *out)
 {
     unsigned i, n = 0;
+    gYgoShopRegion = MP_Region_Current();   /* (boosters by era, by region) */
     for (i = 0; i < YGO_SET_COUNT; i++)
         if (!gYgoSets[i].starter && (C()->packs[i] || Ygo_SetAvailable(i)))
-            out[n++] = (uint8_t)i;
+            out[n++] = (uint16_t)i;
     return n;
 }
 static void PacksScreen(void)
 {
-    uint8_t sets[YGO_SET_COUNT];
+    uint16_t sets[YGO_SET_COUNT];
     unsigned n = PackSets(sets);
     char line[128];
     TcgUi_Background();
@@ -2235,12 +2263,13 @@ static unsigned SpareList(uint16_t *out)
             out[n++] = (uint16_t)id;
     return n;
 }
-static unsigned ShopRows(uint8_t *sets)
+static unsigned ShopRows(uint16_t *sets)
 {
     unsigned i, n = 0;
+    gYgoShopRegion = MP_Region_Current();   /* (boosters by era, by region) */
     for (i = 0; i < YGO_SET_COUNT; i++)
         if (Ygo_SetAvailable(i))
-            sets[n++] = (uint8_t)i;
+            sets[n++] = (uint16_t)i;
     return n;   /* + 1: A CARD YOU PICK */
 }
 static void CounterScreen(void)
@@ -2312,7 +2341,7 @@ static void CounterScreen(void)
     }
     else
     {
-        uint8_t sets[YGO_SET_COUNT];
+        uint16_t sets[YGO_SET_COUNT];
         unsigned n = ShopRows(sets), k;
         int top = Y.cursor < 3 ? 0 : Y.cursor - 3;
         for (k = 0; k < 6 && top + (int)k <= (int)n; k++)
@@ -2587,6 +2616,16 @@ static void FilterTab(unsigned pressed)
     if (pressed & KEY_R)
         Y.filter = (Y.filter + 1) % FILTERS, Y.cursor = 0, PlaySE(SE_SELECT);
 }
+/* The YU-GI-OH! GEN (the host's online): a deck with a card from a later summon type's era can't be played here */
+static int GenOk(unsigned d)
+{
+    unsigned outside;
+    if (Ygo_DeckInGen(Deck(d)->main, Deck(d)->extra, MP_YgoGen(), &outside))
+        return 1;
+    Say(ACT_NONE, "This deck holds %s, past the YU-GI-OH! GEN: %s. Swap it out to play here.", Ygo_Card(outside)->name,
+        Ygo_GenName(MP_YgoGen()));
+    return 0;
+}
 static void Practice(void)
 {
     struct YgoCollection *c = C();
@@ -2596,6 +2635,8 @@ static void Practice(void)
         Say(ACT_NONE, "%s", reason);
         return;
     }
+    if (!GenOk(c->activeDeck))
+        return;
     memset(&Y.opp, 0, sizeof(Y.opp));
     snprintf(Y.opp.name, sizeof(Y.opp.name), "PRACTICE DECK");
     /* a Starter Deck that isn't yours */
@@ -2640,6 +2681,8 @@ static void ChooseDeck(void)
         Say(ACT_NONE, "%s", reason);
         return;
     }
+    if (!GenOk((unsigned)Y.cursor))
+        return;
     c->activeDeck = (uint8_t)Y.cursor;
     if (Y.vs == VS_FRIEND)
     {
@@ -3027,7 +3070,7 @@ int YgoUi_Step(unsigned keys)
             case 2:
                 Screen(Y_PACKS);
                 {
-                    uint8_t sets[YGO_SET_COUNT];
+                    uint16_t sets[YGO_SET_COUNT];
                     unsigned n = PackSets(sets), i;
                     for (i = 0; i < n; i++)
                         if (c->packs[sets[i]])
@@ -3468,7 +3511,7 @@ int YgoUi_Step(unsigned keys)
         break;
     case Y_PACKS:
     {
-        uint8_t sets[YGO_SET_COUNT];
+        uint16_t sets[YGO_SET_COUNT];
         unsigned n = PackSets(sets);
         MoveCursor(pressed, (int)n, 0);
         if (pressed & KEY_B)
@@ -3516,7 +3559,7 @@ int YgoUi_Step(unsigned keys)
             PlaySE(SE_SELECT);
             Screen(Y_PACKS);
             {
-                uint8_t sets[YGO_SET_COUNT];
+                uint16_t sets[YGO_SET_COUNT];
                 unsigned n = PackSets(sets), i;
                 for (i = 0; i < n; i++)
                     if (sets[i] == Y.pack)
@@ -3609,7 +3652,7 @@ int YgoUi_Step(unsigned keys)
         }
         else
         {
-            uint8_t sets[YGO_SET_COUNT];
+            uint16_t sets[YGO_SET_COUNT];
             unsigned n = ShopRows(sets);
             MoveCursor(pressed, (int)n + 1, 1);
             if (pressed & KEY_A)
@@ -3814,6 +3857,13 @@ void Ygo_Debug(const char *command)
         /* the next duels' Decks unshuffled: the last cards of the list are drawn first (tests) */
         extern int gYgoEdoNoShuffle;
         gYgoEdoNoShuffle = 1;
+        return;
+    }
+    if (!strcmp(command, "mock"))   /* the table with the newer summon types' zones (ygo_board.c MockOver) */
+    {
+        void YgoBoard_Mock(int on);
+        YgoBoard_Mock(1);
+        printf("[test] ygo mock on\n");
         return;
     }
     if (!strcmp(command, "practice"))

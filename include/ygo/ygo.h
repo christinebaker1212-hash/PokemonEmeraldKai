@@ -22,14 +22,18 @@ enum YgoFrame
     YGO_RITUAL,
     YGO_SPELL,
     YGO_TRAP,
-    YGO_TOKEN
+    YGO_TOKEN,
+    YGO_SYNCHRO,  /* the newer Extra Deck monsters (the cards to today: the user, 2026-11-20) */
+    YGO_XYZ,      /* (level: its Rank) */
+    YGO_LINK      /* (level: its Link Rating; def 0; markers: its Link Arrows) */
 };
 enum YgoAttribute { YGO_ATTR_NONE, YGO_LIGHT, YGO_DARK, YGO_WATER, YGO_FIRE, YGO_EARTH, YGO_WIND, YGO_DIVINE };
 enum YgoRace
 {
     YGO_RACE_NONE, YGO_AQUA, YGO_BEAST, YGO_BEAST_WARRIOR, YGO_DINOSAUR, YGO_DRAGON, YGO_FAIRY, YGO_FIEND, YGO_FISH,
     YGO_INSECT, YGO_MACHINE, YGO_PLANT, YGO_PYRO, YGO_REPTILE, YGO_ROCK, YGO_SEA_SERPENT, YGO_SPELLCASTER,
-    YGO_THUNDER, YGO_WARRIOR, YGO_WINGED_BEAST, YGO_ZOMBIE, YGO_RACE_COUNT
+    YGO_THUNDER, YGO_WARRIOR, YGO_WINGED_BEAST, YGO_ZOMBIE,
+    YGO_PSYCHIC, YGO_DIVINE_BEAST, YGO_CREATOR_GOD, YGO_WYRM, YGO_CYBERSE, YGO_ILLUSION, YGO_RACE_COUNT
 };
 /* Spell / Trap property */
 enum YgoProperty
@@ -44,7 +48,15 @@ enum
     YGO_ABILITY_TOON = 2,
     YGO_ABILITY_SPIRIT = 4,
     YGO_ABILITY_UNION = 8,
-    YGO_ABILITY_GEMINI = 16
+    YGO_ABILITY_GEMINI = 16,
+    YGO_ABILITY_TUNER = 32,
+    YGO_ABILITY_PENDULUM = 64   /* a Pendulum Monster (scale: its Pendulum Scale) */
+};
+/* Link Arrows (YgoCard.markers) */
+enum
+{
+    YGO_LINK_TOP_LEFT = 1, YGO_LINK_TOP = 2, YGO_LINK_TOP_RIGHT = 4, YGO_LINK_LEFT = 8, YGO_LINK_RIGHT = 16,
+    YGO_LINK_BOTTOM_LEFT = 32, YGO_LINK_BOTTOM = 64, YGO_LINK_BOTTOM_RIGHT = 128
 };
 enum YgoRarity
 {
@@ -59,9 +71,21 @@ struct YgoCard
     uint8_t limit;               /* Stairway's list: 0 Forbidden, 1 Limited, 2 Semi-Limited, 3 */
     uint8_t rarity;              /* its rarest printing (the binder's foil) */
     uint16_t sdd;                /* its card in Stairway (1-1086), 0 none: the GBA picture */
-    uint64_t sets;               /* bit per YGO_SET_* (include/ygo/card_ids.h) that printed it: YGO_SET_BIT */
+    uint8_t scale;               /* a Pendulum Monster's Scale */
+    uint8_t markers;             /* a Link Monster's Link Arrows (YGO_LINK_*) */
+    uint32_t setFirst;           /* its sets (YGO_SET_*, oldest first): gYgoCardSets[setFirst..+setCount] */
+    uint16_t setCount;
+    uint8_t era;                 /* YGO_ERA_* of its first printing (the YU-GI-OH! GEN switch) */
 };
-#define YGO_SET_BIT(set) ((uint64_t)1 << (set))
+extern const uint16_t gYgoCardSets[];
+static inline int Ygo_CardInSet(const struct YgoCard *c, unsigned set)
+{
+    unsigned i;
+    for (i = 0; c && i < c->setCount; i++)
+        if (gYgoCardSets[c->setFirst + i] == set)
+            return 1;
+    return 0;
+}
 struct YgoSetCard
 {
     uint16_t card;
@@ -73,18 +97,47 @@ struct YgoSet
     uint8_t starter;             /* a deck (its list is the deck): YGO_DECK_STARTER or YGO_DECK_STRUCTURE; 0 a booster */
     uint16_t count;
     const struct YgoSetCard *cards;
+    const char *date;            /* its English release (YYYY-MM-DD) */
+    uint8_t era;                 /* YGO_ERA_*: the summon types out by its release */
 };
+/* The eras by summon type (the YU-GI-OH! GEN switch: a step's sets are those before the next type's first) */
+enum { YGO_ERA_FUSION, YGO_ERA_SYNCHRO, YGO_ERA_XYZ, YGO_ERA_PENDULUM, YGO_ERA_LINK, YGO_ERAS };
 enum
 {
     YGO_DECK_STARTER = 1,
-    YGO_DECK_STRUCTURE
+    YGO_DECK_STRUCTURE,
+    YGO_SET_OTHER                /* tins, promos, reprint and collector's sets: never sold as a pack (their cards as singles) */
 };
 extern const struct YgoCard gYgoCards[YGO_CARD_COUNT + 1];
 extern const struct YgoSet gYgoSets[YGO_SET_COUNT];
+/* a Starter or Structure Deck (its list is the deck) */
+static inline int Ygo_SetIsDeck(unsigned set)
+{
+    return set < YGO_SET_COUNT && (gYgoSets[set].starter == YGO_DECK_STARTER || gYgoSets[set].starter == YGO_DECK_STRUCTURE);
+}
+/* the decks of 2002-2006 (their lists card for card, with copies: tools/ygo/wc2006.json), the GAME CENTER clerk's */
+static inline int Ygo_SetIsClassicDeck(unsigned set)
+{
+    const char *d = set < YGO_SET_COUNT ? gYgoSets[set].date : "9";
+    return Ygo_SetIsDeck(set) && d && (d[0] < '2' || (d[0] == '2' && d[1] == '0' && d[2] == '0' &&
+                                                     (d[3] < '6' || (d[3] == '6' && d[5] == '0' && d[6] <= '7'))));
+}
 /* Ids past YGO_CARD_COUNT are cards outside the catalog that a duel can bring in (tokens, cards an effect creates):
  * made from EDOPro's database (src/ygo/ygo_edo_data.c) */
 const struct YgoCard *Ygo_Card(unsigned id);
 const struct YgoCard *Ygo_EdoCard(unsigned id);
-static inline int Ygo_IsMonster(const struct YgoCard *c) { return c && c->frame <= YGO_RITUAL; }
-static inline int Ygo_IsExtra(const struct YgoCard *c) { return c && c->frame == YGO_FUSION; }
+static inline int Ygo_IsMonster(const struct YgoCard *c)
+{
+    return c && (c->frame <= YGO_RITUAL || (c->frame >= YGO_SYNCHRO && c->frame <= YGO_LINK));
+}
+/* "LV4", "RANK4", "LINK-2": a monster's level as its card prints it */
+static inline const char *Ygo_LevelWord(const struct YgoCard *c)
+{
+    return c && c->frame == YGO_XYZ ? "RANK" : c && c->frame == YGO_LINK ? "LINK-" : "LV";
+}
+/* an Extra Deck monster (the Fusion Deck's, now the Extra Deck's: Fusion, Synchro, Xyz, Link) */
+static inline int Ygo_IsExtra(const struct YgoCard *c)
+{
+    return c && (c->frame == YGO_FUSION || (c->frame >= YGO_SYNCHRO && c->frame <= YGO_LINK));
+}
 #endif

@@ -156,7 +156,7 @@ static unsigned Add(struct Build *b, unsigned id, unsigned copies)
 {
     const struct YgoCard *c = Ygo_Card(id);
     unsigned n = 0, limit;
-    if (!Playable(c) || c->frame == YGO_FUSION)
+    if (!Playable(c) || Ygo_IsExtra(c))
         return 0;
     limit = Ygo_GameLimit(id);
     if (Ygo_IsMonster(c))
@@ -200,7 +200,7 @@ static void AddMonsters(struct Build *b, unsigned theme, unsigned want, int onTh
     for (id = 1; id <= YGO_CARD_COUNT; id++)
     {
         const struct YgoCard *c = Ygo_Card(id);
-        if (!Playable(c) || !Ygo_IsMonster(c) || c->frame == YGO_FUSION || c->frame == YGO_RITUAL)
+        if (!Playable(c) || !Ygo_IsMonster(c) || Ygo_IsExtra(c) || c->frame == YGO_RITUAL)
             continue;
         if (onTheme != InTheme(c, theme))
             continue;
@@ -287,19 +287,17 @@ static void BuildDeck(struct YgoOpponent *o, unsigned theme, unsigned tier, u32 
 // Their signature card: the strongest working monster of the type outside the Starter and Structure Decks
 static unsigned Signature(unsigned theme)
 {
-    unsigned id, best = 0, set;
-    uint64_t decks = 0;
-    for (set = 0; set < YGO_SET_COUNT; set++)
-        if (gYgoSets[set].starter)
-            decks |= YGO_SET_BIT(set);
+    unsigned id, best = 0, k;
     int bestScore = -1;
     for (id = 1; id <= YGO_CARD_COUNT; id++)
     {
         const struct YgoCard *c = Ygo_Card(id);
         int s;
-        if (!Playable(c) || !Ygo_IsMonster(c) || !InTheme(c, theme) || c->frame == YGO_RITUAL || c->frame == YGO_FUSION)
+        if (!Playable(c) || !Ygo_IsMonster(c) || !InTheme(c, theme) || c->frame == YGO_RITUAL || Ygo_IsExtra(c))
             continue;
-        if (c->sets & decks)
+        for (k = 0; k < c->setCount && !Ygo_SetIsDeck(gYgoCardSets[c->setFirst + k]); k++)
+            ;
+        if (k < c->setCount)
             continue;
         s = Score(c) + 120 * c->rarity;
         if (s > bestScore)
@@ -653,7 +651,7 @@ int Ygo_FieldPick(struct ObjectEvent *npc, const uint8_t *script, uint32_t h, ui
                 const struct YgoCard *c = Ygo_Card(gYgoSets[set].cards[i].card);
                 if (!Ygo_CardReady(c->id))
                     continue;
-                if (c->frame == YGO_FUSION && e < YGO_FUSION_MAX)
+                if (Ygo_IsExtra(c) && e < YGO_FUSION_MAX)
                     o->extra[e++] = c->id;
                 else if (n < YGO_DECK_MAX)
                     o->main[n++] = c->id;
