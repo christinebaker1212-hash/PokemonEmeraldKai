@@ -90,8 +90,10 @@ static void RenderBGScanline(int bgNum, uint16_t control, uint16_t hoffs, uint16
     // Moemon Kai: UI STYLE draws its own box here (BG0's pixels there not drawn: mp_uistyle.c)
     if (bgNum == 0 && gMpUiHideBg0[2] > gMpUiHideBg0[0] && lineNum >= gMpUiHideBg0[1] && lineNum < gMpUiHideBg0[3])
     {
+        const u8 *cells = gMpUiHideBg0Cells ? gMpUiHideBg0Cells + (lineNum >> 3) * 30 : NULL;
         for (int x = gMpUiHideBg0[0]; x < gMpUiHideBg0[2] && x < DISPLAY_WIDTH; x++)
-            line[x] = 0;
+            if (cells == NULL || cells[x >> 3])
+                line[x] = 0;
     }
     if (bgNum == 0)
         for (int r = 0; r < gMpUiHideCount && r < MP_UI_HIDE_RECTS; r++)
@@ -1362,9 +1364,11 @@ static void DrawScanline(uint16_t *pixels, uint16_t vcount)
     if ((REG_DISPCNT & DISPCNT_OBJ_ON) && (REG_DISPCNT & DISPCNT_BG0_ON) && gMpUiHideBg0[2] > gMpUiHideBg0[0]
      && vcount >= gMpUiHideBg0[1] && vcount < gMpUiHideBg0[3])
     {
+        const u8 *cells = gMpUiHideBg0Cells ? gMpUiHideBg0Cells + (vcount >> 3) * 30 : NULL;
         for (int p = scanline.bgtoprio[0] + 1; p < 4; p++)   // (a sprite at BG0's own priority is in front of it)
             for (int x = gMpUiHideBg0[0] < 0 ? 0 : gMpUiHideBg0[0]; x < gMpUiHideBg0[2] && x < DISPLAY_WIDTH; x++)
-                scanline.spriteLayers[p][x] = 0;
+                if (cells == NULL || cells[x >> 3])
+                    scanline.spriteLayers[p][x] = 0;
     }
 
     memset(&gMpPixelObjPal[vcount * DISPLAY_WIDTH], 0, DISPLAY_WIDTH);

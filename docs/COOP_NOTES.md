@@ -8507,3 +8507,11 @@ res/moves/chatter/anim.s).
   the region she's in.
 - Online: the world rules carry all 40 and 64-bit change marks (tt_integration.c WORLD_MASK_BYTES 8,
   MP_PROTOCOL_VERSION 91). Scenario tt_region_rules (VERMILION in KANTO, then SINNOH's row opened).
+
+## UI STYLE: the transition covers the style's message box as it covers Kai's (2026-11-20)
+- The user: "it stays during the entire battle intro, and doesn't get covered up by it like Kai's style". Kai's
+  transitions draw their pictures straight into BG0's screen in VRAM (battle_transition.c GetBg0TilesDst), over Kai's
+  box; the style hid BG0 in the box's rectangle, so it hid the transition's drawing too and kept its box on top.
+  mp_uistyle.c TransitionCells compares BG0's screen in VRAM with the game's tilemap buffer (what it last copied there)
+  cell by cell each frame of a transition: only the cells still Kai's box are hidden (gMpUiHideBg0Cells, read by
+  gba_easy_draw.c for BG0 and the sprites under it) and drawn in the style; the rest show the transition.

@@ -1,4 +1,5 @@
-# UI STYLE through a trainer's battle transition: YOUNGSTER CALVIN's challenge in the style's message box, and the box
+# UI STYLE through a trainer's battle transition (and gone where the transition draws over Kai's box, as Kai's is:
+# mp_uistyle.c TransitionCells, the user 2026-11-20): YOUNGSTER CALVIN's challenge in the style's message box, and the box
 # kept the style's while the transition runs (shots by hand)
 MODE=1
 WARP=0,17,33,15

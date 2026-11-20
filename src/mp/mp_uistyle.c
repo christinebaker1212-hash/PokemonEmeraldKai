@@ -3705,6 +3705,32 @@ static void PopUps(struct UiPack *p, u16 *frame)
 
 // ---------------------------------------------------------------------------------------------------- each frame
 s16 gMpUiHideBg0[4];
+const u8 *gMpUiHideBg0Cells;
+static u8 sBoxCells[DISPLAY_HEIGHT / 8][DISPLAY_WIDTH / 8];
+static bool8 sBoxCellsOn;
+
+// A battle's transition: the screen's cells where BG0 still shows what the game last copied there (its tilemap
+// buffer: Kai's message box); a transition draws its pictures straight into BG0's screen in VRAM (battle_transition.c
+// GetBg0TilesDst), and where it has, Kai's box is gone, so the style's is too (the user, 2026-11-20: "it stays during
+// the entire battle intro, and doesn't get covered up by it like Kai's style")
+static void TransitionCells(void)
+{
+    const u16 *buf = GetBgTilemapBuffer(0);
+    const u16 *vram = (const u16 *)(BG_VRAM + ((REG_BG0CNT >> 8) & 0x1F) * 0x800);
+    int hofs = *(vu16 *)REG_ADDR_BG0HOFS & 0x1FF, vofs = Bg0VOffset(), tx, ty;
+    if (buf == NULL)
+    {
+        gMpUiHideBg0Cells = NULL, sBoxCellsOn = FALSE;
+        return;
+    }
+    for (ty = 0; ty < DISPLAY_HEIGHT / 8; ty++)
+        for (tx = 0; tx < DISPLAY_WIDTH / 8; tx++)
+        {
+            int i = (((ty * 8 + vofs) >> 3) & 31) * 32 + (((tx * 8 + hofs) >> 3) & 31);
+            sBoxCells[ty][tx] = buf[i] == vram[i];
+        }
+    gMpUiHideBg0Cells = &sBoxCells[0][0], sBoxCellsOn = TRUE;
+}
 s16 gMpUiHideRects[MP_UI_HIDE_RECTS][4];
 u8 gMpUiHideCount;
 
@@ -3758,6 +3784,7 @@ void MP_UiStyle_PreFrame(void)
     u8 style = MP_UiStyle_Active();
     static bool8 sHid;
     gMpUiHideBg0[0] = gMpUiHideBg0[2] = 0;
+    gMpUiHideBg0Cells = NULL, sBoxCellsOn = FALSE;
     gMpUiHideCount = 0;
     sDrawing = 0;
     if (style != UISTYLE_KAI && (InField() || InBattle()) && GetPack(style) && FindSpec(GetPack(style), "win"))
@@ -3868,11 +3895,17 @@ void MP_UiStyle_PreFrame(void)
         else if (FieldMessageShown())
         {
             HideKaiMessageBox();
+            if (InTransition())
+                TransitionCells();   // (only where the transition hasn't drawn over Kai's box)
             sMsgTail = 3;
             sDrawing |= 2;
         }
         else if (sMsgTail && --sMsgTail)   // (the message box just closed: the same, its old tiles kept hidden)
+        {
             HideKaiMessageBox();
+            if (InTransition())
+                TransitionCells();
+        }
     }
 }
 
@@ -3963,7 +3996,18 @@ void MP_UiStyle_Composite(u16 *frame)
             BattlePanel(p, frame);
     }
     if ((sDrawing & 2) && FieldMessageShown())
+    {
+        static u16 sUnder[DISPLAY_WIDTH * DISPLAY_HEIGHT];
+        int x, y;
+        if (sBoxCellsOn)
+            memcpy(sUnder, frame, sizeof(sUnder));
         FieldMessage(p, frame);
+        if (sBoxCellsOn)   // (a transition's pictures over Kai's box cover the style's alike)
+            for (y = 0; y < DISPLAY_HEIGHT; y++)
+                for (x = 0; x < DISPLAY_WIDTH; x++)
+                    if (!sBoxCells[y >> 3][x >> 3])
+                        frame[y * DISPLAY_WIDTH + x] = sUnder[y * DISPLAY_WIDTH + x];
+    }
     if (sDrawing & 4)
         StartMenu(p, frame);
     if (sDrawing & 16)
