@@ -1525,9 +1525,10 @@ FANTASY XIV's, with the rules of FINAL FANTASY VIII's regions.
                   type, -1 for any other), and COMBO after SAME or PLUS, as in
                   FINAL FANTASY VIII. From farther away: THREE OPEN, REVERSE,
                   FALLEN ACE, ASCENSION, DESCENSION, ORDER, CHAOS and SWAP.
-  Regions         HOENN has eight regions, each with its own rules and TRADE
-                  RULE; JOHTO, KANTO, SINNOH and UNOVA are one region each
-                  (CARD CASE > RULES OF the region you're in). You carry the rules of
+  Regions         Every region's towns have their own rules and TRADE RULE:
+                  HOENN's eight, and eight each in JOHTO, KANTO, SINNOH and
+                  UNOVA (CARD CASE > RULES OF the region you're in; A on
+                  another region opens its towns). You carry the rules of
                   the region where you last played. Challenge someone in
                   another region and one of your rules may spread there, or
                   one of theirs you don't carry may be abolished.

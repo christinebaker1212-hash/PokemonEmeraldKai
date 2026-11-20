@@ -51,20 +51,11 @@ static unsigned Take(const uint16_t *list, unsigned n, unsigned start, unsigned 
     return have;
 }
 
-// The card pool a region's players carry: JOHTO's are MAUVILLE's kind, KANTO's LILYCOVE's, SINNOH's LAVARIDGE's,
-// UNOVA's SLATEPORT's
-// (gen_pools.py makes HOENN's 8)
+// The card pool a town's players carry: HOENN's eight (gen_pools.py), each other region's towns the one at the same point
+// in HOENN (KANTO's PALLET plays PETALBURG's kind of cards, its INDIGO PLATEAU EVER GRANDE's)
 unsigned Tt_PoolOf(unsigned region)
 {
-    if (region == TT_REGION_JOHTO)
-        return TT_REGION_MAUVILLE;
-    if (region == TT_REGION_KANTO)
-        return TT_REGION_LILYCOVE;
-    if (region == TT_REGION_SINNOH)
-        return TT_REGION_LAVARIDGE;
-    if (region == TT_REGION_UNOVA)
-        return TT_REGION_SLATEPORT;
-    return region <= TT_REGION_EVER_GRANDE ? region : 0;
+    return region < TT_REGIONS ? Tt_TownIndex(region) : 0;
 }
 
 void Tt_RegionHand(unsigned region, uint32_t h, unsigned tier, unsigned day, uint16_t hand[TT_HAND])
@@ -121,14 +112,14 @@ void Tt_FitRegionHand(unsigned region, uint32_t h, unsigned tierCap, unsigned da
     {
         uint8_t region, tier, k;
         uint16_t off;
-    } list[TT_REGIONS * 4 * DAYS];
+    } list[(1 + TT_WORLD_TOWNS) * 4 * DAYS];
     uint16_t cand[TT_HAND];
     unsigned n = 0, r, t, k, i, best = ~0u, near = 0, pick, regions = 1;
     if (tierCap > 3)
         tierCap = 3;
     for (r = 0; r < regions; r++)
     {
-        unsigned from = (region + r) % TT_REGIONS;
+        unsigned from = r == 0 ? region : r - 1;   /* (a traveler's hand: HOENN's eight are every kind of card) */
         for (t = 0; t <= tierCap; t++)
             for (k = 0; k < DAYS; k++)
             {
@@ -140,7 +131,7 @@ void Tt_FitRegionHand(unsigned region, uint32_t h, unsigned tierCap, unsigned da
                 best = off < best ? off : best;
             }
         if (r == 0 && best > 60)
-            regions = TT_REGIONS;
+            regions = 1 + TT_WORLD_TOWNS;
     }
     for (i = 0; i < n; i++)
         near += list[i].off <= best + NEAR;

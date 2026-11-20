@@ -1,8 +1,10 @@
-# TRIPLE TRIAD's rules are the region's the player is in (the user, 2026-11-19: "Hoenn's rules are always shown"):
-# in KANTO the CARD CASE's TRIPLE TRIAD side says KANTO RULES and RULES OF KANTO, and its rules screen opens on
-# KANTO (src/tt/tt_field.c Tt_CurrentRegion by the region, tt_ui.c Tt_WorldName). Shots home, rules.
+# TRIPLE TRIAD's rules by the region the player is in (the user, 2026-11-19 / 20: "show specifically the region you're
+# in's towns ... Collapse Hoenn if you're in Kanto"): at VERMILION's dock the town is VERMILION, the CARD CASE says
+# VERMILION RULES and RULES OF KANTO, and the rules screen lists HOENN, JOHTO, KANTO, SINNOH, UNOVA with KANTO's eight
+# towns open under it and the cursor on VERMILION; A on SINNOH's row opens SINNOH's towns and folds KANTO's
+# (src/tt/tt_field.c KantoTown, tt_ui.c RulesRows). Shots home, rules, sinnoh.
 MODE=1
 TMO=120
 ENV_A="MOEMON_DEBUG_REGION=2 MOEMON_DEBUG_PARTY=25:40"
-EXPECT_A=("tt region: KANTO rules")
+EXPECT_A=("tt region: VERMILION rules")
 UNEXPECT_A=("[crash]" "TIMEOUT")

@@ -90,7 +90,8 @@ struct World
     uint16_t queenDay;
 };
 #define WORLD_BYTES (TT_REGIONS * 5 + 3)
-#define WORLD_QUEEN_BIT (1u << TT_REGIONS)
+#define WORLD_QUEEN_BIT (1ull << TT_REGIONS)   /* (64-bit marks: 40 towns, MP_PROTOCOL_VERSION 91) */
+#define WORLD_MASK_BYTES 8
 static struct
 {
     int using;                  /* the collection holds the host's HOENN */
@@ -114,26 +115,27 @@ static void WorldSet(const struct World *w)
     sCollection.queenRegion = w->queen < TT_REGIONS ? w->queen : sCollection.queenRegion;
     sCollection.queenDay = w->queenDay;
 }
-static unsigned WorldDiff(const struct World *a, const struct World *b)
+static uint64_t WorldDiff(const struct World *a, const struct World *b)
 {
-    unsigned r, mask = 0;
+    unsigned r;
+    uint64_t mask = 0;
     for (r = 0; r < TT_REGIONS; r++)
         if (a->rules[r] != b->rules[r] || a->trade[r] != b->trade[r])
-            mask |= 1u << r;
+            mask |= 1ull << r;
     if (a->queen != b->queen || a->queenDay != b->queenDay)
         mask |= WORLD_QUEEN_BIT;
     return mask;
 }
-static void WorldSend(unsigned to, const struct World *w, unsigned kind, unsigned mask)
+static void WorldSend(unsigned to, const struct World *w, unsigned kind, uint64_t mask)
 {
-    uint8_t b[8 + WORLD_BYTES];
+    uint8_t b[4 + WORLD_MASK_BYTES + WORLD_BYTES];
     unsigned r, n = 0;
     b[n++] = TCG_LINK_RELAY;
     b[n++] = TCG_LINK_VERSION;
     b[n++] = TT_WORLD_TYPE;
     b[n++] = (uint8_t)kind;
-    b[n++] = (uint8_t)mask;
-    b[n++] = (uint8_t)(mask >> 8);
+    for (r = 0; r < WORLD_MASK_BYTES; r++)
+        b[n++] = (uint8_t)(mask >> (8 * r));
     for (r = 0; r < TT_REGIONS; r++)
     {
         b[n++] = (uint8_t)w->rules[r];
@@ -147,13 +149,14 @@ static void WorldSend(unsigned to, const struct World *w, unsigned kind, unsigne
     b[n++] = (uint8_t)(w->queenDay >> 8);
     MP_SendRelay((u8)to, b, (u16)n);
 }
-static int WorldRead(const unsigned char *d, unsigned len, struct World *w, unsigned *kind, unsigned *mask)
+static int WorldRead(const unsigned char *d, unsigned len, struct World *w, unsigned *kind, uint64_t *mask)
 {
-    unsigned r, n = 6;
-    if (len < 6 + WORLD_BYTES)
+    unsigned r, n = 4 + WORLD_MASK_BYTES;
+    if (len < 4 + WORLD_MASK_BYTES + WORLD_BYTES)
         return 0;
     *kind = d[3];
-    *mask = d[4] | d[5] << 8;
+    for (*mask = 0, r = 0; r < WORLD_MASK_BYTES; r++)
+        *mask |= (uint64_t)d[4 + r] << (8 * r);
     for (r = 0; r < TT_REGIONS; r++, n += 5)
     {
         w->rules[r] = ((uint32_t)d[n] | (uint32_t)d[n + 1] << 8 | (uint32_t)d[n + 2] << 16 | (uint32_t)d[n + 3] << 24) &
@@ -187,7 +190,7 @@ static void WorldForSave(int own)
 static void WorldSendChanges(void)
 {
     struct World cur;
-    unsigned mask;
+    uint64_t mask;
     if (!sW.using || sW.host < 0)
         return;
     WorldGet(&cur);
@@ -195,7 +198,7 @@ static void WorldSendChanges(void)
     if (!mask)
         return;
     WorldSend((unsigned)sW.host, &cur, 1, mask);
-    MPNet_Log("tt world: sent the host a change (%x)", mask);
+    MPNet_Log("tt world: sent the host a change (%llx)", (unsigned long long)mask);
     sW.last = cur;
 }
 static void WorldTick(void)
@@ -255,7 +258,8 @@ static void WorldTick(void)
 void Tt_WorldReceive(unsigned from, const unsigned char *data, unsigned len)
 {
     struct World w;
-    unsigned kind, mask, r;
+    unsigned kind, r;
+    uint64_t mask;
     if (!WorldRead(data, len, &w, &kind, &mask))
         return;
     Tt_GetCollection();
@@ -290,7 +294,7 @@ void Tt_WorldReceive(unsigned from, const unsigned char *data, unsigned len)
         }
     if (mask & WORLD_QUEEN_BIT)
         sCollection.queenRegion = w.queen, sCollection.queenDay = w.queenDay;
-    MPNet_Log("tt world: player %u changed HOENN (%x)", from + 1, mask);
+    MPNet_Log("tt world: player %u changed HOENN (%llx)", from + 1, (unsigned long long)mask);
     sW.timer = 10;   /* (everyone hears it at once) */
 }
 int Tt_WorldFromHost(void) { return sW.using; }

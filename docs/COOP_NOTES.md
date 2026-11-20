@@ -8486,3 +8486,24 @@ res/moves/chatter/anim.s).
   TT_REGIONS, MP_PROTOCOL_VERSION 90), HOENN's eight by the town. The case's row and the rules screen say RULES OF the
   region (Tt_WorldName: HOENN for HOENN's eight), and the rules screen's list shows eight and scrolls to the cursor
   (JOHTO, KANTO, SINNOH were under the strip, so it opened on a row nobody could see). Scenario tt_region_rules.
+
+## TRIPLE TRIAD: every region's own towns (after 1.208.1, 2026-11-20)
+- The user: "show specifically the region you're in's towns, instead of always showing Hoenn's, and then Kanto, Johto,
+  Sinnoh. Collapse Hoenn if you're in Kanto and show Kanto's specific towns". TT_REGIONS is 40: HOENN's eight, then
+  eight towns each for JOHTO, KANTO, SINNOH, UNOVA (include/tt/collection.h). 8-11 (each region whole until now) are
+  their first towns (NEW BARK, PALLET, TWINLEAF, NUVEMA), so an old .tt file's rules carry on there; the rest from 12.
+  tt_collection.c sWorldTowns lists each region's towns in the order they're met (Tt_WorldOf / Tt_TownIndex /
+  Tt_WorldTown / Tt_WorldTitle); start rules a region's first towns plain, its LEAGUE's busiest; TRADE RULEs by place
+  as HOENN's (sWorldTrade).
+- Which town: tt_field.c Tt_CurrentRegion by the region (MP_Region_Current), then its map section (KantoTown,
+  JohtoTown, SinnohTown, UnovaTown; HOENN's RegionOfMapsec); a place of no town keeps the last town if it's the same
+  region's, else the region's first.
+- Players' cards: a town plays the cards of HOENN's town at the same point (tt_hands.c Tt_PoolOf = Tt_TownIndex; the
+  sellers' shelves the same); a traveler's hand tries HOENN's eight.
+- The rules screen (tt_ui.c RulesRows): a row per region, the open one's towns under it, the one you're in open with
+  the cursor on your town (RulesOpen); A on a region's row opens it and folds the open one, A again folds it
+  (RulesToggle); a region's row shows its towns' games and where the CARD QUEEN is (her star on a folded region).
+- The CARD QUEEN drifts among the towns of the region the player is in (QueenDrift); her journeys go to the towns of
+  the region she's in.
+- Online: the world rules carry all 40 and 64-bit change marks (tt_integration.c WORLD_MASK_BYTES 8,
+  MP_PROTOCOL_VERSION 91). Scenario tt_region_rules (VERMILION in KANTO, then SINNOH's row opened).

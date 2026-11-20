@@ -11,7 +11,10 @@
 #define TT_CARD_BYTES ((TT_CARD_MAX + 8) / 8)
 #define TT_REGION_MAX_RULES 7   /* a region never holds more (Final Fantasy VIII's busiest held all seven) */
 
-/* HOENN's regions (then JOHTO and KANTO, one each), each with its own rules (like Final Fantasy VIII's Balamb, Galbadia, Dollet...) */
+/* Each game region's towns, each with its own rules (like Final Fantasy VIII's Balamb, Galbadia, Dollet...): HOENN's
+ * eight, then eight each for JOHTO, KANTO, SINNOH and UNOVA (the user, 2026-11-20: "show specifically the region you're
+ * in's towns"). The numbers are kept in the .tt file and online: 8-11 were JOHTO / KANTO / SINNOH / UNOVA when each was
+ * one region, so they're each one's first town now (its rules carried on), the rest follow from 12. */
 enum
 {
     TT_REGION_PETALBURG,   /* LITTLEROOT, OLDALE, PETALBURG and their routes */
@@ -22,15 +25,50 @@ enum
     TT_REGION_LILYCOVE,    /* FORTREE, LILYCOVE, ROUTES 119-121, MT. PYRE, the SAFARI ZONE */
     TT_REGION_SOOTOPOLIS,  /* MOSSDEEP, SOOTOPOLIS, PACIFIDLOG and the eastern seas */
     TT_REGION_EVER_GRANDE, /* EVER GRANDE, VICTORY ROAD, the BATTLE FRONTIER */
-    TT_REGION_JOHTO,       /* Moemon Kai: all of JOHTO */
-    TT_REGION_KANTO,       /* Moemon Kai: all of KANTO and the SEVII ISLANDS */
-    TT_REGION_SINNOH,      /* Moemon Kai: all of SINNOH (the .tt file keeps its count: older files read as before) */
-    TT_REGION_UNOVA,       /* Moemon Kai: all of UNOVA (2026-11-19) */
+    TT_REGION_NEW_BARK,    /* JOHTO: NEW BARK, CHERRYGROVE, ROUTES 26-27, 29-30, 46 (was all of JOHTO) */
+    TT_REGION_PALLET,      /* KANTO: PALLET, VIRIDIAN, ROUTES 1, 2, 22, VIRIDIAN FOREST (was all of KANTO) */
+    TT_REGION_TWINLEAF,    /* SINNOH: TWINLEAF, SANDGEM, ROUTES 201-202, LAKE VERITY, the southern seas (was all of SINNOH) */
+    TT_REGION_NUVEMA,      /* UNOVA: NUVEMA, ACCUMULA, STRIATON, ROUTES 1-3, the DREAMYARD (was all of UNOVA) */
+    TT_REGION_VIOLET,      /* JOHTO: VIOLET, ROUTES 31, 32, 36, SPROUT TOWER, the RUINS OF ALPH, DARK CAVE */
+    TT_REGION_AZALEA,      /* JOHTO: AZALEA, ROUTE 33, UNION CAVE, SLOWPOKE WELL, ILEX FOREST */
+    TT_REGION_GOLDENROD,   /* JOHTO: GOLDENROD, ROUTES 34-35, the NATIONAL PARK */
+    TT_REGION_ECRUTEAK,    /* JOHTO: ECRUTEAK, ROUTES 37-38, the BURNED TOWER, TIN TOWER */
+    TT_REGION_OLIVINE,     /* JOHTO: OLIVINE, CIANWOOD, ROUTES 39-41, 47-48, the LIGHTHOUSE, WHIRL ISLANDS */
+    TT_REGION_MAHOGANY,    /* JOHTO: MAHOGANY, ROUTES 42-44, the LAKE OF RAGE, MT. MORTAR */
+    TT_REGION_BLACKTHORN,  /* JOHTO: BLACKTHORN, ROUTES 28, 45, ICE PATH, DRAGON'S DEN, VICTORY ROAD, MT. SILVER */
+    TT_REGION_PEWTER,      /* KANTO: PEWTER, ROUTES 3-4, MT. MOON */
+    TT_REGION_CERULEAN,    /* KANTO: CERULEAN, LAVENDER, ROUTES 9, 10, 24, 25, ROCK TUNNEL, the POKeMON TOWER */
+    TT_REGION_VERMILION,   /* KANTO: VERMILION, ROUTES 5, 6, 11, 12, DIGLETT'S CAVE, the S.S. ANNE */
+    TT_REGION_CELADON,     /* KANTO: CELADON, SAFFRON, ROUTES 7, 8, 16, 17, SILPH CO. */
+    TT_REGION_FUCHSIA,     /* KANTO: FUCHSIA, ROUTES 13-15, 18-19, the SAFARI ZONE */
+    TT_REGION_CINNABAR,    /* KANTO: CINNABAR, ROUTES 20-21, SEAFOAM ISLANDS, the SEVII ISLANDS */
+    TT_REGION_INDIGO,      /* KANTO: the INDIGO PLATEAU, ROUTE 23, VICTORY ROAD */
+    TT_REGION_OREBURGH,    /* SINNOH: JUBILIFE, OREBURGH, ROUTES 203-204, the RAVAGED PATH */
+    TT_REGION_ETERNA,      /* SINNOH: FLOAROMA, ETERNA, ROUTES 205-207, ETERNA FOREST, MT. CORONET */
+    TT_REGION_HEARTHOME,   /* SINNOH: HEARTHOME, SOLACEON, ROUTES 208-210, the LOST TOWER */
+    TT_REGION_VEILSTONE,   /* SINNOH: VEILSTONE, PASTORIA, CELESTIC, ROUTES 211-215, the GREAT MARSH, LAKE VALOR */
+    TT_REGION_CANALAVE,    /* SINNOH: CANALAVE, ROUTE 218, IRON ISLAND, FULLMOON ISLAND */
+    TT_REGION_SNOWPOINT,   /* SINNOH: SNOWPOINT, ROUTES 216-217, LAKE ACUITY */
+    TT_REGION_SUNYSHORE,   /* SINNOH: SUNYSHORE, ROUTES 222-230, VICTORY ROAD, the BATTLE ZONE */
+    TT_REGION_NACRENE,     /* UNOVA: NACRENE, PINWHEEL FOREST, SKYARROW BRIDGE */
+    TT_REGION_CASTELIA,    /* UNOVA: CASTELIA, ROUTE 4, the DESERT RESORT, RELIC CASTLE */
+    TT_REGION_NIMBASA,     /* UNOVA: NIMBASA, ANVILLE, ROUTES 5, 16, LOSTLORN FOREST */
+    TT_REGION_DRIFTVEIL,   /* UNOVA: DRIFTVEIL, ROUTE 6, CHARGESTONE CAVE, COLD STORAGE */
+    TT_REGION_MISTRALTON,  /* UNOVA: MISTRALTON, ROUTE 7, CELESTIAL TOWER, TWIST MOUNTAIN */
+    TT_REGION_ICIRRUS,     /* UNOVA: ICIRRUS, ROUTE 8, the MOOR OF ICIRRUS, DRAGONSPIRAL TOWER */
+    TT_REGION_OPELUCID,    /* UNOVA: OPELUCID, ROUTES 9-15, UNDELLA, LACUNOSA, VICTORY ROAD, N's CASTLE */
     TT_REGIONS,
     TT_REGION_NONE = 0xFF
 };
+/* The game regions the towns belong to (REGION_HOENN... in mp_region.h, in that order) */
+enum { TT_WORLD_HOENN, TT_WORLD_JOHTO, TT_WORLD_KANTO, TT_WORLD_SINNOH, TT_WORLD_UNOVA, TT_WORLDS };
+#define TT_WORLD_TOWNS 8
 const char *Tt_RegionName(unsigned region);
-const char *Tt_WorldName(unsigned region);   /* the game's region it's in: HOENN for HOENN's eight, else its own name */
+unsigned Tt_WorldOf(unsigned region);                  /* TT_WORLD_* (HOENN for none) */
+unsigned Tt_TownIndex(unsigned region);                /* its place in its region's list, 0-7 */
+unsigned Tt_WorldTown(unsigned world, unsigned k);     /* the region's k-th town */
+const char *Tt_WorldTitle(unsigned world);             /* "HOENN", "JOHTO"... */
+const char *Tt_WorldName(unsigned region);   /* the game region a town is in */
 uint32_t Tt_RegionStartRules(unsigned region);
 unsigned Tt_RegionStartTrade(unsigned region);
 

@@ -12,10 +12,29 @@
 
 #define R(x) TT_RULE_BIT(TT_RULE_##x)
 static const char *const sRegionNames[TT_REGIONS] = {
-    "PETALBURG", "RUSTBORO", "SLATEPORT", "MAUVILLE", "LAVARIDGE", "LILYCOVE", "SOOTOPOLIS", "EVER GRANDE", "JOHTO", "KANTO", "SINNOH",
-    "UNOVA",
+    "PETALBURG", "RUSTBORO", "SLATEPORT", "MAUVILLE", "LAVARIDGE", "LILYCOVE", "SOOTOPOLIS", "EVER GRANDE",
+    "NEW BARK", "PALLET", "TWINLEAF", "NUVEMA",
+    "VIOLET", "AZALEA", "GOLDENROD", "ECRUTEAK", "OLIVINE", "MAHOGANY", "BLACKTHORN",
+    "PEWTER", "CERULEAN", "VERMILION", "CELADON", "FUCHSIA", "CINNABAR", "INDIGO PLATEAU",
+    "OREBURGH", "ETERNA", "HEARTHOME", "VEILSTONE", "CANALAVE", "SNOWPOINT", "SUNYSHORE",
+    "NACRENE", "CASTELIA", "NIMBASA", "DRIFTVEIL", "MISTRALTON", "ICIRRUS", "OPELUCID",
 };
-// Each region's own rules at the start, as Final Fantasy VIII's regions had theirs
+/* Each game region's towns in the order they're met (a town's place picks its players' cards: tt_hands.c Tt_PoolOf) */
+static const uint8_t sWorldTowns[TT_WORLDS][TT_WORLD_TOWNS] = {
+    {TT_REGION_PETALBURG, TT_REGION_RUSTBORO, TT_REGION_SLATEPORT, TT_REGION_MAUVILLE, TT_REGION_LAVARIDGE,
+     TT_REGION_LILYCOVE, TT_REGION_SOOTOPOLIS, TT_REGION_EVER_GRANDE},
+    {TT_REGION_NEW_BARK, TT_REGION_VIOLET, TT_REGION_AZALEA, TT_REGION_GOLDENROD, TT_REGION_ECRUTEAK,
+     TT_REGION_OLIVINE, TT_REGION_MAHOGANY, TT_REGION_BLACKTHORN},
+    {TT_REGION_PALLET, TT_REGION_PEWTER, TT_REGION_CERULEAN, TT_REGION_VERMILION, TT_REGION_CELADON,
+     TT_REGION_FUCHSIA, TT_REGION_CINNABAR, TT_REGION_INDIGO},
+    {TT_REGION_TWINLEAF, TT_REGION_OREBURGH, TT_REGION_ETERNA, TT_REGION_HEARTHOME, TT_REGION_VEILSTONE,
+     TT_REGION_CANALAVE, TT_REGION_SNOWPOINT, TT_REGION_SUNYSHORE},
+    {TT_REGION_NUVEMA, TT_REGION_NACRENE, TT_REGION_CASTELIA, TT_REGION_NIMBASA, TT_REGION_DRIFTVEIL,
+     TT_REGION_MISTRALTON, TT_REGION_ICIRRUS, TT_REGION_OPELUCID},
+};
+static const char *const sWorldTitles[TT_WORLDS] = {"HOENN", "JOHTO", "KANTO", "SINNOH", "UNOVA"};
+// Each town's own rules at the start, as Final Fantasy VIII's regions had theirs: a region's first towns plain, its
+// last (the LEAGUE's) busiest
 static const uint32_t sStartRules[TT_REGIONS] = {
     [TT_REGION_PETALBURG] = R(OPEN),
     [TT_REGION_RUSTBORO] = R(OPEN) | R(SAME),
@@ -25,19 +44,70 @@ static const uint32_t sStartRules[TT_REGIONS] = {
     [TT_REGION_LILYCOVE] = R(OPEN) | R(SAME) | R(SAME_WALL),
     [TT_REGION_SOOTOPOLIS] = R(ELEMENTAL) | R(PLUS) | R(RANDOM),
     [TT_REGION_EVER_GRANDE] = R(OPEN) | R(SAME) | R(PLUS) | R(SUDDEN_DEATH) | R(SAME_WALL) | R(ELEMENTAL),
-    [TT_REGION_JOHTO] = R(OPEN) | R(SAME) | R(FALLEN_ACE),
-    [TT_REGION_KANTO] = R(OPEN) | R(PLUS) | R(SUDDEN_DEATH),
-    [TT_REGION_SINNOH] = R(OPEN) | R(ELEMENTAL) | R(SAME_WALL),
-    [TT_REGION_UNOVA] = R(OPEN) | R(SAME) | R(RANDOM),
+    [TT_REGION_NEW_BARK] = R(OPEN),
+    [TT_REGION_VIOLET] = R(OPEN) | R(SAME_WALL),
+    [TT_REGION_AZALEA] = R(SAME) | R(RANDOM),
+    [TT_REGION_GOLDENROD] = R(OPEN) | R(SAME) | R(PLUS),
+    [TT_REGION_ECRUTEAK] = R(SAME) | R(FALLEN_ACE),
+    [TT_REGION_OLIVINE] = R(OPEN) | R(ELEMENTAL),
+    [TT_REGION_MAHOGANY] = R(ELEMENTAL) | R(SUDDEN_DEATH),
+    [TT_REGION_BLACKTHORN] = R(OPEN) | R(SAME) | R(PLUS) | R(SAME_WALL) | R(SUDDEN_DEATH),
+    [TT_REGION_PALLET] = R(OPEN),
+    [TT_REGION_PEWTER] = R(OPEN) | R(SAME),
+    [TT_REGION_CERULEAN] = R(PLUS) | R(ELEMENTAL),
+    [TT_REGION_VERMILION] = R(OPEN) | R(RANDOM),
+    [TT_REGION_CELADON] = R(SAME) | R(PLUS) | R(SAME_WALL),
+    [TT_REGION_FUCHSIA] = R(RANDOM) | R(SUDDEN_DEATH),
+    [TT_REGION_CINNABAR] = R(ELEMENTAL) | R(PLUS) | R(SUDDEN_DEATH),
+    [TT_REGION_INDIGO] = R(OPEN) | R(SAME) | R(PLUS) | R(ELEMENTAL) | R(SAME_WALL) | R(SUDDEN_DEATH),
+    [TT_REGION_TWINLEAF] = R(OPEN),
+    [TT_REGION_OREBURGH] = R(OPEN) | R(SAME_WALL),
+    [TT_REGION_ETERNA] = R(SAME) | R(ELEMENTAL),
+    [TT_REGION_HEARTHOME] = R(OPEN) | R(PLUS),
+    [TT_REGION_VEILSTONE] = R(SAME) | R(PLUS) | R(RANDOM),
+    [TT_REGION_CANALAVE] = R(OPEN) | R(SAME) | R(SUDDEN_DEATH),
+    [TT_REGION_SNOWPOINT] = R(ELEMENTAL) | R(SAME_WALL) | R(SUDDEN_DEATH),
+    [TT_REGION_SUNYSHORE] = R(OPEN) | R(SAME) | R(PLUS) | R(ELEMENTAL) | R(SAME_WALL) | R(RANDOM),
+    [TT_REGION_NUVEMA] = R(OPEN),
+    [TT_REGION_NACRENE] = R(OPEN) | R(SAME),
+    [TT_REGION_CASTELIA] = R(RANDOM) | R(PLUS),
+    [TT_REGION_NIMBASA] = R(SAME) | R(PLUS) | R(SUDDEN_DEATH),
+    [TT_REGION_DRIFTVEIL] = R(OPEN) | R(ELEMENTAL),
+    [TT_REGION_MISTRALTON] = R(SAME_WALL) | R(PLUS),
+    [TT_REGION_ICIRRUS] = R(ELEMENTAL) | R(SUDDEN_DEATH) | R(RANDOM),
+    [TT_REGION_OPELUCID] = R(OPEN) | R(SAME) | R(PLUS) | R(ELEMENTAL) | R(SAME_WALL) | R(SUDDEN_DEATH),
 };
-static const uint8_t sStartTrade[TT_REGIONS] = {
+// ... and TRADE RULEs, each region's towns as HOENN's: ONE, then DIFF and DIRECT further on
+static const uint8_t sWorldTrade[TT_WORLD_TOWNS] = {
     TT_TRADE_ONE, TT_TRADE_ONE, TT_TRADE_ONE, TT_TRADE_DIFF, TT_TRADE_ONE, TT_TRADE_DIFF, TT_TRADE_DIRECT, TT_TRADE_ONE,
-    TT_TRADE_ONE, TT_TRADE_DIFF, TT_TRADE_ONE, TT_TRADE_DIFF,
 };
 const char *Tt_RegionName(unsigned region) { return region < TT_REGIONS ? sRegionNames[region] : "HOENN"; }
-const char *Tt_WorldName(unsigned region) { return region <= TT_REGION_EVER_GRANDE || region >= TT_REGIONS ? "HOENN" : sRegionNames[region]; }
+unsigned Tt_WorldOf(unsigned region)
+{
+    unsigned w, k;
+    for (w = 0; w < TT_WORLDS; w++)
+        for (k = 0; k < TT_WORLD_TOWNS; k++)
+            if (sWorldTowns[w][k] == region)
+                return w;
+    return TT_WORLD_HOENN;
+}
+unsigned Tt_TownIndex(unsigned region)
+{
+    unsigned w, k;
+    for (w = 0; w < TT_WORLDS; w++)
+        for (k = 0; k < TT_WORLD_TOWNS; k++)
+            if (sWorldTowns[w][k] == region)
+                return k;
+    return 0;
+}
+unsigned Tt_WorldTown(unsigned world, unsigned k)
+{
+    return sWorldTowns[world < TT_WORLDS ? world : 0][k < TT_WORLD_TOWNS ? k : 0];
+}
+const char *Tt_WorldTitle(unsigned world) { return sWorldTitles[world < TT_WORLDS ? world : 0]; }
+const char *Tt_WorldName(unsigned region) { return Tt_WorldTitle(Tt_WorldOf(region)); }
 uint32_t Tt_RegionStartRules(unsigned region) { return region < TT_REGIONS ? sStartRules[region] : 0; }
-unsigned Tt_RegionStartTrade(unsigned region) { return region < TT_REGIONS ? sStartTrade[region] : 0; }
+unsigned Tt_RegionStartTrade(unsigned region) { return region < TT_REGIONS ? sWorldTrade[Tt_TownIndex(region)] : 0; }
 
 void Tt_CollectionInit(struct TtCollection *c, uint32_t seed)
 {
@@ -47,7 +117,7 @@ void Tt_CollectionInit(struct TtCollection *c, uint32_t seed)
     for (i = 0; i < TT_REGIONS; i++)
     {
         c->regionRules[i] = sStartRules[i];
-        c->regionTrade[i] = sStartTrade[i];
+        c->regionTrade[i] = (uint8_t)Tt_RegionStartTrade(i);
     }
     c->carriedFrom = TT_REGION_NONE;
     c->queenRegion = TT_REGION_MAUVILLE;

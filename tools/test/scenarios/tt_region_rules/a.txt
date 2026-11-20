@@ -16,4 +16,17 @@ wait 4
 press A 2
 wait 20
 rendershot rules
+press DOWN 2
+wait 4
+press DOWN 2
+wait 4
+press DOWN 2
+wait 4
+press DOWN 2
+wait 4
+press DOWN 2
+wait 4
+press A 2
+wait 10
+rendershot sinnoh
 quit

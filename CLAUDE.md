@@ -497,7 +497,7 @@ filters and sorts as a SearchGame, a Shown() cache per UI over the screen's own 
 Also TRIPLE TRIAD (src/tt/, include/tt/: the CARD CASE's third side, L/R go round the three games; every Final Fantasy
 XIV card from xivapi (tools/tt: fetch_cards.py, gen_catalog.py, build_art.py -> graphics/tt/cards.bin, gen_pools.py ->
 tt_pools.c; ids are XIV's); FF8's capture rules from the ff8-decomp (SAME, PLUS, SAME WALL, ELEMENTAL with XIV's types,
-COMBO) and XIV's rules, tt_duel.c deterministic, AI tt_ai.c; HOENN's eight regions with their own rules, the rules
+COMBO) and XIV's rules, tt_duel.c deterministic, AI tt_ai.c; every region's towns with their own rules (HOENN's eight, eight each in JOHTO / KANTO / SINNOH / UNOVA: COOP_NOTES "TRIPLE TRIAD: every region's own towns"), the rules
 carried from the last region played in spread or abolish (Tt_MixRules), the CARD QUEEN (favors, paid journeys);
 only the player ever takes cards (trade rules ONE / DIFF / DIRECT / ALL); XIV decks of five; sellers in seven POKeMON
 CENTERS + the GAME CENTER 2F (shelves under 15% of the cards, BRONZE / SILVER / GOLD packs, MYTHRIL / IMPERIAL never

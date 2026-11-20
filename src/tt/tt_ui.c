@@ -1343,8 +1343,54 @@ static void RevealScreen(void)
     }
 }
 
-/* RULES OF HOENN (or of the region you're in: KANTO...): each region's rules, where the CARD QUEEN is, the rules you
- * carry; it opens on the region you're in */
+/* RULES OF the region you're in: every game region a row, the open one's towns under it (the one you're in opens
+ * first; A on another region's row opens it and folds the open one: the user, 2026-11-20, "Collapse Hoenn if you're
+ * in Kanto and show Kanto's specific towns"); each town's rules, where the CARD QUEEN is, the rules you carry */
+static uint8_t sRulesWorld;                  /* the region whose towns show (TT_WORLDS: none) */
+#define RULES_ROW_WORLD(w) (-1 - (int)(w))  /* a region's own row; a town's row is its number */
+static int RulesRows(int *rows)
+{
+    unsigned w, k;
+    int n = 0;
+    for (w = 0; w < TT_WORLDS; w++)
+    {
+        rows[n++] = RULES_ROW_WORLD(w);
+        if (w == sRulesWorld)
+            for (k = 0; k < TT_WORLD_TOWNS; k++)
+                rows[n++] = (int)Tt_WorldTown(w, k);
+    }
+    return n;
+}
+static int RulesRowOf(int what)
+{
+    int rows[TT_WORLDS + TT_WORLD_TOWNS], n = RulesRows(rows), i;
+    for (i = 0; i < n; i++)
+        if (rows[i] == what)
+            return i;
+    return 0;
+}
+static int RulesRowAt(int cursor)
+{
+    int rows[TT_WORLDS + TT_WORLD_TOWNS], n = RulesRows(rows);
+    return rows[cursor >= 0 && cursor < n ? cursor : 0];
+}
+static void RulesOpen(void)
+{
+    unsigned here = Tt_CurrentRegion();
+    sRulesWorld = (uint8_t)Tt_WorldOf(here);
+    U.cursor = RulesRowOf(here < TT_REGIONS ? (int)here : RULES_ROW_WORLD(sRulesWorld));
+}
+/* A on a region's row: its towns, the open one's folded (A again folds it) */
+static void RulesToggle(void)
+{
+    int row = RulesRowAt(U.cursor);
+    unsigned w;
+    if (row >= 0)
+        return;
+    w = (unsigned)(-1 - row);
+    sRulesWorld = (uint8_t)(sRulesWorld == w ? TT_WORLDS : w);
+    U.cursor = RulesRowOf(row);
+}
 static void RulesScreen(void)
 {
     struct TtCollection *c = C();
@@ -1360,37 +1406,75 @@ static void RulesScreen(void)
     else
         snprintf(line, sizeof(line), "CARRYING NONE YET");
     G_TextAlign(236, 3, TA_RIGHT, 0xf8d878, G_NO_SHADOW, line, TF_NARROW);
-    /* the regions down the left: eight show, the list scrolls to keep the cursor in view (JOHTO, KANTO, SINNOH and
-     * UNOVA were under the strip: the user, 2026-11-19, "Hoenn's rules are always shown") */
+    /* the regions down the left, the open one's towns under it: eight rows show, the list scrolls to the cursor */
     {
         static int sTop;
         enum { RULES_ROWS = 8 };
+        int rows[TT_WORLDS + TT_WORLD_TOWNS], n = RulesRows(rows), i;
+        if (U.cursor >= n)
+            U.cursor = n - 1;
         if (U.cursor < sTop)
             sTop = U.cursor;
         if (U.cursor >= sTop + RULES_ROWS)
             sTop = U.cursor - RULES_ROWS + 1;
-        if (sTop > TT_REGIONS - RULES_ROWS)
-            sTop = TT_REGIONS - RULES_ROWS;
+        if (sTop > n - RULES_ROWS)
+            sTop = n - RULES_ROWS;
         if (sTop < 0)
             sTop = 0;
-        for (r = (unsigned)sTop; r < TT_REGIONS && r < (unsigned)(sTop + RULES_ROWS); r++)
+        for (i = sTop; i < n && i < sTop + RULES_ROWS; i++)
         {
-            int on = U.cursor == (int)r;
-            y = 19 + ((int)r - sTop) * 11;
-            G_RoundFill(2, y, 94, 10, on ? TT_THEME : 0x203448, on ? 255 : 200);
+            int on = U.cursor == i;
+            y = 19 + (i - sTop) * 11;
+            if (rows[i] < 0)
+            {
+                /* a region: its name in gold, + folded / - open, the CARD QUEEN's star while she's in a folded one */
+                unsigned w = (unsigned)(-1 - rows[i]);
+                G_RoundFill(2, y, 94, 10, on ? TT_THEME : 0x142430, on ? 255 : 230);
+                G_RoundFrame(2, y, 94, 10, on ? TT_GOLD : 0x3c5468, 255);
+                G_Text(6, y, Tt_WorldOf(here) == w ? 0xf8e070 : 0xf8d878, G_NO_SHADOW, Tt_WorldTitle(w), 0, TF_NARROW);
+                G_TextAlign(91, y, TA_RIGHT, 0xf8d878, G_NO_SHADOW, w == sRulesWorld ? "-" : "+", TF_NARROW);
+                if (w != sRulesWorld && Tt_WorldOf(c->queenRegion) == w)
+                    Tt_DrawStar(74, (float)y, 9, 255);
+                continue;
+            }
+            r = (unsigned)rows[i];
+            G_RoundFill(8, y, 88, 10, on ? TT_THEME : 0x203448, on ? 255 : 200);
             if (on)
-                G_RoundFrame(2, y, 94, 10, TT_GOLD, 255);
-            G_Text(6, y, r == here ? 0xf8e070 : G_WHITE, G_NO_SHADOW, Tt_RegionName(r), 0, TF_NARROW);
+                G_RoundFrame(8, y, 88, 10, TT_GOLD, 255);
+            G_Text(12, y, r == here ? 0xf8e070 : G_WHITE, G_NO_SHADOW, Tt_RegionName(r), 0, TF_NARROW);
             if (c->queenRegion == r)
                 Tt_DrawStar(84, (float)y, 9, 255);
         }
         if (sTop > 0)
             G_Arrow(72, 14, 0, 0xf8d878);
-        if (sTop + RULES_ROWS < TT_REGIONS)
+        if (sTop + RULES_ROWS < n)
             G_Arrow(72, 107, 1, 0xf8d878);
     }
-    /* the chosen one's rules */
-    r = (unsigned)U.cursor;
+    /* a region's row: its towns and where the CARD QUEEN is */
+    if (RulesRowAt(U.cursor) < 0)
+    {
+        unsigned w = (unsigned)(-1 - RulesRowAt(U.cursor)), games = 0;
+        G_RoundFill(100, 19, 136, 89, 0x182838, 235);
+        G_RoundFrame(100, 19, 136, 89, TT_GOLD, 255);
+        G_Text(106, 22, G_WHITE, 0x101820, Tt_WorldTitle(w), 0, TF_NORMAL);
+        for (k = 0; k < TT_WORLD_TOWNS; k++)
+            games += c->regionGames[Tt_WorldTown(w, k)];
+        snprintf(line, sizeof(line), "%u TOWNS, EACH WITH ITS OWN RULES", TT_WORLD_TOWNS);
+        G_Text(106, 40, 0xf8e0a0, G_NO_SHADOW, line, 126, TF_NARROW);
+        snprintf(line, sizeof(line), "GAMES PLAYED HERE: %u", games);
+        G_Text(106, 64, 0xa0b0c0, G_NO_SHADOW, line, 126, TF_NARROW);
+        if (Tt_WorldOf(c->queenRegion) == w)
+        {
+            snprintf(line, sizeof(line), "The CARD QUEEN is in %s.", Tt_RegionName(c->queenRegion));
+            G_Text(106, 76, 0xf0a0f0, G_NO_SHADOW, line, 126, TF_NARROW);
+        }
+        Strip(0, w == sRulesWorld ? "Its towns are listed under it. Press A to fold them away."
+                                  : "Press A to see the towns of this region and their rules.");
+        TcgUi_Hints(w == sRulesWorld ? "{UP}{DOWN} REGION  {A} FOLD  {B} BACK" : "{UP}{DOWN} REGION  {A} OPEN  {B} BACK");
+        return;
+    }
+    /* the chosen town's rules */
+    r = (unsigned)RulesRowAt(U.cursor);
     G_RoundFill(100, 19, 136, 89, 0x182838, 235);
     G_RoundFrame(100, 19, 136, 89, TT_GOLD, 255);
     G_Text(106, 22, G_WHITE, 0x101820, Tt_RegionName(r), 0, TF_NORMAL);
@@ -1737,9 +1821,9 @@ static void QueenScreen(void)
                 if (c->regionRules[c->queenRegion] >> i & 1)
                     items[n++] = Tt_RuleName(i);
         }
-        else
-            for (i = 0; i < TT_REGIONS; i++)
-                items[n++] = Tt_RegionName(i);
+        else   /* (a journey: the towns of the region she's in) */
+            for (i = 0; i < TT_WORLD_TOWNS; i++)
+                items[n++] = Tt_RegionName(Tt_WorldTown(Tt_WorldOf(c->queenRegion), i));
         if (n)
             TcgUi_PopMenu(120, 2, 112, items, n, U.menuCursor, 0);
     }
@@ -2404,7 +2488,7 @@ int TtUi_Step(unsigned keys)
                 break;
             case 3:
                 Screen(T_RULES);
-                U.cursor = (int)(Tt_CurrentRegion() < TT_REGIONS ? Tt_CurrentRegion() : 0);
+                RulesOpen();
                 break;
             case 4:
                 if (c->optedIn)
@@ -2629,14 +2713,22 @@ int TtUi_Step(unsigned keys)
         break;
     }
     case T_RULES:
-        MoveCursor(pressed, TT_REGIONS, 1);
-        if (pressed & (KEY_A | KEY_B))
+    {
+        int rows[TT_WORLDS + TT_WORLD_TOWNS];
+        MoveCursor(pressed, RulesRows(rows), 1);
+        if ((pressed & KEY_A) && RulesRowAt(U.cursor) < 0)
+        {
+            PlaySE(SE_SELECT);
+            RulesToggle();
+        }
+        else if (pressed & (KEY_A | KEY_B))
         {
             PlaySE(SE_SELECT);
             Screen(T_HOME);
             U.cursor = 3;
         }
         break;
+    }
     case T_CHALLENGE:
     {
         int random = (U.rules & TT_RULE_BIT(TT_RULE_RANDOM)) != 0 && U.vs != VS_FRIEND,
@@ -2765,7 +2857,7 @@ int TtUi_Step(unsigned keys)
         unsigned off = QueenOff();
         if (U.menuOn)
         {
-            int count = U.menuOn == Q_TRADE ? TT_TRADE_COUNT : U.menuOn == Q_TRAVEL ? TT_REGIONS
+            int count = U.menuOn == Q_TRADE ? TT_TRADE_COUNT : U.menuOn == Q_TRAVEL ? TT_WORLD_TOWNS
                       : __builtin_popcount(c->regionRules[c->queenRegion]);
             U.menuCursor = TcgUi_PopMenuMove(pressed, U.menuCursor, count, 0);
             if (pressed & KEY_B)
@@ -2777,6 +2869,7 @@ int TtUi_Step(unsigned keys)
                 PlaySE(SE_SELECT);
                 if (kind == Q_TRAVEL)
                 {
+                    pick = (int)Tt_WorldTown(Tt_WorldOf(c->queenRegion), (unsigned)pick);
                     if ((unsigned)pick == c->queenRegion)
                         Say(ACT_NONE, "But I'm in %s already!", Tt_RegionName((unsigned)pick));
                     else
@@ -2825,7 +2918,7 @@ int TtUi_Step(unsigned keys)
             else
             {
                 U.menuOn = U.cursor;
-                U.menuCursor = U.cursor == Q_TRAVEL ? (int)c->queenRegion : 0;
+                U.menuCursor = U.cursor == Q_TRAVEL ? (int)Tt_TownIndex(c->queenRegion) : 0;
                 if (U.cursor == Q_ABOLISH && !c->regionRules[c->queenRegion])
                 {
                     U.menuOn = 0;
