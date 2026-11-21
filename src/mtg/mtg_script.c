@@ -558,6 +558,13 @@ static int ParseAbility(MtgCardDef *c, int cardId, char *text, int kind, int dep
     }
     if (kind != MTG_AB_SPELL && kind != MTG_AB_ACTIVATED && Mtg_Param(ab, "Cost"))
         Unsupported(c, "optional cost");   // (a trigger's "you may pay ...": not yet)
+    if ((v = Mtg_Param(ab, "UnlessScale")) != NULL) {
+        int kind2 = Mtg_CounterKind(v);
+        if (kind2 <= 0 || !Mtg_Param(ab, "UnlessCost"))
+            Unsupported(c, "UnlessScale");
+        else
+            ab->unlessScale = (uint8_t)kind2;
+    }
     ab->tgt = Mtg_Param(ab, "ValidTgts");
     if (!ActivationRestrictions(ab, kind))
         Unsupported(c, "activation restriction");
@@ -787,6 +794,25 @@ int Mtg_KeywordByName(const char *s)
 
 static void ParseKeyword(MtgCardDef *c, const char *k)
 {
+    if (strncmp(k, "Echo:", 5) == 0 || strncmp(k, "Cumulative upkeep:", 18) == 0) {
+        // (made into a trigger as the card loads: only mana, life, or both for Cumulative upkeep's)
+        const char *cost = k + (k[0] == 'E' ? 5 : 18), *end = strchr(cost, ':');
+        char buf[64];
+        size_t n = end ? (size_t)(end - cost) : strlen(cost);
+        MtgManaCost m;
+        MtgCost full;
+        if (n && n < sizeof(buf)) {
+            memcpy(buf, cost, n);
+            buf[n] = 0;
+            if ((Mtg_ParseManaCost(buf, &m) && !m.x)
+                || (k[0] == 'C' && Mtg_ParseCost(buf, &full) && !full.mana.x && !full.tap && !full.sacSelf && !full.sacN
+                    && !full.discardN && !full.exileSelf && !full.returnSelf && !full.returnN && !full.exileHandN
+                    && !full.exileGraveN && !full.tapTypeN && !full.damageYou && !full.subCtrN && !full.discardSelf))
+                return;
+        }
+        Unsupported(c, k[0] == 'E' ? "Echo" : "Cumulative upkeep");
+        return;
+    }
     int i, kw = Mtg_KeywordByName(k);
     if (kw >= 0) {
         c->keywords |= MTG_KW_BIT(kw);
@@ -911,6 +937,23 @@ static int HasWordI(const char *s, const char *word)   // (case-insensitive: For
 
 #define MTG_SCRIPT_LINES 160
 
+static char *Dup(const char *t)   // (a copy kept for the pool's life: made-up script text)
+{
+    size_t n = strlen(t) + 1;
+    char *p = malloc(n);
+    memcpy(p, t, n);
+    return p;
+}
+
+static void AddSvar(MtgCardDef *c, const char *name, const char *value)   // (the card's SVars: still its own run)
+{
+    gMtgSvars = Grow(gMtgSvars, &sSvarCap, sSvarCount + 1, sizeof(MtgParam));
+    gMtgSvars[sSvarCount].key = Dup(name);
+    gMtgSvars[sSvarCount].value = Dup(value);
+    sSvarCount++;
+    c->svarCount++;
+}
+
 static void ParseCard(int id, char *text)
 {
     MtgCardDef *c = &sCards[id];
@@ -953,6 +996,38 @@ static void ParseCard(int id, char *text)
         gMtgSvars[sSvarCount].value = Trim(val);
         sSvarCount++;
         c->svarCount++;
+    }
+    // keywords that are triggers in Forge (CardFactoryUtil: Echo, Cumulative upkeep): their SVars and T: lines made
+    // here, as Forge makes them, then read as the card's own
+    for (k = 0; k < nLines; k++) {
+        const char *kw = lines[k] && strncmp(lines[k], "K:", 2) == 0 ? lines[k] + 2 : NULL;
+        char cost[64], buf[400];
+        const char *end;
+        size_t n;
+        int cum;
+        if (!kw || !((cum = strncmp(kw, "Cumulative upkeep:", 18) == 0) || strncmp(kw, "Echo:", 5) == 0))
+            continue;
+        kw += cum ? 18 : 5;
+        end = strchr(kw, ':');   // (Cumulative upkeep:PayLife<1>:Pay 1 life.: the cost, then its words)
+        n = end ? (size_t)(end - kw) : strlen(kw);
+        if (n == 0 || n >= sizeof(cost) || nTrig >= 8)
+            continue;   // (ParseKeyword: unsupported)
+        memcpy(cost, kw, n);
+        cost[n] = 0;
+        if (cum) {
+            AddSvar(c, "MtgCuPut", "DB$ PutCounter | Defined$ Self | CounterType$ AGE | CounterNum$ 1 | SubAbility$ MtgCuSac");
+            snprintf(buf, sizeof(buf), "DB$ Sacrifice | SacValid$ Self | UnlessCost$ %s | UnlessPayer$ You | UnlessScale$ AGE", cost);
+            AddSvar(c, "MtgCuSac", buf);
+            triggerLines[nTrig++] = Dup("Mode$ Phase | Phase$ Upkeep | ValidPlayer$ You | TriggerZones$ Battlefield | "
+                                        "Execute$ MtgCuPut | TriggerDescription$ Cumulative upkeep: an age counter on "
+                                        "CARDNAME, then sacrifice it unless you pay its upkeep for each age counter.");
+        } else {
+            snprintf(buf, sizeof(buf), "DB$ Sacrifice | SacValid$ Self | UnlessCost$ %s | UnlessPayer$ You", cost);
+            AddSvar(c, "MtgEchoPay", buf);
+            triggerLines[nTrig++] = Dup("Mode$ Phase | Phase$ Upkeep | ValidPlayer$ You | TriggerZones$ Battlefield | "
+                                        "IsPresent$ Card.Self+cameUnderControlSinceLastUpkeep | Execute$ MtgEchoPay | "
+                                        "TriggerDescription$ Echo: sacrifice CARDNAME unless you pay its echo cost.");
+        }
     }
     for (k = 0; k < nLines; k++) {
         char *colon, *val;

@@ -297,6 +297,7 @@ void Mtg_MoveTo(MtgDuel *d, int obj, int zone)
         o->chosenType = 0;
         o->chosenColors = o->chosenPlayer = 0;
         o->chosenNumber = 0;
+        o->echoDue = 1;
         if (Mtg_Card(o->def)->etbRepl && d->etbCount < 8)
             d->etbQueue[d->etbCount++] = (uint16_t)obj;
     }
@@ -1705,6 +1706,9 @@ static int StartStep(MtgDuel *d)
         PruneEffects(d, MTG_EFF_AFTER_UNTAP, d->active);   // ("doesn't untap during your next untap step": done)
         break;
     case MTG_STEP_UPKEEP:
+        for (i = 0; i < d->objCount; i++)   // (Echo: what came under the player since their last upkeep is due now)
+            if (d->objs[i].controller == d->active && d->objs[i].echoDue == 1)
+                d->objs[i].echoDue = 2;
         // Fading (its upkeep trigger, done as the step begins): a fade counter off, or sacrificed when there's none
         for (i = 0; i < d->objCount; i++)
             if (d->objs[i].controller == d->active && d->objs[i].zone == MTG_ZONE_BATTLEFIELD && Mtg_Card(d->objs[i].def)->fading) {
@@ -1716,6 +1720,9 @@ static int StartStep(MtgDuel *d)
             }
         break;
     case MTG_STEP_DRAW:
+        for (i = 0; i < d->objCount; i++)   // (Echo: due only in that upkeep)
+            if (d->objs[i].controller == d->active && d->objs[i].echoDue == 2)
+                d->objs[i].echoDue = 0;
         if (d->turn > 1)   // the starting player skips the first draw
             Mtg_Draw(d, d->active, 1);
         break;

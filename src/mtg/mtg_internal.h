@@ -123,6 +123,8 @@ typedef struct {
     uint8_t actLimit;               // ActivationLimit$ n: n times each turn (0: no limit)
     uint8_t actSorcery, actMyTurn;  // SorcerySpeed$ True ("only any time you could cast a sorcery"); PlayerTurn$ True
     uint16_t actSteps;              // ActivationPhases$: the steps it may be activated in (bits 1 << MTG_STEP_*; 0: any)
+    uint8_t unlessScale;            // UnlessScale$ KIND (Cumulative upkeep's, made in mtg_script.c): its UnlessCost$ once for
+                                    // each counter of the kind on its source (Mtg_CounterKind; 0: once)
 } MtgAbility;
 int Mtg_AbilityUses(const MtgDuel *d, int obj, int ability);
 void Mtg_Remember(MtgDuel *d, int obj);   // onto the resolving chain's remembered objects (once each)

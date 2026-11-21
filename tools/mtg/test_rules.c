@@ -2507,6 +2507,84 @@ static void TestChoices(void)
           Mtg_Toughness(&sD, k));
 }
 
+// the upkeep's "pay or not" (MTG_CHOICE_PAY) answered
+static void PayAnswer(int pay)
+{
+    MtgAnswer a;
+    memset(&a, 0, sizeof(a));
+    a.card = (uint16_t)pay;
+    Answer(&a);
+}
+
+// on to PLAYER's next upkeep, where a trigger asks to pay (or the draw step, if nothing asks): 1 if asked
+static int UpkeepAsks(int player)
+{
+    int guard = 0;
+    while (guard++ < 400) {
+        const MtgQuery *q = Mtg_Query(&sD);
+        MtgAnswer a;
+        if (q->kind == MTG_Q_CHOOSE && q->choice == MTG_CHOICE_PAY)
+            return 1;
+        if (q->kind == MTG_Q_PRIORITY && sD.active == player && sD.step == MTG_STEP_DRAW && sD.stackCount == 0)
+            return 0;
+        memset(&a, 0, sizeof(a));
+        memset(a.block, -1, sizeof(a.block));
+        Answer(&a);
+    }
+    return 0;
+}
+
+static void TestUpkeepCosts(void)
+{
+    int troll, wall, braid;
+    const MtgQuery *q;
+    printf("echo and cumulative upkeep\n");
+    Table();   // Echo: asked the first upkeep after it came, paid, then never again
+    Lands(0, "Forest", 4);
+    troll = Put(0, "Albino Troll", MTG_ZONE_HAND);
+    Mtg_MoveTo(&sD, troll, MTG_ZONE_BATTLEFIELD);
+    GoToTurn(1, MTG_STEP_MAIN1);
+    q = Mtg_Query(&sD);
+    CHECK(UpkeepAsks(0) && Mtg_Query(&sD)->pay.pip[MTG_G] == 1 && Mtg_Query(&sD)->pay.generic == 1, "echo: pay {1}{G}? at its first upkeep");
+    PayAnswer(1);
+    CHECK(Zone(troll) == MTG_ZONE_BATTLEFIELD, "paid: it stays");
+    GoToTurn(1, MTG_STEP_MAIN1);
+    CHECK(!UpkeepAsks(0) && Zone(troll) == MTG_ZONE_BATTLEFIELD, "not asked again");
+
+    Table();   // Echo not paid: sacrificed
+    Lands(0, "Forest", 4);
+    troll = Put(0, "Albino Troll", MTG_ZONE_HAND);
+    Mtg_MoveTo(&sD, troll, MTG_ZONE_BATTLEFIELD);
+    GoToTurn(1, MTG_STEP_MAIN1);
+    CHECK(UpkeepAsks(0), "echo asks");
+    PayAnswer(0);
+    CHECK(Zone(troll) == MTG_ZONE_GRAVEYARD, "echo not paid: sacrificed");
+
+    Table();   // Cumulative upkeep {U}: 1 age counter and {U}, then 2 and {U}{U}, then not paid: sacrificed
+    Lands(0, "Island", 5);
+    wall = Put(0, "Illusionary Wall", MTG_ZONE_BATTLEFIELD);
+    GoToTurn(1, MTG_STEP_MAIN1);
+    CHECK(UpkeepAsks(0) && Mtg_Query(&sD)->pay.pip[MTG_U] == 1 && Mtg_Counters(&sD, wall, Mtg_CounterKind("AGE")) == 1,
+          "cumulative upkeep: an age counter, pay {U}");
+    PayAnswer(1);
+    GoToTurn(1, MTG_STEP_MAIN1);
+    CHECK(UpkeepAsks(0) && Mtg_Query(&sD)->pay.pip[MTG_U] == 2, "two age counters: pay {U}{U} (%d)", Mtg_Query(&sD)->pay.pip[MTG_U]);
+    PayAnswer(0);
+    CHECK(Zone(wall) == MTG_ZONE_GRAVEYARD, "not paid: sacrificed");
+
+    Table();   // Cumulative upkeep in life: 1, then 2
+    braid = Put(0, "Gallowbraid", MTG_ZONE_BATTLEFIELD);
+    GoToTurn(1, MTG_STEP_MAIN1);
+    CHECK(UpkeepAsks(0), "gallowbraid asks");
+    PayAnswer(1);
+    CHECK(sD.players[0].life == 19, "1 life (%d)", sD.players[0].life);
+    GoToTurn(1, MTG_STEP_MAIN1);
+    CHECK(UpkeepAsks(0), "asks again");
+    PayAnswer(1);
+    CHECK(sD.players[0].life == 17 && Zone(braid) == MTG_ZONE_BATTLEFIELD, "2 more life (%d)", sD.players[0].life);
+    (void)q;
+}
+
 static void TestCantCounter(void)
 {
     int mongoose, bears, cs, herald, istvan, bolt, i;
@@ -3143,6 +3221,7 @@ int main(int argc, char **argv)
     TestPreventAll();
     TestChooseSource();
     TestChoices();
+    TestUpkeepCosts();
     TestCantCounter();
     TestTrigModes();
     TestBecomesTarget();

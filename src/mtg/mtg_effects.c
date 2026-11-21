@@ -1061,6 +1061,8 @@ static int Resolve(MtgDuel *d, MtgResolveCtx *ctx, const MtgAbility *ab)
             if (!OnBattlefield(d, &who.t[i]))
                 continue;
             o = &d->objs[who.t[i].id];
+            if (o->controller != p)
+                o->echoDue = 1;   // (Echo: under a new controller since their last upkeep)
             o->effCtrl = (uint8_t)(p + 1);
             o->effUntil = (uint8_t)(bits < 0 ? 0 : bits);
             o->effSource = (uint16_t)ctx->source;
@@ -1677,10 +1679,19 @@ int Mtg_ResolveStep(MtgDuel *d, MtgResolveCtx *ctx, int ability)
         const char *who = Mtg_Param(ab, "UnlessPayer");
         const MtgCost *other = ab->unless ? &gMtgUnlessCosts[ab->unless - 1] : NULL;
         DefinedBy(d, ctx, who ? who : "TargetedController", &payers);
+        int scale = 1, life;
         if (other)
             cost = other->mana;
         else
             UnlessCost(d, ctx, ab, &cost);
+        if (ab->unlessScale) {   // (Cumulative upkeep: once for each age counter; its mana and life only)
+            int k;
+            scale = Mtg_Counters(d, ctx->source, ab->unlessScale);
+            cost.generic = (uint8_t)(cost.generic * scale);
+            for (k = 0; k < MTG_MANA_KINDS; k++)
+                cost.pip[k] = (uint8_t)(cost.pip[k] * scale);
+        }
+        life = other ? other->payLife * scale : 0;
         for (;;) {
             int pi = d->resStage & 0x3F, p;
             if (pi >= payers.n) {
@@ -1689,7 +1700,8 @@ int Mtg_ResolveStep(MtgDuel *d, MtgResolveCtx *ctx, int ability)
             }
             p = payers.t[pi].id;
             if (payers.t[pi].kind != MTG_TGT_PLAYER || !Mtg_CanPay(d, p, &cost, 0, MTG_NO_OBJ)
-                || (other && !Mtg_CostPayable(d, p, other, ctx->source, MTG_NO_OBJ))) {
+                || (other && !ab->unlessScale && !Mtg_CostPayable(d, p, other, ctx->source, MTG_NO_OBJ))
+                || (ab->unlessScale && d->players[p].life < life)) {
                 d->resStage++;
                 continue;
             }
@@ -1700,7 +1712,13 @@ int Mtg_ResolveStep(MtgDuel *d, MtgResolveCtx *ctx, int ability)
             if (d->resChoice == 1) {
                 d->resStage = 0xC0;
                 d->resChoice = -1;
-                if (other) {   // (its sacrifices, discards, returns... are picked now: the answer goes on from there)
+                if (other && ab->unlessScale) {   // (scaled: its mana, then its life)
+                    Mtg_Pay(d, p, &cost, 0, MTG_NO_OBJ);
+                    if (life) {
+                        d->players[p].life = (int16_t)(d->players[p].life - life);
+                        Mtg_Event(d, MTG_EV_LIFE, p, -life, d->players[p].life);
+                    }
+                } else if (other) {   // (its sacrifices, discards, returns... are picked now: the answer goes on from there)
                     if (Mtg_PayUnlessCost(d, p, ability, ctx->source))
                         return 0;
                 } else
@@ -1730,6 +1748,7 @@ static const char *const sCommon[] = {
     "ConditionDefined", "ConditionPresent", "ConditionCompare", "ConditionCheckSVar", "ConditionSVarCompare",
     "ConditionDescription", "RememberChanged", "RememberMilled", "RememberDiscarded", "RememberDestroyed",
     "RememberSacrificed", "RememberDrawn", "RememberTokens", "RememberTargets", "ForgetOtherRemembered",
+    "UnlessScale",
 };
 static const char *const sApiParams[MTG_API_COUNT][12] = {
     [MTG_API_DEAL_DAMAGE] = {"NumDmg"},

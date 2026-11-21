@@ -125,6 +125,8 @@ static int CardProp(const MtgDuel *d, int obj, const char *p, size_t n, int src,
         h = Holder(d, src);
         return h && h->chosenPlayer && o->controller == h->chosenPlayer - 1;
     }
+    if (n == 31 && strncmp(p, "cameUnderControlSinceLastUpkeep", 31) == 0)   // (Echo's "if": mtg_game.c StartStep)
+        return !d || o->echoDue == 2;
     if (n == 17 && strncmp(p, "inZoneBattlefield", 17) == 0)   // ("by creatures": on the battlefield, not a spell)
         return !d || o->zone == MTG_ZONE_BATTLEFIELD;
     if (n == 10 && strncmp(p, "MultiColor", 10) == 0)

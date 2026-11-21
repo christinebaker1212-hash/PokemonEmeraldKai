@@ -1344,7 +1344,13 @@ static const char *ChooseText(void)
     AbilityWords(words, sizeof(words), q->source, q->ability, B.duel.res.trigger);
     if (q->choice == MTG_CHOICE_PAY && q->ability != 0xFFFF && gMtgAbilities[q->ability].unless) {
         char other[64];
-        UnlessWords(other, sizeof(other), &gMtgUnlessCosts[gMtgAbilities[q->ability].unless - 1]);
+        MtgCost scaled = gMtgUnlessCosts[gMtgAbilities[q->ability].unless - 1];
+        if (gMtgAbilities[q->ability].unlessScale) {   // (Cumulative upkeep: for each age counter, as it's paid)
+            int n = Mtg_Counters(&B.duel, q->source, gMtgAbilities[q->ability].unlessScale);
+            scaled.payLife = (uint8_t)(scaled.payLife * n);
+            scaled.mana = q->pay;
+        }
+        UnlessWords(other, sizeof(other), &scaled);
         snprintf(sChooseText, sizeof(sChooseText), "%s: %s?  %s", name, other, words);
     } else if (q->choice == MTG_CHOICE_PAY) {
         CostText(cost, sizeof(cost), &q->pay);

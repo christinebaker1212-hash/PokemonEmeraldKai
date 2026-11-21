@@ -159,6 +159,8 @@ typedef struct {
     uint8_t chosenColors;         // MTG_COLOR_BIT (0: none)
     uint8_t chosenPlayer;         // the player + 1 (0: none)
     int16_t chosenNumber;
+    uint8_t echoDue;              // Echo: 1 came under its controller since their last upkeep, 2 their upkeep now (its
+                                  // trigger's "if": Valid cameUnderControlSinceLastUpkeep), 0 paid for or not new
 } MtgObj;
 
 typedef struct {
