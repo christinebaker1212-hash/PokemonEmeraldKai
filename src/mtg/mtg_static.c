@@ -26,6 +26,7 @@ static const char *ParamOf(int first, int count, const char *key)
     return NULL;
 }
 
+static int AddStatic(MtgCardDef *c, const MtgStatic *st);
 static int Integer(const char *s, int *out)
 {
     char *end;
@@ -82,6 +83,10 @@ static int Keywords(MtgStatic *st, const char *text)
             k[i - 1] = 0;
         if ((kw = Mtg_KeywordByName(k)) >= 0) {
             st->addKeywords |= MTG_KW_BIT(kw);
+            continue;
+        }
+        if (strncmp(k, "Protection:Card.ChosenColor:", 28) == 0) {   // (its source's chosen color, as it is now)
+            st->protChosen = 1;
             continue;
         }
         for (i = 0; i < 5; i++) {
@@ -241,7 +246,7 @@ static void ParseOne(MtgCardDef *c, int cardId, char *text)
     static const char *const sKnown[] = {"Mode", "Affected", "AddPower", "AddToughness", "AddKeyword", "SetPower",
                                          "SetToughness", "Description", "AffectedZone", "EffectZone", "AffectedDefined",
                                          "IsPresent", "PresentCompare", "ValidCard", "ValidAttacker", "ValidBlocker", "CharacteristicDefining",
-                                         "Activator", "Type", "Amount", "Cost", "Condition", "Secondary", "UnlessDefender",
+                                         "Activator", "Type", "Amount", "Cost", "Condition", "Secondary", "UnlessDefender", "Target",
                                          "ValidCreature", "ValidTarget", "ValidSA", "ValidSource", "Caster", "AddAbility", "AddTrigger", "AddSVar", "GainControl",
                                          "CheckSVar", "SVarCompare", "AddHiddenKeyword"};
     MtgStatic st;
@@ -268,7 +273,35 @@ static void ParseOne(MtgCardDef *c, int cardId, char *text)
             : strcmp(s, "MustAttack") == 0 ? MTG_STATIC_MUST_ATTACK : strcmp(s, "CantBeCast") == 0 ? MTG_STATIC_CANT_BE_CAST
             : strcmp(s, "CantTarget") == 0 ? MTG_STATIC_CANT_TARGET : strcmp(s, "CantPlayLand") == 0 ? MTG_STATIC_CANT_PLAY_LAND
             : strcmp(s, "CantBeActivated") == 0 ? MTG_STATIC_CANT_BE_ACTIVATED
-            : strcmp(s, "CantRegenerate") == 0 ? MTG_STATIC_CANT_REGENERATE : 0xFF;
+            : strcmp(s, "CantRegenerate") == 0 ? MTG_STATIC_CANT_REGENERATE
+            : strcmp(s, "CantAttackUnless") == 0 ? MTG_STATIC_ATTACK_TAX : 0xFF;
+    if (st.mode == MTG_STATIC_ATTACK_TAX) {   // CantAttackUnless: its mana, a number or a counted SVar (no other costs)
+        const char *cost = ParamOf(first, count, "Cost"), *tg = ParamOf(first, count, "Target");
+        st.affected = ParamOf(first, count, "ValidCard");
+        if (!cost || !st.affected || !Mtg_ValidSpecKnown(st.affected) || (tg && strcmp(tg, "You")))
+            goto unknown;
+        for (i = 0; i < count; i++) {
+            const char *key = gMtgParams[first + i].key;
+            if (strcmp(key, "Mode") && strcmp(key, "ValidCard") && strcmp(key, "Target") && strcmp(key, "Cost")
+                && strcmp(key, "Description"))
+                goto unknown;
+        }
+        st.taxYou = tg != NULL;
+        if (Integer(cost, &v))
+            st.costGeneric = (uint8_t)v;
+        else if (CountedAmount(cardId, cost))
+            st.taxX = cost;
+        else
+            goto unknown;
+        if (!AddStatic(c, &st))
+            goto unknown;
+        return;
+    }
+    if ((s = ParamOf(first, count, "Target"))) {   // "can't attack you" (CantAttack only)
+        if (st.mode != MTG_STATIC_CANT_ATTACK || strcmp(s, "You"))
+            goto unknown;
+        st.taxYou = 1;
+    }
     if ((s = ParamOf(first, count, "AddHiddenKeyword"))) {   // "CARDNAME can't block." / "can't attack.": those modes
         if (st.mode != MTG_STATIC_CONTINUOUS || ParamOf(first, count, "AddPower") || ParamOf(first, count, "AddToughness")
             || ParamOf(first, count, "AddKeyword") || ParamOf(first, count, "SetPower") || !ParamOf(first, count, "Affected"))
@@ -1000,6 +1033,8 @@ static void ModsBy(const MtgDuel *d, const MtgStatic *st, int s, int ctrl, uint3
     m->keywords |= st->addKeywords;
     m->landwalk |= st->addLandwalk;
     m->protection |= st->addProtection;
+    if (st->protChosen && s >= 0 && s < d->objCount)
+        m->protection |= gMtgEffCtx ? gMtgEffCtx->chosenColors : d->objs[s].chosenColors;
     if (st->setPower != MTG_STATIC_NO_SET && srcSeq + 1 > setPowerSeq)
         m->setPower = st->setPower, setPowerSeq = srcSeq + 1;
     if (st->setToughness != MTG_STATIC_NO_SET && srcSeq + 1 > setToughSeq)
@@ -1152,6 +1187,8 @@ static int ForbidBy(const MtgDuel *d, const MtgStatic *st, int s, int ctrl, int 
         return 0;
     if (st->unlessDefender && DefenderIs(d, st, s, obj))
         return 0;   // (the defending player is as it says: it may attack)
+    if (mode == MTG_STATIC_CANT_ATTACK && st->taxYou && d->objs[obj].controller == ctrl)
+        return 0;   // ("can't attack you": its controller's own creatures attack the other player)
     // CantBeCast: OTHER is the player casting it (Caster$: anyone / its controller / an opponent / remembered)
     if (mode == MTG_STATIC_CANT_BE_CAST && ((st->activator == 1 && other != ctrl)
                                             || (st->activator == 2 && other == ctrl)
@@ -1172,6 +1209,36 @@ static int ForbidBy(const MtgDuel *d, const MtgStatic *st, int s, int ctrl, int 
             return 0;
     }
     return 1;
+}
+
+int Mtg_AttackTax(const MtgDuel *d, int attacker)
+{
+    int s, k, total = 0;
+    for (s = 0; s < d->objCount; s++) {
+        const MtgObj *src = &d->objs[s];
+        const MtgCardDef *c;
+        if (src->zone != MTG_ZONE_BATTLEFIELD)
+            continue;
+        c = Mtg_Card(src->def);
+        for (k = 0; k < c->staticCount; k++) {
+            const MtgStatic *st = &gMtgStatics[c->statics[k]];
+            if (st->mode != MTG_STATIC_ATTACK_TAX || (st->taxYou && src->controller == d->objs[attacker].controller)
+                || !Mtg_ValidObj(d, attacker, st->affected, s, src->controller))
+                continue;
+            if (st->taxX) {
+                MtgStackEntry e;
+                MtgResolveCtx ctx;
+                int ok;
+                memset(&e, 0, sizeof(e));
+                ctx.e = &e;
+                ctx.controller = src->controller;
+                ctx.source = s;
+                total += Mtg_Amount(d, &ctx, st->card, st->taxX, &ok);
+            } else
+                total += st->costGeneric;
+        }
+    }
+    return total;
 }
 
 int Mtg_StaticForbids(const MtgDuel *d, int mode, int obj, int other)

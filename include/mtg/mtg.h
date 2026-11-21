@@ -32,6 +32,7 @@ enum {
     MTG_KW_DOUBLE_STRIKE, MTG_KW_TRAMPLE, MTG_KW_SHROUD, MTG_KW_FEAR, MTG_KW_FLASH, MTG_KW_LIFELINK,
     MTG_KW_SHADOW,   // (Keyword.SHADOW: it blocks and is blocked only by creatures with shadow)
     MTG_KW_FLANKING, // (Keyword.FLANKING: a creature without flanking blocking it gets -1/-1 until end of turn)
+    MTG_KW_MENACE,   // (Keyword.MENACE: blocked only by two or more creatures)
     MTG_KW_COUNT
 };
 #define MTG_KW_BIT(k) (1u << (k))

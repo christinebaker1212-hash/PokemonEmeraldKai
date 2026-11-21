@@ -215,7 +215,8 @@ enum { MTG_STATIC_CONTINUOUS, MTG_STATIC_CANT_BLOCK, MTG_STATIC_CANT_ATTACK, MTG
        MTG_STATIC_RAISE_COST, MTG_STATIC_REDUCE_COST,
        MTG_STATIC_MUST_ATTACK, MTG_STATIC_CANT_BE_CAST, MTG_STATIC_CANT_TARGET, MTG_STATIC_CANT_PLAY_LAND, MTG_STATIC_CANT_BE_ACTIVATED,
        MTG_STATIC_ETB_TAPPED, MTG_STATIC_NO_UNTAP, MTG_STATIC_CANT_REGENERATE,
-       MTG_STATIC_PREVENT_DAMAGE, MTG_STATIC_CANT_BE_COUNTERED };   // (PREVENT_DAMAGE: Event$ DamageDone | Prevent$ True, another R: line)   // (two replacement effects, R: lines, kept here: they test alike)
+       MTG_STATIC_PREVENT_DAMAGE, MTG_STATIC_CANT_BE_COUNTERED,
+       MTG_STATIC_ATTACK_TAX };   // (CantAttackUnless: its mana for each creature it affects that attacks)   // (PREVENT_DAMAGE: Event$ DamageDone | Prevent$ True, another R: line)   // (two replacement effects, R: lines, kept here: they test alike)
 typedef struct {
     uint16_t card;
     uint8_t mode;                   // MTG_STATIC_*
@@ -254,6 +255,9 @@ typedef struct {
     uint8_t tgtKind, combatOnly, damageMax;
     uint8_t gainLife;               // ... and its controller gains the damage prevented as life
     uint8_t oneShot;                // an Effect's "the next time ...": ReplaceWith$ exiling the Effect (PreventionEffect$)
+    uint8_t protChosen;             // AddKeyword$ Protection:Card.ChosenColor: from its source's chosen color
+    uint8_t taxYou;                 // AttackTax's Target$ You: only for attacks on its controller
+    const char *taxX;               // ... its Cost$ an SVar counted now (else costGeneric)
 } MtgStatic;
 typedef struct {
     int addPower, addToughness, setPower, setToughness;
@@ -268,6 +272,7 @@ int Mtg_DamagePrevented(MtgDuel *d, int src, MtgTarget to, int combat, int amoun
 int Mtg_ChosenCard(const MtgDuel *d);   // ChooseSource's pick (the Effect's own while one is read), MTG_NO_OBJ: none   // a PreventDamage in force says so   // R: lines (only the forms above)
 void Mtg_StaticMods(const MtgDuel *d, int obj, MtgStaticMods *m);
 int Mtg_StaticForbids(const MtgDuel *d, int mode, int obj, int other);
+int Mtg_AttackTax(const MtgDuel *d, int attacker);   // the generic mana its attacking costs (Propaganda...)
 // a permanent's abilities now: its card's, then those statics give it (AddAbility$); returns how many (at most max)
 int Mtg_ObjAbilities(const MtgDuel *d, int obj, uint16_t *out, int max);
 int Mtg_ObjTriggers(const MtgDuel *d, int obj, uint16_t *out, int max);

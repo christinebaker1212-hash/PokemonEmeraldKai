@@ -2617,6 +2617,13 @@
 "number": "127",
 "set": "uds"
 },
+"Brainwash": {
+"artist": "Pete Venters",
+"file": "4ed_11",
+"frame": "1993",
+"number": "11",
+"set": "4ed"
+},
 "Branchsnap Lorian": {
 "artist": "Heather Hudson",
 "file": "lgn_118",
@@ -3765,6 +3772,13 @@
 "number": "10",
 "set": "mmq"
 },
+"Cho-Manno's Blessing": {
+"artist": "John Matson",
+"file": "mmq_12",
+"frame": "1997",
+"number": "12",
+"set": "mmq"
+},
 "Choke": {
 "artist": "Terese Nielsen",
 "file": "tmp_219",
@@ -4170,6 +4184,13 @@
 "frame": "1993",
 "number": "17",
 "set": "ice"
+},
+"Collective Restraint": {
+"artist": "Alan Rabinowitz",
+"file": "inv_49",
+"frame": "1997",
+"number": "49",
+"set": "inv"
 },
 "Collective Unconscious": {
 "artist": "Andrew Goldhawk",
@@ -5375,6 +5396,13 @@
 "number": "183",
 "set": "ody"
 },
+"Demoralize": {
+"artist": "Greg Hildebrandt & Tim Hildebrandt",
+"file": "ody_184",
+"frame": "1997",
+"number": "184",
+"set": "ody"
+},
 "Demystify": {
 "artist": "Christopher Rush",
 "file": "ons_24",
@@ -6361,6 +6389,13 @@
 "frame": "1997",
 "number": "240",
 "set": "ody"
+},
+"Elephant Grass": {
+"artist": "Tony Roberts",
+"file": "vis_104",
+"frame": "1997",
+"number": "104",
+"set": "vis"
 },
 "Elephant Guide": {
 "artist": "Jim Nelson",
@@ -7727,6 +7762,13 @@
 "number": "136",
 "set": "usg"
 },
+"Flickering Ward": {
+"artist": "Greg Simanson",
+"file": "tmp_19",
+"frame": "1997",
+"number": "19",
+"set": "tmp"
+},
 "Flight": {
 "artist": "Anson Maddocks",
 "file": "4ed_72",
@@ -7747,6 +7789,13 @@
 "frame": "1997",
 "number": "130",
 "set": "nem"
+},
+"Floating Shield": {
+"artist": "Keith Garletts",
+"file": "tor_5",
+"frame": "1997",
+"number": "5",
+"set": "tor"
 },
 "Flood": {
 "artist": "Dennis Detwiller",
@@ -8062,6 +8111,13 @@
 "frame": "1997",
 "number": "114",
 "set": "pcy"
+},
+"Form of the Dragon": {
+"artist": "Carl Critchlow",
+"file": "scg_93",
+"frame": "1997",
+"number": "93",
+"set": "scg"
 },
 "Forsaken City": {
 "artist": "Dana Knutson",
@@ -9029,6 +9085,13 @@
 "number": "196",
 "set": "usg"
 },
+"Goblin War Drums": {
+"artist": "Dan Frazier",
+"file": "5ed_237",
+"frame": "1997",
+"number": "237",
+"set": "5ed"
+},
 "Goblin War Strike": {
 "artist": "Michael Weaver",
 "file": "p02_105",
@@ -9090,6 +9153,13 @@
 "file": "all_72a",
 "frame": "1993",
 "number": "72a",
+"set": "all"
+},
+"Gorilla War Cry": {
+"artist": "Bryon Wackwitz",
+"file": "all_73a",
+"frame": "1993",
+"number": "73a",
 "set": "all"
 },
 "Gorilla Warrior": {
@@ -10282,6 +10352,13 @@
 "number": "62",
 "set": "pls"
 },
+"Imposing Visage": {
+"artist": "Phil Foglio",
+"file": "ice_193",
+"frame": "1993",
+"number": "193",
+"set": "ice"
+},
 "Improvised Armor": {
 "artist": "Alan Pollack",
 "file": "ons_40",
@@ -11324,6 +11401,13 @@
 "frame": "1997",
 "number": "141",
 "set": "nem"
+},
+"Koskun Falls": {
+"artist": "Rob Alexander",
+"file": "hml_55",
+"frame": "1993",
+"number": "55",
+"set": "hml"
 },
 "Koskun Keep": {
 "artist": "Pat Lewis",
@@ -15147,6 +15231,13 @@
 "number": "67",
 "set": "inv"
 },
+"Propaganda": {
+"artist": "Jeff Miracola",
+"file": "tmp_80",
+"frame": "1997",
+"number": "80",
+"set": "tmp"
+},
 "Prophetic Bolt": {
 "artist": "Dave Dorman",
 "file": "apc_116",
@@ -17470,6 +17561,13 @@
 "frame": "1997",
 "number": "165",
 "set": "inv"
+},
+"Searing Spear Askari": {
+"artist": "Richard Kane Ferguson",
+"file": "mir_191",
+"frame": "1997",
+"number": "191",
+"set": "mir"
 },
 "Searing Touch": {
 "artist": "D. Alexander Gregory",
@@ -20530,6 +20628,13 @@
 "number": "43",
 "set": "inv"
 },
+"Teferi's Moat": {
+"artist": "rk post",
+"file": "inv_279",
+"frame": "1997",
+"number": "279",
+"set": "inv"
+},
 "Teleport": {
 "artist": "Douglas Shuler",
 "file": "bchr_26",
@@ -22238,6 +22343,13 @@
 "number": "223",
 "set": "usg"
 },
+"Viashino Runner": {
+"artist": "Steve White",
+"file": "usg_224",
+"frame": "1997",
+"number": "224",
+"set": "usg"
+},
 "Viashino Sandscout": {
 "artist": "Scott M. Fischer",
 "file": "ulg_96",
@@ -22461,6 +22573,13 @@
 "frame": "1997",
 "number": "286",
 "set": "inv"
+},
+"Voice of All": {
+"artist": "rk post",
+"file": "pls_19",
+"frame": "1997",
+"number": "19",
+"set": "pls"
 },
 "Voice of Duty": {
 "artist": "Mark Zug",
@@ -22846,6 +22965,13 @@
 "frame": "1993",
 "number": "286",
 "set": "4ed"
+},
+"Ward Sliver": {
+"artist": "Pete Venters",
+"file": "lgn_25",
+"frame": "1997",
+"number": "25",
+"set": "lgn"
 },
 "Warmonger": {
 "artist": "Heather Hudson",
@@ -23280,6 +23406,20 @@
 "frame": "1997",
 "number": "77",
 "set": "por"
+},
+"Wind Spirit": {
+"artist": "Kaja Foglio",
+"file": "ice_106",
+"frame": "1993",
+"number": "106",
+"set": "ice"
+},
+"Windborn Muse": {
+"artist": "Adam Rex",
+"file": "lgn_28",
+"frame": "1997",
+"number": "28",
+"set": "lgn"
 },
 "Winding Wurm": {
 "artist": "DiTerlizzi",

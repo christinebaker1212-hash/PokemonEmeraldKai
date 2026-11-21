@@ -100,7 +100,7 @@ int Mtg_TokenDef(const char *script)
             snprintf(word, sizeof(word), "%s", tok);
             word[0] = (char)(word[0] >= 'a' && word[0] <= 'z' ? word[0] - 32 : word[0]);
             static const char *const sWalk[5] = {"plainswalk", "islandwalk", "swampwalk", "mountainwalk", "forestwalk"};
-            static const char *const sNot[] = {"banding", "menace", "provoke", "flanking", "shadow", "horsemanship",
+            static const char *const sNot[] = {"banding", "provoke", "flanking", "shadow", "horsemanship",
                                                "indestructible", "deathtouch", "hexproof", "changeling", "phasing"};
             int w, other = 0;
             for (w = 0; w < (int)(sizeof(sNot) / sizeof(sNot[0])); w++)
@@ -889,6 +889,7 @@ static const struct { const char *name; int kw; } sKeywords[] = {
     {"Defender", MTG_KW_DEFENDER}, {"First Strike", MTG_KW_FIRST_STRIKE}, {"Double Strike", MTG_KW_DOUBLE_STRIKE},
     {"Trample", MTG_KW_TRAMPLE}, {"Shroud", MTG_KW_SHROUD}, {"Fear", MTG_KW_FEAR}, {"Flash", MTG_KW_FLASH},
     {"Lifelink", MTG_KW_LIFELINK}, {"Shadow", MTG_KW_SHADOW}, {"Flanking", MTG_KW_FLANKING},
+    {"Menace", MTG_KW_MENACE},
 };
 static const char *const sColorNames[5] = {"white", "blue", "black", "red", "green"};
 static const char *const sBasicTypes[5] = {"Plains", "Island", "Swamp", "Mountain", "Forest"};

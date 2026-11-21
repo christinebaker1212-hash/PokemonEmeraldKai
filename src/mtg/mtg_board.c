@@ -1808,7 +1808,13 @@ void MtgBoard_Draw(void)
     case MODE_ATTACK: {
         char line[120];
         int n = __builtin_popcount(B.attack);
-        if (n)
+        int k, tax = 0;
+        for (k = 0; k < B.duel.query.candidateCount && k < 32; k++)   // (attack taxes: Propaganda)
+            if (B.attack & (1u << k))
+                tax += Mtg_AttackTax(&B.duel, B.duel.query.candidates[k]);
+        if (n && tax)
+            snprintf(line, sizeof(line), "%d attacking (pay %d): %d damage if not blocked  {START} ATTACK!", n, tax, AttackPower());
+        else if (n)
             snprintf(line, sizeof(line), "%d attacking: %d damage if not blocked  {START} ATTACK!", n, AttackPower());
         else
             snprintf(line, sizeof(line), "Choose your attackers  {A} CHOOSE  {SELECT} ALL  {START} NO ATTACK");

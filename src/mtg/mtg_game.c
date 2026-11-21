@@ -486,14 +486,17 @@ void Mtg_Destroy(MtgDuel *d, int obj, int noRegen)
 }
 
 // the protection an Aura gives its own creature (WHITE WARD's from white: it doesn't push itself off)
-static uint8_t Mtg_AuraOwnProtection(int def)
+static uint8_t Mtg_AuraOwnProtection(const MtgDuel *d, int aura)
 {
-    const MtgCardDef *c = Mtg_Card(def);
+    const MtgCardDef *c = Mtg_Card(d->objs[aura].def);
     uint8_t p = 0;
     int k;
     for (k = 0; k < c->staticCount; k++)
-        if (gMtgStatics[c->statics[k]].enchanted)
+        if (gMtgStatics[c->statics[k]].enchanted) {
             p |= gMtgStatics[c->statics[k]].addProtection;
+            if (gMtgStatics[c->statics[k]].protChosen)   // (FLICKERING WARD: its chosen color)
+                p |= d->objs[aura].chosenColors;
+        }
     return p;
 }
 
@@ -568,7 +571,7 @@ static void StateBasedActions(MtgDuel *d)
                 continue;
             if (to == MTG_NO_OBJ || to >= d->objCount || d->objs[to].zone != MTG_ZONE_BATTLEFIELD
                 || !Mtg_ValidObj(d, to, Mtg_Card(o->def)->enchantSpec ? Mtg_Card(o->def)->enchantSpec : "Creature", i, o->controller)
-                || (Mtg_Protection(d, to) & Mtg_ObjColors(d, i) & ~Mtg_AuraOwnProtection(o->def))) {
+                || (Mtg_Protection(d, to) & Mtg_ObjColors(d, i) & ~Mtg_AuraOwnProtection(d, i))) {
                 Mtg_MoveTo(d, i, MTG_ZONE_GRAVEYARD);
                 again = 1;
             }
@@ -2286,6 +2289,29 @@ int Mtg_Answer(MtgDuel *d, const MtgAnswer *a)
             if (Mtg_StaticForbids(d, MTG_STATIC_MUST_ATTACK, q->candidates[i], MTG_NO_OBJ))
                 forced.attack |= 1u << i;
         a = &forced;
+        {   // attack taxes (Propaganda): what can't be paid for is dropped, the last chosen first, then the rest paid
+            int tax, k;
+            MtgManaCost m;
+            for (;;) {
+                tax = 0;
+                for (k = 0; k < q->candidateCount && k < 32; k++)
+                    if (forced.attack & (1u << k))
+                        tax += Mtg_AttackTax(d, q->candidates[k]);
+                memset(&m, 0, sizeof(m));
+                m.generic = (uint8_t)(tax > 255 ? 255 : tax);
+                if (!tax || Mtg_CanPay(d, q->player, &m, 0, MTG_NO_OBJ))
+                    break;
+                for (k = (q->candidateCount < 32 ? q->candidateCount : 32) - 1; k >= 0; k--)
+                    if ((forced.attack & (1u << k)) && Mtg_AttackTax(d, q->candidates[k])) {
+                        forced.attack &= ~(1u << k);
+                        break;
+                    }
+                if (k < 0)
+                    break;
+            }
+            if (tax)
+                Mtg_Pay(d, q->player, &m, 0, MTG_NO_OBJ);
+        }
         for (i = 0; i < q->candidateCount; i++)
             if (a->attack & (1u << i)) {
                 int o = q->candidates[i];
@@ -2304,7 +2330,8 @@ int Mtg_Answer(MtgDuel *d, const MtgAnswer *a)
         }
         break;
     }
-    case MTG_Q_BLOCKERS:
+    case MTG_Q_BLOCKERS: {
+        static MtgAnswer fixedB;
         for (i = 0; i < q->candidateCount; i++) {
             int b = q->candidates[i], k = a->block[i];
             if (k < 0)
@@ -2312,6 +2339,19 @@ int Mtg_Answer(MtgDuel *d, const MtgAnswer *a)
             if (k >= q->attackerCount || !Mtg_CanBlock(d, b, q->attackers[k]))
                 return 0;
         }
+        fixedB = *a;   // (menace: a lone blocker of one doesn't block)
+        for (i = 0; i < q->attackerCount; i++) {
+            int n = 0, k;
+            if (!(Mtg_Keywords(d, q->attackers[i]) & MTG_KW_BIT(MTG_KW_MENACE)))
+                continue;
+            for (k = 0; k < q->candidateCount; k++)
+                n += fixedB.block[k] == i;
+            if (n == 1)
+                for (k = 0; k < q->candidateCount; k++)
+                    if (fixedB.block[k] == i)
+                        fixedB.block[k] = -1;
+        }
+        a = &fixedB;
         for (i = 0; i < q->candidateCount; i++) {
             int b = q->candidates[i], k = a->block[i];
             if (k < 0)
@@ -2323,6 +2363,7 @@ int Mtg_Answer(MtgDuel *d, const MtgAnswer *a)
         BlocksDeclared(d);
         d->stepStarted = 1;
         break;
+    }
     case MTG_Q_DISCARD:
         if (a->card >= q->candidateCount)
             return 0;

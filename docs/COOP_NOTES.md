@@ -8671,3 +8671,13 @@ res/moves/chatter/anim.s).
   (MtgCost.xPart): the X offered is at most what that part can pay (Mtg_CostMaxX: the life, the cards, the
   permanents, the counters), paid with the X chosen (PayCost's sCostX). Mana abilities with one (the storage lands)
   are activated on their own (ManaByHand), X asked. Playable: 3407 -> 3424.
+
+## MAGIC: attack taxes, "can't attack you", protection from the chosen color, Menace (2026-11-21)
+- CantAttackUnless with a mana Cost$ (a number or a counted SVar): MTG_STATIC_ATTACK_TAX, Mtg_AttackTax per attacker;
+  the declared attackers' taxes are paid together, the last chosen dropped while it can't all be paid (mtg_game.c
+  ATTACKERS); the table's attack prompt says "pay N". Target$ You: only for attacks on its controller (MtgStatic.taxYou;
+  CantAttack's too: Teferi's Moat, Form of the Dragon).
+- AddKeyword$ Protection:Card.ChosenColor: protection from its source's chosen color (MtgStatic.protChosen; an Aura's own
+  color doesn't push it off: Mtg_AuraOwnProtection).
+- Menace (MTG_KW_MENACE): a lone blocker of a menace attacker doesn't block (BLOCKERS answer).
+- Playable: 3424 -> 3444. Tests: test_rules.c TestTapAllPerm (Propaganda, Form of the Dragon, Viashino Runner, Voice of All).

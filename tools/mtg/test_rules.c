@@ -3018,6 +3018,65 @@ static void TestTapAllPerm(void)
                   "two counters off: UU floating, one left");
         }
     }
+    {   // Propaganda: {2} for each creature attacking its controller (three lands: one of the two attacks); Form of the
+        // Dragon: creatures without flying can't attack you, but its controller's own still attack
+        int b1, b2, own;
+        Table();
+        Put(1, "Propaganda", MTG_ZONE_BATTLEFIELD);
+        b1 = Put(0, "Grizzly Bears", MTG_ZONE_BATTLEFIELD);
+        b2 = Put(0, "Grizzly Bears", MTG_ZONE_BATTLEFIELD);
+        Lands(0, "Forest", 3);
+        Attack(3);
+        CHECK(sD.objs[b1].attacking + sD.objs[b2].attacking == 1, "one paid for, one dropped");
+        {
+            int k, tapped = 0;
+            for (k = 0; k < sD.objCount; k++)
+                tapped += sD.objs[k].zone == MTG_ZONE_BATTLEFIELD && sD.objs[k].tapped && (Mtg_Card(sD.objs[k].def)->types & MTG_T_LAND);
+            CHECK(tapped == 2, "{2} paid (%d lands tapped)", tapped);
+        }
+        Table();
+        Put(1, "Form of the Dragon", MTG_ZONE_BATTLEFIELD);
+        b1 = Put(0, "Grizzly Bears", MTG_ZONE_BATTLEFIELD);
+        own = Put(1, "Grizzly Bears", MTG_ZONE_BATTLEFIELD);
+        CHECK(Mtg_StaticForbids(&sD, MTG_STATIC_CANT_ATTACK, b1, MTG_NO_OBJ)
+              && !Mtg_StaticForbids(&sD, MTG_STATIC_CANT_ATTACK, own, MTG_NO_OBJ), "their bears can't attack you, yours can");
+    }
+    {   // Menace: one blocker doesn't block it, two do; Voice of All's chosen color gives it protection
+        int run, b1, b2, voice;
+        Table();
+        run = Put(0, "Viashino Runner", MTG_ZONE_BATTLEFIELD);
+        b1 = Put(1, "Grizzly Bears", MTG_ZONE_BATTLEFIELD);
+        b2 = Put(1, "Grizzly Bears", MTG_ZONE_BATTLEFIELD);
+        Attack(1);
+        Block(b1, run);
+        CHECK(sD.objs[b1].blocking == MTG_NO_OBJ && !sD.objs[run].blocked, "one blocker: not blocked");
+        GoToTurn(0, MTG_STEP_MAIN1);
+        GoToTurn(1, MTG_STEP_MAIN1);
+        GoToTurn(0, MTG_STEP_MAIN1);
+        sD.objs[run].tapped = 0;
+        Attack(1);
+        {
+            const MtgQuery *q = Mtg_Query(&sD);
+            MtgAnswer a;
+            int k;
+            while (q->kind == MTG_Q_PRIORITY && sD.step == MTG_STEP_COMBAT_ATTACKERS)
+                Pass();
+            memset(&a, 0, sizeof(a));
+            memset(a.block, -1, sizeof(a.block));
+            for (k = 0; k < q->candidateCount; k++)
+                if (q->candidates[k] == b1 || q->candidates[k] == b2)
+                    a.block[k] = 0;
+            Answer(&a);
+            CHECK(sD.objs[run].blocked && sD.objs[b1].blocking == run && sD.objs[b2].blocking == run, "two blockers: blocked");
+        }
+        Table();
+        voice = Put(0, "Voice of All", MTG_ZONE_HAND);
+        Mtg_MoveTo(&sD, voice, MTG_ZONE_BATTLEFIELD);
+        Mtg_RefreshQuery(&sD);
+        if (Mtg_Query(&sD)->kind == MTG_Q_CHOOSE)
+            ChooseOption(NULL, MTG_R);
+        CHECK(Mtg_Protection(&sD, voice) & MTG_COLOR_BIT(MTG_R), "voice of all: protection from red");
+    }
     {   // Flailing Ogre: any player may activate its -1/-1 (the opponent, paying)
         int ogre, k, found = -1;
         const MtgQuery *q;
