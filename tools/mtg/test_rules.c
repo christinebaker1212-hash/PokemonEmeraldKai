@@ -2976,6 +2976,48 @@ static void TestTapAllPerm(void)
         GoToTurn(1, MTG_STEP_MAIN1);
         CHECK(Mtg_Keywords(&sD, bird) & MTG_KW_BIT(MTG_KW_FLYING), "flying again next turn");
     }
+    {   // Hatred: pay X life (X chosen, up to the life there is): +X/+0
+        int hat, bears, k;
+        MtgAnswer an;
+        Table();
+        Lands(0, "Swamp", 5);
+        hat = Put(0, "Hatred", MTG_ZONE_HAND);
+        bears = Put(0, "Grizzly Bears", MTG_ZONE_BATTLEFIELD);
+        k = Find(MTG_ACT_CAST, hat, MTG_TGT_OBJ, bears);
+        CHECK(k >= 0, "hatred castable");
+        memset(&an, 0, sizeof(an));
+        an.action = (uint16_t)k;
+        Answer(&an);
+        CHECK(Mtg_Query(&sD)->forCost == 8 && Mtg_Query(&sD)->optCount == 21, "X asked: 0 to 20 life (%d)", Mtg_Query(&sD)->optCount);
+        memset(&an, 0, sizeof(an));
+        an.card = 3;
+        Answer(&an);
+        PassBoth();
+        CHECK(sD.players[0].life == 17 && Mtg_Power(&sD, bears) == 5, "3 life: 5/2 (%d, %d)", sD.players[0].life, Mtg_Power(&sD, bears));
+    }
+    {   // Saprazzan Cove: a storage counter a turn, then T, remove X: X blue mana (X asked, the counters there are)
+        int cove, k;
+        MtgAnswer an;
+        Table();
+        cove = Put(0, "Saprazzan Cove", MTG_ZONE_BATTLEFIELD);
+        Mtg_AddCountersKind(&sD, cove, Mtg_CounterKind("STORAGE"), 3);
+        k = -1;
+        Mtg_RefreshQuery(&sD);
+        for (int j = 0; j < Mtg_Query(&sD)->actionCount; j++)
+            if (Mtg_Query(&sD)->actions[j].obj == cove && gMtgAbilities[Mtg_Query(&sD)->actions[j].ability].api == MTG_API_MANA)
+                k = j;
+        CHECK(k >= 0 && Mtg_Query(&sD)->actions[k].x == 3, "the cove's mana: up to 3");
+        if (k >= 0) {
+            memset(&an, 0, sizeof(an));
+            an.action = (uint16_t)k;
+            Answer(&an);
+            memset(&an, 0, sizeof(an));
+            an.card = 2;
+            Answer(&an);
+            CHECK(sD.players[0].pool[MTG_U] == 2 && Mtg_Counters(&sD, cove, Mtg_CounterKind("STORAGE")) == 1 && sD.objs[cove].tapped,
+                  "two counters off: UU floating, one left");
+        }
+    }
     {   // Flailing Ogre: any player may activate its -1/-1 (the opponent, paying)
         int ogre, k, found = -1;
         const MtgQuery *q;

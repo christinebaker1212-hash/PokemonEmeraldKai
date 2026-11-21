@@ -127,7 +127,7 @@ int Mtg_AddExtraCost(const char *text, const char *label)
     MtgAltCost alt;
     memset(&alt, 0, sizeof(alt));
     if (!Mtg_ParseCost(text, &alt.cost) || alt.cost.mana.x || alt.cost.tap || alt.cost.sacSelf || alt.cost.exileSelf
-        || alt.cost.returnSelf || alt.cost.discardSelf || alt.cost.subCtrN || alt.cost.damageYou)
+        || alt.cost.returnSelf || alt.cost.discardSelf || alt.cost.subCtrN || alt.cost.damageYou || alt.cost.xPart)
         return 0;
     snprintf(alt.label, sizeof(alt.label), "%s", label);
     if (sAltCount + 1 > sAltCap) {
@@ -177,7 +177,7 @@ static void ParseAlt(MtgCardDef *c, int cardId, char *text)
         || !(s = ParamOf(first, count, "EffectZone")) || strcmp(s, "All") != 0
         || !(s = ParamOf(first, count, "Cost")) || !Mtg_ParseCost(s, &alt.cost)
         || Mtg_ManaCostTotal(&alt.cost.mana) || alt.cost.mana.x || alt.cost.tap || alt.cost.sacSelf || alt.cost.exileSelf
-        || alt.cost.returnSelf || alt.cost.discardSelf || alt.cost.discardRandom)
+        || alt.cost.returnSelf || alt.cost.discardSelf || alt.cost.discardRandom || alt.cost.xPart)
         goto unknown;
     if ((alt.present = ParamOf(first, count, "IsPresent")) && !Mtg_ValidSpecKnown(alt.present))
         goto unknown;

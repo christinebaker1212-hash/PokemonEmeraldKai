@@ -1134,7 +1134,19 @@ static void AddAltCasts(const MtgDuel *d, MtgQuery *q, int obj, int p)
 static int HasOther(const MtgCost *c)
 {
     return c->sacN || c->discardN || c->payLife || c->exileHandN || c->returnN || c->tapTypeN || c->exileGraveN
-        || c->discardHand || c->millN || c->exileTopN || c->subCtrAll;
+        || c->discardHand || c->millN || c->exileTopN || c->subCtrAll || c->xPart;
+}
+
+int Mtg_CostMaxX(const MtgDuel *d, int player, const MtgCost *c, int source)
+{
+    switch (c->xPart) {
+    case MTG_XPART_LIFE: return d->players[player].life > 0 ? d->players[player].life : 0;
+    case MTG_XPART_DISCARD: return Mtg_CostCandidates(d, player, c, MTG_COSTK_DISCARD, source, NULL);
+    case MTG_XPART_SAC: return Mtg_CostCandidates(d, player, c, MTG_COSTK_SAC, source, NULL);
+    case MTG_XPART_EXILE_GRAVE: return Mtg_CostCandidates(d, player, c, MTG_COSTK_EXILE_GRAVE, source, NULL);
+    case MTG_XPART_COUNTERS: return source != MTG_NO_OBJ ? Mtg_Counters(d, source, c->subCtrKind) : 0;
+    }
+    return 0;
 }
 
 // a mana ability that paying never uses (it costs mana, sacrifices itself, or more than {T}): activated on its own,
@@ -1142,7 +1154,8 @@ static int HasOther(const MtgCost *c)
 static int ManaByHand(const MtgAbility *ab)
 {
     return ab->api == MTG_API_MANA && (!ab->cost.tap || ab->cost.sacSelf || Mtg_ManaCostTotal(&ab->cost.mana)
-                                       || ab->cost.mana.x || HasOther(&ab->cost) || ab->cost.exileSelf || ab->cost.returnSelf);
+                                       || ab->cost.mana.x || HasOther(&ab->cost) || ab->cost.exileSelf || ab->cost.returnSelf
+                                       || ab->cost.xPart);
 }
 
 // the extra cost a cast pays (gMtgAltCosts + 1: its alternative one, a kicker, buyback, flashback; 0 none or two)
@@ -1286,6 +1299,14 @@ static void BuildPriority(MtgDuel *d)
             ability = MainAbility(c);
             if (ability != 0xFFFF && !Mtg_CostPayable(d, p, &gMtgAbilities[ability].cost, i, i))
                 continue;
+            if (ability != 0xFFFF && gMtgAbilities[ability].cost.xPart) {   // (X also in an additional cost: no more than it pays)
+                int most = Mtg_CostMaxX(d, p, &gMtgAbilities[ability].cost, i);
+                x = cost.x ? (x < most ? x : most) : most;
+                if (gMtgAbilities[ability].cost.xPart == MTG_XPART_DISCARD && x > 0)
+                    x--;   // (the card being cast pays nothing)
+                if (x == 0 && !cost.x)
+                    continue;
+            }
             if (ability != 0xFFFF && ((gMtgAbilities[ability].actMyTurn && d->active != p)
                                       || (gMtgAbilities[ability].actSteps
                                           && !(gMtgAbilities[ability].actSteps & (1u << d->step)))))
@@ -1325,6 +1346,12 @@ static void BuildPriority(MtgDuel *d)
                     continue;
                 if (ab->cost.mana.x) {
                     x = Mtg_MaxX(d, p, &ab->cost.mana, ab->cost.tap ? i : MTG_NO_OBJ);
+                    if (x == 0)
+                        continue;
+                }
+                if (ab->cost.xPart) {   // (X in a part besides mana: no more than that part can pay)
+                    int most = Mtg_CostMaxX(d, p, &ab->cost, i);
+                    x = ab->cost.mana.x ? (x < most ? x : most) : most;
                     if (x == 0)
                         continue;
                 }
@@ -1510,8 +1537,15 @@ static void PayCostPick(MtgDuel *d, int obj)
 }
 
 // the costs paid at once (life, a random discard, the source exiled or returned); the picks are set to be asked
+static int sCostX;   // (the X chosen for the cost being paid: its X part's amount)
 static void PayCost(MtgDuel *d, int p, const MtgCost *c, int ability, int source, int alt)
 {
+    if (c->xPart == MTG_XPART_LIFE && sCostX > 0) {
+        d->players[p].life = (int16_t)(d->players[p].life - sCostX);
+        Mtg_Event(d, MTG_EV_LIFE, p, -sCostX, d->players[p].life);
+    }
+    if (c->xPart == MTG_XPART_COUNTERS && sCostX > 0)
+        Mtg_AddCountersKind(d, source, c->subCtrKind, -sCostX);
     if (c->payLife) {
         d->players[p].life -= c->payLife;
         Mtg_Event(d, MTG_EV_LIFE, p, -c->payLife, d->players[p].life);
@@ -1556,12 +1590,12 @@ static void PayCost(MtgDuel *d, int p, const MtgCost *c, int ability, int source
                 Mtg_MoveTo(d, hand[Mtg_Random(d, (uint32_t)n)], MTG_ZONE_GRAVEYARD);
         }
     }
-    d->costSac = c->sacN;
-    d->costDiscard = c->discardRandom ? 0 : c->discardN;
+    d->costSac = c->xPart == MTG_XPART_SAC ? (uint8_t)sCostX : c->sacN;
+    d->costDiscard = c->xPart == MTG_XPART_DISCARD ? (uint8_t)sCostX : c->discardRandom ? 0 : c->discardN;
     d->costExile = c->exileHandN;
     d->costReturn = c->returnN;
     d->costTap = c->tapTypeN;
-    d->costExileGrave = c->exileGraveN;
+    d->costExileGrave = c->xPart == MTG_XPART_EXILE_GRAVE ? (uint8_t)sCostX : c->exileGraveN;
     d->costPlayer = (uint8_t)p;
     d->costSource = (uint16_t)source;
     d->costAbility = (uint16_t)ability;
@@ -1653,6 +1687,7 @@ static void DoAction(MtgDuel *d, const MtgAction *a)
     e->source = a->obj;
     e->ability = a->ability;
     e->x = a->x;
+    sCostX = a->x;   // (an X part of its costs pays this much)
     e->target = a->target;
     e->trigger = 0xFFFF;
     Mtg_Event(d, e->isSpell ? MTG_EV_CAST : MTG_EV_ACTIVATE, a->obj, a->target.kind, a->target.id);

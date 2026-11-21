@@ -82,7 +82,9 @@ typedef struct {
     uint8_t subCtrAll;                      // SubCounter<All/TYPE>: every one of them (subCtrKind)
     uint8_t discardHand;                    // Discard<1/Hand>: its player's whole hand
     uint8_t millN, exileTopN;               // Mill<n>, ExileFromTop<n/Card>: its player's library's top cards
+    uint8_t xPart;                          // one part's amount is X (as chosen: MtgAction.x): MTG_XPART_*
 } MtgCost;
+enum { MTG_XPART_NONE, MTG_XPART_LIFE, MTG_XPART_DISCARD, MTG_XPART_SAC, MTG_XPART_COUNTERS, MTG_XPART_EXILE_GRAVE };
 // what a cost's picks come from (Mtg_CostCandidates): 0 discard (hand), 1 sacrifice, 2 exile from the hand, 3 return
 // to the hand, 4 tap (an untapped permanent), 5 exile from the graveyard
 enum { MTG_COSTK_DISCARD, MTG_COSTK_SAC, MTG_COSTK_EXILE_HAND, MTG_COSTK_RETURN, MTG_COSTK_TAP, MTG_COSTK_EXILE_GRAVE };
@@ -102,6 +104,7 @@ int Mtg_CostPayable(const MtgDuel *d, int player, const MtgCost *c, int source, 
 int Mtg_PayUnlessCost(MtgDuel *d, int player, int ability, int source);
 int Mtg_PayOptCost(MtgDuel *d, int player, int ability, int source);   // (a trigger's own cost's picks: 1 if asked)
 int Mtg_CostCandidates(const MtgDuel *d, int player, const MtgCost *c, int sac, int source, uint16_t *out);
+int Mtg_CostMaxX(const MtgDuel *d, int player, const MtgCost *c, int source);   // its X part's most (the life, the cards...)
 
 #define MTG_TGT_X 0xFF
 typedef struct {

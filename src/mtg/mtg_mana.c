@@ -58,6 +58,8 @@ int Mtg_ManaAbilityColors(const MtgDuel *d, int obj, int *amount)
             continue;
         if (ab->cost.subCtrN && Mtg_Counters(d, obj, ab->cost.subCtrKind) < ab->cost.subCtrN)
             continue;   // (T, remove a depletion counter: only while it has one)
+        if (ab->cost.xPart)
+            continue;   // (an X to choose: activated on its own)
         if (Mtg_StaticForbids(d, MTG_STATIC_CANT_BE_ACTIVATED, obj, abil[i]))
             continue;   // (Null Rod on a Mox, Cursed Totem on Llanowar Elves)
         m = Mtg_ProducedColors(Mtg_Param(ab, "Produced"));

@@ -309,8 +309,21 @@ static int CostPart(const char *tok, const char *name, int *n, const char **spec
     if (strncmp(tok, name, len) != 0 || tok[len] != '<' || !(end = strchr(tok, '>')))
         return 0;
     p = tok + len + 1;
+    if (*p == 'X' && (p[1] == '>' || p[1] == '/')) {   // (X: as chosen; 2 says so, *n is 0)
+        *n = 0;
+        p++;
+        if (*p == '>') {
+            *spec = NULL, *specLen = 0;
+            return 2;
+        }
+        p++;
+        slash = strchr(p, '/');
+        *spec = p;
+        *specLen = (size_t)((slash && slash < end ? slash : end) - p);
+        return 2;
+    }
     if (*p < '0' || *p > '9')
-        return -1;   // (X and the like: not yet)
+        return -1;   // (the likes of XMin1: not yet)
     *n = atoi(p);
     while (*p >= '0' && *p <= '9')
         p++;
@@ -387,7 +400,16 @@ int Mtg_ParseCost(const char *s, MtgCost *out)
         else if ((r = CostPart(tok, "SubCounter", &n, &spec, &specLen)) != 0) {   // CostRemoveCounter (from itself)
             char kname[16];
             int kind;
-            if (r < 0 || !spec || n < 1 || n > 20 || out->subCtrN || specLen >= sizeof(kname))
+            if (r == 2 && !out->xPart && spec && specLen < sizeof(kname) && !out->subCtrN) {   // SubCounter<X/TYPE>
+                memcpy(kname, spec, specLen);
+                kname[specLen] = 0;
+                if ((kind = Mtg_CounterKind(kname)) <= 0)
+                    return 0;
+                out->xPart = MTG_XPART_COUNTERS;
+                out->subCtrKind = (uint8_t)kind;
+                continue;
+            }
+            if (r < 0 || r == 2 || !spec || n < 1 || n > 20 || out->subCtrN || specLen >= sizeof(kname))
                 return 0;
             memcpy(kname, spec, specLen);
             kname[specLen] = 0;
@@ -400,18 +422,36 @@ int Mtg_ParseCost(const char *s, MtgCost *out)
                 return 0;
             out->damageYou = (uint8_t)n;
         } else if ((r = CostPart(tok, "PayLife", &n, &spec, &specLen)) != 0) {
-            if (r < 0 || spec || n < 1 || n > 20 || out->payLife)
+            if (r == 2 && !spec && !out->xPart && !out->payLife) {   // PayLife<X>
+                out->xPart = MTG_XPART_LIFE;
+                continue;
+            }
+            if (r < 0 || r == 2 || spec || n < 1 || n > 20 || out->payLife)
                 return 0;
             out->payLife = (uint8_t)n;
         } else if ((r = CostPart(tok, "Sac", &n, &spec, &specLen)) != 0) {
-            if (r < 0 || !spec || n < 1 || n > 3 || out->sacN)
+            if (r == 2 && spec && !out->xPart && !out->sacN) {   // Sac<X/Type>
+                out->xPart = MTG_XPART_SAC;
+                out->sacSpec = KeepSpec(spec, specLen);
+                if (!Mtg_ValidSpecKnown(out->sacSpec))
+                    return 0;
+                continue;
+            }
+            if (r < 0 || r == 2 || !spec || n < 1 || n > 3 || out->sacN)
                 return 0;
             out->sacN = (uint8_t)n;
             out->sacSpec = KeepSpec(spec, specLen);
             if (!Mtg_ValidSpecKnown(out->sacSpec))
                 return 0;
         } else if ((r = CostPart(tok, "Discard", &n, &spec, &specLen)) != 0) {
-            if (r < 0 || !spec || n < 1 || n > 3 || out->discardN)
+            if (r == 2 && spec && !out->xPart && !out->discardN && strncmp(spec, "Random", 6) && strncmp(spec, "Hand", 4)) {
+                out->xPart = MTG_XPART_DISCARD;   // Discard<X/Type>
+                out->discardSpec = KeepSpec(spec, specLen);
+                if (!Mtg_ValidSpecKnown(out->discardSpec))
+                    return 0;
+                continue;
+            }
+            if (r < 0 || r == 2 || !spec || n < 1 || n > 3 || out->discardN)
                 return 0;
             out->discardN = (uint8_t)n;
             if (specLen == 6 && strncmp(spec, "Random", 6) == 0)
@@ -424,7 +464,14 @@ int Mtg_ParseCost(const char *s, MtgCost *out)
                     return 0;
             }
         } else if ((r = CostPart(tok, "ExileFromGrave", &n, &spec, &specLen)) != 0) {   // CostExile from the graveyard
-            if (r < 0 || !spec || n < 1 || n > 5 || out->exileGraveN)
+            if (r == 2 && spec && !out->xPart && !out->exileGraveN) {   // ExileFromGrave<X/Type>
+                out->xPart = MTG_XPART_EXILE_GRAVE;
+                out->exileGraveSpec = KeepSpec(spec, specLen);
+                if (!Mtg_ValidSpecKnown(out->exileGraveSpec) || strstr(out->exileGraveSpec, "CARDNAME"))
+                    return 0;
+                continue;
+            }
+            if (r < 0 || r == 2 || !spec || n < 1 || n > 5 || out->exileGraveN)
                 return 0;
             out->exileGraveN = (uint8_t)n;
             out->exileGraveSpec = specLen == 4 && strncmp(spec, "card", 4) == 0 ? "Card"   // (Psychatog's spelling)
@@ -588,7 +635,7 @@ static int ParseAbility(MtgCardDef *c, int cardId, char *text, int kind, int dep
         MtgManaCost m;
         MtgCost uc;
         if (!(Mtg_ParseManaCost(v, &m) && !m.x) && Mtg_ParseCost(v, &uc) && !uc.tap && !uc.sacSelf && !uc.exileSelf
-            && !uc.returnSelf && !uc.discardSelf && !uc.mana.x) {
+            && !uc.returnSelf && !uc.discardSelf && !uc.mana.x && !uc.xPart) {
             gMtgUnlessCosts = Grow(gMtgUnlessCosts, &sUnlessCap, sUnlessCount + 1, sizeof(MtgCost));
             gMtgUnlessCosts[sUnlessCount++] = uc;
             ab = &gMtgAbilities[idx];
@@ -596,7 +643,7 @@ static int ParseAbility(MtgCardDef *c, int cardId, char *text, int kind, int dep
         }
     }
     if (kind == MTG_AB_TRIGGERED && Mtg_Param(ab, "Cost") && strcmp(gMtgParams[first].key, "AB") == 0
-        && !ab->cost.mana.x && !ab->cost.discardSelf && !ab->cost.subCtrN && !ab->cost.subCtrAll)
+        && !ab->cost.mana.x && !ab->cost.discardSelf && !ab->cost.subCtrN && !ab->cost.subCtrAll && !ab->cost.xPart)
         ab->optCost = 1;   // (a trigger's "you may pay ... If you do": asked as it resolves)
     else if (kind != MTG_AB_SPELL && kind != MTG_AB_ACTIVATED && Mtg_Param(ab, "Cost"))
         Unsupported(c, "optional cost");

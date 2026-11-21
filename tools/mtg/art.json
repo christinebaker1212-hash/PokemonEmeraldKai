@@ -3709,6 +3709,13 @@
 "number": "56",
 "set": "tmp"
 },
+"Chill Haunting": {
+"artist": "Brian Snõddy",
+"file": "scg_60",
+"frame": "1997",
+"number": "60",
+"set": "scg"
+},
 "Chilling Apparition": {
 "artist": "Ron Spears",
 "file": "pcy_59",
@@ -4296,6 +4303,13 @@
 "frame": "1997",
 "number": "291",
 "set": "usg"
+},
+"Copper-Leaf Angel": {
+"artist": "Christopher Moeller",
+"file": "pcy_137",
+"frame": "1997",
+"number": "137",
+"set": "pcy"
 },
 "Coral Atoll": {
 "artist": "John Avon",
@@ -8091,6 +8105,13 @@
 "number": "19",
 "set": "mmq"
 },
+"Fountain of Cho": {
+"artist": "Scott Hampton",
+"file": "mmq_317",
+"frame": "1997",
+"number": "317",
+"set": "mmq"
+},
 "Fountain of Youth": {
 "artist": "Daniel Gelon",
 "file": "bchr_98",
@@ -9463,6 +9484,13 @@
 "number": "108",
 "set": "inv"
 },
+"Hatred": {
+"artist": "Brom",
+"file": "exo_64",
+"frame": "1997",
+"number": "64",
+"set": "exo"
+},
 "Haunted Cadaver": {
 "artist": "Randy Gallegos",
 "file": "ons_154",
@@ -9476,6 +9504,13 @@
 "frame": "1997",
 "number": "138",
 "set": "mmq"
+},
+"Haunting Misery": {
+"artist": "Gary Leach",
+"file": "wth_71",
+"frame": "1997",
+"number": "71",
+"set": "wth"
 },
 "Havenwood Battleground": {
 "artist": "Mark Poole",
@@ -12529,6 +12564,20 @@
 "number": "46",
 "set": "jud"
 },
+"Mercadian Bazaar": {
+"artist": "Terese Nielsen",
+"file": "mmq_321",
+"frame": "1997",
+"number": "321",
+"set": "mmq"
+},
+"Mercadian Lift": {
+"artist": "Gary Ruddell",
+"file": "mmq_306",
+"frame": "1997",
+"number": "306",
+"set": "mmq"
+},
 "Mercenary Informer": {
 "artist": "Nelson DeCastro",
 "file": "pcy_15",
@@ -13320,6 +13369,13 @@
 "number": "132",
 "set": "vis"
 },
+"Murderous Betrayal": {
+"artist": "Randy Gallegos",
+"file": "nem_61",
+"frame": "1997",
+"number": "61",
+"set": "nem"
+},
 "Muscle Sliver": {
 "artist": "Richard Kane Ferguson",
 "file": "tmp_238",
@@ -13571,6 +13627,13 @@
 "frame": "1997",
 "number": "44",
 "set": "apc"
+},
+"Necrologia": {
+"artist": "Brom",
+"file": "exo_68",
+"frame": "1997",
+"number": "68",
+"set": "exo"
 },
 "Need for Speed": {
 "artist": "Christopher Moeller",
@@ -14096,6 +14159,13 @@
 "frame": "1997",
 "number": "32",
 "set": "mir"
+},
+"Painbringer": {
+"artist": "Pete Venters",
+"file": "ody_155",
+"frame": "1997",
+"number": "155",
+"set": "ody"
 },
 "Paladin en-Vec": {
 "artist": "Randy Elliott",
@@ -16722,6 +16792,13 @@
 "number": "264",
 "set": "mmq"
 },
+"Rushwood Grove": {
+"artist": "George Pratt",
+"file": "mmq_325",
+"frame": "1997",
+"number": "325",
+"set": "mmq"
+},
 "Rushwood Herbalist": {
 "artist": "Terese Nielsen",
 "file": "mmq_265",
@@ -16981,6 +17058,13 @@
 "number": "98",
 "set": "mmq"
 },
+"Saprazzan Cove": {
+"artist": "Rebecca Guay",
+"file": "mmq_327",
+"frame": "1997",
+"number": "327",
+"set": "mmq"
+},
 "Saprazzan Legate": {
 "artist": "Andrew Goldhawk",
 "file": "mmq_100",
@@ -17176,6 +17260,13 @@
 "frame": "1993",
 "number": "141",
 "set": "all"
+},
+"Scorched Earth": {
+"artist": "Nicola Leonard",
+"file": "tmp_200",
+"frame": "1997",
+"number": "200",
+"set": "tmp"
 },
 "Scorching Missile": {
 "artist": "Don Hazeltine",
@@ -18066,6 +18157,13 @@
 "number": "156",
 "set": "usg"
 },
+"Sickening Dreams": {
+"artist": "Scott M. Fischer",
+"file": "tor_83",
+"frame": "1997",
+"number": "83",
+"set": "tor"
+},
 "Siege-Gang Commander": {
 "artist": "Christopher Moeller",
 "file": "scg_103",
@@ -18254,6 +18352,13 @@
 "frame": "1997",
 "number": "213",
 "set": "mmq"
+},
+"Skeletal Scrying": {
+"artist": "Bob Petillo",
+"file": "ody_161",
+"frame": "1997",
+"number": "161",
+"set": "ody"
 },
 "Skeleton Ship": {
 "artist": "Amy Weber & Tom Wänerstrand",
@@ -19991,6 +20096,13 @@
 "number": "48",
 "set": "nem"
 },
+"Subterranean Hangar": {
+"artist": "Matt Cavotta",
+"file": "mmq_329",
+"frame": "1997",
+"number": "329",
+"set": "mmq"
+},
 "Subterranean Spirit": {
 "artist": "John Bolton",
 "file": "mir_195",
@@ -21166,6 +21278,13 @@
 "frame": "1993",
 "number": "109",
 "set": "bchr"
+},
+"Tornado": {
+"artist": "Susan Van Camp",
+"file": "all_101",
+"frame": "1993",
+"number": "101",
+"set": "all"
 },
 "Torture": {
 "artist": "Mark Tedin",

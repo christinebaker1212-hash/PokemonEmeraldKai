@@ -8667,3 +8667,7 @@ res/moves/chatter/anim.s).
 - X chosen (2026-11-21): an action with an X its targets don't set (MtgAction.xFixed: X targets, cmcEQX) asks
   "choose X" first, 0 up to the most it can pay (query CHOOSE OPTION NUMBER with forCost 8, MtgDuel.pendAct; then
   DoAction). The table's list starts on the most; the AI takes the most, as before.
+- X costs (2026-11-21): PayLife<X>, Discard<X/...>, Sac<X/...>, SubCounter<X/...>, ExileFromGrave<X/...>
+  (MtgCost.xPart): the X offered is at most what that part can pay (Mtg_CostMaxX: the life, the cards, the
+  permanents, the counters), paid with the X chosen (PayCost's sCostX). Mana abilities with one (the storage lands)
+  are activated on their own (ManaByHand), X asked. Playable: 3407 -> 3424.
