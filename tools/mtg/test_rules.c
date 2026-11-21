@@ -2855,6 +2855,95 @@ static void TestManaFx(void)
     }
 }
 
+static void TestTapAllPerm(void)
+{
+    int deluge, bears, bird, wing, wing2;
+    printf("tap all, a pump for good\n");
+    Table();   // Deluge: every creature without flying tapped
+    Lands(0, "Island", 3);
+    deluge = Put(0, "Deluge", MTG_ZONE_HAND);
+    bears = Put(1, "Grizzly Bears", MTG_ZONE_BATTLEFIELD);
+    bird = Put(1, "Birds of Paradise", MTG_ZONE_BATTLEFIELD);
+    Do(MTG_ACT_CAST, deluge, -1, 0);
+    PassBoth();
+    CHECK(sD.objs[bears].tapped && !sD.objs[bird].tapped, "the bears tapped, the bird not");
+
+    Table();   // Tin-Wing Chimera on another: +2/+2 counter and flying for good (still flying next turn)
+    wing = Put(0, "Tin-Wing Chimera", MTG_ZONE_BATTLEFIELD);
+    wing2 = Put(0, "Tin-Wing Chimera", MTG_ZONE_BATTLEFIELD);
+    Do(MTG_ACT_ACTIVATE, wing, MTG_TGT_OBJ, wing2);
+    PassBoth();
+    GoToTurn(1, MTG_STEP_MAIN1);
+    CHECK((Mtg_Keywords(&sD, wing2) & MTG_KW_BIT(MTG_KW_FLYING)) && Mtg_Power(&sD, wing2) == 4,
+          "a turn later: still flying, 4/4 (%d)", Mtg_Power(&sD, wing2));
+    Mtg_MoveTo(&sD, wing2, MTG_ZONE_HAND);
+    CHECK(!sD.objs[wing2].permKeywords, "gone once it leaves");
+
+    {   // Mother of Runes: protection from the color chosen until end of turn (red: the bolt can't target it)
+        int mom, bears, bolt;
+        Table();
+        mom = Put(0, "Mother of Runes", MTG_ZONE_BATTLEFIELD);
+        sD.objs[mom].sick = 0;
+        bears = Put(0, "Grizzly Bears", MTG_ZONE_BATTLEFIELD);
+        Do(MTG_ACT_ACTIVATE, mom, MTG_TGT_OBJ, bears);
+        PassBoth();
+        CHECK(Mtg_Query(&sD)->kind == MTG_Q_CHOOSE && Mtg_Query(&sD)->optKind == MTG_OPT_COLOR, "the color asked");
+        ChooseOption(NULL, MTG_R);
+        Lands(1, "Mountain", 1);
+        bolt = Put(1, "Lightning Bolt", MTG_ZONE_HAND);
+        GoTo(1, MTG_STEP_MAIN1);
+        CHECK(Find(MTG_ACT_CAST, bolt, MTG_TGT_OBJ, bears) < 0 && (Mtg_Protection(&sD, bears) & MTG_COLOR_BIT(MTG_R)),
+              "protection from red: no bolt at it");
+        (void)GoToTurn;
+    }
+    {   // Kindle: 2 damage plus the Kindles in all graveyards (named, Plus.2)
+        int k1;
+        Table();
+        Lands(0, "Mountain", 2);
+        Put(0, "Kindle", MTG_ZONE_GRAVEYARD);
+        Put(1, "Kindle", MTG_ZONE_GRAVEYARD);
+        k1 = Put(0, "Kindle", MTG_ZONE_HAND);
+        Do(MTG_ACT_CAST, k1, MTG_TGT_PLAYER, 1);
+        PassBoth();
+        CHECK(sD.players[1].life == 16, "kindle with two in graveyards: 4 damage (%d)", sD.players[1].life);
+    }
+    {   // Exhume: each player returns a creature from their own graveyard, under their own control
+        int ex, b0, b1;
+        Table();
+        Lands(0, "Swamp", 2);
+        ex = Put(0, "Exhume", MTG_ZONE_HAND);
+        b0 = Put(0, "Grizzly Bears", MTG_ZONE_GRAVEYARD);
+        b1 = Put(1, "Raging Goblin", MTG_ZONE_GRAVEYARD);
+        Do(MTG_ACT_CAST, ex, -1, 0);
+        PassBoth();
+        CHECK(Zone(b0) == MTG_ZONE_BATTLEFIELD && Zone(b1) == MTG_ZONE_BATTLEFIELD && sD.objs[b0].controller == 0
+              && sD.objs[b1].controller == 1, "both back, each under its owner");
+    }
+    {   // Flailing Ogre: any player may activate its -1/-1 (the opponent, paying)
+        int ogre, k, found = -1;
+        const MtgQuery *q;
+        Table();
+        ogre = Put(0, "Flailing Ogre", MTG_ZONE_BATTLEFIELD);
+        Lands(1, "Mountain", 1);
+        GoToTurn(1, MTG_STEP_MAIN1);
+        Mtg_RefreshQuery(&sD);
+        q = Mtg_Query(&sD);
+        for (k = 0; k < q->actionCount; k++)
+            if (q->actions[k].kind == MTG_ACT_ACTIVATE && q->actions[k].obj == ogre
+                && Mtg_Param(&gMtgAbilities[q->actions[k].ability], "IsCurse"))
+                found = k;
+        CHECK(q->player == 1 && found >= 0, "the opponent may use the ogre's -1/-1");
+        if (found >= 0) {
+            MtgAnswer a;
+            memset(&a, 0, sizeof(a));
+            a.action = (uint16_t)found;
+            Answer(&a);
+            PassBoth();
+            CHECK(Mtg_Power(&sD, ogre) == 2 && sD.stack[0].controller == 1, "3/3 -> 2/2 (%d)", Mtg_Power(&sD, ogre));
+        }
+    }
+}
+
 static void TestCantCounter(void)
 {
     int mongoose, bears, cs, herald, istvan, bolt, i;
@@ -3496,6 +3585,7 @@ int main(int argc, char **argv)
     TestMorph();
     TestTriggerCosts();
     TestManaFx();
+    TestTapAllPerm();
     TestCantCounter();
     TestTrigModes();
     TestBecomesTarget();

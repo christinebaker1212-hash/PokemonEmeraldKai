@@ -53,6 +53,9 @@ enum {
     MTG_API_CHOOSE_PLAYER,    // ChoosePlayerEffect: a player (Choices$) kept on its source (chosenPlayer)
     MTG_API_CHOOSE_NUMBER,    // ChooseNumberEffect: Min$..Max$ kept on its source (chosenNumber)
     MTG_API_GENERIC_CHOICE,   // ChooseGenericEffect: one of Choices$ (chains of their own) runs
+    MTG_API_TAP_ALL,          // TapAllEffect: every ValidCards$ permanent tapped
+    MTG_API_UNTAP_ALL,        // UntapAllEffect: ... untapped
+    MTG_API_PROTECTION,       // ProtectionEffect: protection from Gains$ colors (Choice: one of Choices$ AnyColor) this turn
     MTG_API_COUNT
 };
 
@@ -127,6 +130,8 @@ typedef struct {
     uint8_t tgtShared;              // a sub-ability whose target is its chain's (tgtFromSub on the first)
     uint8_t actLimit;               // ActivationLimit$ n: n times each turn (0: no limit)
     uint8_t actSorcery, actMyTurn;  // SorcerySpeed$ True ("only any time you could cast a sorcery"); PlayerTurn$ True
+    uint8_t anyPlayer;              // Activator$ Player: any player may activate it (and controls it on the stack)
+    uint8_t actNotMyTurn;           // Activator$ You.NonActive: only when it isn't its controller's turn
     uint16_t actSteps;              // ActivationPhases$: the steps it may be activated in (bits 1 << MTG_STEP_*; 0: any)
     uint8_t manaFx;                 // a mana ability's SubAbility$ chain besides its mana (Draw, a counter, sacrifice...):
                                     // queued as it's used (Mtg_Pay), resolved right after (mtg_game.c Run)

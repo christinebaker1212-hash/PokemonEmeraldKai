@@ -599,6 +599,14 @@ static int ParseAbility(MtgCardDef *c, int cardId, char *text, int kind, int dep
         else
             ab->unlessScale = (uint8_t)kind2;
     }
+    if ((v = Mtg_Param(ab, "Activator")) != NULL) {   // who may activate it besides its controller
+        if (kind == MTG_AB_ACTIVATED && strcmp(v, "Player") == 0)
+            ab->anyPlayer = 1;
+        else if (kind == MTG_AB_ACTIVATED && strcmp(v, "You.NonActive") == 0)
+            ab->actNotMyTurn = 1;
+        else
+            Unsupported(c, "Activator");
+    }
     ab->tgt = Mtg_Param(ab, "ValidTgts");
     if (!ActivationRestrictions(ab, kind))
         Unsupported(c, "activation restriction");

@@ -8640,3 +8640,17 @@ res/moves/chatter/anim.s).
   ResolveManaNow), "any color" asked (MTG_OPT_COLOR). Floating mana shows by each life plate.
 - ChangeZone with no Defined$ from the battlefield: the card itself (Forge's default: "return CARDNAME to its owner's hand").
 - Playable: 3129 -> 3234. Tests: test_rules.c TestTriggerCosts, TestManaFx.
+
+## MAGIC: TapAll, any player's abilities, protection this turn, permanent pumps, counted amounts (2026-11-21)
+- TapAll / UntapAll (every ValidCards$ permanent). Defined$ Player.Opponent / Player.Other (two players: the other).
+- Pump's Duration$ Permanent: MtgObj permPower / permToughness / permKeywords, for as long as it stays (the Chimeras).
+- Activator$ Player: MtgAbility.anyPlayer, offered to the other player too (they pay, and control it on the stack:
+  the Flailing creatures, Aether Storm); Activator$ You.NonActive: actNotMyTurn (Ghost Town).
+- ProtectionEffect (MTG_API_PROTECTION): Gains$ colors, ChosenColor, or Choice of AnyColor (MTG_OPT_COLOR; the AI
+  picks the opponent's most common color) into MtgObj.tempProtection until end of turn (Mother of Runes).
+- Amounts: TriggeredCard$CardPower / CardToughness, Sacrificed$CardToughness (MtgStackEntry.sacToughness), Count$Valid
+  modifiers /Twice /LimitMax.N /NMinus.N; Valid named<Name>, TargetedPlayerCtrl / TargetedPlayerOwn (the resolving
+  ability's target player), blockingTriggeredAttacker.
+- ChangeZone DefinedPlayer$: each of them chooses from their own cards (Exhume, Curfew, Show and Tell).
+- Playable: 3234 -> 3350. Tests: test_rules.c TestTapAllPerm (Deluge, Tin-Wing Chimera, Mother of Runes, Kindle, Exhume,
+  Flailing Ogre).

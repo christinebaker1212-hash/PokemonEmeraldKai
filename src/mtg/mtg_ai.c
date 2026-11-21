@@ -696,6 +696,8 @@ static void ChooseOption(const MtgDuel *d, const MtgQuery *q, MtgAnswer *out)
     const MtgAbility *ab = q->ability != 0xFFFF ? &gMtgAbilities[q->ability] : NULL;
     const char *logic = ab ? Mtg_Param(ab, "AILogic") : NULL;
     int i, best = 0, bestV = -(1 << 30), me = q->player;
+    if (ab && ab->api == MTG_API_PROTECTION && !logic)
+        logic = "MostProminentOppControls";   // (protection: from what the opponent has)
     for (i = 0; i < q->optCount; i++) {
         int v = 0, o = q->opts[i];
         switch (q->optKind) {

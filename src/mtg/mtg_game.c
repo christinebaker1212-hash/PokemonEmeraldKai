@@ -61,7 +61,7 @@ int Mtg_Power(const MtgDuel *d, int obj)
     Mtg_StaticMods(d, obj, &m);
     int base = o->animUntil && o->animPower != MTG_ANIM_NO_PT ? o->animPower : Mtg_Card(o->def)->power;
     return (m.setPower != MTG_STATIC_NO_SET ? m.setPower : base) + m.addPower + o->counters11 + o->tempPower
-         + CounterPT(o, 0);
+         + o->permPower + CounterPT(o, 0);
 }
 
 int Mtg_Toughness(const MtgDuel *d, int obj)
@@ -71,14 +71,14 @@ int Mtg_Toughness(const MtgDuel *d, int obj)
     Mtg_StaticMods(d, obj, &m);
     int base = o->animUntil && o->animToughness != MTG_ANIM_NO_PT ? o->animToughness : Mtg_Card(o->def)->toughness;
     return (m.setToughness != MTG_STATIC_NO_SET ? m.setToughness : base) + m.addToughness + o->counters11
-         + o->tempToughness + CounterPT(o, 1);
+         + o->tempToughness + o->permToughness + CounterPT(o, 1);
 }
 
 uint32_t Mtg_Keywords(const MtgDuel *d, int obj)
 {
     MtgStaticMods m;
     Mtg_StaticMods(d, obj, &m);
-    return Mtg_Card(d->objs[obj].def)->keywords | d->objs[obj].tempKeywords | m.keywords
+    return Mtg_Card(d->objs[obj].def)->keywords | d->objs[obj].tempKeywords | d->objs[obj].permKeywords | m.keywords
          | (d->objs[obj].animUntil ? d->objs[obj].animKeywords : 0);
 }
 
@@ -92,14 +92,15 @@ uint8_t Mtg_Landwalk(const MtgDuel *d, int obj)
 {
     MtgStaticMods m;
     Mtg_StaticMods(d, obj, &m);
-    return Mtg_Card(d->objs[obj].def)->landwalk | m.landwalk | ((d->objs[obj].tempKeywords >> MTG_KWX_WALK_SHIFT) & 0x1F);
+    return Mtg_Card(d->objs[obj].def)->landwalk | m.landwalk
+         | (((d->objs[obj].tempKeywords | d->objs[obj].permKeywords) >> MTG_KWX_WALK_SHIFT) & 0x1F);
 }
 
 uint8_t Mtg_Protection(const MtgDuel *d, int obj)
 {
     MtgStaticMods m;
     Mtg_StaticMods(d, obj, &m);
-    return Mtg_Card(d->objs[obj].def)->protection | m.protection;
+    return Mtg_Card(d->objs[obj].def)->protection | m.protection | d->objs[obj].tempProtection;
 }
 
 static int IsCreature(const MtgDuel *d, int obj)
@@ -120,6 +121,9 @@ static void ResetPermanentState(MtgObj *o)
     o->damage = 0;
     o->tempPower = o->tempToughness = 0;
     o->tempKeywords = 0;
+    o->permPower = o->permToughness = 0;
+    o->tempProtection = 0;
+    o->permKeywords = 0;
     o->counters11 = 0;
     memset(o->ctrKind, 0, sizeof(o->ctrKind));
     memset(o->ctrNum, 0, sizeof(o->ctrNum));
@@ -252,6 +256,8 @@ static int ActivationTimingOk(const MtgDuel *d, int obj, int ability, int player
     if (ab->actSorcery && !SorceryTiming(d, player))
         return 0;
     if (ab->actMyTurn && d->active != player)
+        return 0;
+    if (ab->actNotMyTurn && d->active == player)   // (Activator$ You.NonActive)
         return 0;
     if (ab->actSteps && !(ab->actSteps & (1u << d->step)))
         return 0;
@@ -1254,12 +1260,14 @@ static void BuildPriority(MtgDuel *d)
             const MtgCost *mc = &gMtgAltCosts[Mtg_Card(o->faceDownOf - 1)->morph - 1].cost;
             if (Mtg_CanPay(d, p, &mc->mana, 0, MTG_NO_OBJ) && (!HasOther(mc) || Mtg_CostPayable(d, p, mc, i, MTG_NO_OBJ)))
                 AddAction(q, MTG_ACT_TURN_UP, i, 0xFFFF, 0, none);
-        } else if (o->zone == MTG_ZONE_BATTLEFIELD && o->controller == p) {
+        } else if (o->zone == MTG_ZONE_BATTLEFIELD) {   // (another's: only what any player may activate)
             uint16_t abil[16];
-            int abilCount = Mtg_ObjAbilities(d, i, abil, 16);   // (its card's and those statics give it)
+            int abilCount = Mtg_ObjAbilities(d, i, abil, 16), mine = o->controller == p;   // (its card's and statics')
             for (k = 0; k < abilCount; k++) {
                 const MtgAbility *ab = &gMtgAbilities[abil[k]];
                 int x = 0;
+                if (!mine && !ab->anyPlayer)
+                    continue;
                 if (ab->kind != MTG_AB_ACTIVATED || ab->fromHand || (ab->api == MTG_API_MANA && !ManaByHand(ab)))
                     continue;   // (mana abilities are used by paying, except those paying can't; Cycling only from the hand)
                 if (Mtg_StaticForbids(d, MTG_STATIC_CANT_BE_ACTIVATED, i, abil[k]))
@@ -1428,10 +1436,13 @@ static void PayCostPick(MtgDuel *d, int obj)
         return;
     }
     if (d->costSac) {
-        if (d->costAlt == 4)   // (its last known power, for Sacrificed$CardPower)
+        if (d->costAlt == 4) {   // (its last known power and toughness, for Sacrificed$CardPower / CardToughness)
             d->res.sacPower = (int16_t)Mtg_Power(d, obj);
-        else if (d->stackCount && d->costAlt != 2 && d->costAlt != 3)
+            d->res.sacToughness = (int16_t)Mtg_Toughness(d, obj);
+        } else if (d->stackCount && d->costAlt != 2 && d->costAlt != 3) {
             d->stack[d->stackCount - 1].sacPower = (int16_t)Mtg_Power(d, obj);
+            d->stack[d->stackCount - 1].sacToughness = (int16_t)Mtg_Toughness(d, obj);
+        }
         Mtg_Sacrifice(d, obj);
         d->costSac--;
     } else if (d->costDiscard) {
@@ -1821,6 +1832,7 @@ static void EndOfTurnCleanup(MtgDuel *d)
         o->damagedBy[0] = o->damagedBy[1] = o->damagedBy[2] = MTG_NO_OBJ;
         o->tempPower = o->tempToughness = 0;
         o->tempKeywords = 0;
+        o->tempProtection = 0;
         o->regen = 0;
         o->prevent = 0;
         if (o->animUntil == 1)

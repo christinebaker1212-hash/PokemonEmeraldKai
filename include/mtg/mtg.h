@@ -142,6 +142,9 @@ typedef struct {
     int16_t damage;               // marked damage
     int8_t tempPower, tempToughness;   // until end of turn (Pump)
     uint32_t tempKeywords;
+    uint8_t tempProtection;       // protection from colors until end of turn (ProtectionEffect: MTG_COLOR_BIT)
+    int8_t permPower, permToughness;   // for good, while it stays (Pump's Duration$ Permanent)
+    uint32_t permKeywords;
     int16_t counters11;           // +1/+1 counters (-1/-1 as negative)
     uint8_t ctrKind[4], ctrNum[4];  // other counters: kind (Mtg_CounterKind, 0: free slot) and how many
     uint16_t attachedTo;          // an Aura: the creature it enchants (MTG_NO_OBJ: none)
@@ -191,6 +194,7 @@ typedef struct {
     // last known information about the target as it resolves (Forge's LKI copies)
     int16_t lkiPower, lkiToughness;
     int16_t sacPower;             // the power of what its cost sacrificed (Sacrificed$CardPower: FLING)
+    int16_t sacToughness;         // ... and its toughness (Sacrificed$CardToughness)
     uint8_t lkiController;
     // a triggered ability (TriggerHandler / WrappedAbility): its trigger, what set it off ("TriggeredCard"...), and
     // whether its controller may choose not to (OptionalDecider$ You: asked as it resolves)

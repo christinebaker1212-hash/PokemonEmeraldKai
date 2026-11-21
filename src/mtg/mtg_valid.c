@@ -125,6 +125,18 @@ static int CardProp(const MtgDuel *d, int obj, const char *p, size_t n, int src,
         h = Holder(d, src);
         return h && h->chosenPlayer && o->controller == h->chosenPlayer - 1;
     }
+    if (n > 5 && strncmp(p, "named", 5) == 0) {   // "namedKindle": a card of that name
+        const char *nm = c ? c->name : "";
+        return !d || (strlen(nm) == n - 5 && strncmp(nm, p + 5, n - 5) == 0);
+    }
+    if ((n == 18 && strncmp(p, "TargetedPlayerCtrl", 18) == 0) || (n == 17 && strncmp(p, "TargetedPlayerOwn", 17) == 0)) {
+        if (!d)   // (the player the resolving spell or ability targets)
+            return 1;
+        return d->resolving && d->res.target.kind == MTG_TGT_PLAYER
+            && (p[14] == 'C' ? o->controller : o->owner) == d->res.target.id;
+    }
+    if (n == 25 && strncmp(p, "blockingTriggeredAttacker", 25) == 0)   // (blocking the attacker that set it off)
+        return !d || (d->resolving && d->res.trigObj != MTG_NO_OBJ && o->blocking == d->res.trigObj);
     if (n == 6 && strncmp(p, "kicked", 6) == 0)   // (cast kicked: mtg_game.c; "kicked 1" / "kicked 2": with that kicker)
         return !d || o->kicked;
     if (n == 8 && strncmp(p, "kicked ", 7) == 0 && (p[7] == '1' || p[7] == '2'))
