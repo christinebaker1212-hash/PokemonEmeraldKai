@@ -177,7 +177,7 @@ photo, its bottom curved; "The VM2 option should not appear in the PC unless a V
   was disconnected. It's safe to unplug it.").
 - Tests: tools/test/vm2/vm2_test.sh (the link), kai_vm2_test.sh (a grown VENUSAUR withdrawn), kai_vm2_egg_test.sh
   (an EGG of CHARMANDER deposited; the pet on that image then hatches it and knows it's a VM2).
-- Still open from before: the MASTER / ASTRAL BALLS bought on the pet aren't given to the BAG yet.
+- The MASTER / ASTRAL BALLS bought on the pet come to the BAG with the grown MOéMON.
 
 ## One program, LINK the VM2's (built 2026-11-21)
 

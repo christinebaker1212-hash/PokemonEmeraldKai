@@ -21,6 +21,7 @@ struct.pack_into('<I', rec, 16, 0x12345678)
 rec[20:26] = bytes([31, 20, 25, 10, 15, 30])
 struct.pack_into('<I', rec, 27, 0xC0FFEE01)
 rec[31] = 1
+rec[32] = 1                             # a MASTER BALL bought
 d[page:page + 16] = b'MOEMONVMUPET' + bytes([1, 1, 0, 0])
 d[page + 16:page + 16 + 39] = rec
 open(out, 'wb').write(d)

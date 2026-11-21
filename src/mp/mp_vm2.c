@@ -6,7 +6,8 @@
 // "MOEMONVMUPET", then the pet's RAM $40-$7b), then the box screen opens over a box of its own ("VM2", one place:
 // VM2_SLOT, the VMU's screen) holding what the pet has: its EGG, or its grown MOéMON as a POKéMON of this game.
 // The menus are the PC's own; when they close the box is compared with what the VM2 held:
-//   taken out          the VM2 holds nothing now (the pet starts a new Egg); the MOéMON's transfer ID is remembered
+//   taken out          the VM2 holds nothing now (the pet starts a new Egg), the MASTER / ASTRAL BALLS bought come to
+//                      the BAG; the MOéMON's transfer ID is remembered
 //                      ("<save>.vmu": each comes in once, as the pet's SWAP can leave one on two units)
 //   an EGG put there   it becomes the VM2's (an EGG of the KANTO EDITION: national 1-151)
 //   anything else      anywhere else in those boxes, or not an EGG it can raise: back to the player's own PC
@@ -358,6 +359,14 @@ void MP_Vm2_BoxClosed(void)
     {
         // taken: in once only; the VM2 has nothing now (unless an EGG went there)
         Take(Get32(sRecord + R_TID));
+        if (sRecord[R_STAGE] == 2)       // the BALLS bought with SPARKS come with it
+        {
+            if (sRecord[R_MASTER])
+                AddBagItem(ITEM_MASTER_BALL, sRecord[R_MASTER]);
+            if (sRecord[R_ASTRAL])
+                AddBagItem(ITEM_ASTRAL_BALL, sRecord[R_ASTRAL]);
+            MPNet_Log("vm2: %u MASTER BALL(S), %u ASTRAL BALL(S) to the BAG", sRecord[R_MASTER], sRecord[R_ASTRAL]);
+        }
         memset(rec, 0, REC_BYTES);
         rec[R_MAGIC] = 'P';
         MPNet_Log("vm2: its %s came in", sRecord[R_STAGE] == 1 ? "EGG" : "MOEMON");

@@ -68,6 +68,7 @@ quit
 SCRIPT
 TMO=200 "$TOOLS/run1.sh" "$W" MOEMON_VM2_PORT="$(cat "$W/port")" MOEMON_DEBUG_PARTY=258:10
 grep -E "vm2:|party" "$W/log.txt" | head -20
+grep -q "vm2: 1 MASTER BALL(S), 0 ASTRAL BALL(S) to the BAG" "$W/log.txt" || { echo "FAIL kai_vm2: the MASTER BALL bought didn't come"; exit 1; }
 python3 - "$W/internal.bin" <<'PY'
 import sys
 d = open(sys.argv[1], 'rb').read()
