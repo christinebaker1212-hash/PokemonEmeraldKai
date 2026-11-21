@@ -11,9 +11,19 @@ int gMtgValidX = -1;
 uint8_t Mtg_ObjColors(const MtgDuel *d, int obj)
 {
     const MtgObj *o = &d->objs[obj];
-    if (o->animUntil && o->zone == MTG_ZONE_BATTLEFIELD)   // (an Animate's colors: instead, or besides)
-        return o->animOverwrite ? o->animColors : (uint8_t)(Mtg_Card(o->def)->colors | o->animColors);
-    return Mtg_Card(o->def)->colors;
+    uint8_t col = Mtg_Card(o->def)->colors;
+    MtgStaticMods m;
+    if (o->zone != MTG_ZONE_BATTLEFIELD)
+        return col;
+    if (!Mtg_TypeLayer(d))
+        m.colorsSet = 0;
+    else
+        Mtg_StaticMods(d, obj, &m);
+    if (m.colorsSet)   // (a static's SetColor$: the latest; an Animate's colors besides or instead, after it)
+        col = m.colors;
+    if (o->animUntil)
+        return o->animOverwrite ? o->animColors : (uint8_t)(col | o->animColors);
+    return col;
 }
 
 static int TypeBit(const char *t, size_t n)
@@ -29,21 +39,6 @@ static int TypeBit(const char *t, size_t n)
     for (i = 0; i < sizeof(sT) / sizeof(sT[0]); i++)
         if (strlen(sT[i].name) == n && strncmp(t, sT[i].name, n) == 0)
             return sT[i].bit;
-    return 0;
-}
-
-static int HasSubtype(const MtgCardDef *c, const char *t, size_t n)
-{
-    const char *s = c->subtypes;
-    while (*s) {
-        const char *e = strchr(s, ' ');
-        size_t len = e ? (size_t)(e - s) : strlen(s);
-        if (len == n && strncmp(s, t, n) == 0)
-            return 1;
-        if (!e)
-            break;
-        s = e + 1;
-    }
     return 0;
 }
 
@@ -131,7 +126,7 @@ static int CardProp(const MtgDuel *d, int obj, const char *p, size_t n, int src,
         if (!d)
             return 1;
         h = Holder(d, src);
-        return h && h->chosenType && HasSubtype(c, Mtg_SubtypeName(h->chosenType - 1), strlen(Mtg_SubtypeName(h->chosenType - 1)));
+        return h && h->chosenType && Mtg_ObjHasSubtype(d, obj, Mtg_SubtypeName(h->chosenType - 1), strlen(Mtg_SubtypeName(h->chosenType - 1)));
     }
     if (n == 11 && strncmp(p, "ChosenColor", 11) == 0) {   // of the color chosen for the source
         const MtgObj *h;
@@ -357,7 +352,7 @@ static int CardProp(const MtgDuel *d, int obj, const char *p, size_t n, int src,
             if (!((p[i] >= 'a' && p[i] <= 'z') || (p[i] >= 'A' && p[i] <= 'Z')))
                 break;
         if (i == (int)n && KnownSubtype(p, n))
-            return !d || HasSubtype(c, p, n);
+            return !d || Mtg_ObjHasSubtype(d, obj, p, n);
     }
     *known = 0;
     return 0;
@@ -430,10 +425,9 @@ static int Alternative(const MtgDuel *d, int isPlayer, int id, const char *a, si
     if (d && isPlayer)
         return 0;
     if (d) {
-        const MtgCardDef *c = Mtg_Card(d->objs[id].def);
         if (bit && bit != 0xFF && !(Mtg_ObjTypes(d, id) & bit))
             return 0;
-        if (!bit && !HasSubtype(c, a, tn))
+        if (!bit && !Mtg_ObjHasSubtype(d, id, a, tn))
             return 0;
     }
     if (dot) {

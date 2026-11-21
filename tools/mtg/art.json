@@ -489,6 +489,13 @@
 "number": "115",
 "set": "mmq"
 },
+"Alloy Golem": {
+"artist": "Greg Staples",
+"file": "inv_297",
+"frame": "1997",
+"number": "297",
+"set": "inv"
+},
 "Alpha Kavu": {
 "artist": "Matt Cavotta",
 "file": "pls_77",
@@ -530,6 +537,13 @@
 "frame": "1993",
 "number": "62",
 "set": "hml"
+},
+"Ambush Commander": {
+"artist": "Darrell Riche",
+"file": "scg_111",
+"frame": "1997",
+"number": "111",
+"set": "scg"
 },
 "Ambush Party": {
 "artist": "Mark Poole",
@@ -2232,6 +2246,13 @@
 "number": "238",
 "set": "usg"
 },
+"Blanket of Night": {
+"artist": "Cliff Nielsen",
+"file": "vis_52",
+"frame": "1997",
+"number": "52",
+"set": "vis"
+},
 "Blasted Landscape": {
 "artist": "Ciruelo",
 "file": "usg_319",
@@ -2371,6 +2392,13 @@
 "frame": "1997",
 "number": "60",
 "set": "mmq"
+},
+"Blood Moon": {
+"artist": "Tom Wänerstrand",
+"file": "bchr_46",
+"frame": "1993",
+"number": "46",
+"set": "bchr"
 },
 "Blood Pet": {
 "artist": "Brom",
@@ -4451,6 +4479,13 @@
 "number": "64",
 "set": "4ed"
 },
+"Conversion": {
+"artist": "Jesper Myrfors",
+"file": "4ed_19",
+"frame": "1993",
+"number": "19",
+"set": "4ed"
+},
 "Conviction": {
 "artist": "Paolo Parente",
 "file": "sth_5",
@@ -5059,6 +5094,13 @@
 "frame": "1997",
 "number": "55",
 "set": "nem"
+},
+"Darkest Hour": {
+"artist": "Heather Hudson",
+"file": "usg_128",
+"frame": "1997",
+"number": "128",
+"set": "usg"
 },
 "Darkling Stalker": {
 "artist": "Susan Van Camp",
@@ -6089,6 +6131,13 @@
 "number": "302",
 "set": "inv"
 },
+"Dralnu's Crusade": {
+"artist": "Arnie Swekel",
+"file": "pls_104",
+"frame": "1997",
+"number": "104",
+"set": "pls"
+},
 "Dread Specter": {
 "artist": "Kathryn Rathke",
 "file": "mir_119",
@@ -6410,6 +6459,13 @@
 "frame": "1997",
 "number": "15",
 "set": "s99"
+},
+"Earnest Fellowship": {
+"artist": "Heather Hudson",
+"file": "ody_21",
+"frame": "1997",
+"number": "21",
+"set": "ody"
 },
 "Earsplitting Rats": {
 "artist": "Heather Hudson",
@@ -7152,6 +7208,13 @@
 "frame": "1997",
 "number": "159",
 "set": "5ed"
+},
+"Evil Presence": {
+"artist": "Sandra Everingham",
+"file": "4ed_136",
+"frame": "1993",
+"number": "136",
+"set": "4ed"
 },
 "Evincar's Justice": {
 "artist": "Hannibal King",
@@ -8957,6 +9020,13 @@
 "file": "ice_71",
 "frame": "1993",
 "number": "71",
+"set": "ice"
+},
+"Glaciers": {
+"artist": "Mark Tedin",
+"file": "ice_294",
+"frame": "1993",
+"number": "294",
 "set": "ice"
 },
 "Glade Gnarr": {
@@ -11710,6 +11780,13 @@
 "number": "141",
 "set": "nem"
 },
+"Kormus Bell": {
+"artist": "Christopher Rush",
+"file": "4ed_332",
+"frame": "1993",
+"number": "332",
+"set": "4ed"
+},
 "Koskun Falls": {
 "artist": "Rob Alexander",
 "file": "hml_55",
@@ -12284,6 +12361,13 @@
 "number": "69",
 "set": "scg"
 },
+"Lingering Mirage": {
+"artist": "Jerry Tiritilli",
+"file": "usg_84",
+"frame": "1997",
+"number": "84",
+"set": "usg"
+},
 "Lithatog": {
 "artist": "Franz Vohwinkel",
 "file": "ody_289",
@@ -12311,6 +12395,20 @@
 "frame": "1993",
 "number": "103",
 "set": "bchr"
+},
+"Living Lands": {
+"artist": "Jesper Myrfors",
+"file": "4ed_260",
+"frame": "1993",
+"number": "260",
+"set": "4ed"
+},
+"Living Terrain": {
+"artist": "Andrew Goldhawk",
+"file": "pcy_117",
+"frame": "1997",
+"number": "117",
+"set": "pcy"
 },
 "Llanowar Behemoth": {
 "artist": "Hannibal King",
@@ -12857,6 +12955,13 @@
 "frame": "1997",
 "number": "11",
 "set": "uds"
+},
+"Masked Gorgon": {
+"artist": "Matthew D. Wilson",
+"file": "jud_69",
+"frame": "1997",
+"number": "69",
+"set": "jud"
 },
 "Massacre": {
 "artist": "Pete Venters",
@@ -13992,6 +14097,13 @@
 "number": "35",
 "set": "hml"
 },
+"Natural Emergence": {
+"artist": "Heather Hudson",
+"file": "pls_117",
+"frame": "1997",
+"number": "117",
+"set": "pls"
+},
 "Natural Order": {
 "artist": "Terese Nielsen",
 "file": "vis_114",
@@ -14033,6 +14145,13 @@
 "frame": "1997",
 "number": "137",
 "set": "wth"
+},
+"Nature's Revolt": {
+"artist": "Donato Giancola",
+"file": "tmp_240",
+"frame": "1997",
+"number": "240",
+"set": "tmp"
 },
 "Nature's Wrath": {
 "artist": "Liz Danforth",
@@ -14951,6 +15070,13 @@
 "number": "88",
 "set": "4ed"
 },
+"Phantasmal Terrain": {
+"artist": "Dameon Willich",
+"file": "4ed_89",
+"frame": "1993",
+"number": "89",
+"set": "4ed"
+},
 "Phantatog": {
 "artist": "Glen Angus",
 "file": "ody_291",
@@ -15412,6 +15538,34 @@
 "frame": "1997",
 "number": "323",
 "set": "usg"
+},
+"Possessed Aven": {
+"artist": "Scott M. Fischer",
+"file": "tor_45",
+"frame": "1997",
+"number": "45",
+"set": "tor"
+},
+"Possessed Barbarian": {
+"artist": "Scott M. Fischer",
+"file": "tor_111",
+"frame": "1997",
+"number": "111",
+"set": "tor"
+},
+"Possessed Centaur": {
+"artist": "Alex Horley-Orlandelli",
+"file": "tor_137",
+"frame": "1997",
+"number": "137",
+"set": "tor"
+},
+"Possessed Nomad": {
+"artist": "Eric Peterson",
+"file": "tor_13",
+"frame": "1997",
+"number": "13",
+"set": "tor"
 },
 "Pouncing Jaguar": {
 "artist": "Daren Bader",
@@ -16574,6 +16728,13 @@
 "frame": "1993",
 "number": "11",
 "set": "bchr"
+},
+"Repentant Vampire": {
+"artist": "Mark Tedin",
+"file": "ody_157",
+"frame": "1997",
+"number": "157",
+"set": "ody"
 },
 "Repercussion": {
 "artist": "Michael Sutfin",
@@ -17933,6 +18094,13 @@
 "number": "38",
 "set": "hml"
 },
+"Sea's Claim": {
+"artist": "Alan Pollack",
+"file": "ons_113",
+"frame": "1997",
+"number": "113",
+"set": "ons"
+},
 "Seafloor Debris": {
 "artist": "Larry Elmore",
 "file": "ody_325",
@@ -18500,6 +18668,13 @@
 "number": "335",
 "set": "ice"
 },
+"Shifting Sky": {
+"artist": "Jerry Tiritilli",
+"file": "pls_32",
+"frame": "1997",
+"number": "32",
+"set": "pls"
+},
 "Shifting Sliver": {
 "artist": "Darrell Riche",
 "file": "lgn_52",
@@ -18869,6 +19044,13 @@
 "file": "pls_71",
 "frame": "1997",
 "number": "71",
+"set": "pls"
+},
+"Sinister Strength": {
+"artist": "Terese Nielsen",
+"file": "pls_54",
+"frame": "1997",
+"number": "54",
 "set": "pls"
 },
 "Sisay's Ingenuity": {
@@ -21048,6 +21230,13 @@
 "number": "161",
 "set": "usg"
 },
+"Tainted Well": {
+"artist": "Val Mayerik",
+"file": "inv_126",
+"frame": "1997",
+"number": "126",
+"set": "inv"
+},
 "Talon Sliver": {
 "artist": "Mike Raabe",
 "file": "tmp_50",
@@ -21103,6 +21292,13 @@
 "frame": "1997",
 "number": "105",
 "set": "pcy"
+},
+"Tattoo Ward": {
+"artist": "Ben Thompson",
+"file": "ody_54",
+"frame": "1997",
+"number": "54",
+"set": "ody"
 },
 "Tawnos's Wand": {
 "artist": "Douglas Shuler",
@@ -21502,6 +21698,13 @@
 "frame": "1997",
 "number": "141",
 "set": "uds"
+},
+"Thran Lens": {
+"artist": "Allen Williams",
+"file": "ulg_133",
+"frame": "1997",
+"number": "133",
+"set": "ulg"
 },
 "Thran Quarry": {
 "artist": "Michael Sutfin",
@@ -22475,6 +22678,13 @@
 "frame": "1997",
 "number": "162",
 "set": "usg"
+},
+"Unquestioned Authority": {
+"artist": "Alex Horley-Orlandelli",
+"file": "jud_31",
+"frame": "1997",
+"number": "31",
+"set": "jud"
 },
 "Unseen Walker": {
 "artist": "Alan Rabinowitz",
@@ -23679,6 +23889,13 @@
 "frame": "1997",
 "number": "44",
 "set": "inv"
+},
+"Wayward Angel": {
+"artist": "Mark Tedin",
+"file": "ody_57",
+"frame": "1997",
+"number": "57",
+"set": "ody"
 },
 "Wayward Soul": {
 "artist": "M. W. Kaluta & DiTerlizzi",

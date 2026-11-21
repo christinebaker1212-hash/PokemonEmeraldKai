@@ -3614,6 +3614,37 @@ static void TestProtectionKinds(void)
           sD.players[0].life, sD.players[1].life);
 }
 
+static void TestTypeLayer(void)
+{
+    int moon, city, mtn, lands, forest, bears, hour, amount, colors;
+    uint16_t abil[16];
+    printf("statics that change types and colors\n");
+    Table();   // Blood Moon: City of Brass is a Mountain: {T}: add {R}, nothing else (305.7)
+    moon = Put(1, "Blood Moon", MTG_ZONE_BATTLEFIELD);
+    city = Put(0, "City of Brass", MTG_ZONE_BATTLEFIELD);
+    mtn = Put(0, "Island", MTG_ZONE_BATTLEFIELD);
+    colors = Mtg_ManaAbilityColors(&sD, city, &amount);
+    CHECK(colors == (int)MTG_COLOR_BIT(MTG_R) && Mtg_ObjAbilities(&sD, city, abil, 16) == 0,
+          "the city makes red only, no ability of its own (%x)", colors);
+    CHECK(Mtg_ValidObj(&sD, city, "Mountain", moon, 1) && !Mtg_ValidObj(&sD, mtn, "Mountain", moon, 1),
+          "the city is a Mountain, the basic Island isn't");
+    Mtg_MoveTo(&sD, moon, MTG_ZONE_GRAVEYARD);
+    colors = Mtg_ManaAbilityColors(&sD, city, &amount);
+    CHECK(colors != (int)MTG_COLOR_BIT(MTG_R), "Blood Moon gone: the city's own colors again (%x)", colors);
+
+    Table();   // Living Lands: Forests are 1/1 creatures; Darkest Hour: all creatures are black
+    lands = Put(1, "Living Lands", MTG_ZONE_BATTLEFIELD);
+    forest = Put(0, "Forest", MTG_ZONE_BATTLEFIELD);
+    bears = Put(0, "Grizzly Bears", MTG_ZONE_BATTLEFIELD);
+    CHECK((Mtg_ObjTypes(&sD, forest) & MTG_T_CREATURE) && Mtg_Power(&sD, forest) == 1 && Mtg_Toughness(&sD, forest) == 1,
+          "the forest is a 1/1 creature");
+    hour = Put(1, "Darkest Hour", MTG_ZONE_BATTLEFIELD);
+    CHECK(Mtg_ObjColors(&sD, bears) == MTG_COLOR_BIT(MTG_B) && Mtg_ObjColors(&sD, forest) == MTG_COLOR_BIT(MTG_B),
+          "the bears and the forest are black");
+    CHECK(Mtg_ObjColors(&sD, lands) == MTG_COLOR_BIT(MTG_G), "Living Lands itself still green");
+    (void)hour;
+}
+
 static void TestDuels(void)
 {
     static MtgDeck red, green;
@@ -3910,6 +3941,7 @@ int main(int argc, char **argv)
     TestManaFx();
     TestTapAllPerm();
     TestProtectionKinds();
+    TestTypeLayer();
     TestCantCounter();
     TestTrigModes();
     TestBecomesTarget();

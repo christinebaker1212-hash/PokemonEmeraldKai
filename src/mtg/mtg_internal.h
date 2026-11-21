@@ -264,6 +264,13 @@ typedef struct {
     uint8_t gainLife;               // ... and its controller gains the damage prevented as life
     uint8_t oneShot;                // an Effect's "the next time ...": ReplaceWith$ exiling the Effect (PreventionEffect$)
     uint8_t protChosen;             // AddKeyword$ Protection:Card.ChosenColor: from its source's chosen color
+    const char *addProtSpec;        // AddKeyword$ Protection:SPEC (creatures, enchantments, Gorgons); protExceptHost: its
+    uint8_t protExceptHost, protOwnColors;   // (Protection from cardColors: each from its own colors)
+    // AddType$ (card types, subtypes: subtype index + 1; MTG_SUB_CHOSEN its source's chosen type), RemoveLandTypes$ /
+    // RemoveCreatureTypes$ True; SetColor$ (setColors: MTG_SETCOLOR | the colors, | MTG_SETCOLOR_CHOSEN its chosen one)
+    uint8_t addTypes, removeLand, removeCreature, setColors;
+    uint16_t addSub[2];
+    uint8_t protExceptHostPad;         // ...:Card.CardUID_HostCardUID: not from the source itself (an Aura stays on)
     uint8_t taxYou;                 // AttackTax's Target$ You: only for attacks on its controller
     const char *taxX;               // ... its Cost$ an SVar counted now (else costGeneric)
 } MtgStatic;
@@ -271,6 +278,10 @@ typedef struct {
     int addPower, addToughness, setPower, setToughness;
     uint32_t keywords;
     uint8_t landwalk, protection;
+    uint8_t addTypes, removeLand, removeCreature, colorsSet, colors;   // (the type / color layers: latest SetColor wins)
+    uint16_t addSub[4];             // subtype index + 1
+    const char *protSpec[2];        // protection from what a Valid spec names (AddKeyword$ Protection:SPEC)...
+    int16_t protExcept[2];          // ... but not from this object (-1: none)
 } MtgStaticMods;
 extern MtgStatic *gMtgStatics;
 void Mtg_ParseStatic(MtgCardDef *c, int cardId, char *text);
@@ -279,6 +290,14 @@ int Mtg_ParseEffectReplacement(MtgCardDef *c, int cardId, char *text);   // an E
 int Mtg_DamagePrevented(MtgDuel *d, int src, MtgTarget to, int combat, int amount);   // (a one-time one is used up)
 int Mtg_ChosenCard(const MtgDuel *d);   // ChooseSource's pick (the Effect's own while one is read), MTG_NO_OBJ: none   // a PreventDamage in force says so   // R: lines (only the forms above)
 void Mtg_StaticMods(const MtgDuel *d, int obj, MtgStaticMods *m);
+#define MTG_SUB_CHOSEN 0xFFFF
+#define MTG_SETCOLOR 0x40
+#define MTG_SETCOLOR_CHOSEN 0x80
+int Mtg_TypeLayer(const MtgDuel *d);   // a static that changes types or colors is on the battlefield (else none is asked)
+uint8_t Mtg_ObjLandTypes(const MtgDuel *d, int obj);
+uint8_t Mtg_StaticTypes(const MtgDuel *d, int obj);   // the card types statics add to it now (the type layer alone)   // its basic land types now (MTG_COLOR_BIT W..G: the mana they make)
+int Mtg_ObjHasSubtype(const MtgDuel *d, int obj, const char *t, size_t n);   // (statics' AddType$ / Remove...Types$ too)
+int Mtg_ObjLostText(const MtgDuel *d, int obj);   // a land made a basic type by a static (305.7): its own abilities gone
 int Mtg_StaticForbids(const MtgDuel *d, int mode, int obj, int other);
 int Mtg_AttackTax(const MtgDuel *d, int attacker);   // the generic mana its attacking costs (Propaganda...)
 // a permanent's abilities now: its card's, then those statics give it (AddAbility$); returns how many (at most max)

@@ -89,6 +89,30 @@ static int Keywords(MtgStatic *st, const char *text)
             st->protChosen = 1;
             continue;
         }
+        if (strcmp(k, "Protection from cardColors") == 0) {   // (EARNEST FELLOWSHIP)
+            st->protOwnColors = 1;
+            continue;
+        }
+        if (strcmp(k, "Protection from artifacts") == 0 || strncmp(k, "Protection:Artifact", 19) == 0) {
+            st->addProtection |= MTG_PROT_ARTIFACT;
+            continue;
+        }
+        if (strncmp(k, "Protection:", 11) == 0 && strncmp(k, "Protection:Card.", 16) != 0 && !st->addProtSpec) {
+            char spec[48], *e = strchr(k + 11, ':');   // "Protection:Creature", "Protection:Enchantment:enchantments:
+            size_t len = e ? (size_t)(e - (k + 11)) : strlen(k + 11);   // Card.CardUID_HostCardUID"
+            const char *ex = e ? strchr(e + 1, ':') : NULL;
+            if (len < sizeof(spec) && (!ex || strcmp(ex + 1, "Card.CardUID_HostCardUID") == 0)) {
+                memcpy(spec, k + 11, len);
+                spec[len] = 0;
+                if (Mtg_ValidSpecKnown(spec)) {
+                    char *t = malloc(len + 1);
+                    memcpy(t, spec, len + 1);
+                    st->addProtSpec = t;
+                    st->protExceptHost = ex != NULL;
+                    continue;
+                }
+            }
+        }
         for (i = 0; i < 5; i++) {
             if (strcmp(k, sWalk[i]) == 0 || (strncmp(k, "Landwalk:", 9) == 0 && strcmp(k + 9, sBasic[i]) == 0))
                 st->addLandwalk |= MTG_COLOR_BIT(i), found = 1;
@@ -248,7 +272,8 @@ static void ParseOne(MtgCardDef *c, int cardId, char *text)
                                          "IsPresent", "PresentCompare", "ValidCard", "ValidAttacker", "ValidBlocker", "CharacteristicDefining",
                                          "Activator", "Type", "Amount", "Cost", "Condition", "Secondary", "UnlessDefender", "Target",
                                          "ValidCreature", "ValidTarget", "ValidSA", "ValidSource", "Caster", "AddAbility", "AddTrigger", "AddSVar", "GainControl",
-                                         "CheckSVar", "SVarCompare", "AddHiddenKeyword"};
+                                         "CheckSVar", "SVarCompare", "AddHiddenKeyword", "AddType", "SetColor",
+                                         "RemoveLandTypes", "RemoveCreatureTypes"};
     MtgStatic st;
     int first, count, i, v;
     const char *s;
@@ -473,6 +498,53 @@ static void ParseOne(MtgCardDef *c, int cardId, char *text)
     }
     if ((s = ParamOf(first, count, "AddKeyword")) && !Keywords(&st, s))
         goto unknown;
+    if ((s = ParamOf(first, count, "AddType"))) {   // "Creature & Elf", "Mountain", "ChosenType"
+        char names[96], *p = names, *k;
+        if (st.mode != MTG_STATIC_CONTINUOUS || strlen(s) >= sizeof(names))
+            goto unknown;
+        strcpy(names, s);
+        while ((k = Mtg_Token(&p, '&')) != NULL) {
+            static const struct { const char *name; uint8_t bit; } sTypes[] = {
+                {"Creature", MTG_T_CREATURE}, {"Artifact", MTG_T_ARTIFACT}, {"Land", MTG_T_LAND}, {"Enchantment", MTG_T_ENCHANTMENT}};
+            unsigned q;
+            int idx;
+            while (*k == ' ')
+                k++;
+            for (i = (int)strlen(k); i > 0 && k[i - 1] == ' '; i--)
+                k[i - 1] = 0;
+            for (q = 0; q < sizeof(sTypes) / sizeof(sTypes[0]) && strcmp(k, sTypes[q].name); q++)
+                ;
+            if (q < sizeof(sTypes) / sizeof(sTypes[0])) {
+                st.addTypes |= sTypes[q].bit;
+                continue;
+            }
+            idx = strcmp(k, "ChosenType") == 0 ? MTG_SUB_CHOSEN - 1 : Mtg_SubtypeIndex(k, (unsigned)strlen(k));
+            if (idx < 0 || (st.addSub[0] && st.addSub[1]))
+                goto unknown;
+            st.addSub[st.addSub[0] ? 1 : 0] = (uint16_t)(idx + 1);
+        }
+    }
+    if ((s = ParamOf(first, count, "RemoveLandTypes")))
+        st.removeLand = strcmp(s, "True") == 0;
+    if ((s = ParamOf(first, count, "RemoveCreatureTypes")))
+        st.removeCreature = strcmp(s, "True") == 0;
+    if ((st.removeLand || st.removeCreature) && !st.addSub[0])
+        goto unknown;
+    if ((s = ParamOf(first, count, "SetColor"))) {   // "Black", "Colorless", "ChosenColor"
+        static const char *const sNames[5] = {"White", "Blue", "Black", "Red", "Green"};
+        if (st.mode != MTG_STATIC_CONTINUOUS)
+            goto unknown;
+        st.setColors = MTG_SETCOLOR;
+        if (strcmp(s, "ChosenColor") == 0)
+            st.setColors |= MTG_SETCOLOR_CHOSEN;
+        else if (strcmp(s, "Colorless") != 0) {
+            for (i = 0; i < 5 && strcmp(s, sNames[i]); i++)
+                ;
+            if (i == 5)
+                goto unknown;
+            st.setColors |= (uint8_t)MTG_COLOR_BIT(i);
+        }
+    }
     if ((st.check = ParamOf(first, count, "CheckSVar"))) {   // (StaticAbility.checkConditions' CheckSVar)
         st.compare = ParamOf(first, count, "SVarCompare");
         if (!Mtg_CheckSvarKnown(cardId, st.check, st.compare))
@@ -1011,6 +1083,7 @@ static int Applies(const MtgDuel *d, const MtgStatic *st, int src, int obj)
 
 // What every static on the battlefield does to OBJ now
 // one static's share of what OBJ is now (SRC its source, CTRL that source's controller)
+static int sModsObj;   // (the object Mtg_StaticMods works out)
 static void ModsBy(const MtgDuel *d, const MtgStatic *st, int s, int ctrl, uint32_t srcSeq, MtgStaticMods *m,
                    uint32_t *setPowerSeqP, uint32_t *setToughSeqP)
 {
@@ -1033,6 +1106,21 @@ static void ModsBy(const MtgDuel *d, const MtgStatic *st, int s, int ctrl, uint3
     m->keywords |= st->addKeywords;
     m->landwalk |= st->addLandwalk;
     m->protection |= st->addProtection;
+    if (st->protOwnColors)
+        m->protection |= Mtg_Card(d->objs[sModsObj].def)->colors;   // (its printed colors: no static asked again)
+    if (st->setColors) {
+        m->colorsSet = 1;
+        m->colors = st->setColors & 0x1F;
+        if ((st->setColors & MTG_SETCOLOR_CHOSEN) && s >= 0 && s < d->objCount)
+            m->colors = gMtgEffCtx ? gMtgEffCtx->chosenColors : d->objs[s].chosenColors;
+    }
+    if (st->addProtSpec)
+        for (int q = 0; q < 2; q++)
+            if (!m->protSpec[q]) {
+                m->protSpec[q] = st->addProtSpec;
+                m->protExcept[q] = (int16_t)(st->protExceptHost ? s : -1);
+                break;
+            }
     if (st->protChosen && s >= 0 && s < d->objCount)
         m->protection |= gMtgEffCtx ? gMtgEffCtx->chosenColors : d->objs[s].chosenColors;
     if (st->setPower != MTG_STATIC_NO_SET && srcSeq + 1 > setPowerSeq)
@@ -1065,6 +1153,7 @@ void Mtg_StaticMods(const MtgDuel *d, int obj, MtgStaticMods *m)
     if (sDepth || d->objs[obj].zone != MTG_ZONE_BATTLEFIELD)
         return;
     sDepth++;
+    sModsObj = obj;
     for (s = 0; s < d->objCount; s++) {
         const MtgObj *src = &d->objs[s];
         const MtgCardDef *c;
@@ -1095,10 +1184,153 @@ void Mtg_StaticMods(const MtgDuel *d, int obj, MtgStaticMods *m)
     sDepth--;
 }
 
+// the type-changing layer alone (613.1d), worked out before the others: what statics add to OBJ's types and subtypes
+// (its own guard: Darkest Hour's "creatures" asks for Living Lands' Forests, P/T and colors after it)
+static int sTypeDepth;
+static void TypeModsBy(const MtgDuel *d, const MtgStatic *st, int s, MtgStaticMods *m)
+{
+    int q, r;
+    m->addTypes |= st->addTypes;
+    m->removeLand |= st->removeLand;
+    m->removeCreature |= st->removeCreature;
+    for (q = 0; q < 2 && st->addSub[q]; q++) {
+        uint16_t sub = st->addSub[q];
+        if (sub == MTG_SUB_CHOSEN) {   // (its source's chosen type, as it is now)
+            if (s < 0 || s >= d->objCount || !d->objs[s].chosenType)
+                continue;
+            sub = d->objs[s].chosenType;
+        }
+        for (r = 0; r < 4; r++)
+            if (!m->addSub[r] || m->addSub[r] == sub) {
+                m->addSub[r] = sub;
+                break;
+            }
+    }
+}
+
+static void TypeMods(const MtgDuel *d, int obj, MtgStaticMods *m)
+{
+    int s, k;
+    memset(m, 0, sizeof(*m));
+    if (sTypeDepth || d->objs[obj].zone != MTG_ZONE_BATTLEFIELD || !Mtg_TypeLayer(d))
+        return;
+    sTypeDepth++;
+    for (s = 0; s < d->objCount; s++) {
+        const MtgObj *src = &d->objs[s];
+        const MtgCardDef *c;
+        if (src->zone != MTG_ZONE_BATTLEFIELD)
+            continue;
+        c = Mtg_Card(src->def);
+        for (k = 0; k < c->staticCount; k++) {
+            const MtgStatic *st = &gMtgStatics[c->statics[k]];
+            if (st->mode == MTG_STATIC_CONTINUOUS && !st->fromGrave && (st->addTypes || st->addSub[0])
+                && Applies(d, st, s, obj))
+                TypeModsBy(d, st, s, m);
+        }
+    }
+    sTypeDepth--;
+}
+
+uint8_t Mtg_StaticTypes(const MtgDuel *d, int obj)
+{
+    MtgStaticMods m;
+    TypeMods(d, obj, &m);
+    return m.addTypes;
+}
+
+static int CardHasSub(const MtgCardDef *c, const char *t, size_t n)
+{
+    const char *s = c->subtypes;
+    while (s && *s) {
+        const char *e = strchr(s, ' ');
+        size_t len = e ? (size_t)(e - s) : strlen(s);
+        if (len == n && strncmp(s, t, n) == 0)
+            return 1;
+        if (!e)
+            break;
+        s = e + 1;
+    }
+    return 0;
+}
+
+static const char *const sBasicNames[5] = {"Plains", "Island", "Swamp", "Mountain", "Forest"};
+
+int Mtg_TypeLayer(const MtgDuel *d)
+{
+    static const MtgDuel *sD;   // (kept while nothing has moved: d->seq counts every move)
+    static uint32_t sSeq;
+    static int sCount = -1, sResult;
+    int i, k;
+    if (sD == d && sSeq == d->seq && sCount == d->objCount)
+        return sResult;
+    sD = d, sSeq = d->seq, sCount = d->objCount, sResult = 0;
+    for (i = 0; i < d->objCount; i++)
+        if (d->objs[i].zone == MTG_ZONE_BATTLEFIELD) {
+            const MtgCardDef *c = Mtg_Card(d->objs[i].def);
+            for (k = 0; k < c->staticCount; k++) {
+                const MtgStatic *st = &gMtgStatics[c->statics[k]];
+                if (st->addTypes || st->addSub[0] || st->setColors)
+                    return sResult = 1;
+            }
+        }
+    return 0;
+}
+
+// the basic land types the statics add (MTG_COLOR_BIT W..G)
+static uint8_t AddedBasics(const MtgStaticMods *m)
+{
+    uint8_t b = 0;
+    int r, i;
+    for (r = 0; r < 4 && m->addSub[r]; r++)
+        for (i = 0; i < 5; i++)
+            if (strcmp(Mtg_SubtypeName(m->addSub[r] - 1), sBasicNames[i]) == 0)
+                b |= (uint8_t)MTG_COLOR_BIT(i);
+    return b;
+}
+
+uint8_t Mtg_ObjLandTypes(const MtgDuel *d, int obj)
+{
+    MtgStaticMods m;
+    uint8_t own = Mtg_Card(d->objs[obj].def)->intrinsicMana;
+    if (d->objs[obj].zone != MTG_ZONE_BATTLEFIELD || !Mtg_TypeLayer(d))
+        return own;
+    TypeMods(d, obj, &m);
+    return (uint8_t)((m.removeLand ? 0 : own) | AddedBasics(&m));
+}
+
+int Mtg_ObjLostText(const MtgDuel *d, int obj)
+{
+    MtgStaticMods m;
+    if (d->objs[obj].zone != MTG_ZONE_BATTLEFIELD || !(Mtg_Card(d->objs[obj].def)->types & MTG_T_LAND) || !Mtg_TypeLayer(d))
+        return 0;
+    TypeMods(d, obj, &m);
+    return m.removeLand && AddedBasics(&m);
+}
+
+int Mtg_ObjHasSubtype(const MtgDuel *d, int obj, const char *t, size_t n)
+{
+    const MtgCardDef *c = Mtg_Card(d->objs[obj].def);
+    MtgStaticMods m;
+    int idx, r, kinds;
+    if (d->objs[obj].zone != MTG_ZONE_BATTLEFIELD || !Mtg_TypeLayer(d))
+        return CardHasSub(c, t, n);
+    TypeMods(d, obj, &m);
+    idx = Mtg_SubtypeIndex(t, (unsigned)n);
+    for (r = 0; r < 4 && m.addSub[r]; r++)
+        if (m.addSub[r] - 1 == idx)
+            return 1;
+    if (!CardHasSub(c, t, n))
+        return 0;
+    kinds = idx >= 0 ? Mtg_SubtypeKinds(idx) : 0;
+    return !((m.removeLand && (kinds & MTG_SUBK_LAND)) || (m.removeCreature && (kinds & MTG_SUBK_CREATURE)));
+}
+
 int Mtg_ObjAbilities(const MtgDuel *d, int obj, uint16_t *out, int max)
 {
     const MtgCardDef *c = Mtg_Card(d->objs[obj].def);
     int n = 0, s, k, g;
+    if (!sDepth && Mtg_ObjLostText(d, obj))
+        c = Mtg_Card(MTG_FACE_DOWN);   // (none of its own: Blood Moon's nonbasic lands)
     for (k = 0; k < c->abilityCount && n < max; k++)
         out[n++] = c->abilities[k];
     if (sDepth || d->objs[obj].zone != MTG_ZONE_BATTLEFIELD)
@@ -1128,6 +1360,8 @@ int Mtg_ObjTriggers(const MtgDuel *d, int obj, uint16_t *out, int max)
 {
     const MtgCardDef *c = Mtg_Card(d->objs[obj].def);
     int n = 0, s, k, g;
+    if (!sDepth && Mtg_ObjLostText(d, obj))
+        c = Mtg_Card(MTG_FACE_DOWN);
     for (k = 0; k < c->triggerCount && n < max; k++)
         out[n++] = c->triggers[k];
     if (sDepth || d->objs[obj].zone != MTG_ZONE_BATTLEFIELD)

@@ -184,7 +184,7 @@ int Mtg_Amount(const MtgDuel *d, const MtgResolveCtx *ctx, int card, const char 
             return 0;
         for (i = 0; i < d->objCount; i++)
             if (d->objs[i].zone == MTG_ZONE_BATTLEFIELD && d->objs[i].controller == ctx->controller)
-                types |= Mtg_Card(d->objs[i].def)->intrinsicMana;
+                types |= Mtg_ObjLandTypes(d, i);
         return __builtin_popcount(types & 0x1f);
     }
     if (strcmp(sv, "TargetedPlayer$CardsInHand") == 0) {

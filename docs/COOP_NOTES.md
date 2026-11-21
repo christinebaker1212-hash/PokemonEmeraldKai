@@ -8719,3 +8719,17 @@ res/moves/chatter/anim.s).
   Every check goes through Mtg_ProtectedFrom (targeting, damage, blocking, Auras falling off). "Protection from each color".
 - ProtectionAll (every ValidCards$ permanent; Gains$ TargetedCardColor: the target's colors).
 - Playable: 3509 -> 3527. Tests: test_rules.c TestProtectionKinds.
+
+## MAGIC: statics that change types and colors, protection they give (2026-11-21)
+- AddType$ (card types; subtypes by index, ChosenType: its source's), RemoveLandTypes$ / RemoveCreatureTypes$, SetColor$
+  (a color, Colorless, ChosenColor) on Continuous statics (MtgStatic addTypes / addSub / setColors).
+- The type layer is worked out alone first (mtg_static.c TypeMods, its own guard sTypeDepth) so other statics see it
+  (Darkest Hour's "all creatures" includes Living Lands' Forests); Mtg_ObjTypes, Mtg_ObjHasSubtype (every subtype test in
+  mtg_valid.c), Mtg_ObjLandTypes (the basic types' mana: mtg_mana.c, Domain, landwalk) read it; colors through
+  Mtg_StaticMods (the latest SetColor$, then an Animate's). A land made a basic type with RemoveLandTypes$ loses its own
+  abilities and triggers (305.7: Blood Moon, Evil Presence; Mtg_ObjLostText).
+- Mtg_TypeLayer: whether any such static is on the battlefield, kept while d->seq (every move, a morph turned up) holds:
+  without one nothing is asked (the tests' time stays as it was).
+- Statics' AddKeyword$ Protection:SPEC (creatures, Gorgons; ...:Card.CardUID_HostCardUID: not from the Aura itself),
+  from artifacts, from cardColors (each creature's own colors): MtgStaticMods.protSpec / protExcept, Mtg_ProtectedFrom.
+- Playable: 3527 -> 3558. Tests: test_rules.c TestTypeLayer (Blood Moon on City of Brass, Living Lands, Darkest Hour).

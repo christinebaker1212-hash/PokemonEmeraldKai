@@ -86,7 +86,9 @@ uint32_t Mtg_Keywords(const MtgDuel *d, int obj)
 uint8_t Mtg_ObjTypes(const MtgDuel *d, int obj)
 {
     const MtgObj *o = &d->objs[obj];
-    return Mtg_Card(o->def)->types | (o->animUntil && o->zone == MTG_ZONE_BATTLEFIELD ? o->animTypes : 0);
+    if (o->zone != MTG_ZONE_BATTLEFIELD)
+        return Mtg_Card(o->def)->types;
+    return Mtg_Card(o->def)->types | (o->animUntil ? o->animTypes : 0) | Mtg_StaticTypes(d, obj);
 }
 
 uint8_t Mtg_Landwalk(const MtgDuel *d, int obj)
@@ -108,9 +110,17 @@ int Mtg_ProtectedFrom(const MtgDuel *d, int obj, int source, uint8_t ignore)
 {
     const char *spec = Mtg_Card(d->objs[obj].def)->protSpec;
     uint8_t from = (uint8_t)(Mtg_ObjColors(d, source) | ((Mtg_ObjTypes(d, source) & MTG_T_ARTIFACT) ? MTG_PROT_ARTIFACT : 0));
+    MtgStaticMods m;
+    int q;
     if (Mtg_Protection(d, obj) & from & ~ignore)
         return 1;
-    return spec && d->objs[obj].faceDownOf == 0 && Mtg_ValidObj(d, source, spec, obj, d->objs[obj].controller);
+    if (spec && d->objs[obj].faceDownOf == 0 && Mtg_ValidObj(d, source, spec, obj, d->objs[obj].controller))
+        return 1;
+    Mtg_StaticMods(d, obj, &m);   // (what statics give it: an Aura's "protection from creatures", not from itself)
+    for (q = 0; q < 2 && m.protSpec[q]; q++)
+        if (m.protExcept[q] != source && Mtg_ValidObj(d, source, m.protSpec[q], obj, d->objs[obj].controller))
+            return 1;
+    return 0;
 }
 
 static int IsCreature(const MtgDuel *d, int obj)
@@ -1704,6 +1714,7 @@ static void DoAction(MtgDuel *d, const MtgAction *a)
         Mtg_Pay(d, p, &mc->mana, 0, MTG_NO_OBJ);
         o->def = (uint16_t)(o->faceDownOf - 1);
         o->faceDownOf = 0;
+        d->seq++;   // (what is on the battlefield changed: Mtg_TypeLayer's cache)
         Mtg_Event(d, MTG_EV_TURNED_UP, a->obj, p, 0);
         if (HasOther(mc)) {
             d->costAltIdx = (uint16_t)idx;
@@ -1840,7 +1851,7 @@ static int ControlsLandType(const MtgDuel *d, int player, int basic)
     int i;
     for (i = 0; i < d->objCount; i++)
         if (d->objs[i].zone == MTG_ZONE_BATTLEFIELD && d->objs[i].controller == player
-            && (Mtg_Card(d->objs[i].def)->intrinsicMana & MTG_COLOR_BIT(basic)))
+            && (Mtg_ObjLandTypes(d, i) & MTG_COLOR_BIT(basic)))
             return 1;
     return 0;
 }
@@ -1849,13 +1860,13 @@ static int ControlsLandType(const MtgDuel *d, int player, int basic)
 int Mtg_CanBlock(const MtgDuel *d, int blocker, int attacker)
 {
     uint32_t akw = Mtg_Keywords(d, attacker), bkw = Mtg_Keywords(d, blocker);
-    const MtgCardDef *ac = Mtg_Card(d->objs[attacker].def), *bc = Mtg_Card(d->objs[blocker].def);
+    const MtgCardDef *ac = Mtg_Card(d->objs[attacker].def);
     int i;
     if (bkw & MTG_KWX_CANT_BLOCK)   // (a Pump's "can't block" this turn)
         return 0;
     if ((akw & MTG_KW_BIT(MTG_KW_FLYING)) && !(bkw & (MTG_KW_BIT(MTG_KW_FLYING) | MTG_KW_BIT(MTG_KW_REACH))))
         return 0;
-    if ((akw & MTG_KW_BIT(MTG_KW_FEAR)) && !(bc->types & MTG_T_ARTIFACT) && !(bc->colors & MTG_COLOR_BIT(MTG_B)))
+    if ((akw & MTG_KW_BIT(MTG_KW_FEAR)) && !(Mtg_ObjTypes(d, blocker) & MTG_T_ARTIFACT) && !(Mtg_ObjColors(d, blocker) & MTG_COLOR_BIT(MTG_B)))
         return 0;
     // (shadow: "can block or be blocked by only creatures with shadow", both ways)
     if (((akw ^ bkw) & MTG_KW_BIT(MTG_KW_SHADOW)) != 0)

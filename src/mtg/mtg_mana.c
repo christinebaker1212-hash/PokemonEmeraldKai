@@ -39,7 +39,6 @@ int Mtg_ProducedColors(const char *produced)
 int Mtg_ManaAbilityColors(const MtgDuel *d, int obj, int *amount)
 {
     const MtgObj *o = &d->objs[obj];
-    const MtgCardDef *c = Mtg_Card(o->def);
     int i, mask = 0;
     *amount = 1;
     if (o->zone != MTG_ZONE_BATTLEFIELD || o->tapped)
@@ -48,7 +47,7 @@ int Mtg_ManaAbilityColors(const MtgDuel *d, int obj, int *amount)
         return 0;
     uint16_t abil[16];
     int abilCount = Mtg_ObjAbilities(d, obj, abil, 16);   // (Citanul Hierophants' creatures too)
-    mask = c->intrinsicMana;
+    mask = Mtg_ObjLandTypes(d, obj);
     for (i = 0; i < abilCount; i++) {
         const MtgAbility *ab = &gMtgAbilities[abil[i]];
         const char *amt;
@@ -77,7 +76,7 @@ int Mtg_ManaPain(const MtgDuel *d, int obj, int color)
 {
     uint16_t abil[16];
     int n = Mtg_ObjAbilities(d, obj, abil, 16), i, best = -1;
-    if (Mtg_Card(d->objs[obj].def)->intrinsicMana & (1 << color))
+    if (Mtg_ObjLandTypes(d, obj) & (1 << color))
         return 0;   // (a basic land type's)
     for (i = 0; i < n; i++) {
         const MtgAbility *ab = &gMtgAbilities[abil[i]];
@@ -97,7 +96,7 @@ static void ManaAbilityUsed(MtgDuel *d, int obj, int color)
 {
     uint16_t abil[16];
     int n, i;
-    if (Mtg_Card(d->objs[obj].def)->intrinsicMana & (1 << color))
+    if (Mtg_ObjLandTypes(d, obj) & (1 << color))
         return;   // (a basic land type's)
     n = Mtg_ObjAbilities(d, obj, abil, 16);
     for (i = 0; i < n; i++) {
