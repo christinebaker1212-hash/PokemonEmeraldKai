@@ -124,9 +124,39 @@ animations for the Pokemon too, as well as at least one positive and negative re
 LINK, animations (hop / step / turn, eating, happy with a heart, unhappy with a sweat drop, the Egg's wobble).
 Fixed on the way, without the hardware: the emulator harness now enforces what the user's VMU showed (XRAM's missing
 bytes, VCCR's rules, drawing only on RC, a VM2's receiver garbling slow bytes); LINK TEST 4 and the pet default to the
-fast RC link. Not in this draft: battles, the colour file icon per MOeMON, Kai's side (reading the save page, giving
-Eggs), the per-species Egg colours of the user's style guide beyond the 1-bit patterns. Screens:
+fast RC link. Not in this draft: battles, Kai's side (reading the save page, giving Eggs); the Eggs and the colour icon came
+next (below). Screens:
 docs/vmu_pet/pet_screens.png.
+
+## Eggs for each MOéMON and the colour file icon (2026-11-21)
+
+The user: "let's continue battles, color file icon, species specific eggs, and Kai's side".
+- **Eggs** (`vmu_pet/tools/eggs.py`): the guide's own 19x20 silhouette (docs/user_images/96.png, leaning as drawn),
+  one of 8 patterns by the first type (FLAMES fire / dragon, WAVES water / ice, ROSES grass / bug, STARS psychic /
+  fairy, BANDS ground / rock / fighting / steel, SPOTS normal, ZIGZAG electric / flying, BLOTCHES poison / ghost /
+  dark), in one of 2 phases and maybe mirrored by the second type and number (32 looks on the LCD), and in colour the
+  MOéMON's own: the shell and pattern from its PMD sprite's two main colours, the outline a dark shade of the
+  pattern's. The LCD draws the outline and the pattern; the Egg turns as it rocks before hatching.
+- **The colour file icon** (`vmu_pet/pet/icon.inc`): the pet redraws its own header's icon when its stage or
+  MOéMON changes: an Egg in its design and colours; a hatched MOéMON as its PMD Normal portrait. The 151 portraits
+  are 40 KB even at 4 colours, and a VMU program can be 64 KB at most (Sega's manual), so they're a data file of
+  their own, PICTURES (`tools/gen_icons.py`, 81 blocks; the VMU's file menu copies data files, VM2 to VMU too):
+  the pet finds it by its mark wherever its blocks are. Without it, a hatched MOéMON's icon is its LCD sprite in its
+  Egg's outline colour. Checked pixel for pixel in the emulator (`tools/icon_check.py`, test pet_icon).
+
+## Battles (built 2026-11-21)
+
+`vmu_pet/pet/battle.inc` (screens: docs/vmu_pet/battle_screens.png). Only when the player starts one; nothing is ever
+lost (a loss only means no prize). The two face each other (ours on the left), 3 HP each, taking turns. A hit comes
+from power against power (level + today's STRENGTH x 2 + IVs / 16, +3 with no care mistakes, so the day's training
+helps) and type against type (the full type chart): super effective hits for 2, not very effective less often.
+- **WILD** (MENU > BATTLE): a MOéMON of the edition within 2 levels; on our turns a marker runs along
+  [....##....] and A on ## is a sure hit. Prizes: SPARKS (the foe's level x 4) and 2 EXP for each of the first 3 wins
+  of a day (so battles help without breaking the week to level 50).
+- **LINK** (LINK > BATTLE, two units top to top): both wait, A on either calls; they swap a card (edition, MOéMON,
+  level, power, a seed) and both play out the same battle from the shared seed, each with its own MOéMON on the left.
+  The caller attacks first. Counted in the MOéMON's record (battles, wins: bytes $62-$64, which go to Kai with it).
+- Tests: pet_battle (WILD), pet_battle_link (two units: each counts one battle, one wins).
 
 ## The VMU manager (built 2026-11-21)
 

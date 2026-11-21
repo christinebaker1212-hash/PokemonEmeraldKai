@@ -5,7 +5,7 @@ usage:
   vmufs.py make OUT.bin [--game FILE.VMS [--name NAME]] [--data NAME=FILE ...]   a formatted image with these files
   vmufs.py ls IMAGE                                                            the directory
   vmufs.py get IMAGE NAME OUT                                                  one file's bytes
-  vmufs.py vmi FILE.VMS VMUNAME OUT.VMI [DESCRIPTION]                          the .VMI that goes with a .VMS (for
+  vmufs.py vmi FILE.VMS VMUNAME OUT.VMI [DESCRIPTION] [--data]                 the .VMI that goes with a .VMS (for
                                                                                VMU Explorer, the VM2's GUI, emulators)
 
 The layout (a standard VMU; libevmu's evmu_fat.h names the same fields):
@@ -154,14 +154,15 @@ class Image:
         self._write_entry(TYPE_DATA, name, free[0], n, 0)
 
 
-def make_vmi(vms_path, vmu_name, desc=''):
+def make_vmi(vms_path, vmu_name, desc='', is_game=None):
     """The 108-byte .VMI: checksum (resource name AND 'SEGA'), description, copyright, date, version 0, file number 1,
     the .VMS's resource name (8), the name on the VMU (12), mode (bit 1 GAME, bit 0 copy protected), size."""
     import os
     size = os.path.getsize(vms_path)
     res = os.path.splitext(os.path.basename(vms_path))[0].upper().encode('ascii')[:8].ljust(8, b'\0')
     data = open(vms_path, 'rb').read()
-    is_game = len(data) > 0x200 + 0x40 and data[0x200:0x210].strip() != b''
+    if is_game is None:
+        is_game = len(data) > 0x200 + 0x40 and data[0x200:0x210].strip() != b''
     v = bytearray(108)
     v[0:4] = bytes(res[i] & b'SEGA'[i] for i in range(4))
     v[4:36] = desc.encode('ascii')[:32].ljust(32, b' ')
@@ -208,7 +209,10 @@ def main(argv):
         img = Image(open(argv[2], 'rb').read())
         open(argv[4], 'wb').write(img.read(argv[3]))
     elif cmd == 'vmi':
-        open(argv[4], 'wb').write(make_vmi(argv[2], argv[3], argv[5] if len(argv) > 5 else ''))
+        rest = argv[5:]
+        data = '--data' in rest
+        rest = [a for a in rest if a != '--data']
+        open(argv[4], 'wb').write(make_vmi(argv[2], argv[3], rest[0] if rest else '', False if data else None))
     else:
         sys.exit(__doc__)
 

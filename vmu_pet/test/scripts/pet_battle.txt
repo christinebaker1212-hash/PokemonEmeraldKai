@@ -1,0 +1,30 @@
+# image: build/pet.bin
+# A WILD battle (MENU > BATTLE): the foe appears, the two take turns (the marker left to run out), it ends in a win or
+# a loss, counted (P_BATTLES $64), and the pet is back on its screen.
+date a 2026 11 21 10 0 0
+date b 2026 11 21 10 0 0
+run 3
+date a 2026 11 21 10 31 0
+run 4
+peek a 41 02
+press a B 0.2
+run 0.5
+press a D 0.2
+run 0.4
+press a D 0.2
+run 0.4
+shot a menu
+press a A 0.2
+run 1.2
+shot a intro
+expect a 0 A WILD
+expect a 2 APPEARED!
+run 2
+shot a scene
+run 4
+shot a marker
+run 6
+shot a turn2
+run 60
+shot a after
+peek a 64 01

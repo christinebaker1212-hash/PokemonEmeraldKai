@@ -8,7 +8,7 @@ peek a 41 01
 expect a 4 EGG 0S
 shot a egg
 date a 2026 11 21 10 31 0
-run 2.4
+run 3
 peek a 41 02
 expect a 4 HATCHED!
 shot a hatched
@@ -61,6 +61,8 @@ press a D 0.2
 run 0.4
 press a D 0.2
 run 0.4
+press a D 0.2
+run 0.4
 press a A 0.2
 run 1.0
 expect a 4 CLEAN!
@@ -78,10 +80,10 @@ run 1.5
 press a A 0.1
 run 1.5
 press a A 0.1
-run 1.8
+run 2.6
 shot a trainresult
 expect a 4 TRAINED!
-run 1.5
+run 0.7
 peek a 4c 01
 run 2.5
 press a U 0.2
@@ -118,6 +120,8 @@ press a D 0.2
 run 0.3
 press a D 0.2
 run 0.3
+press a D 0.2
+run 0.3
 press a A 0.2
 run 0.6
 shot a shop
@@ -133,3 +137,4 @@ date a 2026 11 22 12 0 0
 run 2
 peek a 68 3e
 save a OUT/a.bin
+save a OUT/icon_sprite.bin

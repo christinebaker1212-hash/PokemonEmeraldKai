@@ -25,15 +25,19 @@ press b D 0.2
 run 0.3
 press b D 0.2
 run 0.3
+press b D 0.2
+run 0.3
 press b A 0.2
 run 0.6
 press b D 0.2
 run 0.3
 press b A 0.2
 run 0.6
-expect b 3 WAITING...
+expect b 4 WAITING...
 press a B 0.2
 run 0.5
+press a D 0.2
+run 0.3
 press a D 0.2
 run 0.3
 press a D 0.2
