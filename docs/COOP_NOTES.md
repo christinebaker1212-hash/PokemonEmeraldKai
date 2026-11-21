@@ -4131,7 +4131,11 @@ a byte to struct ObjectEvent, which MinGW's bitfield layout grew to 40 bytes: Wi
 - New games in JOHTO / KANTO: CB2_NewGame fades in (no ExecuteTruckSequence, which drew the truck's door into the
   house), BIRCH's farewell per region (main_menu.c, MP_Region_StartChoice), harness condition `regionmenu`.
 - Quetzal's travelling visitors (JESSIE and JAMES, qz_specials.c TravelingEvent) wait for the region's League.
-- tools/quetzal_port/fix_warp_tiles.py (run by import.py): FireRed door mats warp on both halves.
+- Exit mats are FireRed's: one south-arrow tile under a one-tile mat (the warps either side are plain floor). The
+  import once ran fix_warp_tiles.py, which took them for two-tile mats and gave the floor tiles beside each mat the
+  arrow behaviour in their tilesets: every room using those floor tiles then showed an exit arrow walking down, and
+  the GAME CORNER's exit moved off its mat (2026-11-21: the 71 tiles back as Quetzal / FireRed have them, the script
+  gone). Never give a shared metatile a warp behaviour for one map's sake; scenario kanto_floor_arrows.
 - Script numbers the import can't translate (a number set into a var, then additem VAR): check with a scan of
   `setvar VAR_0x80xx, N` before item / species / move commands; OAK's 5 POKé BALLS and RED's gift were the two.
 - QzBufferLastReceivedMonForNickname reads gMpLastGivenMonPlace / Slot (pokemon.c GiveMonToPlayer), not VAR_RESULT.
