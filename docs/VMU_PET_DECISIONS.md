@@ -116,6 +116,18 @@ Started 2026-11-20. Nothing is built yet; graphics come from the user.
   Kai's boxes, put an Egg from Kai's boxes onto it; leaving ends the connection by software (proposed: @REST00, the
   VM2 restarts out of GUI-mode, ready to use). This replaces the title menu's TRANSFER MOEMON FROM VMU. Mock-ups first.
 
+## The pet's first draft (2026-11-21)
+
+The user: "fix it on your own, and give me a first draft of the actual program", then "make certain there are basic
+animations for the Pokemon too, as well as at least one positive and negative reaction". `vmu_pet/pet/` (README
+"The pet"): KANTO edition, Egg to level 50, Digimon-style daily care, SPARKS clicker + helpers + shop, evolutions,
+LINK, animations (hop / step / turn, eating, happy with a heart, unhappy with a sweat drop, the Egg's wobble).
+Fixed on the way, without the hardware: the emulator harness now enforces what the user's VMU showed (XRAM's missing
+bytes, VCCR's rules, drawing only on RC, a VM2's receiver garbling slow bytes); LINK TEST 4 and the pet default to the
+fast RC link. Not in this draft: battles, the colour file icon per MOeMON, Kai's side (reading the save page, giving
+Eggs), the per-species Egg colours of the user's style guide beyond the 1-bit patterns. Screens:
+docs/vmu_pet/pet_screens.png.
+
 ## The VMU manager (built 2026-11-21)
 
 `vmu_pet/manager/` (README.txt; Dear ImGui on SDL2, Windows and Linux): VMU images on the VM2's SD card over USB

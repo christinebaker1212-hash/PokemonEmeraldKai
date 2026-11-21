@@ -83,7 +83,7 @@ sio_recv:
   ld ticks
   st sio_t0
 .loop:
-  call sio_poll
+  callf sio_poll
   bz .done
   ld ticks
   sub sio_t0
@@ -98,8 +98,8 @@ sio_recv:
 sio_xfer:
   st sio_t1
   mov #0, sio_err
-  call sio_send
-  call sio_recv
+  callf sio_send
+  callf sio_recv
   bnz .fail
   ld b
   sub sio_t1
@@ -115,6 +115,6 @@ sio_xfer:
 
 ;; sio_flush: drop anything already received
 sio_flush:
-  call sio_poll
+  callf sio_poll
   bz sio_flush
   ret

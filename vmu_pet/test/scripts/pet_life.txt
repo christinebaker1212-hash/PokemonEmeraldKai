@@ -1,0 +1,135 @@
+# image: build/pet.bin
+# The KANTO pet: an Egg hatches (wobbling), is fed (eating, happy), cleaned, trained; a fifth meal is refused (unhappy);
+# a day ends (care judged); helpers earn while the clock runs; it all survives a reload.
+date a 2026 11 21 10 0 0
+date b 2026 11 21 10 0 0
+run 2
+peek a 41 01
+expect a 4 EGG 0S
+shot a egg
+date a 2026 11 21 10 31 0
+run 2.4
+peek a 41 02
+expect a 4 HATCHED!
+shot a hatched
+run 3
+expect a 4 LV1 0S
+press a B 0.2
+run 0.5
+press a A 0.2
+run 0.5
+press a A 0.2
+run 1.7
+expect a 4 YUM!
+run 2.5
+press a B 0.2
+run 0.5
+press a A 0.2
+run 0.5
+press a A 0.2
+run 2
+run 2.5
+press a B 0.2
+run 0.5
+press a A 0.2
+run 0.5
+press a A 0.2
+run 2
+run 2.5
+press a B 0.2
+run 0.5
+press a A 0.2
+run 0.5
+press a A 0.2
+run 2
+run 2.5
+peek a 45 04
+peek a 47 02
+shot a fed
+press a B 0.2
+run 0.5
+press a A 0.2
+run 0.5
+press a A 0.2
+run 1.0
+expect a 4 FULL!
+shot a full
+run 2.5
+press a B 0.2
+run 0.5
+press a D 0.2
+run 0.4
+press a D 0.2
+run 0.4
+press a A 0.2
+run 1.0
+expect a 4 CLEAN!
+peek a 47 00
+run 2.5
+press a B 0.2
+run 0.5
+press a D 0.2
+run 0.4
+press a A 0.2
+run 1
+shot a training
+press a A 0.1
+run 1.5
+press a A 0.1
+run 1.5
+press a A 0.1
+run 1.8
+shot a trainresult
+expect a 4 TRAINED!
+run 1.5
+peek a 4c 01
+run 2.5
+press a U 0.2
+run 0.6
+shot a status0
+press a R 0.2
+run 0.6
+shot a status1
+press a R 0.2
+run 0.6
+shot a status2
+expect a 0 TODAY
+expect a 1 MEALS 4/4
+expect a 2 TRAIN 1/3
+press a B 0.2
+run 0.6
+# the next day: trained once (under 3): one care mistake; fed 4 and clean: no more
+date a 2026 11 22 10 0 0
+run 2
+peek a 49 01
+peek a 4a 01
+peek a 45 00
+# the shop: 100 SPARKS, a helper (50); two hours: 12 more
+poke a 68 64
+press a B 0.2
+run 0.5
+press a D 0.2
+run 0.3
+press a D 0.2
+run 0.3
+press a D 0.2
+run 0.3
+press a D 0.2
+run 0.3
+press a D 0.2
+run 0.3
+press a A 0.2
+run 0.6
+shot a shop
+press a D 0.2
+run 0.4
+press a A 0.2
+run 0.8
+expect a 4 BOUGHT!
+peek a 6c 01
+peek a 68 32
+run 2.5
+date a 2026 11 22 12 0 0
+run 2
+peek a 68 3e
+save a OUT/a.bin

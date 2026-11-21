@@ -11,6 +11,7 @@
  *   expect UNIT LINE TEXT...    fail unless the screen's text line LINE (0-4, read back through the 3x5 font) is TEXT
  *   date UNIT Y M D H MI S      set the unit's clock
  *   vm2 UNIT                    the unit receives like a VM2 (bytes clocked slower than 1 ms a bit arrive garbled)
+ *   poke UNIT ADDR VALUE        write RAM bank 1 (hex), e.g. a test's shortcut; peek UNIT ADDR VALUE fails unless it holds VALUE
  *   rules on|off                real-hardware rules (default on): XRAM's missing bytes, VCCR bit 6, drawing on RC
  *
  * The link: libevmu keeps SCON/SBUF as plain registers (it emulates no serial port), so this does it. When a unit
@@ -244,6 +245,15 @@ int main(int argc, char** argv) {
         else if(!strcmp(cmd, "shot")) shot(unit(a1), a2);
         else if(!strcmp(cmd, "save")) saveFlash(unit(a1), a2);
         else if(!strcmp(cmd, "vm2")) unit(a1)->vm2 = 1;
+        else if(!strcmp(cmd, "poke")) {  /* poke UNIT ADDR VALUE: RAM bank 1 (hex) */
+            EvmuRam_* r = EVMU_RAM_(unit(a1)->dev->pRam);
+            r->ram[1][strtol(a2, NULL, 16) & 0xFF] = (EvmuWord)strtol(a3, NULL, 16);
+        } else if(!strcmp(cmd, "peek")) {  /* peek UNIT ADDR EXPECTED: fail unless RAM bank 1 holds it (hex) */
+            EvmuRam_* r = EVMU_RAM_(unit(a1)->dev->pRam);
+            int got = r->ram[1][strtol(a2, NULL, 16) & 0xFF], want = (int)strtol(a3, NULL, 16);
+            if(got != want) { fprintf(stderr, "line %d: unit %s RAM %s is %02X, expected %02X\n", lineNo, a1, a2, got, want); ++failures; }
+            else printf("ok: unit %s RAM %s = %02X\n", a1, a2, got);
+        }
         else if(!strcmp(cmd, "rules")) g_rules = !strcmp(a1, "on");
         else if(!strcmp(cmd, "expect")) {
             char got[16], want[300];

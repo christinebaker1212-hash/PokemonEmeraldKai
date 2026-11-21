@@ -35,8 +35,10 @@ lcd_clear:
   ret
 
 ;; lcd_char: acc = an ASCII character, c = column 0-11, b = text line 0-4 (6 pixels a line). Past column 11:
-;; nothing (it would land in the next line's bytes).
+;; nothing (it would land in the next line's bytes). Calls lcd_hook first (the program's: e.g. the buttons sampled while
+;; drawing, so a short press during a redraw isn't missed).
 lcd_char:
+  callf lcd_hook
   push acc
   ld c
   sub #12
@@ -157,7 +159,7 @@ lcd_text:
   push trl
   push trh
   push lcd_t5
-  call lcd_char
+  callf lcd_char
   pop lcd_t5
   pop trh
   pop trl
@@ -194,19 +196,19 @@ lcd_num:
   push lcd_t3
   ld lcd_t0
   add #48
-  call lcd_char
+  callf lcd_char
   inc c
   pop lcd_t3
   pop lcd_t1
   push lcd_t3
   ld lcd_t1
   add #48
-  call lcd_char
+  callf lcd_char
   inc c
   pop lcd_t3
   ld lcd_t3
   add #48
-  call lcd_char
+  callf lcd_char
   inc c
   pop acc
   ret
@@ -218,7 +220,7 @@ lcd_clear_line:
   mov #0, c
 .cl:
   mov #32, acc
-  call lcd_char
+  callf lcd_char
   inc c
   ld c
   bne #12, .cl
@@ -250,6 +252,150 @@ lcd_hex:
 .num:
   add #48
 .put:
-  call lcd_char
+  callf lcd_char
   inc c
+  ret
+
+;; lcd_row: acc = a pixel row 0-31 -> xbnk set, r2 = the XRAM address (low byte) of the row's first byte
+lcd_row:
+  st lcd_t5
+  mov #0, xbnk
+  bn lcd_t5, 4, .b0
+  mov #1, xbnk
+.b0:
+  ld lcd_t5
+  and #$0e
+  rol
+  rol
+  rol
+  add #$80
+  bn lcd_t5, 0, .even
+  add #6
+.even:
+  st 2
+  ret
+
+;; lcd_clear_rows: acc = the first pixel row, b = how many: those rows blank
+lcd_clear_rows:
+  push acc
+  push b
+  st lcd_t4
+.row:
+  ld lcd_t4
+  callf lcd_row
+  mov #6, lcd_t3
+.byte:
+  mov #0, acc
+  st @R2
+  inc 2
+  dec lcd_t3
+  ld lcd_t3
+  bnz .byte
+  inc lcd_t4
+  dec b
+  ld b
+  bnz .row
+  pop b
+  pop acc
+  ret
+
+;; lcd_blit24: trh:trl = a sprite (a row count, then 3 bytes a row), acc = its top pixel row, c = the byte column
+;; (0-3) its 24 pixels start at. The sprite's bytes replace what's there.
+lcd_blit24:
+  push b
+  st lcd_t2                 ; the row
+  mov #0, acc
+  ldc
+  st lcd_t1                 ; rows left
+  mov #1, lcd_t0            ; the data index
+.row:
+  ld lcd_t1
+  bz .done
+  ld lcd_t2
+  callf lcd_row
+  ld 2
+  add c
+  st 2
+  mov #3, b
+.byte:
+  ld lcd_t0
+  ldc
+  st @R2
+  inc 2
+  inc lcd_t0
+  dec b
+  ld b
+  bnz .byte
+  inc lcd_t2
+  dec lcd_t1
+  br .row
+.done:
+  pop b
+  ret
+
+;; lcd_blit8: trh:trl = 8 bytes (an 8x8 icon), acc = its top pixel row, c = the byte column (0-5)
+lcd_blit8:
+  push b
+  st lcd_t2
+  mov #0, lcd_t0
+.row:
+  ld lcd_t2
+  callf lcd_row
+  ld 2
+  add c
+  st 2
+  ld lcd_t0
+  ldc
+  st @R2
+  inc lcd_t2
+  inc lcd_t0
+  ld lcd_t0
+  bne #8, .row
+  pop b
+  ret
+
+;; lcd_text_at: like lcd_text but trh:trl, c, b saved (handy for one-line calls)
+
+;; lcd_blit24m: like lcd_blit24, mirrored (the sprite faces the other way): each row's 3 bytes in reverse order, each
+;; byte's bits reversed (rev_bits: a 256-byte table the program includes)
+lcd_blit24m:
+  push b
+  st lcd_t2
+  mov #0, acc
+  ldc
+  st lcd_t1
+  mov #1, lcd_t0
+.row:
+  ld lcd_t1
+  bz .done
+  ld lcd_t2
+  callf lcd_row
+  ld 2
+  add c
+  add #2                    ; from the right byte leftwards
+  st 2
+  mov #3, b
+.byte:
+  ld lcd_t0
+  ldc
+  push trl
+  push trh
+  st lcd_t3
+  mov #<rev_bits, trl
+  mov #>rev_bits, trh
+  ld lcd_t3
+  ldc
+  pop trh
+  pop trl
+  st @R2
+  dec 2
+  inc lcd_t0
+  dec b
+  ld b
+  bnz .byte
+  inc lcd_t2
+  dec lcd_t1
+  br .row
+.done:
+  pop b
   ret
