@@ -431,6 +431,10 @@ static const u8 sText_MpWeatherAllSand[] = _("Everyone was buffeted\nby the sand
 static const u8 sText_MpIntimidatePartyAll[] = _("{B_SCR_ACTIVE_NAME_WITH_PREFIX}'s {B_SCR_ACTIVE_ABILITY}\ncuts the party's ATTACK!");
 static const u8 sText_MpIntimidateFoesAll[] = _("{B_SCR_ACTIVE_NAME_WITH_PREFIX}'s {B_SCR_ACTIVE_ABILITY}\ncuts the foes' ATTACK!");
 const u16 gMpIntimidateStringIds[] = {STRINGID_MP_INTIMIDATE_ALL, STRINGID_PKMNCUTSATTACKWITH};
+// Moemon Co-op: a move's several targets hit at once: which one each line is about
+static const u8 sText_MpCritOn[] = _("A critical hit on\n{B_DEF_NAME_WITH_PREFIX}!");
+static const u8 sText_MpSuperOn[] = _("It's super effective on\n{B_DEF_NAME_WITH_PREFIX}!");
+static const u8 sText_MpNotVeryOn[] = _("It's not very effective on\n{B_DEF_NAME_WITH_PREFIX}…");
 static const u8 sText_MpWeatherAllHail[] = _("Everyone was pelted\nby HAIL!");
 static const u8 sText_MpGroupPartyNoLower[] = _("The party's {B_BUFF1}\nwon't go any lower!");
 static const u8 sText_MpGroupFoesNoLower[] = _("The foes' {B_BUFF1}\nwon't go any lower!");
@@ -2607,6 +2611,15 @@ void BufferStringBattle(u16 stringID)
         break;
     case STRINGID_MP_JOIN_HELP:
         stringPtr = sText_MpJoinHelp;
+        break;
+    case STRINGID_MP_CRIT_ON:
+        stringPtr = sText_MpCritOn;
+        break;
+    case STRINGID_MP_SUPER_ON:
+        stringPtr = sText_MpSuperOn;
+        break;
+    case STRINGID_MP_NOTVERY_ON:
+        stringPtr = sText_MpNotVeryOn;
         break;
     case STRINGID_MP_INTIMIDATE_ALL:
         stringPtr = GetBattlerSide(gBattlerTarget) == B_SIDE_PLAYER ? sText_MpIntimidatePartyAll : sText_MpIntimidateFoesAll;

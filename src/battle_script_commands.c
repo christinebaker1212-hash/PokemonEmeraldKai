@@ -1826,10 +1826,72 @@ static void Cmd_adjustnormaldamage2(void)
     gBattlescriptCurrInstr++;
 }
 
+// Moemon Co-op: a move hitting several Pokémon at once takes effect on all of them at once (the user, 2026-11-21).
+// Each target's damage is worked out in turn as before, but its hit flash, HP bar, the HP sent to the screens, its
+// messages, its added effect and its fainting wait (recMask); after the last target BattleScript_MpSpreadFlush plays
+// every flash, then every HP bar together, then each one's messages and effect, then every faint together; the
+// battle's usual faint handling (switch-ins, blackouts, the win) follows as it always does.
+static struct
+{
+    bool8 active, flushing;
+    u8 recMask, hitMask, hpMask, faintMask, faintShown, effMask, effCertain;
+    u8 count, idx;
+    u8 order[MAX_BATTLERS_COUNT];
+    s16 bar[MAX_BATTLERS_COUNT];
+    u8 result[MAX_BATTLERS_COUNT], crit[MAX_BATTLERS_COUNT], effect[MAX_BATTLERS_COUNT];
+} sMpSpread;
+
+void MP_Spread_Reset(void)
+{
+    if (sMpSpread.active && (sMpSpread.hpMask || sMpSpread.recMask))
+        MPNet_Log("battle: spread left unshown (rec %x hp %x)", sMpSpread.recMask, sMpSpread.hpMask);
+    memset(&sMpSpread, 0, sizeof(sMpSpread));
+}
+
+// waiting: the battler's visuals are held for the flush (its own damage only: BS_TARGET of this move)
+static bool8 MpSpreadHolds(u8 battler)
+{
+    return sMpSpread.active && !sMpSpread.flushing && battler == gBattlerTarget && battler < MAX_BATTLERS_COUNT;
+}
+
+static void MpSpreadNote(u8 battler)
+{
+    if (!(sMpSpread.recMask & gBitTable[battler]) && sMpSpread.count < MAX_BATTLERS_COUNT)
+    {
+        sMpSpread.recMask |= gBitTable[battler];
+        sMpSpread.order[sMpSpread.count++] = battler;
+    }
+    sMpSpread.result[battler] = gMoveResultFlags;
+    sMpSpread.crit[battler] = gCritMultiplier;
+}
+
+// at the move's first animation: a damaging move for two or more of the foes (or everyone) in a Double / Triple Battle
+static void MpSpreadStart(void)
+{
+    u8 i, n = 0, tgt = gBattleMoves[gCurrentMove].target;
+    if (sMpSpread.active || !(gBattleTypeFlags & BATTLE_TYPE_DOUBLE) || gBattleMoves[gCurrentMove].power == 0
+        || gMultiHitCounter > 1 || !(tgt & (MOVE_TARGET_BOTH | MOVE_TARGET_FOES_AND_ALLY)))
+        return;
+    for (i = 0; i < gBattlersCount; i++)
+    {
+        if (i == gBattlerAttacker || (gAbsentBattlerFlags & gBitTable[i]) || gBattleMons[i].hp == 0)
+            continue;
+        if ((tgt & MOVE_TARGET_BOTH) && !(tgt & MOVE_TARGET_FOES_AND_ALLY) && GetBattlerSide(i) == GetBattlerSide(gBattlerAttacker))
+            continue;
+        n++;
+    }
+    if (n < 2)
+        return;
+    memset(&sMpSpread, 0, sizeof(sMpSpread));
+    sMpSpread.active = TRUE;
+    MPNet_Log("battle: move %u holds its %u targets' hits", gCurrentMove, n);
+}
+
 static void Cmd_attackanimation(void)
 {
     if (gBattleControllerExecFlags)
         return;
+    MpSpreadStart();
 
     if ((gHitMarker & HITMARKER_NO_ANIMATIONS) && (gCurrentMove != MOVE_TRANSFORM && gCurrentMove != MOVE_SUBSTITUTE))
     {
@@ -1915,8 +1977,16 @@ static void Cmd_healthbarupdate(void)
             else
                 healthValue = maxPossibleDmgValue;
 
+            if (MpSpreadHolds(gActiveBattler))
+            {
+                MpSpreadNote(gActiveBattler);   // (its bar goes down with the others')
+                sMpSpread.bar[gActiveBattler] = healthValue;
+            }
+            else
+            {
             BtlController_EmitHealthBarUpdate(B_COMM_TO_CONTROLLER, healthValue);
             MarkBattlerForControllerExec(gActiveBattler);
+            }
 
             if (GetBattlerSide(gActiveBattler) == B_SIDE_PLAYER && gBattleMoveDamage > 0)
                 gBattleResults.playerMonWasDamaged = TRUE;
@@ -2061,8 +2131,15 @@ static void Cmd_datahpupdate(void)
             gHitMarker &= ~HITMARKER_PASSIVE_HP_UPDATE;
 
             // Send updated HP
+            if (MpSpreadHolds(gActiveBattler) && (sMpSpread.recMask & gBitTable[gActiveBattler]))
+            {
+                sMpSpread.hpMask |= gBitTable[gActiveBattler];   // (sent once its bar has gone down)
+            }
+            else
+            {
             BtlController_EmitSetMonData(B_COMM_TO_CONTROLLER, REQUEST_HP_BATTLE, 0, sizeof(gBattleMons[gActiveBattler].hp), &gBattleMons[gActiveBattler].hp);
             MarkBattlerForControllerExec(gActiveBattler);
+            }
         }
     }
     else
@@ -2079,9 +2156,14 @@ static void Cmd_critmessage(void)
 {
     if (gBattleControllerExecFlags == 0)
     {
+        if (MpSpreadHolds(gBattlerTarget) && (sMpSpread.recMask & gBitTable[gBattlerTarget]))
+        {
+            gBattlescriptCurrInstr++;   // (said after every HP bar has gone down)
+            return;
+        }
         if (gCritMultiplier >= 2 && !(gMoveResultFlags & MOVE_RESULT_NO_EFFECT))
         {
-            PrepareStringBattle(STRINGID_CRITICALHIT, gBattlerAttacker);
+            PrepareStringBattle(sMpSpread.flushing && sMpSpread.count > 1 ? STRINGID_MP_CRIT_ON : STRINGID_CRITICALHIT, gBattlerAttacker);
             gBattleCommunication[MSG_DISPLAY] = 1;
         }
         gBattlescriptCurrInstr++;
@@ -2092,6 +2174,11 @@ static void Cmd_effectivenesssound(void)
 {
     if (gBattleControllerExecFlags)
         return;
+    if (sMpSpread.active && !sMpSpread.flushing)
+    {
+        gBattlescriptCurrInstr++;   // (one sound with the flashes: the flush)
+        return;
+    }
 
     gActiveBattler = gBattlerTarget;
     if (!(gMoveResultFlags & MOVE_RESULT_MISSED))
@@ -2141,6 +2228,11 @@ static void Cmd_resultmessage(void)
 
     if (gBattleControllerExecFlags)
         return;
+    if (MpSpreadHolds(gBattlerTarget) && (sMpSpread.recMask & gBitTable[gBattlerTarget]))
+    {
+        gBattlescriptCurrInstr++;   // (said after every HP bar has gone down)
+        return;
+    }
 
     if (gMoveResultFlags & MOVE_RESULT_MISSED && (!(gMoveResultFlags & MOVE_RESULT_DOESNT_AFFECT_FOE) || gBattleCommunication[MISS_TYPE] > B_MSG_AVOIDED_ATK))
     {
@@ -2218,6 +2310,9 @@ static void Cmd_resultmessage(void)
         }
     }
 
+    if (sMpSpread.flushing && sMpSpread.count > 1)   // (several hit at once: which one it was)
+        stringId = stringId == STRINGID_SUPEREFFECTIVE ? STRINGID_MP_SUPER_ON
+                 : stringId == STRINGID_NOTVERYEFFECTIVE ? STRINGID_MP_NOTVERY_ON : stringId;
     if (stringId)
         PrepareStringBattle(stringId, gBattlerAttacker);
 
@@ -3043,6 +3138,42 @@ static void Cmd_seteffectwithchance(void)
     else
         percentChance = gBattleMoves[gCurrentMove].secondaryEffectChance;
 
+    // Moemon Co-op: a spread move's added effect is decided now, done after every HP bar (the flush)
+    if (sMpSpread.flushing && gBattlerTarget < MAX_BATTLERS_COUNT && (sMpSpread.recMask & gBitTable[gBattlerTarget]))
+    {
+        if ((sMpSpread.effMask & gBitTable[gBattlerTarget]) && !(gMoveResultFlags & MOVE_RESULT_NO_EFFECT))
+        {
+            gBattleCommunication[MOVE_EFFECT_BYTE] = sMpSpread.effect[gBattlerTarget];
+            SetMoveEffect(FALSE, (sMpSpread.effCertain & gBitTable[gBattlerTarget]) ? MOVE_EFFECT_CERTAIN : 0);
+        }
+        else
+            gBattlescriptCurrInstr++;
+        return;
+    }
+    if (MpSpreadHolds(gBattlerTarget) && (sMpSpread.recMask & gBitTable[gBattlerTarget]))
+    {
+        u8 b = gBattlerTarget, eff = gBattleCommunication[MOVE_EFFECT_BYTE];
+        bool8 happens = FALSE, certain = FALSE;
+        if ((eff & MOVE_EFFECT_CERTAIN) && !(gMoveResultFlags & MOVE_RESULT_NO_EFFECT))
+            happens = certain = TRUE, eff &= ~MOVE_EFFECT_CERTAIN;
+        else if (gCurrentMove == MOVE_CHATTER)
+        {
+            bool8 MP_Chatter_Confuses(u8 attacker, u8 target, u16 random);
+            happens = MP_Chatter_Confuses(gBattlerAttacker, b, Random()) && eff && !(gMoveResultFlags & MOVE_RESULT_NO_EFFECT);
+        }
+        else if (Random() % 100 < percentChance && eff && !(gMoveResultFlags & MOVE_RESULT_NO_EFFECT))
+            happens = TRUE, certain = percentChance >= 100;
+        if (happens)
+        {
+            sMpSpread.effMask |= gBitTable[b];
+            sMpSpread.effect[b] = eff;
+            if (certain)
+                sMpSpread.effCertain |= gBitTable[b];
+        }
+        gBattlescriptCurrInstr++;
+        return;
+    }
+
     if (gBattleCommunication[MOVE_EFFECT_BYTE] & MOVE_EFFECT_CERTAIN
         && !(gMoveResultFlags & MOVE_RESULT_NO_EFFECT))
     {
@@ -3126,6 +3257,15 @@ static void Cmd_tryfaintmon(void)
     {
         u8 battler;
 
+        if (gBattlescriptCurrInstr[DSIZE8BIT] != BS_ATTACKER && MpSpreadHolds(gBattlerTarget)
+            && (sMpSpread.recMask & gBitTable[gBattlerTarget]))
+        {
+            // Moemon Co-op: a spread move's targets faint together, after every HP bar (the flush)
+            if (!(gAbsentBattlerFlags & gBitTable[gBattlerTarget]) && gBattleMons[gBattlerTarget].hp == 0)
+                sMpSpread.faintMask |= gBitTable[gBattlerTarget];
+            gBattlescriptCurrInstr += DSIZE8BIT + DSIZE8BIT + DSIZE8BIT + DSIZEPTR;
+            return;
+        }
         if (gBattlescriptCurrInstr[DSIZE8BIT] == BS_ATTACKER)
         {
             gActiveBattler = gBattlerAttacker;
@@ -5112,6 +5252,14 @@ static void Cmd_moveend(void)
                 }
             }
             gBattleScripting.moveendState++;
+            // Moemon Co-op: every target is done: a spread move's hits, all at once
+            if (sMpSpread.active && sMpSpread.recMask)
+            {
+                BattleScriptPushCursor();
+                gBattlescriptCurrInstr = BattleScript_MpSpreadFlush;
+                effect = TRUE;
+                break;
+            }
             // Moemon Co-op: every target is done: a spread stat move's changes, together
             if (gMpStatGroupMask | gMpStatGroupFailMask)
             {
@@ -6267,6 +6415,13 @@ static void Cmd_hitanimation(void)
 
     if (gMoveResultFlags & MOVE_RESULT_NO_EFFECT)
     {
+        gBattlescriptCurrInstr += 2;
+    }
+    else if (MpSpreadHolds(gActiveBattler)
+             && (!(gBattleMons[gActiveBattler].status2 & STATUS2_SUBSTITUTE) || !gDisableStructs[gActiveBattler].substituteHP
+                 || (gHitMarker & HITMARKER_IGNORE_SUBSTITUTE)))
+    {
+        sMpSpread.hitMask |= gBitTable[gActiveBattler];   // (it flashes with the others: the flush)
         gBattlescriptCurrInstr += 2;
     }
     else if (!(gHitMarker & HITMARKER_IGNORE_SUBSTITUTE) || !(gBattleMons[gActiveBattler].status2 & STATUS2_SUBSTITUTE) || gDisableStructs[gActiveBattler].substituteHP == 0)
@@ -11672,6 +11827,141 @@ static u8 MpFirstOf(u8 mask, u8 *count)
 // mode 1: set up the shared animation and line for the changed ones (jump if none)
 // mode 3: set up the line for the ones that can't go lower (jump if none)
 static u8 sMpIntimMask, sMpIntimChanger;   // (INTIMIDATE's foes so far: mpstatgroup 4 / 5)
+
+// BattleScript_MpSpreadFlush's steps (mpstatgroup 20-29): what a spread move's targets waited for, together
+static void MpSpreadFlushStep(u8 mode, const u8 *jumpPtr)
+{
+    u8 i, b, best = 0;
+    switch (mode)
+    {
+    case 20:   // (an own-loop move's script, EARTHQUAKE / EXPLOSION, at its end: the flush if anything waits)
+        if (sMpSpread.active && sMpSpread.recMask)
+        {
+            gBattlescriptCurrInstr += DSIZE8BIT + DSIZE8BIT + DSIZEPTR;
+            BattleScriptPushCursor();
+            gBattlescriptCurrInstr = BattleScript_MpSpreadFlush;
+            return;
+        }
+        break;
+    case 21:   // the sound (the strongest hit's) and every hit flash at once
+        if (gBattleControllerExecFlags)
+            return;
+        sMpSpread.flushing = TRUE;
+        MPNet_Log("battle: move %u lands on %u at once (mask %x)", gCurrentMove, sMpSpread.count, sMpSpread.recMask);
+        for (i = 0; i < sMpSpread.count; i++)
+        {
+            u8 r = sMpSpread.result[sMpSpread.order[i]];
+            u8 kind = (r & MOVE_RESULT_SUPER_EFFECTIVE) ? 3 : (r & MOVE_RESULT_NOT_VERY_EFFECTIVE) ? 1 : 2;
+            if (kind == 3 || (kind == 2 && best != 3) || (kind == 1 && best == 0))
+                best = kind;
+        }
+        if (best)   // (the attacker plays it: one message a battler a step, or the link loses one)
+        {
+            gActiveBattler = gBattlerAttacker;
+            BtlController_EmitPlaySE(B_COMM_TO_CONTROLLER, best == 3 ? SE_SUPER_EFFECTIVE : best == 1 ? SE_NOT_EFFECTIVE : SE_EFFECTIVE);
+            MarkBattlerForControllerExec(gActiveBattler);
+        }
+        break;
+    case 19:   // every hit flash at once
+        if (gBattleControllerExecFlags)
+            return;
+        for (b = 0; b < gBattlersCount; b++)
+            if (sMpSpread.hitMask & gBitTable[b])
+            {
+                gActiveBattler = b;
+                BtlController_EmitHitAnimation(B_COMM_TO_CONTROLLER);
+                MarkBattlerForControllerExec(b);
+            }
+        break;
+    case 22:   // every HP bar at once
+        if (gBattleControllerExecFlags)
+            return;
+        for (i = 0; i < sMpSpread.count; i++)
+        {
+            b = sMpSpread.order[i];
+            gActiveBattler = b;
+            BtlController_EmitHealthBarUpdate(B_COMM_TO_CONTROLLER, sMpSpread.bar[b]);
+            MarkBattlerForControllerExec(b);
+            if (GetBattlerSide(b) == B_SIDE_PLAYER && sMpSpread.bar[b] > 0)
+                gBattleResults.playerMonWasDamaged = TRUE;
+        }
+        break;
+    case 23:   // the HP the screens keep, now the bars are down
+        if (gBattleControllerExecFlags)
+            return;
+        for (b = 0; b < gBattlersCount; b++)
+            if (sMpSpread.hpMask & gBitTable[b])
+            {
+                gActiveBattler = b;
+                BtlController_EmitSetMonData(B_COMM_TO_CONTROLLER, REQUEST_HP_BATTLE, 0, sizeof(gBattleMons[b].hp), &gBattleMons[b].hp);
+                MarkBattlerForControllerExec(b);
+            }
+        sMpSpread.hpMask = 0;
+        sMpSpread.idx = 0;
+        break;
+    case 24:   // the next one's messages and added effect (its result and critical hit as they were); jump when done
+        if (sMpSpread.idx >= sMpSpread.count)
+        {
+            sMpSpread.idx = 0;
+            gBattlescriptCurrInstr = jumpPtr;
+            return;
+        }
+        b = sMpSpread.order[sMpSpread.idx++];
+        gBattlerTarget = b;
+        gMoveResultFlags = sMpSpread.result[b];
+        gCritMultiplier = sMpSpread.crit[b];
+        break;
+    case 25:   // the fainted ones' cries at once (jump: none fainted)
+        if (gBattleControllerExecFlags)
+            return;
+        for (b = 0; b < gBattlersCount; b++)
+            if ((sMpSpread.faintMask & gBitTable[b]) && gBattleMons[b].hp == 0 && !(gAbsentBattlerFlags & gBitTable[b]))
+            {
+                gActiveBattler = b;
+                BtlController_EmitFaintingCry(B_COMM_TO_CONTROLLER);
+                MarkBattlerForControllerExec(b);
+                sMpSpread.faintShown |= gBitTable[b];
+            }
+        if (!sMpSpread.faintShown)
+        {
+            gBattlescriptCurrInstr = jumpPtr;
+            return;
+        }
+        break;
+    case 26:   // ... and their faint animations at once
+        if (gBattleControllerExecFlags)
+            return;
+        for (b = 0; b < gBattlersCount; b++)
+            if (sMpSpread.faintShown & gBitTable[b])
+            {
+                gActiveBattler = b;
+                BtlController_EmitFaintAnimation(B_COMM_TO_CONTROLLER);
+                MarkBattlerForControllerExec(b);
+            }
+        break;
+    case 27:   // the next fainted one: its faint (the message, EXP...; its cry and animation done); jump when done
+        while (sMpSpread.idx < sMpSpread.count && !(sMpSpread.faintMask & gBitTable[sMpSpread.order[sMpSpread.idx]]))
+            sMpSpread.idx++;
+        if (sMpSpread.idx >= sMpSpread.count)
+        {
+            gBattlescriptCurrInstr = jumpPtr;
+            return;
+        }
+        gBattlerTarget = sMpSpread.order[sMpSpread.idx++];
+        break;
+    case 28:   // done
+        memset(&sMpSpread, 0, sizeof(sMpSpread));
+        break;
+    case 29:   // BattleScript_FaintTarget: its cry and animation were shown with the others' (jump past them)
+        if (gBattlerTarget < MAX_BATTLERS_COUNT && (sMpSpread.faintShown & gBitTable[gBattlerTarget]))
+        {
+            gBattlescriptCurrInstr = jumpPtr;
+            return;
+        }
+        break;
+    }
+    gBattlescriptCurrInstr += DSIZE8BIT + DSIZE8BIT + DSIZEPTR;
+}
 static void Cmd_mpstatgroup(void)
 {
     u8 mode = gBattlescriptCurrInstr[DSIZE8BIT];
@@ -11697,6 +11987,11 @@ static void Cmd_mpstatgroup(void)
         return;
     }
 
+    if (mode >= 19 && mode <= 29)
+    {
+        MpSpreadFlushStep(mode, jumpPtr);
+        return;
+    }
     if (mode == 4)
     {
         // INTIMIDATE (doubles and triples): each foe it lowers is kept; shown together after the last (mode 5)

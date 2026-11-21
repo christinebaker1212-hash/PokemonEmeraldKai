@@ -1,0 +1,8 @@
+# EARTHQUAKE (its own loop) on everyone at once (the user, 2026-11-21): GABBY & TY's double battle, GYARADOS's EARTHQUAKE
+# hits both foes and its partner RAICHU: three flashes, three HP bars together, then "It's super effective on Foe
+# MAGNEMITE!" and the rest, then both foes faint together. Shots q*.
+MODE=1
+TMO=200
+ENV_A="MOEMON_DEBUG_PARTY=130:60,26:60"
+EXPECT_A=("lands on 3 at once")
+UNEXPECT_A=("[crash]" "spread left unshown")

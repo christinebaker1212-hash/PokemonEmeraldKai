@@ -408,6 +408,7 @@ BattleScript_ExplosionLoop:
 	tryfaintmon BS_TARGET
 	moveendto MOVEEND_NEXT_TARGET
 	jumpifnexttargetvalid BattleScript_ExplosionLoop
+	mpstatgroup 20   @ Moemon Co-op: every target's hit at once
 	tryfaintmon BS_ATTACKER
 	end
 BattleScript_ExplosionMissed:
@@ -416,6 +417,7 @@ BattleScript_ExplosionMissed:
 	waitmessage B_WAIT_TIME_LONG
 	moveendto MOVEEND_NEXT_TARGET
 	jumpifnexttargetvalid BattleScript_ExplosionLoop
+	mpstatgroup 20
 	tryfaintmon BS_ATTACKER
 	end
 
@@ -1879,6 +1881,7 @@ BattleScript_DoHitAllWithUndergroundBonus::
 	tryfaintmon BS_TARGET
 	moveendto MOVEEND_NEXT_TARGET
 	jumpifnexttargetvalid BattleScript_HitsAllWithUndergroundBonusLoop
+	mpstatgroup 20   @ Moemon Co-op: every target's hit at once
 	end
 BattleScript_HitAllWithUndergroundBonusMissed::
 	pause B_WAIT_TIME_SHORT
@@ -1888,6 +1891,7 @@ BattleScript_HitAllWithUndergroundBonusMissed::
 	waitmessage B_WAIT_TIME_LONG
 	moveendto MOVEEND_NEXT_TARGET
 	jumpifnexttargetvalid BattleScript_HitsAllWithUndergroundBonusLoop
+	mpstatgroup 20
 	end
 
 BattleScript_EffectFutureSight::
@@ -2827,9 +2831,11 @@ BattleScript_FaintAttacker::
 	return
 
 BattleScript_FaintTarget::
+	mpstatgroup 29, BattleScript_FaintTargetShown   @ Moemon Co-op: fainted with a spread move's others
 	playfaintcry BS_TARGET
 	pause B_WAIT_TIME_LONG
 	dofaintanimation BS_TARGET
+BattleScript_FaintTargetShown:
 	cleareffectsonfaint BS_TARGET
 	printstring STRINGID_TARGETFAINTED
 	return
@@ -2967,6 +2973,39 @@ BattleScript_MpStatGroupFails:
 	printfromtable gMpStatGroupStringIds
 	waitmessage B_WAIT_TIME_LONG
 BattleScript_MpStatGroupDone:
+	return
+
+@ Moemon Co-op: a move's several targets hit at once (the user, 2026-11-21): every hit flash, every HP bar together,
+@ each one's messages and added effect, then every faint together (src/battle_script_commands.c sMpSpread)
+BattleScript_MpSpreadFlush::
+	mpstatgroup 21
+	waitstate
+	mpstatgroup 19
+	waitstate
+	mpstatgroup 22
+	waitstate
+	mpstatgroup 23
+	waitstate
+BattleScript_MpSpreadEach:
+	mpstatgroup 24, BattleScript_MpSpreadFaints
+	critmessage
+	waitmessage B_WAIT_TIME_LONG
+	resultmessage
+	waitmessage B_WAIT_TIME_LONG
+	seteffectwithchance
+	goto BattleScript_MpSpreadEach
+BattleScript_MpSpreadFaints:
+	mpstatgroup 25, BattleScript_MpSpreadDone
+	waitstate
+	pause B_WAIT_TIME_LONG
+	mpstatgroup 26
+	waitstate
+BattleScript_MpSpreadFaintEach:
+	mpstatgroup 27, BattleScript_MpSpreadDone
+	tryfaintmon BS_TARGET
+	goto BattleScript_MpSpreadFaintEach
+BattleScript_MpSpreadDone:
+	mpstatgroup 28
 	return
 
 BattleScript_MpCoopTrainerBattleWon::

@@ -227,6 +227,7 @@ extern const u8 BattleScript_ActionThrowPokeblock[];
 
 extern const u8 BattleScript_MpCoopTrainerBattleWon[];
 extern const u8 BattleScript_MpStatGroupShow[];
+extern const u8 BattleScript_MpSpreadFlush[];   // Moemon Co-op: a spread move's targets at once
 extern const u8 BattleScript_MpCoopGrew[];
 extern const u8 BattleScript_MpCoopLearnedAll[];
 extern const u8 BattleScript_MpCoopLearnAll[];

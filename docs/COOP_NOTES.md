@@ -8786,3 +8786,20 @@ res/moves/chatter/anim.s).
   SUPERSWEET SYRUP lowered its foes' EVASIVENESS!" (battle_gen59.c G59_MSG_ALL_LOWERED / FOES_LOWERED;
   STRINGID_G59_COUNT 134).
 - Scenario intimidate_all (GABBY & TY's double battle, GYARADOS leads).
+
+## A move's several targets hit at once (2026-11-21, the user)
+- A damaging move for two or more Pokemon (MOVE_TARGET_BOTH / FOES_AND_ALLY) in a Double / Triple Battle: each target's
+  damage is worked out in turn as before (accuracy, damage, HP data, Bide / Counter trackers), but what shows waits
+  (battle_script_commands.c sMpSpread, from the move's first attackanimation: MpSpreadStart): its hit flash
+  (Cmd_hitanimation), HP bar (Cmd_healthbarupdate), the HP the screens keep (Cmd_datahpupdate's SetMonData), the
+  effectiveness sound, critmessage / resultmessage, the added effect (decided now, done later: Cmd_seteffectwithchance)
+  and its faint (Cmd_tryfaintmon BS_TARGET). After the last target (MOVEEND_NEXT_TARGET, or `mpstatgroup 20` at the end
+  of EARTHQUAKE's / EXPLOSION's own loops) BattleScript_MpSpreadFlush: the sound, every flash, every HP bar together,
+  the HP data, then each one's lines ("It's super effective on X!", "A critical hit on X!": STRINGID_MP_*_ON) and
+  effect, then every fainted one's cry and faint animation together (BattleScript_FaintTarget skips them: mode 29),
+  each one's "fainted!" and EXP; the battle's usual faint handling (switch-ins, blackouts, the win) follows.
+- One message a battler a step: the sound is played by the attacker, the flashes in their own step (sent together to
+  the same battler, a co-op link lost one and the battle stopped: tri_explode).
+- MP_Spread_Reset at each move (battle_util.c HandleAction_UseMove) logs "spread left unshown" if anything waited.
+- What the move's per-target move-end does (a target's Ability, an item) still happens between targets, before the
+  flush. Scenarios spread_at_once (SURF), spread_quake (EARTHQUAKE on three).
