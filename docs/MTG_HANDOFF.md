@@ -8,9 +8,17 @@ The user (2026-11-20) asked for every planned card: the whole Premodern pool (do
 Shadow (MTG_KW_SHADOW, mtg_game.c Mtg_CanBlock), Flanking (MTG_KW_FLANKING) and Rampage (MtgCardDef.rampage) in
 BlocksDeclared, Fading (MtgCardDef.fading: etbKind FADE, StartStep's upkeep): 2793 -> 2850 playable; then Valid properties Snow / nonSnow,
 blocked / unblocked, "AttachedTo <spec>" (mtg_valid.c): 2870; tests in tools/mtg/test_rules.c TestShadow.
-**The biggest next piece: a choice asked during resolution** (a query and the table's menu, the AI's pick): ChooseType
-(37), ChooseColor (23, and ETBReplacement:Other:ChooseColor 19), ChoosePlayer (23), ChooseCard (20), GenericChoice
-(16), NameCard (14), ChooseNumber (13): about 150 cards. Then an X picker (SubCounter<X/...>, PayLife<X>, X costs the
+**Done (2026-11-21): choices asked during resolution, and "as it enters"** (2870 -> 2907): MTG_CHOICE_OPTION
+(MtgQuery optKind / opts, MtgAnswer.card now 16 bits; Mtg_AskOption), ChooseType / ChooseColor / ChoosePlayer /
+ChooseNumber kept on the card that chose (MtgObj chosenType / chosenColors / chosenPlayer / chosenNumber, copied
+into an Effect as it begins: MtgEffect), GenericChoice's modes run as a coin's branch (MtgDuel.resMode), Valid
+ChosenType / ChosenColor / ChosenCtrl / Player.Chosen, Defined$ ChosenPlayer, Count$ChosenNumber;
+K:ETBReplacement:Other:SVAR (MtgCardDef.etbRepl, queued by Mtg_MoveTo, run by mtg_game.c RunEtb before anything
+else in Run); the table's list menu (mtg_board.c MODE_OPTION, OptionMenu: the creature types in the game first);
+the AI by Forge's AILogic (mtg_ai.c ChooseOption; modes by a look-ahead). Tests test_rules.c TestChoices, scenario
+mtg_choices. Still out of these: ChooseCard (20), NameCard (14), "each player chooses" (Defined$ Player),
+ChooseType Type$ Card, ChooseNumber Secretly / ChooseAnyNumber, ChooseColor OrColors, Animate's Types$ ChosenType
+(Mistform), ETBReplacement:Copy (Clone). Then an X picker (SubCounter<X/...>, PayLife<X>, X costs the
 player chooses rather than the most that can be paid). (The three combat ones resolve as blocks are declared rather than as triggers on
 the stack: nothing in the pool answers them in a way that matters.)
 How to find the next piece: tools/mtg/scope.py's table, and for "static ability" an instrumented copy of

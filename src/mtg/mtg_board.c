@@ -44,7 +44,8 @@ enum { ROW_OPP_LANDS, ROW_OPP_PERMS, ROW_MY_PERMS, ROW_MY_LANDS, ROW_HAND, ROW_C
 enum { MODE_NORMAL, MODE_MENU, MODE_TARGET, MODE_ATTACK, MODE_BLOCK, MODE_BLOCK_PICK, MODE_DISCARD, MODE_RESULT,
        MODE_TURN, MODE_CONCEDE, MODE_VIEW,
        MODE_CHOOSE,     // a yes / no or pay / don't while something resolves (MTG_Q_CHOOSE)
-       MODE_PICK };     // a permanent to sacrifice (MTG_Q_CHOOSE's PICK on the table)
+       MODE_PICK,       // a permanent to sacrifice (MTG_Q_CHOOSE's PICK on the table)
+       MODE_OPTION };   // a creature type, a color, a player, a number or a mode (MTG_Q_CHOOSE's OPTION: a list)
 // the piles the cursor can rest on (past a row's end)
 enum { PILE_NONE = -1, PILE_MY_GRAVE, PILE_MY_LIBRARY, PILE_OPP_LIBRARY, PILE_OPP_GRAVE };
 
@@ -694,7 +695,7 @@ static void DrawCard(int obj, const Rect *rc, int count, float x, float y)
     // what it costs to cast (in the hand) or to use (on the table), on its top edge: the card under the cursor only
     // (the user: for the table's looks)
     if (Focused() == obj && ShowFocus() && B.mode != MODE_RESULT && B.mode != MODE_VIEW && B.mode != MODE_CHOOSE
-        && B.mode != MODE_PICK) {
+        && B.mode != MODE_PICK && B.mode != MODE_OPTION) {
         if (o->zone == MTG_ZONE_HAND && !(c->types & MTG_T_LAND)) {
             MtgManaCost cost;   // (as it would be paid now: what cost-changing cards on the table add or take off)
             Mtg_SpellCost(&B.view, o->owner, obj, &cost);
@@ -1389,6 +1390,92 @@ static void AskedCard(int obj)
     MtgGfx_DrawCard(B.duel.objs[obj].def, 60, 41, 44, 61, 0, 255, 0);
 }
 
+// an option's words: the creature type, the color, the player, the number, a mode's own words
+static void OptionLabel(int i, char *out, unsigned cap)
+{
+    static const char *const sColors[5] = {"WHITE", "BLUE", "BLACK", "RED", "GREEN"};
+    const MtgQuery *q = &B.duel.query;
+    int o = i >= 0 && i < q->optCount ? q->opts[i] : 0;
+    unsigned k;
+    switch (q->optKind) {
+    case MTG_OPT_TYPE:
+        snprintf(out, cap, "%s", Mtg_SubtypeName(o));
+        for (k = 0; out[k]; k++)
+            if (out[k] >= 'a' && out[k] <= 'z')
+                out[k] -= 32;
+        break;
+    case MTG_OPT_COLOR:
+        snprintf(out, cap, "%s", o < 5 ? sColors[o] : "?");
+        break;
+    case MTG_OPT_PLAYER:
+        snprintf(out, cap, "%s", o == ME ? "YOU" : B.opp);
+        break;
+    case MTG_OPT_NUMBER:
+        snprintf(out, cap, "%d", o);
+        break;
+    default:
+        AbilityWords(out, cap, q->source, o, 0xFFFF);
+        if (!out[0])
+            snprintf(out, cap, "CHOICE %d", i + 1);
+    }
+}
+
+#define OPTION_ROWS 8
+static void OptionMenu(void)
+{
+    const MtgQuery *q = &B.duel.query;
+    const char *items[OPTION_ROWS];
+    static char labels[OPTION_ROWS][44];
+    int n = q->optCount, top = B.menuCursor - OPTION_ROWS / 2, rows, i, x = 120, y = 8, w = 0, h;
+    if (top > n - OPTION_ROWS)
+        top = n - OPTION_ROWS;
+    if (top < 0)
+        top = 0;
+    rows = n < OPTION_ROWS ? n : OPTION_ROWS;
+    for (i = 0; i < rows; i++) {
+        int m;
+        OptionLabel(top + i, labels[i], sizeof(labels[i]));
+        if (strlen(labels[i]) > 30)   // (a mode's words: the whole of them in the prompt)
+            strcpy(labels[i] + 27, "...");
+        items[i] = labels[i];
+        m = G_Measure(items[i], TF_SMALL);
+        if (m > w)
+            w = m;
+    }
+    w += 24;
+    h = rows * 13 + 10;
+    if (x + w > 238)
+        x = 238 - w;
+    G_Window(x, y, w, h);
+    for (i = 0; i < rows; i++) {
+        if (top + i == B.menuCursor)
+            G_Cursor(x + 7, y + 7 + i * 13);
+        G_Text(x + 14, y + 4 + i * 13, G_INK, G_INK_SHADOW, items[i], 0, TF_SMALL);
+    }
+    if (top > 0)   // (more above / below)
+        G_Arrow(x + w - 12, y + 3, 0, 0x383838);
+    if (top + rows < n)
+        G_Arrow(x + w - 12, y + h - 7, 1, 0x383838);
+}
+
+static char sOptionText[200];
+static const char *OptionText(void)
+{
+    static const char *const sWhat[] = {"choose a creature type", "choose a color", "choose a player", "choose a number", ""};
+    const MtgQuery *q = &B.duel.query;
+    char name[64], label[160];
+    Name(name, sizeof(name), q->source);
+    if (q->optKind == MTG_OPT_TYPE && q->ability != 0xFFFF && Mtg_Param(&gMtgAbilities[q->ability], "Type")
+        && strstr(Mtg_Param(&gMtgAbilities[q->ability], "Type"), "Land"))
+        snprintf(sOptionText, sizeof(sOptionText), "%s: choose a land type.  {A}", name);
+    else if (q->optKind == MTG_OPT_MODE) {
+        OptionLabel(B.menuCursor, label, sizeof(label));
+        snprintf(sOptionText, sizeof(sOptionText), "%s: %s  {A}", name, label);
+    } else
+        snprintf(sOptionText, sizeof(sOptionText), "%s: %s.  {A}", name, sWhat[q->optKind < 4 ? q->optKind : 4]);
+    return sOptionText;
+}
+
 // a target in a graveyard: the card big over the middle, IN YOUR / THEIR GRAVEYARD under it
 static void GraveTarget(int obj)
 {
@@ -1594,7 +1681,7 @@ void MtgBoard_Draw(void)
         if (t.on && t.w)
             G_Focus(t.x, t.y, t.w, t.h, 0xf8f070, B.frame);
     } else if (B.mode != MODE_RESULT && B.mode != MODE_VIEW && B.mode != MODE_CONCEDE && B.mode != MODE_CHOOSE
-               && ShowFocus()) {
+               && B.mode != MODE_OPTION && ShowFocus()) {
         Rect f = FocusRect();
         if (f.w) {
             G_Focus(f.x, f.y, f.w, f.h, G_WHITE, B.frame);
@@ -1620,6 +1707,9 @@ void MtgBoard_Draw(void)
         static const char *const sYesNo[2] = {"YES", "NO"}, *const sPay[2] = {"PAY", "DON'T PAY"};
         AskedCard(B.duel.query.source);
         Menu(166, 92, B.duel.query.choice == MTG_CHOICE_PAY ? sPay : sYesNo, 2, B.menuCursor, 0);
+    } else if (B.mode == MODE_OPTION) {
+        AskedCard(B.duel.query.source);
+        OptionMenu();
     }
     switch (B.mode) {
     case MODE_TARGET: {
@@ -1641,6 +1731,9 @@ void MtgBoard_Draw(void)
     }
     case MODE_CHOOSE:
         Prompt(ChooseText(), 1);
+        break;
+    case MODE_OPTION:
+        Prompt(OptionText(), 0);
         break;
     case MODE_PICK: {
         char line[120], name[64];
@@ -2965,6 +3058,35 @@ static void HumanChoose(unsigned pressed)
         }
         return;
     }
+    if (q->choice == MTG_CHOICE_OPTION) {   // a list: UP / DOWN, LEFT / RIGHT a page, A chooses
+        int n = q->optCount;
+        YourMove("an option");
+        if (B.mode != MODE_OPTION) {
+            B.mode = MODE_OPTION;
+            B.menuCursor = 0;
+            B.trayWanted = 0;
+            PlaySE(SE_SELECT);
+        }
+        if (n <= 0)
+            return;
+        if (pressed & KEY_UP)
+            B.menuCursor = (B.menuCursor + n - 1) % n, PlaySE(SE_SELECT);
+        if (pressed & KEY_DOWN)
+            B.menuCursor = (B.menuCursor + 1) % n, PlaySE(SE_SELECT);
+        if (pressed & KEY_LEFT)
+            B.menuCursor = B.menuCursor >= OPTION_ROWS ? B.menuCursor - OPTION_ROWS : 0, PlaySE(SE_SELECT);
+        if (pressed & KEY_RIGHT)
+            B.menuCursor = B.menuCursor + OPTION_ROWS < n ? B.menuCursor + OPTION_ROWS : n - 1, PlaySE(SE_SELECT);
+        if (pressed & KEY_A) {
+            char label[160];
+            OptionLabel(B.menuCursor, label, sizeof(label));
+            MPNet_Log("mtg: you: chose %s", label);
+            a.card = (uint16_t)B.menuCursor;
+            PlaySE(SE_SELECT);
+            Answer(&a);
+        }
+        return;
+    }
     YourMove(q->choice == MTG_CHOICE_PAY ? "pay or not" : "yes or no");
     if (B.mode != MODE_CHOOSE) {
         B.mode = MODE_CHOOSE;
@@ -3107,7 +3229,7 @@ int MtgBoard_Step(unsigned pressed, unsigned keys)
     }
     if ((pressed & (KEY_INSPECT | KEY_SELECT)) && B.mode != MODE_ATTACK && B.mode != MODE_TURN) {
         int f = Focused();
-        if (B.mode == MODE_CHOOSE)
+        if (B.mode == MODE_CHOOSE || B.mode == MODE_OPTION)
             f = q->source;
         else if (B.mode == MODE_PICK)
             f = q->candidates[B.targetCursor];

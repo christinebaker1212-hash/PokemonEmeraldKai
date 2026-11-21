@@ -17,14 +17,16 @@ static const struct { const char *name; uint8_t api; } sApis[] = {
     {"DelayedTrigger", MTG_API_DELAYED_TRIGGER}, {"PreventDamage", MTG_API_PREVENT_DAMAGE},
     {"GainControl", MTG_API_GAIN_CONTROL}, {"PutCounterAll", MTG_API_PUT_COUNTER_ALL},
     {"RemoveCounter", MTG_API_REMOVE_COUNTER}, {"Dig", MTG_API_DIG}, {"Mill", MTG_API_MILL}, {"FlipCoin", MTG_API_FLIP_COIN}, {"Cleanup", MTG_API_CLEANUP}, {"Reveal", MTG_API_REVEAL}, {"RepeatEach", MTG_API_REPEAT_EACH}, {"SetLife", MTG_API_SET_LIFE}, {"Effect", MTG_API_EFFECT}, {"Fog", MTG_API_FOG}, {"ChooseSource", MTG_API_CHOOSE_SOURCE},
-    {"RearrangeTopOfLibrary", MTG_API_REARRANGE_TOP},
+    {"RearrangeTopOfLibrary", MTG_API_REARRANGE_TOP}, {"ChooseType", MTG_API_CHOOSE_TYPE},
+    {"ChooseColor", MTG_API_CHOOSE_COLOR}, {"ChoosePlayer", MTG_API_CHOOSE_PLAYER}, {"ChooseNumber", MTG_API_CHOOSE_NUMBER},
+    {"GenericChoice", MTG_API_GENERIC_CHOICE},
 };
 
 const char *const gMtgApiNames[MTG_API_COUNT] = {
     "", "DealDamage", "DamageAll", "Draw", "Destroy", "DestroyAll", "GainLife", "LoseLife", "Pump", "PumpAll",
     "ChangeZone", "Mana", "Discard", "Tap", "Untap", "Counter", "Sacrifice", "PutCounter", "Attach", "Regenerate", "Token", "Charm",
     "ChangeZoneAll", "Animate", "DelayedTrigger", "PreventDamage", "GainControl", "PutCounterAll", "RemoveCounter", "Dig", "Mill", "FlipCoin", "Cleanup", "Reveal", "RepeatEach", "SetLife", "Effect", "Fog", "ChooseSource",
-    "RearrangeTopOfLibrary",
+    "RearrangeTopOfLibrary", "ChooseType", "ChooseColor", "ChoosePlayer", "ChooseNumber", "GenericChoice",
 };
 
 int Mtg_ApiKnown(const char *name)
@@ -61,6 +63,8 @@ int Mtg_Amount(const MtgDuel *d, const MtgResolveCtx *ctx, int card, const char 
     }
     if (strcmp(sv, "Count$xPaid") == 0)
         return d ? ctx->e->x : 0;
+    if (strcmp(sv, "Count$ChosenNumber") == 0)   // (ChooseNumber's, kept on its source)
+        return d && ctx->source >= 0 && ctx->source < d->objCount ? d->objs[ctx->source].chosenNumber : 0;
     if (strcmp(sv, "Remembered$Amount") == 0 || strcmp(sv, "Count$RememberedSize") == 0) {   // (the cards, not players)
         int k, n = 0;
         for (k = 0; d && k < d->remCount; k++)
@@ -211,7 +215,7 @@ typedef struct { int n; MtgTarget t[MTG_MAX_DEFINED]; } Defined;
 static const char *const sDefinedKnown[] = {
     "You", "Opponent", "Player", "Self", "Targeted", "ParentTarget", "TargetedController", "TargetedPlayer",
     "Enchanted", "DelayTriggerRemembered", "DelayTriggerRememberedLKI", "Remembered", "RememberedLKI", "RememberedCard",
-    "Player.IsRemembered", "ChosenCard",
+    "Player.IsRemembered", "ChosenCard", "ChosenPlayer",
 };
 
 // what set a triggered ability off (SpellAbility.getTriggeringObject: "Triggered" + the AbilityKey's name, its
@@ -346,6 +350,9 @@ static void DefinedBy(const MtgDuel *d, const MtgResolveCtx *ctx, const char *de
         int c = Mtg_ChosenCard(d);
         if (c != MTG_NO_OBJ)
             Add(out, MTG_TGT_OBJ, c);
+    } else if (strcmp(def, "ChosenPlayer") == 0) {   // (ChoosePlayer's, kept on its source)
+        if (ctx->source >= 0 && ctx->source < d->objCount && d->objs[ctx->source].chosenPlayer)
+            Add(out, MTG_TGT_PLAYER, d->objs[ctx->source].chosenPlayer - 1);
     } else if (strcmp(def, "You") == 0)
         Add(out, MTG_TGT_PLAYER, ctx->controller);
     else if (strcmp(def, "Opponent") == 0)
@@ -543,8 +550,8 @@ static int AnimTypes(const char *s, int *ok)
         for (k = 0; k < sizeof(sT) / sizeof(sT[0]); k++)
             if (strcmp(t, sT[k].name) == 0)
                 bits |= sT[k].bit, found = 1;
-        if (!found && !(t[0] >= 'A' && t[0] <= 'Z'))
-            *ok = 0;   // (a creature type: a word, kept by nothing here)
+        if (!found && (!(t[0] >= 'A' && t[0] <= 'Z') || strncmp(t, "Chosen", 6) == 0))
+            *ok = 0;   // (a creature type: a word, kept by nothing here; ChosenType: the choice, not yet)
     }
     return bits;
 }
@@ -816,6 +823,98 @@ static void CounterSpell(MtgDuel *d, int sourceObj, int toLibraryTop)   // (Dest
         }
 }
 
+// ChooseType$'s Type$ ("Creature", "Basic Land", "Land") -> MTG_SUBK_* (0: not translated)
+static int ChooseTypeKind(const char *t)
+{
+    return !t ? 0 : strcmp(t, "Creature") == 0 ? MTG_SUBK_CREATURE : strcmp(t, "Basic Land") == 0 ? MTG_SUBK_BASIC
+         : strcmp(t, "Land") == 0 ? MTG_SUBK_LAND : 0;
+}
+
+static int InNameList(const char *list, const char *name)   // "Mountain,Forest,Plains"
+{
+    size_t n = strlen(name);
+    const char *p = list;
+    while (p && *p) {
+        while (*p == ' ')
+            p++;
+        if (strncmp(p, name, n) == 0 && (p[n] == ',' || p[n] == 0 || p[n] == ' '))
+            return 1;
+        p = strchr(p, ',');
+        if (p)
+            p++;
+    }
+    return 0;
+}
+
+static const char *const sColorWords[5] = {"white", "blue", "black", "red", "green"};
+
+// what a Choose* / GenericChoice offers now: the options and their kind (MTG_OPT_*); a creature type in the game
+// comes before the rest (the list is long), each part in order
+static int ChoiceOptions(const MtgDuel *d, const MtgResolveCtx *ctx, const MtgAbility *ab, uint16_t *opts, int *kind)
+{
+    int n = 0, i, ok;
+    switch (ab->api) {
+    case MTG_API_CHOOSE_TYPE: {
+        int want = ChooseTypeKind(Mtg_Param(ab, "Type")), pass, k;
+        const char *invalid = Mtg_Param(ab, "InvalidTypes");
+        *kind = MTG_OPT_TYPE;
+        for (pass = 0; pass < 2; pass++)
+            for (i = 0; i < Mtg_SubtypeCount() && n < MTG_MAX_OPTIONS; i++) {
+                int seen = 0;
+                const char *name = Mtg_SubtypeName(i);
+                if (!(Mtg_SubtypeKinds(i) & want) || (invalid && InNameList(invalid, name)))
+                    continue;
+                if (d && want == MTG_SUBK_CREATURE)
+                    for (k = 0; k < d->objCount && !seen; k++) {
+                        const char *st = Mtg_Card(d->objs[k].def)->subtypes, *f = st ? strstr(st, name) : NULL;
+                        size_t l = strlen(name);
+                        while (f && !seen) {
+                            seen = (f == st || f[-1] == ' ') && (f[l] == ' ' || f[l] == 0);
+                            f = strstr(f + 1, name);
+                        }
+                    }
+                else
+                    seen = 1;
+                if (seen == !pass)
+                    opts[n++] = (uint16_t)i;
+            }
+        return n;
+    }
+    case MTG_API_CHOOSE_COLOR: {
+        const char *ch = Mtg_Param(ab, "Choices");
+        *kind = MTG_OPT_COLOR;
+        for (i = 0; i < 5; i++)
+            if (!ch || InNameList(ch, sColorWords[i]))
+                opts[n++] = (uint16_t)i;
+        return n;
+    }
+    case MTG_API_CHOOSE_PLAYER: {
+        const char *ch = Mtg_Param(ab, "Choices");
+        *kind = MTG_OPT_PLAYER;
+        for (i = 0; i < MTG_PLAYERS; i++)
+            if (!d || (!d->players[i].lost && (!ch || Mtg_ValidPlayerFrom(d, i, ch, ctx->source, ctx->controller))))
+                opts[n++] = (uint16_t)i;
+        return n;
+    }
+    case MTG_API_CHOOSE_NUMBER: {
+        int lo = Mtg_Param(ab, "Min") ? Mtg_Amount(d, ctx, ab->card, Mtg_Param(ab, "Min"), &ok) : 0;
+        int hi = Mtg_Amount(d, ctx, ab->card, Mtg_Param(ab, "Max"), &ok);
+        *kind = MTG_OPT_NUMBER;
+        if (lo < 0)
+            lo = 0;
+        for (i = lo; i <= hi && n < MTG_MAX_OPTIONS; i++)
+            opts[n++] = (uint16_t)i;
+        return n;
+    }
+    case MTG_API_GENERIC_CHOICE:
+        *kind = MTG_OPT_MODE;
+        for (i = 0; i < ab->choiceCount; i++)
+            opts[n++] = ab->choices[i];
+        return n;
+    }
+    return 0;
+}
+
 static int Resolve(MtgDuel *d, MtgResolveCtx *ctx, const MtgAbility *ab)
 {
     Defined who;
@@ -1056,6 +1155,9 @@ static int Resolve(MtgDuel *d, MtgResolveCtx *ctx, const MtgAbility *ab)
         ef->exileOnMoved = Mtg_Param(ab, "ExileOnMoved") != NULL;
         ef->chosen1 = d->chosen1;   // (ChooseSource's pick: ChosenCard in its statics)
         ef->chosenSeq = d->chosenSeq;
+        ef->chosenType = d->objs[ctx->source].chosenType;   // (and what its source chose: ChosenType... in them)
+        ef->chosenColors = d->objs[ctx->source].chosenColors;
+        ef->chosenPlayer = d->objs[ctx->source].chosenPlayer;
         if (rem) {
             DefinedBy(d, ctx, rem, &who);
             for (i = 0; i < who.n && ef->remCount < 4; i++) {
@@ -1290,6 +1392,44 @@ static int Resolve(MtgDuel *d, MtgResolveCtx *ctx, const MtgAbility *ab)
         if (Mtg_Param(ab, "ClearChosenCard"))
             d->chosen1 = 0;
         break;
+    case MTG_API_CHOOSE_TYPE:
+    case MTG_API_CHOOSE_COLOR:
+    case MTG_API_CHOOSE_PLAYER:
+    case MTG_API_CHOOSE_NUMBER:
+    case MTG_API_GENERIC_CHOICE: {   // a choice, kept on its source (GenericChoice: its mode runs next, ContinueResolve)
+        uint16_t opts[MTG_MAX_OPTIONS];
+        int n = 0, kind, chooser = ctx->controller;
+        MtgObj *src = &d->objs[ctx->source];
+        Targets(d, ctx, ab, DEF_PLAYER, &who);
+        if (who.n) {
+            if (who.t[0].kind == MTG_TGT_PLAYER)
+                chooser = who.t[0].id;
+            else if (who.t[0].kind == MTG_TGT_OBJ)
+                chooser = d->objs[who.t[0].id].controller;
+        } else if (Mtg_Param(ab, "Defined"))
+            break;   // (nobody to choose: Targeted gone)
+        n = ChoiceOptions(d, ctx, ab, opts, &kind);
+        if (n <= 0)
+            break;
+        if (n > 1 && d->resChoice < 0) {
+            Mtg_AskOption(d, chooser, kind, opts, n);
+            return 0;
+        }
+        i = n == 1 ? opts[0] : d->resChoice;
+        d->resChoice = -1;
+        if (kind == MTG_OPT_TYPE)
+            src->chosenType = (uint16_t)(i + 1);
+        else if (kind == MTG_OPT_COLOR)
+            src->chosenColors = (uint8_t)MTG_COLOR_BIT(i);
+        else if (kind == MTG_OPT_PLAYER)
+            src->chosenPlayer = (uint8_t)(i + 1);
+        else if (kind == MTG_OPT_NUMBER)
+            src->chosenNumber = (int16_t)i;
+        else
+            d->resMode = (uint16_t)(i + 1);
+        Mtg_Event(d, MTG_EV_OPTION, ctx->source, kind, i);
+        break;
+    }
     case MTG_API_CHOOSE_SOURCE: {   // ChooseSourceEffect: a permanent or a spell of the kind, picked by its controller
         uint16_t list[MTG_MAX_COMBAT];
         int n = 0;
@@ -1631,6 +1771,11 @@ static const char *const sApiParams[MTG_API_COUNT][12] = {
     [MTG_API_PUT_COUNTER] = {"CounterType", "CounterNum"},
     [MTG_API_TOKEN] = {"TokenScript", "TokenOwner", "TokenAmount"},
     [MTG_API_CHARM] = {"Choices"},
+    [MTG_API_CHOOSE_TYPE] = {"Type", "InvalidTypes"},
+    [MTG_API_CHOOSE_COLOR] = {"Choices"},
+    [MTG_API_CHOOSE_PLAYER] = {"Choices", "ChoiceTitle"},
+    [MTG_API_CHOOSE_NUMBER] = {"Min", "Max", "ListTitle"},
+    [MTG_API_GENERIC_CHOICE] = {"Choices"},
 };
 static const char *const sPayersKnown[] = {
     "You", "Opponent", "Player", "Targeted", "TargetedController", "TargetedPlayer", "Player.IsRemembered",
@@ -1756,6 +1901,37 @@ int Mtg_ApiParamsKnown(const MtgAbility *ab, const char **why)
         return 1;
     case MTG_API_CHOOSE_SOURCE:
         return (v = CardsOnly(Mtg_Param(ab, "Choices"))) && Mtg_ValidSpecKnown(v);
+    case MTG_API_CHOOSE_TYPE:
+    case MTG_API_CHOOSE_COLOR:
+    case MTG_API_CHOOSE_PLAYER:
+    case MTG_API_CHOOSE_NUMBER:
+    case MTG_API_GENERIC_CHOICE:   // (one player chooses: "each player chooses" is a RepeatEach's)
+        if ((v = Mtg_Param(ab, "Defined")) && strcmp(v, "Player") == 0)
+            return 0;
+        if (ab->tgt)
+            return 0;
+        if (ab->api == MTG_API_CHOOSE_TYPE)
+            return ChooseTypeKind(Mtg_Param(ab, "Type")) != 0;
+        if (ab->api == MTG_API_CHOOSE_PLAYER)
+            return !(v = Mtg_Param(ab, "Choices")) || Mtg_ValidPlayerSpecKnown(v);
+        if (ab->api == MTG_API_CHOOSE_NUMBER)
+            return Mtg_Param(ab, "Max") && AmountKnown(ab, "Max", 1) && AmountKnown(ab, "Min", 0);
+        if (ab->api == MTG_API_CHOOSE_COLOR && (v = Mtg_Param(ab, "Choices"))) {
+            char buf[64], *p = buf, *t;
+            int k, found;
+            if (strlen(v) >= sizeof(buf))
+                return 0;
+            strcpy(buf, v);
+            while ((t = Mtg_Token(&p, ',')) != NULL) {
+                while (*t == ' ')
+                    t++;
+                for (k = found = 0; k < 5; k++)
+                    found |= strcmp(t, sColorWords[k]) == 0;
+                if (!found)
+                    return 0;
+            }
+        }
+        return 1;
     case MTG_API_EFFECT: {   // (its statics and replacements are parsed as it's loaded: mtg_script.c)
         const char *du = Mtg_Param(ab, "Duration"), *rem = Mtg_Param(ab, "RememberObjects");
         if (!Mtg_Param(ab, "StaticAbilities") && !Mtg_Param(ab, "ReplacementEffects"))

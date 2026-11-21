@@ -692,7 +692,7 @@ static int ParseAbility(MtgCardDef *c, int cardId, char *text, int kind, int dep
                 continue;
             s = SubAbility(c, cardId, name, depth);
             for (k = s; k >= 0 && k != 0xFFFF; k = gMtgAbilities[k].sub)
-                if (gMtgAbilities[k].api == MTG_API_FLIP_COIN)
+                if (gMtgAbilities[k].api == MTG_API_FLIP_COIN || gMtgAbilities[k].api == MTG_API_GENERIC_CHOICE)
                     s = -1;
             if (s < 0) {
                 Unsupported(c, "FlipCoin");
@@ -702,6 +702,29 @@ static int ParseAbility(MtgCardDef *c, int cardId, char *text, int kind, int dep
                 gMtgAbilities[idx].loseSub = (uint16_t)s;
             else
                 gMtgAbilities[idx].winSub = (uint16_t)s;
+        }
+    }
+    if (gMtgAbilities[idx].api == MTG_API_GENERIC_CHOICE) {   // its modes: chains of their own (one runs, as a coin's branch)
+        char buf[160], *tok, *save;
+        const char *ch = Mtg_Param(&gMtgAbilities[idx], "Choices");
+        if (!ch || strlen(ch) >= sizeof(buf)) {
+            Unsupported(c, "GenericChoice");
+            return idx;
+        }
+        strcpy(buf, ch);
+        for (save = buf, tok = Mtg_Token(&save, ','); tok; tok = Mtg_Token(&save, ',')) {
+            int m, k;
+            while (*tok == ' ')
+                tok++;
+            m = SubAbility(c, cardId, tok, depth);
+            for (k = m; k >= 0 && k != 0xFFFF; k = gMtgAbilities[k].sub)
+                if (gMtgAbilities[k].api == MTG_API_GENERIC_CHOICE || gMtgAbilities[k].api == MTG_API_FLIP_COIN)
+                    m = -1;
+            if (m < 0 || gMtgAbilities[idx].choiceCount >= 5) {
+                Unsupported(c, "GenericChoice");
+                break;
+            }
+            gMtgAbilities[idx].choices[gMtgAbilities[idx].choiceCount++] = (uint16_t)m;
         }
     }
     if (gMtgAbilities[idx].api == MTG_API_CHARM) {   // its modes: parsed as spells, then given the charm's kind and cost
@@ -809,6 +832,10 @@ static void ParseKeyword(MtgCardDef *c, const char *k)
     }
     if (strncmp(k, "Rampage:", 8) == 0 && k[8] >= '1' && k[8] <= '9' && !k[9]) {   // (Keyword.RAMPAGE: mtg_game.c BlocksDeclared)
         c->rampage = (uint8_t)(k[8] - '0');
+        return;
+    }
+    if (strncmp(k, "ETBReplacement:Other:", 21) == 0) {   // "ETBReplacement:Other:SVAR[:Mandatory|:Optional]": parsed
+        c->etbReplText = k + 21;                            // once the SVars are read (below)
         return;
     }
     if (strncmp(k, "Cycling:", 8) == 0) {   // (Forge's CardFactoryUtil: an ability from the hand, made once the lines are read)
@@ -1010,6 +1037,30 @@ static void ParseCard(int id, char *text)
         else
             c->abilities[c->abilityCount++] = (uint16_t)ParseAbility(c, id, text, MTG_AB_ACTIVATED, 0);
     }
+    if (c->etbReplText) {   // "as it enters": its SVar an ability of its own, run as it lands (no target: nothing to aim)
+        char name[48], *opt;
+        const char *sv;
+        size_t len = strlen(c->etbReplText);
+        if (len < sizeof(name)) {
+            memcpy(name, c->etbReplText, len + 1);
+            opt = strchr(name, ':');
+            if (opt)
+                *opt++ = 0;
+            sv = Mtg_Svar(id, name);
+            if (sv && strncmp(sv, "DB$", 3) == 0 && (!opt || strcmp(opt, "Mandatory") == 0 || strcmp(opt, "Optional") == 0)) {
+                char *copy = malloc(strlen(sv) + 1);
+                int a;
+                strcpy(copy, sv);
+                a = ParseAbility(c, id, copy, MTG_AB_TRIGGERED, 0);
+                if (gMtgAbilities[a].tgt)
+                    Unsupported(c, "ETBReplacement");
+                c->etbRepl = (uint16_t)(a + 1);
+                c->etbOptional = opt && strcmp(opt, "Optional") == 0;
+            } else
+                Unsupported(c, "ETBReplacement");
+        } else
+            Unsupported(c, "ETBReplacement");
+    }
     if (c->starPT) {   // a */* side no static sets
         int k, set = 0;
         for (k = 0; k < c->staticCount; k++) {
@@ -1050,11 +1101,13 @@ static void ParseCard(int id, char *text)
 // Every subtype a card of the pool has (from each Types: line, before the cards are parsed: the cards' Valid specs are
 // checked against it as they load), sorted
 static char **sSubtypes;
+static uint8_t *sSubtypeKind;   // MTG_SUBK_* (what the cards it's on are)
 static int sSubtypeCount;
 
-static int CmpStr(const void *a, const void *b)
+typedef struct { char *w; uint8_t kind; } SubWord;
+static int CmpSub(const void *a, const void *b)
 {
-    return strcmp(*(char *const *)a, *(char *const *)b);
+    return strcmp(((const SubWord *)a)->w, ((const SubWord *)b)->w);
 }
 
 static void CollectSubtypes(const char *text, int cardCount, const uint8_t *table)
@@ -1062,9 +1115,11 @@ static void CollectSubtypes(const char *text, int cardCount, const uint8_t *tabl
     static const char *const sNot[] = {"Land", "Creature", "Artifact", "Enchantment", "Instant", "Sorcery",
                                        "Planeswalker", "Tribal", "Kindred", "Basic", "Legendary", "Snow", "World"};
     int i, cap = 0, k, n = 0;
+    SubWord *words = NULL;
     for (i = 0; i < cardCount; i++) {
         uint32_t e[4];
-        const char *t, *line, *end;
+        const char *t, *line, *end, *lineStart;
+        uint8_t kind = 0;
         memcpy(e, table + 16 * i, 16);
         t = text + e[1];
         line = strstr(t, "Types:");
@@ -1076,6 +1131,17 @@ static void CollectSubtypes(const char *text, int cardCount, const uint8_t *tabl
         end = strchr(line, '\n');
         if (!end)
             end = line + strlen(line);
+        lineStart = line;
+        {
+            char buf[160];
+            size_t len = (size_t)(end - lineStart) < sizeof(buf) - 1 ? (size_t)(end - lineStart) : sizeof(buf) - 1;
+            memcpy(buf, lineStart, len);
+            buf[len] = 0;
+            if (strstr(buf, "Creature") || strstr(buf, "Tribal") || strstr(buf, "Kindred"))
+                kind |= MTG_SUBK_CREATURE;
+            if (strstr(buf, "Land"))
+                kind |= MTG_SUBK_LAND;
+        }
         while (line < end) {
             const char *w = line;
             size_t len;
@@ -1092,24 +1158,41 @@ static void CollectSubtypes(const char *text, int cardCount, const uint8_t *tabl
             if (k < (int)(sizeof(sNot) / sizeof(sNot[0])))
                 continue;
             if (n == cap)
-                cap = cap ? cap * 2 : 1024, sSubtypes = realloc(sSubtypes, cap * sizeof(char *));
-            sSubtypes[n] = malloc(len + 1);
-            memcpy(sSubtypes[n], w, len);
-            sSubtypes[n++][len] = 0;
+                cap = cap ? cap * 2 : 1024, words = realloc(words, cap * sizeof(*words));
+            words[n].w = malloc(len + 1);
+            memcpy(words[n].w, w, len);
+            words[n].w[len] = 0;
+            words[n++].kind = kind;
         }
     }
-    qsort(sSubtypes, n, sizeof(char *), CmpStr);
-    for (i = k = 0; i < n; i++) {   // (each once)
-        if (k && strcmp(sSubtypes[k - 1], sSubtypes[i]) == 0) {
-            free(sSubtypes[i]);
+    qsort(words, n, sizeof(*words), CmpSub);
+    sSubtypes = malloc((n ? n : 1) * sizeof(char *));
+    sSubtypeKind = malloc(n ? n : 1);
+    for (i = k = 0; i < n; i++) {   // (each once, with every kind it's of)
+        if (k && strcmp(sSubtypes[k - 1], words[i].w) == 0) {
+            sSubtypeKind[k - 1] |= words[i].kind;
+            free(words[i].w);
             continue;
         }
-        sSubtypes[k++] = sSubtypes[i];
+        sSubtypeKind[k] = words[i].kind;
+        sSubtypes[k++] = words[i].w;
+    }
+    free(words);
+    for (i = 0; i < k; i++) {
+        static const char *const sBasic[5] = {"Plains", "Island", "Swamp", "Mountain", "Forest"};
+        int b;
+        for (b = 0; b < 5; b++)
+            if (strcmp(sSubtypes[i], sBasic[b]) == 0)
+                sSubtypeKind[i] |= MTG_SUBK_BASIC | MTG_SUBK_LAND;
     }
     sSubtypeCount = k;
 }
 
-int Mtg_IsSubtype(const char *t, size_t n)
+int Mtg_SubtypeCount(void) { return sSubtypeCount; }
+const char *Mtg_SubtypeName(int i) { return i >= 0 && i < sSubtypeCount ? sSubtypes[i] : ""; }
+int Mtg_SubtypeKinds(int i) { return i >= 0 && i < sSubtypeCount ? sSubtypeKind[i] : 0; }
+
+int Mtg_SubtypeIndex(const char *t, unsigned n)
 {
     int lo = 0, hi = sSubtypeCount - 1;
     while (lo <= hi) {
@@ -1117,13 +1200,18 @@ int Mtg_IsSubtype(const char *t, size_t n)
         if (c == 0 && sSubtypes[mid][n])
             c = 1;
         if (c == 0)
-            return 1;
+            return mid;
         if (c < 0)
             lo = mid + 1;
         else
             hi = mid - 1;
     }
-    return 0;
+    return -1;
+}
+
+int Mtg_IsSubtype(const char *t, size_t n)
+{
+    return Mtg_SubtypeIndex(t, (unsigned)n) >= 0;
 }
 
 int Mtg_DbLoad(const void *pak, uint32_t size)

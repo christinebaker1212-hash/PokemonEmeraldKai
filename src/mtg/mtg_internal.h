@@ -48,6 +48,11 @@ enum {
     MTG_API_FOG,              // FogEffect: all combat damage this turn is prevented (MtgDuel.fog)
     MTG_API_CHOOSE_SOURCE,    // ChooseSourceEffect: its controller picks a source (Choices$): MtgDuel.chosen1
     MTG_API_REARRANGE_TOP,    // RearrangeTopOfLibraryEffect: the top NumCards$ put back in the order their owner picks
+    MTG_API_CHOOSE_TYPE,      // ChooseTypeEffect: a creature / land type (Type$) kept on its source (MtgObj.chosenType)
+    MTG_API_CHOOSE_COLOR,     // ChooseColorEffect: a color (Choices$ some) kept on its source (chosenColors)
+    MTG_API_CHOOSE_PLAYER,    // ChoosePlayerEffect: a player (Choices$) kept on its source (chosenPlayer)
+    MTG_API_CHOOSE_NUMBER,    // ChooseNumberEffect: Min$..Max$ kept on its source (chosenNumber)
+    MTG_API_GENERIC_CHOICE,   // ChooseGenericEffect: one of Choices$ (chains of their own) runs
     MTG_API_COUNT
 };
 
@@ -284,6 +289,8 @@ void Mtg_RefreshQuery(MtgDuel *d);
 int Mtg_CanBlock(const MtgDuel *d, int blocker, int attacker);   // CombatUtil.canBlock
 // a choice while resolving (d->query becomes MTG_Q_CHOOSE for player)
 void Mtg_AskChoice(MtgDuel *d, int player, int choice, const MtgManaCost *pay);
+// an MTG_CHOICE_OPTION among n options of a kind (MTG_OPT_*); the answer's option lands in d->resChoice
+void Mtg_AskOption(MtgDuel *d, int player, int kind, const uint16_t *opts, int n);
 
 // mtg_effects.c: one resolve per API (forge/game/ability/effects)
 typedef struct {

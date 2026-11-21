@@ -293,6 +293,13 @@ void Mtg_MoveTo(MtgDuel *d, int obj, int zone)
         ResetPermanentState(o);
         o->sick = zone == MTG_ZONE_BATTLEFIELD;   // (a permanent arriving: under its controller since this turn)
     }
+    if (zone == MTG_ZONE_BATTLEFIELD) {   // a new object: nothing chosen for it yet ("as it enters": queued, Run)
+        o->chosenType = 0;
+        o->chosenColors = o->chosenPlayer = 0;
+        o->chosenNumber = 0;
+        if (Mtg_Card(o->def)->etbRepl && d->etbCount < 8)
+            d->etbQueue[d->etbCount++] = (uint16_t)obj;
+    }
     if (zone != MTG_ZONE_BATTLEFIELD)
         o->controller = o->owner, o->ctrlBase = 0;
     o->zone = (uint8_t)zone;
@@ -684,6 +691,16 @@ void Mtg_AskChoice(MtgDuel *d, int player, int choice, const MtgManaCost *pay)
         q->pay = *pay;
 }
 
+void Mtg_AskOption(MtgDuel *d, int player, int kind, const uint16_t *opts, int n)
+{
+    Mtg_AskChoice(d, player, MTG_CHOICE_OPTION, NULL);
+    if (n > MTG_MAX_OPTIONS)
+        n = MTG_MAX_OPTIONS;
+    d->query.optKind = (uint8_t)kind;
+    d->query.optCount = (uint16_t)n;
+    memcpy(d->query.opts, opts, (size_t)n * sizeof(opts[0]));
+}
+
 static void FinishResolve(MtgDuel *d)
 {
     const MtgStackEntry *e = &d->res;
@@ -752,6 +769,12 @@ static int ContinueResolve(MtgDuel *d)
                     d->resReturn = next;
                     next = b;
                 }
+            }
+            if (gMtgAbilities[d->resAbility].api == MTG_API_GENERIC_CHOICE && d->resMode) {   // the mode chosen, then on
+                uint16_t b = (uint16_t)(d->resMode - 1);
+                d->resMode = 0;
+                d->resReturn = next;
+                next = b;
             }
             if (gMtgAbilities[d->resAbility].api == MTG_API_REPEAT_EACH && d->repStart) {   // its first item's run
                 d->repStart = 0;
@@ -836,7 +859,44 @@ static int ResolveTop(MtgDuel *d)
     d->repStart = 0;
     d->resStage = d->resPicks = 0;
     d->resChoice = -1;
+    d->resMode = 0;
     return ContinueResolve(d);
+}
+
+// what permanents that just entered do "as they enter" (ETBReplacement: a choice...), oldest first, each resolving as
+// an ability of its own (nothing to target, no stack); 1 while one asks
+static int RunEtb(MtgDuel *d)
+{
+    while (d->etbCount && !d->over) {
+        int obj = d->etbQueue[0];
+        const MtgCardDef *c = Mtg_Card(d->objs[obj].def);
+        memmove(&d->etbQueue[0], &d->etbQueue[1], (size_t)(--d->etbCount) * sizeof(d->etbQueue[0]));
+        if (d->objs[obj].zone != MTG_ZONE_BATTLEFIELD || !c->etbRepl)
+            continue;
+        memset(&d->res, 0, sizeof(d->res));
+        d->res.controller = d->objs[obj].controller;
+        d->res.source = (uint16_t)obj;
+        d->res.ability = (uint16_t)(c->etbRepl - 1);
+        d->res.trigger = 0xFFFF;
+        d->res.trigObj = d->res.trigObj2 = MTG_NO_OBJ;
+        d->res.trigPlayer = d->res.trigCtrl = 0xFF;
+        d->res.optional = c->etbOptional ? 1 : 0;
+        d->resolving = 1;
+        d->resAbility = d->res.ability;
+        d->resReturn = 0xFFFF;
+        d->resFlip = 0;
+        d->resCondAb = 0xFFFF;
+        d->remCount = 0;
+        d->repAb = 0xFFFF;
+        d->repStart = 0;
+        d->resStage = d->resPicks = 0;
+        d->resExtra = 0;
+        d->resChoice = -1;
+        d->resMode = 0;
+        if (ContinueResolve(d))
+            return 1;
+    }
+    return 0;
 }
 
 // ---- priority: the legal actions (what PlayerControllerHuman / AiController choose from) ----
@@ -1788,6 +1848,8 @@ static void Run(MtgDuel *d)
             d->query.winner = d->winner;
             return;
         }
+        if (d->etbCount && RunEtb(d))
+            return;
         if (d->stepStarted == 0 && StartStep(d))
             return;
         if (d->stepStarted == 3 || d->step == MTG_STEP_UNTAP || d->step == MTG_STEP_CLEANUP) {
@@ -1815,7 +1877,7 @@ void Mtg_RefreshQuery(MtgDuel *d)   // (after the state was changed from outside
 {
     if (d->query.kind == MTG_Q_PRIORITY) {
         StateBasedActions(d);
-        if (d->over)
+        if (d->over || d->etbCount)
             Run(d);
         else
             BuildPriority(d);
@@ -1929,6 +1991,10 @@ int Mtg_Answer(MtgDuel *d, const MtgAnswer *a)
             if (a->card >= q->candidateCount)
                 return 0;
             d->resChoice = (int16_t)q->candidates[a->card];
+        } else if (q->choice == MTG_CHOICE_OPTION) {
+            if (a->card >= q->optCount)
+                return 0;
+            d->resChoice = (int16_t)q->opts[a->card];
         } else
             d->resChoice = a->card ? 1 : 0;
         if (ContinueResolve(d))

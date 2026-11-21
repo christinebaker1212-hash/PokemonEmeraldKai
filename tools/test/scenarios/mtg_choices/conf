@@ -1,0 +1,7 @@
+# MAGIC's choices as something resolves or enters: ENGINEERED PLAGUE asks for a creature type as it enters (a list:
+# the types in the game first, UP / DOWN, LEFT / RIGHT a page), the first type chosen; ESSENCE FILTER's two modes (the
+# highlighted one's words in the prompt). Shots ch_type, ch_type_page, ch_after, ch_mode, ch_mode2.
+MODE=1
+TMO=240
+EXPECT_A=("mtg: you: cast Engineered Plague" "mtg: you: chose Destroy all nonwhite enchantments." "mtg: you: cast Essence Filter" "mtg: you: chose")
+UNEXPECT_A=("[crash]" "mtg: can't put" "mtg: no Engineered Plague to focus")

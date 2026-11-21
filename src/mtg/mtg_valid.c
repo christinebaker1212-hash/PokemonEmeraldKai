@@ -71,6 +71,19 @@ static int Number(const char *p, size_t n, int *out)
     return 1;
 }
 
+// the card a choice is kept on (ChooseType / Color / Player: the source of the ability or static reading it)
+static const MtgObj *Holder(const MtgDuel *d, int src)
+{
+    static MtgObj sFromEffect;
+    if (gMtgEffCtx) {   // (an Effect's statics: what its source had chosen as it began)
+        sFromEffect.chosenType = gMtgEffCtx->chosenType;
+        sFromEffect.chosenColors = gMtgEffCtx->chosenColors;
+        sFromEffect.chosenPlayer = gMtgEffCtx->chosenPlayer;
+        return &sFromEffect;
+    }
+    return src >= 0 && src < d->objCount ? &d->objs[src] : NULL;
+}
+
 // one card property ("nonBlack", "YouCtrl", "powerLE2"...); *known = 0 if it isn't translated
 static int CardProp(const MtgDuel *d, int obj, const char *p, size_t n, int src, int controller, int *known)
 {
@@ -91,6 +104,27 @@ static int CardProp(const MtgDuel *d, int obj, const char *p, size_t n, int src,
             return !d || (Mtg_ObjColors(d, obj) & MTG_COLOR_BIT(i)) != 0;
     if ((n == 10 && strncmp(p, "ChosenCard", 10) == 0) || (n == 16 && strncmp(p, "ChosenCardStrict", 16) == 0))
         return !d || obj == Mtg_ChosenCard(d);   // (ChooseSource's pick)
+    if (n == 10 && strncmp(p, "ChosenType", 10) == 0) {   // of the type chosen for the source
+        const MtgObj *h;
+        if (!d)
+            return 1;
+        h = Holder(d, src);
+        return h && h->chosenType && HasSubtype(c, Mtg_SubtypeName(h->chosenType - 1), strlen(Mtg_SubtypeName(h->chosenType - 1)));
+    }
+    if (n == 11 && strncmp(p, "ChosenColor", 11) == 0) {   // of the color chosen for the source
+        const MtgObj *h;
+        if (!d)
+            return 1;
+        h = Holder(d, src);
+        return h && (Mtg_ObjColors(d, obj) & h->chosenColors) != 0;
+    }
+    if (n == 10 && strncmp(p, "ChosenCtrl", 10) == 0) {   // controlled by the player chosen for the source
+        const MtgObj *h;
+        if (!d)
+            return 1;
+        h = Holder(d, src);
+        return h && h->chosenPlayer && o->controller == h->chosenPlayer - 1;
+    }
     if (n == 17 && strncmp(p, "inZoneBattlefield", 17) == 0)   // ("by creatures": on the battlefield, not a spell)
         return !d || o->zone == MTG_ZONE_BATTLEFIELD;
     if (n == 10 && strncmp(p, "MultiColor", 10) == 0)
@@ -279,6 +313,8 @@ static int Alternative(const MtgDuel *d, int isPlayer, int id, const char *a, si
             const char *pp = dot + 1;
             if (pn == 12 && strncmp(pp, "IsRemembered", 12) == 0)   // (a player the resolving chain or Effect remembers)
                 return !d || (isPlayer && Mtg_IsRememberedPlayer(d, id));
+            if (pn == 6 && strncmp(pp, "Chosen", 6) == 0)   // (the player chosen for the source: ChoosePlayer)
+                return !d || (isPlayer && Holder(d, src) && Holder(d, src)->chosenPlayer == id + 1);
             if (pn == 19 && strncmp(pp, "EnchantedController", 19) == 0)   // (the controller of the creature its Aura holds)
                 return !d || (isPlayer && src != MTG_NO_OBJ && d->objs[src].attachedTo != MTG_NO_OBJ
                               && d->objs[d->objs[src].attachedTo].controller == id);

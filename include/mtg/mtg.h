@@ -76,6 +76,10 @@ typedef struct MtgCardDef {
     uint8_t etbKind, etbNum, etbX;           // K:etbCounter:TYPE:N: enters with N (etbX: X, as paid) counters of a kind
     uint8_t fading;                          // K:Fading:N: enters with N fade counters (etbKind / etbNum), loses one each upkeep
     uint8_t rampage;                         // K:Rampage:N: +N/+N for each creature blocking it past the first
+    uint16_t etbRepl;                        // K:ETBReplacement:Other:SVAR: what happens as it enters (a choice...):
+                                             // ability + 1 (0: none), run as it lands (mtg_game.c)
+    uint8_t etbOptional;                     // ... :Optional ("you may": asked)
+    const char *etbReplText;                 // (its keyword's text, while the card loads)
     uint8_t staticCount;
     uint16_t statics[4];                     // indexes into the static table (S: lines; mtg_static.c)
     uint16_t svarFirst, svarCount;           // the card's SVar: lines
@@ -91,6 +95,14 @@ const MtgCardDef *Mtg_Card(int id);         // a pool card, or a token (id >= MT
 #define MTG_TOKEN_BASE 0x7000                // token definitions (made from Forge's token names: Mtg_TokenDef)
 int Mtg_TokenDef(const char *script);        // "g_1_1_saproling" -> its definition's id, -1 if not understood
 int Mtg_CardByName(const char *name);       // -1 if not in the pool
+// every subtype of the pool's cards, sorted (ChooseType's choices): its name, and what it is (MTG_SUBK_*)
+#define MTG_SUBK_CREATURE 1
+#define MTG_SUBK_LAND     2
+#define MTG_SUBK_BASIC    4
+int Mtg_SubtypeCount(void);
+const char *Mtg_SubtypeName(int i);
+int Mtg_SubtypeKinds(int i);
+int Mtg_SubtypeIndex(const char *t, unsigned n);   // -1: not one
 const char *Mtg_PTText(const MtgCardDef *c);  // "2/3", "*/*", "*/1" as printed (a static buffer)
 
 // ---- a duel ----
@@ -141,6 +153,12 @@ typedef struct {
     uint16_t usedAb[2];           // abilities with an ActivationLimit$ used this turn (0xFFFF: free slot) ...
     uint8_t usedN[2];             // ... and how many times
     uint32_t seq;                 // order within its zone (higher = newer; the library's top is the highest)
+    // what was chosen for it (Forge's card.getChosenType / Color / Player / Number: kept on the card that chose, as
+    // it resolved or entered; ChosenType, ChosenColor, ChosenCtrl, Player.Chosen, Count$ChosenNumber read them)
+    uint16_t chosenType;          // Mtg_SubtypeName(chosenType - 1) (0: none)
+    uint8_t chosenColors;         // MTG_COLOR_BIT (0: none)
+    uint8_t chosenPlayer;         // the player + 1 (0: none)
+    int16_t chosenNumber;
 } MtgObj;
 
 typedef struct {
@@ -191,6 +209,8 @@ typedef struct {
     uint32_t remSeq[4];
     uint16_t chosen1;               // the source chosen as it began (ChooseSource: object + 1, 0 none) and its seq
     uint32_t chosenSeq;
+    uint16_t chosenType;            // what its source had chosen as it began (MtgObj's chosenType / Colors / Player)
+    uint8_t chosenColors, chosenPlayer;
     uint8_t used;                   // a one-time replacement of its own happened: over
 } MtgEffect;
 #define MTG_MAX_EFFECTS 12
@@ -218,7 +238,15 @@ enum { MTG_Q_NONE, MTG_Q_PRIORITY, MTG_Q_ATTACKERS, MTG_Q_BLOCKERS, MTG_Q_DISCAR
        MTG_Q_CHOOSE };         // a choice while something resolves (choice: MTG_CHOICE_*)
 // MTG_Q_CHOOSE: answer.card is 1 yes / 0 no (YESNO, PAY: 1 pays), or the index into candidates (PICK: a card to
 // sacrifice or discard). MTG_Q_TRIGGER_TARGET: answer.action is the index into actions.
-enum { MTG_CHOICE_YESNO, MTG_CHOICE_PAY, MTG_CHOICE_PICK };
+// MTG_CHOICE_OPTION: answer.card is the index into opts (a creature type, a color, a player, a number, a mode:
+// optKind MTG_OPT_*)
+enum { MTG_CHOICE_YESNO, MTG_CHOICE_PAY, MTG_CHOICE_PICK, MTG_CHOICE_OPTION };
+enum { MTG_OPT_TYPE,     // opts: Mtg_SubtypeName indexes
+       MTG_OPT_COLOR,    // MTG_W..MTG_G
+       MTG_OPT_PLAYER,   // 0 / 1
+       MTG_OPT_NUMBER,   // the numbers
+       MTG_OPT_MODE };   // GenericChoice: abilities (gMtgAbilities)
+#define MTG_MAX_OPTIONS 200
 enum { MTG_ACT_PASS, MTG_ACT_LAND, MTG_ACT_CAST, MTG_ACT_ACTIVATE };
 
 typedef struct {
@@ -247,13 +275,17 @@ typedef struct {
                                                      // the hand, 4 return to the hand, 5 tap, 6 exile from the
                                                      // graveyard (MTG_COSTK_* + 1); 7 another target (a spell's
                                                      // TargetMax$: answer candidateCount to stop when it may)
+    uint8_t optKind;                                 // CHOOSE's OPTION: what the options are (MTG_OPT_*) ...
+    uint16_t optCount;
+    uint16_t opts[MTG_MAX_OPTIONS];                  // ... and each
 } MtgQuery;
 
 typedef struct {
     uint16_t action;                                 // PRIORITY: index into actions
     uint32_t attack;                                 // ATTACKERS: bit i = candidates[i] attacks
     int8_t block[MTG_MAX_COMBAT];                    // BLOCKERS: candidate i blocks attackers[block[i]] or -1
-    uint8_t card;                                    // DISCARD / CHOOSE: index into candidates (CHOOSE: or 1 / 0)
+    uint16_t card;                                   // DISCARD / CHOOSE: index into candidates (CHOOSE: or 1 / 0,
+                                                     // or into opts)
 } MtgAnswer;
 
 enum {
@@ -269,7 +301,8 @@ enum {
     MTG_EV_KCOUNTERS,  // a = the object, b = a counter kind (not +1/+1: MTG_EV_COUNTERS), c = how many it has now
     MTG_EV_COIN,       // a = the source, b = the player who flipped, c = 1 won / 0 lost
     MTG_EV_REVEAL,     // a = the card revealed (from a hand), b = the player revealing it
-    MTG_EV_CHOSEN      // a = the source chosen (ChooseSource), b = the player choosing it
+    MTG_EV_CHOSEN,     // a = the source chosen (ChooseSource), b = the player choosing it
+    MTG_EV_OPTION      // a = the card it's kept on, b = what (MTG_OPT_*), c = the option chosen (a type, a color...)
 };
 typedef struct { uint8_t kind; int16_t a, b, c; } MtgEvent;
 #define MTG_REM_PLAYER 0xFF00   // a remembered player in MtgDuel.rem / repItems   // a, b, c by kind (mtg_game.c Mtg_Event)
@@ -315,7 +348,11 @@ typedef struct MtgDuel {
     uint16_t chosen1;                                // ChooseSource's pick (object + 1; 0: none) and its seq
     uint32_t chosenSeq;
     uint8_t resFlip;                                 // the coin just flipped: 1 won, 2 lost (0: none)
-    int16_t resChoice;                               // the answer: 1 / 0, or the object picked (-1: not asked yet)
+    int16_t resChoice;                               // the answer: 1 / 0, the object picked or the option (-1: not asked yet)
+    uint16_t resMode;                                // GenericChoice: the mode chosen + 1, its chain run next (0: none)
+    // permanents that just entered with an "as it enters" (etbRepl) still to run, oldest first (mtg_game.c Run)
+    uint8_t etbCount;
+    uint16_t etbQueue[8];
     // a cast or an activation's costs still to pick (sacrifices, then discards): asked as MTG_Q_CHOOSE's PICK with
     // query.forCost set, before anyone gets priority
     uint8_t costSac, costDiscard, costPlayer;

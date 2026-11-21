@@ -2362,6 +2362,151 @@ static void TestChooseSource(void)
     CHECK(sD.players[0].life == 20, "only the next time (%d)", sD.players[0].life);
 }
 
+// an MTG_CHOICE_OPTION answered by its words (a creature type, a color...) or its value
+static int OptionIndex(const char *word, int value)
+{
+    const MtgQuery *q = Mtg_Query(&sD);
+    int i;
+    for (i = 0; i < q->optCount; i++)
+        if (word ? q->optKind == MTG_OPT_TYPE && strcmp(Mtg_SubtypeName(q->opts[i]), word) == 0 : q->opts[i] == value)
+            return i;
+    return -1;
+}
+
+static void ChooseOption(const char *word, int value)
+{
+    MtgAnswer a;
+    int i = OptionIndex(word, value);
+    if (i < 0) {
+        printf("  no option %s %d\n", word ? word : "", value);
+        sFails++;
+        return;
+    }
+    memset(&a, 0, sizeof(a));
+    a.card = (uint16_t)i;
+    Answer(&a);
+}
+
+static void TestChoices(void)
+{
+    int plague, g1, g2, bears, ext, vise, i, filter, cop, rites, elves, k;
+    const MtgQuery *q;
+    MtgAnswer ai;
+    static const char *const cards[] = {"Engineered Plague", "Extinction", "Black Vise", "Essence Filter", "Rites of Initiation",
+                                        "Shared Triumph", "Lost Order of Jarkeld", "Wash Out", "Lava Storm", "Roots of Life", NULL};
+    printf("choices: a creature type, a color, a player, a number, a mode; as it enters\n");
+    for (i = 0; cards[i]; i++)
+        CHECK(Mtg_CardByName(cards[i]) >= 0 && Mtg_Card(Mtg_CardByName(cards[i]))->supported, "%s plays", cards[i]);
+
+    Table();   // Engineered Plague: a creature type chosen as it enters (the types in the game first), the goblins die
+    Lands(0, "Swamp", 3);
+    plague = Put(0, "Engineered Plague", MTG_ZONE_HAND);
+    g1 = Put(1, "Raging Goblin", MTG_ZONE_BATTLEFIELD);
+    g2 = Put(1, "Goblin Raider", MTG_ZONE_BATTLEFIELD);
+    bears = Put(1, "Grizzly Bears", MTG_ZONE_BATTLEFIELD);
+    Do(MTG_ACT_CAST, plague, -1, 0);
+    PassBoth();
+    q = Mtg_Query(&sD);
+    CHECK(q->kind == MTG_Q_CHOOSE && q->choice == MTG_CHOICE_OPTION && q->optKind == MTG_OPT_TYPE && q->player == 0
+          && Zone(plague) == MTG_ZONE_BATTLEFIELD, "the plague asks for a creature type as it enters (%d %d)", q->kind, q->choice);
+    CHECK(q->optCount > 100, "every creature type of the pool (%d)", q->optCount);
+    {
+        int goblin = OptionIndex("Goblin", 0), bear = OptionIndex("Bear", 0), zombie = OptionIndex("Zombie", 0);
+        CHECK(goblin >= 0 && bear >= 0 && zombie >= 0 && goblin < zombie && bear < zombie && goblin < 6,
+              "the types in the game first (goblin %d, bear %d, zombie %d)", goblin, bear, zombie);
+    }
+    MtgAi_Answer(&sD, &ai);   // (MostProminentOppControls: their goblins)
+    CHECK(q->optKind == MTG_OPT_TYPE && strcmp(Mtg_SubtypeName(q->opts[ai.card]), "Goblin") == 0,
+          "the AI would name the opponent's most common type (%s)", Mtg_SubtypeName(q->opts[ai.card]));
+    ChooseOption("Goblin", 0);
+    CHECK(Zone(g1) == MTG_ZONE_GRAVEYARD && Mtg_Power(&sD, g2) == 1 && Mtg_Toughness(&sD, g2) == 1
+          && Mtg_Power(&sD, bears) == 2 && Zone(bears) == MTG_ZONE_BATTLEFIELD,
+          "the goblins got -1/-1 (the 1/1 died, the raider 1/1), the bears didn't");
+    CHECK(Mtg_Query(&sD)->kind == MTG_Q_PRIORITY && sD.stackCount == 0, "then on as before");
+
+    Table();   // Extinction: the type chosen as it resolves
+    Lands(0, "Swamp", 5);
+    ext = Put(0, "Extinction", MTG_ZONE_HAND);
+    g1 = Put(1, "Raging Goblin", MTG_ZONE_BATTLEFIELD);
+    bears = Put(1, "Grizzly Bears", MTG_ZONE_BATTLEFIELD);
+    Do(MTG_ACT_CAST, ext, -1, 0);
+    PassBoth();
+    ChooseOption("Bear", 0);
+    CHECK(Zone(bears) == MTG_ZONE_GRAVEYARD && Zone(g1) == MTG_ZONE_BATTLEFIELD && Zone(ext) == MTG_ZONE_GRAVEYARD,
+          "extinction: the bears destroyed, the goblin not");
+
+    Table();   // Black Vise: the one opponent chosen without a question; 6 cards in their hand: 2 damage at their upkeep
+    Lands(0, "Plains", 1);
+    vise = Put(0, "Black Vise", MTG_ZONE_HAND);
+    for (i = 0; i < 6; i++)
+        Put(1, "Plains", MTG_ZONE_HAND);
+    Do(MTG_ACT_CAST, vise, -1, 0);
+    PassBoth();
+    CHECK(Mtg_Query(&sD)->kind == MTG_Q_PRIORITY && sD.objs[vise].chosenPlayer == 2, "the opponent chosen (%d)",
+          sD.objs[vise].chosenPlayer);
+    GoToTurn(1, MTG_STEP_DRAW);
+    CHECK(sD.players[1].life == 18, "black vise: 6 - 4 = 2 damage at their upkeep (%d)", sD.players[1].life);
+
+    Table();   // Essence Filter: a mode, as it resolves (nonwhite enchantments only)
+    Lands(0, "Forest", 3);
+    filter = Put(0, "Essence Filter", MTG_ZONE_HAND);
+    cop = Put(0, "Circle of Protection: Red", MTG_ZONE_BATTLEFIELD);
+    plague = Put(1, "Engineered Plague", MTG_ZONE_BATTLEFIELD);
+    Do(MTG_ACT_CAST, filter, -1, 0);
+    PassBoth();
+    q = Mtg_Query(&sD);
+    CHECK(q->kind == MTG_Q_CHOOSE && q->choice == MTG_CHOICE_OPTION && q->optKind == MTG_OPT_MODE && q->optCount == 2,
+          "essence filter: two modes (%d)", q->optCount);
+    MtgAi_Answer(&sD, &ai);
+    CHECK(ai.card == 1, "the AI keeps its own white circle (mode %d)", ai.card);
+    {
+        MtgAnswer a;
+        memset(&a, 0, sizeof(a));
+        a.card = 1;
+        Answer(&a);
+    }
+    CHECK(Zone(cop) == MTG_ZONE_BATTLEFIELD && Zone(plague) == MTG_ZONE_GRAVEYARD && Zone(filter) == MTG_ZONE_GRAVEYARD,
+          "nonwhite: the plague destroyed, the circle kept");
+
+    Table();   // Rites of Initiation: a number (0 to the cards in hand), that many discarded, +1/+0 for each
+    Lands(0, "Mountain", 1);
+    rites = Put(0, "Rites of Initiation", MTG_ZONE_HAND);
+    elves = Put(0, "Llanowar Elves", MTG_ZONE_BATTLEFIELD);
+    for (i = 0; i < 3; i++)
+        Put(0, "Plains", MTG_ZONE_HAND);
+    Do(MTG_ACT_CAST, rites, -1, 0);
+    PassBoth();
+    q = Mtg_Query(&sD);
+    CHECK(q->kind == MTG_Q_CHOOSE && q->optKind == MTG_OPT_NUMBER && q->optCount == 4 && q->opts[0] == 0 && q->opts[3] == 3,
+          "rites: 0 to 3 (%d options)", q->optCount);
+    ChooseOption(NULL, 2);
+    CHECK(HandCount(0) == 1 && Mtg_Power(&sD, elves) == 3, "two discarded, the elves 3/1 (%d in hand, power %d)",
+          HandCount(0), Mtg_Power(&sD, elves));
+
+    Table();   // Walking Desecration: its Effect keeps the type chosen as it began (a later choice is another one's)
+    k = Put(0, "Walking Desecration", MTG_ZONE_BATTLEFIELD);
+    Lands(0, "Swamp", 1);
+    sD.objs[k].sick = 0;
+    g1 = Put(1, "Raging Goblin", MTG_ZONE_BATTLEFIELD);
+    bears = Put(1, "Grizzly Bears", MTG_ZONE_BATTLEFIELD);
+    Do(MTG_ACT_ACTIVATE, k, -1, 0);
+    PassBoth();
+    ChooseOption("Goblin", 0);
+    sD.objs[k].chosenType = (uint16_t)(Mtg_SubtypeIndex("Bear", 4) + 1);
+    CHECK(Mtg_StaticForbids(&sD, MTG_STATIC_MUST_ATTACK, g1, MTG_NO_OBJ)
+          && !Mtg_StaticForbids(&sD, MTG_STATIC_MUST_ATTACK, bears, MTG_NO_OBJ),
+          "the goblin must attack, the bears needn't (the Effect's own choice)");
+
+    Table();   // Lost Order of Jarkeld: 1 + the creatures the chosen opponent controls
+    k = Put(0, "Lost Order of Jarkeld", MTG_ZONE_HAND);
+    Put(1, "Grizzly Bears", MTG_ZONE_BATTLEFIELD);
+    Put(1, "Raging Goblin", MTG_ZONE_BATTLEFIELD);
+    Mtg_MoveTo(&sD, k, MTG_ZONE_BATTLEFIELD);
+    Mtg_RefreshQuery(&sD);
+    CHECK(Mtg_Power(&sD, k) == 3 && Mtg_Toughness(&sD, k) == 3, "lost order: 3/3 (%d/%d)", Mtg_Power(&sD, k),
+          Mtg_Toughness(&sD, k));
+}
+
 static void TestCantCounter(void)
 {
     int mongoose, bears, cs, herald, istvan, bolt, i;
@@ -2997,6 +3142,7 @@ int main(int argc, char **argv)
     TestEffect();
     TestPreventAll();
     TestChooseSource();
+    TestChoices();
     TestCantCounter();
     TestTrigModes();
     TestBecomesTarget();

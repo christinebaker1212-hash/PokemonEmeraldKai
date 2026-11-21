@@ -303,10 +303,10 @@ static void ParseOne(MtgCardDef *c, int cardId, char *text)
     }
     if ((s = ParamOf(first, count, "CharacteristicDefining"))) {   // */*: on the card itself, wherever it is
         if (strcmp(s, "True") != 0 || st.mode != MTG_STATIC_CONTINUOUS || ParamOf(first, count, "Affected")
-            || ParamOf(first, count, "AffectedDefined") || !c->starPT)
+            || ParamOf(first, count, "AffectedDefined"))   // (a printed P/T too: Lost Order of Jarkeld's 1/1)
             goto unknown;
-        st.self = 1;
-        if ((s = ParamOf(first, count, "EffectZone")) && strcmp(s, "All") != 0)
+        st.self = 1;   // (EffectZone$ Battlefield too: it's only counted there, Mtg_StaticMods)
+        if ((s = ParamOf(first, count, "EffectZone")) && strcmp(s, "All") != 0 && strcmp(s, "Battlefield") != 0)
             goto unknown;
     } else if ((s = ParamOf(first, count, "EffectZone")) && strcmp(s, "All") == 0
                && (st.mode == MTG_STATIC_REDUCE_COST || st.mode == MTG_STATIC_RAISE_COST)

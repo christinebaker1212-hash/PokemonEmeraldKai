@@ -616,10 +616,99 @@ static int GivesUpOwn(const MtgAbility *ab)
     return o && (strcmp(o, "Battlefield") == 0 || (strcmp(o, "Graveyard") == 0 && (!dz || strcmp(dz, "Battlefield"))));
 }
 
+// how many of the cards it may look at have the subtype / color: AILogic says whose ("Opp", "Human": the opponent's
+// on the battlefield and in the graveyard; "Graveyard": its own graveyard; else its own cards, its library's too)
+static int OptionCount(const MtgDuel *d, int me, const char *logic, int kind, int opt)
+{
+    int i, n = 0, theirs = logic && (strstr(logic, "Opp") || strstr(logic, "Human") || strstr(logic, "Attackers")
+                                     || strstr(logic, "ActivePlayer"));
+    int grave = logic && strstr(logic, "Graveyard"), all = logic && (strstr(logic, "InGame") || strstr(logic, "Permanent"));
+    for (i = 0; i < d->objCount; i++) {
+        const MtgObj *o = &d->objs[i];
+        const MtgCardDef *c = Mtg_Card(o->def);
+        int owner = o->zone == MTG_ZONE_BATTLEFIELD ? o->controller : o->owner, hit;
+        if (all ? o->zone != MTG_ZONE_BATTLEFIELD
+                : theirs ? (owner == me || (o->zone != MTG_ZONE_BATTLEFIELD && o->zone != MTG_ZONE_GRAVEYARD))
+                : grave ? (owner != me || o->zone != MTG_ZONE_GRAVEYARD) : owner != me)
+            continue;
+        if (kind == MTG_OPT_COLOR)
+            hit = (Mtg_ObjColors(d, i) & MTG_COLOR_BIT(opt)) != 0;
+        else {
+            const char *name = Mtg_SubtypeName(opt), *f = c->subtypes ? strstr(c->subtypes, name) : NULL;
+            size_t l = strlen(name);
+            hit = 0;
+            while (f && !hit) {
+                hit = (f == c->subtypes || f[-1] == ' ') && (f[l] == ' ' || f[l] == 0);
+                f = strstr(f + 1, name);
+            }
+        }
+        n += hit;
+    }
+    return n;
+}
+
+static int LookaheadOption(const MtgDuel *d, int k, int me)   // the mode k answered on a copy, the rest as this AI would
+{
+    static MtgDuel copy;
+    MtgAnswer ans;
+    int guard = 0, v;
+    copy = *d;
+    sSimulating = 1;
+    memset(&ans, 0, sizeof(ans));
+    ans.card = (uint16_t)k;
+    if (Mtg_Answer(&copy, &ans))
+        while (guard++ < 300 && !copy.over) {
+            const MtgQuery *q = Mtg_Query(&copy);
+            if (q->kind == MTG_Q_PRIORITY && !copy.resolving)
+                break;
+            memset(&ans, 0, sizeof(ans));
+            if (q->kind != MTG_Q_PRIORITY)
+                MtgAi_Answer(&copy, &ans);
+            if (!Mtg_Answer(&copy, &ans))
+                break;
+        }
+    v = Eval(&copy, me);
+    sSimulating = 0;
+    return v;
+}
+
+// an option (a creature type, a color, a player, a number, a mode): Forge's AILogic where it says whose cards count
+static void ChooseOption(const MtgDuel *d, const MtgQuery *q, MtgAnswer *out)
+{
+    const MtgAbility *ab = q->ability != 0xFFFF ? &gMtgAbilities[q->ability] : NULL;
+    const char *logic = ab ? Mtg_Param(ab, "AILogic") : NULL;
+    int i, best = 0, bestV = -(1 << 30), me = q->player;
+    for (i = 0; i < q->optCount; i++) {
+        int v = 0, o = q->opts[i];
+        switch (q->optKind) {
+        case MTG_OPT_TYPE:
+        case MTG_OPT_COLOR:
+            v = OptionCount(d, me, logic, q->optKind, o) * 4 + (OptionCount(d, me, NULL, q->optKind, o) > 0);
+            break;
+        case MTG_OPT_PLAYER:   // (Curse, MostCardsInHand...: the opponent when it may)
+            v = o != me;
+            break;
+        case MTG_OPT_NUMBER:   // the least for what costs it, else the most
+            v = logic && (strcmp(logic, "Min") == 0 || strstr(logic, "Lowest") || strcmp(logic, "LoseLife") == 0) ? -o : o;
+            break;
+        case MTG_OPT_MODE:
+            v = sSimulating ? -i : LookaheadOption(d, i, me);
+            break;
+        }
+        if (v > bestV)
+            bestV = v, best = i;
+    }
+    out->card = (uint16_t)best;
+}
+
 // a choice while resolving: "you may" yes, pay to keep its own things or to save its spell, the least to lose
 static void Choose(const MtgDuel *d, const MtgQuery *q, MtgAnswer *out)
 {
     int i, best = 0, bestV = 1 << 30;
+    if (q->choice == MTG_CHOICE_OPTION) {
+        ChooseOption(d, q, out);
+        return;
+    }
     if (q->choice == MTG_CHOICE_PAY && q->ability != 0xFFFF && gMtgAbilities[q->ability].unless) {
         // a cost that isn't only mana: paid unless it costs too much life or too many permanents
         const MtgCost *c = &gMtgUnlessCosts[gMtgAbilities[q->ability].unless - 1];

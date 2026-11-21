@@ -8570,3 +8570,25 @@ res/moves/chatter/anim.s).
   etbKind / etbNum; StartStep's upkeep takes one off or sacrifices it). Those "triggers" resolve at once, not on the
   stack. Keyword words on the card: MtgGfx_KeywordLine's SHADOW / FLANKING. Playable: 2793 -> 2850 (docs/MTG_SCOPE.md).
   Tests: tools/mtg/test_rules.c TestShadow (shadow, flanking, fading). What comes next: docs/MTG_HANDOFF.md.
+
+## MAGIC: choices as something resolves or enters (2026-11-21)
+- "Choose a creature type / a color / an opponent / a number", "choose one of these" and "as CARDNAME enters, choose
+  ...": the query MTG_Q_CHOOSE's MTG_CHOICE_OPTION (MtgQuery.optKind, optCount, opts: MTG_OPT_TYPE / COLOR / PLAYER /
+  NUMBER / MODE; the answer's card is an index into opts, 16 bits now). Forge keeps a choice on the card that made it,
+  and so does this: MtgObj chosenType (a subtype index + 1: Mtg_SubtypeName, the pool's subtypes with their kinds,
+  MTG_SUBK_CREATURE / LAND / BASIC), chosenColors, chosenPlayer, chosenNumber; cleared as it enters the battlefield;
+  an Effect takes its source's as it begins (MtgEffect, read through mtg_valid.c Holder while gMtgEffCtx is set).
+  Read by the Valid properties ChosenType / ChosenColor / ChosenCtrl / Player.Chosen, Defined$ ChosenPlayer and
+  Count$ChosenNumber. GenericChoice's modes are chains of their own (mtg_script.c), the one chosen run next as a
+  coin's branch (MtgDuel.resMode, ContinueResolve).
+- K:ETBReplacement:Other:SVAR[:Mandatory|:Optional]: the SVar parsed as an ability of its own (MtgCardDef.etbRepl;
+  no targets), queued by Mtg_MoveTo as the card lands (MtgDuel.etbQueue) and resolved by mtg_game.c RunEtb first thing
+  in Run, before the step, state-based actions and triggers (so ENGINEERED PLAGUE's choice is made before its -1/-1
+  kills anything, and before its own enters triggers go on the stack). Optional: asked as a "you may".
+- The table: a list menu over the board (mtg_board.c MODE_OPTION, OptionMenu: 8 rows, UP / DOWN, LEFT / RIGHT a page,
+  arrows where there's more), the asking card big at the left, the prompt saying what to choose (a mode's own words,
+  the highlighted one's in full). Creature types in the game come first, then the rest, each part A to Z.
+- The AI (mtg_ai.c ChooseOption): types and colors counted where Forge's AILogic says (the opponent's cards, its own,
+  its graveyard), the opponent as the player, the least or most of a number by AILogic, a mode by a look-ahead on a copy.
+- Also: CharacteristicDefining statics on cards with a printed P/T (LOST ORDER OF JARKELD) and EffectZone$ Battlefield.
+  Playable: 2870 -> 2907. Tests: tools/mtg/test_rules.c TestChoices; scenario mtg_choices (shots ch_type, ch_mode2).
