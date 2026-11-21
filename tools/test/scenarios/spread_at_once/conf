@@ -1,0 +1,8 @@
+# A move hitting several Pokemon takes effect on them all at once (the user, 2026-11-21): GABBY & TY's double battle,
+# GYARADOS's SURF on both foes: one flash on both, both HP bars down together, both faint together, then the battle
+# goes on as usual (their next POKeMON / the win). Shots s*.
+MODE=1
+TMO=200
+ENV_A="MOEMON_DEBUG_PARTY=130:60,26:60"
+EXPECT_A=("lands on 2 at once")
+UNEXPECT_A=("[crash]" "spread left unshown")

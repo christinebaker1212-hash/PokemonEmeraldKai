@@ -90,6 +90,10 @@ void HandleAction_UseMove(void)
     u8 var = 4;
 
     gBattlerAttacker = gBattlerByTurnOrder[gCurrentTurnActionNumber];
+    {
+        void MP_Spread_Reset(void);
+        MP_Spread_Reset();   // Moemon Co-op: a spread move's targets at once (battle_script_commands.c)
+    }
 
     if (*(&gBattleStruct->absentBattlerFlags) & gBitTable[gBattlerAttacker])
     {

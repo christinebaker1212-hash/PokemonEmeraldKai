@@ -403,6 +403,9 @@
 #define STRINGID_ORRE_TEXT2                 408   // (a second line of them: CALL's outcome)
 #define STRINGID_MPCOOP_ITEM_PP             409   // Moemon Co-op: "...'s PP was restored." (an ETHER in a co-op battle)
 #define STRINGID_MP_INTIMIDATE_ALL          410   // Moemon Co-op: "X's INTIMIDATE cuts the foes' ATTACK!" (all at once)
+#define STRINGID_MP_CRIT_ON                 411   // Moemon Co-op: a spread move's targets at once: "A critical hit on X!"
+#define STRINGID_MP_SUPER_ON                412   // ... "It's super effective on X!"
+#define STRINGID_MP_NOTVERY_ON              413   // ... "It's not very effective on X..." 
 
 // Moemon Kai: Gen 4 messages, 420 on (handled in BufferStringBattle, not the table)
 #include "constants/battle_gen4_strings.h"
