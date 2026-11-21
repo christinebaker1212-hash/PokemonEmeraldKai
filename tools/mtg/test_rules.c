@@ -156,6 +156,11 @@ static void Do(int kind, int obj, int tgtKind, int tgtId)
     memset(&a, 0, sizeof(a));
     a.action = (uint16_t)i;
     Answer(&a);
+    if (Mtg_Query(&sD)->kind == MTG_Q_CHOOSE && Mtg_Query(&sD)->forCost == 8) {   // (an X: the most, as before)
+        memset(&a, 0, sizeof(a));
+        a.card = (uint16_t)(Mtg_Query(&sD)->optCount - 1);
+        Answer(&a);
+    }
 }
 
 static void PassBoth(void) { Pass(); Pass(); }   // both pass: the top of the stack resolves
@@ -377,6 +382,26 @@ static void TestSpells(void)
     Do(MTG_ACT_CAST, stream, MTG_TGT_PLAYER, 0);
     PassBoth();
     CHECK(sD.players[0].life == 24, "X = 4: %d", sD.players[0].life);
+
+    Table();   // the X chosen: 2 of the 4 it could pay (two forests left untapped)
+    Lands(0, "Forest", 5);
+    stream = Put(0, "Stream of Life", MTG_ZONE_HAND);
+    {
+        MtgAnswer a;
+        int k = Find(MTG_ACT_CAST, stream, MTG_TGT_PLAYER, 0), untapped = 0;
+        memset(&a, 0, sizeof(a));
+        a.action = (uint16_t)k;
+        Answer(&a);
+        CHECK(Mtg_Query(&sD)->kind == MTG_Q_CHOOSE && Mtg_Query(&sD)->forCost == 8 && Mtg_Query(&sD)->optCount == 5,
+              "X asked: 0 to 4");
+        memset(&a, 0, sizeof(a));
+        a.card = 2;
+        Answer(&a);
+        PassBoth();
+        for (k = 0; k < sD.objCount; k++)
+            untapped += sD.objs[k].zone == MTG_ZONE_BATTLEFIELD && !sD.objs[k].tapped;
+        CHECK(sD.players[0].life == 22 && untapped == 2, "X = 2: 22 life, two forests left (%d, %d)", sD.players[0].life, untapped);
+    }
 }
 
 // Auras (Enchant:Creature): cast onto a creature, what they give it, Forge's AttachAILogic, falling off
@@ -2918,6 +2943,38 @@ static void TestTapAllPerm(void)
         PassBoth();
         CHECK(Zone(b0) == MTG_ZONE_BATTLEFIELD && Zone(b1) == MTG_ZONE_BATTLEFIELD && sD.objs[b0].controller == 0
               && sD.objs[b1].controller == 1, "both back, each under its owner");
+    }
+    {   // Spell Blast on their 2-mana spell: X is 2 (its target's mana value), not all the mana there is
+        int blast, bears, claws, bird, k, untapped = 0;
+        Table();
+        Lands(0, "Island", 5);
+        blast = Put(0, "Spell Blast", MTG_ZONE_HAND);
+        Lands(1, "Forest", 2);
+        bears = Put(1, "Grizzly Bears", MTG_ZONE_HAND);
+        GoToTurn(1, MTG_STEP_MAIN1);
+        Do(MTG_ACT_CAST, bears, -1, 0);
+        Pass();
+        k = Find(MTG_ACT_CAST, blast, MTG_TGT_STACK, bears);
+        CHECK(k >= 0 && Mtg_Query(&sD)->actions[k].x == 2, "spell blast at the bears for X = 2");
+        if (k >= 0) {
+            MtgAnswer a;
+            memset(&a, 0, sizeof(a));
+            a.action = (uint16_t)k;
+            Answer(&a);
+            PassBoth();
+            for (k = 0; k < sD.objCount; k++)
+                untapped += sD.objs[k].zone == MTG_ZONE_BATTLEFIELD && sD.objs[k].controller == 0 && !sD.objs[k].tapped;
+            CHECK(Zone(bears) == MTG_ZONE_GRAVEYARD && untapped == 2, "countered, two islands left (%d)", untapped);
+        }
+        Table();   // Canopy Claws: the bird loses flying this turn only
+        Lands(0, "Forest", 1);
+        claws = Put(0, "Canopy Claws", MTG_ZONE_HAND);
+        bird = Put(1, "Birds of Paradise", MTG_ZONE_BATTLEFIELD);
+        Do(MTG_ACT_CAST, claws, MTG_TGT_OBJ, bird);
+        PassBoth();
+        CHECK(!(Mtg_Keywords(&sD, bird) & MTG_KW_BIT(MTG_KW_FLYING)), "no flying now");
+        GoToTurn(1, MTG_STEP_MAIN1);
+        CHECK(Mtg_Keywords(&sD, bird) & MTG_KW_BIT(MTG_KW_FLYING), "flying again next turn");
     }
     {   // Flailing Ogre: any player may activate its -1/-1 (the opponent, paying)
         int ogre, k, found = -1;

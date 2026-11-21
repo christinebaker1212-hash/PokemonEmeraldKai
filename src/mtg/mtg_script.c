@@ -48,9 +48,17 @@ const MtgCardDef *Mtg_Card(int id)
 int Mtg_TokenDef(const char *script)
 {
     static const char sCol[] = "wubrg";
+    // Forge's tokens named for their card (res/tokenscripts), as the colors_power_toughness_type words they are
+    static const char *const sNamed[][2] = {
+        {"butterfly", "g_1_1_insect_flying"}, {"wood", "g_0_1_wall_defender"}, {"wasp", "c_1_1_a_insect_flying"},
+        {"kelp", "u_0_1_plant_wall_defender"}, {"carnivore", "r_3_1_beast"}, {"tombspawn", "b_2_2_zombie_haste"},
+    };
     char buf[40], *p, *tok, *save;
     MtgCardDef *c;
     int i, part = 0;
+    for (i = 0; script && i < (int)(sizeof(sNamed) / sizeof(sNamed[0])); i++)
+        if (strcmp(script, sNamed[i][0]) == 0)
+            return Mtg_TokenDef(sNamed[i][1]);
     if (!script || strlen(script) >= sizeof(buf))
         return -1;
     for (i = 0; i < sTokenCount; i++)

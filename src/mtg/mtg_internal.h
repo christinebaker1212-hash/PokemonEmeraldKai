@@ -55,6 +55,7 @@ enum {
     MTG_API_GENERIC_CHOICE,   // ChooseGenericEffect: one of Choices$ (chains of their own) runs
     MTG_API_TAP_ALL,          // TapAllEffect: every ValidCards$ permanent tapped
     MTG_API_UNTAP_ALL,        // UntapAllEffect: ... untapped
+    MTG_API_DEBUFF,           // DebuffEffect: each loses Keywords$ until end of turn (Duration$ Permanent: for good)
     MTG_API_PROTECTION,       // ProtectionEffect: protection from Gains$ colors (Choice: one of Choices$ AnyColor) this turn
     MTG_API_COUNT
 };
@@ -277,6 +278,7 @@ void Mtg_SpellCost(const MtgDuel *d, int player, int obj, MtgManaCost *out);   /
 
 // mtg_valid.c: Forge's "Valid" properties (CardProperty.java, PlayerProperty.java)
 int Mtg_ValidObj(const MtgDuel *d, int obj, const char *spec, int sourceObj, int controller);
+extern int gMtgValidX;   // the X "cmcEQX" / "cmcLEX" compare against while a cast's targets are checked (-1: the resolving one's)
 int Mtg_ValidPlayer(const MtgDuel *d, int player, const char *spec, int controller);
 int Mtg_ValidPlayerSpecKnown(const char *spec);
 int Mtg_ValidPlayerFrom(const MtgDuel *d, int player, const char *spec, int src, int controller);   // (SRC: its source)                  // (a player's spec: You, Player.IsRemembered...)

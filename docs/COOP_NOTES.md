@@ -8654,3 +8654,16 @@ res/moves/chatter/anim.s).
 - ChangeZone DefinedPlayer$: each of them chooses from their own cards (Exhume, Curfew, Show and Tell).
 - Playable: 3234 -> 3350. Tests: test_rules.c TestTapAllPerm (Deluge, Tin-Wing Chimera, Mother of Runes, Kindle, Exhume,
   Flailing Ogre).
+
+## MAGIC: Debuff, chosen colors in Animate, Threshold amounts, X-valued targets, named tokens (2026-11-21)
+- DebuffEffect (MTG_API_DEBUFF): MtgObj loseKeywords until end of turn / permLoseKeywords (Duration$ Permanent),
+  taken off in Mtg_Keywords. Animate's Colors$ ChosenColor (its source's choice). Count$Threshold.A.B.
+- Valid StrictlyOther, cmcLEX / cmcLTX / cmcGEX / cmcGTX / cmcEQX against X (gMtgValidX while a cast's targets are
+  checked, else the resolving one's). A target spec comparing with X (Spell Blast, Detonate) offers each candidate with
+  X its own mana value, if affordable (mtg_game.c ValidAt); TargetStillLegal checks against the X paid.
+- Forge's tokens named for their card (butterfly, wood, wasp, kelp, carnivore, tombspawn) as their colors_P_T_type
+  words (Mtg_TokenDef).
+- Playable: 3350 -> 3407. Tests: test_rules.c TestTapAllPerm (Spell Blast, Canopy Claws).
+- X chosen (2026-11-21): an action with an X its targets don't set (MtgAction.xFixed: X targets, cmcEQX) asks
+  "choose X" first, 0 up to the most it can pay (query CHOOSE OPTION NUMBER with forCost 8, MtgDuel.pendAct; then
+  DoAction). The table's list starts on the most; the AI takes the most, as before.

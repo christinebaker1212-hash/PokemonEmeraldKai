@@ -6,6 +6,7 @@
 #include "mtg_internal.h"
 
 static const char *const sColorProps[5] = {"White", "Blue", "Black", "Red", "Green"};
+int gMtgValidX = -1;
 
 uint8_t Mtg_ObjColors(const MtgDuel *d, int obj)
 {
@@ -215,7 +216,17 @@ static int CardProp(const MtgDuel *d, int obj, const char *p, size_t n, int src,
     }
     if (n == 22 && strncmp(p, "wasDealtDamageThisTurn", 22) == 0)   // (marked damage lasts the turn)
         return !d || o->damage > 0;
-    if (n == 5 && strncmp(p, "Other", 5) == 0)
+    if (n > 5 && strncmp(p, "cmc", 3) == 0 && p[n - 1] == 'X' && n == 6
+        && ((p[3] == 'L' && (p[4] == 'E' || p[4] == 'T')) || (p[3] == 'G' && (p[4] == 'E' || p[4] == 'T'))
+            || (p[3] == 'E' && p[4] == 'Q'))) {   // "cmcLEX": against the resolving spell's X
+        int v, x;
+        if (!d)
+            return 1;
+        v = Mtg_ManaCostTotal(&c->cost);
+        x = gMtgValidX >= 0 ? gMtgValidX : d->resolving ? d->res.x : 0;
+        return p[3] == 'E' ? v == x : p[3] == 'L' ? (p[4] == 'E' ? v <= x : v < x) : (p[4] == 'E' ? v >= x : v > x);
+    }
+    if ((n == 5 && strncmp(p, "Other", 5) == 0) || (n == 13 && strncmp(p, "StrictlyOther", 13) == 0))
         return !d || obj != src;
     if ((n == 4 && strncmp(p, "Self", 4) == 0) || (n == 12 && strncmp(p, "StrictlySelf", 12) == 0))   // (the card the ability or trigger belongs to)
         return !d || obj == src;

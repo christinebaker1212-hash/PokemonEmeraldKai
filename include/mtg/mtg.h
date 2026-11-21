@@ -143,6 +143,8 @@ typedef struct {
     int8_t tempPower, tempToughness;   // until end of turn (Pump)
     uint32_t tempKeywords;
     uint8_t tempProtection;       // protection from colors until end of turn (ProtectionEffect: MTG_COLOR_BIT)
+    uint32_t loseKeywords;        // keywords it loses until end of turn (DebuffEffect) ...
+    uint32_t permLoseKeywords;    // ... and for good (Duration$ Permanent)
     int8_t permPower, permToughness;   // for good, while it stays (Pump's Duration$ Permanent)
     uint32_t permKeywords;
     int16_t counters11;           // +1/+1 counters (-1/-1 as negative)
@@ -277,6 +279,7 @@ typedef struct {
     int16_t x;
     MtgTarget target;
     uint8_t alt;      // MTG_ACT_CAST: MTG_ALT_* (its alternative cost: S:Mode$ AlternativeCost; Kicker, Buyback, Flashback)
+    uint8_t xFixed;   // x is set by its targets (their number, or a mana value it must match): not asked
 } MtgAction;
 
 typedef struct {
@@ -294,6 +297,7 @@ typedef struct {
     uint8_t choice;
     MtgManaCost pay;
     uint8_t forCost;                                 // CHOOSE's PICK for a cost: 1 sacrifice, 2 discard, 3 exile from
+                                                     // (8: CHOOSE's OPTION of X for the action chosen: MtgDuel.pendAct)
                                                      // the hand, 4 return to the hand, 5 tap, 6 exile from the
                                                      // graveyard (MTG_COSTK_* + 1); 7 another target (a spell's
                                                      // TargetMax$: answer candidateCount to stop when it may)
@@ -373,6 +377,7 @@ typedef struct MtgDuel {
     uint8_t resFlip;                                 // the coin just flipped: 1 won, 2 lost (0: none)
     int16_t resChoice;                               // the answer: 1 / 0, the object picked or the option (-1: not asked yet)
     uint8_t resSkip;                                 // the resolving chain stops here (its optional cost not paid)
+    MtgAction pendAct;                               // an action with an X, waiting for its X (query forCost 8)
     uint16_t resMode;                                // GenericChoice: the mode chosen + 1, its chain run next (0: none)
     // permanents that just entered with an "as it enters" (etbRepl) still to run, oldest first (mtg_game.c Run)
     uint8_t etbCount;

@@ -20,7 +20,7 @@ static const struct { const char *name; uint8_t api; } sApis[] = {
     {"RearrangeTopOfLibrary", MTG_API_REARRANGE_TOP}, {"ChooseType", MTG_API_CHOOSE_TYPE},
     {"ChooseColor", MTG_API_CHOOSE_COLOR}, {"ChoosePlayer", MTG_API_CHOOSE_PLAYER}, {"ChooseNumber", MTG_API_CHOOSE_NUMBER},
     {"GenericChoice", MTG_API_GENERIC_CHOICE}, {"TapAll", MTG_API_TAP_ALL}, {"UntapAll", MTG_API_UNTAP_ALL},
-    {"Protection", MTG_API_PROTECTION},
+    {"Protection", MTG_API_PROTECTION}, {"Debuff", MTG_API_DEBUFF},
 };
 
 const char *const gMtgApiNames[MTG_API_COUNT] = {
@@ -28,7 +28,7 @@ const char *const gMtgApiNames[MTG_API_COUNT] = {
     "ChangeZone", "Mana", "Discard", "Tap", "Untap", "Counter", "Sacrifice", "PutCounter", "Attach", "Regenerate", "Token", "Charm",
     "ChangeZoneAll", "Animate", "DelayedTrigger", "PreventDamage", "GainControl", "PutCounterAll", "RemoveCounter", "Dig", "Mill", "FlipCoin", "Cleanup", "Reveal", "RepeatEach", "SetLife", "Effect", "Fog", "ChooseSource",
     "RearrangeTopOfLibrary", "ChooseType", "ChooseColor", "ChoosePlayer", "ChooseNumber", "GenericChoice",
-    "TapAll", "UntapAll", "Protection",
+    "TapAll", "UntapAll", "Debuff", "Protection",
 };
 
 int Mtg_ApiKnown(const char *name)
@@ -74,6 +74,17 @@ int Mtg_Amount(const MtgDuel *d, const MtgResolveCtx *ctx, int card, const char 
         }
         kicked = d && ctx->source >= 0 && ctx->source < d->objCount && d->objs[ctx->source].kicked;
         return atoi(kicked ? a : dot + 1);
+    }
+    if (strncmp(sv, "Count$Threshold.", 16) == 0) {   // "Count$Threshold.A.B": A with seven cards in its graveyard
+        const char *a = sv + 16, *dot = strchr(a, '.');
+        int k, g = 0;
+        if (!dot || strspn(a, "0123456789") != (size_t)(dot - a) || strspn(dot + 1, "0123456789") != strlen(dot + 1) || !dot[1]) {
+            *ok = 0;
+            return 0;
+        }
+        for (k = 0; d && k < d->objCount; k++)
+            g += d->objs[k].zone == MTG_ZONE_GRAVEYARD && d->objs[k].owner == ctx->controller;
+        return atoi(g >= 7 ? a : dot + 1);
     }
     if (strcmp(sv, "Count$ChosenNumber") == 0)   // (ChooseNumber's, kept on its source)
         return d && ctx->source >= 0 && ctx->source < d->objCount ? d->objs[ctx->source].chosenNumber : 0;
@@ -589,6 +600,8 @@ static int AnimColors(const char *s)
     int mask = 0, k;
     if (!s)
         return 0;
+    if (strcmp(s, "ChosenColor") == 0)
+        return 0x80;   // (its source's chosen color, as it resolves)
     if (strlen(s) >= sizeof(buf))
         return -1;
     strcpy(buf, s);
@@ -1074,6 +1087,8 @@ static int Resolve(MtgDuel *d, MtgResolveCtx *ctx, const MtgAbility *ab)
         const char *dur = Mtg_Param(ab, "Duration"), *pw = Mtg_Param(ab, "Power"), *tg = Mtg_Param(ab, "Toughness");
         int types = AnimTypes(Mtg_Param(ab, "Types"), &ok), colors = AnimColors(Mtg_Param(ab, "Colors"));
         uint32_t kw = KeywordList(Mtg_Param(ab, "Keywords"), &ok);
+        if (colors == 0x80)
+            colors = d->objs[ctx->source].chosenColors;
         Targets(d, ctx, ab, DEF_CARD, &who);
         for (i = 0; i < who.n; i++) {
             MtgObj *o;
@@ -1389,6 +1404,19 @@ static int Resolve(MtgDuel *d, MtgResolveCtx *ctx, const MtgAbility *ab)
     case MTG_API_CHARM:    // (never on the stack itself: each mode is cast or activated on its own)
     case MTG_API_ATTACH:   // (the Aura enters attached as the spell finishes: mtg_game.c FinishResolve)
         break;
+    case MTG_API_DEBUFF: {   // DebuffEffect: the keywords lost until end of turn (or for good)
+        uint32_t kw = KeywordList(Mtg_Param(ab, "Keywords"), &ok);
+        int forGood = Mtg_Param(ab, "Duration") != NULL;
+        Targets(d, ctx, ab, DEF_CARD, &who);
+        for (i = 0; i < who.n; i++)
+            if (OnBattlefield(d, &who.t[i])) {
+                if (forGood)
+                    d->objs[who.t[i].id].permLoseKeywords |= kw;
+                else
+                    d->objs[who.t[i].id].loseKeywords |= kw;
+            }
+        break;
+    }
     case MTG_API_PROTECTION: {   // protection from its colors until end of turn (Choice: the controller picks one)
         const char *g = Mtg_Param(ab, "Gains");
         int colors;
@@ -1942,6 +1970,7 @@ static const char *const sApiParams[MTG_API_COUNT][16] = {
     [MTG_API_TAP_ALL] = {"ValidCards", "ValidDescription"},
     [MTG_API_UNTAP_ALL] = {"ValidCards", "ValidDescription"},
     [MTG_API_PROTECTION] = {"Gains", "Choices"},
+    [MTG_API_DEBUFF] = {"Keywords", "Duration"},
 };
 static const char *const sPayersKnown[] = {
     "You", "Opponent", "Player", "Targeted", "TargetedController", "TargetedPlayer", "Player.IsRemembered",
@@ -2070,6 +2099,9 @@ int Mtg_ApiParamsKnown(const MtgAbility *ab, const char **why)
     case MTG_API_TAP_ALL:
     case MTG_API_UNTAP_ALL:
         return (v = Mtg_Param(ab, "ValidCards")) && Mtg_ValidSpecKnown(v) && !ab->tgt;
+    case MTG_API_DEBUFF:
+        KeywordList(Mtg_Param(ab, "Keywords"), &ok);
+        return ok && Mtg_Param(ab, "Keywords") && (!(v = Mtg_Param(ab, "Duration")) || strcmp(v, "Permanent") == 0);
     case MTG_API_PROTECTION:   // colors only: "white", "black,red", Choice of AnyColor, ChosenColor
         if (!(v = Mtg_Param(ab, "Gains")))
             return 0;

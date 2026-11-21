@@ -78,8 +78,9 @@ uint32_t Mtg_Keywords(const MtgDuel *d, int obj)
 {
     MtgStaticMods m;
     Mtg_StaticMods(d, obj, &m);
-    return Mtg_Card(d->objs[obj].def)->keywords | d->objs[obj].tempKeywords | d->objs[obj].permKeywords | m.keywords
-         | (d->objs[obj].animUntil ? d->objs[obj].animKeywords : 0);
+    return (Mtg_Card(d->objs[obj].def)->keywords | d->objs[obj].tempKeywords | d->objs[obj].permKeywords | m.keywords
+            | (d->objs[obj].animUntil ? d->objs[obj].animKeywords : 0))
+         & ~(d->objs[obj].loseKeywords | d->objs[obj].permLoseKeywords);   // (Debuff: lost)
 }
 
 uint8_t Mtg_ObjTypes(const MtgDuel *d, int obj)
@@ -123,6 +124,7 @@ static void ResetPermanentState(MtgObj *o)
     o->tempKeywords = 0;
     o->permPower = o->permToughness = 0;
     o->tempProtection = 0;
+    o->loseKeywords = o->permLoseKeywords = 0;
     o->permKeywords = 0;
     o->counters11 = 0;
     memset(o->ctrKind, 0, sizeof(o->ctrKind));
@@ -668,7 +670,17 @@ void Mtg_ShuffleLibrary(MtgDuel *d, int player)
 }
 
 // ---- the stack ----
+static int TargetStillLegalX(const MtgDuel *d, const MtgStackEntry *e, const MtgAbility *ab);
 static int TargetStillLegal(const MtgDuel *d, const MtgStackEntry *e, const MtgAbility *ab)
+{
+    int r;
+    gMtgValidX = e->x;   // (cmcEQX: against the X it was cast for)
+    r = TargetStillLegalX(d, e, ab);
+    gMtgValidX = -1;
+    return r;
+}
+
+static int TargetStillLegalX(const MtgDuel *d, const MtgStackEntry *e, const MtgAbility *ab)
 {
     int i;
     if (e->target.kind == MTG_TGT_NONE)
@@ -988,13 +1000,43 @@ static void AddAction(MtgQuery *q, int kind, int obj, int ability, int x, MtgTar
     a->x = (int16_t)x;
     a->target = t;
     a->alt = 0;
+    a->xFixed = 0;
 }
 
+// a target candidate under a spec comparing its mana value with X ("cmcEQX", "cmcLEX": Spell Blast, Detonate): legal
+// with X its own mana value (at most the X that can be paid), *ax that X; otherwise as usual (*ax = x)
+static int ValidAt(const MtgDuel *d, const MtgAbility *ab, int target, int obj, int player, int x, int *ax)
+{
+    int ok, cmc;
+    *ax = x;
+    if (!strstr(ab->tgt, "cmcEQX") && !strstr(ab->tgt, "cmcLEX"))
+        return Mtg_ValidObj(d, target, ab->tgt, obj, player);
+    cmc = Mtg_ManaCostTotal(&Mtg_Card(d->objs[target].def)->cost);
+    if (cmc > x)
+        return 0;
+    gMtgValidX = cmc;
+    ok = Mtg_ValidObj(d, target, ab->tgt, obj, player);
+    gMtgValidX = -1;
+    *ax = cmc;
+    return ok;
+}
+
+static int sXFixed;   // (AddWithTargets: the actions it adds have their X set by their targets)
+static void AddWithTargetsX(const MtgDuel *d, MtgQuery *q, int kind, int obj, int ability, int x, int player);
 static void AddWithTargets(const MtgDuel *d, MtgQuery *q, int kind, int obj, int ability, int x, int player)
+{
+    int before = q->actionCount, m;
+    sXFixed = 0;
+    AddWithTargetsX(d, q, kind, obj, ability, x, player);
+    for (m = before; m < q->actionCount; m++)
+        q->actions[m].xFixed = (uint8_t)sXFixed;
+}
+
+static void AddWithTargetsX(const MtgDuel *d, MtgQuery *q, int kind, int obj, int ability, int x, int player)
 {
     const MtgAbility *ab = ability != 0xFFFF ? &gMtgAbilities[ability] : NULL;
     MtgTarget t = {MTG_TGT_NONE, 0};
-    int i;
+    int i, ax;
     if (!ab || !ab->tgt) {
         AddAction(q, kind, obj, ability, x, t);
         return;
@@ -1008,22 +1050,26 @@ static void AddWithTargets(const MtgDuel *d, MtgQuery *q, int kind, int obj, int
             x = n < 5 ? n : 5;   // ("X target creatures": X no more than there are; the rest of the mana stays)
         if (n < (ab->tgtMin == MTG_TGT_X ? x : ab->tgtMin) || (ab->tgtMax == MTG_TGT_X && x < 1))
             return;
+        if (ab->tgtMax == MTG_TGT_X)
+            sXFixed = 1;   // (X is how many targets: not asked)
     }
+    if (strstr(ab->tgt, "cmcEQX") || strstr(ab->tgt, "cmcLEX"))
+        sXFixed = 1;   // (X is its target's mana value)
     if (ab->tgtZone != MTG_ZONE_BATTLEFIELD) {   // (cards in a graveyard)
         for (i = 0; i < d->objCount; i++)
-            if (d->objs[i].zone == ab->tgtZone && Mtg_ValidObj(d, i, ab->tgt, obj, player)) {
+            if (d->objs[i].zone == ab->tgtZone && ValidAt(d, ab, i, obj, player, x, &ax)) {
                 t.kind = MTG_TGT_OBJ;
                 t.id = (uint16_t)i;
-                AddAction(q, kind, obj, ability, x, t);
+                AddAction(q, kind, obj, ability, ax, t);
             }
         return;
     }
     if (ab->tgtStack) {
         for (i = d->stackCount - 1; i >= 0; i--)
-            if (d->stack[i].isSpell && Mtg_ValidObj(d, d->stack[i].source, ab->tgt, obj, player)) {
+            if (d->stack[i].isSpell && ValidAt(d, ab, d->stack[i].source, obj, player, x, &ax)) {
                 t.kind = MTG_TGT_STACK;
                 t.id = d->stack[i].source;
-                AddAction(q, kind, obj, ability, x, t);
+                AddAction(q, kind, obj, ability, ax, t);
             }
         return;
     }
@@ -1034,11 +1080,11 @@ static void AddWithTargets(const MtgDuel *d, MtgQuery *q, int kind, int obj, int
             AddAction(q, kind, obj, ability, x, t);
         }
     for (i = 0; i < d->objCount; i++)
-        if (d->objs[i].zone == MTG_ZONE_BATTLEFIELD && Mtg_ValidObj(d, i, ab->tgt, obj, player)
+        if (d->objs[i].zone == MTG_ZONE_BATTLEFIELD && ValidAt(d, ab, i, obj, player, x, &ax)
             && Mtg_CanTarget(d, i, obj)) {
             t.kind = MTG_TGT_OBJ;
             t.id = (uint16_t)i;
-            AddAction(q, kind, obj, ability, x, t);
+            AddAction(q, kind, obj, ability, ax, t);
         }
 }
 
@@ -1833,6 +1879,7 @@ static void EndOfTurnCleanup(MtgDuel *d)
         o->tempPower = o->tempToughness = 0;
         o->tempKeywords = 0;
         o->tempProtection = 0;
+        o->loseKeywords = 0;
         o->regen = 0;
         o->prevent = 0;
         if (o->animUntil == 1)
@@ -2177,6 +2224,18 @@ int Mtg_Answer(MtgDuel *d, const MtgAnswer *a)
             } else
                 d->priority ^= 1;
         } else {
+            if (act.x > 0 && !act.xFixed) {   // an X: asked first (0 up to the most it can pay)
+                uint16_t opts[MTG_MAX_OPTIONS];
+                int k, n = act.x + 1 < MTG_MAX_OPTIONS ? act.x + 1 : MTG_MAX_OPTIONS;
+                for (k = 0; k < n; k++)
+                    opts[k] = (uint16_t)k;
+                d->pendAct = act;
+                Mtg_AskOption(d, d->priority, MTG_OPT_NUMBER, opts, n);
+                d->query.forCost = 8;
+                d->query.source = act.obj;
+                d->query.ability = act.ability;
+                return 1;
+            }
             DoAction(d, &act);
             d->passes = 0;
             if (AskCost(d))
@@ -2241,6 +2300,19 @@ int Mtg_Answer(MtgDuel *d, const MtgAnswer *a)
         PushTrigger(d, NextPending(d), q->actions[a->action].target);
         break;
     case MTG_Q_CHOOSE:
+        if (q->forCost == 8) {   // the X of the action chosen: now it's done
+            MtgAction act = d->pendAct;
+            if (a->card >= q->optCount)
+                return 0;
+            act.x = (int16_t)q->opts[a->card];
+            DoAction(d, &act);
+            d->passes = 0;
+            if (AskCost(d))
+                return 1;
+            if (ResolveManaNow(d))
+                return 1;
+            break;
+        }
         if (q->forCost) {   // a cost's sacrifice / discard (or another target)
             if (q->forCost == 7 && a->card == q->candidateCount && !d->tgtLeft) {
                 d->tgtOpt = 0;   // (no more targets: it may stop here)

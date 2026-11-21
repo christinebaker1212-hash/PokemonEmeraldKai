@@ -1522,7 +1522,9 @@ static const char *OptionText(void)
     const MtgQuery *q = &B.duel.query;
     char name[64], label[160];
     Name(name, sizeof(name), q->source);
-    if (q->optKind == MTG_OPT_TYPE && q->ability != 0xFFFF && Mtg_Param(&gMtgAbilities[q->ability], "Type")
+    if (q->forCost == 8)
+        snprintf(sOptionText, sizeof(sOptionText), "%s: choose X.  {A}", name);
+    else if (q->optKind == MTG_OPT_TYPE && q->ability != 0xFFFF && Mtg_Param(&gMtgAbilities[q->ability], "Type")
         && strstr(Mtg_Param(&gMtgAbilities[q->ability], "Type"), "Land"))
         snprintf(sOptionText, sizeof(sOptionText), "%s: choose a land type.  {A}", name);
     else if (q->optKind == MTG_OPT_MODE) {
@@ -3176,7 +3178,7 @@ static void HumanChoose(unsigned pressed)
         YourMove("an option");
         if (B.mode != MODE_OPTION) {
             B.mode = MODE_OPTION;
-            B.menuCursor = 0;
+            B.menuCursor = q->forCost == 8 && n > 0 ? n - 1 : 0;   // (an X: the most it can pay first)
             B.trayWanted = 0;
             PlaySE(SE_SELECT);
         }

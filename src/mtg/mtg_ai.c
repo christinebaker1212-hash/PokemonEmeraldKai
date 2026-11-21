@@ -708,8 +708,9 @@ static void ChooseOption(const MtgDuel *d, const MtgQuery *q, MtgAnswer *out)
         case MTG_OPT_PLAYER:   // (Curse, MostCardsInHand...: the opponent when it may)
             v = o != me;
             break;
-        case MTG_OPT_NUMBER:   // the least for what costs it, else the most
-            v = logic && (strcmp(logic, "Min") == 0 || strstr(logic, "Lowest") || strcmp(logic, "LoseLife") == 0) ? -o : o;
+        case MTG_OPT_NUMBER:   // the least for what costs it, else the most (an X: the most it can pay)
+            v = q->forCost != 8 && logic && (strcmp(logic, "Min") == 0 || strstr(logic, "Lowest") || strcmp(logic, "LoseLife") == 0)
+                ? -o : o;
             break;
         case MTG_OPT_MODE:
             v = sSimulating ? -i : LookaheadOption(d, i, me);
