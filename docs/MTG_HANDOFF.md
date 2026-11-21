@@ -3,6 +3,24 @@
 The user's decisions: `docs/MTG_DECISIONS.md` (keep to them). How much of the pool plays: `docs/MTG_SCOPE.md`
 (generated: `tools/mtg/scope.py`). This file: what is built, how it is built, what comes next.
 
+## Pick up here (2026-11-21, end of day): 3424 of 5408
+**The user: "Do not push 500 different Magic updates. Push and only update once everything all at once is finished."**
+MAGIC batches are LOCAL commits on the default branch (`git log origin/claude/clever-clarke-hqati2..HEAD`) until all
+5408 cards play; then one push and one release (its notes: everything since 1.210.0's MAGIC line).
+Done today, each in COOP_NOTES ("MAGIC: choices...", "Echo, Cumulative upkeep, Kicker, Buyback, Flashback", "Morph",
+"more costs, triggers' own costs, mana abilities that do more", "TapAll, any player's abilities...", "Debuff, ... X"):
+2870 -> 3424. Tests: test_rules.c (918 checks), scenarios mtg_choices, mtg_flashback, mtg_morph.
+How each batch goes: the blockers (`/tmp/mtg-tests/scope_dump graphics/mtg/forge.pak`, grouped by reason; for
+"static ability" an instrumented copy of mtg_static.c whose `goto unknown`s note their line), translate, check the
+newly playable cards' scripts for anything half-understood, a test in test_rules.c, then tools/mtg/fetch_art.py &&
+build_printed.py && tools/mtg/test.sh, scope.py, a COOP_NOTES line, a local commit.
+Next, by cards: static abilities (292: AddKeyword Banding / Phasing / Menace / Protection:<types>, modes
+CantAttackUnless / CantBlockUnless / AttackRequirement / MinMaxBlocker, counted Add/SetPower), damage replacements
+(R: DamageDone with ReplaceWith ReplaceEffect / ReplaceDamage / PutCounter / RemoveCounter: 30ish), Effects with
+Triggers$ (33: an Effect's own triggers, reading its remembered objects), multiple targets on triggers and more APIs
+(TargetMin 32, "a second target" 19), DividedAsYouChoose (19), Pump's UntilUntaps / UntilEndOfCombat durations,
+ChooseCard (25), Banding (20), Storm (12, needs spell copies), Phasing (12), Defined ReplacedCard / ExiledWith.
+
 ## Pick up here (2026-11-21, later)
 **The user: "Do not push 500 different Magic updates. Push and only update once everything all at once is finished."**
 MAGIC batches are local commits on the default branch until all 5408 cards play; then one push and one release.
