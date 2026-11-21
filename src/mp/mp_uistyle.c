@@ -45,6 +45,7 @@
 #include "mp_uistyle.h"
 #include "item.h"
 #include "mail.h"
+#include "mp_dexplus.h"   // Moemon Co-op: MY DEX BALL
 
 const char *Updater_ExeFile(const char *name);
 bool8 MP_StartMenu_State(u8 *actions, u8 *count, u8 *cursor, const u8 **names);
@@ -1406,6 +1407,7 @@ static void Choices(struct Surf *s, struct UiPack *p, const struct UiOp *op, con
 }
 
 // spec SP over FRAME with its top-left at (ax, ay)
+static bool8 sOwnBallBox;   // a battle box being drawn whose caught ball is shown twice (MY DEX BALL)
 static void DrawSpec(struct UiPack *p, const struct UiSpec *sp, struct UiData *d, u16 *frame, int ax, int ay,
                      const struct MpFadeFit *fit)
 {
@@ -1449,6 +1451,13 @@ static void DrawSpec(struct UiPack *p, const struct UiSpec *sp, struct UiData *d
         switch (op->kind)
         {
         case OP_IMG:
+            if (op->a < p->nImg && sOwnBallBox && (op->cond & C_CAUGHT))
+            {
+                // (Moemon Co-op: the second ball just behind; RED's / CRYSTAL's solid black ones further out, or they
+                // run together)
+                bool8 gb = MP_UiStyle_Active() == UISTYLE_RED || MP_UiStyle_Active() == UISTYLE_CRYSTAL;
+                DrawImg(s, &p->img[op->a], x + (gb ? 3 : 1), y - (gb ? 2 : 1));
+            }
             if (op->a < p->nImg)
                 DrawImg(s, &p->img[op->a], x, y);
             break;
@@ -1595,6 +1604,7 @@ struct Hud
     u8 name[POKEMON_NAME_LENGTH + 12];
     u8 level, gender, status;   // (gender 0 none, 1 male, 2 female; status 0 none, 1 PSN 2 PAR 3 SLP 4 FRZ 5 BRN)
     bool8 caught;               // (a wild foe whose kind is caught: battle_interface.c TryAddPokeballIconToHealthbox)
+    bool8 ownBall;              // ... in the player's own POKéDEX too, on a server: its ball twice (MP_OwnDexBall)
     s32 hp, maxHp;
     s32 exp, expMax;
 };
@@ -1672,6 +1682,7 @@ void MP_UiStyle_HudUpdate(u8 battler, struct Pokemon *mon, bool8 hpToo)
              && !(gBattleTypeFlags & BATTLE_TYPE_WALLY_TUTORIAL)
              && (!(gBattleTypeFlags & BATTLE_TYPE_TRAINER) || (gMpCoopBattle && gMpCoopWild))   // (co-op wild: a link "trainer" battle)
              && GetSetPokedexFlag(SpeciesToNationalPokedexNum(species), FLAG_GET_CAUGHT);
+    h->ownBall = h->caught && MP_OwnDexBall(SpeciesToNationalPokedexNum(species));
     if ((species == SPECIES_NIDORAN_F || species == SPECIES_NIDORAN_M) && StringCompare(h->name, gSpeciesNames[species]) == 0)
         h->gender = 0;
     if (hpToo)
@@ -1839,10 +1850,12 @@ static void BattleHuds(struct UiPack *p, u16 *frame)
                 | C_NOBG;   // (RED's and CRYSTAL's boxes stand on the background itself: WHITE BG ON makes the whole
                             // background plain, mp_battlepic.c, so no paper of their own, the user 2026-11-16)
         MP_FadeFit_FromPalette(&fit, OBJ_PLTT_ID(box->oam.paletteNum));
+        sOwnBallBox = h->ownBall;   // (the style's own caught ball, a second one behind it: DrawSpec)
         if ((MP_UiStyle_Active() == UISTYLE_RED || MP_UiStyle_Active() == UISTYLE_CRYSTAL) && !gMpConfig.uiNoWhiteBg)
             DrawSpecOutlined(p, sp, &d, frame, x, y, &fit);
         else
             DrawSpec(p, sp, &d, frame, x, y, &fit);
+        sOwnBallBox = FALSE;
     }
 }
 

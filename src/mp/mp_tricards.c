@@ -29,6 +29,7 @@
 #include "pokedex.h"
 #include "graphics.h"
 const u8 *MP_CaughtBallGfx(void);   // battle_interface.c
+const u8 *MP_CaughtBallGfxFor(u8 battler);   // (both balls when it counts for the own POKéDEX too: MY DEX BALL)
 #include "sprite.h"
 #include "string_util.h"
 #include "text.h"
@@ -563,7 +564,7 @@ void MP_TriCards_Composite(u16 *frame)
         {
             // the caught ball: the healthbox's own tile in its own palette (TryAddPokeballIconToHealthbox), its rows
             // 1-7 on the level's row and below, under the same fade as the card
-            const u8 *t = MP_CaughtBallGfx();
+            const u8 *t = MP_CaughtBallGfxFor(b);
             for (py = 0; py < 8; py++)
                 for (px = 0; px < 8; px++)
                 {

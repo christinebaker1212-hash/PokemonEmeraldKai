@@ -24,6 +24,7 @@
 #include "pokemon_summary_screen.h"
 #include "strings.h"
 #include "mp_uistyle.h"
+#include "mp_dexplus.h"   // Moemon Co-op: the own POKéDEX's second ball
 #include "constants/battle_anim.h"
 #include "constants/rgb.h"
 #include "constants/songs.h"
@@ -1996,6 +1997,38 @@ const u8 *MP_CaughtBallGfx(void)
     return GetHealthboxElementGfxPtr(HEALTHBOX_GFX_STATUS_BALL_CAUGHT);
 }
 
+// Moemon Co-op: the caught ball with a second one just behind it (1 right, 1 up), as the POKéDEX list shows one caught
+// for the player's own POKéDEX too on a server (MP_OwnDexBall; OPTIONS > CO-OP > MY DEX BALL)
+const u8 *MP_CaughtBallsGfx(void)
+{
+    static u8 sTile[32];
+    const u8 *t = GetHealthboxElementGfxPtr(HEALTHBOX_GFX_STATUS_BALL_CAUGHT);
+    int x, y;
+    memset(sTile, 0, sizeof(sTile));
+    for (y = 0; y < 8; y++)
+        for (x = 0; x < 8; x++)
+        {
+            u8 v = 0, back, front;
+            back = (x >= 1) ? (t[y * 4 + (x - 1) / 2] >> (((x - 1) & 1) * 4)) & 0xF : 0;   // (the ball 1 right)
+            front = (y >= 1) ? (t[(y - 1) * 4 + x / 2] >> ((x & 1) * 4)) & 0xF : 0;       // (the ball 1 down)
+            v = front ? front : back;
+            sTile[y * 4 + x / 2] |= v << ((x & 1) * 4);
+        }
+    return sTile;
+}
+
+// the battler's caught ball: both balls when it counts for the player's own POKéDEX too
+static const u8 *CaughtBallFor(u8 battler)
+{
+    u16 nat = SpeciesToNationalPokedexNum(GetMonData(&gEnemyParty[gBattlerPartyIndexes[battler]], MON_DATA_SPECIES));
+    return MP_OwnDexBall(nat) ? MP_CaughtBallsGfx() : GetHealthboxElementGfxPtr(HEALTHBOX_GFX_STATUS_BALL_CAUGHT);
+}
+
+const u8 *MP_CaughtBallGfxFor(u8 battler)
+{
+    return CaughtBallFor(battler);
+}
+
 static void TryAddPokeballIconToHealthbox(u8 healthboxSpriteId, bool8 noStatus)
 {
     u8 battler, healthBarSpriteId;
@@ -2014,7 +2047,7 @@ static void TryAddPokeballIconToHealthbox(u8 healthboxSpriteId, bool8 noStatus)
     healthBarSpriteId = gSprites[healthboxSpriteId].hMain_HealthBarSpriteId;
 
     if (noStatus)
-        CpuCopy32(GetHealthboxElementGfxPtr(HEALTHBOX_GFX_STATUS_BALL_CAUGHT), (void *)(OBJ_VRAM0 + (gSprites[healthBarSpriteId].oam.tileNum + 8) * TILE_SIZE_4BPP), 32);
+        CpuCopy32(CaughtBallFor(battler), (void *)(OBJ_VRAM0 + (gSprites[healthBarSpriteId].oam.tileNum + 8) * TILE_SIZE_4BPP), 32);
     else
         CpuFill32(0, (void *)(OBJ_VRAM0 + (gSprites[healthBarSpriteId].oam.tileNum + 8) * TILE_SIZE_4BPP), 32);
 }

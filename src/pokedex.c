@@ -3073,8 +3073,7 @@ static void CreateMonDexNum(u16 entryNum, u8 left, u8 top, u16 unused)
 // caught that one for their own POKéDEX too (the user, 2026-11-21: more reason to catch what a friend has)
 static void CreateCaughtBall(bool16 owned, u8 x, u8 y, u16 dexNum)
 {
-    if (owned && dexNum && dexNum <= NATIONAL_DEX_COUNT && MP_IsConnected() && MP_DexView_Shared()
-        && MP_DexOwn_Has(dexNum, TRUE))
+    if (owned && MP_DexView_Shared() && MP_OwnDexBall(dexNum))
     {
         FillWindowPixelRect(0, PIXEL_FILL(0), x * 8, y * 8, 8, 16);
         BlitBitmapRectToWindow(0, sCaughtBall_Gfx, 0, 2, 8, 16, x * 8 + 1, y * 8, 7, 14);   // (2 up, 1 right)
