@@ -4136,6 +4136,15 @@ a byte to struct ObjectEvent, which MinGW's bitfield layout grew to 40 bytes: Wi
   arrow behaviour in their tilesets: every room using those floor tiles then showed an exit arrow walking down, and
   the GAME CORNER's exit moved off its mat (2026-11-21: the 71 tiles back as Quetzal / FireRed have them, the script
   gone). Never give a shared metatile a warp behaviour for one map's sake; scenario kanto_floor_arrows.
+- No move tutors in KANTO (the user, 2026-11-21): FireRed's 15 (fix_move_tutors.py) give a TM once instead
+  (tools/quetzal_port/tutors_to_tms.py, run once with pret/pokered; flags FLAG_KANTO_GOT_TM_* 0x1564-0x1573, so a save
+  a tutor taught still gets the TM). RED's own TM givers in those places say RED's words: CELADON CITY TM131
+  SOFTBOILED, CELADON DEPT. STORE 3F TM113 COUNTER, CINNABAR LAB TM125 METRONOME, the COPYCAT TM121 MIMIC (POKé DOLL),
+  VIRIDIAN TM85 DREAM EATER, SILPH CO. 2F TM126 SELFDESTRUCT (RED's, not FireRed's THUNDER WAVE). FireRed's own keep
+  their words, the offer made a gift: ROUTE 4 TM93 MEGA PUNCH / TM100 MEGA KICK, PEWTER MUSEUM TM114 SEISMIC TOSS,
+  ROCK TUNNEL TM80 ROCK SLIDE, FUCHSIA TM90 SUBSTITUTE, VICTORY ROAD 2F TM105 DOUBLE-EDGE, FOUR ISLAND TM103 BODY
+  SLAM, SEVEN ISLAND TM75 SWORDS DANCE, MT. EMBER TM64 EXPLOSION (Kai's TM for each move, TM93 on RED's: gen_tm3.py).
+  CAPE BRINK's starter moves stay Quetzal's stand-in. Scenarios kanto_tutor_tms, kanto_move_people.
 - Script numbers the import can't translate (a number set into a var, then additem VAR): check with a scan of
   `setvar VAR_0x80xx, N` before item / species / move commands; OAK's 5 POKé BALLS and RED's gift were the two.
 - QzBufferLastReceivedMonForNickname reads gMpLastGivenMonPlace / Slot (pokemon.c GiveMonToPlayer), not VAR_RESULT.

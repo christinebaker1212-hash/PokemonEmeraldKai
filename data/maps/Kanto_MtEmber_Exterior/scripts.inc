@@ -165,24 +165,19 @@ Kanto_MtEmber_Exterior_EventScript_846C22C::
 
 @ Kanto_MtEmber_Exterior object 1 (local id 1, gfx 0x3F0C) at 29,45
 Kanto_MtEmber_Exterior_EventScript_8471C6F::
-	@ Moemon Kai: FireRed's EXPLOSION tutor (tools/quetzal_port/fix_move_tutors.py), on Kai's move tutors
+	@ Moemon Kai: FireRed's EXPLOSION tutor (tools/quetzal_port/fix_move_tutors.py),
+	@ now gives its TM (tools/quetzal_port/tutors_to_tms.py)
 	lock
 	faceplayer
-	goto_if_set 0x21EF, Kanto_MtEmber_Exterior_EventScript_8471C6F_Taught
-	msgbox Kanto_MtEmber_Exterior_EventScript_8471C6F_Teach, MSGBOX_YESNO
-	goto_if_eq VAR_RESULT, NO, Kanto_MtEmber_Exterior_EventScript_8471C6F_Declined
-	call MoveTutor_EventScript_CanOnlyBeLearnedOnce
-	goto_if_eq VAR_RESULT, NO, Kanto_MtEmber_Exterior_EventScript_8471C6F_Declined
-	msgbox Kanto_MtEmber_Exterior_EventScript_8471C6F_WhichMon, MSGBOX_DEFAULT
-	setvar VAR_0x8005, TUTOR_MOVE_EXPLOSION
-	call MoveTutor_EventScript_OpenPartyMenu
-	goto_if_eq VAR_RESULT, 0, Kanto_MtEmber_Exterior_EventScript_8471C6F_Declined
-	setflag 0x21EF
+	goto_if_set FLAG_KANTO_GOT_TM_EXPLOSION, Kanto_MtEmber_Exterior_EventScript_8471C6F_Taught
+	msgbox Kanto_MtEmber_Exterior_EventScript_8471C6F_Teach, MSGBOX_DEFAULT
+	giveitem ITEM_TM64
+	goto_if_eq VAR_RESULT, FALSE, Kanto_MtEmber_Exterior_EventScript_8471C6F_Declined
+	setflag FLAG_KANTO_GOT_TM_EXPLOSION
 	goto Kanto_MtEmber_Exterior_EventScript_8471C6F_Taught
 	end
 
-Kanto_MtEmber_Exterior_EventScript_8471C6F_Declined:
-	msgbox Kanto_MtEmber_Exterior_EventScript_8471C6F_DeclinedText, MSGBOX_DEFAULT
+Kanto_MtEmber_Exterior_EventScript_8471C6F_Declined::
 	release
 	end
 
@@ -196,17 +191,8 @@ Kanto_MtEmber_Exterior_EventScript_8471C6F_Teach:
 	.string "If this volcano were to erupt?\p"
 	.string "The explosion would be the end of\n"
 	.string "us. How terrifying is that?\p"
-	.string "While we're terrified, would you\n"
-	.string "like me to teach EXPLOSION?$"
-
-Kanto_MtEmber_Exterior_EventScript_8471C6F_DeclinedText:
-	.string "Yeah, you're right.\n"
-	.string "It is too terrifying.$"
-
-Kanto_MtEmber_Exterior_EventScript_8471C6F_WhichMon:
-	.string "You're terribly brave!\p"
-	.string "Which MOéMON should I teach\n"
-	.string "EXPLOSION?$"
+	.string "While we're terrified, take this\n"
+	.string "TM. It's EXPLOSION!$"
 
 Kanto_MtEmber_Exterior_EventScript_8471C6F_TaughtText:
 	.string "Using EXPLOSION while on this\n"

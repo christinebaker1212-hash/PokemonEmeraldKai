@@ -51,24 +51,19 @@ Kanto_Route4_EventScript_846BAED::
 
 @ Kanto_Route4 object 5 (local id 5, gfx 0x3EEB) at 47,3
 Kanto_Route4_EventScript_8471C78::
-	@ Moemon Kai: FireRed's MEGAPUNCH tutor (pokefirered data/scripts/move_tutors.inc), on Kai's move tutors
+	@ Moemon Kai: FireRed's MEGAPUNCH tutor (pokefirered data/scripts/move_tutors.inc),
+	@ now gives its TM (tools/quetzal_port/tutors_to_tms.py)
 	lock
 	faceplayer
-	goto_if_set 0x21DF, Kanto_Route4_EventScript_MegaPunchTaught
-	msgbox Kanto_Route4_Text_MegaPunchTeach, MSGBOX_YESNO
-	goto_if_eq VAR_RESULT, NO, Kanto_Route4_EventScript_MegaPunchDeclined
-	call MoveTutor_EventScript_CanOnlyBeLearnedOnce
-	goto_if_eq VAR_RESULT, NO, Kanto_Route4_EventScript_MegaPunchDeclined
-	msgbox Kanto_Route4_Text_MegaPunchWhichMon, MSGBOX_DEFAULT
-	setvar VAR_0x8005, TUTOR_MOVE_MEGA_PUNCH
-	call MoveTutor_EventScript_OpenPartyMenu
-	goto_if_eq VAR_RESULT, 0, Kanto_Route4_EventScript_MegaPunchDeclined
-	setflag 0x21DF
+	goto_if_set FLAG_KANTO_GOT_TM_MEGA_PUNCH, Kanto_Route4_EventScript_MegaPunchTaught
+	msgbox Kanto_Route4_Text_MegaPunchTeach, MSGBOX_DEFAULT
+	giveitem ITEM_TM93
+	goto_if_eq VAR_RESULT, FALSE, Kanto_Route4_EventScript_MegaPunchDeclined
+	setflag FLAG_KANTO_GOT_TM_MEGA_PUNCH
 	goto Kanto_Route4_EventScript_MegaPunchTaught
 	end
 
 Kanto_Route4_EventScript_MegaPunchDeclined::
-	msgbox Kanto_Route4_Text_MegaPunchDeclined, MSGBOX_DEFAULT
 	release
 	end
 
@@ -84,15 +79,7 @@ Kanto_Route4_Text_MegaPunchTeach:
 	.string "MEGA PUNCH is the ultimate attack!\l"
 	.string "You agree, yes?\p"
 	.string "Now!\n"
-	.string "Let me teach it to your MOéMON!$"
-
-Kanto_Route4_Text_MegaPunchDeclined:
-	.string "You'll be back when you understand\n"
-	.string "the worth of MEGA PUNCH.$"
-
-Kanto_Route4_Text_MegaPunchWhichMon:
-	.string "Fine!\n"
-	.string "Which MOéMON will learn it?$"
+	.string "Take this TM for your MOéMON!$"
 
 Kanto_Route4_Text_MegaPunchTaught:
 	.string "Now, we are comrades in the way of\n"
@@ -103,24 +90,19 @@ Kanto_Route4_Text_MegaPunchTaught:
 
 @ Kanto_Route4 object 6 (local id 6, gfx 0x3EEB) at 50,3
 Kanto_Route4_EventScript_8471C81::
-	@ Moemon Kai: FireRed's MEGAKICK tutor (pokefirered data/scripts/move_tutors.inc), on Kai's move tutors
+	@ Moemon Kai: FireRed's MEGAKICK tutor (pokefirered data/scripts/move_tutors.inc),
+	@ now gives its TM (tools/quetzal_port/tutors_to_tms.py)
 	lock
 	faceplayer
-	goto_if_set 0x21DC, Kanto_Route4_EventScript_MegaKickTaught
-	msgbox Kanto_Route4_Text_MegaKickTeach, MSGBOX_YESNO
-	goto_if_eq VAR_RESULT, NO, Kanto_Route4_EventScript_MegaKickDeclined
-	call MoveTutor_EventScript_CanOnlyBeLearnedOnce
-	goto_if_eq VAR_RESULT, NO, Kanto_Route4_EventScript_MegaKickDeclined
-	msgbox Kanto_Route4_Text_MegaKickWhichMon, MSGBOX_DEFAULT
-	setvar VAR_0x8005, TUTOR_MOVE_MEGA_KICK
-	call MoveTutor_EventScript_OpenPartyMenu
-	goto_if_eq VAR_RESULT, 0, Kanto_Route4_EventScript_MegaKickDeclined
-	setflag 0x21DC
+	goto_if_set FLAG_KANTO_GOT_TM_MEGA_KICK, Kanto_Route4_EventScript_MegaKickTaught
+	msgbox Kanto_Route4_Text_MegaKickTeach, MSGBOX_DEFAULT
+	giveitem ITEM_TM100
+	goto_if_eq VAR_RESULT, FALSE, Kanto_Route4_EventScript_MegaKickDeclined
+	setflag FLAG_KANTO_GOT_TM_MEGA_KICK
 	goto Kanto_Route4_EventScript_MegaKickTaught
 	end
 
 Kanto_Route4_EventScript_MegaKickDeclined::
-	msgbox Kanto_Route4_Text_MegaKickDeclined, MSGBOX_DEFAULT
 	release
 	end
 
@@ -136,15 +118,7 @@ Kanto_Route4_Text_MegaKickTeach:
 	.string "MEGA KICK is the ultimate attack!\l"
 	.string "Don't you agree?\p"
 	.string "Okay!\n"
-	.string "I'll teach it to your MOéMON!$"
-
-Kanto_Route4_Text_MegaKickDeclined:
-	.string "You'll come crawling back when you\n"
-	.string "realize the value of MEGA KICK.$"
-
-Kanto_Route4_Text_MegaKickWhichMon:
-	.string "All right!\n"
-	.string "Which MOéMON wants to learn it?$"
+	.string "Here's the TM for your MOéMON!$"
 
 Kanto_Route4_Text_MegaKickTaught:
 	.string "Now, we are soul mates in the way\n"

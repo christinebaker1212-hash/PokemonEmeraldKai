@@ -53,27 +53,19 @@ Kanto_SaffronCity_CopycatsHouse_2F_EventScript_841EC56::
 	msgbox Kanto_SaffronCity_CopycatsHouse_2F_Text_844AFFB, MSGBOX_SIGN
 	end
 
-@ Moemon Kai: FireRed's MIMIC tutor (pokefirered data/scripts/move_tutors.inc EventScript_MimicTutor): a POKé DOLL for
-@ her, MIMIC once, on Kai's move tutors (Quetzal's "move training from the team menu" stand-in is gone)
+@ Moemon Kai: RED's TM31 MIMIC (Kai's TM121) for a POKé DOLL, with RED's words (FireRed made her a MIMIC tutor:
+@ tools/quetzal_port/fix_move_tutors.py, then tools/quetzal_port/tutors_to_tms.py)
 Kanto_SaffronCity_CopycatsHouse_2F_EventScript_8471CC9::
-	goto_if_set 0x2221, Kanto_SaffronCity_CopycatsHouse_2F_EventScript_MimicTaught
-	msgbox Kanto_SaffronCity_CopycatsHouse_2F_Text_MimicTeach, MSGBOX_YESNO
-	goto_if_eq VAR_RESULT, NO, Kanto_SaffronCity_CopycatsHouse_2F_EventScript_MimicDeclined
-	call MoveTutor_EventScript_CanOnlyBeLearnedOnce
-	goto_if_eq VAR_RESULT, NO, Kanto_SaffronCity_CopycatsHouse_2F_EventScript_MimicDeclined
-	msgbox Kanto_SaffronCity_CopycatsHouse_2F_Text_MimicWhichMon, MSGBOX_DEFAULT
-	setvar VAR_0x8005, TUTOR_MOVE_MIMIC
-	call MoveTutor_EventScript_OpenPartyMenu
-	lock
-	faceplayer
-	goto_if_eq VAR_RESULT, 0, Kanto_SaffronCity_CopycatsHouse_2F_EventScript_MimicDeclined
+	goto_if_set FLAG_KANTO_GOT_TM_MIMIC, Kanto_SaffronCity_CopycatsHouse_2F_EventScript_MimicTaught
+	msgbox Kanto_SaffronCity_CopycatsHouse_2F_Text_MimicTeach, MSGBOX_DEFAULT
+	giveitem ITEM_TM121
+	goto_if_eq VAR_RESULT, FALSE, Kanto_SaffronCity_CopycatsHouse_2F_EventScript_MimicDeclined
 	removeitem ITEM_POKE_DOLL
-	setflag 0x2221
+	setflag FLAG_KANTO_GOT_TM_MIMIC
 	goto Kanto_SaffronCity_CopycatsHouse_2F_EventScript_MimicTaught
 	end
 
 Kanto_SaffronCity_CopycatsHouse_2F_EventScript_MimicDeclined::
-	msgbox Kanto_SaffronCity_CopycatsHouse_2F_Text_MimicDeclined, MSGBOX_DEFAULT
 	release
 	end
 
@@ -93,19 +85,9 @@ Kanto_SaffronCity_CopycatsHouse_2F_EventScript_MimicTaughtFemale::
 	return
 
 Kanto_SaffronCity_CopycatsHouse_2F_Text_MimicTeach::
-	.string "Oh wow!\n"
-	.string "A POKé DOLL!\p"
-	.string "For me?\n"
-	.string "Thank you!\p"
-	.string "You know what?\n"
-	.string "I can teach the move MIMIC.$"
-
-Kanto_SaffronCity_CopycatsHouse_2F_Text_MimicWhichMon::
-	.string "I really love MIMIC!\n"
-	.string "Who’s going to learn it?$"
-
-Kanto_SaffronCity_CopycatsHouse_2F_Text_MimicDeclined::
-	.string "Don’t you like MIMIC?$"
+	.string "Oh wow! A POKé DOLL!\p"
+	.string "For me? Thank you!\p"
+	.string "You can have this, then!$"
 
 Kanto_SaffronCity_CopycatsHouse_2F_Text_MimicTaughtMale::
 	.string "{PLAYER}: Hi!\n"

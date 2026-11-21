@@ -1,0 +1,37 @@
+pressuntil A field 5000
+wait 30
+mp setflag 0x210E
+mp warp 36,48,10,5
+wait 120
+press UP 4
+wait 20
+press A 4
+wait 60
+shot silph_words
+mash A 60 12
+wait 120
+mp hasitem 730
+mp unitem 730 1
+mp hasitem 730
+press A 4
+wait 30
+press A 4
+wait 30
+press A 4
+wait 30
+shot silph_after
+mash A 20 12
+wait 60
+mp hasitem 730
+mp warp 37,79,48,3
+wait 120
+shot route4
+press LEFT 4
+wait 20
+press A 4
+wait 40
+shot route4_words
+mash A 60 12
+wait 120
+mp hasitem 697
+quit

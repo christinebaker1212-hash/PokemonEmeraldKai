@@ -128,6 +128,23 @@
 #define FLAG_JOHTO_GOT_TM_SWEET_SCENT 0x154E   // ROUTE 34's ILEX FOREST gate teacher (EVENT_GOT_TM12_SWEET_SCENT)
 #define FLAG_JOHTO_ITEM_TM_SWIFT      0x154F   // UNION CAVE B1F's ball (EVENT_UNION_CAVE_B1F_TM_SWIFT)
 #define FLAG_JOHTO_ITEM_TM_SNORE      0x1550   // DARK CAVE's BLACKTHORN side ball (EVENT_DARK_CAVE_BLACKTHORN_ENTRANCE_TM_SNORE)
+// KANTO's tutors give TMs, as RED's people did (tools/quetzal_port/tutors_to_tms.py; the tutors' own "taught"
+// flags 0x21DF... are left as they were: a save taught by one still gets the TM once)
+#define FLAG_KANTO_GOT_TM_SOFT_BOILED      0x1564   // CELADON CITY's old man (RED's EVENT_GOT_TM41)
+#define FLAG_KANTO_GOT_TM_COUNTER          0x1565   // CELADON DEPT. STORE 3F (EVENT_GOT_TM18)
+#define FLAG_KANTO_GOT_TM_METRONOME        0x1566   // CINNABAR LAB (EVENT_GOT_TM35)
+#define FLAG_KANTO_GOT_TM_MIMIC            0x1567   // the COPYCAT, for a POKé DOLL (EVENT_GOT_TM31)
+#define FLAG_KANTO_GOT_TM_DREAM_EATER      0x1568   // VIRIDIAN CITY's sleepy man (EVENT_GOT_TM42)
+#define FLAG_KANTO_GOT_TM_SELF_DESTRUCT    0x156A   // SILPH CO. 2F's worker (EVENT_GOT_TM36)
+#define FLAG_KANTO_GOT_TM_MEGA_PUNCH       0x156B   // ROUTE 4 (FireRed's tutors from here on)
+#define FLAG_KANTO_GOT_TM_MEGA_KICK        0x156C   // ROUTE 4
+#define FLAG_KANTO_GOT_TM_SEISMIC_TOSS     0x156D   // PEWTER's MUSEUM
+#define FLAG_KANTO_GOT_TM_ROCK_SLIDE       0x156E   // ROCK TUNNEL B1F
+#define FLAG_KANTO_GOT_TM_SUBSTITUTE       0x156F   // FUCHSIA CITY
+#define FLAG_KANTO_GOT_TM_DOUBLE_EDGE      0x1570   // VICTORY ROAD 2F
+#define FLAG_KANTO_GOT_TM_BODY_SLAM        0x1571   // FOUR ISLAND
+#define FLAG_KANTO_GOT_TM_SWORDS_DANCE     0x1572   // SEVEN ISLAND
+#define FLAG_KANTO_GOT_TM_EXPLOSION        0x1573   // MT. EMBER
 #define FLAG_JOHTO_HIDE_GOLDENROD_TUTOR 0x153D // GOLDENROD's move tutor: Wednesdays and Saturdays after the LEAGUE (case 144)
 // Crystal's hidden items (case 131, tools/quetzal_port/gen_hidden_items.py)
 #define FLAG_JOHTO_HIDDEN_ITEM_1           0x1601   // AzaleaTown FULL_HEAL (EVENT_AZALEA_TOWN_HIDDEN_FULL_HEAL)

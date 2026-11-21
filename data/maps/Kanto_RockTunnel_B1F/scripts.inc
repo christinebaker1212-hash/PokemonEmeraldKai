@@ -66,24 +66,19 @@ Kanto_RockTunnel_B1F_EventScript_846C024::
 
 @ Kanto_RockTunnel_B1F object 9 (local id 9, gfx 0x3F5C) at 2,29
 Kanto_RockTunnel_B1F_EventScript_8471C66::
-	@ Moemon Kai: FireRed's ROCK SLIDE tutor (tools/quetzal_port/fix_move_tutors.py), on Kai's move tutors
+	@ Moemon Kai: FireRed's ROCK SLIDE tutor (tools/quetzal_port/fix_move_tutors.py),
+	@ now gives its TM (tools/quetzal_port/tutors_to_tms.py)
 	lock
 	faceplayer
-	goto_if_set 0x21EE, Kanto_RockTunnel_B1F_EventScript_8471C66_Taught
-	msgbox Kanto_RockTunnel_B1F_EventScript_8471C66_Teach, MSGBOX_YESNO
-	goto_if_eq VAR_RESULT, NO, Kanto_RockTunnel_B1F_EventScript_8471C66_Declined
-	call MoveTutor_EventScript_CanOnlyBeLearnedOnce
-	goto_if_eq VAR_RESULT, NO, Kanto_RockTunnel_B1F_EventScript_8471C66_Declined
-	msgbox Kanto_RockTunnel_B1F_EventScript_8471C66_WhichMon, MSGBOX_DEFAULT
-	setvar VAR_0x8005, TUTOR_MOVE_ROCK_SLIDE
-	call MoveTutor_EventScript_OpenPartyMenu
-	goto_if_eq VAR_RESULT, 0, Kanto_RockTunnel_B1F_EventScript_8471C66_Declined
-	setflag 0x21EE
+	goto_if_set FLAG_KANTO_GOT_TM_ROCK_SLIDE, Kanto_RockTunnel_B1F_EventScript_8471C66_Taught
+	msgbox Kanto_RockTunnel_B1F_EventScript_8471C66_Teach, MSGBOX_DEFAULT
+	giveitem ITEM_TM80
+	goto_if_eq VAR_RESULT, FALSE, Kanto_RockTunnel_B1F_EventScript_8471C66_Declined
+	setflag FLAG_KANTO_GOT_TM_ROCK_SLIDE
 	goto Kanto_RockTunnel_B1F_EventScript_8471C66_Taught
 	end
 
-Kanto_RockTunnel_B1F_EventScript_8471C66_Declined:
-	msgbox Kanto_RockTunnel_B1F_EventScript_8471C66_DeclinedText, MSGBOX_DEFAULT
+Kanto_RockTunnel_B1F_EventScript_8471C66_Declined::
 	release
 	end
 
@@ -100,14 +95,7 @@ Kanto_RockTunnel_B1F_EventScript_8471C66_Teach:
 	.string "That'd be, like, waaaaaaaaaaah!\n"
 	.string "Total terror!\p"
 	.string "You don't seem to be scared.\n"
-	.string "Want to try using ROCK SLIDE?$"
-
-Kanto_RockTunnel_B1F_EventScript_8471C66_DeclinedText:
-	.string "Oh, so you are scared after all.$"
-
-Kanto_RockTunnel_B1F_EventScript_8471C66_WhichMon:
-	.string "Which MOéMON should I teach\n"
-	.string "ROCK SLIDE?$"
+	.string "Here, try this TM: ROCK SLIDE!$"
 
 Kanto_RockTunnel_B1F_EventScript_8471C66_TaughtText:
 	.string "It might be scary to use it in this\n"

@@ -79,24 +79,19 @@ Kanto_SilphCo_2F_EventScript_8458DF8::
 	goto Quetzal_EventScript_8458FE6
 
 Kanto_SilphCo_2F_EventScript_8471C5D::
-	@ Moemon Kai: FireRed's THUNDER WAVE tutor (tools/quetzal_port/fix_move_tutors.py), on Kai's move tutors
+	@ Moemon Kai: FireRed's THUNDER WAVE tutor (tools/quetzal_port/fix_move_tutors.py),
+	@ now gives its TM (tools/quetzal_port/tutors_to_tms.py)
 	lock
 	faceplayer
-	goto_if_set 0x210E, Kanto_SilphCo_2F_EventScript_8471C5D_Taught
-	msgbox Kanto_SilphCo_2F_EventScript_8471C5D_Teach, MSGBOX_YESNO
-	goto_if_eq VAR_RESULT, NO, Kanto_SilphCo_2F_EventScript_8471C5D_Declined
-	call MoveTutor_EventScript_CanOnlyBeLearnedOnce
-	goto_if_eq VAR_RESULT, NO, Kanto_SilphCo_2F_EventScript_8471C5D_Declined
-	msgbox Kanto_SilphCo_2F_EventScript_8471C5D_WhichMon, MSGBOX_DEFAULT
-	setvar VAR_0x8005, TUTOR_MOVE_THUNDER_WAVE
-	call MoveTutor_EventScript_OpenPartyMenu
-	goto_if_eq VAR_RESULT, 0, Kanto_SilphCo_2F_EventScript_8471C5D_Declined
-	setflag 0x210E
+	goto_if_set FLAG_KANTO_GOT_TM_SELF_DESTRUCT, Kanto_SilphCo_2F_EventScript_8471C5D_Taught
+	msgbox Kanto_SilphCo_2F_EventScript_8471C5D_Teach, MSGBOX_DEFAULT
+	giveitem ITEM_TM126
+	goto_if_eq VAR_RESULT, FALSE, Kanto_SilphCo_2F_EventScript_8471C5D_Declined
+	setflag FLAG_KANTO_GOT_TM_SELF_DESTRUCT
 	goto Kanto_SilphCo_2F_EventScript_8471C5D_Taught
 	end
 
-Kanto_SilphCo_2F_EventScript_8471C5D_Declined:
-	msgbox Kanto_SilphCo_2F_EventScript_8471C5D_DeclinedText, MSGBOX_DEFAULT
+Kanto_SilphCo_2F_EventScript_8471C5D_Declined::
 	release
 	end
 
@@ -106,28 +101,16 @@ Kanto_SilphCo_2F_EventScript_8471C5D_Taught:
 	end
 
 Kanto_SilphCo_2F_EventScript_8471C5D_Teach:
-	.string "Eeek!\n"
-	.string "No! Stop! Help!\p"
-	.string "Oh, you're not with TEAM ROCKET.\n"
-	.string "I'm sorry, I thought…\p"
-	.string "Will you forgive me if I teach\n"
-	.string "you the THUNDER WAVE technique?$"
-
-Kanto_SilphCo_2F_EventScript_8471C5D_DeclinedText:
-	.string "Oh…\n"
-	.string "But THUNDER WAVE is convenient…$"
-
-Kanto_SilphCo_2F_EventScript_8471C5D_WhichMon:
-	.string "Which MOéMON should I teach\n"
-	.string "THUNDER WAVE?$"
+	.string "Eeek! No! Stop! Help!\p"
+	.string "Oh, you’re not with TEAM\n"
+	.string "ROCKET. I thought… I’m sorry.\l"
+	.string "Here, please take this!$"
 
 Kanto_SilphCo_2F_EventScript_8471C5D_TaughtText:
-	.string "THUNDER WAVE causes paralysis in\n"
-	.string "the target MOéMON.\p"
-	.string "A paralyzed MOéMON may be unable\n"
-	.string "to move in battle.\p"
-	.string "It's an ELECTRIC-type move, so it\n"
-	.string "won't work on some MOéMON.$"
+	.string "TM126 is SELFDESTRUCT!\p"
+	.string "It’s powerful, but the MOéMON\n"
+	.string "that uses it faints! Be\l"
+	.string "careful.$"
 
 Kanto_SilphCo_2F_Text_8425C43::
 	.string "Help!\n"

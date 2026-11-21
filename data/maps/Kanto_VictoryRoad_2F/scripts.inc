@@ -116,24 +116,19 @@ Kanto_VictoryRoad_2F_EventScript_846BEF9::
 
 @ Kanto_VictoryRoad_2F object 13 (local id 13, gfx 0x3EFD) at 40,9
 Kanto_VictoryRoad_2F_EventScript_8471C54::
-	@ Moemon Kai: FireRed's DOUBLE EDGE tutor (tools/quetzal_port/fix_move_tutors.py), on Kai's move tutors
+	@ Moemon Kai: FireRed's DOUBLE EDGE tutor (tools/quetzal_port/fix_move_tutors.py),
+	@ now gives its TM (tools/quetzal_port/tutors_to_tms.py)
 	lock
 	faceplayer
-	goto_if_set 0x210D, Kanto_VictoryRoad_2F_EventScript_8471C54_Taught
-	msgbox Kanto_VictoryRoad_2F_EventScript_8471C54_Teach, MSGBOX_YESNO
-	goto_if_eq VAR_RESULT, NO, Kanto_VictoryRoad_2F_EventScript_8471C54_Declined
-	call MoveTutor_EventScript_CanOnlyBeLearnedOnce
-	goto_if_eq VAR_RESULT, NO, Kanto_VictoryRoad_2F_EventScript_8471C54_Declined
-	msgbox Kanto_VictoryRoad_2F_EventScript_8471C54_WhichMon, MSGBOX_DEFAULT
-	setvar VAR_0x8005, TUTOR_MOVE_DOUBLE_EDGE
-	call MoveTutor_EventScript_OpenPartyMenu
-	goto_if_eq VAR_RESULT, 0, Kanto_VictoryRoad_2F_EventScript_8471C54_Declined
-	setflag 0x210D
+	goto_if_set FLAG_KANTO_GOT_TM_DOUBLE_EDGE, Kanto_VictoryRoad_2F_EventScript_8471C54_Taught
+	msgbox Kanto_VictoryRoad_2F_EventScript_8471C54_Teach, MSGBOX_DEFAULT
+	giveitem ITEM_TM105
+	goto_if_eq VAR_RESULT, FALSE, Kanto_VictoryRoad_2F_EventScript_8471C54_Declined
+	setflag FLAG_KANTO_GOT_TM_DOUBLE_EDGE
 	goto Kanto_VictoryRoad_2F_EventScript_8471C54_Taught
 	end
 
-Kanto_VictoryRoad_2F_EventScript_8471C54_Declined:
-	msgbox Kanto_VictoryRoad_2F_EventScript_8471C54_DeclinedText, MSGBOX_DEFAULT
+Kanto_VictoryRoad_2F_EventScript_8471C54_Declined::
 	release
 	end
 
@@ -147,17 +142,7 @@ Kanto_VictoryRoad_2F_EventScript_8471C54_Teach:
 	.string "having battled your way through\l"
 	.string "VICTORY ROAD so courageously.\p"
 	.string "In recognition of your feat,\n"
-	.string "I'll teach you DOUBLE-EDGE.\p"
-	.string "Would you like me to teach that\n"
-	.string "technique?$"
-
-Kanto_VictoryRoad_2F_EventScript_8471C54_DeclinedText:
-	.string "I'll teach you the technique\n"
-	.string "anytime.$"
-
-Kanto_VictoryRoad_2F_EventScript_8471C54_WhichMon:
-	.string "Which MOéMON should I teach\n"
-	.string "DOUBLE-EDGE?$"
+	.string "please take this TM: DOUBLE-EDGE!$"
 
 Kanto_VictoryRoad_2F_EventScript_8471C54_TaughtText:
 	.string "Keep that drive going for the\n"

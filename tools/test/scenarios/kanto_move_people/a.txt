@@ -14,8 +14,9 @@ wait 150
 press UP 10
 mash A 45 30
 wait 60
-mp getflag 0x2221
+mp getflag 0x1567
 mp checkitem 80
+mp hasitem 725
 mp moves 0
 mp moves 0 84
 mp additem 103 2
