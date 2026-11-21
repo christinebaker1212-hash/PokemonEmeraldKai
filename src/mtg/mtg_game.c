@@ -783,10 +783,16 @@ static int ContinueResolve(MtgDuel *d)
                                                         || strcmp(Mtg_Param(&gMtgAbilities[d->resAbility], "Defined"), "ParentTarget") == 0)))) {
             // the same again, at its next target (and a sub-ability on "Targeted" likewise: HOPE AND GLORY)
             int t = d->res.extra[d->resExtra++];
-            d->res.target.id = (uint16_t)t;
-            d->res.lkiPower = (int16_t)Mtg_Power(d, t);
-            d->res.lkiToughness = (int16_t)Mtg_Toughness(d, t);
-            d->res.lkiController = d->objs[t].controller;
+            if (t >= MTG_REM_PLAYER) {   // (a player)
+                d->res.target.kind = MTG_TGT_PLAYER;
+                d->res.target.id = (uint16_t)(t - MTG_REM_PLAYER);
+            } else {
+                d->res.target.kind = MTG_TGT_OBJ;
+                d->res.target.id = (uint16_t)t;
+                d->res.lkiPower = (int16_t)Mtg_Power(d, t);
+                d->res.lkiToughness = (int16_t)Mtg_Toughness(d, t);
+                d->res.lkiController = d->objs[t].controller;
+            }
             d->resStage = d->resPicks = 0;
             d->resCondAb = 0xFFFF;
             d->resChoice = -1;
@@ -794,6 +800,7 @@ static int ContinueResolve(MtgDuel *d)
         }
         if (d->res.extraCount && d->resExtra) {   // (back to the first target for what follows)
             d->res.target.id = d->resFirst;
+            d->res.target.kind = d->resFirstKind;
             d->resExtra = 0;
         }
         {
@@ -869,19 +876,28 @@ static int ResolveTop(MtgDuel *d)
     if (ab && ab->tgt && e.extraCount) {   // several targets: those still legal stay; it fizzles only with none
         MtgStackEntry t = e;
         uint16_t all[5];
+        uint8_t share[5];
         int n = 0, k, legal = 0;
-        all[n++] = e.target.id;
-        for (k = 0; k < e.extraCount; k++)
+        all[n] = e.target.kind == MTG_TGT_PLAYER ? MTG_REM_PLAYER + e.target.id : e.target.id;
+        share[n] = e.divide[0];
+        n++;
+        for (k = 0; k < e.extraCount; k++) {
+            share[n] = e.divide[k + 1];
             all[n++] = e.extra[k];
+        }
         e.extraCount = 0;
-        for (k = 0; k < n; k++) {
-            t.target.id = all[k];
+        for (k = 0; k < n; k++) {   // (each share stays with its target)
+            t.target.kind = all[k] >= MTG_REM_PLAYER ? MTG_TGT_PLAYER : MTG_TGT_OBJ;
+            t.target.id = (uint16_t)(all[k] >= MTG_REM_PLAYER ? all[k] - MTG_REM_PLAYER : all[k]);
             if (!TargetStillLegal(d, &t, ab))
                 continue;
-            if (!legal++)
-                e.target.id = all[k];
-            else
+            if (!legal++) {
+                e.target = t.target;
+                e.divide[0] = share[k];
+            } else {
+                e.divide[e.extraCount + 1] = share[k];
                 e.extra[e.extraCount++] = all[k];
+            }
         }
     }
     d->resExtra = 0;
@@ -898,6 +914,7 @@ static int ResolveTop(MtgDuel *d)
     }
     Mtg_Event(d, MTG_EV_RESOLVE, e.source, e.ability, e.isSpell);
     d->resFirst = e.target.id;
+    d->resFirstKind = e.target.kind;
     d->res = e;
     d->resolving = 1;
     d->resAbility = e.ability;
@@ -1475,7 +1492,39 @@ static int AskCost(MtgDuel *d)
         q->candidateCount = (uint8_t)TargetCandidates(d, q->candidates);
         if (!q->candidateCount) {
             d->tgtLeft = d->tgtOpt = 0;
+            return AskCost(d);   // (the division, if any)
+        }
+        return 1;
+    } else if (d->divPending && d->stackCount) {   // DividedAsYouChoose$: each target's share but the last's, asked
+        MtgStackEntry *e = &d->stack[d->stackCount - 1];
+        int count = 1 + e->extraCount, total, given = 0, k, ok;
+        MtgResolveCtx ctx;
+        ctx.e = e;
+        ctx.controller = e->controller;
+        ctx.source = e->source;
+        total = Mtg_Amount(d, &ctx, gMtgAbilities[e->ability].card,
+                           Mtg_Param(&gMtgAbilities[e->ability], "DividedAsYouChoose"), &ok);
+        for (k = 0; k < d->divIdx; k++)
+            given += e->divide[k];
+        if (count == 1 || d->divIdx >= count - 1 || total - given <= count - 1 - d->divIdx) {
+            for (k = d->divIdx; k < count && k < 5; k++)   // (the last one: the rest; none left to give: 1 each, as rules
+                e->divide[k] = (uint8_t)(k == count - 1 ? (total - given > 0 ? total - given : 0) : 1);   // demand)
+            d->divPending = 0;
             return 0;
+        }
+        {
+            uint16_t opts[MTG_MAX_OPTIONS];
+            int most = total - given - (count - 1 - d->divIdx), n = 0, who;
+            for (k = 1; k <= most && n < MTG_MAX_OPTIONS; k++)
+                opts[n++] = (uint16_t)k;
+            who = d->divIdx == 0 ? (e->target.kind == MTG_TGT_PLAYER ? MTG_REM_PLAYER + e->target.id : e->target.id)
+                                 : e->extra[d->divIdx - 1];
+            Mtg_AskOption(d, e->controller, MTG_OPT_NUMBER, opts, n);
+            d->query.forCost = 9;
+            d->query.source = e->source;
+            d->query.ability = e->ability;
+            d->query.candidates[0] = (uint16_t)who;
+            d->query.candidateCount = 1;
         }
         return 1;
     } else
@@ -1505,8 +1554,8 @@ static void PayCostPick(MtgDuel *d, int obj)
         if (e->extraCount < 4) {
             MtgTarget t;
             e->extra[e->extraCount++] = (uint16_t)obj;
-            t.kind = MTG_TGT_OBJ;
-            t.id = (uint16_t)obj;
+            t.kind = obj >= MTG_REM_PLAYER ? MTG_TGT_PLAYER : MTG_TGT_OBJ;
+            t.id = (uint16_t)(obj >= MTG_REM_PLAYER ? obj - MTG_REM_PLAYER : obj);
             TargetEvent(d, t, e->source, e->controller);
         }
         if (d->tgtLeft)
@@ -1716,9 +1765,20 @@ static void DoAction(MtgDuel *d, const MtgAction *a)
     } else if (a->ability != 0xFFFF)
         PayOtherCosts(d, p, &gMtgAbilities[a->ability], a->obj);
     d->tgtLeft = d->tgtOpt = 0;
-    if (a->ability != 0xFFFF && gMtgAbilities[a->ability].tgtMax > 1 && a->target.kind == MTG_TGT_OBJ) {
+    d->divPending = a->ability != 0xFFFF && Mtg_Param(&gMtgAbilities[a->ability], "DividedAsYouChoose") != NULL;
+    d->divIdx = 0;
+    if (a->ability != 0xFFFF && gMtgAbilities[a->ability].tgtMax > 1
+        && (a->target.kind == MTG_TGT_OBJ || a->target.kind == MTG_TGT_PLAYER)) {
         const MtgAbility *ab = &gMtgAbilities[a->ability];   // (its other targets: asked after the costs)
         int most = ab->tgtMax == MTG_TGT_X ? a->x : ab->tgtMax, least = ab->tgtMin == MTG_TGT_X ? a->x : ab->tgtMin;
+        if (ab->tgtMax == MTG_TGT_SVAR) {   // (MaxTgts: counted now)
+            MtgResolveCtx ctx;
+            int ok;
+            ctx.e = e;
+            ctx.controller = p;
+            ctx.source = a->obj;
+            most = Mtg_Amount(d, &ctx, ab->card, ab->tgtMaxSv, &ok);
+        }
         int need = least > 1 ? least : 1;
         if (most > 5)
             most = 5;   // (the first and four more)
@@ -1735,6 +1795,13 @@ static int TargetCandidates(const MtgDuel *d, uint16_t *out)
     const MtgStackEntry *e = &d->stack[d->stackCount - 1];
     const MtgAbility *ab = &gMtgAbilities[e->ability];
     int i, k, n = 0;
+    for (i = 0; i < MTG_PLAYERS && ab->tgtZone == MTG_ZONE_BATTLEFIELD && !ab->tgtStack; i++) {   // (players: "Any")
+        int taken = e->target.kind == MTG_TGT_PLAYER && e->target.id == i;
+        for (k = 0; k < e->extraCount; k++)
+            taken |= e->extra[k] == MTG_REM_PLAYER + i;
+        if (!taken && !d->players[i].lost && Mtg_ValidPlayer(d, i, ab->tgt, e->controller))
+            out[n++] = (uint16_t)(MTG_REM_PLAYER + i);
+    }
     for (i = 0; i < d->objCount && n < MTG_MAX_COMBAT; i++) {
         int taken = e->target.kind == MTG_TGT_OBJ && e->target.id == i;
         for (k = 0; k < e->extraCount; k++)
@@ -2398,6 +2465,14 @@ int Mtg_Answer(MtgDuel *d, const MtgAnswer *a)
         PushTrigger(d, NextPending(d), q->actions[a->action].target);
         break;
     case MTG_Q_CHOOSE:
+        if (q->forCost == 9) {   // a share of a divided amount, to the next target
+            if (a->card >= q->optCount || !d->stackCount)
+                return 0;
+            d->stack[d->stackCount - 1].divide[d->divIdx++] = (uint8_t)q->opts[a->card];
+            if (AskCost(d))
+                return 1;
+            break;
+        }
         if (q->forCost == 8) {   // the X of the action chosen: now it's done
             MtgAction act = d->pendAct;
             if (a->card >= q->optCount)
@@ -2413,7 +2488,9 @@ int Mtg_Answer(MtgDuel *d, const MtgAnswer *a)
         }
         if (q->forCost) {   // a cost's sacrifice / discard (or another target)
             if (q->forCost == 7 && a->card == q->candidateCount && !d->tgtLeft) {
-                d->tgtOpt = 0;   // (no more targets: it may stop here)
+                d->tgtOpt = 0;   // (no more targets: it may stop here; then its division, if any)
+                if (AskCost(d))
+                    return 1;
                 break;
             }
             if (a->card >= q->candidateCount)

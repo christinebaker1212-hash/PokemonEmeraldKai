@@ -1,0 +1,33 @@
+pressuntil A field 5000
+wait 60
+mp mtg starter 0
+mp mtg duel 1
+wait 30
+press A 2
+waitlog 3000 mtg: your move: priority
+wait 10
+mp mtg put 0 field Mountain
+mp mtg put 0 field Mountain
+mp mtg put 0 field Mountain
+mp mtg put 1 field Grizzly Bears
+mp mtg put 0 hand Arc Lightning
+wait 10
+mp mtg focus Arc Lightning
+press A 2
+wait 20
+rendershot dv_target
+press A 2
+waitlog 900 mtg: your move: a pick
+wait 20
+rendershot dv_more
+press A 2
+wait 20
+rendershot dv_more2
+press B 2
+wait 40
+wait 20
+rendershot dv_divide
+press A 2
+wait 240
+rendershot dv_after
+quit

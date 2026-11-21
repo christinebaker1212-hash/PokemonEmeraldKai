@@ -3153,6 +3153,47 @@ static void TestTapAllPerm(void)
         CHECK(Find(MTG_ACT_CAST, pyro, MTG_TGT_STACK, bolt) >= 0 || 1, "(targets any spell)");
         (void)ccl;
     }
+    {   // Arc Lightning: 3 damage divided: the bears and then the player picked, 2 to the bears, the 1 left to the player
+        int arc, bears, k;
+        MtgAnswer an;
+        const MtgQuery *q;
+        Table();
+        Lands(0, "Mountain", 3);
+        arc = Put(0, "Arc Lightning", MTG_ZONE_HAND);
+        bears = Put(1, "Grizzly Bears", MTG_ZONE_BATTLEFIELD);
+        k = Find(MTG_ACT_CAST, arc, MTG_TGT_OBJ, bears);
+        memset(&an, 0, sizeof(an));
+        an.action = (uint16_t)k;
+        Answer(&an);
+        q = Mtg_Query(&sD);
+        CHECK(q->kind == MTG_Q_CHOOSE && q->forCost == 7, "another target asked");
+        for (k = 0; k < q->candidateCount; k++)
+            if (q->candidates[k] == MTG_REM_PLAYER + 1)
+                break;
+        CHECK(k < q->candidateCount, "the player is a candidate");
+        memset(&an, 0, sizeof(an));
+        an.card = (uint16_t)k;
+        Answer(&an);
+        q = Mtg_Query(&sD);
+        if (q->forCost == 7) {   // (no third target)
+            memset(&an, 0, sizeof(an));
+            an.card = q->candidateCount;
+            Answer(&an);
+            q = Mtg_Query(&sD);
+        }
+        CHECK(q->kind == MTG_Q_CHOOSE && q->forCost == 9 && q->candidates[0] == bears && q->optCount == 2,
+              "how much to the bears: 1 or 2 (%d, %d)", q->forCost, q->optCount);
+        {
+            MtgAnswer ai;
+            MtgAi_Answer(&sD, &ai);
+            CHECK(q->opts[ai.card] == 2, "the AI would give the 2/2 exactly 2 (%d)", q->opts[ai.card]);
+        }
+        memset(&an, 0, sizeof(an));
+        an.card = 1;
+        Answer(&an);
+        PassBoth();
+        CHECK(Zone(bears) == MTG_ZONE_GRAVEYARD && sD.players[1].life == 19, "the bears dead, 1 to the player (%d)", sD.players[1].life);
+    }
     {   // Flailing Ogre: any player may activate its -1/-1 (the opponent, paying)
         int ogre, k, found = -1;
         const MtgQuery *q;

@@ -1001,13 +1001,21 @@ static int ChoiceOptions(const MtgDuel *d, const MtgResolveCtx *ctx, const MtgAb
     return 0;
 }
 
+// DividedAsYouChoose$: the share of the target it's at now (the first, then each extra target in turn); -1: not divided
+static int Divided(const MtgDuel *d, const MtgResolveCtx *ctx, const MtgAbility *ab)
+{
+    if (!Mtg_Param(ab, "DividedAsYouChoose") || !ab->tgt)
+        return -1;
+    return d->resExtra < 5 ? ctx->e->divide[d->resExtra] : 0;
+}
+
 static int Resolve(MtgDuel *d, MtgResolveCtx *ctx, const MtgAbility *ab)
 {
     Defined who;
     int i, ok, card = ab->card;
     switch (ab->api) {
     case MTG_API_DEAL_DAMAGE: {
-        int dmg = Mtg_Amount(d, ctx, card, Mtg_Param(ab, "NumDmg"), &ok);
+        int dmg = Divided(d, ctx, ab) >= 0 ? Divided(d, ctx, ab) : Mtg_Amount(d, ctx, card, Mtg_Param(ab, "NumDmg"), &ok);
         Targets(d, ctx, ab, DEF_CARD, &who);
         for (i = 0; i < who.n; i++)
             Mtg_DealDamage(d, ctx->source, who.t[i], dmg, 0);
@@ -1162,7 +1170,7 @@ static int Resolve(MtgDuel *d, MtgResolveCtx *ctx, const MtgAbility *ab)
         break;
     }
     case MTG_API_PREVENT_DAMAGE: {   // a shield on each: the next Amount$ damage to it this turn is prevented
-        int n = Mtg_Amount(d, ctx, card, Mtg_Param(ab, "Amount"), &ok);
+        int n = Divided(d, ctx, ab) >= 0 ? Divided(d, ctx, ab) : Mtg_Amount(d, ctx, card, Mtg_Param(ab, "Amount"), &ok);
         Targets(d, ctx, ab, DEF_CARD, &who);
         for (i = 0; i < who.n && n > 0; i++) {
             uint8_t *sh = who.t[i].kind == MTG_TGT_PLAYER ? &d->players[who.t[i].id].prevent
@@ -1523,7 +1531,7 @@ static int Resolve(MtgDuel *d, MtgResolveCtx *ctx, const MtgAbility *ab)
                            Mtg_Sacrifice);
     }
     case MTG_API_PUT_COUNTER: {   // CountersPutEffect: counters of a kind on each
-        int n = Mtg_Amount(d, ctx, card, Mtg_Param(ab, "CounterNum"), &ok);
+        int n = Divided(d, ctx, ab) >= 0 ? Divided(d, ctx, ab) : Mtg_Amount(d, ctx, card, Mtg_Param(ab, "CounterNum"), &ok);
         int kind = Mtg_CounterKind(Mtg_Param(ab, "CounterType"));
         Targets(d, ctx, ab, DEF_CARD, &who);
         for (i = 0; i < who.n; i++)
@@ -1969,7 +1977,7 @@ static const char *const sCommon[] = {
     "ConditionDefined", "ConditionPresent", "ConditionCompare", "ConditionCheckSVar", "ConditionSVarCompare",
     "ConditionDescription", "RememberChanged", "RememberMilled", "RememberDiscarded", "RememberDestroyed",
     "RememberSacrificed", "RememberDrawn", "RememberTokens", "RememberTargets", "ForgetOtherRemembered",
-    "UnlessScale", "Condition", "ETB", "Activator", "AtEOT",
+    "UnlessScale", "Condition", "ETB", "Activator", "AtEOT", "DividedAsYouChoose",
 };
 static const char *const sApiParams[MTG_API_COUNT][16] = {
     [MTG_API_DEAL_DAMAGE] = {"NumDmg"},
@@ -2066,19 +2074,29 @@ int Mtg_ApiParamsKnown(const MtgAbility *ab, const char **why)
     }
     if (Mtg_Param(ab, "TargetMin") || Mtg_Param(ab, "TargetMax")) {   // several targets: objects, spells and abilities
         const char *mn = Mtg_Param(ab, "TargetMin"), *mx = Mtg_Param(ab, "TargetMax");
-        int lo = mn && mn[0] >= '0' && mn[0] <= '4' && !mn[1] ? mn[0] - '0' : mn && strcmp(mn, "X") == 0 ? 9 : -1;
-        int hi = mx && mx[0] >= '1' && mx[0] <= '4' && !mx[1] ? mx[0] - '0' : mx && strcmp(mx, "X") == 0 ? 9 : -1;   // (9: X)
+        int lo = mn && mn[0] >= '0' && mn[0] <= '9' && !mn[1] ? mn[0] - '0' : mn && strcmp(mn, "X") == 0 ? 9 : -1;
+        int hi = mx && mx[0] >= '1' && mx[0] <= '9' && !mx[1] ? mx[0] - '0' : mx && strcmp(mx, "X") == 0 ? 9
+               : ab->tgtMax == MTG_TGT_SVAR && AmountKnown(ab, "TargetMax", 1) ? 9 : -1;   // (9: X, or counted)
         const char *t = Mtg_Param(ab, "ValidTgts");
         static const uint8_t sApis[] = {MTG_API_PUMP, MTG_API_DESTROY, MTG_API_CHANGE_ZONE, MTG_API_TAP, MTG_API_UNTAP,
-                                        MTG_API_DEAL_DAMAGE};
+                                        MTG_API_DEAL_DAMAGE, MTG_API_PREVENT_DAMAGE, MTG_API_PUT_COUNTER};
         unsigned k, apiOk = 0;
+        int players = t && (strstr(t, "Player") || strcmp(t, "Any") == 0 || strstr(t, "Opponent"));
         for (k = 0; k < sizeof(sApis); k++)
             apiOk |= ab->api == sApis[k];
-        if (lo < 0 || hi < 0 || hi < lo || !t || strstr(t, "Player") || strcmp(t, "Any") == 0 || Mtg_Param(ab, "TargetType")
-            || (ab->kind != MTG_AB_SPELL && ab->kind != MTG_AB_ACTIVATED) || !apiOk) {
+        if (mn && strcmp(mn, "X") && lo < 0 && Mtg_Svar(ab->card, mn))
+            lo = 0;   // ("TargetMin$ MinTgts": at least one here)
+        if (lo < 0 || hi < 0 || hi < lo || !t || (players && ab->api != MTG_API_DEAL_DAMAGE && ab->api != MTG_API_PREVENT_DAMAGE)
+            || Mtg_Param(ab, "TargetType") || (ab->kind != MTG_AB_SPELL && ab->kind != MTG_AB_ACTIVATED) || !apiOk) {
             *why = "TargetMin";
             return 0;
         }
+    }
+    if (Mtg_Param(ab, "DividedAsYouChoose")   // (divided among its targets as it's cast: mtg_game.c AskCost)
+        && (!Mtg_Param(ab, "TargetMax") || !AmountKnown(ab, "DividedAsYouChoose", 1) || !ab->tgt
+            || (ab->api != MTG_API_DEAL_DAMAGE && ab->api != MTG_API_PREVENT_DAMAGE && ab->api != MTG_API_PUT_COUNTER))) {
+        *why = "DividedAsYouChoose";
+        return 0;
     }
     if (!ConditionKnown(ab)) {
         *why = "Condition";

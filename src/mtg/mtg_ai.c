@@ -708,7 +708,12 @@ static void ChooseOption(const MtgDuel *d, const MtgQuery *q, MtgAnswer *out)
         case MTG_OPT_PLAYER:   // (Curse, MostCardsInHand...: the opponent when it may)
             v = o != me;
             break;
-        case MTG_OPT_NUMBER:   // the least for what costs it, else the most (an X: the most it can pay)
+        case MTG_OPT_NUMBER:   // the least for what costs it, else the most (an X: the most it can pay; a division: just
+            if (q->forCost == 9 && q->candidates[0] < MTG_REM_PLAYER) {   // enough to finish a creature off)
+                int t = q->candidates[0], need = Mtg_Toughness(d, t) - d->objs[t].damage;
+                v = o == (need < 1 ? 1 : need) ? 1000 : o < need ? o : -o;
+                break;
+            }
             v = q->forCost != 8 && logic && (strcmp(logic, "Min") == 0 || strstr(logic, "Lowest") || strcmp(logic, "LoseLife") == 0)
                 ? -o : o;
             break;
@@ -781,11 +786,20 @@ static void Choose(const MtgDuel *d, const MtgQuery *q, MtgAnswer *out)
     if (q->forCost == 7) {   // another target: the opponent's best for what harms, its own best for what helps
         int helps = Helps(&gMtgAbilities[q->ability]), bestS = -1000;
         for (i = 0; i < q->candidateCount; i++) {
-            const MtgObj *o = &d->objs[q->candidates[i]];
-            int mine = (o->zone == MTG_ZONE_BATTLEFIELD ? o->controller : o->owner) == q->player;
-            int worth = o->zone == MTG_ZONE_BATTLEFIELD && (Mtg_ObjTypes(d, q->candidates[i]) & MTG_T_CREATURE)
+            int c = q->candidates[i], mine, worth, sc;
+            const MtgObj *o;
+            if (c >= MTG_REM_PLAYER) {   // (a player: worth a little, the creatures first)
+                mine = c - MTG_REM_PLAYER == q->player;
+                sc = mine == helps ? 100 + 3 : -3;
+                if (sc > bestS)
+                    bestS = sc, best = i;
+                continue;
+            }
+            o = &d->objs[c];
+            mine = (o->zone == MTG_ZONE_BATTLEFIELD ? o->controller : o->owner) == q->player;
+            worth = o->zone == MTG_ZONE_BATTLEFIELD && (Mtg_ObjTypes(d, q->candidates[i]) & MTG_T_CREATURE)
                       ? Value(d, q->candidates[i]) : Mtg_ManaCostTotal(&Mtg_Card(o->def)->cost);
-            int sc = mine == helps ? 100 + worth : -worth;
+            sc = mine == helps ? 100 + worth : -worth;
             if (sc > bestS)
                 bestS = sc, best = i;
         }

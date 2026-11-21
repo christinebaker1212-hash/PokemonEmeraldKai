@@ -1,0 +1,7 @@
+# MAGIC's divided damage on the table: ARC LIGHTNING's first target, then "another target?" (players are candidates,
+# their life plate lit), B to stop, then "how much to ...?" (a list of shares), then it resolves.
+# Shots dv_target, dv_more, dv_more2, dv_divide, dv_after.
+MODE=1
+TMO=240
+EXPECT_A=("mtg: you: cast Arc Lightning" "mtg: you: no more targets" "mtg: you: chose 1")
+UNEXPECT_A=("[crash]" "mtg: can't put")

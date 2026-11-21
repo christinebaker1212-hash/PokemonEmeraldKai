@@ -158,6 +158,16 @@ static void Name(char *out, unsigned cap, int obj)
     Mtg_PlainText(out, cap, Def(obj)->name);
 }
 
+// a pick's candidate: a card, or a player (MTG_REM_PLAYER + the player: another target of "any target")
+static Rect CandRect(int c);
+static void CandName(char *out, unsigned cap, int c)
+{
+    if (c >= MTG_REM_PLAYER)
+        snprintf(out, cap, "%s", c - MTG_REM_PLAYER == ME ? "YOU" : B.opp);
+    else
+        Name(out, cap, c);
+}
+
 static const char *Who(int player)
 {
     return player == ME ? "YOU" : B.opp;
@@ -301,6 +311,15 @@ static Rect PileRect(int pile)
 }
 static const Rect sOppHand = {1, 61, 30, 27, 1};
 static Rect LifeRect(int player) { return player == ME ? MakeRect(1, 126, 30, 25) : MakeRect(209, 1, 30, 25); }
+static Rect CandRect(int c)
+{
+    if (c >= MTG_REM_PLAYER) {
+        Rect r = LifeRect(c - MTG_REM_PLAYER);
+        r.on = 1;
+        return r;
+    }
+    return B.rect[c];
+}
 
 static float Ease(float t)
 {
@@ -1524,6 +1543,11 @@ static const char *OptionText(void)
     Name(name, sizeof(name), q->source);
     if (q->forCost == 8)
         snprintf(sOptionText, sizeof(sOptionText), "%s: choose X.  {A}", name);
+    else if (q->forCost == 9) {   // a share of a divided amount
+        char who[64];
+        CandName(who, sizeof(who), q->candidates[0]);
+        snprintf(sOptionText, sizeof(sOptionText), "%s: how much to %s?  {A}", name, who);
+    }
     else if (q->optKind == MTG_OPT_TYPE && q->ability != 0xFFFF && Mtg_Param(&gMtgAbilities[q->ability], "Type")
         && strstr(Mtg_Param(&gMtgAbilities[q->ability], "Type"), "Land"))
         snprintf(sOptionText, sizeof(sOptionText), "%s: choose a land type.  {A}", name);
@@ -1696,16 +1720,16 @@ void MtgBoard_Draw(void)
     if (B.mode == MODE_PICK) {   // the permanents that can be picked: lit; the cursor on one
         const MtgQuery *q = &B.duel.query;
         for (i = 0; i < q->candidateCount; i++) {
-            Rect a = B.rect[q->candidates[i]];
+            Rect a = CandRect(q->candidates[i]);
             if (!a.on)
                 continue;
             G_RoundFill(a.x - 1, a.y - 1, a.w + 2, a.h + 2, 0xf8a0a0, 50 + (unsigned)(40 * sinf(B.frame * 0.15f)));
             G_RoundFrame(a.x - 2, a.y - 2, a.w + 4, a.h + 4, 0xf08070, 255);
         }
-        if (B.targetCursor < q->candidateCount && B.rect[q->candidates[B.targetCursor]].on) {
-            Rect t = B.rect[q->candidates[B.targetCursor]];
+        if (B.targetCursor < q->candidateCount && CandRect(q->candidates[B.targetCursor]).on) {
+            Rect t = CandRect(q->candidates[B.targetCursor]);
             G_Focus(t.x, t.y, t.w, t.h, 0xf8f070, B.frame);
-        } else if (B.targetCursor < q->candidateCount
+        } else if (B.targetCursor < q->candidateCount && q->candidates[B.targetCursor] < MTG_REM_PLAYER
                    && B.duel.objs[q->candidates[B.targetCursor]].zone == MTG_ZONE_LIBRARY) {   // a search: the finds fanned
             int k;
             char count[16];
@@ -1720,7 +1744,7 @@ void MtgBoard_Draw(void)
             G_Focus(120 - 26, 66 - 36, 52, 72, 0xf8f070, B.frame);
             snprintf(count, sizeof(count), "%d / %d", B.targetCursor + 1, q->candidateCount);
             G_TextAlign(120, 106, TA_CENTER, 0xffffff, G_NO_SHADOW, count, TF_SMALL);
-        } else if (B.targetCursor < q->candidateCount
+        } else if (B.targetCursor < q->candidateCount && q->candidates[B.targetCursor] < MTG_REM_PLAYER
                    && B.duel.objs[q->candidates[B.targetCursor]].zone == MTG_ZONE_GRAVEYARD) {   // (its pile)
             int obj = q->candidates[B.targetCursor];
             Rect t = PileRect(B.duel.objs[obj].owner == ME ? PILE_MY_GRAVE : PILE_OPP_GRAVE);
@@ -1797,7 +1821,7 @@ void MtgBoard_Draw(void)
     case MODE_PICK: {
         char line[120], name[64];
         const MtgQuery *q = &B.duel.query;
-        Name(name, sizeof(name), q->candidates[B.targetCursor]);
+        CandName(name, sizeof(name), q->candidates[B.targetCursor]);
         if (q->forCost == 7 && !B.duel.tgtLeft)   // (another target, or it may stop)
             snprintf(line, sizeof(line), "Another target?  %s  {A} OK  {B} DONE", name);
         else
@@ -3143,7 +3167,7 @@ static void HumanChoose(unsigned pressed)
     MtgAnswer a;
     memset(&a, 0, sizeof(a));
     if (q->choice == MTG_CHOICE_PICK) {
-        int inHand = q->candidateCount && B.duel.objs[q->candidates[0]].zone == MTG_ZONE_HAND;
+        int inHand = q->candidateCount && q->candidates[0] < MTG_REM_PLAYER && B.duel.objs[q->candidates[0]].zone == MTG_ZONE_HAND;
         YourMove("a pick");
         if (inHand) {   // (a discard of the player's choice: as at the end of the turn, in the hand)
             if (B.mode != MODE_DISCARD) {
@@ -3171,7 +3195,7 @@ static void HumanChoose(unsigned pressed)
         }
         if (pressed & KEY_A) {
             char name[64];
-            Name(name, sizeof(name), q->candidates[B.targetCursor]);
+            CandName(name, sizeof(name), q->candidates[B.targetCursor]);
             MPNet_Log("mtg: you: picked %s", name);
             a.card = (uint8_t)B.targetCursor;
             PlaySE(SE_SELECT);
@@ -3367,7 +3391,7 @@ int MtgBoard_Step(unsigned pressed, unsigned keys)
         if (B.mode == MODE_CHOOSE || B.mode == MODE_OPTION)
             f = q->source;
         else if (B.mode == MODE_PICK)
-            f = q->candidates[B.targetCursor];
+            f = q->candidates[B.targetCursor] < MTG_REM_PLAYER ? q->candidates[B.targetCursor] : MTG_NO_OBJ;
         else if (B.mode == MODE_TARGET) {
             const MtgAction *a = &q->actions[B.targets[B.targetCursor]];
             f = a->target.kind == MTG_TGT_OBJ || a->target.kind == MTG_TGT_STACK ? a->target.id : MTG_NO_OBJ;

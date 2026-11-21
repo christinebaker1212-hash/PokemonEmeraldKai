@@ -108,6 +108,7 @@ int Mtg_CostCandidates(const MtgDuel *d, int player, const MtgCost *c, int sac, 
 int Mtg_CostMaxX(const MtgDuel *d, int player, const MtgCost *c, int source);   // its X part's most (the life, the cards...)
 
 #define MTG_TGT_X 0xFF
+#define MTG_TGT_SVAR 0xFE
 typedef struct {
     uint8_t kind, api;
     uint16_t card;                  // the card it belongs to
@@ -122,7 +123,8 @@ typedef struct {
     uint16_t charmOf;               // a Charm's mode: the charm (0xFFFF: none)
     uint8_t fromHand;               // ActivationZone$ Hand: activated from its owner's hand (Cycling)
     uint8_t manaPain;               // a mana ability's "CARDNAME deals n damage to you" (SubAbility$ DealDamage, Defined$ You)
-    uint8_t tgtMin, tgtMax;         // TargetMin$ / TargetMax$ (objects only; 1 / 1 without them; MTG_TGT_X: X of them)
+    uint8_t tgtMin, tgtMax;         // TargetMin$ / TargetMax$ (1 / 1 without them; MTG_TGT_X: X of them; MTG_TGT_SVAR: an
+    const char *tgtMaxSv;           // SVar counted as it's cast, tgtMaxSv)
     uint16_t unless;                // UnlessCost$ that isn't only mana (Return<1/Land>, Discard<1/Random>, DamageYou<5>...):
                                     // gMtgUnlessCosts[unless - 1] (0: none, or a mana one: Mtg_Param)
     uint16_t delayed;               // DelayedTrigger: its trigger (gMtgTriggers[delayed - 1]), built from its own params

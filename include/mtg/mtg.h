@@ -193,8 +193,9 @@ typedef struct {
     uint16_t ability;             // ability table index
     int16_t x;
     MtgTarget target;
-    uint8_t extraCount;           // TargetMin$ / TargetMax$: its other targets (objects, as target's zone)
-    uint16_t extra[4];
+    uint8_t extraCount;           // TargetMin$ / TargetMax$: its other targets (objects, as target's zone; a player as
+    uint16_t extra[4];            // MTG_REM_PLAYER + the player)
+    uint8_t divide[5];            // DividedAsYouChoose$: each target's share (the first, then extra[]'s), as it was cast
     // last known information about the target as it resolves (Forge's LKI copies)
     int16_t lkiPower, lkiToughness;
     int16_t sacPower;             // the power of what its cost sacrificed (Sacrificed$CardPower: FLING)
@@ -303,7 +304,8 @@ typedef struct {
     uint8_t choice;
     MtgManaCost pay;
     uint8_t forCost;                                 // CHOOSE's PICK for a cost: 1 sacrifice, 2 discard, 3 exile from
-                                                     // (8: CHOOSE's OPTION of X for the action chosen: MtgDuel.pendAct)
+                                                     // (8: CHOOSE's OPTION of X for the action chosen: MtgDuel.pendAct;
+                                                     // 9: how much of a DividedAsYouChoose$ to candidates[0])
                                                      // the hand, 4 return to the hand, 5 tap, 6 exile from the
                                                      // graveyard (MTG_COSTK_* + 1); 7 another target (a spell's
                                                      // TargetMax$: answer candidateCount to stop when it may)
@@ -401,6 +403,8 @@ typedef struct MtgDuel {
     uint8_t costSac, costDiscard, costPlayer;
     uint16_t costSource, costAbility;
     uint8_t costExile, costReturn, costTap, costExileGrave;
+    uint8_t divPending, divIdx;                      // the casting spell's division still to ask (DividedAsYouChoose$) ...
+    uint8_t resFirstKind;                            // (the first target's kind, back after its extra targets)
     uint8_t tgtLeft, tgtOpt;                         // the casting spell's other targets still to pick: needed, may
     uint8_t resExtra;                                // its extra targets resolved so far
     uint16_t resFirst;                               // ... and its first target (each targeting part starts there)          // ... cards to exile from the hand, permanents to return, to tap

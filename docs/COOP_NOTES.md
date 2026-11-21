@@ -8699,3 +8699,13 @@ res/moves/chatter/anim.s).
 - Valid (2026-11-21): EffectSource, DefenderCtrl, attackedThisTurn (MtgObj.attackedTurn), faceDown, power / toughness
   against X, the Spell type (a card on the stack: "Spell.Blue"). X in a property is the source card's SVar X when it's
   counted (Ensnaring Bridge's cards in hand: mtg_valid.c ValidXOf), else the paid X. Playable: 3473 -> 3493.
+
+## MAGIC: players among several targets, divided amounts (2026-11-21)
+- A spell's other targets (TargetMin$ / TargetMax$, now up to 9 or a counted SVar: MTG_TGT_SVAR) may be players for
+  DealDamage / PreventDamage ("any target"): MtgStackEntry.extra holds MTG_REM_PLAYER + the player; the table lights the
+  life plate (mtg_board.c CandRect / CandName), the AI weighs them below creatures.
+- DividedAsYouChoose$ (DealDamage, PreventDamage, PutCounter): once the targets are picked, the caster gives each but
+  the last a share (query CHOOSE OPTION NUMBER, forCost 9, candidates[0] the target; the last gets the rest): MtgStackEntry
+  .divide, kept with its target if others become illegal (ResolveTop), used as the effect reaches it (mtg_effects.c
+  Divided). The AI gives a creature exactly what finishes it.
+- Playable: 3493 -> 3509. Tests: test_rules.c (Arc Lightning); scenario mtg_divide.

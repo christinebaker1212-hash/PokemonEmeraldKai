@@ -951,6 +951,20 @@
 "number": "61",
 "set": "4ed"
 },
+"Arc Lightning": {
+"artist": "Andrew Goldhawk",
+"file": "usg_174",
+"frame": "1997",
+"number": "174",
+"set": "usg"
+},
+"Arc Mage": {
+"artist": "Terese Nielsen",
+"file": "nem_77",
+"frame": "1997",
+"number": "77",
+"set": "nem"
+},
 "Arcades Sabboth": {
 "artist": "Edward P. Beard, Jr.",
 "file": "bchr_71",
@@ -2911,6 +2925,13 @@
 "number": "29",
 "set": "uds"
 },
+"Builder's Bane": {
+"artist": "Charles Gillespie",
+"file": "mir_160",
+"frame": "1997",
+"number": "160",
+"set": "mir"
+},
 "Bull Elephant": {
 "artist": "Steve White",
 "file": "mgb_9",
@@ -4366,6 +4387,13 @@
 "frame": "1997",
 "number": "62",
 "set": "scg"
+},
+"Contagion": {
+"artist": "Mike Raabe",
+"file": "all_45",
+"frame": "1993",
+"number": "45",
+"set": "all"
 },
 "Contemplation": {
 "artist": "Brom",
@@ -6544,6 +6572,13 @@
 "number": "242",
 "set": "4ed"
 },
+"Elven Rite": {
+"artist": "Jeff Miracola",
+"file": "sth_106",
+"frame": "1997",
+"number": "106",
+"set": "sth"
+},
 "Elven Warhounds": {
 "artist": "Kev Walker",
 "file": "tmp_225",
@@ -6684,6 +6719,13 @@
 "number": "262",
 "set": "mir"
 },
+"Embolden": {
+"artist": "Rebecca Guay",
+"file": "ody_22",
+"frame": "1997",
+"number": "22",
+"set": "ody"
+},
 "Emerald Charm": {
 "artist": "Greg Spalenka",
 "file": "vis_106",
@@ -6767,6 +6809,13 @@
 "frame": "1997",
 "number": "285",
 "set": "tmp"
+},
+"Energy Arc": {
+"artist": "Terese Nielsen",
+"file": "all_106",
+"frame": "1993",
+"number": "106",
+"set": "all"
 },
 "Energy Bolt": {
 "artist": "Scott Kirschner",
@@ -7594,6 +7643,13 @@
 "number": "187",
 "set": "usg"
 },
+"Fire Covenant": {
+"artist": "Dan Frazier",
+"file": "ice_289",
+"frame": "1993",
+"number": "289",
+"set": "ice"
+},
 "Fire Diamond": {
 "artist": "Richard Thomas",
 "file": "mir_302",
@@ -7754,6 +7810,13 @@
 "frame": "1993",
 "number": "184",
 "set": "ice"
+},
+"Flameshot": {
+"artist": "Mark Brill",
+"file": "pcy_90",
+"frame": "1997",
+"number": "90",
+"set": "pcy"
 },
 "Flametongue Kavu": {
 "artist": "Pete Venters",
@@ -15630,6 +15693,13 @@
 "number": "214",
 "set": "ice"
 },
+"Pyrokinesis": {
+"artist": "Ron Spencer",
+"file": "all_78",
+"frame": "1993",
+"number": "78",
+"set": "all"
+},
 "Pyromania": {
 "artist": "Christopher Moeller",
 "file": "tor_112",
@@ -15643,6 +15713,13 @@
 "frame": "1997",
 "number": "100",
 "set": "scg"
+},
+"Pyrotechnics": {
+"artist": "Anson Maddocks",
+"file": "4ed_217",
+"frame": "1993",
+"number": "217",
+"set": "4ed"
 },
 "Python": {
 "artist": "Steve White",
@@ -16351,6 +16428,13 @@
 "number": "14",
 "set": "uds"
 },
+"Remedy": {
+"artist": "Zina Saunders",
+"file": "vis_17",
+"frame": "1997",
+"number": "17",
+"set": "vis"
+},
 "Reminisce": {
 "artist": "Bradley Williams",
 "file": "ons_105",
@@ -16826,6 +16910,13 @@
 "frame": "1997",
 "number": "279",
 "set": "mir"
+},
+"Rock Slide": {
+"artist": "Mike Kerr",
+"file": "vis_92",
+"frame": "1997",
+"number": "92",
+"set": "vis"
 },
 "Rockshard Elemental": {
 "artist": "Anthony S. Waters",
@@ -18450,6 +18541,13 @@
 "frame": "1997",
 "number": "96",
 "set": "usg"
+},
+"Shower of Coals": {
+"artist": "Matt Cavotta",
+"file": "ody_221",
+"frame": "1997",
+"number": "221",
+"set": "ody"
 },
 "Shriek of Dread": {
 "artist": "Nelson DeCastro",
@@ -21342,6 +21440,13 @@
 "number": "134",
 "set": "jud"
 },
+"Thrive": {
+"artist": "Mike Ploog",
+"file": "pcy_129",
+"frame": "1997",
+"number": "129",
+"set": "pcy"
+},
 "Throne of Bone": {
 "artist": "Anson Maddocks",
 "file": "4ed_353",
@@ -23014,6 +23119,13 @@
 "frame": "1997",
 "number": "56",
 "set": "pls"
+},
+"Volley of Boulders": {
+"artist": "Tony Szczudlo",
+"file": "ody_227",
+"frame": "1997",
+"number": "227",
+"set": "ody"
 },
 "Volrath's Gardens": {
 "artist": "Rob Alexander",
