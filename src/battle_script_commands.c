@@ -11,6 +11,7 @@ u16 MP_RegionVictorySong(u16 song);   // Moemon Kai (pokemon.c)
 #include "battle_gimmick.h"
 #include "mp_region.h"   // Moemon Kai: Gen 5-9
 #include "mp.h"
+#include "mp_dexplus.h"   // Moemon Co-op: the player's own POKéDEX
 #include "mp_uistyle.h"
 #include "mp/mp_join.h"
 #include "battle.h"
@@ -11345,7 +11346,19 @@ static void Cmd_trysetcaughtmondexflags(void)
     u16 species = GetMonData(&gEnemyParty[gBattlerPartyIndexes[MpCatchBattler()]], MON_DATA_SPECIES, NULL);
     u32 personality = GetMonData(&gEnemyParty[gBattlerPartyIndexes[MpCatchBattler()]], MON_DATA_PERSONALITY, NULL);
 
-    if (GetSetPokedexFlag(SpeciesToNationalPokedexNum(species), FLAG_GET_CAUGHT))
+    extern bool8 gMpCatchMyDex;
+    u16 nat = SpeciesToNationalPokedexNum(species);
+    gMpCatchMyDex = FALSE;
+    if (GetSetPokedexFlag(nat, FLAG_GET_CAUGHT) && MP_IsConnected() && !MP_DexOwn_Has(nat, TRUE))
+    {
+        // Moemon Co-op: a friend on the server caught one before: it goes in the player's own POKéDEX now, with its
+        // message ("my MOéDEX") and page as a first catch has (the user, 2026-11-21)
+        GetSetPokedexFlag(nat, FLAG_SET_CAUGHT);
+        gMpCatchMyDex = TRUE;
+        MPNet_Log("dex: %u into my own POKeDEX (a friend's catch before)", nat);
+        gBattlescriptCurrInstr += DSIZE8BIT + DSIZEPTR;
+    }
+    else if (GetSetPokedexFlag(nat, FLAG_GET_CAUGHT))
     {
         gBattlescriptCurrInstr = T1_READ_PTR(gBattlescriptCurrInstr + DSIZE8BIT);
     }

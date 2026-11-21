@@ -8767,3 +8767,12 @@ res/moves/chatter/anim.s).
 - A chance to chain: the window lists the cards, CHECK, PASS (item -3). CHECK puts it away (mode M_CHECK): the cursor
   goes round the table, A / LOOK shows a card, B (CANCEL) brings the window back. "mp ygo autochain" (tests: the
   harness plays for you but leaves chances to chain to the table). Scenario ygo_chain_check.
+
+## The player's own POKéDEX on a server: the second ball, "my MOéDEX" (2026-11-21, the user)
+- A catch of a species a friend on the server already put in the shared POKéDEX, but not yet in the player's own
+  ("<save>.owndex"): it goes in the own POKéDEX with "<NAME>'s data was added to my MOéDEX." and its page, as a first
+  catch has (battle_script_commands.c Cmd_trysetcaughtmondexflags, gMpCatchMyDex picks the line in battle_message.c).
+  Before, such a catch skipped the dex flags altogether and never reached the own POKéDEX.
+- In the SHARED list while connected, a species caught for the own POKéDEX too has a second, identical ball just
+  behind the first (1 right, 2 up: pokedex.c CreateCaughtBall).
+- Scenario coop_mydex (BOB catches a ZIGZAGOON, then ALICE: the line, the list).

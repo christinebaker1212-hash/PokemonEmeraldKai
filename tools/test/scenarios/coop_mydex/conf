@@ -1,0 +1,11 @@
+# The player's own POKéDEX on a server (the user, 2026-11-21): BOB catches a ZIGZAGOON first (the shared POKéDEX has
+# it), then ALICE catches one on her own: "...added to my MOéDEX.", its page, and in the SHARED list a second ball peeks
+# out behind the first. Shots msg (the message), dex (the list).
+MODE=2
+WARP=0,16,12,11
+WARP_B=0,17,10,10
+TMO=240
+ENV_A="MOEMON_DEBUG_PARTY=280:40"
+ENV_B="MOEMON_DEBUG_PARTY=280:40"
+EXPECT_A=("dex: 263 into my own")
+UNEXPECT_B=("into my own")

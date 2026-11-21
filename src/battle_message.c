@@ -686,6 +686,9 @@ static const u8 sText_PkmnSentToPC[] = _("{B_OPPONENT_MON1_NAME} was sent to\n{B
 static const u8 sText_Someones[] = _("someone's");
 static const u8 sText_Lanettes[] = _("LANETTE's");
 static const u8 sText_PkmnDataAddedToDex[] = _("{B_OPPONENT_MON1_NAME}'s data was\nadded to the MOéDEX.\p");
+// Moemon Co-op: on a server, one a friend already put in the shared MOéDEX, now in the player's own (the user, 2026-11-21)
+static const u8 sText_PkmnDataAddedToMyDex[] = _("{B_OPPONENT_MON1_NAME}'s data was\nadded to my MOéDEX.\p");
+bool8 gMpCatchMyDex;
 static const u8 sText_ItIsRaining[] = _("It is raining.");
 static const u8 sText_SandstormIsRaging[] = _("A sandstorm is raging.");
 static const u8 sText_BoxIsFull[] = _("The BOX is full!\nYou can't catch any more!\p");
@@ -2674,6 +2677,8 @@ void BufferStringBattle(u16 stringID)
         else
         {
             stringPtr = gBattleStringsTable[stringID - BATTLESTRINGS_TABLE_START];
+            if (stringID == STRINGID_PKMNDATAADDEDTODEX && gMpCatchMyDex)
+                stringPtr = sText_PkmnDataAddedToMyDex;
         }
         break;
     }
