@@ -104,6 +104,18 @@ Started 2026-11-20. Nothing is built yet; graphics come from the user.
   stars). **An Egg looks like the MOéMON inside**: its colours from the species, its pattern from a small library chosen
   by the species (type and look). Mock-ups before building. (95.png, a yellow spotted Egg, came first and was replaced.)
 
+- **The game talks to the VM2 itself** (the user, 2026-11-21, once its USB protocol was known): no SD card swapping
+  for Moemon Kai; the manager is for managing VMUs in general (any game's).
+- **Kai gives Eggs too** (2026-11-21): both ways. Kai drops an Egg off on the VM2 (a real one: its species, moves,
+  parents, from Kai's boxes) to raise on the VMU, and takes grown MOéMON back. The VMU still makes its own Egg when it
+  has none. (This widens "the Egg comes from the VMU program".)
+- **Where** (the user's words, 2026-11-21): "A PC option that is enabled ONLY if the VMU is connected. It then opens a PC
+  box to grab and drop the Egg from, and place a new egg into if you have one available. After completion, it will
+  disconnect the VM2 via software." So: a VM2 option on the PC's menu, there only while a VM2 is plugged in (and in
+  GUI-mode); it opens a box-like screen with the VM2 as a box: take what's on it (a grown MOéMON, or an Egg) into
+  Kai's boxes, put an Egg from Kai's boxes onto it; leaving ends the connection by software (proposed: @REST00, the
+  VM2 restarts out of GUI-mode, ready to use). This replaces the title menu's TRANSFER MOEMON FROM VMU. Mock-ups first.
+
 ## The VMU manager (built 2026-11-21)
 
 `vmu_pet/manager/` (README.txt; Dear ImGui on SDL2, Windows and Linux): VMU images on the VM2's SD card over USB
