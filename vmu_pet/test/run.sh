@@ -16,6 +16,6 @@ for s in test/scripts/*.txt; do
         echo "FAIL $name"; grep -E "expected|unknown|can't" "$out/log.txt"; fail=1
     fi
 done
-[ -f build/test/linktest_send/b.bin ] && python3 tools/find_linktest.py build/test/linktest_send/b.bin | grep -q "SENT 1, GOT 3" \
+[ -f build/test/linktest_send/b.bin ] && python3 tools/find_linktest.py build/test/linktest_send/b.bin | grep -q "SENT 1, GOT 2" \
     && echo "PASS linktest_save" || { echo "FAIL linktest_save"; fail=1; }
 exit $fail

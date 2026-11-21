@@ -46,6 +46,11 @@ What to report: which speeds said OK both ways; the exact words on both screens 
 `ECHO 4D>-- ` with `AT BYTE n` under it, `NO ACK`, `LOST IT`, `BAD DATA`); whether B's raw byte shows up on the other
 side (and the `BACK` value); and what step 4 printed.
 
+LINK TEST 4 (2026-11-21) starts at speed 8 and writes VCCR whole (`mov`, never `set1` / `clr1`: it's write-only, and
+bit instructions on it set its other bits; LINK TEST 2 / 3's screen stayed broken by that). The emulator harness now
+enforces what the user's hardware showed: XRAM's missing bytes, VCCR's rules, drawing only on RC, and `vm2 UNIT`
+(a VM2's receiver garbles bytes clocked slower than 1 ms a bit). `tools/where.py` finds an address's source line.
+
 Speeds (LINK TEST 3): 1-4 run the link on the 32 kHz crystal (Sega's advice; XT on the screen), 5-8 on the RC clock
 (about 25 times faster; RC). Both units at the same speed.
 

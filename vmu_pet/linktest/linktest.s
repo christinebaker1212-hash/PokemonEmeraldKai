@@ -55,7 +55,7 @@ main:
   mov #0, raw_count
   mov #0, raw_sent
   mov #1, ud_held
-  mov #0, speed_idx
+  mov #7, speed_idx         ; speed 8: RC, the fastest (the VM2 garbles the crystal speeds 1-4)
   call speed_set
   call save_load
   inc boot_count
@@ -532,16 +532,16 @@ save_write:
   ret
 
 ;; clk_fast: the internal RC clock (1/12) for drawing; clk_slow: the 32 kHz crystal for idling (and the serial link
-;; at speeds 1-4). Sega's rule with the screen on (hardware manual VMD-156 / VCCR6): going to the crystal, shut the CPU
+;; at speeds 1-4). Sega's rule with the screen on (hardware manual VMD-131/156, VCCR6): going to the crystal, shut the CPU
 ;; out of the screen's memory first (VCCR bit 6 = 1); going back to RC, let it in again (bit 6 = 0). The screen's
 ;; memory is only read or written on RC.
 clk_fast:
-  clr1 vccr, 6
+  mov #VCCR_RC, vccr        ; VCCR is write-only: never set1 / clr1 it (that writes its other bits too)
   mov #OSC_RC, ocr
   ret
 
 clk_slow:
-  set1 vccr, 6
+  mov #VCCR_XT, vccr
   mov #OSC_XT, ocr
   ret
 
@@ -635,7 +635,7 @@ int_base_timer:
   ret
 
 s_title:
-  .string 12 "LINK TEST 3"
+  .string 12 "LINK TEST 4"
 s_sent:
   .string 6 "SENT "
 s_got:

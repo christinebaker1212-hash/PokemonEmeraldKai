@@ -58,6 +58,11 @@ OSC_RC   = $4d      ; internal RC, 1/12
 OSC_RCFW = $cd      ; internal RC, 1/6: flash writes
 OSC_XT   = $ef      ; the 32 kHz crystal
 
+;; VCCR is write-only (Sega: bit instructions on it set its other bits): always MOV the whole value. Bit 7 = the
+;; screen on, bit 6 = the CPU shut out of XRAM (required on the crystal), bits 5-0 always 0.
+VCCR_RC = $80
+VCCR_XT = $c0
+
 ;; RAM bank 0 / bank 1 system addresses
 LOW_BATT_CHK = $6e  ; bank 0: $ff = don't detect a low battery
 FMFLAG  = $7c       ; bank 1: flash write end detection

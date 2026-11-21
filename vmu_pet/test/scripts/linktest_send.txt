@@ -1,75 +1,52 @@
-# LINK TEST: unit a sends to unit b at speed 1 (Sega's rate), then at speed 4; both save what they counted.
+# LINK TEST: unit a is a VMU, unit b a VM2 (bytes clocked slowly arrive garbled, as on the user's VM2).
+# Speed 8 (RC, the default) both ways; speed 1 (the crystal) from the VMU fails as it did on the hardware.
+vm2 b
 run 1.5
 expect a 3 NO CABLE
+expect a 4 SPEED 8 RC
 cable on
 run 1
 expect a 3 CABLE OK
 expect b 3 CABLE OK
 press a A 0.3
-run 25
+run 4
 shot a sent
 shot b got
 expect a 3 SENT OK!
 expect a 1 SENT 001
 expect b 3 GOT IT OK!
 expect b 2 GOT  001
-# speed 4 on both
-press a U 0.6
-run 0.6
-press a U 0.6
-run 0.6
-press a U 0.6
-run 0.6
-press b U 0.6
-run 0.6
-press b U 0.6
-run 0.6
-press b U 0.6
-run 1
-expect a 4 SPEED 4 XT
-expect b 4 SPEED 4 XT
-press a A 0.3
-run 6
-expect a 3 SENT OK!
-expect a 1 SENT 002
-expect b 2 GOT  002
-# b sends back
-press b A 0.3
-run 6
-expect b 3 SENT OK!
-expect a 2 GOT  001
-# speed 8: the link on the RC clock
-press a D 0.6
-run 0.6
-press b D 0.6
-run 0.6
-press a D 0.6
-run 0.6
-press b D 0.6
-run 0.6
-press a D 0.6
-run 0.6
-press b D 0.6
-run 0.6
-press a D 0.6
-run 0.6
-press b D 0.6
-run 1
-expect a 4 SPEED 8 RC
-expect b 4 SPEED 8 RC
 press a A 0.3
 run 4
-expect a 3 SENT OK!
-expect b 2 GOT  003
-# one raw byte (B): the other side shows it
+expect a 1 SENT 002
+expect b 2 GOT  002
+# the VM2 sends back
+press b A 0.3
+run 4
+expect b 3 SENT OK!
+expect a 2 GOT  001
+# one raw byte (B) each way
 press a B 0.3
 run 2
 expect b 3 RAW A0 001
+press b B 0.3
+run 2
+expect a 3 RAW A0 001
 press a B 0.3
 run 2
 expect b 3 RAW A1 002
 save a OUT/a.bin
 save b OUT/b.bin
+# speed 1 on both: the VMU's bytes reach the VM2 garbled, so no answer comes back
+press a U 0.6
+run 0.6
+press b U 0.6
+run 1
+expect a 4 SPEED 1 XT
+expect b 4 SPEED 1 XT
+press a A 0.3
+run 30
+expect a 3 NO ANSWER
 cable off
 run 1.5
 expect a 3 NO CABLE
