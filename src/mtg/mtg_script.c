@@ -834,10 +834,23 @@ static void ParseKeyword(MtgCardDef *c, const char *k)
         return;
     }
     if (strncmp(k, "etbCounter:", 11) == 0) {   // "etbCounter:P1P1:3": enters with that many (X: as paid)
-        char buf[40], *num;
+        char buf[160], *num, *rest;
         int kind;
-        if (strlen(k + 11) < sizeof(buf) && (strcpy(buf, k + 11), num = strchr(buf, ':')) && !strchr(num + 1, ':')) {
+        if (strlen(k + 11) < sizeof(buf) && (strcpy(buf, k + 11), num = strchr(buf, ':'))) {
             *num++ = 0;
+            if ((rest = strchr(num, ':')) != NULL) {   // ":CheckSVar$ NAME:words" (only when it's GE1), ":no Condition:words"
+                char *end;
+                *rest++ = 0;
+                if (strncmp(rest, "CheckSVar$ ", 11) == 0) {
+                    rest += 11;
+                    if ((end = strchr(rest, ':')) != NULL)
+                        *end = 0;
+                    c->etbCheck = KeepSpec(rest, strlen(rest));
+                } else if (strncmp(rest, "no Condition", 12) != 0) {
+                    Unsupported(c, "etbCounter");
+                    return;
+                }
+            }
             kind = Mtg_CounterKind(buf);
             if (kind > 0 && (strcmp(num, "X") == 0 || (num[0] >= '1' && num[0] <= '9' && strspn(num, "0123456789") == strlen(num)))) {
                 c->etbKind = (uint8_t)kind;
@@ -861,9 +874,16 @@ static void ParseKeyword(MtgCardDef *c, const char *k)
         return;
     }
     if (strncmp(k, "ETBReplacement:Other:", 21) == 0) {   // "ETBReplacement:Other:SVAR[:Mandatory|:Optional]": parsed
-        c->etbReplText = k + 21;                            // once the SVars are read (below)
+        if (!c->etbReplText[0])                             // once the SVars are read (below); two at most
+            c->etbReplText[0] = k + 21;
+        else if (!c->etbReplText[1])
+            c->etbReplText[1] = k + 21;
+        else
+            Unsupported(c, "ETBReplacement");
         return;
     }
+    if (strncmp(k, "Kicker:", 7) == 0 || strncmp(k, "Buyback:", 8) == 0 || strncmp(k, "Flashback:", 10) == 0)
+        return;   // (their costs: once the lines are read, below)
     if (strncmp(k, "Cycling:", 8) == 0) {   // (Forge's CardFactoryUtil: an ability from the hand, made once the lines are read)
         c->cyclingCost = k + 8;
         return;
@@ -958,6 +978,7 @@ static void ParseCard(int id, char *text)
 {
     MtgCardDef *c = &sCards[id];
     char *lines[MTG_SCRIPT_LINES], *abilityLines[8], *triggerLines[8], *line, *next;
+    const char *extraKw[3] = {NULL, NULL, NULL};   // (K:Kicker:..., K:Buyback:..., K:Flashback:... as written)
     int nLines = 0, nAbil = 0, nTrig = 0, i, k;
     memset(c, 0, sizeof(*c));
     c->supported = 1;
@@ -998,9 +1019,13 @@ static void ParseCard(int id, char *text)
         c->svarCount++;
     }
     // keywords that are triggers in Forge (CardFactoryUtil: Echo, Cumulative upkeep): their SVars and T: lines made
-    // here, as Forge makes them, then read as the card's own
+    // here, as Forge makes them, then read as the card's own; Kicker / Buyback / Flashback kept for after the lines
     for (k = 0; k < nLines; k++) {
         const char *kw = lines[k] && strncmp(lines[k], "K:", 2) == 0 ? lines[k] + 2 : NULL;
+        if (kw && (strncmp(kw, "Kicker:", 7) == 0 || strncmp(kw, "Buyback:", 8) == 0 || strncmp(kw, "Flashback:", 10) == 0)) {
+            extraKw[kw[0] == 'K' ? 0 : kw[0] == 'B' ? 1 : 2] = kw;
+            continue;
+        }
         char cost[64], buf[400];
         const char *end;
         size_t n;
@@ -1112,29 +1137,80 @@ static void ParseCard(int id, char *text)
         else
             c->abilities[c->abilityCount++] = (uint16_t)ParseAbility(c, id, text, MTG_AB_ACTIVATED, 0);
     }
-    if (c->etbReplText) {   // "as it enters": its SVar an ability of its own, run as it lands (no target: nothing to aim)
-        char name[48], *opt;
+    for (i = 0; i < 2; i++) {   // "as it enters": its SVar an ability of its own, run as it lands (no target to aim)
+        // "SVAR[:Mandatory|:Optional[:words[:Condition]]]": the condition a Valid spec on itself ("Card.Self+kicked 1")
+        char name[96], *opt = NULL, *desc = NULL, *cond = NULL;
         const char *sv;
-        size_t len = strlen(c->etbReplText);
-        if (len < sizeof(name)) {
-            memcpy(name, c->etbReplText, len + 1);
-            opt = strchr(name, ':');
-            if (opt)
-                *opt++ = 0;
-            sv = Mtg_Svar(id, name);
-            if (sv && strncmp(sv, "DB$", 3) == 0 && (!opt || strcmp(opt, "Mandatory") == 0 || strcmp(opt, "Optional") == 0)) {
-                char *copy = malloc(strlen(sv) + 1);
-                int a;
-                strcpy(copy, sv);
-                a = ParseAbility(c, id, copy, MTG_AB_TRIGGERED, 0);
-                if (gMtgAbilities[a].tgt)
-                    Unsupported(c, "ETBReplacement");
-                c->etbRepl = (uint16_t)(a + 1);
-                c->etbOptional = opt && strcmp(opt, "Optional") == 0;
-            } else
+        size_t len;
+        if (!c->etbReplText[i])
+            continue;
+        len = strlen(c->etbReplText[i]);
+        if (len >= sizeof(name)) {
+            Unsupported(c, "ETBReplacement");
+            continue;
+        }
+        memcpy(name, c->etbReplText[i], len + 1);
+        if ((opt = strchr(name, ':')) != NULL) {
+            *opt++ = 0;
+            if ((desc = strchr(opt, ':')) != NULL) {
+                *desc++ = 0;
+                if ((cond = strchr(desc, ':')) != NULL)
+                    *cond++ = 0;
+            }
+        }
+        sv = Mtg_Svar(id, name);
+        if (sv && strncmp(sv, "DB$", 3) == 0 && (!opt || strcmp(opt, "Mandatory") == 0 || strcmp(opt, "Optional") == 0)
+            && (!cond || !*cond || Mtg_ValidSpecKnown(cond))) {
+            char *copy = malloc(strlen(sv) + 1);
+            int a;
+            strcpy(copy, sv);
+            a = ParseAbility(c, id, copy, MTG_AB_TRIGGERED, 0);
+            if (gMtgAbilities[a].tgt)
                 Unsupported(c, "ETBReplacement");
+            c->etbRepl[i] = (uint16_t)(a + 1);
+            c->etbCond[i] = cond && *cond ? KeepSpec(cond, strlen(cond)) : NULL;
+            if (opt && strcmp(opt, "Optional") == 0)
+                c->etbOptional |= (uint8_t)(1 << i);
         } else
             Unsupported(c, "ETBReplacement");
+    }
+    if (c->etbCheck && !Mtg_CheckSvarKnown(id, c->etbCheck, NULL))
+        Unsupported(c, "etbCounter");
+    {   // Kicker, Buyback, Flashback: their costs (gMtgAltCosts), cast as the spell's other ways (mtg_game.c)
+        static const char *const sKw[3] = {"Kicker:", "Buyback:", "Flashback:"};
+        int kk;
+        for (k = 0; k < 3; k++) {
+            const char *kw = extraKw[k];
+            for (kk = 0; kw && kk < 3; kk++)
+                if (strncmp(kw, sKw[kk], strlen(sKw[kk])) == 0) {
+                    char buf[96], *second;
+                    const char *cost = kw + strlen(sKw[kk]);
+                    int a1, a2 = 0;
+                    if (strlen(cost) >= sizeof(buf)) {
+                        Unsupported(c, sKw[kk]);
+                        break;
+                    }
+                    strcpy(buf, cost);
+                    second = strchr(buf, ':');   // (Kicker:1 U:B: two kickers; the others' words after it)
+                    if (second)
+                        *second++ = 0;
+                    a1 = Mtg_AddExtraCost(buf, kk == 0 ? "KICKER" : kk == 1 ? "BUYBACK" : "FLASHBACK");
+                    if (kk == 0 && second)
+                        a2 = Mtg_AddExtraCost(second, "KICKER");
+                    if (!a1 || (kk == 0 && second && !a2) || (kk != 2 && (c->types & MTG_T_LAND))
+                        || (kk == 2 && !(c->types & (MTG_T_INSTANT | MTG_T_SORCERY))) || (kk == 1 && !(c->types & (MTG_T_INSTANT | MTG_T_SORCERY)))) {
+                        Unsupported(c, sKw[kk]);
+                        break;
+                    }
+                    if (kk == 0) {
+                        c->kicker[0] = (uint16_t)a1;
+                        c->kicker[1] = (uint16_t)a2;
+                    } else if (kk == 1)
+                        c->buyback = (uint16_t)a1;
+                    else
+                        c->flashback = (uint16_t)a1;
+                }
+        }
     }
     if (c->starPT) {   // a */* side no static sets
         int k, set = 0;

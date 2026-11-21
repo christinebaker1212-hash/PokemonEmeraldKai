@@ -120,6 +120,24 @@ static char *Kept(size_t len)
 MtgAltCost *gMtgAltCosts;
 static int sAltCount, sAltCap;
 
+// Kicker / Buyback / Flashback's cost ("1 R", "Sac<1/Land>", "1 G PayLife<3>"): gMtgAltCosts index + 1, 0 if it isn't
+// one the engine pays (an X, {T}, itself)
+int Mtg_AddExtraCost(const char *text, const char *label)
+{
+    MtgAltCost alt;
+    memset(&alt, 0, sizeof(alt));
+    if (!Mtg_ParseCost(text, &alt.cost) || alt.cost.mana.x || alt.cost.tap || alt.cost.sacSelf || alt.cost.exileSelf
+        || alt.cost.returnSelf || alt.cost.discardSelf || alt.cost.subCtrN || alt.cost.damageYou)
+        return 0;
+    snprintf(alt.label, sizeof(alt.label), "%s", label);
+    if (sAltCount + 1 > sAltCap) {
+        sAltCap = sAltCap ? sAltCap * 2 : 64;
+        gMtgAltCosts = realloc(gMtgAltCosts, (size_t)sAltCap * sizeof(MtgAltCost));
+    }
+    gMtgAltCosts[sAltCount++] = alt;
+    return sAltCount;
+}
+
 // "S:Mode$ AlternativeCost | ValidSA$ Spell.Self | EffectZone$ All | Cost$ ... [| IsPresent$ ...] | Description$ ...":
 // the spell may be cast paying that instead of its mana cost (StaticAbilityAlternativeCost). Costs without mana only.
 static void ParseAlt(MtgCardDef *c, int cardId, char *text)

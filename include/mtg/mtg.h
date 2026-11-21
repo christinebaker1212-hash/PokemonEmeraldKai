@@ -76,10 +76,14 @@ typedef struct MtgCardDef {
     uint8_t etbKind, etbNum, etbX;           // K:etbCounter:TYPE:N: enters with N (etbX: X, as paid) counters of a kind
     uint8_t fading;                          // K:Fading:N: enters with N fade counters (etbKind / etbNum), loses one each upkeep
     uint8_t rampage;                         // K:Rampage:N: +N/+N for each creature blocking it past the first
-    uint16_t etbRepl;                        // K:ETBReplacement:Other:SVAR: what happens as it enters (a choice...):
+    uint16_t etbRepl[2];                     // K:ETBReplacement:Other:SVAR: what happens as it enters (a choice...):
                                              // ability + 1 (0: none), run as it lands (mtg_game.c)
-    uint8_t etbOptional;                     // ... :Optional ("you may": asked)
-    const char *etbReplText;                 // (its keyword's text, while the card loads)
+    const char *etbCond[2];                  // ... only if it is so (its fourth part: "Card.Self+kicked 1"; NULL: always)
+    uint8_t etbOptional;                     // ... :Optional ("you may": asked; bit per one)
+    const char *etbReplText[2];              // (its keywords' text, while the card loads)
+    const char *etbCheck;                    // etbCounter's CheckSVar$: its counters only when that SVar is GE1
+    uint16_t kicker[2];                      // K:Kicker:COST[:COST2]: gMtgAltCosts + 1 (0: none)
+    uint16_t buyback, flashback;             // K:Buyback:COST, K:Flashback:COST (the same)
     uint8_t staticCount;
     uint16_t statics[4];                     // indexes into the static table (S: lines; mtg_static.c)
     uint16_t svarFirst, svarCount;           // the card's SVar: lines
@@ -159,6 +163,10 @@ typedef struct {
     uint8_t chosenColors;         // MTG_COLOR_BIT (0: none)
     uint8_t chosenPlayer;         // the player + 1 (0: none)
     int16_t chosenNumber;
+    uint8_t kicked;               // cast kicked (Kicker: bit 0 its first kicker, bit 1 its second), kept onto the
+                                  // battlefield (Valid kicked, Condition$ Kicked, Count$Kicked); cleared as it leaves
+    uint8_t castMode;             // on the stack, cast with Buyback (1: back to the hand as it resolves) or Flashback
+                                  // (2: exiled whenever it would leave the stack)
     uint8_t echoDue;              // Echo: 1 came under its controller since their last upkeep, 2 their upkeep now (its
                                   // trigger's "if": Valid cameUnderControlSinceLastUpkeep), 0 paid for or not new
 } MtgObj;
@@ -250,13 +258,16 @@ enum { MTG_OPT_TYPE,     // opts: Mtg_SubtypeName indexes
        MTG_OPT_MODE };   // GenericChoice: abilities (gMtgAbilities)
 #define MTG_MAX_OPTIONS 200
 enum { MTG_ACT_PASS, MTG_ACT_LAND, MTG_ACT_CAST, MTG_ACT_ACTIVATE };
+// MtgAction.alt for a cast: its alternative cost, kicked (with its first / second / both kickers), with buyback,
+// for its flashback cost (from its owner's graveyard)
+enum { MTG_ALT_NONE, MTG_ALT_COST, MTG_ALT_KICK1, MTG_ALT_KICK2, MTG_ALT_KICK12, MTG_ALT_BUYBACK, MTG_ALT_FLASHBACK };
 
 typedef struct {
     uint8_t kind;
     uint16_t obj, ability;
     int16_t x;
     MtgTarget target;
-    uint8_t alt;      // MTG_ACT_CAST: cast for its alternative cost instead of its mana cost (S:Mode$ AlternativeCost)
+    uint8_t alt;      // MTG_ACT_CAST: MTG_ALT_* (its alternative cost: S:Mode$ AlternativeCost; Kicker, Buyback, Flashback)
 } MtgAction;
 
 typedef struct {
@@ -363,7 +374,8 @@ typedef struct MtgDuel {
     uint8_t tgtLeft, tgtOpt;                         // the casting spell's other targets still to pick: needed, may
     uint8_t resExtra;                                // its extra targets resolved so far
     uint16_t resFirst;                               // ... and its first target (each targeting part starts there)          // ... cards to exile from the hand, permanents to return, to tap
-    uint8_t costAlt;                                 // ... the cost is the spell's alternative one (its card's altCost)
+    uint8_t costAlt;                                 // ... the cost is the spell's alternative one or an extra one ...
+    uint16_t costAltIdx;                             // ... gMtgAltCosts + 1 (its altCost, a kicker, buyback, flashback)
     MtgQuery query;
     uint32_t eventCount;                             // every event so far (the ring keeps the last MTG_EVENT_RING)
     MtgEvent events[MTG_EVENT_RING];

@@ -88,6 +88,7 @@ typedef struct {
     char label[40];        // the menu's words ("SACRIFICE A MOUNTAIN"), from its Description$
 } MtgAltCost;
 extern MtgAltCost *gMtgAltCosts;
+int Mtg_AddExtraCost(const char *text, const char *label);   // Kicker / Buyback / Flashback's: index + 1 (0: not paid here)
 int Mtg_CostPayable(const MtgDuel *d, int player, const MtgCost *c, int source, int casting);
 // pays an ability's non-mana UnlessCost$ as it resolves: its mana and what's paid at once now, then 1 if a pick is asked
 // (d->query: the answer goes on with the resolution once the picks are done)

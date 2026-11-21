@@ -63,6 +63,16 @@ int Mtg_Amount(const MtgDuel *d, const MtgResolveCtx *ctx, int card, const char 
     }
     if (strcmp(sv, "Count$xPaid") == 0)
         return d ? ctx->e->x : 0;
+    if (strncmp(sv, "Count$Kicked.", 13) == 0) {   // "Count$Kicked.A.B": A if it was kicked, else B
+        const char *a = sv + 13, *dot = strchr(a, '.');
+        int kicked;
+        if (!dot || strspn(a, "0123456789") != (size_t)(dot - a) || !dot[1] || strspn(dot + 1, "0123456789") != strlen(dot + 1)) {
+            *ok = 0;
+            return 0;
+        }
+        kicked = d && ctx->source >= 0 && ctx->source < d->objCount && d->objs[ctx->source].kicked;
+        return atoi(kicked ? a : dot + 1);
+    }
     if (strcmp(sv, "Count$ChosenNumber") == 0)   // (ChooseNumber's, kept on its source)
         return d && ctx->source >= 0 && ctx->source < d->objCount ? d->objs[ctx->source].chosenNumber : 0;
     if (strcmp(sv, "Remembered$Amount") == 0 || strcmp(sv, "Count$RememberedSize") == 0) {   // (the cards, not players)
@@ -1589,8 +1599,10 @@ static int ConditionKnown(const MtgAbility *ab)
 {
     const char *def = Mtg_Param(ab, "ConditionDefined"), *pr = Mtg_Param(ab, "ConditionPresent");
     const char *cmp = Mtg_Param(ab, "ConditionCompare"), *sv = Mtg_Param(ab, "ConditionCheckSVar");
-    const char *svc = Mtg_Param(ab, "ConditionSVarCompare");
+    const char *svc = Mtg_Param(ab, "ConditionSVarCompare"), *cond = Mtg_Param(ab, "Condition");
     int op, ok;
+    if (cond && strcmp(cond, "Kicked") && strcmp(cond, "Kicked 1") && strcmp(cond, "Kicked 2") && strcmp(cond, "Threshold"))
+        return 0;
     if (def && !InList(def, sDefinedKnown, (int)(sizeof(sDefinedKnown) / sizeof(sDefinedKnown[0]))))
         return 0;
     if ((def || cmp) && !pr)
@@ -1612,8 +1624,19 @@ static int ConditionMet(MtgDuel *d, MtgResolveCtx *ctx, const MtgAbility *ab)
 {
     const char *def = Mtg_Param(ab, "ConditionDefined"), *pr = Mtg_Param(ab, "ConditionPresent");
     const char *cmp = Mtg_Param(ab, "ConditionCompare"), *sv = Mtg_Param(ab, "ConditionCheckSVar");
-    const char *svc = Mtg_Param(ab, "ConditionSVarCompare");
+    const char *svc = Mtg_Param(ab, "ConditionSVarCompare"), *cond = Mtg_Param(ab, "Condition");
     int op, ok, i;
+    if (cond && cond[0] == 'K') {   // Kicked (with either kicker), Kicked 1 / Kicked 2 (with that one)
+        int k = ctx->source >= 0 && ctx->source < d->objCount ? d->objs[ctx->source].kicked : 0;
+        if (!(cond[6] ? k & (cond[7] == '1' ? 1 : 2) : k))
+            return 0;
+    } else if (cond) {   // Threshold: seven or more cards in its controller's graveyard
+        int n = 0;
+        for (i = 0; i < d->objCount; i++)
+            n += d->objs[i].zone == MTG_ZONE_GRAVEYARD && d->objs[i].owner == ctx->controller;
+        if (n < 7)
+            return 0;
+    }
     if (pr && strcmp(pr, "Card,Emblem") == 0)
         pr = "Card";   // (no emblems here)
     if (pr) {   // how many of the Defined$ ones (or permanents on the battlefield) are of the spec
@@ -1748,7 +1771,7 @@ static const char *const sCommon[] = {
     "ConditionDefined", "ConditionPresent", "ConditionCompare", "ConditionCheckSVar", "ConditionSVarCompare",
     "ConditionDescription", "RememberChanged", "RememberMilled", "RememberDiscarded", "RememberDestroyed",
     "RememberSacrificed", "RememberDrawn", "RememberTokens", "RememberTargets", "ForgetOtherRemembered",
-    "UnlessScale",
+    "UnlessScale", "Condition",
 };
 static const char *const sApiParams[MTG_API_COUNT][12] = {
     [MTG_API_DEAL_DAMAGE] = {"NumDmg"},

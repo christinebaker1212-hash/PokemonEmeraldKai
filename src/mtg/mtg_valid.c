@@ -125,6 +125,10 @@ static int CardProp(const MtgDuel *d, int obj, const char *p, size_t n, int src,
         h = Holder(d, src);
         return h && h->chosenPlayer && o->controller == h->chosenPlayer - 1;
     }
+    if (n == 6 && strncmp(p, "kicked", 6) == 0)   // (cast kicked: mtg_game.c; "kicked 1" / "kicked 2": with that kicker)
+        return !d || o->kicked;
+    if (n == 8 && strncmp(p, "kicked ", 7) == 0 && (p[7] == '1' || p[7] == '2'))
+        return !d || (o->kicked & (p[7] == '1' ? 1 : 2));
     if (n == 31 && strncmp(p, "cameUnderControlSinceLastUpkeep", 31) == 0)   // (Echo's "if": mtg_game.c StartStep)
         return !d || o->echoDue == 2;
     if (n == 17 && strncmp(p, "inZoneBattlefield", 17) == 0)   // ("by creatures": on the battlefield, not a spell)

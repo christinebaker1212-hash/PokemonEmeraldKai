@@ -1,0 +1,7 @@
+# MAGIC's Kicker and Flashback on the table: SKIZZIK's menu offers CAST and KICKED (+R), the kicked one cast; then
+# FIREBOLT in the graveyard: the viewer says {A} FLASHBACK, A casts it from there (its target, then it resolves).
+# Shots fb_kick_menu, fb_view, fb_target.
+MODE=1
+TMO=240
+EXPECT_A=("mtg: you: cast Skizzik" "mtg: focus your graveyard" "mtg: you: cast Firebolt")
+UNEXPECT_A=("[crash]" "mtg: can't put" "mtg: no Skizzik to focus")

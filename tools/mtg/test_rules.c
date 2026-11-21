@@ -2585,6 +2585,129 @@ static void TestUpkeepCosts(void)
     (void)q;
 }
 
+// the cast of OBJ that is ALT (MTG_ALT_*) on TGT (tgtKind -1: any)
+static int FindCast(int obj, int alt, int tgtKind, int tgtId)
+{
+    const MtgQuery *q;
+    int i;
+    Mtg_RefreshQuery(&sD);
+    q = Mtg_Query(&sD);
+    for (i = 0; i < q->actionCount; i++) {
+        const MtgAction *a = &q->actions[i];
+        if (a->kind == MTG_ACT_CAST && a->obj == obj && a->alt == alt
+            && (tgtKind < 0 || (a->target.kind == tgtKind && a->target.id == tgtId)))
+            return i;
+    }
+    return -1;
+}
+
+static void DoCast(int obj, int alt, int tgtKind, int tgtId)
+{
+    MtgAnswer a;
+    int i = FindCast(obj, alt, tgtKind, tgtId);
+    if (i < 0) {
+        printf("  no cast of %s (alt %d)\n", Mtg_Card(sD.objs[obj].def)->name, alt);
+        sFails++;
+        return;
+    }
+    memset(&a, 0, sizeof(a));
+    a.action = (uint16_t)i;
+    Answer(&a);
+}
+
+static void TestKickerFlashback(void)
+{
+    int demise, bears, skizzik, elite, bolt, capsize, infest, i;
+    static const char *const cards[] = {"Agonizing Demise", "Skizzik", "Llanowar Elite", "Firebolt", "Capsize",
+                                        "Fanning the Flames", "Saproling Infestation", "Battle Screech", NULL};
+    printf("kicker, buyback, flashback\n");
+    for (i = 0; cards[i]; i++)
+        CHECK(Mtg_CardByName(cards[i]) >= 0 && Mtg_Card(Mtg_CardByName(cards[i]))->supported, "%s plays", cards[i]);
+
+    Table();   // Agonizing Demise: kicked only with the mana for both; kicked, its controller takes the creature's power
+    Lands(0, "Swamp", 4);
+    demise = Put(0, "Agonizing Demise", MTG_ZONE_HAND);
+    bears = Put(1, "Grizzly Bears", MTG_ZONE_BATTLEFIELD);
+    CHECK(FindCast(demise, MTG_ALT_NONE, MTG_TGT_OBJ, bears) >= 0 && FindCast(demise, MTG_ALT_KICK1, -1, 0) < 0,
+          "four swamps: cast, not kicked ({1}{R} more)");
+    Lands(0, "Mountain", 2);
+    DoCast(demise, MTG_ALT_KICK1, MTG_TGT_OBJ, bears);
+    PassBoth();
+    CHECK(Zone(bears) == MTG_ZONE_GRAVEYARD && sD.players[1].life == 18, "kicked: destroyed, 2 damage to its controller (%d)",
+          sD.players[1].life);
+    CHECK(sD.objs[demise].kicked == 0 && Zone(demise) == MTG_ZONE_GRAVEYARD, "in the graveyard, no longer kicked");
+
+    Table();   // Skizzik: not kicked, sacrificed at the end step; kicked, it stays
+    Lands(0, "Mountain", 5);
+    skizzik = Put(0, "Skizzik", MTG_ZONE_HAND);
+    DoCast(skizzik, MTG_ALT_KICK1, -1, 0);
+    PassBoth();
+    CHECK(sD.objs[skizzik].kicked == 1 && Zone(skizzik) == MTG_ZONE_BATTLEFIELD, "skizzik kicked on the battlefield");
+    GoToTurn(1, MTG_STEP_MAIN1);
+    CHECK(Zone(skizzik) == MTG_ZONE_BATTLEFIELD, "kicked: it stays past the end step");
+    Table();
+    Lands(0, "Mountain", 4);
+    skizzik = Put(0, "Skizzik", MTG_ZONE_HAND);
+    DoCast(skizzik, MTG_ALT_NONE, -1, 0);
+    PassBoth();
+    GoToTurn(1, MTG_STEP_MAIN1);
+    CHECK(Zone(skizzik) == MTG_ZONE_GRAVEYARD, "not kicked: sacrificed at the end step");
+
+    Table();   // Llanowar Elite: a +1/+1 counter... only when kicked (etbCounter's CheckSVar$)
+    Lands(0, "Forest", 10);
+    elite = Put(0, "Llanowar Elite", MTG_ZONE_HAND);
+    DoCast(elite, MTG_ALT_KICK1, -1, 0);
+    PassBoth();
+    CHECK(Mtg_Counters(&sD, elite, MTG_CTR_P1P1) == 5, "kicked: five +1/+1 counters (%d)", Mtg_Counters(&sD, elite, MTG_CTR_P1P1));
+    elite = Put(0, "Llanowar Elite", MTG_ZONE_HAND);
+    DoCast(elite, MTG_ALT_NONE, -1, 0);
+    PassBoth();
+    CHECK(Mtg_Counters(&sD, elite, MTG_CTR_P1P1) == 0, "not kicked: none (%d)", Mtg_Counters(&sD, elite, MTG_CTR_P1P1));
+
+    Table();   // Firebolt: cast, then its flashback from the graveyard, then exiled
+    Lands(0, "Mountain", 6);
+    bolt = Put(0, "Firebolt", MTG_ZONE_HAND);
+    CHECK(FindCast(bolt, MTG_ALT_FLASHBACK, -1, 0) < 0, "no flashback from the hand");
+    DoCast(bolt, MTG_ALT_NONE, MTG_TGT_PLAYER, 1);
+    PassBoth();
+    CHECK(Zone(bolt) == MTG_ZONE_GRAVEYARD && sD.players[1].life == 18, "firebolt: 2 damage, to the graveyard");
+    DoCast(bolt, MTG_ALT_FLASHBACK, MTG_TGT_PLAYER, 1);
+    PassBoth();
+    CHECK(Zone(bolt) == MTG_ZONE_EXILE && sD.players[1].life == 16, "flashback: 2 more, then exiled (%d)", Zone(bolt));
+
+    Table();   // Capsize with buyback: the permanent back to its owner's hand, and Capsize to yours
+    Lands(0, "Island", 6);
+    capsize = Put(0, "Capsize", MTG_ZONE_HAND);
+    bears = Put(1, "Grizzly Bears", MTG_ZONE_BATTLEFIELD);
+    DoCast(capsize, MTG_ALT_BUYBACK, MTG_TGT_OBJ, bears);
+    PassBoth();
+    CHECK(Zone(bears) == MTG_ZONE_HAND && Zone(capsize) == MTG_ZONE_HAND, "buyback: capsize back in hand");
+    for (i = 0; i < sD.objCount; i++)
+        CHECK(sD.objs[i].zone != MTG_ZONE_BATTLEFIELD || !sD.objs[i].tapped || Mtg_Card(sD.objs[i].def)->types & MTG_T_LAND,
+              "(nothing else tapped)");
+    {
+        int tapped = 0;
+        for (i = 0; i < sD.objCount; i++)
+            tapped += sD.objs[i].zone == MTG_ZONE_BATTLEFIELD && sD.objs[i].tapped;
+        CHECK(tapped == 6, "six lands paid {1}{U}{U} + {3} (%d)", tapped);
+    }
+
+    Table();   // Saproling Infestation: a kicked spell sets it off
+    Lands(0, "Mountain", 5);
+    infest = Put(0, "Saproling Infestation", MTG_ZONE_BATTLEFIELD);
+    skizzik = Put(0, "Skizzik", MTG_ZONE_HAND);
+    DoCast(skizzik, MTG_ALT_KICK1, -1, 0);
+    PassBoth();   // (the trigger)
+    PassBoth();   // (skizzik)
+    {
+        int saps = 0;
+        for (i = 0; i < sD.objCount; i++)
+            saps += sD.objs[i].zone == MTG_ZONE_BATTLEFIELD && sD.objs[i].def >= MTG_TOKEN_BASE;
+        CHECK(saps == 1, "one saproling (%d)", saps);
+    }
+    (void)infest;
+}
+
 static void TestCantCounter(void)
 {
     int mongoose, bears, cs, herald, istvan, bolt, i;
@@ -3222,6 +3345,7 @@ int main(int argc, char **argv)
     TestChooseSource();
     TestChoices();
     TestUpkeepCosts();
+    TestKickerFlashback();
     TestCantCounter();
     TestTrigModes();
     TestBecomesTarget();

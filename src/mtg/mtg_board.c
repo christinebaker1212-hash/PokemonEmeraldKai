@@ -1175,6 +1175,22 @@ static void InspectWindow(int obj)
 }
 
 // a graveyard, card by card (as the POKeMON table shows a discard pile)
+static int GatherMenu(int focused);
+// the graveyard card under the viewer's cursor can be cast now (yours, your priority: Flashback)
+static int ViewCastable(void)
+{
+    const MtgQuery *q = &B.duel.query;
+    int i, f;
+    if (B.viewPlayer != ME || B.viewCursor >= B.viewCount || q->kind != MTG_Q_PRIORITY || q->player != ME
+        || MtgBoard_Busy())
+        return 0;
+    f = B.viewList[B.viewCursor];
+    for (i = 1; i < q->actionCount; i++)
+        if (q->actions[i].obj == f && q->actions[i].kind == MTG_ACT_CAST)
+            return 1;
+    return 0;
+}
+
 static void DrawView(void)
 {
     int i, start = B.viewCursor / 14 * 14;
@@ -1200,7 +1216,7 @@ static void DrawView(void)
         Name(name, sizeof(name), B.viewList[B.viewCursor]);
         TcgUi_Strip(NULL, 0, name);
     }
-    TcgUi_Hints("{INSPECT} LOOK  {B} BACK");
+    TcgUi_Hints(ViewCastable() ? "{A} FLASHBACK  {INSPECT} LOOK  {B} BACK" : "{INSPECT} LOOK  {B} BACK");
 }
 
 static int sMenuLabelsInit;
@@ -2438,6 +2454,12 @@ void MtgBoard_DebugFocus(const char *name)   // "mp mtg focus NAME": the cursor 
 {
     int r, i;
     BuildRows();
+    if (strcmp(name, "GRAVEYARD") == 0) {   // ("mp mtg focus GRAVEYARD": your graveyard pile)
+        B.pile = PILE_MY_GRAVE;
+        B.trayWanted = 0;
+        MPNet_Log("mtg: focus your graveyard");
+        return;
+    }
     for (r = ROW_COUNT - 1; r >= 0; r--)
         for (i = 0; i < B.itemCount[r]; i++)
             if (strcmp(Def(B.items[r][i].obj)->name, name) == 0) {
@@ -2533,7 +2555,7 @@ static int GatherMenu(int focused)
         int m = 0, pass;
         for (pass = 0; pass < 2; pass++)
             for (k = 0; k < n; k++)
-                if (q->actions[B.menu[k]].alt == pass)
+                if ((q->actions[B.menu[k]].alt != 0) == pass)
                     sorted[m++] = B.menu[k];
         memcpy(B.menu, sorted, sizeof(uint16_t) * (size_t)n);
     }
@@ -2546,9 +2568,30 @@ static void MenuLabel(int k, char *out, unsigned cap)
     const MtgAction *a = &B.duel.query.actions[B.menu[k]];
     if (a->kind == MTG_ACT_LAND)
         snprintf(out, cap, "PLAY THE LAND");
-    else if (a->kind == MTG_ACT_CAST && a->alt) {   // its alternative cost, in the card's own words ("SACRIFICE A MOUNTAIN")
-        const MtgCardDef *c = Mtg_Card(B.duel.objs[a->obj].def);
+    else if (a->kind == MTG_ACT_CAST && a->alt == MTG_ALT_COST) {   // its alternative cost, in the card's own words
+        const MtgCardDef *c = Mtg_Card(B.duel.objs[a->obj].def);              // ("SACRIFICE A MOUNTAIN")
         snprintf(out, cap, "CAST: %s", gMtgAltCosts[c->altCost - 1].label);
+        TcgUi_FitText(out, 206, TF_SMALL);
+    } else if (a->kind == MTG_ACT_CAST && a->alt) {   // kicked, with buyback, flashback: what it pays besides (or instead)
+        const MtgCardDef *c = Mtg_Card(B.duel.objs[a->obj].def);
+        char what[64];
+        int idx = a->alt == MTG_ALT_KICK1 ? c->kicker[0] : a->alt == MTG_ALT_KICK2 ? c->kicker[1]
+                : a->alt == MTG_ALT_BUYBACK ? c->buyback : a->alt == MTG_ALT_FLASHBACK ? c->flashback : 0;
+        unsigned u;
+        what[0] = 0;
+        if (idx) {   // ("pay 1 R, sacrifice 1 Land" -> "1 R, SACRIFICE 1 LAND")
+            UnlessWords(what, sizeof(what), &gMtgAltCosts[idx - 1].cost);
+            if (strncmp(what, "pay ", 4) == 0)
+                memmove(what, what + 4, strlen(what + 4) + 1);
+            for (u = 0; what[u]; u++)
+                if (what[u] >= 'a' && what[u] <= 'z')
+                    what[u] -= 32;
+        }
+        if (a->alt == MTG_ALT_KICK12)
+            snprintf(out, cap, "CAST WITH BOTH KICKERS");
+        else
+            snprintf(out, cap, "%s (%s%s)", a->alt == MTG_ALT_FLASHBACK ? "FLASHBACK" : a->alt == MTG_ALT_BUYBACK ? "BUYBACK" : "KICKED",
+                     a->alt == MTG_ALT_FLASHBACK ? "" : "+", what);
         TcgUi_FitText(out, 206, TF_SMALL);
     }
     else if (a->kind == MTG_ACT_CAST && a->ability != 0xFFFF && gMtgAbilities[a->ability].charmOf != 0xFFFF) {
@@ -2589,7 +2632,7 @@ static void ChooseKind(int k)
     B.targetCount = 0;
     for (i = 1; i < q->actionCount; i++) {
         const MtgAction *a = &q->actions[i];
-        if (a->kind == chosen->kind && a->ability == chosen->ability && a->obj == chosen->obj)
+        if (a->kind == chosen->kind && a->ability == chosen->ability && a->obj == chosen->obj && a->alt == chosen->alt)
             B.targets[B.targetCount++] = (uint16_t)i;
     }
     if (B.targetCount == 1 && chosen->target.kind == MTG_TGT_NONE) {
@@ -3198,7 +3241,21 @@ int MtgBoard_Step(unsigned pressed, unsigned keys)
             B.viewCursor += 7, PlaySE(SE_SELECT);
         if (pressed & KEY_UP && B.viewCursor >= 7)
             B.viewCursor -= 7, PlaySE(SE_SELECT);
-        if (pressed & (KEY_INSPECT | KEY_SELECT | KEY_A)) {
+        if ((pressed & KEY_A) && ViewCastable()) {   // a card of yours that can be cast from there (Flashback)
+            int f = B.viewList[B.viewCursor];
+            B.menuCount = GatherMenu(f);
+            B.mode = MODE_NORMAL;
+            if (B.menuCount == 1)
+                ChooseKind(0);
+            else {
+                for (f = 0; f < B.menuCount; f++)
+                    MenuLabel(f, sMenuLabels[f], sizeof(sMenuLabels[f]));
+                sMenuLabelsInit = 1;
+                B.menuCursor = 0;
+                B.mode = MODE_MENU;
+                PlaySE(SE_SELECT);
+            }
+        } else if (pressed & (KEY_INSPECT | KEY_SELECT | KEY_A)) {
             B.inspect = 1;
             B.inspectObj = B.viewList[B.viewCursor];
             PlaySE(SE_SELECT);

@@ -264,9 +264,18 @@ static int ScoreAction(const MtgDuel *d, const MtgAction *a, int me)
         int price = CostPrice(d, &gMtgAbilities[a->ability], me, a->obj);
         s = s > price ? s - price : 0;
     }
-    if (s > 0 && s < 500 && a->alt) {   // the alternative cost's price: the mana cast wins when both are there
+    if (s > 0 && s < 500 && a->alt == MTG_ALT_COST) {   // the alternative cost's price: the mana cast wins when both are there
         int price = 1 + CostPriceOf(d, &gMtgAltCosts[Mtg_Card(d->objs[a->obj].def)->altCost - 1].cost, me, a->obj);
         s = s > price ? s - price : 0;
+    } else if (s > 0 && s < 500 && a->alt && a->alt != MTG_ALT_FLASHBACK) {
+        // kicked or with buyback: worth it when what else it pays costs little (Forge's AI kicks whenever it can pay)
+        const MtgCardDef *c = Mtg_Card(d->objs[a->obj].def);
+        int idx = a->alt == MTG_ALT_KICK1 ? c->kicker[0] : a->alt == MTG_ALT_KICK2 ? c->kicker[1]
+                : a->alt == MTG_ALT_BUYBACK ? c->buyback : 0;
+        int price = idx ? CostPriceOf(d, &gMtgAltCosts[idx - 1].cost, me, a->obj) : 0;
+        s += (a->alt == MTG_ALT_KICK12 ? 6 : 3) - price;
+        if (s < 1)
+            s = 1;
     }
     return s;
 }

@@ -8592,3 +8592,23 @@ res/moves/chatter/anim.s).
   its graveyard), the opponent as the player, the least or most of a number by AILogic, a mode by a look-ahead on a copy.
 - Also: CharacteristicDefining statics on cards with a printed P/T (LOST ORDER OF JARKELD) and EffectZone$ Battlefield.
   Playable: 2870 -> 2907. Tests: tools/mtg/test_rules.c TestChoices; scenario mtg_choices (shots ch_type, ch_mode2).
+
+## MAGIC: Echo, Cumulative upkeep, Kicker, Buyback, Flashback (2026-11-21)
+- **The user (2026-11-21): no pushes or releases of MAGIC work until every card plays; then one push, one update.**
+  These batches are local commits until then.
+- Echo and Cumulative upkeep are made into upkeep triggers as the card loads (mtg_script.c, after the SVars: SVars
+  MtgEchoPay / MtgCuPut / MtgCuSac and T: lines, as Forge's CardFactoryUtil writes them): "sacrifice it unless you pay"
+  through the UnlessCost$ machinery. Echo's "if it came under your control since your last upkeep" is MtgObj.echoDue
+  (1 on entering or a GainControl, 2 during that controller's upkeep, 0 after; Valid cameUnderControlSinceLastUpkeep).
+  Cumulative upkeep: an AGE counter, then its cost once per counter (MtgAbility.unlessScale from UnlessScale$ AGE;
+  mana and life costs; the table's prompt says the scaled amount).
+- Kicker / Buyback / Flashback: their costs in gMtgAltCosts (Mtg_AddExtraCost), MtgCardDef kicker[2] / buyback /
+  flashback. Casts are MtgAction.alt MTG_ALT_KICK1 / KICK2 / KICK12 / BUYBACK / FLASHBACK beside the plain one
+  (mtg_game.c AddExtraCasts, AddFlashback from the graveyard; CastMana adds their mana, HasOther their other parts,
+  paid through costAltIdx / CostNow). MtgObj.kicked (kept onto the battlefield: Valid kicked / kicked 1 / kicked 2,
+  Condition$ Kicked, Count$Kicked.A.B, etbCounter's CheckSVar$) and castMode (Buyback: back to the hand as it
+  resolves; Flashback: exiled whenever it leaves the stack, Mtg_MoveTo). Also ETBReplacement's fourth part (a
+  condition: Anavolver's "Card.Self+kicked 1") and two per card, Condition$ Threshold.
+- The table: the card's menu shows CAST, KICKED (+R), BUYBACK (+3)...; the graveyard viewer's A casts a card with
+  flashback ({A} FLASHBACK in its hints). The AI kicks when what it pays besides costs little.
+- Playable: 2907 -> 2961 -> 3060. Tests: test_rules.c TestUpkeepCosts, TestKickerFlashback; scenario mtg_flashback.

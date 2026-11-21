@@ -266,6 +266,10 @@ void Mtg_MoveTo(MtgDuel *d, int obj, int zone)
     MtgTrigEvent ev;
     if (from == MTG_ZONE_BATTLEFIELD && zone == MTG_ZONE_GRAVEYARD && Mtg_Card(o->def)->diesToLibraryTop)
         zone = MTG_ZONE_LIBRARY;   // "if it would die, put it on top of its owner's library instead" (its top: the end)
+    if (from == MTG_ZONE_STACK && o->castMode == 2)
+        zone = MTG_ZONE_EXILE;     // (Flashback: exiled instead, wherever it would go from the stack)
+    if (from == MTG_ZONE_BATTLEFIELD || (from == MTG_ZONE_STACK && zone != MTG_ZONE_BATTLEFIELD))
+        o->kicked = o->castMode = 0;   // (cast kicked: only while it's the spell, or the permanent it became)
     memset(&ev, 0, sizeof(ev));
     ev.mode = MTG_TRIG_CHANGES_ZONE;
     ev.obj = (uint16_t)obj;
@@ -298,8 +302,9 @@ void Mtg_MoveTo(MtgDuel *d, int obj, int zone)
         o->chosenColors = o->chosenPlayer = 0;
         o->chosenNumber = 0;
         o->echoDue = 1;
-        if (Mtg_Card(o->def)->etbRepl && d->etbCount < 8)
-            d->etbQueue[d->etbCount++] = (uint16_t)obj;
+        for (i = 0; i < 2; i++)   // (each "as it enters" of its card: obj, the second with bit 15)
+            if (Mtg_Card(o->def)->etbRepl[i] && d->etbCount < 8)
+                d->etbQueue[d->etbCount++] = (uint16_t)(obj | (i << 15));
     }
     if (zone != MTG_ZONE_BATTLEFIELD)
         o->controller = o->owner, o->ctrlBase = 0;
@@ -314,7 +319,8 @@ void Mtg_MoveTo(MtgDuel *d, int obj, int zone)
     Mtg_Event(d, MTG_EV_ZONE, obj, from, zone);
     if (zone == MTG_ZONE_BATTLEFIELD && Mtg_StaticForbids(d, MTG_STATIC_ETB_TAPPED, obj, MTG_NO_OBJ))
         Mtg_Tap(d, obj, 1);   // (it enters tapped: ETBTapped)
-    if (zone == MTG_ZONE_BATTLEFIELD && Mtg_Card(o->def)->etbKind && Mtg_Card(o->def)->etbNum)
+    if (zone == MTG_ZONE_BATTLEFIELD && Mtg_Card(o->def)->etbKind && Mtg_Card(o->def)->etbNum
+        && (!Mtg_Card(o->def)->etbCheck || Mtg_CheckSvar(d, o->def, obj, o->controller, Mtg_Card(o->def)->etbCheck, NULL)))
         Mtg_AddCountersKind(d, obj, Mtg_Card(o->def)->etbKind, Mtg_Card(o->def)->etbNum);   // (etbCounter:TYPE:N)
     if (from != MTG_ZONE_BATTLEFIELD)
         Mtg_CheckTriggers(d, &ev);
@@ -708,8 +714,8 @@ static void FinishResolve(MtgDuel *d)
     const MtgCardDef *c = Mtg_Card(d->objs[e->source].def);
     d->resolving = 0;
     if (e->isSpell && d->objs[e->source].zone == MTG_ZONE_STACK) {
-        if (c->types & (MTG_T_INSTANT | MTG_T_SORCERY))
-            Mtg_MoveTo(d, e->source, MTG_ZONE_GRAVEYARD);
+        if (c->types & (MTG_T_INSTANT | MTG_T_SORCERY))   // (Buyback: back to its owner's hand)
+            Mtg_MoveTo(d, e->source, d->objs[e->source].castMode == 1 ? MTG_ZONE_HAND : MTG_ZONE_GRAVEYARD);
         else {
             d->objs[e->source].controller = e->controller;
             Mtg_MoveTo(d, e->source, MTG_ZONE_BATTLEFIELD);
@@ -869,19 +875,20 @@ static int ResolveTop(MtgDuel *d)
 static int RunEtb(MtgDuel *d)
 {
     while (d->etbCount && !d->over) {
-        int obj = d->etbQueue[0];
+        int obj = d->etbQueue[0] & 0x7FFF, which = d->etbQueue[0] >> 15;
         const MtgCardDef *c = Mtg_Card(d->objs[obj].def);
         memmove(&d->etbQueue[0], &d->etbQueue[1], (size_t)(--d->etbCount) * sizeof(d->etbQueue[0]));
-        if (d->objs[obj].zone != MTG_ZONE_BATTLEFIELD || !c->etbRepl)
+        if (d->objs[obj].zone != MTG_ZONE_BATTLEFIELD || !c->etbRepl[which]
+            || (c->etbCond[which] && !Mtg_ValidObj(d, obj, c->etbCond[which], obj, d->objs[obj].controller)))
             continue;
         memset(&d->res, 0, sizeof(d->res));
         d->res.controller = d->objs[obj].controller;
         d->res.source = (uint16_t)obj;
-        d->res.ability = (uint16_t)(c->etbRepl - 1);
+        d->res.ability = (uint16_t)(c->etbRepl[which] - 1);
         d->res.trigger = 0xFFFF;
         d->res.trigObj = d->res.trigObj2 = MTG_NO_OBJ;
         d->res.trigPlayer = d->res.trigCtrl = 0xFF;
-        d->res.optional = c->etbOptional ? 1 : 0;
+        d->res.optional = (c->etbOptional >> which) & 1;
         d->resolving = 1;
         d->resAbility = d->res.ability;
         d->resReturn = 0xFFFF;
@@ -1009,6 +1016,94 @@ static void AddAltCasts(const MtgDuel *d, MtgQuery *q, int obj, int p)
         q->actions[m].alt = 1;
 }
 
+// a cost's parts that are picked or paid besides mana (sacrifices, discards, life...)
+static int HasOther(const MtgCost *c)
+{
+    return c->sacN || c->discardN || c->payLife || c->exileHandN || c->returnN || c->tapTypeN || c->exileGraveN;
+}
+
+// the extra cost a cast pays (gMtgAltCosts + 1: its alternative one, a kicker, buyback, flashback; 0 none or two)
+static int ExtraIdx(const MtgCardDef *c, int alt)
+{
+    switch (alt) {
+    case MTG_ALT_COST: return c->altCost;
+    case MTG_ALT_KICK1: return c->kicker[0];
+    case MTG_ALT_KICK2: return c->kicker[1];
+    case MTG_ALT_BUYBACK: return c->buyback;
+    case MTG_ALT_FLASHBACK: return c->flashback;
+    }
+    return 0;
+}
+
+// the mana a cast pays: its own (with Raise / ReduceCost), and its kickers' or buyback's besides
+static void CastMana(const MtgCardDef *c, int alt, MtgManaCost *cost)
+{
+    int k, j;
+    for (j = 0; j < 2; j++) {
+        int idx = alt == MTG_ALT_KICK12 ? c->kicker[j] : j ? 0 : ExtraIdx(c, alt);
+        const MtgManaCost *m;
+        if (!idx || alt == MTG_ALT_COST || alt == MTG_ALT_FLASHBACK)
+            continue;
+        m = &gMtgAltCosts[idx - 1].cost.mana;
+        cost->generic = (uint8_t)(cost->generic + m->generic);
+        for (k = 0; k < MTG_MANA_KINDS; k++)
+            cost->pip[k] = (uint8_t)(cost->pip[k] + m->pip[k]);
+    }
+}
+
+// a spell's kicked and buyback casts beside its plain one (its cost already payable)
+static void AddExtraCasts(const MtgDuel *d, MtgQuery *q, int obj, int p, const MtgManaCost *base, int ability)
+{
+    const MtgCardDef *c = Mtg_Card(d->objs[obj].def);
+    const MtgCost *own = ability != 0xFFFF ? &gMtgAbilities[ability].cost : NULL;
+    static const uint8_t sAlts[4] = {MTG_ALT_KICK1, MTG_ALT_KICK2, MTG_ALT_KICK12, MTG_ALT_BUYBACK};
+    int k, m;
+    for (k = 0; k < 4; k++) {
+        int alt = sAlts[k], idx = ExtraIdx(c, alt), before = q->actionCount, x = 0;
+        MtgManaCost cost = *base;
+        const MtgCost *extra = idx ? &gMtgAltCosts[idx - 1].cost : NULL;
+        if (alt == MTG_ALT_KICK12) {
+            if (!c->kicker[0] || !c->kicker[1] || HasOther(&gMtgAltCosts[c->kicker[0] - 1].cost)
+                || HasOther(&gMtgAltCosts[c->kicker[1] - 1].cost))
+                continue;
+        } else if (!extra)
+            continue;
+        CastMana(c, alt, &cost);
+        if (cost.x && (x = Mtg_MaxX(d, p, &cost, MTG_NO_OBJ)) == 0)   // (X: the most that can be paid besides it)
+            continue;
+        if (!Mtg_CanPay(d, p, &cost, x, MTG_NO_OBJ))
+            continue;
+        if (extra && HasOther(extra) && ((own && HasOther(own)) || !Mtg_CostPayable(d, p, extra, obj, obj)))
+            continue;
+        AddWithTargets(d, q, MTG_ACT_CAST, obj, ability, x, p);
+        for (m = before; m < q->actionCount; m++)
+            q->actions[m].alt = (uint8_t)alt;
+    }
+}
+
+// a card's flashback cast from its owner's graveyard (its timing, its flashback cost instead of its mana)
+static void AddFlashback(const MtgDuel *d, MtgQuery *q, int obj, int p)
+{
+    const MtgCardDef *c = Mtg_Card(d->objs[obj].def);
+    const MtgCost *fb = &gMtgAltCosts[c->flashback - 1].cost;
+    int ability = MainAbility(c), before = q->actionCount, m;
+    if (!(c->types & MTG_T_INSTANT) && !(c->keywords & MTG_KW_BIT(MTG_KW_FLASH)) && !SorceryTiming(d, p))
+        return;
+    if (Mtg_StaticForbids(d, MTG_STATIC_CANT_BE_CAST, obj, p) || !Mtg_CanPay(d, p, &fb->mana, 0, MTG_NO_OBJ))
+        return;
+    if (HasOther(fb) && !Mtg_CostPayable(d, p, fb, obj, obj))
+        return;
+    if (ability != 0xFFFF) {
+        const MtgAbility *ab = &gMtgAbilities[ability];
+        if (ab->api == MTG_API_CHARM || (HasOther(fb) && HasOther(&ab->cost)) || !Mtg_CostPayable(d, p, &ab->cost, obj, obj)
+            || (ab->actMyTurn && d->active != p) || (ab->actSteps && !(ab->actSteps & (1u << d->step))))
+            return;
+    }
+    AddWithTargets(d, q, MTG_ACT_CAST, obj, ability, 0, p);
+    for (m = before; m < q->actionCount; m++)
+        q->actions[m].alt = MTG_ALT_FLASHBACK;
+}
+
 static void BuildPriority(MtgDuel *d)
 {
     MtgQuery *q = &d->query;
@@ -1063,6 +1158,8 @@ static void BuildPriority(MtgDuel *d)
                                       || (gMtgAbilities[ability].actSteps
                                           && !(gMtgAbilities[ability].actSteps & (1u << d->step)))))
                 continue;   // ("cast only during combat before blockers are declared"...)
+            if (ability == 0xFFFF || gMtgAbilities[ability].api != MTG_API_CHARM)
+                AddExtraCasts(d, q, i, p, &cost, ability);   // (kicked, with buyback)
             if (ability != 0xFFFF && gMtgAbilities[ability].api == MTG_API_CHARM) {   // one action per mode
                 const MtgAbility *ch = &gMtgAbilities[ability];
                 for (k = 0; k < ch->choiceCount; k++)
@@ -1070,6 +1167,8 @@ static void BuildPriority(MtgDuel *d)
                 continue;
             }
             AddWithTargets(d, q, MTG_ACT_CAST, i, ability, x, p);
+        } else if (o->zone == MTG_ZONE_GRAVEYARD && o->owner == p && c->flashback) {
+            AddFlashback(d, q, i, p);
         } else if (o->zone == MTG_ZONE_BATTLEFIELD && o->controller == p) {
             uint16_t abil[16];
             int abilCount = Mtg_ObjAbilities(d, i, abil, 16);   // (its card's and those statics give it)
@@ -1165,7 +1264,7 @@ static const MtgCost *CostNow(const MtgDuel *d)
     if (d->costAlt == 2)   // (an UnlessCost$ paid as its ability resolves)
         return &gMtgUnlessCosts[gMtgAbilities[d->costAbility].unless - 1];
     if (d->costAlt)
-        return &gMtgAltCosts[Mtg_Card(d->objs[d->costSource].def)->altCost - 1].cost;
+        return &gMtgAltCosts[d->costAltIdx - 1].cost;
     return &gMtgAbilities[d->costAbility].cost;
 }
 
@@ -1330,11 +1429,14 @@ static void DoAction(MtgDuel *d, const MtgAction *a)
     }
     if (d->stackCount >= MTG_MAX_STACK)
         return;
-    if (a->kind == MTG_ACT_CAST && a->alt) {   // (its alternative cost instead of its mana: paid below)
-        Mtg_MoveTo(d, a->obj, MTG_ZONE_STACK);
+    if (a->kind == MTG_ACT_CAST && (a->alt == MTG_ALT_COST || a->alt == MTG_ALT_FLASHBACK)) {
+        if (a->alt == MTG_ALT_FLASHBACK)   // (its flashback cost's mana instead of its own; the rest paid below)
+            Mtg_Pay(d, p, &gMtgAltCosts[Mtg_Card(d->objs[a->obj].def)->flashback - 1].cost.mana, 0, MTG_NO_OBJ);
+        Mtg_MoveTo(d, a->obj, MTG_ZONE_STACK);   // (its alternative cost instead of its mana: paid below)
     } else if (a->kind == MTG_ACT_CAST) {
         MtgManaCost cost;
         Mtg_SpellCost(d, p, a->obj, &cost);
+        CastMana(Mtg_Card(d->objs[a->obj].def), a->alt, &cost);   // (kicked, buyback: theirs besides)
         Mtg_Pay(d, p, &cost, a->x, MTG_NO_OBJ);
         Mtg_MoveTo(d, a->obj, MTG_ZONE_STACK);
     } else {
@@ -1343,6 +1445,11 @@ static void DoAction(MtgDuel *d, const MtgAction *a)
         if (ab->cost.tap)
             Mtg_Tap(d, a->obj, 1);
         CountUse(d, a->obj, a->ability);
+    }
+    if (a->kind == MTG_ACT_CAST) {   // (how it was cast: before "whenever a player kicks a spell" looks)
+        MtgObj *o = &d->objs[a->obj];
+        o->kicked = (uint8_t)(a->alt == MTG_ALT_KICK1 ? 1 : a->alt == MTG_ALT_KICK2 ? 2 : a->alt == MTG_ALT_KICK12 ? 3 : 0);
+        o->castMode = (uint8_t)(a->alt == MTG_ALT_BUYBACK ? 1 : a->alt == MTG_ALT_FLASHBACK ? 2 : 0);
     }
     e = &d->stack[d->stackCount++];
     memset(e, 0, sizeof(*e));
@@ -1362,8 +1469,13 @@ static void DoAction(MtgDuel *d, const MtgAction *a)
     if (!e->isSpell && gMtgAbilities[a->ability].fromHand && gMtgAbilities[a->ability].cost.discardSelf)
         TrigEvent(d, MTG_TRIG_CYCLED, a->obj, MTG_NO_OBJ, p);   // ("when you cycle ...": TriggerCycled)
     if (a->kind == MTG_ACT_CAST && a->alt) {
-        const MtgAltCost *alt = &gMtgAltCosts[Mtg_Card(d->objs[a->obj].def)->altCost - 1];
-        PayCost(d, p, &alt->cost, a->ability, a->obj, 1);
+        const MtgCardDef *c = Mtg_Card(d->objs[a->obj].def);
+        int idx = ExtraIdx(c, a->alt);
+        if (a->alt == MTG_ALT_COST || (idx && HasOther(&gMtgAltCosts[idx - 1].cost))) {
+            d->costAltIdx = (uint16_t)idx;   // (that cost's picks: CostNow)
+            PayCost(d, p, &gMtgAltCosts[idx - 1].cost, a->ability, a->obj, 1);
+        } else if (a->ability != 0xFFFF)
+            PayOtherCosts(d, p, &gMtgAbilities[a->ability], a->obj);
     } else if (a->ability != 0xFFFF)
         PayOtherCosts(d, p, &gMtgAbilities[a->ability], a->obj);
     d->tgtLeft = d->tgtOpt = 0;
