@@ -115,8 +115,11 @@ def page_slice(fmt, has, hasnt, out, done):
     print('%s: %d decks' % (key, n), flush=True)
 
 
+OFFSETS = os.path.join(CACHE, 'slices.offsets')   # (per run: a run of other formats beside it keeps its own)
+
+
 def load_offsets():
-    path = os.path.join(CACHE, 'slices.offsets')
+    path = OFFSETS
     try:
         return json.load(open(path))
     except (OSError, ValueError):
@@ -124,7 +127,7 @@ def load_offsets():
 
 
 def save_offsets(offsets):
-    path = os.path.join(CACHE, 'slices.offsets')
+    path = OFFSETS
     with open(path + '.tmp', 'w') as f:
         json.dump(offsets, f)
     os.replace(path + '.tmp', path)
@@ -139,8 +142,15 @@ def fetch(fmt):
 
 
 def main():
+    global OFFSETS
     os.makedirs(CACHE, exist_ok=True)
-    for fmt in (sys.argv[1:] or FORMATS):
+    fmts = sys.argv[1:] or FORMATS
+    if sys.argv[1:]:
+        import hashlib
+        OFFSETS = os.path.join(CACHE, 'slices.offsets.' + hashlib.md5('|'.join(fmts).encode()).hexdigest()[:8])
+        if not os.path.exists(OFFSETS) and os.path.exists(os.path.join(CACHE, 'slices.offsets')):
+            save_offsets(json.load(open(os.path.join(CACHE, 'slices.offsets'))))   # (where a run of every format got to)
+    for fmt in fmts:
         fetch(fmt)
 
 
