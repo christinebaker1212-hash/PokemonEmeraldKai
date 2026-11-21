@@ -8741,3 +8741,11 @@ res/moves/chatter/anim.s).
   Fog, shield, prevention static or protection prevents damage), IgnoreLandWalk (Staff of the Ages), UnspentMana
   (Upwelling: pools aren't emptied between steps).
 - Playable: 3558 -> 3578. Tests: test_rules.c TestNewStaticModes.
+
+## MAGIC: untap limits (Winter Orb, Static Orb, Smoke, Mungha Wurm) (2026-11-21)
+- AddKeyword$ UntapAdjust:TYPE:N on Affected$ Player / You is its own static (MTG_STATIC_UNTAP_LIMIT; You: only its
+  controller's untap step; IsPresent$ kept: the Orbs only while untapped). In the untap step (mtg_game.c StartStep), for
+  each limit in force, when more of that type would untap than it lets, the player picks which (query CHOOSE PICK,
+  forCost 10, "Untap" on the table; MtgObj.untapPick bits, MtgDuel.untapStage / untapLimit / untapTight); the rest of
+  that type stay tapped, everything else untaps. The AI keeps its best.
+- Playable: 3578 -> 3582. Tests: test_rules.c TestUntapLimits.

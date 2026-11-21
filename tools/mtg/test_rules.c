@@ -3689,6 +3689,31 @@ static void TestNewStaticModes(void)
     CHECK(sD.players[0].pool[MTG_G] == 2, "the green mana kept (%d)", sD.players[0].pool[MTG_G]);
 }
 
+static void TestUntapLimits(void)
+{
+    int orb, l[3], bears, i, untapped;
+    printf("untap limits (Winter Orb)\n");
+    Table();   // Winter Orb: three tapped lands, one picked to untap; the creature untaps anyway
+    orb = Put(1, "Winter Orb", MTG_ZONE_BATTLEFIELD);
+    for (i = 0; i < 3; i++) {
+        l[i] = Put(0, "Forest", MTG_ZONE_BATTLEFIELD);
+        sD.objs[l[i]].tapped = 1;
+    }
+    bears = Put(0, "Grizzly Bears", MTG_ZONE_BATTLEFIELD);
+    sD.objs[bears].tapped = 1;
+    GoToTurn(1, MTG_STEP_END);
+    for (i = 0; i < 10 && !(Mtg_Query(&sD)->kind == MTG_Q_CHOOSE && Mtg_Query(&sD)->forCost == 10); i++)
+        Pass();
+    CHECK(Mtg_Query(&sD)->kind == MTG_Q_CHOOSE && Mtg_Query(&sD)->candidateCount == 3 && Mtg_Query(&sD)->player == 0,
+          "which land to untap: asked");
+    ChoosePick(l[1]);
+    for (i = untapped = 0; i < 3; i++)
+        untapped += !sD.objs[l[i]].tapped;
+    CHECK(untapped == 1 && !sD.objs[l[1]].tapped && !sD.objs[bears].tapped, "one land untapped (%d), the bears too", untapped);
+    CHECK(sD.active == 0 && sD.step > MTG_STEP_UNTAP, "the turn goes on (step %d)", sD.step);
+    sD.objs[orb].tapped = 1;   // (Winter Orb tapped: in Forge's text it still works; Static Orb stops)
+}
+
 static void TestDuels(void)
 {
     static MtgDeck red, green;
@@ -3987,6 +4012,7 @@ int main(int argc, char **argv)
     TestProtectionKinds();
     TestTypeLayer();
     TestNewStaticModes();
+    TestUntapLimits();
     TestCantCounter();
     TestTrigModes();
     TestBecomesTarget();

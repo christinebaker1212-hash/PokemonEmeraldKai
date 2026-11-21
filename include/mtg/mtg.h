@@ -179,6 +179,7 @@ typedef struct {
                                   // (2: exiled whenever it would leave the stack)
     uint16_t attackedTurn;        // the turn it last attacked (+1; 0: never): Valid attackedThisTurn
     uint16_t faceDownOf;          // face down (Morph): its real card + 1 while def is MTG_FACE_DOWN (0: face up)
+    uint8_t untapPick;            // the untap step's limits (Winter Orb...): bit per limit it was picked to untap under
     uint8_t echoDue;              // Echo: 1 came under its controller since their last upkeep, 2 their upkeep now (its
                                   // trigger's "if": Valid cameUnderControlSinceLastUpkeep), 0 paid for or not new
 } MtgObj;
@@ -388,6 +389,8 @@ typedef struct MtgDuel {
     int16_t resChoice;                               // the answer: 1 / 0, the object picked or the option (-1: not asked yet)
     uint8_t resSkip;                                 // the resolving chain stops here (its optional cost not paid)
     MtgAction pendAct;                               // an action with an X, waiting for its X (query forCost 8)
+    uint8_t untapStage, untapLimit, untapPicks, untapTight;   // the untap step's limits: begun; the one asked; picks
+                                                     // made for it; those with more tapped than they let untap (bits)
     uint16_t resMode;                                // GenericChoice: the mode chosen + 1, its chain run next (0: none)
     // permanents that just entered with an "as it enters" (etbRepl) still to run, oldest first (mtg_game.c Run)
     uint8_t etbCount;

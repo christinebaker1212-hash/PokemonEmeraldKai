@@ -307,6 +307,32 @@ static void ParseOne(MtgCardDef *c, int cardId, char *text)
             : strcmp(s, "CantPreventDamage") == 0 ? MTG_STATIC_CANT_PREVENT
             : strcmp(s, "IgnoreLandWalk") == 0 ? MTG_STATIC_IGNORE_LANDWALK
             : strcmp(s, "UnspentMana") == 0 ? MTG_STATIC_UNSPENT_MANA : 0xFF;
+    if (st.mode == MTG_STATIC_CONTINUOUS && (s = ParamOf(first, count, "AddKeyword")) && strncmp(s, "UntapAdjust:", 12) == 0) {
+        const char *aff = ParamOf(first, count, "Affected"), *colon = strchr(s + 12, ':');
+        char spec[24];
+        for (i = 0; i < count; i++) {   // ("You can't untap more than one land during your untap step")
+            const char *key = gMtgParams[first + i].key;
+            if (strcmp(key, "Mode") && strcmp(key, "Description") && strcmp(key, "IsPresent") && strcmp(key, "Affected")
+                && strcmp(key, "AddKeyword"))
+                goto unknown;
+        }
+        if (!aff || (strcmp(aff, "Player") && strcmp(aff, "You")) || !colon || (size_t)(colon - (s + 12)) >= sizeof(spec)
+            || !Integer(colon + 1, &v) || v < 0 || v > 20)
+            goto unknown;
+        memcpy(spec, s + 12, (size_t)(colon - (s + 12)));
+        spec[colon - (s + 12)] = 0;
+        if (!Mtg_ValidSpecKnown(spec) || ((st.present = ParamOf(first, count, "IsPresent")) && !Mtg_ValidSpecKnown(st.present)))
+            goto unknown;
+        st.mode = MTG_STATIC_UNTAP_LIMIT;
+        st.affected = Kept(strlen(spec) + 1);
+        strcpy((char *)st.affected, spec);
+        st.untapN = (uint8_t)v;
+        st.taxYou = aff[0] == 'Y';
+        st.presentNum = 1;
+        if (!AddStatic(c, &st))
+            goto unknown;
+        return;
+    }
     if (st.mode == MTG_STATIC_CANT_PREVENT || st.mode == MTG_STATIC_IGNORE_LANDWALK || st.mode == MTG_STATIC_UNSPENT_MANA) {
         for (i = 0; i < count; i++) {   // (nothing but its mode, maybe IsPresent$: kept below)
             const char *key = gMtgParams[first + i].key;
@@ -1468,6 +1494,26 @@ static int ForbidBy(const MtgDuel *d, const MtgStatic *st, int s, int ctrl, int 
             return 0;
     }
     return 1;
+}
+
+int Mtg_UntapLimits(const MtgDuel *d, int player, const char **spec, int *n, int max)
+{
+    int s, k, count = 0;
+    for (s = 0; s < d->objCount && count < max; s++) {
+        const MtgObj *src = &d->objs[s];
+        const MtgCardDef *c;
+        if (src->zone != MTG_ZONE_BATTLEFIELD)
+            continue;
+        c = Mtg_Card(src->def);
+        for (k = 0; k < c->staticCount && count < max; k++) {
+            const MtgStatic *st = &gMtgStatics[c->statics[k]];
+            if (st->mode != MTG_STATIC_UNTAP_LIMIT || (st->taxYou && src->controller != player) || !Present(d, st, s))
+                continue;
+            spec[count] = st->affected;
+            n[count++] = st->untapN;
+        }
+    }
+    return count;
 }
 
 int Mtg_AttackTax(const MtgDuel *d, int attacker)

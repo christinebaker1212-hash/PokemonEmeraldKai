@@ -13985,6 +13985,13 @@
 "number": "132",
 "set": "vis"
 },
+"Mungha Wurm": {
+"artist": "Greg Staples",
+"file": "pcy_119",
+"frame": "1997",
+"number": "119",
+"set": "pcy"
+},
 "Murderous Betrayal": {
 "artist": "Randy Gallegos",
 "file": "nem_61",
@@ -19627,6 +19634,13 @@
 "number": "17",
 "set": "sth"
 },
+"Smoke": {
+"artist": "Jesper Myrfors",
+"file": "4ed_222",
+"frame": "1993",
+"number": "222",
+"set": "4ed"
+},
 "Smokespew Invoker": {
 "artist": "Thomas M. Baxa",
 "file": "lgn_81",
@@ -20613,6 +20627,13 @@
 "frame": "1997",
 "number": "106",
 "set": "mmq"
+},
+"Static Orb": {
+"artist": "Dermot Power",
+"file": "tmp_310",
+"frame": "1997",
+"number": "310",
+"set": "tmp"
 },
 "Staunch Defenders": {
 "artist": "Mark Poole",
@@ -24427,6 +24448,13 @@
 "file": "4ed_290",
 "frame": "1993",
 "number": "290",
+"set": "4ed"
+},
+"Winter Orb": {
+"artist": "Mark Tedin",
+"file": "4ed_358",
+"frame": "1993",
+"number": "358",
 "set": "4ed"
 },
 "Winter Sky": {

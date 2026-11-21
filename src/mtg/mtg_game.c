@@ -2133,24 +2133,74 @@ static int HoldsLock(const MtgDuel *d, int obj)
     return 0;
 }
 
+// a tapped permanent of the active player that untaps in their untap step (nothing keeps it tapped)
+static int WouldUntap(const MtgDuel *d, int i)
+{
+    return d->objs[i].controller == d->active && d->objs[i].zone == MTG_ZONE_BATTLEFIELD && d->objs[i].tapped
+        && !Mtg_StaticForbids(d, MTG_STATIC_NO_UNTAP, i, MTG_NO_OBJ) && !HoldsLock(d, i);
+}
+
 // the step's turn-based actions; returns 1 if it is waiting for a decision (the query is set)
 static int StartStep(MtgDuel *d)
 {
     int i;
     d->stepStarted = 1;
     switch (d->step) {
-    case MTG_STEP_UNTAP:
-        PruneEffects(d, MTG_EFF_NEXT_TURN, d->active);   // ("until your next turn")
-        for (i = 0; i < d->objCount; i++)
-            d->objs[i].usedN[0] = d->objs[i].usedN[1] = 0;   // (ActivationLimit$: each turn)
+    case MTG_STEP_UNTAP: {
+        const char *lspec[8];
+        int lnum[8], limits, k;
+        if (!d->untapStage) {
+            PruneEffects(d, MTG_EFF_NEXT_TURN, d->active);   // ("until your next turn")
+            for (i = 0; i < d->objCount; i++)
+                d->objs[i].usedN[0] = d->objs[i].usedN[1] = 0, d->objs[i].untapPick = 0;   // (ActivationLimit$: each turn)
+            d->untapStage = 1, d->untapLimit = 0, d->untapPicks = 0, d->untapTight = 0;
+        }
+        // the limits (Winter Orb: "can't untap more than one land"): for each in turn, the player picks which of those
+        // that would untap do, when more would than it lets (query CHOOSE PICK, forCost 10)
+        limits = Mtg_UntapLimits(d, d->active, lspec, lnum, 8);
+        while (d->untapLimit < limits) {
+            uint16_t list[MTG_MAX_COMBAT];
+            int n = 0, picked = 0;
+            for (i = 0; i < d->objCount && n < MTG_MAX_COMBAT; i++)
+                if (WouldUntap(d, i) && Mtg_ValidObj(d, i, lspec[d->untapLimit], MTG_NO_OBJ, d->active)) {
+                    if (d->objs[i].untapPick & (1u << d->untapLimit))
+                        picked++;
+                    else
+                        list[n++] = (uint16_t)i;
+                }
+            if (n + picked > lnum[d->untapLimit])
+                d->untapTight |= (uint8_t)(1u << d->untapLimit);
+            if (n + picked <= lnum[d->untapLimit] || picked >= lnum[d->untapLimit] || !n) {
+                d->untapLimit++;
+                d->untapPicks = 0;
+                continue;
+            }
+            memset(&d->query, 0, sizeof(d->query));
+            d->query.kind = MTG_Q_CHOOSE;
+            d->query.choice = MTG_CHOICE_PICK;
+            d->query.forCost = 10;
+            d->query.ability = 0xFFFF;
+            d->query.player = (uint8_t)d->active;
+            memcpy(d->query.candidates, list, (size_t)n * sizeof(list[0]));
+            d->query.candidateCount = (uint8_t)n;
+            d->stepStarted = 2;
+            return 1;
+        }
         for (i = 0; i < d->objCount; i++)
             if (d->objs[i].controller == d->active && d->objs[i].zone == MTG_ZONE_BATTLEFIELD) {
-                if (!d->objs[i].tapped || (!Mtg_StaticForbids(d, MTG_STATIC_NO_UNTAP, i, MTG_NO_OBJ) && !HoldsLock(d, i)))
+                int held = 0;
+                for (k = 0; k < limits; k++)   // (one a limit holds back: of its type, not picked, more than it lets)
+                    if ((d->untapTight & (1u << k)) && !(d->objs[i].untapPick & (1u << k))
+                        && Mtg_ValidObj(d, i, lspec[k], MTG_NO_OBJ, d->active))
+                        held = 1;
+                if (!held && WouldUntap(d, i))
                     Mtg_Tap(d, i, 0);
                 d->objs[i].sick = 0;
             }
+        d->untapStage = 0;
         PruneEffects(d, MTG_EFF_AFTER_UNTAP, d->active);   // ("doesn't untap during your next untap step": done)
         break;
+    }
     case MTG_STEP_UPKEEP:
         for (i = 0; i < d->objCount; i++)   // (Echo: what came under the player since their last upkeep is due now)
             if (d->objs[i].controller == d->active && d->objs[i].echoDue == 1)
@@ -2493,6 +2543,14 @@ int Mtg_Answer(MtgDuel *d, const MtgAnswer *a)
         PushTrigger(d, NextPending(d), q->actions[a->action].target);
         break;
     case MTG_Q_CHOOSE:
+        if (q->forCost == 10) {   // one to untap under the untap step's limit: the step goes on
+            if (a->card >= q->candidateCount)
+                return 0;
+            d->objs[q->candidates[a->card]].untapPick |= (uint8_t)(1u << d->untapLimit);
+            d->untapPicks++;
+            d->stepStarted = 0;
+            break;
+        }
         if (q->forCost == 9) {   // a share of a divided amount, to the next target
             if (a->card >= q->optCount || !d->stackCount)
                 return 0;

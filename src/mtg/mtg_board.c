@@ -1441,6 +1441,8 @@ static const char *PickVerb(void)
         return "Exile";   // (from the graveyard)
     if (q->forCost == 7)
         return "Target";  // (a spell's next target)
+    if (q->forCost == 10)
+        return "Untap";   // (the untap step's limit: Winter Orb)
     if (q->candidateCount && q->ability != 0xFFFF && gMtgAbilities[q->ability].api == MTG_API_CHANGE_ZONE
         && B.duel.objs[q->candidates[0]].zone != MTG_ZONE_LIBRARY && Mtg_Param(&gMtgAbilities[q->ability], "Destination")) {
         const char *dz = Mtg_Param(&gMtgAbilities[q->ability], "Destination");   // (its own cards: back to the hand, exiled)

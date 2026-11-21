@@ -783,6 +783,17 @@ static void Choose(const MtgDuel *d, const MtgQuery *q, MtgAnswer *out)
         out->card = (uint8_t)best;
         return;
     }
+    if (q->forCost == 10) {   // one to untap (Winter Orb): its best (a land of a color it lacks counts as a 3-drop)
+        int bestS = -1;
+        for (i = 0; i < q->candidateCount; i++) {
+            int c = q->candidates[i];
+            int sc = (Mtg_ObjTypes(d, c) & MTG_T_CREATURE) ? Value(d, c) : Mtg_ManaCostTotal(&Mtg_Card(d->objs[c].def)->cost) + 3;
+            if (sc > bestS)
+                bestS = sc, best = i;
+        }
+        out->card = (uint8_t)best;
+        return;
+    }
     if (q->forCost == 7) {   // another target: the opponent's best for what harms, its own best for what helps
         int helps = Helps(&gMtgAbilities[q->ability]), bestS = -1000;
         for (i = 0; i < q->candidateCount; i++) {
