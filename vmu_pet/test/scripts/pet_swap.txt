@@ -1,0 +1,68 @@
+# image: build/pet_vm2.bin
+# image_b: build/pet.bin
+# LINK > SWAP: unit a is a VM2 (marked: its MENU has LINK), unit b a VMU (no LINK; it answers by itself). b holds a
+# grown MOeMON, a an Egg: they change places; b, having sent a grown one on, gets its SPARK a tap more.
+vm2 a
+date a 2026 11 21 10 0 0
+date b 2026 11 21 10 0 0
+run 2
+poke b 41 02
+poke b 43 32
+poke b 42 18
+poke a 42 05
+run 1
+# b's MENU: no LINK (ABOUT after SHOP)
+press b B 0.2
+run 0.5
+press b D 0.2
+run 0.3
+press b D 0.2
+run 0.3
+press b D 0.2
+run 0.3
+press b D 0.2
+run 0.3
+press b D 0.2
+run 0.3
+press b D 0.2
+run 0.3
+press b D 0.2
+run 0.3
+shot b vmu_menu
+peek b 1f 07
+press b B 0.2
+run 0.5
+cable on
+run 1
+press a B 0.2
+run 0.5
+press a D 0.2
+run 0.3
+press a D 0.2
+run 0.3
+press a D 0.2
+run 0.3
+press a D 0.2
+run 0.3
+press a D 0.2
+run 0.3
+press a D 0.2
+run 0.3
+press a D 0.2
+run 0.3
+shot a vm2_menu
+expect a 4 >LINK
+press a A 0.2
+run 0.6
+shot a link_screen
+expect a 0 LINK VMU
+press a A 0.2
+run 8
+shot a swapped_a
+shot b swapped_b
+peek a 41 02
+peek a 42 18
+peek a 43 32
+peek b 41 01
+peek b 42 05
+peek b 6d 01

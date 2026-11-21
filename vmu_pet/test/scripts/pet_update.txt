@@ -1,0 +1,45 @@
+# image: build/pet_vm2.bin
+# image_b: build/pet_old.bin
+# update_species: 18
+# LINK > UPDATE: the VM2 (unit a) sends its program to the VMU (unit b, an older version): b's receiver writes the
+# 375 pages, b starts the new version with its own SAVE page (its MOeMON) kept; run.sh checks OUT/update_*.bin.
+vm2 a
+date a 2026 11 21 10 0 0
+date b 2026 11 21 10 0 0
+run 2
+poke b 41 02
+poke b 43 05
+poke b 42 18
+run 1
+cable on
+run 1
+press a B 0.2
+run 0.5
+press a D 0.2
+run 0.3
+press a D 0.2
+run 0.3
+press a D 0.2
+run 0.3
+press a D 0.2
+run 0.3
+press a D 0.2
+run 0.3
+press a D 0.2
+run 0.3
+press a D 0.2
+run 0.3
+press a A 0.2
+run 0.6
+press a D 0.2
+run 0.3
+press a A 0.2
+run 3
+shot a updating_a
+shot b updating_b
+run 160
+shot a updated_a
+shot b updated_b
+peek b 42 18
+peek b 41 02
+save b OUT/update_b.bin

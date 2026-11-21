@@ -179,15 +179,26 @@ its IVs, nature, shiny, POKé BALL, the MASTER / ASTRAL BALLS bought into the BA
 proposed friendship 255 less 10 a care mistake (70 at least) and EVs from its trainings. An EGG given from Kai must be
 of the edition's hatchable MOéMON (KANTO: 73).
 
-## Sending the pet to a VMU without a Dreamcast (the user's idea, 2026-11-21)
+## One program, LINK the VM2's (built 2026-11-21)
 
-The VMU's own file menu won't copy a GAME (only saves), so the first copy needs a Dreamcast once. After that, the
-pet on the VMU can take **updates** from the VM2 (the user: "the VMU a slave program to the VM2, the main transfer
-program"): LINK > UPDATE on both, the VM2's newer pet sends its own program over the top connector, the VMU writes it
-into its own file page by page (fm_wrt_ex) and checks it. To be safe: the receiving code sits at a fixed place at
-the end of the file that an update never rewrites (a cut cable leaves a VMU that can try again), and the file is
-made bigger than the pet needs at the first install (a GAME's size can't change later). To decide: how many blocks
-to keep (the pet is 56 now; PICTURES 81 beside it).
+The user: "Reserve as many as you think we'll need. For now, the VM2 will act as the main program, since I cannot use
+another VMU. There will be one program, with two functions. The Link function will only work if it's a VM2.
+Otherwise, it acts as normal." Built (`vmu_pet/pet/link.inc`, `update.inc`):
+- **96 blocks** (48 KB; the pet uses 29): later versions grow into it (a GAME's size can't change once it's on a
+  VMU). Fixed places in every version: the version page $BB00, the SAVE page $BB80, the UPDATE receiver $BC00-$BFFF
+  (`tools/check_layout.py` checks them at every build). With PICTURES (81) that's 177 of the VMU's 200 blocks.
+- **A VM2 knows it's one** by a mark in its SAVE page ("VM2M" + its own root block's format time, so a copy of the
+  program on another VMU doesn't count): Kai leaves it when the VM2 is connected (PC > VM2), or
+  `tools/vm2mark.py IMAGE` (`build/pet_vm2.bin` is the pet's image marked).
+- **On a VM2, MENU > LINK** (the VMU on top): **SWAP** (the two MOéMON change places; the VM2 keeps the VMU's in its
+  SAVE page first, so a pulled cable loses nothing: at worst one is on both, and Kai takes each only once; a VMU
+  that sends on a grown one gets its SPARK a tap more), **UPDATE** (this program to the VMU), **BATTLE**.
+- **On a VMU there's no LINK**: the pet answers the VM2's calls by itself while joined.
+- **UPDATE**: the VM2 sends its 375 program pages; the VMU's receiver writes and checks each. The receiver is never
+  rewritten, and page 0 points into it until the last page, so a cut cable or flat battery leaves a VMU that starts
+  waiting for the VM2 to try again (MODE goes back to its menus). In the emulator a whole update takes about 2.3
+  minutes. The first copy onto a VMU still needs a Dreamcast once (the VMU's menu won't copy a GAME).
+- Tests: pet_swap, pet_update, pet_update_cut (the cable pulled partway, then whole), pet_battle_link.
 
 ## The VMU manager (built 2026-11-21)
 

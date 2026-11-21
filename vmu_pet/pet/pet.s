@@ -89,8 +89,9 @@ P_ASTRAL   = $61            ; ASTRAL BALLS bought
 P_WINDAY   = $62            ; battles won today (the first 3 give EXP)
 P_WINALL   = $63            ; battles won ever (to 255)
 P_BATTLES  = $64            ; battles ever (to 255)
+P_UNIT     = $67            ; not sent: bit 0 this is a VM2 (link.inc vm2_check), bit 1 its port is listening
 P_END      = $68
-PET_BYTES  = 40
+PET_BYTES  = 39             ; $40-$66 (P_UNIT stays)
 ;; The owner ($68-$7b: stays on this VMU)
 O_SPARKS   = $68            ; 3 bytes, low first
 O_TAP      = $6b            ; TAP UP level: a tap earns 1 + this + O_PRESTIGE
@@ -134,6 +135,7 @@ main:
   mov #0, dirty
   mov #SCR_MAIN, screen
   callf save_load
+  callf vm2_check           ; a VM2? (then MENU > LINK is there: link.inc)
   callf time_read
   ld O_MAGIC
   be #$4f, .known           ; 'O': this VMU has run the pet before
@@ -164,6 +166,7 @@ loop:
   callf on_tick
   callf icon_check          ; the file icon follows an Egg laid, hatched, evolved or received (icon.inc)
 .sametick:
+  callf slave_poll          ; a VMU joined to a VM2 answers its calls (link.inc)
   ld redraw
   bz .halt
   mov #0, redraw
@@ -659,7 +662,7 @@ hatch_anim:
 
 ;; ---------------------------------------------------------------- the menu
 
-MENU_ITEMS = 9
+MENU_ITEMS = 9              ; 8 on a VMU (LINK is the VM2's)
 
 key_menu:
   ld keys_new
@@ -678,8 +681,9 @@ key_menu:
   dec cursor
   br .scroll
 .down:
-  ld cursor
-  be #MENU_ITEMS - 1, .r
+  callf menu_count
+  dec acc
+  be cursor, .r
   inc cursor
 .scroll:
   ; four lines show: keep the cursor in them
@@ -701,6 +705,7 @@ key_menu:
   ret
 .pick:
   ld cursor
+  callf menu_id
   be #0, .feed
   be #1, .train
   be #2, .battle
@@ -747,10 +752,14 @@ draw_menu:
 .line:
   ld scroll
   add tmp0
-  st tmp1                   ; the item
-  sub #MENU_ITEMS
+  st tmp1                   ; the row
+  callf menu_count
+  st tmp2
+  ld tmp1
+  sub tmp2
   bn psw, 7, .done
   ld tmp1
+  callf menu_id
   rol
   st tmp2
   mov #<menu_texts, trl
@@ -779,6 +788,24 @@ draw_menu:
   ld tmp0
   bne #4, .line
 .done:
+  ret
+
+;; menu_count: acc = the menu's rows (LINK only on a VM2); menu_id: acc = a row -> the item it is
+menu_count:
+  mov #MENU_ITEMS, acc
+  bp P_UNIT, 0, .r
+  dec acc
+.r:
+  ret
+
+menu_id:
+  bp P_UNIT, 0, .r
+  push acc
+  sub #7
+  pop acc
+  bp psw, 7, .r
+  inc acc                   ; past LINK
+.r:
   ret
 
 menu_texts:
@@ -1434,7 +1461,7 @@ egg_new:
   st @R0
   inc 0
   ld 0
-  bne #P_END, .clr
+  bne #P_MAGIC + PET_BYTES, .clr    ; (P_UNIT stays)
   mov #$50, P_MAGIC         ; 'P'
   mov #1, P_STAGE
   mov #1, P_EDITION
@@ -2263,11 +2290,11 @@ key_link:
   ret
 .go:
   ld cursor
-  be #1, .recv
+  be #1, .update
   be #2, .battle
-  jmpf link_send
-.recv:
-  jmpf link_receive
+  jmpf link_swap
+.update:
+  jmpf link_update
 .battle:
   jmpf battle_link
 
@@ -2277,13 +2304,13 @@ draw_link:
   mov #0, c
   mov #0, b
   callf lcd_text
-  mov #<s_send, trl
-  mov #>s_send, trh
+  mov #<s_swap, trl
+  mov #>s_swap, trh
   mov #1, c
   mov #1, b
   callf lcd_text
-  mov #<s_receive, trl
-  mov #>s_receive, trh
+  mov #<s_update, trl
+  mov #>s_update, trh
   mov #1, c
   mov #2, b
   callf lcd_text
@@ -2318,199 +2345,7 @@ link_status:
   callf lcd_text
   ret
 
-;; link_send: a grown MOeMON (level 50) to the other unit: SYNC, length, its 40 bytes, checksum, each echoed, then
-;; the other side's ACK; then a new Egg starts (helpers and TAP UP start over; one more sent on: a SPARK a tap more)
-link_send:
-  ld P_STAGE
-  bne #2, .notready
-  ld P_LEVEL
-  be #MAX_LEVEL, .ready
-.notready:
-  mov #<s_not_grown, trl
-  mov #>s_not_grown, trh
-  jmpf link_status
-.ready:
-  callf sio_connected
-  bz .cable
-  mov #<s_nocable, trl
-  mov #>s_nocable, trh
-  jmpf link_status
-.cable:
-  mov #<s_sending, trl
-  mov #>s_sending, trh
-  callf link_status
-  callf sio_init
-  callf sio_flush
-  mov #0, chk
-  mov #P_MAGIC, idx
-.sum:
-  ld idx
-  st 0
-  ld @R0
-  add chk
-  st chk
-  inc idx
-  ld idx
-  bne #P_MAGIC + PET_BYTES, .sum
-  mov #SIO_SYNC, acc
-  callf sio_xfer
-  bnz .fail
-  mov #PET_BYTES, acc
-  callf sio_xfer
-  bnz .fail
-  mov #P_MAGIC, idx
-.send:
-  ld idx
-  st 0
-  ld @R0
-  callf sio_xfer
-  bnz .fail
-  inc idx
-  ld idx
-  bne #P_MAGIC + PET_BYTES, .send
-  ld chk
-  callf sio_xfer
-  bnz .fail
-  callf sio_recv
-  bz .ans
-  callf sio_recv
-  bnz .fail
-.ans:
-  ld b
-  bne #SIO_ACK, .refused
-  callf sio_end
-  ; it's gone: a new Egg; per pet, the helpers and TAP UP start over; it leaves a SPARK a tap for good
-  inc O_PRESTIGE
-  mov #0, O_TAP
-  mov #0, O_HELPER
-  callf egg_new
-  callf save_write
-  mov #<s_sent, trl
-  mov #>s_sent, trh
-  jmpf message
-.refused:
-  callf sio_end
-  mov #<s_refused, trl
-  mov #>s_refused, trh
-  jmpf link_status
-.fail:
-  callf sio_end
-  mov #<s_link_failed, trl
-  mov #>s_link_failed, trh
-  jmpf link_status
-
-;; link_receive: wait (up to ~10 s, B stops) for a MOeMON from the other unit; taken only in place of an Egg
-link_receive:
-  callf sio_connected
-  bz .cable
-  mov #<s_nocable, trl
-  mov #>s_nocable, trh
-  jmpf link_status
-.cable:
-  mov #<s_waiting, trl
-  mov #>s_waiting, trh
-  callf link_status
-  callf sio_init
-  ld ticks
-  st tmp3
-.wait:
-  callf sio_poll
-  bz .got
-  ld p3
-  bn acc, BTN_B, .stop
-  ld ticks
-  sub tmp3
-  sub #20
-  bp psw, 7, .wait
-.stop:
-  callf sio_end
-  mov #<s_link_failed, trl
-  mov #>s_link_failed, trh
-  jmpf link_status
-.got:
-  ld b
-  bne #SIO_SYNC, .wait
-  ld b
-  callf sio_send            ; echo
-  callf sio_recv
-  bnzo .lost
-  ld b
-  st tmp2
-  callf sio_send
-  ld tmp2
-  bneo #PET_BYTES, .lost
-  mov #0, chk
-  mov #0, idx
-.get:
-  callf sio_recv
-  bnzo .lost
-  ld b
-  st tmp2
-  callf sio_send
-  ld idx
-  add #FMBUFF               ; collected in the page buffer first
-  st 0
-  ld tmp2
-  st @R0
-  add chk
-  st chk
-  inc idx
-  ld idx
-  bne #PET_BYTES, .get
-  callf sio_recv
-  bnz .lost
-  ld b
-  st tmp2
-  callf sio_send
-  callf sio_sent
-  callf link_pause
-  ld tmp2
-  sub chk
-  bnz .bad
-  ld FMBUFF                 ; a MOeMON's bytes ('P' first), and room for it (only an Egg is replaced)
-  bne #$50, .bad
-  ld P_STAGE
-  be #2, .full
-  mov #0, idx
-.take:
-  ld idx
-  add #FMBUFF
-  st 0
-  ld @R0
-  push acc
-  ld idx
-  add #P_MAGIC
-  st 0
-  pop acc
-  st @R0
-  inc idx
-  ld idx
-  bne #PET_BYTES, .take
-  mov #SIO_ACK, acc
-  callf sio_send
-  callf sio_sent
-  callf sio_end
-  callf save_write
-  mov #<s_received, trl
-  mov #>s_received, trh
-  jmpf message
-.full:
-  mov #SIO_NAK, acc
-  callf sio_send
-  callf sio_sent
-  callf sio_end
-  mov #<s_has_mon, trl
-  mov #>s_has_mon, trh
-  jmpf link_status
-.bad:
-  mov #SIO_NAK, acc
-  callf sio_send
-  callf sio_sent
-.lost:
-  callf sio_end
-  mov #<s_link_failed, trl
-  mov #>s_link_failed, trh
-  jmpf link_status
+  .include "link.inc"
 
 link_pause:
   mov #200, idx
@@ -2573,9 +2408,14 @@ save_load:
   bne #$7c, .clr
   ret
 
-;; save_write: the magic and $40-$7b into the SAVE page, through the BIOS (interrupts off, RC 1/6). Keeps trh:trl
-;; (a message's text is often waiting in them).
+;; save_write: the magic and $40-$7b into the SAVE page, through the BIOS (interrupts off, RC 1/6); its $4c-$7f (the
+;; VM2's tray and mark) as they were. Keeps trh:trl (a message's text is often waiting in them).
 save_write:
+  callf save_keep_tail
+  ; (on into save_write_buf)
+
+;; save_write_buf: the same, the page buffer's $4c-$7f as they are (link.inc: the tray just received)
+save_write_buf:
   push acc
   push b
   push c
@@ -2611,13 +2451,6 @@ save_write:
   inc idx
   ld idx
   bne #$7c - P_MAGIC, .copy
-  mov #FMBUFF + 16 + $7c - P_MAGIC, 0
-.zero:
-  mov #0, acc
-  st @R0
-  inc 0
-  ld 0
-  bnz .zero
   mov #0, FMBANK
   mov #>save_page, FMADD_H
   mov #<save_page, FMADD_L
@@ -2633,6 +2466,31 @@ save_write:
   pop c
   pop b
   pop acc
+  ret
+
+;; save_keep_tail: the SAVE page's $4c-$7f from flash into the page buffer (keeps trh:trl)
+save_keep_tail:
+  push trl
+  push trh
+  push acc
+  mov #<save_page, trl
+  mov #>save_page, trh
+  mov #$4c, idx
+.k:
+  ld idx
+  ldc
+  push acc
+  ld idx
+  add #FMBUFF
+  st 0
+  pop acc
+  st @R0
+  inc idx
+  ld idx
+  bne #$80, .k
+  pop acc
+  pop trh
+  pop trl
   ret
 
 save_magic:
@@ -2807,29 +2665,11 @@ s_short:
 s_maxed:
   .string 8 "NO MORE"
 s_link:
-  .string 9 "LINK VM2"
-s_send:
-  .string 5 "SEND"
-s_receive:
-  .string 8 "RECEIVE"
+  .string 9 "LINK VMU"
 s_link_hint:
   .string 11 "TOP TO TOP"
-s_not_grown:
-  .string 9 "NOT LV50"
 s_nocable:
   .string 9 "NO CABLE"
-s_sending:
-  .string 11 "SENDING..."
-s_waiting:
-  .string 11 "WAITING..."
-s_sent:
-  .string 9 "SENT ON!"
-s_received:
-  .string 9 "WELCOME!"
-s_refused:
-  .string 10 "NOT TAKEN"
-s_has_mon:
-  .string 8 "HAS ONE"
 s_link_failed:
   .string 8 "NO LINK"
 s_about:
@@ -2855,8 +2695,21 @@ ic_overlays:                ; 1 a heart, 2 a sweat drop, 3-5 a meal: whole, bitt
   .include "icon.inc"
   .include "battle.inc"
 
-  ;; The SAVE page: 128 bytes on a 128-byte boundary (the magic, then $40-$7b)
-  .cnop 0, $80
+;; ---------------------------------------------------------------- the file's fixed places
+;; 96 blocks (the user, 2026-11-21: "reserve as many as you think we'll need"; a GAME's size can't change once it's
+;; on a VMU, so later versions grow into this). The program runs from $0000 up to code_end (tools/check_layout.py
+;; checks it stays below $BB00); then the version page, the SAVE page and the UPDATE receiver, at the same places
+;; in every version (an UPDATE sends $0000-$BB7F only).
+code_end:
+
+  .org $bb00
+pet_version:
+  .text 8 "MOEPETVR"
+  .byte 2, 0                ; this program's version (2: battles, the icons, the VM2's LINK)
+
+  ;; The SAVE page: the magic, then RAM $40-$7b, then (kept by save_write) the VM2's tray ($4c-$72: a MOeMON
+  ;; held during a SWAP) and the VM2 mark ($78-$7f: "VM2M" and the root block's $33-$36; tools/vm2mark.py)
+  .org $bb80
 save_page:
   .byte 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0
   .byte 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0
@@ -2867,4 +2720,7 @@ save_page:
   .byte 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0
   .byte 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0
 
-  .cnop 0, $200
+  .include "update.inc"
+
+  .org $bfff
+  .byte 0

@@ -2,7 +2,7 @@
 WATERBEAR := .tools/waterbear-bin
 PY        := python3
 
-all: build/LINKTEST.VMS build/LINKTEST.VMI build/linktest.bin build/PET.VMS build/PET.VMI build/pet.bin
+all: build/LINKTEST.VMS build/LINKTEST.VMI build/linktest.bin build/PET.VMS build/PET.VMI build/pet.bin build/pet_vm2.bin build/pet_old.bin
 
 # The PICTURES file (the colour icons of hatched MOeMON: tools/gen_icons.py), from the PMD portraits
 # (tools/fetch_portraits.sh, which needs the network once). Not in `all`: `make pictures`.
@@ -33,15 +33,24 @@ pet/kanto.inc: tools/gen_edition.py tools/eggs.py tools/onebit.py tools/pmd_read
 pet/font.inc: build/font.inc
 	cp $< $@
 
-build/PET.VMS: pet/pet.s pet/icon.inc pet/battle.inc pet/kanto.inc pet/font.inc pet/icon.png inc/*.inc
+build/PET.VMS: pet/pet.s pet/icon.inc pet/battle.inc pet/link.inc pet/update.inc pet/kanto.inc pet/font.inc pet/icon.png inc/*.inc tools/check_layout.py
 	@mkdir -p build
-	cd pet && ../$(WATERBEAR) assemble pet.s -o ../$@
+	cd pet && ../$(WATERBEAR) assemble --debug pet.s -o ../$@
+	$(PY) tools/check_layout.py $@
 
 build/PET.VMI: build/PET.VMS tools/vmufs.py
 	$(PY) tools/vmufs.py vmi $< MOEKANTO $@ "MOEMON VMU PET - KANTO EDITION"
 
 build/pet.bin: build/PET.VMS tools/vmufs.py
 	$(PY) tools/vmufs.py make $@ --game $< --name MOEKANTO
+
+# An "older version" of it (its version page and ABOUT changed): the UPDATE test's VMU
+build/pet_old.bin: build/pet.bin
+	$(PY) -c "d=bytearray(open('$<','rb').read()); d[0xBB08]=1; i=d.find(b'MOEMON KANTO\\x00', 0x1000); d[i:i+12]=b'OLD VERSION!'; open('$@','wb').write(d)"
+
+# The same, marked as a VM2's (its LINK menu there): for the VM2's SD card, and the tests
+build/pet_vm2.bin: build/pet.bin tools/vm2mark.py
+	$(PY) tools/vm2mark.py $< $@
 
 build/PICTURES.VMS: tools/gen_icons.py
 	@mkdir -p build

@@ -1,6 +1,8 @@
-# image: build/pet.bin
-# A LINK battle (LINK > BATTLE) between two units joined by the cable: both wait, A on unit a calls, they swap cards and
-# play out the same battle (each counts one battle, P_BATTLES $64; one wins: P_WINALL $63).
+# image: build/pet_vm2.bin
+# image_b: build/pet.bin
+# LINK > BATTLE: the VM2 (unit a) calls the VMU on top (unit b), which answers by itself; they swap cards and play out
+# the same battle (each counts one battle, P_BATTLES $64; one wins: P_WINALL $63).
+vm2 a
 date a 2026 11 21 10 0 0
 date b 2026 11 21 10 0 0
 cable on
@@ -32,36 +34,9 @@ press a D 0.2
 run 0.3
 press a D 0.2
 run 0.3
+shot a link_screen
 press a A 0.2
-run 0.6
-press b B 0.2
-run 0.5
-press b D 0.2
-run 0.3
-press b D 0.2
-run 0.3
-press b D 0.2
-run 0.3
-press b D 0.2
-run 0.3
-press b D 0.2
-run 0.3
-press b D 0.2
-run 0.3
-press b D 0.2
-run 0.3
-press b A 0.2
-run 0.6
-press b D 0.2
-run 0.3
-press b D 0.2
-run 0.3
-press b A 0.2
-run 0.6
-shot a waiting
-expect a 4 A CALLS IT
-press a A 0.2
-run 0.8
+run 1.0
 shot a vs_a
 shot b vs_b
 expect a 0 VS

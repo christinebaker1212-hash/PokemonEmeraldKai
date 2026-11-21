@@ -9,10 +9,21 @@ for s in test/scripts/*.txt; do
     rm -rf "$out"; mkdir -p "$out"
     img=$(sed -n 's/^# image: *//p' "$s" | head -1)
     img=${img:-build/linktest.bin}
+    imgb=$(sed -n 's/^# image_b: *//p' "$s" | head -1)   # unit b's own image (default: the same)
+    imgb=${imgb:-$img}
     if [ ! -f "$img" ]; then echo "SKIP $name (no $img)"; continue; fi
     sed "s#OUT#$out#g" "$s" > "$out/script.txt"
-    if build/vmutest "$img" "$img" "$out/script.txt" "$out" > "$out/log.txt" 2>&1; then
+    if build/vmutest "$img" "$imgb" "$out/script.txt" "$out" > "$out/log.txt" 2>&1; then
         echo "PASS $name"
+        for i in "$out"/update_*.bin; do
+            [ -f "$i" ] || continue
+            sp=$(sed -n 's/^# update_species: *//p' "$s" | head -1)
+            if python3 tools/update_check.py "$i" build/PET.VMS $sp > "${i%.bin}.txt"; then
+                echo "PASS $name $(basename "$i" .bin): $(cat "${i%.bin}.txt")"
+            else
+                echo "FAIL $name $(basename "$i" .bin): $(cat "${i%.bin}.txt")"; fail=1
+            fi
+        done
         for i in "$out"/icon_*.bin; do
             [ -f "$i" ] || continue
             if python3 tools/icon_check.py "$i" "${i%.bin}.png" > "${i%.bin}.txt"; then
