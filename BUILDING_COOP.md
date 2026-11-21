@@ -77,6 +77,10 @@ The workflow builds both games and servers, packages
 and publishes the release. Locally the same steps are `tools/release/build_windows.sh SDL2_DIR`,
 `package.sh windows|linux OUT`, `manifest.sh OUT`. The updater only runs in a folder with
 `moemon_release.txt` (packaged releases), never in a source checkout.
+There is no size limit on a release zip (the user, 2026-11-21): the updater writes it to the disk and installs from
+there a file at a time, with 64-bit sizes and ZIP64 (zips past 4 GB or 65535 files); the DANCE songs, ORRE's packs and
+the Maker pack the same. Games older than that keep their own limits (512 MB before 1.210.0, 2000 MB until this) and
+take a bigger release by hand once.
 
 What a release keeps from the last one (2026-11-13: a run took 30 to 60 minutes, most of it rebuilding what hadn't
 changed). Nothing it ships differs from a fresh build:

@@ -613,6 +613,13 @@ gSpecials::
 	def_special MP_PcMenuChoice
 	def_special MP_ShowGlobalPC, waitstate=1
 	def_special MP_GlobalPcLinked
+	def_special MP_Vm2_StartRead
+	def_special MP_Vm2_Busy
+	def_special MP_Vm2_Result
+	def_special MP_ShowVm2Box, waitstate=1
+	def_special MP_Vm2_Returned
+	def_special MP_Vm2_Written
+	def_special MP_Vm2_Close
 	def_special MP_RegionPartyCount
 	def_special MP_RegionFirstVisit
 	def_special MP_RegionTripAllowed

@@ -158,6 +158,48 @@ helps) and type against type (the full type chart): super effective hits for 2, 
   The caller attacks first. Counted in the MOéMON's record (battles, wins: bytes $62-$64, which go to Kai with it).
 - Tests: pet_battle (WILD), pet_battle_link (two units: each counts one battle, one wins).
 
+## Kai's side (built 2026-11-21)
+
+The user approved the mock-ups (`docs/vmu_pet/kai_vm2_mockups.png`; "looks good", then the VMU redrawn after their
+photo, its bottom curved; "The VM2 option should not appear in the PC unless a VM2 is connected"). Built:
+- **PC > VM2**, only while a VM2 answers (CH340 port, GUI-mode): `src/script_menu.c` PCMENU_VM2,
+  `src/mp/mp_vm2.c` MP_Vm2_Present; the link itself `src/platform/vm2.c` (as the VMU manager's).
+- Choosing it reads the VM2 on a thread ("Connected to the VM2. It holds VENUSAUR." / "a MOéMON EGG." / "no
+  MOéMON"), then the PC's own menus open over the **VM2 box**: the VMU drawn as its wallpaper
+  (`tools/moemon_vm2/gen_wallpaper.py` -> graphics/pokemon_storage/wallpapers/vm2, from the mock-up's drawing),
+  its screen the box's place 14.
+- What comes in: an EGG keeps its personality and IVs; a grown MOéMON its level, IVs (+5 to the lowest for each IV
+  UP bought), nature and gender, shiny if bought, friendship 255 less 10 a care mistake (70 at least), EVs from its
+  trainings. Each transfer ID once ("<save>.vmu").
+- What goes out: an EGG of the KANTO EDITION (national 1-151), put on the VMU's screen or DEPOSITed in the box.
+  Anything else left in those boxes goes back to the player's PC (said so).
+- Closing writes the pet's SAVE page with the VM2 mark (its LINK menu) and restarts the VM2 out of GUI-mode ("The VM2
+  was disconnected. It's safe to unplug it.").
+- Tests: tools/test/vm2/vm2_test.sh (the link), kai_vm2_test.sh (a grown VENUSAUR withdrawn), kai_vm2_egg_test.sh
+  (an EGG of CHARMANDER deposited; the pet on that image then hatches it and knows it's a VM2).
+- The MASTER / ASTRAL BALLS bought on the pet come to the BAG with the grown MOéMON.
+
+## One program, LINK the VM2's (built 2026-11-21)
+
+The user: "Reserve as many as you think we'll need. For now, the VM2 will act as the main program, since I cannot use
+another VMU. There will be one program, with two functions. The Link function will only work if it's a VM2.
+Otherwise, it acts as normal." Built (`vmu_pet/pet/link.inc`, `update.inc`):
+- **96 blocks** (48 KB; the pet uses 29): later versions grow into it (a GAME's size can't change once it's on a
+  VMU). Fixed places in every version: the version page $BB00, the SAVE page $BB80, the UPDATE receiver $BC00-$BFFF
+  (`tools/check_layout.py` checks them at every build). With PICTURES (81) that's 177 of the VMU's 200 blocks.
+- **A VM2 knows it's one** by a mark in its SAVE page ("VM2M" + its own root block's format time, so a copy of the
+  program on another VMU doesn't count): Kai leaves it when the VM2 is connected (PC > VM2), or
+  `tools/vm2mark.py IMAGE` (`build/pet_vm2.bin` is the pet's image marked).
+- **On a VM2, MENU > LINK** (the VMU on top): **SWAP** (the two MOéMON change places; the VM2 keeps the VMU's in its
+  SAVE page first, so a pulled cable loses nothing: at worst one is on both, and Kai takes each only once; a VMU
+  that sends on a grown one gets its SPARK a tap more), **UPDATE** (this program to the VMU), **BATTLE**.
+- **On a VMU there's no LINK**: the pet answers the VM2's calls by itself while joined.
+- **UPDATE**: the VM2 sends its 375 program pages; the VMU's receiver writes and checks each. The receiver is never
+  rewritten, and page 0 points into it until the last page, so a cut cable or flat battery leaves a VMU that starts
+  waiting for the VM2 to try again (MODE goes back to its menus). In the emulator a whole update takes about 2.3
+  minutes. The first copy onto a VMU still needs a Dreamcast once (the VMU's menu won't copy a GAME).
+- Tests: pet_swap, pet_update, pet_update_cut (the cable pulled partway, then whole), pet_battle_link.
+
 ## The VMU manager (built 2026-11-21)
 
 `vmu_pet/manager/` (README.txt; Dear ImGui on SDL2, Windows and Linux): VMU images on the VM2's SD card over USB

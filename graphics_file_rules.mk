@@ -182,6 +182,10 @@ $(WALLPAPERGFXDIR)/forest/frame.4bpp: %.4bpp: %.png
 $(WALLPAPERGFXDIR)/forest/tiles.4bpp: $(WALLPAPERGFXDIR)/forest/frame.4bpp $(WALLPAPERGFXDIR)/forest/bg.4bpp
 	@cat $^ >$@
 
+# Moemon Kai: the VM2 box's (tools/moemon_vm2/gen_wallpaper.py)
+$(WALLPAPERGFXDIR)/vm2/tiles.4bpp: $(WALLPAPERGFXDIR)/vm2/frame.4bpp $(WALLPAPERGFXDIR)/vm2/bg.4bpp
+	@cat $^ >$@
+
 $(WALLPAPERGFXDIR)/city/frame.4bpp: %.4bpp: %.png
 	$(GFX) $< $@ -num_tiles 52 -Wnum_tiles
 

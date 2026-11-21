@@ -1132,6 +1132,10 @@ struct MpPcCursor
 struct PokemonStorage;
 struct BoxPokemon;
 struct PokemonStorage *MP_PersonalStorage(void);
+void MP_ShowOtherPC(struct PokemonStorage *boxes);   // pokemon_storage_system.c: the PC's menus over other boxes
+bool8 MP_Vm2_Present(void);      // mp_vm2.c: a VM2 is plugged in and answers (the PC menu's VM2)
+bool8 MP_Vm2_BoxOpen(void);      // mp_vm2.c: the box screen is the VM2's
+void MP_Vm2_BoxClosed(void);     // mp_vm2.c: its box closed: what changed goes to the VM2
 void MP_Storage_ShowOther(struct PokemonStorage *other);   // Moemon Kai: the GLOBAL PC in the box screen (NULL: back)
 bool8 MP_SharedBox_IsMirrorShown(void);
 void MP_SharedBox_ShowShared(bool8 shared);

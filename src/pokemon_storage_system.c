@@ -1631,7 +1631,7 @@ enum {
 #define tNextOption     data[3]
 #define tWindowId       data[15]
 
-static bool8 sMpGlobalPc;   // Moemon Kai: the menus are the GLOBAL PC's
+static bool8 sMpGlobalPc;   // Moemon Kai: the menus are the GLOBAL PC's (or the VM2's: mp_vm2.c)
 
 static void Task_PCMainMenu(u8 taskId)
 {
@@ -1678,7 +1678,10 @@ static void Task_PCMainMenu(u8 taskId)
                 // Moemon Kai: the GLOBAL PC closes; what came out of it takes this region's levels
                 sMpGlobalPc = FALSE;
                 MP_Storage_ShowOther(NULL);
-                MP_Region_FitAll();
+                if (MP_Vm2_BoxOpen())
+                    MP_Vm2_BoxClosed();   // (the VM2's box: what changed goes to it)
+                else
+                    MP_Region_FitAll();
             }
             ClearStdWindowAndFrame(task->tWindowId, TRUE);
             UnlockPlayerFieldControls();
@@ -1755,8 +1758,14 @@ static void Task_PCMainMenu(u8 taskId)
 // Moemon Kai: the GLOBAL PC (mp_region.c keeps its boxes): the same menus and box screen over its boxes
 void MP_ShowGlobalPC(void)
 {
+    MP_ShowOtherPC(MP_Region_GlobalPC());
+}
+
+// Moemon Kai: the PC's menus and box screen over another set of boxes (the GLOBAL PC, the VM2's: mp_vm2.c)
+void MP_ShowOtherPC(struct PokemonStorage *boxes)
+{
     sMpGlobalPc = TRUE;
-    MP_Storage_ShowOther(MP_Region_GlobalPC());
+    MP_Storage_ShowOther(boxes);
     ShowPokemonStorageSystemPC();
 }
 
@@ -5767,6 +5776,8 @@ static void LoadWallpaperGfx(u8 boxId, s8 direction)
     if (wallpaperId != WALLPAPER_FRIENDS)
     {
         wallpaper = &sWallpapers[wallpaperId];
+        if (MP_Vm2_BoxOpen() && sStorage->wallpaperLoadBoxId == 0)
+            wallpaper = &sWallpaperVm2;   // Moemon Kai: the VM2's box (mp_vm2.c)
         LZ77UnCompWram(wallpaper->tilemap, sStorage->wallpaperTilemap);
         DrawWallpaper(sStorage->wallpaperTilemap, sStorage->wallpaperLoadDir, sStorage->wallpaperOffset);
 

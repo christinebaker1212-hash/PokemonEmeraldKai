@@ -90,7 +90,7 @@ static void Task_OrreCheckBoat(u8 taskId)
         gSpecialVar_Result = 5;   // (the launch's own download is still under way: platform/updater.c OrrePreWorker)
     else if (st == UPD_AVAILABLE)
     {
-        ConvertIntToDecimalStringN(gStringVar1, (total + (1 << 20) - 1) >> 20, STR_CONV_MODE_LEFT_ALIGN, 5);
+        ConvertIntToDecimalStringN(gStringVar1, (total + (1 << 10) - 1) >> 10, STR_CONV_MODE_LEFT_ALIGN, 5);   // (KB to MB: updater.c)
         gSpecialVar_Result = 2;
     }
     else if (st == UPD_FAILED)

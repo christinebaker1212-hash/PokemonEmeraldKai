@@ -38,7 +38,7 @@ samples VMT-72..88, flash VMT "Reading and Writing Flash Memory"), libevmu's hea
 An Egg (its pattern by the MOeMON inside) hatches 30 minutes after it appears. A taps the pet for SPARKS; B is the
 menu: FEED (MEAL / VITAMIN), TRAIN (three rounds: A while the cursor is over ##), BATTLE (a WILD one: `battle.inc`),
 CLEAN, MEDICINE, STATUS (four pages), SHOP (TAP UP, HELPER, RARE CANDY, IV UP, SHINY, MASTER, ASTRAL), LINK (SEND a
-level-50 MOeMON to a VM2 or another VMU, RECEIVE one in place of an Egg, BATTLE another VMU), ABOUT. UP / DOWN on the pet opens STATUS. MODE leaves (it saves).
+SWAP, UPDATE, BATTLE: only on a VM2, `link.inc`; a VMU answers by itself), ABOUT. UP / DOWN on the pet opens STATUS. MODE leaves (it saves).
 
 - Care by the day (from 4 AM): 4 meals, 3 trainings, no poop left; a missed one is a care mistake; poop left makes it
   sick. All done: 10 EXP. About a week of care to level 50 (8 EXP a level).
@@ -52,16 +52,20 @@ level-50 MOeMON to a VM2 or another VMU, RECEIVE one in place of an Egg, BATTLE 
 - Battles (`battle.inc`): 3 HP each, turns, power against power and type against type; WILD (A in ## on the
   marker: a sure hit; SPARKS, and EXP for the first 3 wins a day), LINK (both units play the same battle from a
   shared seed). Never a loss of anything.
-- The save page (in the program's own file): "MOEMONVMUPET", format 1, edition 1, then RAM $40-$7b (the MOeMON:
+- The file (96 blocks): the program from $0000, the version page $BB00, the SAVE page $BB80, the UPDATE receiver
+  $BC00 (`update.inc`, never rewritten); `tools/check_layout.py` after every build. A VM2 has a mark in its SAVE page
+  (`tools/vm2mark.py`; `build/pet_vm2.bin`).
+- The save page (in the program's own file, at $BB80): "MOEMONVMUPET", format 1, edition 1, then RAM $40-$7b (the MOeMON:
   $40-$67, what LINK sends; the owner: $68-$7b). Kai reads it there.
 - Drawn only on RC, VCCR written whole, the button interrupt only around HALT (it's level-triggered), buttons sampled
   while drawing (`lcd_hook`), the BIOS's idle count reset on a press (it sleeps after ~2 minutes without).
 - The file icon (`icon.inc`): rewritten when the stage or MOeMON changes (the header's $25e / $25f say what it
   shows): an Egg's design in its colours, the portrait from PICTURES, or the LCD sprite. `tools/icon_check.py IMAGE`
   checks a saved unit's icon pixel for pixel (run.sh does it for every `OUT/icon_*.bin`).
-- Tests: `test/scripts/pet_battle.txt`, `pet_battle_link.txt`, `test/scripts/pet_icon.txt` (the Egg's icon, then the portrait's; skipped without `make pictures`),
+- Tests: `test/scripts/pet_battle.txt`, `pet_battle_link.txt`, `pet_swap.txt`, `pet_update.txt`, `pet_update_cut.txt`
+  (`tools/update_check.py`; a script's `# image_b:` gives unit b its own image), `test/scripts/pet_icon.txt` (the Egg's icon, then the portrait's; skipped without `make pictures`),
   `test/scripts/pet_life.txt` (hatch, meals, full, clean, training, status, a day judged, shop, helpers),
-  `pet_link.txt` (to a VM2), `pet_reload.txt` (a saved unit started again). `tools/screen_text.py` reads a shot's text;
+`pet_reload.txt` (a saved unit started again). `tools/screen_text.py` reads a shot's text;
   `tools/shots_sheet.py` makes a sheet; `tools/fix_branches.py` lengthens branches that can't reach.
 
 ## Testing LINK TEST on hardware (a VMU and a VM2)

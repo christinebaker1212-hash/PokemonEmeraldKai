@@ -5,8 +5,8 @@
 ;;   (gen_edition.py type_chart): super effective hits for 2, not very effective hits less often.
 ;;   WILD: a MOeMON of the edition near its level; on its own turns the player stops a marker in ## with A for a sure
 ;;   hit. Prizes: SPARKS (the foe's level x 4) and, for the first 3 wins of a day, 2 EXP each.
-;;   LINK: both units swap a card (edition, MOeMON, level, power, a seed) and play out the same battle from the shared
-;;   seed, each seeing its own MOeMON on the left; the one that called attacks first.
+;;   LINK (the VM2 calls the VMU on top: link.inc): both swap a card (edition, MOeMON, level, power, a seed) and play
+;;   out the same battle from the shared seed, each seeing its own MOeMON on the left; the VM2 attacks first.
 ;; RAM while it runs (free then: the digits, the clock's scratch, the shop's): below.
 
 B_MYHP   = $36
@@ -731,8 +731,8 @@ battle_end:
   mov #>s_b_lostmsg, trh
   jmpf message
 
-;; ---- LINK > BATTLE: VMU to VMU. Both wait; A on either calls: the caller sends its card, the other sends its own
-;; back, then both play the battle from the two seeds.
+;; ---- LINK > BATTLE (the VM2 calls; the VMU answers from its main loop: link.inc): they swap cards, then both play
+;; the battle from the two seeds; the VM2 (the caller) attacks first.
 battle_link:
   callf need_mon
   bz .mon
@@ -744,61 +744,22 @@ battle_link:
   mov #>s_nocable, trh
   jmpf link_status
 .cable:
-  callf b_my_power
-  st B_MYPOW
-  callf rand
-  ld O_RNG
-  bnz .seedok
-  inc acc
-.seedok:
-  st B_T                    ; my seed (kept in the card buffer below)
-  ; my card at FMBUFF + $40: the edition, MOeMON, level, power, seed, 0
-  mov #FMBUFF + $40, 0
-  mov #1, acc
-  st @R0
-  inc 0
-  ld P_SPECIES
-  st @R0
-  inc 0
-  ld P_LEVEL
-  st @R0
-  inc 0
-  ld B_MYPOW
-  st @R0
-  inc 0
-  ld B_T
-  st @R0
-  inc 0
-  mov #0, acc
-  st @R0
-  mov #<s_b_calla, trl
-  mov #>s_b_calla, trh
+  callf b_build_card
+  mov #<s_linking, trl
+  mov #>s_linking, trh
   callf link_status
   callf sio_init
-.up:
-  ld p3                     ; the A that chose BATTLE comes up first
-  bn acc, BTN_A, .up
-  ld ticks
-  st tmp3
-.wait:
-  callf sio_poll
-  bz .got
-  ld p3
-  bn acc, BTN_A, .call
-  bn acc, BTN_B, .stop
-  ld ticks
-  sub tmp3
-  sub #40
-  bp psw, 7, .wait
-.stop:
-  callf sio_end
-  mov #<s_link_failed, trl
-  mov #>s_link_failed, trh
-  jmpf link_status
+  mov #10, tmp3             ; the VMU answers between its naps: the card's call is tried again
 .call:
-  ; the caller: my card, then theirs; I attack first
+  push tmp3
   callf b_card_send
-  bnzo .fail
+  pop tmp3
+  bz .sent
+  dec tmp3
+  ld tmp3
+  bnz .call
+  jmpf .fail
+.sent:
   ld ticks
   st tmp3
 .wait2:
@@ -819,22 +780,69 @@ battle_link:
   st B_SEED
   ld FMBUFF + 4
   st B_SEED + 1
-  br .play
-.got:
-  ld b
-  bne #B_CARD_SYNC, .wait
+  jmpf battle_linked
+.fail:
+  jmpf link_fail
+
+;; battle_answer (the VMU; the VM2's card sync is in b): its card, ours back, then the battle (they attack first)
+battle_answer:
+  ld P_STAGE
+  be #2, .mon
+  ret                       ; an Egg doesn't battle: no answer (the VM2 says NO LINK)
+.mon:
   callf b_card_recv
   bnz .fail
+  callf b_build_card
   callf link_pause
   callf b_card_send
   bnz .fail
-  mov #%10, B_FLAGS         ; they called: they attack first
+  mov #%10, B_FLAGS
   ld FMBUFF + 4             ; the seed: the caller's (theirs) low, mine high
   st B_SEED
   ld FMBUFF + $44
   st B_SEED + 1
-.play:
+  jmpf battle_linked
+.fail:
+  mov #<s_link_failed, trl
+  mov #>s_link_failed, trh
+  jmpf message
+
+;; b_build_card: our card at FMBUFF + $40: the edition, MOeMON, level, power, a seed, 0
+b_build_card:
+  callf b_my_power
+  st B_MYPOW
+  callf rand
+  ld O_RNG
+  bnz .seedok
+  inc acc
+.seedok:
+  st B_T
+  mov #FMBUFF + $40, 0
+  mov #1, acc
+  st @R0
+  inc 0
+  ld P_SPECIES
+  st @R0
+  inc 0
+  ld P_LEVEL
+  st @R0
+  inc 0
+  ld B_MYPOW
+  st @R0
+  inc 0
+  ld B_T
+  st @R0
+  inc 0
+  mov #0, acc
+  st @R0
+  ret
+
+;; battle_linked: the cards swapped: theirs in FMBUFF; the battle
+battle_linked:
   callf sio_end
+  bp P_UNIT, 0, .vm2
+  clr1 P_UNIT, 1            ; a VMU: the port is set up again by slave_poll
+.vm2:
   ld FMBUFF                 ; the same edition?
   bne #1, .fail
   ld FMBUFF + 1
@@ -844,6 +852,7 @@ battle_link:
   ld FMBUFF + 3
   st B_FOEPOW
   set1 B_FLAGS, 0
+  mov #SCR_MAIN, screen
   callf lcd_clear
   mov #<s_b_vs, trl
   mov #>s_b_vs, trh
@@ -866,10 +875,9 @@ battle_link:
   callf battle_run
   jmpf battle_end
 .fail:
-  callf sio_end
   mov #<s_link_failed, trl
   mov #>s_link_failed, trh
-  jmpf link_status
+  jmpf message
 
 ;; b_card_send: my card (FMBUFF + $40, B_CARD_LEN bytes): the sync, the bytes, their sum, each echoed -> acc 0 ok
 b_card_send:
@@ -951,5 +959,3 @@ s_b_won:
   .string 9 "YOU WON!"
 s_b_lostmsg:
   .string 11 "IT LOST..."
-s_b_calla:
-  .string 11 "A CALLS IT"

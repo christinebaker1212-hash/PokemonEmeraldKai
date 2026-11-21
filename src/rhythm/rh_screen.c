@@ -2031,7 +2031,7 @@ static void StateNoSongs(void)
     case SONGS_AVAILABLE:
         RhGfx_Text(RH_FONT_NORMAL, RH_W / 2, 44, R.haveSongs ? "New songs are out!" : "The songs aren't on this PC yet.",
                    RH_RGB(255, 255, 255), RH_CENTER);
-        snprintf(line, sizeof(line), "Download them now? (%ld MB)", (total + 524288) / 1048576);
+        snprintf(line, sizeof(line), "Download them now? (%ld MB)", (total + 512) / 1024);   // (KB: updater.c)
         RhGfx_Text(RH_FONT_NORMAL, RH_W / 2, 64, line, RH_RGB(230, 255, 160), RH_CENTER);
         RhGfx_Text(RH_FONT_SMALL, RH_W / 2, 86, "Only the first time: they stay on this PC.", RH_RGB(255, 255, 255), RH_CENTER);
         Hint(R.haveSongs ? "A: download   B: play with the songs I have" : "A: download   B: leave");
@@ -2050,7 +2050,7 @@ static void StateNoSongs(void)
         RhGfx_Fill(20, 72, 200, 10, RH_RGB(20, 40, 10), 256);
         RhGfx_Fill(20, 72, w > 200 ? 200 : w, 10, RH_RGB(200, 255, 80), 256);
         if (st == SONGS_DOWNLOADING)
-            snprintf(line, sizeof(line), "%ld / %ld MB", done / 1048576, total / 1048576);
+            snprintf(line, sizeof(line), "%ld / %ld MB", done / 1024, total / 1024);
         else
             snprintf(line, sizeof(line), "%ld / %ld files", done, total);
         RhGfx_Text(RH_FONT_SMALL, RH_W / 2, 88, line, RH_RGB(230, 255, 160), RH_CENTER);

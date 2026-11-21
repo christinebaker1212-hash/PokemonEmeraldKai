@@ -196,6 +196,16 @@ static const struct Wallpaper sWallpapers[WALLPAPER_COUNT - 1] =
     [WALLPAPER_PLAIN]      = WALLPAPER_ENTRY(Plain),
 };
 
+// Moemon Kai: the VM2's box (src/mp/mp_vm2.c; tools/moemon_vm2/gen_wallpaper.py): a VMU, its screen the box's one place
+static const u16 sWallpaperPalettes_Vm2[][16] =
+{
+    INCGFX_U16("graphics/pokemon_storage/wallpapers/vm2/frame.png", ".gbapal"),
+    INCGFX_U16("graphics/pokemon_storage/wallpapers/vm2/bg.png", ".gbapal"),
+};
+static const u32 sWallpaperTiles_Vm2[] = INCGFX_U32("graphics/pokemon_storage/wallpapers/vm2/tiles.4bpp", ".lz");
+static const u32 sWallpaperTilemap_Vm2[] = INCGFX_U32("graphics/pokemon_storage/wallpapers/vm2/tilemap.bin", ".lz");
+static const struct Wallpaper sWallpaperVm2 = WALLPAPER_ENTRY(Vm2);
+
 static const u8 sArrow_Gfx[] = INCGFX_U8("graphics/pokemon_storage/arrow.png", ".4bpp");
 
 static const u16 sWallpaperPalettes_Zigzagoon[][16] =
