@@ -112,6 +112,8 @@ static int CardProp(const MtgDuel *d, int obj, const char *p, size_t n, int src,
         return !d || (((c->supertypes & MTG_ST_BASIC) != 0) ^ neg);
     if (n == 9 && strncmp(p, "Legendary", 9) == 0)
         return !d || (((c->supertypes & MTG_ST_LEGENDARY) != 0) ^ neg);
+    if (n == 4 && strncmp(p, "Snow", 4) == 0)   // (nonSnow: neg)
+        return !d || (((c->supertypes & MTG_ST_SNOW) != 0) ^ neg);
     if (n == 7 && strncmp(p, "YouCtrl", 7) == 0)
         return !d || o->controller == controller;
     if (n == 12 && strncmp(p, "IsRemembered", 12) == 0)   // (the resolving chain's remembered objects)
@@ -184,6 +186,25 @@ static int CardProp(const MtgDuel *d, int obj, const char *p, size_t n, int src,
         return !d || !o->tapped;
     if (n == 9 && strncmp(p, "attacking", 9) == 0)
         return !d || o->attacking;
+    if (n > 11 && strncmp(p, "AttachedTo ", 11) == 0) {   // "Aura.AttachedTo Creature": attached to one of those
+        char spec[32];
+        if (n - 11 >= sizeof(spec)) {
+            *known = 0;
+            return 0;
+        }
+        memcpy(spec, p + 11, n - 11);
+        spec[n - 11] = 0;
+        if (!Mtg_ValidSpecKnown(spec)) {
+            *known = 0;
+            return 0;
+        }
+        return !d || (o->attachedTo != MTG_NO_OBJ && o->attachedTo < d->objCount
+                      && Mtg_ValidObj(d, o->attachedTo, spec, src, controller));
+    }
+    if (n == 7 && strncmp(p, "blocked", 7) == 0)     // (an attacking creature some creature blocked)
+        return !d || (o->attacking && o->blocked);
+    if (n == 9 && strncmp(p, "unblocked", 9) == 0)   // (... no creature blocked)
+        return !d || (o->attacking && !o->blocked);
     if (n == 8 && strncmp(p, "blocking", 8) == 0)
         return !d || o->blocking != MTG_NO_OBJ;
     if (StartsWith(p, n, "without") || StartsWith(p, n, "with")) {

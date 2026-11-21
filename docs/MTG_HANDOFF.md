@@ -6,8 +6,12 @@ The user's decisions: `docs/MTG_DECISIONS.md` (keep to them). How much of the po
 ## Pick up here (2026-11-20: "finish up work on Magic ... incorporating all planned cards")
 The user (2026-11-20) asked for every planned card: the whole Premodern pool (docs/MTG_SCOPE.md). This session:
 Shadow (MTG_KW_SHADOW, mtg_game.c Mtg_CanBlock), Flanking (MTG_KW_FLANKING) and Rampage (MtgCardDef.rampage) in
-BlocksDeclared, Fading (MtgCardDef.fading: etbKind FADE, StartStep's upkeep): 2793 -> 2850 playable; tests in
-tools/mtg/test_rules.c TestShadow. (The three combat ones resolve as blocks are declared rather than as triggers on
+BlocksDeclared, Fading (MtgCardDef.fading: etbKind FADE, StartStep's upkeep): 2793 -> 2850 playable; then Valid properties Snow / nonSnow,
+blocked / unblocked, "AttachedTo <spec>" (mtg_valid.c): 2870; tests in tools/mtg/test_rules.c TestShadow.
+**The biggest next piece: a choice asked during resolution** (a query and the table's menu, the AI's pick): ChooseType
+(37), ChooseColor (23, and ETBReplacement:Other:ChooseColor 19), ChoosePlayer (23), ChooseCard (20), GenericChoice
+(16), NameCard (14), ChooseNumber (13): about 150 cards. Then an X picker (SubCounter<X/...>, PayLife<X>, X costs the
+player chooses rather than the most that can be paid). (The three combat ones resolve as blocks are declared rather than as triggers on
 the stack: nothing in the pool answers them in a way that matters.)
 How to find the next piece: tools/mtg/scope.py's table, and for "static ability" an instrumented copy of
 mtg_static.c ParseOne (each `goto unknown` noting its line) shows which check fails: most are values not yet known

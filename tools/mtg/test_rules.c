@@ -850,6 +850,19 @@ static void TestShadow(void)
     CHECK(Zone(bears) == MTG_ZONE_GRAVEYARD && Zone(knight) == MTG_ZONE_BATTLEFIELD,
           "flanking: the 1/1 elves die before they deal damage");
 
+    // Valid: blocked / unblocked attackers, Snow
+    printf("valid: blocked, unblocked, snow\n");
+    Table();
+    knight = Put(0, "Grizzly Bears", MTG_ZONE_BATTLEFIELD);
+    bears = Put(1, "Snow-Covered Forest", MTG_ZONE_BATTLEFIELD);
+    sD.objs[knight].attacking = 1;
+    CHECK(Mtg_ValidObj(&sD, knight, "Creature.unblocked", MTG_NO_OBJ, 0) && !Mtg_ValidObj(&sD, knight, "Creature.blocked", MTG_NO_OBJ, 0),
+          "an attacker nobody blocked is unblocked");
+    sD.objs[knight].blocked = 1;
+    CHECK(Mtg_ValidObj(&sD, knight, "Creature.blocked", MTG_NO_OBJ, 0), "once blocked, blocked");
+    CHECK(Mtg_ValidObj(&sD, bears, "Land.Snow", MTG_NO_OBJ, 1) && !Mtg_ValidObj(&sD, bears, "Land.nonSnow", MTG_NO_OBJ, 1),
+          "a snow land is Snow");
+
     // Fading: enters with N fade counters, one off each upkeep, sacrificed when it can't
     printf("fading: counters off, then sacrificed\n");
     Table();

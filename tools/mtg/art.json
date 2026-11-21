@@ -1112,6 +1112,13 @@
 "number": "2",
 "set": "pls"
 },
+"Avalanche": {
+"artist": "Brian Snõddy",
+"file": "ice_171",
+"frame": "1993",
+"number": "171",
+"set": "ice"
+},
 "Avatar of Fury": {
 "artist": "rk post",
 "file": "pcy_82",
@@ -1301,6 +1308,13 @@
 "number": "324",
 "set": "mir"
 },
+"Baki's Curse": {
+"artist": "Nicola Leonard",
+"file": "hml_22",
+"frame": "1993",
+"number": "22",
+"set": "hml"
+},
 "Balduvian Barbarians": {
 "artist": "Mark Poole",
 "file": "ice_172",
@@ -1313,6 +1327,13 @@
 "file": "ice_226",
 "frame": "1993",
 "number": "226",
+"set": "ice"
+},
+"Balduvian Conjurer": {
+"artist": "Mark Tedin",
+"file": "ice_58",
+"frame": "1993",
+"number": "58",
 "set": "ice"
 },
 "Balduvian Horde": {
@@ -1614,6 +1635,13 @@
 "file": "wth_9",
 "frame": "1997",
 "number": "9",
+"set": "wth"
+},
+"Benalish Missionary": {
+"artist": "Pete Venters",
+"file": "wth_10",
+"frame": "1997",
+"number": "10",
 "set": "wth"
 },
 "Benalish Trapper": {
@@ -4556,6 +4584,13 @@
 "number": "101",
 "set": "inv"
 },
+"Devout Harpist": {
+"artist": "Rebecca Guay",
+"file": "ulg_6",
+"frame": "1997",
+"number": "6",
+"set": "ulg"
+},
 "Devout Witness": {
 "artist": "Don Hazeltine",
 "file": "mmq_17",
@@ -4947,6 +4982,13 @@
 "frame": "1997",
 "number": "131",
 "set": "tmp"
+},
+"Drift of the Dead": {
+"artist": "Brian Snõddy",
+"file": "ice_123",
+"frame": "1993",
+"number": "123",
+"set": "ice"
 },
 "Drifting Djinn": {
 "artist": "Carl Critchlow",
@@ -7202,6 +7244,13 @@
 "number": "16",
 "set": "scg"
 },
+"Glacial Crevasses": {
+"artist": "Mike Raabe",
+"file": "ice_187",
+"frame": "1993",
+"number": "187",
+"set": "ice"
+},
 "Glacial Wall": {
 "artist": "Dameon Willich",
 "file": "ice_71",
@@ -7608,6 +7657,13 @@
 "number": "168",
 "set": "por"
 },
+"Gossamer Chains": {
+"artist": "Steve Luke",
+"file": "vis_6",
+"frame": "1997",
+"number": "6",
+"set": "vis"
+},
 "Grafted Skullcap": {
 "artist": "Brian Despain",
 "file": "usg_296",
@@ -7831,6 +7887,13 @@
 "frame": "1997",
 "number": "196",
 "set": "ody"
+},
+"Hallowed Ground": {
+"artist": "Douglas Shuler",
+"file": "ice_29",
+"frame": "1993",
+"number": "29",
+"set": "ice"
 },
 "Hammerhead Shark": {
 "artist": "Stephen Daniele",
@@ -8490,6 +8553,13 @@
 "number": "73",
 "set": "ice"
 },
+"Icequake": {
+"artist": "Richard Kane Ferguson",
+"file": "ice_134",
+"frame": "1993",
+"number": "134",
+"set": "ice"
+},
 "Icy Manipulator": {
 "artist": "Amy Weber",
 "file": "ice_322",
@@ -9125,6 +9195,13 @@
 "file": "ice_356",
 "frame": "1993",
 "number": "356",
+"set": "ice"
+},
+"Karplusan Giant": {
+"artist": "Daniel Gelon",
+"file": "ice_196",
+"frame": "1993",
+"number": "196",
 "set": "ice"
 },
 "Kavu Climber": {
@@ -12270,6 +12347,13 @@
 "number": "41",
 "set": "4ed"
 },
+"Piety Charm": {
+"artist": "David Martin",
+"file": "ons_49",
+"frame": "1997",
+"number": "49",
+"set": "ons"
+},
 "Pilgrim of Justice": {
 "artist": "Dany Orizio",
 "file": "ody_40",
@@ -14615,6 +14699,13 @@
 "number": "45",
 "set": "ody"
 },
+"Seedling Charm": {
+"artist": "Stuart Griffin",
+"file": "mir_240",
+"frame": "1997",
+"number": "240",
+"set": "mir"
+},
 "Seeker": {
 "artist": "Mark Poole",
 "file": "4ed_49",
@@ -15609,6 +15700,13 @@
 "number": "69",
 "set": "apc"
 },
+"Smite": {
+"artist": "Daren Bader",
+"file": "sth_17",
+"frame": "1997",
+"number": "17",
+"set": "sth"
+},
 "Smokespew Invoker": {
 "artist": "Thomas M. Baxa",
 "file": "lgn_81",
@@ -15644,6 +15742,13 @@
 "number": "170",
 "set": "ons"
 },
+"Snag": {
+"artist": "Ron Spencer",
+"file": "pcy_124",
+"frame": "1997",
+"number": "124",
+"set": "pcy"
+},
 "Snake Basket": {
 "artist": "Roger Raupp",
 "file": "vis_155",
@@ -15671,6 +15776,13 @@
 "frame": "1997",
 "number": "272",
 "set": "mmq"
+},
+"Snow Devil": {
+"artist": "Ken Meyer, Jr.",
+"file": "ice_100",
+"frame": "1993",
+"number": "100",
+"set": "ice"
 },
 "Snow Fortress": {
 "artist": "Jeff A. Menges",
@@ -16869,6 +16981,13 @@
 "number": "42",
 "set": "inv"
 },
+"Sunstone": {
+"artist": "Phil Foglio",
+"file": "ice_341",
+"frame": "1993",
+"number": "341",
+"set": "ice"
+},
 "Sunstrike Legionnaire": {
 "artist": "Mark Zug",
 "file": "lgn_22",
@@ -17309,6 +17428,13 @@
 "frame": "1997",
 "number": "53",
 "set": "mmq"
+},
+"Thermokarst": {
+"artist": "Ken Meyer, Jr.",
+"file": "ice_268",
+"frame": "1993",
+"number": "268",
+"set": "ice"
 },
 "Thicket Basilisk": {
 "artist": "Dan Frazier",
@@ -19032,6 +19158,13 @@
 "number": "169",
 "set": "4ed"
 },
+"Warpath": {
+"artist": "Paolo Parente",
+"file": "mmq_226",
+"frame": "1997",
+"number": "226",
+"set": "mmq"
+},
 "Warped Devotion": {
 "artist": "Dany Orizio",
 "file": "pls_57",
@@ -19584,6 +19717,13 @@
 "frame": "1997",
 "number": "125",
 "set": "nem"
+},
+"Woolly Mammoths": {
+"artist": "Dan Frazier",
+"file": "ice_278",
+"frame": "1993",
+"number": "278",
+"set": "ice"
 },
 "Woolly Spider": {
 "artist": "Daniel Gelon",
