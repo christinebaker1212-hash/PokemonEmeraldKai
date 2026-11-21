@@ -124,9 +124,25 @@ animations for the Pokemon too, as well as at least one positive and negative re
 LINK, animations (hop / step / turn, eating, happy with a heart, unhappy with a sweat drop, the Egg's wobble).
 Fixed on the way, without the hardware: the emulator harness now enforces what the user's VMU showed (XRAM's missing
 bytes, VCCR's rules, drawing only on RC, a VM2's receiver garbling slow bytes); LINK TEST 4 and the pet default to the
-fast RC link. Not in this draft: battles, the colour file icon per MOeMON, Kai's side (reading the save page, giving
-Eggs), the per-species Egg colours of the user's style guide beyond the 1-bit patterns. Screens:
+fast RC link. Not in this draft: battles, Kai's side (reading the save page, giving Eggs); the Eggs and the colour icon came
+next (below). Screens:
 docs/vmu_pet/pet_screens.png.
+
+## Eggs for each MOéMON and the colour file icon (2026-11-21)
+
+The user: "let's continue battles, color file icon, species specific eggs, and Kai's side".
+- **Eggs** (`vmu_pet/tools/eggs.py`): the guide's own 19x20 silhouette (docs/user_images/96.png, leaning as drawn),
+  one of 8 patterns by the first type (FLAMES fire / dragon, WAVES water / ice, ROSES grass / bug, STARS psychic /
+  fairy, BANDS ground / rock / fighting / steel, SPOTS normal, ZIGZAG electric / flying, BLOTCHES poison / ghost /
+  dark), in one of 2 phases and maybe mirrored by the second type and number (32 looks on the LCD), and in colour the
+  MOéMON's own: the shell and pattern from its PMD sprite's two main colours, the outline a dark shade of the
+  pattern's. The LCD draws the outline and the pattern; the Egg turns as it rocks before hatching.
+- **The colour file icon** (`vmu_pet/pet/icon.inc`): the pet redraws its own header's icon when its stage or
+  MOéMON changes: an Egg in its design and colours; a hatched MOéMON as its PMD Normal portrait. The 151 portraits
+  are 40 KB even at 4 colours, and a VMU program can be 64 KB at most (Sega's manual), so they're a data file of
+  their own, PICTURES (`tools/gen_icons.py`, 81 blocks; the VMU's file menu copies data files, VM2 to VMU too):
+  the pet finds it by its mark wherever its blocks are. Without it, a hatched MOéMON's icon is its LCD sprite in its
+  Egg's outline colour. Checked pixel for pixel in the emulator (`tools/icon_check.py`, test pet_icon).
 
 ## The VMU manager (built 2026-11-21)
 

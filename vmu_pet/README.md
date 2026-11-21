@@ -5,9 +5,12 @@ The user's decisions: `docs/VMU_PET_DECISIONS.md`.
 
 ## Layout
 
-- `pet/`: the pet, KANTO edition (first draft, 2026-11-21): `pet.s`; its data from Kai's tables and PMD sprites
-  (`tools/gen_edition.py kanto`: 151 MOeMON, 73 hatchable, 1-bit 24x24 sprites, seven Egg patterns by type). Screens:
-  `docs/vmu_pet/pet_screens.png`.
+- `pet/`: the pet, KANTO edition (first draft, 2026-11-21): `pet.s`, `icon.inc` (its colour file icon); its data
+  from Kai's tables and PMD sprites (`tools/gen_edition.py kanto`: 151 MOeMON, 73 hatchable, 1-bit 24x24 sprites, an
+  Egg for each: `tools/eggs.py`). Screens: `docs/vmu_pet/pet_screens.png`.
+- PICTURES (`make pictures`: `tools/fetch_portraits.sh`, `tools/gen_icons.py`): the 151 PMD Normal portraits at 32x32
+  in 4 colours, a data file of 81 blocks beside the pet; with it a hatched MOeMON's file icon is its portrait.
+  `build/pet_pictures.bin` is a VMU image with both.
 - `linktest/`: LINK TEST, the first program: two VMU programs talking over the top connector, saving what they get.
 - `inc/`: shared assembly: `sfr.inc` (registers), `header.inc` (Sega's GHEAD: vectors and BIOS calls), `lcd.inc`
   (the screen, a 3x5 font), `sio.inc` (VMU-to-VMU serial, every byte echoed).
@@ -50,7 +53,11 @@ another VMU, RECEIVE one in place of an Egg), ABOUT. UP / DOWN on the pet opens 
   $40-$67, what LINK sends; the owner: $68-$7b). Kai reads it there.
 - Drawn only on RC, VCCR written whole, the button interrupt only around HALT (it's level-triggered), buttons sampled
   while drawing (`lcd_hook`), the BIOS's idle count reset on a press (it sleeps after ~2 minutes without).
-- Tests: `test/scripts/pet_life.txt` (hatch, meals, full, clean, training, status, a day judged, shop, helpers),
+- The file icon (`icon.inc`): rewritten when the stage or MOeMON changes (the header's $25e / $25f say what it
+  shows): an Egg's design in its colours, the portrait from PICTURES, or the LCD sprite. `tools/icon_check.py IMAGE`
+  checks a saved unit's icon pixel for pixel (run.sh does it for every `OUT/icon_*.bin`).
+- Tests: `test/scripts/pet_icon.txt` (the Egg's icon, then the portrait's; skipped without `make pictures`),
+  `test/scripts/pet_life.txt` (hatch, meals, full, clean, training, status, a day judged, shop, helpers),
   `pet_link.txt` (to a VM2), `pet_reload.txt` (a saved unit started again). `tools/screen_text.py` reads a shot's text;
   `tools/shots_sheet.py` makes a sheet; `tools/fix_branches.py` lengthens branches that can't reach.
 

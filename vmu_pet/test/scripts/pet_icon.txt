@@ -1,0 +1,11 @@
+# image: build/pet_pictures.bin
+# The colour file icon (pet/icon.inc): an Egg in its design and colours, then the hatched MOeMON's portrait from the
+# PICTURES file (make pictures); run.sh checks every OUT/icon_*.bin with tools/icon_check.py. Skipped without it.
+date a 2026 11 21 10 0 0
+date b 2026 11 21 10 0 0
+run 3
+save a OUT/icon_egg.bin
+date a 2026 11 21 10 31 0
+run 4
+peek a 41 02
+save a OUT/icon_portrait.bin

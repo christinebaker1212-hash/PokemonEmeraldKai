@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Moemon VMU pet: an edition's data (its MOeMON, names, evolutions, sprites, Eggs) as waterbear source.
+"""Moemon VMU pet: an edition's data (its MOeMON, names, evolutions, sprites, Eggs: eggs.py) as waterbear source.
 
 usage: gen_edition.py kanto OUT.inc [PREVIEW.png]
 
@@ -11,11 +11,14 @@ national 1-151. In the edition a MOeMON is its index (0..n-1):
   ed_species  (2 bytes each)    Kai's species number
   ed_evo_to   (1 each)          what it becomes ($ff = nothing), ed_evo_lv (1 each) at which level
   ed_evo_kind (1 each)          0 by level, 1 a stone / trade / friendship (care: at ed_evo_lv), 2 EEVEE (care picks)
-  ed_egg      (1 each)          its Egg's pattern (0-5)
+  ed_egg      (1 each)          its Egg (eggs.py): bits 0-3 the design (kind * 2 + phase), bit 4 mirrored
+  ed_egg_rgb  (6 each)          its Egg's colours for the file icon: outline, shell, pattern (ARGB4444, little-endian)
   ed_name     (2 each)          -> a 0-terminated name
   ed_sprite   (2 each)          -> its sprite: a row count h, then h rows of 3 bytes (24 pixels, bit 7 left), the
                                    sprite centred and standing on the bottom row
-  egg_pat_N                     the Eggs: 18 rows of 3 bytes each (16x18 in the middle), N = 0-5
+  egg_pat_N, egg_pats           the 16 Egg designs for the LCD: a sprite like ed_sprite's (20 rows, outline and pattern)
+  icon_egg_ol, icon_egg_in      the Egg on the colour icon: 28 rows of 4 bytes (32 pixels), its outline and inside
+  icon_egg_pat_N, icon_egg_pats each design's pattern on the icon (28 rows of 4 bytes)
 Non-level evolutions (the user: "care decides"): stones and friendship at level 30, trades at 36; EEVEE at 25 into
 VAPOREON (no care mistakes), FLAREON (trained more than fed) or JOLTEON (the rest).
 """
@@ -30,12 +33,6 @@ sys.path.insert(0, HERE)
 EDITIONS = {'kanto': list(range(1, 152))}
 CARE_LEVEL = {'EVO_ITEM': 30, 'EVO_FRIENDSHIP': 30, 'EVO_FRIENDSHIP_DAY': 30, 'EVO_FRIENDSHIP_NIGHT': 30,
               'EVO_TRADE': 36, 'EVO_TRADE_ITEM': 36}
-# An Egg's pattern by the MOeMON's first type (the user's style guide, docs/user_images/96.png: a pattern on each)
-PATTERN = {'FIRE': 0, 'DRAGON': 0, 'WATER': 1, 'ICE': 1, 'GRASS': 2, 'BUG': 2, 'ELECTRIC': 3, 'FLYING': 3,
-           'POISON': 4, 'GHOST': 4, 'PSYCHIC': 4, 'DARK': 4, 'FAIRY': 5, 'NORMAL': 5,
-           'ROCK': 6, 'GROUND': 6, 'FIGHTING': 6, 'STEEL': 6}
-
-
 def read(p):
     return open(os.path.join(REPO, p), encoding='utf-8', errors='replace').read()
 
@@ -80,48 +77,6 @@ def evolutions(nums):
     return out
 
 
-def egg_patterns():
-    """Seven 16x18 1-bit Eggs: an outline (the egg's own edge) and a pattern inside, after the user's style guide."""
-    W, H = 16, 18
-    cx, cy = 7.5, 9.6
-
-    def inside(x, y):
-        dx, dy = (x - cx) / 7.6, (y - cy) / (8.9 if y > cy else 8.2)
-        return dx * dx + dy * dy <= 1.0
-
-    shape = [[inside(x, y) for x in range(W)] for y in range(H)]
-
-    def edge(x, y):
-        if not shape[y][x]:
-            return False
-        for ax, ay in ((x - 1, y), (x + 1, y), (x, y - 1), (x, y + 1)):
-            if not (0 <= ax < W and 0 <= ay < H) or not shape[ay][ax]:
-                return True
-        return False
-
-    pats = {
-        0: lambda x, y: (y >= 11 and ((x + (y - 11) // 2) % 5 < 2 or y >= 15)),           # flames from below
-        1: lambda x, y: (y in (7, 12) and True) or (y in (6, 11) and x % 4 == 1) or (y in (8, 13) and x % 4 == 3),  # waves
-        2: lambda x, y: ((x - 4) ** 2 + (y - 6) ** 2 <= 3) or ((x - 11) ** 2 + (y - 12) ** 2 <= 4) or ((x - 5) ** 2 + (y - 13) ** 2 <= 2),  # leaves / spots
-        3: lambda x, y: (y - 7) in (0, 1) and x % 6 < 3 or (y - 9) in (0, 1) and (x + 3) % 6 < 3,  # zigzag
-        4: lambda x, y: abs(((x - 8) ** 2 + (y - 10) ** 2) ** 0.5 - 3.2) < 0.7 and not (x > 8 and y < 10),  # a swirl
-        5: lambda x, y: ((x - 5) ** 2 + (y - 7) ** 2 <= 1.5) or ((x - 10) ** 2 + (y - 11) ** 2 <= 2) or ((x - 6) ** 2 + (y - 14) ** 2 <= 1),  # spots
-        6: lambda x, y: y in (8, 9, 13),                                                   # bands
-    }
-    out = []
-    for n in range(7):
-        rows = []
-        for y in range(H):
-            row = 0
-            for x in range(W):
-                on = edge(x, y) or (shape[y][x] and pats[n](x, y))
-                if on:
-                    row |= 1 << (23 - (x + 4))  # centred in 24
-            rows.append(row)
-        out.append(rows)
-    return out
-
-
 def main():
     ed, outp = sys.argv[1], sys.argv[2]
     preview = sys.argv[3] if len(sys.argv) > 3 else None
@@ -152,8 +107,10 @@ def main():
                 lv.append(int(a) if a.isdigit() else 30); kind.append(0)
             else:
                 lv.append(CARE_LEVEL.get(k, 30)); kind.append(1)
+    import eggs
+    designs = [eggs.design(d, info[d]['types']) for d in dex]
     for label, vals in (('ed_evo_to', to), ('ed_evo_lv', lv), ('ed_evo_kind', kind),
-                        ('ed_egg', [PATTERN.get(info[d]['types'][0], 5) for d in dex])):
+                        ('ed_egg', [k * 2 + p + (16 if m else 0) for k, p, m in designs])):
         L.append(label + ':')
         for i in range(0, len(vals), 16):
             L.append('  .byte ' + ', '.join(str(v) for v in vals[i:i + 16]))
@@ -187,20 +144,50 @@ def main():
         L.append('  .byte %d' % h)
         for y in range(0, h, 4):
             L.append('  .byte ' + ', '.join('$%02x, $%02x, $%02x' % ((v >> 16) & 255, (v >> 8) & 255, v & 255) for v in rows[y:y + 4]))
-    eggs = egg_patterns()
-    for n, rows in enumerate(eggs):
+    L.append('ed_egg_rgb:')
+    for d in dex:
+        L.append('  .word ' + ', '.join('$%04x' % eggs.to4444(c)[0] for c in eggs.palette(*eggs.body_colours(d))))
+
+    def bits(rows, left, width):
+        out = []
+        for r in rows:
+            v = 0
+            for x, on in enumerate(r):
+                if on:
+                    v |= 1 << (width - 1 - (left + x))
+            out.append(v)
+        return out
+    egg_lcd = []
+    for n in range(16):
+        ol, sh, pt = eggs.masks(eggs.LCD_W, eggs.LCD_H, n // 2, n % 2)
+        rows = bits([[o or q for o, q in zip(a, b)] for a, b in zip(ol, pt)], 2, 24)
+        egg_lcd.append(rows)
         L.append('egg_pat_%d:' % n)
-        for y in range(0, len(rows), 6):
-            L.append('  .byte ' + ', '.join('$%02x, $%02x, $%02x' % ((v >> 16) & 255, (v >> 8) & 255, v & 255) for v in rows[y:y + 6]))
+        L.append('  .byte %d' % len(rows))
+        for y in range(0, len(rows), 5):
+            L.append('  .byte ' + ', '.join('$%02x, $%02x, $%02x' % ((v >> 16) & 255, (v >> 8) & 255, v & 255) for v in rows[y:y + 5]))
     L.append('egg_pats:')
-    L.append('  .word ' + ', '.join('egg_pat_%d' % n for n in range(len(eggs))))
+    L.append('  .word ' + ', '.join('egg_pat_%d' % n for n in range(16)))
+
+    def rows32(label, rows):
+        L.append(label + ':')
+        for y in range(0, len(rows), 4):
+            L.append('  .byte ' + ', '.join('$%02x, $%02x, $%02x, $%02x' % tuple((v >> s) & 255 for s in (24, 16, 8, 0)) for v in rows[y:y + 4]))
+    ol, sh, pt = eggs.masks(eggs.ICON_W, eggs.ICON_H, 0, 0)
+    rows32('icon_egg_ol', bits(ol, 2, 32))
+    rows32('icon_egg_in', bits(sh, 2, 32))
+    for n in range(16):
+        ol, sh, pt = eggs.masks(eggs.ICON_W, eggs.ICON_H, n // 2, n % 2)
+        rows32('icon_egg_pat_%d' % n, bits(pt, 2, 32))
+    L.append('icon_egg_pats:')
+    L.append('  .word ' + ', '.join('icon_egg_pat_%d' % n for n in range(16)))
     open(outp, 'w').write('\n'.join(L) + '\n')
     if preview:
         from PIL import Image
         cols = 16
-        img = Image.new('L', (cols * 26, ((len(dex) + len(eggs) + cols - 1) // cols) * 26), 200)
+        img = Image.new('L', (cols * 26, ((len(dex) + len(egg_lcd) + cols - 1) // cols) * 26), 200)
         px = img.load()
-        for i, rows in enumerate(sheet + [[0] * (24 - len(e)) + e for e in eggs]):
+        for i, rows in enumerate(sheet + egg_lcd):
             ox, oy = (i % cols) * 26 + 1, (i // cols) * 26 + 1 + (24 - len(rows))
             for y, v in enumerate(rows):
                 for x in range(24):

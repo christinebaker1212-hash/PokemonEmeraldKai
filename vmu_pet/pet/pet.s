@@ -15,7 +15,7 @@
   .org $200
   .text 16 "MOEMON KANTO"
   .text 32 "MOEMON VMU PET - KANTO EDITION"
-  .string 11 "MOEMON KAI"
+  .string 16 "MOEMON KAI"
   .include icon "icon.png" speed=16
 
 ;; ---- RAM bank 1 ($00-$0f: the indirect registers; $7c-$ff: the BIOS's flash call area and page buffer)
@@ -159,6 +159,7 @@ loop:
   be last_ticks, .sametick
   st last_ticks
   callf on_tick
+  callf icon_check          ; the file icon follows an Egg laid, hatched, evolved or received (icon.inc)
 .sametick:
   ld redraw
   bz .halt
@@ -346,11 +347,14 @@ draw_pet:
   callf lcd_clear_rows
   ld P_STAGE
   be #2, .mon
-  ; the Egg: its pattern by the MOeMON inside (gen_edition.py ed_egg), rocking by a row
+  ; the Egg: its design by the MOeMON inside (gen_edition.py ed_egg: bits 0-3 the design, bit 4 mirrored), rocking
+  ; by a row and turning with `mirror`
   ld P_SPECIES
   mov #<ed_egg, trl
   mov #>ed_egg, trh
   ldc
+  st tmp2
+  and #$0f
   rol
   st tmp0
   mov #<egg_pats, trl
@@ -366,9 +370,22 @@ draw_pet:
   st trl
   ld posx
   st c
-  mov #6, acc
+  ld tmp2
+  ror
+  ror
+  ror
+  ror
+  xor mirror
+  and #1
+  bnz .eggm
+  mov #4, acc
   sub bob
-  callf egg_blit
+  callf lcd_blit24
+  br .extras
+.eggm:
+  mov #4, acc
+  sub bob
+  callf lcd_blit24m
   br .extras
 .mon:
   ld P_SPECIES
@@ -464,35 +481,6 @@ draw_pet:
 .well:
   ret
 
-
-;; egg_blit: trh:trl = an Egg (18 rows of 3 bytes, no count), acc = top row, c = byte column
-egg_blit:
-  push b
-  st lcd_t2
-  mov #0, lcd_t0
-  mov #18, lcd_t1
-.row:
-  ld lcd_t2
-  callf lcd_row
-  ld 2
-  add c
-  st 2
-  mov #3, b
-.byte:
-  ld lcd_t0
-  ldc
-  st @R2
-  inc 2
-  inc lcd_t0
-  dec b
-  ld b
-  bnz .byte
-  inc lcd_t2
-  dec lcd_t1
-  ld lcd_t1
-  bnz .row
-  pop b
-  ret
 
 ;; draw_bottom: line 4: the message, or "LV12 123456" (an Egg: "EGG 123456")
 draw_bottom:
@@ -652,6 +640,7 @@ hatch_anim:
   ld tmp3
   and #1
   st bob
+  st mirror                 ; turning as it rocks
   push tmp3
   callf draw_pet
   pop tmp3
@@ -661,6 +650,7 @@ hatch_anim:
   ld tmp3
   bne #8, .w
   mov #0, bob
+  mov #0, mirror
 .r:
   ret
 
@@ -2836,6 +2826,7 @@ ic_overlays:                ; 1 a heart, 2 a sweat drop, 3-5 a meal: whole, bitt
   .include "font.inc"
   .include "../inc/rev_bits.inc"
   .include "kanto.inc"
+  .include "icon.inc"
 
   ;; The SAVE page: 128 bytes on a 128-byte boundary (the magic, then $40-$7b)
   .cnop 0, $80
