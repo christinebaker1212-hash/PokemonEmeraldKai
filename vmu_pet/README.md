@@ -12,6 +12,8 @@ The user's decisions: `docs/VMU_PET_DECISIONS.md`.
   (finds LINK TEST's saves on an SD card), `pmd_read.py` + `onebit.py` (PMD Collab sprites to 1 bit),
   `get_tools.sh` (the assembler and emulator at pinned commits into `.tools/`, never committed).
 - `test/`: `vmutest` (two VMUs in libevmu joined by a cable, run by a script), `scripts/*.txt`, `run.sh`.
+- `manager/`: the VMU manager (README.txt there): VMU images on the VM2 (USB: docs/VM2_USB_PROTOCOL.md), SD cards,
+  folders and files; `make -C vmu_pet/manager` / `windows` / `test`.
 - `prebuilt/`: the programs as built, for putting on a VM2 without building.
 
 ## Building and testing
