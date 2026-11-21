@@ -40,9 +40,14 @@ Started 2026-11-20. Nothing is built yet; graphics come from the user.
   This replaces the one 900-species program: an edition is about 130-200 species, so it takes far fewer blocks and the
   VMU icon can be the pet's own Normal portrait (proposed: the program rewrites its own file icon).
 - **KANTO is the first edition.**
-- **One week of daily care reaches level 50**, faster with steps.
-- **Steps are a currency**: spent on faster levels, better IVs, turning it shiny, rare items (MASTER BALL, ASTRAL BALL)
-  that come into Kai with it. How steps reach the VMU is open: the VMU has no step sensor.
+- **One week of daily care reaches level 50**, faster with the currency below.
+- **No steps** (2026-11-21: the VMU has no step sensor; a pedometer was ruled out). **The currency is time the program
+  runs on the VMU**: the pet earns while it's with him and running, even with the screen off; time with the program
+  closed earns nothing. Spent on faster levels, better IVs, turning it shiny, rare items (MASTER BALL, ASTRAL BALL)
+  that come into Kai with it.
+- Running for hours means the program idles like the VMU's own clock: the slow 32 kHz clock, HALT between the base
+  timer's ticks, the screen off until a button. It saves to flash on care, on leaving and about hourly (flash wears
+  with writes), so pulled batteries lose at most an hour. To measure on hardware.
 
 ## Sprites (determined 2026-11-21)
 
