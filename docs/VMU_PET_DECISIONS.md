@@ -15,6 +15,20 @@ Started 2026-11-20. Nothing is built yet; graphics come from the user.
   Windows GUI). The player puts the VM2's microSD in the PC, runs Kai, and on the title menu of the save they want picks
   "TRANSFER MOEMON FROM VMU".
 - The user's VM2 runs the latest firmware (the newest found online: 1.5.5, August 2025; GUI 1.9.9.1).
+- **Any MOéMON that can hatch from an Egg can hatch** (2026-11-21). In Kai's tables 874 of the 1025 species are in a
+  breedable egg group, plus the babies: about 900 species whose art the VMU must hold, every stage of each line.
+- **Full maturity is level 50.**
+- **Care is Digimon-style** (V-Pet: hunger and strength, training, battles, care mistakes, sleep, sickness...).
+- **No Dreamcast** (the user has one but would rather not use it): the program reaches the VM2 from the SD card, and an
+  original VMU from the VM2 by the VMU's own file transfer (top to top).
+
+## Space (from the hardware)
+
+- Code runs from flash bank 0 (64 KB); LDF reads all 128 KB (the bank bit at SFR 0x154). A minigame starts at block 0
+  and is contiguous, so data past 64 KB can live in blocks 128-199 of the same GAME file.
+- About 900 species: a 16x16 1-bit frame is 32 bytes (about 29 KB a frame for all of them), 24x24 is 72 bytes (about
+  64 KB). Two 16x16 frames each, or one 24x24, fits only if the program takes nearly the whole VMU (about 190 blocks,
+  no other saves beside it). Stats, types and evolutions for 900 species take about 10 KB more; names about 7 KB.
 
 ## How it works (proposed, to confirm as it's built)
 
@@ -33,6 +47,7 @@ Started 2026-11-20. Nothing is built yet; graphics come from the user.
    Chao Adventure did) is unconfirmed. A small link-test program comes before the pet.
 2. Where a minigame running on the VM2 saves: its internal 128 KB or the active SD image, and when that reaches the
    card.
+3. That the VM2 can send the program to an original VMU by the VMU's file transfer (no Dreamcast), at its full size.
 
 ## Tools
 
