@@ -1,5 +1,6 @@
 #include "global.h"
 #include "mp_region.h"
+#include "mp.h"
 #include "main.h"
 #include "event_data.h"
 #include "field_effect.h"
@@ -360,11 +361,13 @@ bool16 ScriptMenu_CreatePCMultichoice(void)
 #define PCMENU_HOF     2
 #define PCMENU_LOGOFF  3
 #define PCMENU_GLOBAL  4
-static u8 sPcMenuRows[5];
+#define PCMENU_VM2     5   // only while a VM2 is plugged in (the user: "should not appear in the PC unless a VM2 is connected")
+static u8 sPcMenuRows[6];
 
 static void CreatePCMultichoice(void)
 {
     static const u8 sGlobalPc[] = _("GLOBAL PC");
+    static const u8 sVm2[] = _("VM2");
     u8 x = 8;
     u32 pixelWidth = 0;
     u8 width;
@@ -386,13 +389,16 @@ static void CreatePCMultichoice(void)
         sPcMenuRows[numChoices++] = PCMENU_HOF;
     if (MP_Region_AnyCleared())         // Moemon Kai: the GLOBAL PC, after any region's Elite Four
         sPcMenuRows[numChoices++] = PCMENU_GLOBAL;
+    if (MP_Vm2_Present())                // Moemon Kai: the VMU pet's VM2 (mp_vm2.c)
+        sPcMenuRows[numChoices++] = PCMENU_VM2;
     sPcMenuRows[numChoices++] = PCMENU_LOGOFF;
 
     windowId = CreateWindowFromRect(0, 0, width, numChoices * 2);
     SetStandardWindowBorderStyle(windowId, FALSE);
     for (i = 2; i < numChoices; i++)
     {
-        const u8 *text = sPcMenuRows[i] == PCMENU_HOF ? gText_HallOfFame : sPcMenuRows[i] == PCMENU_GLOBAL ? sGlobalPc : gText_LogOff;
+        const u8 *text = sPcMenuRows[i] == PCMENU_HOF ? gText_HallOfFame : sPcMenuRows[i] == PCMENU_GLOBAL ? sGlobalPc
+                       : sPcMenuRows[i] == PCMENU_VM2 ? sVm2 : gText_LogOff;
         AddTextPrinterParameterized(windowId, FONT_NORMAL, text, x, 1 + 16 * i, TEXT_SKIP_DRAW, NULL);
     }
 
