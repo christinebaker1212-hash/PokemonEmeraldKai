@@ -285,6 +285,45 @@ int main(void)
     CHECK(HasMonster(0, "Summoned Skull") && !HasMonster(0, "Celtic Guardian") && InGrave(0, "Celtic Guardian"));
     printf("ok   %s\n", sScenario);
 
+    /* A Tribute Summon from the table (zone 0x40): its zone asked after the Tributes, the Tribute's zone among them */
+    sScenario = "tribute summon zone";
+    Start(LIST("Celtic Guardian", "Summoned Skull"), LIST("Waboku"), NULL);
+    Until(0, YGO_Q_IDLE);
+    {
+        struct YgoAnswer a;
+        unsigned i, found = 0;
+        memset(&a, 0, sizeof(a));
+        for (i = 0; i < D.query.count; i++)
+            if (D.query.items[i].kind == YGO_ACT_SUMMON && !strcmp(ItemName(i), "Celtic Guardian"))
+                a.picks[a.count++] = (uint8_t)i;
+        a.zone = 3;   /* the third Monster Zone */
+        Answer(&a);
+        Until(0, YGO_Q_IDLE);
+        CHECK(D.s.players[0].monsters[2] != 0);
+        Act(YGO_ACT_END_TURN, NULL);
+        Until(0, YGO_Q_IDLE);
+        memset(&a, 0, sizeof(a));
+        for (i = 0; i < D.query.count; i++)
+            if (D.query.items[i].kind == YGO_ACT_SUMMON && !strcmp(ItemName(i), "Summoned Skull"))
+                a.picks[a.count++] = (uint8_t)i;
+        a.zone = 0x40;
+        Answer(&a);
+        CHECK(D.query.type == YGO_Q_CARDS && D.query.prompt == YGO_P_TRIBUTE);
+        Choose(LIST("Celtic Guardian"));
+        CHECK(D.query.type == YGO_Q_ZONE && D.query.player == 0);
+        for (i = 0; i < D.query.count; i++)
+            if (!(D.query.items[i].flags & (YGO_ZF_SPELL | YGO_ZF_OPPONENT)) && D.query.items[i].value == 2)
+                found = i + 1;
+        CHECK(found);
+        memset(&a, 0, sizeof(a));
+        a.count = 1;
+        a.picks[0] = (uint8_t)(found - 1);
+        Answer(&a);
+        Until(0, YGO_Q_IDLE);
+        CHECK(D.s.players[0].monsters[2] && !strcmp(Ygo_Card(D.s.objs[D.s.players[0].monsters[2] - 1].card)->name, "Summoned Skull"));
+    }
+    printf("ok   %s\n", sScenario);
+
     /* Dark Hole: every monster destroyed */
     sScenario = "dark hole";
     Start(LIST("Celtic Guardian", "Dark Hole"), LIST("Feral Imp"), NULL);

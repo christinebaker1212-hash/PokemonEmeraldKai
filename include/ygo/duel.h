@@ -181,7 +181,7 @@ struct YgoAnswer
 {
     uint8_t count;
     uint8_t picks[YGO_PICKS_MAX];   /* item indices (COUNTER: amounts per item) */
-    uint8_t zone;   /* a Main Phase answer that puts a card from the hand on the field: the zone it goes to + 1
+    uint8_t zone;   /* (0x40: ask the zone when it's time: a Tribute Summon's, after its Tributes) a Main Phase answer that puts a card from the hand on the field: the zone it goes to + 1
                      * (bit 7: a Spell & Trap Zone; 0: the first empty one). Ignored for the rest. */
 };
 /* A chain link */

@@ -1762,7 +1762,7 @@ static int Ask(struct YgoDuel *d)
             (void)wanted;
             if (d->query.count == 1)
                 pick = 0;
-            else if (wanted && GP(e, cp) == e->wantZonePlayer && type == MSG_SELECT_PLACE)
+            else if (wanted && GP(e, cp) == e->wantZonePlayer && type == MSG_SELECT_PLACE && !(e->wantZone & 0x40))
                 for (i = 0; i < d->query.count && pick < 0; i++)
                 {
                     const struct YgoChoice *c = &d->query.items[i];

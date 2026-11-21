@@ -215,6 +215,7 @@ enum
     M_PILE,        /* looking through a pile */
     M_CONFIRM,     /* conceding? */
     M_NAMES,       /* declare a card name: a list of names */
+    M_CHECK,       /* a chance to chain: CHECK, the window put away to look at any card (B: back to it) */
     M_OVER
 };
 enum
@@ -258,6 +259,7 @@ static struct
     uint8_t theme;      /* the background (YGO_BG_*) */
     uint16_t fieldCard; /* the Field Spell whose picture is the background now (0 none) */
     int zoneItem, zoneSpell;   /* M_ZONE: the menu's choice, and Spell & Trap Zones (1) or Monster Zones (0) */
+    int tribZone;              /* our last Tribute's Monster Zone + 1: a Tribute Summon's zone question starts there */
     int pickPrefer;            /* a pick on the table: the item the cursor starts on (PreferredPick) */
     int windowItems[YGO_QUERY_MAX + 1], windowCount, windowCursor;
     uint8_t picked[YGO_QUERY_MAX];
@@ -320,8 +322,12 @@ static struct Fx *AddFx(unsigned kind, int x, int y, int life);
 /* A turn or a phase beginning: the POKeMON card table's YOUR TURN band, the same look, length and sounds */
 static int Sweep(const char *text, unsigned player)
 {
-    struct Fx *f = AddFx(FX_SWEEP, 0, GAP_Y + 11, Fast() ? 34 : 52);
-    int mine = player == B.me;
+    struct Fx *f;
+    int mine = player == B.me, i;
+    for (i = 0; i < FX_MAX; i++)   /* (the last one's band goes: two never overlap, one's text dimmed by the other's band) */
+        if (B.fx[i].life && B.fx[i].kind == FX_SWEEP)
+            B.fx[i].life = 0;
+    f = AddFx(FX_SWEEP, 0, GAP_Y + 11, Fast() ? 34 : 52);
     if (f)
     {
         snprintf(f->text, sizeof(f->text), "%s", text);
@@ -424,7 +430,7 @@ static unsigned PileList(unsigned side, unsigned pile, uint8_t *out)
 }
 static int HandRaised(void)
 {
-    return (B.mode == M_FREE || B.mode == M_WATCH || B.mode == M_PICK_FIELD || B.mode == M_MENU) &&
+    return (B.mode == M_FREE || B.mode == M_WATCH || B.mode == M_PICK_FIELD || B.mode == M_MENU || B.mode == M_CHECK) &&
            B.cursorKind == SP_HAND;
 }
 static struct Rect HandRect(unsigned i, unsigned n)
@@ -899,6 +905,8 @@ static int Present(const struct YgoEvent *e)
     case YGO_EV_TO_GRAVE:
         if (o >= B.objCount)
             return 0;
+        if ((e->flags & YGO_REASON_TRIBUTE) && B.shown[o].loc == YGO_LOC_MZONE && B.shown[o].controller == B.me)
+            B.tribZone = B.shown[o].seq + 1;
         if ((e->flags & YGO_REASON_TRIBUTE) && B.shown[o].loc == YGO_LOC_MZONE && ObjCenter(o, &x, &y))
         {
             /* a Tribute: it goes up as light where it stands (Advance sends it to the Graveyard after) */
@@ -1253,11 +1261,17 @@ static void NewQuestion(void)
         B.mode = M_PICK_FIELD;
         B.cursorKind = -1;
         B.pickPrefer = 0;
+        for (i = 0; B.tribZone && i < q->count; i++)   /* (a Tribute Summon: where the last Tribute was) */
+            if (!(q->items[i].flags & (YGO_ZF_SPELL | YGO_ZF_OPPONENT)) && q->items[i].value == B.tribZone - 1)
+                B.pickPrefer = (int)i;
+        B.tribZone = 0;
         break;
     case YGO_Q_CHAIN:
         B.mode = M_WINDOW;
         for (i = 0; i < q->count; i++)
             B.windowItems[B.windowCount++] = (int)i;
+        B.windowItems[B.windowCount++] = -3;   /* CHECK: look at the field first (the user, 2026-11-21) */
+        MPNet_Log("ygo board: chain window, %u to activate", q->count);
         B.windowItems[B.windowCount++] = -1;   /* pass */
         Tip("You can respond! A Trap or Quick-Play Spell can be activated now, in a chain. Or pass with {B}. "
             "You're asked when something happens: hold {L} to be asked at every chance.");
@@ -1670,10 +1684,10 @@ static void Advance(void)
         for (i = 0; i < FX_MAX && shown; i++)
             if (B.fx[i].life && B.fx[i].kind == FX_SWEEP)
                 shown = 0;
-        /* (out as fast as a banner's band opens: a tenth of its life) */
-        float out = Fast() ? 0.3f : 0.2f;
+        /* (out at once: the band covers that line, and text fading under it looked like the band's own words
+           dimming, the user 2026-11-21) */
         if (!shown)
-            B.infoFade = B.infoFade > out ? B.infoFade - out : 0;
+            B.infoFade = 0;
         else if (B.infoFade < 1)
             B.infoFade = B.infoFade < 0.9f ? B.infoFade + 0.1f : 1;
     }
@@ -2150,7 +2164,17 @@ int YgoBoard_Step(unsigned pressed, unsigned held, struct YgoAnswer *answer, uns
                 return YB_NONE;
             }
             B.mode = M_WATCH;
-            return Answer1(answer, item);
+            {
+                unsigned r = Answer1(answer, item);
+                const struct YgoCard *tc;
+                if (item >= 0 && (q->items[item].kind == YGO_ACT_SUMMON || q->items[item].kind == YGO_ACT_SET_MONSTER)
+                    && q->items[item].obj < B.objCount && (tc = ObjCard(q->items[item].obj)) && tc->level >= 5)
+                {
+                    answer->zone = 0x40;   /* (a Tribute Summon: its zone asked after the Tributes, from the last one's) */
+                    B.tribZone = 0;
+                }
+                return r;
+            }
         }
         return YB_NONE;
     case M_ZONE:
@@ -2354,6 +2378,26 @@ int YgoBoard_Step(unsigned pressed, unsigned held, struct YgoAnswer *answer, uns
         }
         return YB_NONE;
     }
+    case M_CHECK:
+        if (pressed & (KEY_UP | KEY_DOWN | KEY_LEFT | KEY_RIGHT))
+            MoveCursor(pressed);
+        cur = CurrentSpot();
+        if (pressed & (KEY_A | KEY_INSPECT))
+        {
+            unsigned id = InspectSpot(cur);
+            if (id)
+            {
+                *card = id;
+                PlaySE(SE_SELECT);
+                return YB_INSPECT;
+            }
+        }
+        if (pressed & KEY_B)
+        {
+            PlaySE(SE_SELECT);
+            B.mode = M_WINDOW;
+        }
+        return YB_NONE;
     case M_WINDOW:
         if (!B.windowCount)
             return YB_NONE;
@@ -2372,6 +2416,15 @@ int YgoBoard_Step(unsigned pressed, unsigned held, struct YgoAnswer *answer, uns
                 *card = id;
                 return YB_INSPECT;
             }
+        }
+        if (pressed & KEY_A && B.windowItems[B.windowCursor] == -3)
+        {
+            /* CHECK: the window goes, the cursor goes round the table; B brings it back */
+            PlaySE(SE_SELECT);
+            B.mode = M_CHECK;
+            BuildSpots();
+            MPNet_Log("ygo board: check the field");
+            return YB_NONE;
         }
         if (pressed & KEY_B && q->type == YGO_Q_CHAIN)
         {
@@ -3018,6 +3071,8 @@ static void Gap(void)
             first = PromptText(q, prompt, sizeof(prompt));
         else if (B.mode == M_ZONE)
             first = B.zoneSpell ? "Which Spell & Trap Zone?" : "Which Monster Zone?";
+        else if (B.mode == M_CHECK && !SpotCard(cur))
+            first = "Check any card before you answer.";
         else if (B.mode == M_WATCH && !MyQuestion() && B.log[0])
             first = B.log, firstColor = 0xb8c0d0;
         if (B.mode == M_PICK_GRID || B.mode == M_PILE)
@@ -3069,6 +3124,9 @@ static void Gap(void)
             snprintf(line, sizeof(line), "A direct attack on their Life Points");
         /* (what to pick, when we're asked, always shows) */
         float fade = B.mode == M_PICK_FIELD || B.mode == M_PICK_GRID || B.mode == M_ZONE || B.mode == M_PILE ? 1 : B.infoFade;
+        for (i = 0; i < FX_MAX; i++)   /* (never under a turn / phase band) */
+            if (B.fx[i].life && B.fx[i].kind == FX_SWEEP)
+                fade = 0;
         G_TextAlpha((unsigned)(255 * fade));
         if (first && fade > 0)
             Line(4, GAP_Y, firstColor, first, width1);
@@ -3104,6 +3162,9 @@ static void Gap(void)
             break;
         case M_ZONE:
             hint = "{A}PUT IT HERE {B}BACK";
+            break;
+        case M_CHECK:
+            hint = "{A}LOOK {B}CANCEL";
             break;
         default:
             hint = "{A}OK {INSPECT}LOOK";
@@ -3188,7 +3249,7 @@ static void Highlights(void)
                 }
         }
     }
-    if (cur >= 0 && (B.mode == M_FREE || B.mode == M_WATCH || B.mode == M_PICK_FIELD || B.mode == M_MENU))
+    if (cur >= 0 && (B.mode == M_FREE || B.mode == M_WATCH || B.mode == M_PICK_FIELD || B.mode == M_MENU || B.mode == M_CHECK))
     {
         const struct Spot *s = &B.spots[cur];
         int y = s->r.y - (s->kind == SP_HAND ? 4 : 0);
@@ -3551,7 +3612,9 @@ static void Menus(void)
         {
             int item = B.windowItems[i];
             rows[i] = names[i];
-            if (item < 0)
+            if (item == -3)
+                snprintf(names[i], sizeof(names[i]), "CHECK");
+            else if (item < 0)
                 snprintf(names[i], sizeof(names[i]), "PASS");
             else if (q->type == YGO_Q_CHAIN)
             {

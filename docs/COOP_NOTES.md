@@ -8756,3 +8756,14 @@ res/moves/chatter/anim.s).
 - MinMaxBlocker (Min$ / Max$: MTG_STATIC_BLOCKERS, Mtg_BlockerLimits): too few blockers of one don't block (as menace),
   past the most only the first do.
 - Playable: 3582 -> 3593. Tests: test_rules.c TestHandAndBlockers.
+
+## YU-GI-OH!: the Tribute Summon's zone, the phase bands, CHECK (2026-11-21, the user's list)
+- A Tribute Summon from the table answers with zone 0x40 (YgoAnswer.zone): the bridge doesn't place it by itself
+  (ygo_edo.c MSG_SELECT_PLACE) and asks the zone after the Tributes; the board's cursor starts on the last Tribute's
+  Monster Zone (ygo_board.c B.tribZone from its TO_GRAVE event). TCG_LINK_VERSION 20. Test: test_edo_cards.c
+  "tribute summon zone".
+- Turn / phase bands: a new one clears the last (they overlapped: 52 frames each, the next after 40, the new band's
+  dark fill dimming the old text), and the middle line's text is never drawn under a band. Scenario ygo_phase_sweep.
+- A chance to chain: the window lists the cards, CHECK, PASS (item -3). CHECK puts it away (mode M_CHECK): the cursor
+  goes round the table, A / LOOK shows a card, B (CANCEL) brings the window back. "mp ygo autochain" (tests: the
+  harness plays for you but leaves chances to chain to the table). Scenario ygo_chain_check.

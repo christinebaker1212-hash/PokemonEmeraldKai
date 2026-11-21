@@ -1,0 +1,5 @@
+# YU-GI-OH!'s turn and phase bands (the user, 2026-11-21: on the opponent's turn the text seemed to fade bit by bit):
+# a new band clears the last one, so two never overlap. Shots ph* every 6 frames through a few phase changes.
+MODE=1
+TMO=200
+UNEXPECT_A=("[crash]" "TIMEOUT")

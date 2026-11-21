@@ -1008,7 +1008,7 @@ static void DuelStep(unsigned pressed, unsigned keys)
     }
     /* the opponent (and the harness's autoplay for you) */
     if (!Y.online && !Y.duel.s.over && Y.duel.query.type != YGO_Q_NONE && YgoBoard_Idle() &&
-        (Y.duel.query.player == 1 || Y.autoPlay))
+        (Y.duel.query.player == 1 || (Y.autoPlay && !(Y.autoPlay == 2 && Y.duel.query.type == YGO_Q_CHAIN && Y.duel.query.count))))
     {
         if (Y.aiDelay > 0)
             Y.aiDelay--;
@@ -4019,6 +4019,12 @@ void Ygo_Debug(const char *command)
     {
         /* the next duels' shuffles from a known seed (tests: the same duel every run) */
         C()->rng = n ? n : 1;
+        return;
+    }
+    if (!strcmp(command, "autochain"))
+    {
+        /* (tests) the harness plays for you, but a chance to chain with something to activate is yours on the table */
+        Y.autoPlay = 2;
         return;
     }
     if (!strcmp(command, "auto"))

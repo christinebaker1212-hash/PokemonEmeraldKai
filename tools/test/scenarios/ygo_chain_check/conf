@@ -1,0 +1,7 @@
+# YU-GI-OH!'s chance to chain (the user, 2026-11-21): ACTIVATE (the card) / CHECK / PASS. CHECK puts the window away so
+# any card can be looked at; B (CANCEL) brings the window back. Shots w1-w2 the window, c1-c2 checking, c3 the window
+# again, c4 passed.
+MODE=1
+TMO=300
+EXPECT_A=("board: chain window" "board: check the field")
+UNEXPECT_A=("[crash]" "TIMEOUT")
