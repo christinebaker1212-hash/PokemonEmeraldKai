@@ -8681,3 +8681,11 @@ res/moves/chatter/anim.s).
   color doesn't push it off: Mtg_AuraOwnProtection).
 - Menace (MTG_KW_MENACE): a lone blocker of a menace attacker doesn't block (BLOCKERS answer).
 - Playable: 3424 -> 3444. Tests: test_rules.c TestTapAllPerm (Propaganda, Form of the Dragon, Viashino Runner, Voice of All).
+
+## MAGIC: Effects' own triggers, SacrificeAll (2026-11-21)
+- An Effect's Triggers$ (MtgAbility.effTrigs, Mtg_ParseEffectTrigger: TriggerZones$ Command, its zones any): checked
+  while the Effect lasts with its source as their card (mtg_trigger.c, gMtgEffCtx set while matching: IsRemembered,
+  ChosenColor read the Effect's), the Effect's remembered objects carried onto the stack (MtgPending / MtgStackEntry
+  effRem) and remembered as it resolves; Defined$ EffectSource is its source. An Effect with only triggers is made too.
+- SacrificeAllEffect: every ValidCards$ permanent, or the Defined$ ones (Controller$ You: its controller's own).
+- Playable: 3444 -> 3458. Test: test_rules.c (Mountain Titan).

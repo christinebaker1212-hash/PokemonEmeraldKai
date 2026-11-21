@@ -3077,6 +3077,20 @@ static void TestTapAllPerm(void)
             ChooseOption(NULL, MTG_R);
         CHECK(Mtg_Protection(&sD, voice) & MTG_COLOR_BIT(MTG_R), "voice of all: protection from red");
     }
+    {   // Mountain Titan's Effect: this turn, each black spell you cast puts a +1/+1 counter on it
+        int titan, rit;
+        Table();
+        titan = Put(0, "Mountain Titan", MTG_ZONE_BATTLEFIELD);
+        Lands(0, "Mountain", 3);
+        Lands(0, "Swamp", 1);
+        rit = Put(0, "Dark Ritual", MTG_ZONE_HAND);
+        Do(MTG_ACT_ACTIVATE, titan, -1, 0);
+        PassBoth();
+        Do(MTG_ACT_CAST, rit, -1, 0);
+        PassBoth();   // (the trigger)
+        PassBoth();   // (the ritual)
+        CHECK(Mtg_Counters(&sD, titan, MTG_CTR_P1P1) == 1, "a black spell: a counter (%d)", Mtg_Counters(&sD, titan, MTG_CTR_P1P1));
+    }
     {   // Flailing Ogre: any player may activate its -1/-1 (the opponent, paying)
         int ogre, k, found = -1;
         const MtgQuery *q;

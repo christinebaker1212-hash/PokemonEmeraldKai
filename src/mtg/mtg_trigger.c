@@ -246,7 +246,9 @@ static int ParseTrig(MtgCardDef *c, int cardId, char *text, int attach)
     }
     // where the card must be: TriggerZones$, else TriggerChangesZone.correctZones' (leaving the battlefield: from
     // there; its own arrival: where it arrives), else the battlefield
-    if ((v = Mtg_TriggerParam(t, "TriggerZones")) != NULL) {
+    if (attach == 2 && (!(v = Mtg_TriggerParam(t, "TriggerZones")) || strcmp(v, "Command") == 0))
+        t->zones = 0xFF;   // (an Effect's: it lives with the Effect, wherever its source is)
+    else if ((v = Mtg_TriggerParam(t, "TriggerZones")) != NULL) {
         t->zones = (uint8_t)Zones(v);
         if (!t->zones || strcmp(v, "Any") == 0) {
             Mtg_Unsupported(c, Reason("TriggerZones"));
@@ -340,6 +342,11 @@ void Mtg_ParseTrigger(MtgCardDef *c, int cardId, char *text)
 int Mtg_ParseGrantedTrigger(MtgCardDef *c, int cardId, char *text)
 {
     return ParseTrig(c, cardId, text, 0);
+}
+
+int Mtg_ParseEffectTrigger(MtgCardDef *c, int cardId, char *text)
+{
+    return ParseTrig(c, cardId, text, 2);
 }
 
 
@@ -517,6 +524,40 @@ void Mtg_CheckTriggers(MtgDuel *d, const MtgTrigEvent *ev)
             p->trigPlayer = ev->player;
             p->trigCtrl = ev->objCtrl;
             p->trigAmount = ev->amount;
+            p->effRemCount = 0;
+        }
+    }
+    for (i = 0; i < d->effCount; i++) {   // the Effects' own triggers ("whenever a creature blocks this turn")
+        const MtgEffect *e = &d->effects[i];
+        const MtgAbility *ab = &gMtgAbilities[e->ability];
+        if (!Mtg_EffectAlive(d, e))
+            continue;
+        for (k = 0; k < ab->effTrigCount; k++) {
+            const MtgTrigger *t = &gMtgTriggers[ab->effTrigs[k]];
+            MtgPending *p;
+            int ok, r;
+            if (t->mode != ev->mode)
+                continue;
+            gMtgEffCtx = e;   // (IsRemembered: the Effect's own)
+            ok = Matches(d, t, e->source, ev) && Present(d, t, e->source);
+            gMtgEffCtx = NULL;
+            if (!ok)
+                continue;
+            if (d->pendingCount >= MTG_MAX_PENDING)
+                return;
+            p = &d->pending[d->pendingCount++];
+            p->source = e->source;
+            p->trigger = ab->effTrigs[k];
+            p->trigObj = ev->obj;
+            p->trigObj2 = ev->obj2;
+            p->controller = e->controller;
+            p->trigPlayer = ev->player;
+            p->trigCtrl = ev->objCtrl;
+            p->trigAmount = ev->amount;
+            p->effRemCount = 0;
+            for (r = 0; r < e->remCount && r < 4; r++)   // (what the Effect remembers: Defined$ Remembered as it resolves)
+                if (e->rem[r] >= MTG_REM_PLAYER || d->objs[e->rem[r]].seq == e->remSeq[r])
+                    p->effRem[p->effRemCount++] = e->rem[r];
         }
     }
 }

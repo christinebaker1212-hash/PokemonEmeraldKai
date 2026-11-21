@@ -205,6 +205,8 @@ typedef struct {
     uint16_t trigObj, trigObj2;   // the card that triggered it; the other card involved (a blocker, a damaged creature)
     uint8_t trigPlayer, trigCtrl, optional;   // the player involved (by mode, mtg_trigger.c); trigObj's controller then
     int16_t trigAmount;           // DamageDone: how much
+    uint8_t effRemCount;          // an Effect's trigger: its Effect's remembered objects, remembered as it resolves
+    uint16_t effRem[4];
 } MtgStackEntry;
 
 // a trigger waiting to go on the stack (the next time a player would get priority, in APNAP order)
@@ -212,6 +214,8 @@ typedef struct {
     uint16_t source, trigger, trigObj, trigObj2;
     uint8_t controller, trigPlayer, trigCtrl;
     int16_t trigAmount;
+    uint8_t effRemCount;          // an Effect's trigger: what that Effect remembered (its Defined$ Remembered)
+    uint16_t effRem[4];
 } MtgPending;
 #define MTG_MAX_PENDING 24
 

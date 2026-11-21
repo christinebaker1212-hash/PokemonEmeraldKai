@@ -758,9 +758,9 @@ static int ParseAbility(MtgCardDef *c, int cardId, char *text, int kind, int dep
         }
     }
     if (gMtgAbilities[idx].api == MTG_API_EFFECT) {   // its statics and replacements: SVars of its card, parsed now, kept on the ability
-        static const char *const sLists[2] = {"StaticAbilities", "ReplacementEffects"};
+        static const char *const sLists[3] = {"StaticAbilities", "ReplacementEffects", "Triggers"};
         int li;
-        for (li = 0; li < 2; li++) {
+        for (li = 0; li < 3; li++) {
             char names[96], *p = names, *k;
             const char *list = Mtg_Param(&gMtgAbilities[idx], sLists[li]);
             if (!list)
@@ -776,12 +776,20 @@ static int ParseAbility(MtgCardDef *c, int cardId, char *text, int kind, int dep
                 int st;
                 while (*k == ' ')
                     k++;
-                if (!(sv = Mtg_Svar(cardId, k)) || gMtgAbilities[idx].effStaticCount >= 3) {
+                if (!(sv = Mtg_Svar(cardId, k)) || gMtgAbilities[idx].effStaticCount >= 3
+                    || (li == 2 && gMtgAbilities[idx].effTrigCount >= 2)) {
                     Unsupported(c, "Effect");
                     break;
                 }
                 copy = malloc(strlen(sv) + 1);
                 strcpy(copy, sv);
+                if (li == 2) {   // (its own trigger)
+                    int tr = Mtg_ParseEffectTrigger(c, cardId, copy);
+                    if (tr < 0)
+                        break;   // (it said why)
+                    gMtgAbilities[idx].effTrigs[gMtgAbilities[idx].effTrigCount++] = (uint16_t)tr;
+                    continue;
+                }
                 st = li ? Mtg_ParseEffectReplacement(c, cardId, copy) : Mtg_ParseEffectStatic(c, cardId, copy);
                 if (st < 0)
                     break;   // (it said why)

@@ -20,7 +20,7 @@ static const struct { const char *name; uint8_t api; } sApis[] = {
     {"RearrangeTopOfLibrary", MTG_API_REARRANGE_TOP}, {"ChooseType", MTG_API_CHOOSE_TYPE},
     {"ChooseColor", MTG_API_CHOOSE_COLOR}, {"ChoosePlayer", MTG_API_CHOOSE_PLAYER}, {"ChooseNumber", MTG_API_CHOOSE_NUMBER},
     {"GenericChoice", MTG_API_GENERIC_CHOICE}, {"TapAll", MTG_API_TAP_ALL}, {"UntapAll", MTG_API_UNTAP_ALL},
-    {"Protection", MTG_API_PROTECTION}, {"Debuff", MTG_API_DEBUFF},
+    {"Protection", MTG_API_PROTECTION}, {"Debuff", MTG_API_DEBUFF}, {"SacrificeAll", MTG_API_SACRIFICE_ALL},
 };
 
 const char *const gMtgApiNames[MTG_API_COUNT] = {
@@ -28,7 +28,7 @@ const char *const gMtgApiNames[MTG_API_COUNT] = {
     "ChangeZone", "Mana", "Discard", "Tap", "Untap", "Counter", "Sacrifice", "PutCounter", "Attach", "Regenerate", "Token", "Charm",
     "ChangeZoneAll", "Animate", "DelayedTrigger", "PreventDamage", "GainControl", "PutCounterAll", "RemoveCounter", "Dig", "Mill", "FlipCoin", "Cleanup", "Reveal", "RepeatEach", "SetLife", "Effect", "Fog", "ChooseSource",
     "RearrangeTopOfLibrary", "ChooseType", "ChooseColor", "ChoosePlayer", "ChooseNumber", "GenericChoice",
-    "TapAll", "UntapAll", "Debuff", "Protection",
+    "TapAll", "UntapAll", "SacrificeAll", "Debuff", "Protection",
 };
 
 int Mtg_ApiKnown(const char *name)
@@ -249,7 +249,7 @@ typedef struct { int n; MtgTarget t[MTG_MAX_DEFINED]; } Defined;
 static const char *const sDefinedKnown[] = {
     "You", "Opponent", "Player", "Self", "Targeted", "ParentTarget", "TargetedController", "TargetedPlayer",
     "Enchanted", "DelayTriggerRemembered", "DelayTriggerRememberedLKI", "Remembered", "RememberedLKI", "RememberedCard",
-    "Player.IsRemembered", "ChosenCard", "ChosenPlayer", "Player.Opponent", "Player.Other",
+    "Player.IsRemembered", "ChosenCard", "ChosenPlayer", "Player.Opponent", "Player.Other", "EffectSource",
 };
 
 // what set a triggered ability off (SpellAbility.getTriggeringObject: "Triggered" + the AbilityKey's name, its
@@ -387,7 +387,9 @@ static void DefinedBy(const MtgDuel *d, const MtgResolveCtx *ctx, const char *de
     } else if (strcmp(def, "ChosenPlayer") == 0) {   // (ChoosePlayer's, kept on its source)
         if (ctx->source >= 0 && ctx->source < d->objCount && d->objs[ctx->source].chosenPlayer)
             Add(out, MTG_TGT_PLAYER, d->objs[ctx->source].chosenPlayer - 1);
-    } else if (strcmp(def, "You") == 0)
+    } else if (strcmp(def, "EffectSource") == 0)   // (an Effect's trigger: the card that made the Effect)
+        Add(out, MTG_TGT_OBJ, ctx->source);
+    else if (strcmp(def, "You") == 0)
         Add(out, MTG_TGT_PLAYER, ctx->controller);
     else if (strcmp(def, "Player.Opponent") == 0 || strcmp(def, "Player.Other") == 0)
         Add(out, MTG_TGT_PLAYER, ctx->controller ^ 1);   // (two players: the other one)
@@ -1206,7 +1208,7 @@ static int Resolve(MtgDuel *d, MtgResolveCtx *ctx, const MtgAbility *ab)
     case MTG_API_EFFECT: {   // EffectEffect: its statics in force for a while, with what it remembers
         const char *rem = Mtg_Param(ab, "RememberObjects"), *du = Mtg_Param(ab, "Duration");
         MtgEffect *ef;
-        if (d->effCount >= MTG_MAX_EFFECTS || !ab->effStaticCount)
+        if (d->effCount >= MTG_MAX_EFFECTS || (!ab->effStaticCount && !ab->effTrigCount))
             break;
         ef = &d->effects[d->effCount++];
         memset(ef, 0, sizeof(*ef));
@@ -1404,6 +1406,21 @@ static int Resolve(MtgDuel *d, MtgResolveCtx *ctx, const MtgAbility *ab)
     case MTG_API_CHARM:    // (never on the stack itself: each mode is cast or activated on its own)
     case MTG_API_ATTACH:   // (the Aura enters attached as the spell finishes: mtg_game.c FinishResolve)
         break;
+    case MTG_API_SACRIFICE_ALL: {   // every ValidCards$ permanent, or the Defined$ ones (Controller$ You: its own)
+        const char *cards = Mtg_Param(ab, "ValidCards");
+        int mine = Mtg_Param(ab, "Controller") != NULL;
+        if (cards) {
+            for (i = 0; i < d->objCount; i++)
+                if (d->objs[i].zone == MTG_ZONE_BATTLEFIELD && Mtg_ValidObj(d, i, cards, ctx->source, ctx->controller))
+                    Mtg_Sacrifice(d, i);
+            break;
+        }
+        Targets(d, ctx, ab, DEF_CARD, &who);
+        for (i = 0; i < who.n; i++)
+            if (OnBattlefield(d, &who.t[i]) && (!mine || d->objs[who.t[i].id].controller == ctx->controller))
+                Mtg_Sacrifice(d, who.t[i].id);
+        break;
+    }
     case MTG_API_DEBUFF: {   // DebuffEffect: the keywords lost until end of turn (or for good)
         uint32_t kw = KeywordList(Mtg_Param(ab, "Keywords"), &ok);
         int forGood = Mtg_Param(ab, "Duration") != NULL;
@@ -1947,7 +1964,7 @@ static const char *const sApiParams[MTG_API_COUNT][16] = {
     [MTG_API_REPEAT_EACH] = {"RepeatSubAbility", "RepeatPlayers", "RepeatCards", "Zone", "DamageMap", "ChangeZoneTable"},
     [MTG_API_SET_LIFE] = {"LifeAmount"},
     [MTG_API_EFFECT] = {"StaticAbilities", "ReplacementEffects", "RememberObjects", "Duration", "ExileOnMoved", "ForgetOnMoved", "Name",
-                        "Stackable"},
+                        "Stackable", "Triggers"},
     [MTG_API_DELAYED_TRIGGER] = {"Mode", "Phase", "ValidPlayer", "Execute", "RememberObjects", "NextTurn",
                                  "TriggerDescription", "Secondary"},
     [MTG_API_GAIN_LIFE] = {"LifeAmount"},
@@ -1971,6 +1988,7 @@ static const char *const sApiParams[MTG_API_COUNT][16] = {
     [MTG_API_UNTAP_ALL] = {"ValidCards", "ValidDescription"},
     [MTG_API_PROTECTION] = {"Gains", "Choices"},
     [MTG_API_DEBUFF] = {"Keywords", "Duration"},
+    [MTG_API_SACRIFICE_ALL] = {"ValidCards", "Controller"},
 };
 static const char *const sPayersKnown[] = {
     "You", "Opponent", "Player", "Targeted", "TargetedController", "TargetedPlayer", "Player.IsRemembered",
@@ -2099,6 +2117,12 @@ int Mtg_ApiParamsKnown(const MtgAbility *ab, const char **why)
     case MTG_API_TAP_ALL:
     case MTG_API_UNTAP_ALL:
         return (v = Mtg_Param(ab, "ValidCards")) && Mtg_ValidSpecKnown(v) && !ab->tgt;
+    case MTG_API_SACRIFICE_ALL:   // ValidCards$ (every one), or Defined$ (those named; Controller$ You: only its own)
+        if ((v = Mtg_Param(ab, "Controller")) && strcmp(v, "You"))
+            return 0;
+        if ((v = Mtg_Param(ab, "ValidCards")))
+            return Mtg_ValidSpecKnown(v) && !Mtg_Param(ab, "Defined") && !ab->tgt;
+        return Mtg_Param(ab, "Defined") != NULL;   // (its name is checked with the others: Mtg_ApiParamsKnown)
     case MTG_API_DEBUFF:
         KeywordList(Mtg_Param(ab, "Keywords"), &ok);
         return ok && Mtg_Param(ab, "Keywords") && (!(v = Mtg_Param(ab, "Duration")) || strcmp(v, "Permanent") == 0);
@@ -2141,7 +2165,7 @@ int Mtg_ApiParamsKnown(const MtgAbility *ab, const char **why)
         return 1;
     case MTG_API_EFFECT: {   // (its statics and replacements are parsed as it's loaded: mtg_script.c)
         const char *du = Mtg_Param(ab, "Duration"), *rem = Mtg_Param(ab, "RememberObjects");
-        if (!Mtg_Param(ab, "StaticAbilities") && !Mtg_Param(ab, "ReplacementEffects"))
+        if (!Mtg_Param(ab, "StaticAbilities") && !Mtg_Param(ab, "ReplacementEffects") && !Mtg_Param(ab, "Triggers"))
             return 0;
         if (du && strcmp(du, "Permanent") && strcmp(du, "UntilHostLeavesPlayOrEOT") && strcmp(du, "UntilYourNextTurn")
             && strcmp(du, "UntilEndOfCombat") && strcmp(du, "AsLongAsInPlay") && strcmp(du, "UntilTheEndOfYourNextUntap")

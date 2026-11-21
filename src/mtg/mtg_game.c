@@ -904,7 +904,9 @@ static int ResolveTop(MtgDuel *d)
     d->resReturn = 0xFFFF;
     d->resFlip = 0;
     d->resCondAb = 0xFFFF;
-    d->remCount = 0;   // (a new chain remembers its own)
+    d->remCount = 0;   // (a new chain remembers its own; an Effect's trigger, its Effect's)
+    for (; d->remCount < e.effRemCount; d->remCount++)
+        d->rem[d->remCount] = e.effRem[d->remCount];
     d->repAb = 0xFFFF;
     d->repStart = 0;
     d->resStage = d->resPicks = 0;
@@ -2147,6 +2149,8 @@ static void PushTrigger(MtgDuel *d, int i, MtgTarget target)
     e->trigCtrl = pd.trigCtrl;
     e->trigAmount = pd.trigAmount;
     e->optional = t->optional;
+    e->effRemCount = pd.effRemCount;
+    memcpy(e->effRem, pd.effRem, sizeof(e->effRem));
     d->passes = 0;
     Mtg_Event(d, MTG_EV_TRIGGER, pd.source, target.kind, target.id);
     TargetEvent(d, target, pd.source, pd.controller);

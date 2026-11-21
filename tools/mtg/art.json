@@ -1742,6 +1742,13 @@
 "number": "41",
 "set": "hml"
 },
+"Barreling Attack": {
+"artist": "Ian Miller",
+"file": "mir_157",
+"frame": "1997",
+"number": "157",
+"set": "mir"
+},
 "Barren Moor": {
 "artist": "Heather Hudson",
 "file": "ons_312",
@@ -1776,6 +1783,13 @@
 "frame": "1997",
 "number": "188",
 "set": "ons"
+},
+"Battle Cry": {
+"artist": "Douglas Shuler",
+"file": "ice_5",
+"frame": "1993",
+"number": "5",
+"set": "ice"
 },
 "Battle Frenzy": {
 "artist": "Brian Snõddy",
@@ -5137,6 +5151,13 @@
 "number": "96",
 "set": "apc"
 },
+"Death Pit Offering": {
+"artist": "Pete Venters",
+"file": "nem_56",
+"frame": "1997",
+"number": "56",
+"set": "nem"
+},
 "Death Pulse": {
 "artist": "Tony Szczudlo",
 "file": "ons_137",
@@ -7993,6 +8014,13 @@
 "number": "244",
 "set": "4ed"
 },
+"Fog Elemental": {
+"artist": "Jon J Muth",
+"file": "wth_40",
+"frame": "1997",
+"number": "40",
+"set": "wth"
+},
 "Fog of Gnats": {
 "artist": "Jeff Miracola",
 "file": "ulg_53",
@@ -9666,6 +9694,13 @@
 "number": "108",
 "set": "uds"
 },
+"Heart Wolf": {
+"artist": "Margaret Organ-Kean",
+"file": "hml_75",
+"frame": "1993",
+"number": "75",
+"set": "hml"
+},
 "Heart of Ramos": {
 "artist": "David Martin",
 "file": "mmq_296",
@@ -11323,6 +11358,13 @@
 "file": "ice_137",
 "frame": "1993",
 "number": "137",
+"set": "ice"
+},
+"Kjeldoran Elite Guard": {
+"artist": "Melissa A. Benson",
+"file": "ice_34",
+"frame": "1993",
+"number": "34",
 "set": "ice"
 },
 "Kjeldoran Frostbeast": {
@@ -13376,6 +13418,13 @@
 "number": "203",
 "set": "ice"
 },
+"Mountain Titan": {
+"artist": "Melissa A. Benson",
+"file": "ice_299",
+"frame": "1993",
+"number": "299",
+"set": "ice"
+},
 "Mountain Valley": {
 "artist": "Kari Johnson",
 "file": "mir_328",
@@ -14201,6 +14250,13 @@
 "frame": "1997",
 "number": "113",
 "set": "apc"
+},
+"Overlaid Terrain": {
+"artist": "DiTerlizzi",
+"file": "nem_108",
+"frame": "1997",
+"number": "108",
+"set": "nem"
 },
 "Overload": {
 "artist": "Gary Ruddell",
@@ -18283,6 +18339,13 @@
 "number": "55",
 "set": "ons"
 },
+"Silent Assassin": {
+"artist": "rk post",
+"file": "mmq_160",
+"frame": "1997",
+"number": "160",
+"set": "mmq"
+},
 "Silent Attendant": {
 "artist": "Rebecca Guay",
 "file": "usg_51",
@@ -19550,6 +19613,13 @@
 "number": "23",
 "set": "nem"
 },
+"Spiritualize": {
+"artist": "Christopher Moeller",
+"file": "ody_53",
+"frame": "1997",
+"number": "53",
+"set": "ody"
+},
 "Spiteful Bully": {
 "artist": "Chippy",
 "file": "nem_72",
@@ -20782,6 +20852,13 @@
 "number": "70",
 "set": "ulg"
 },
+"Thalakos Deceiver": {
+"artist": "Andrew Robinson",
+"file": "sth_45",
+"frame": "1997",
+"number": "45",
+"set": "sth"
+},
 "Thalakos Dreamsower": {
 "artist": "Susan Van Camp",
 "file": "tmp_92",
@@ -21215,6 +21292,13 @@
 "frame": "1997",
 "number": "75",
 "set": "por"
+},
+"Time Elemental": {
+"artist": "Amy Weber",
+"file": "4ed_108",
+"frame": "1993",
+"number": "108",
+"set": "4ed"
 },
 "Timid Drake": {
 "artist": "Mike Dringenberg",
@@ -22433,6 +22517,13 @@
 "frame": "1997",
 "number": "33",
 "set": "jud"
+},
+"Vigorous Charge": {
+"artist": "Scott M. Fischer",
+"file": "inv_222",
+"frame": "1997",
+"number": "222",
+"set": "inv"
 },
 "Vile Consumption": {
 "artist": "Heather Hudson",
@@ -23966,6 +24057,13 @@
 "frame": "1997",
 "number": "168",
 "set": "ody"
+},
+"Zombie Boa": {
+"artist": "Greg Staples",
+"file": "apc_54",
+"frame": "1997",
+"number": "54",
+"set": "apc"
 },
 "Zombie Cutthroat": {
 "artist": "Thomas M. Baxa",

@@ -55,6 +55,7 @@ enum {
     MTG_API_GENERIC_CHOICE,   // ChooseGenericEffect: one of Choices$ (chains of their own) runs
     MTG_API_TAP_ALL,          // TapAllEffect: every ValidCards$ permanent tapped
     MTG_API_UNTAP_ALL,        // UntapAllEffect: ... untapped
+    MTG_API_SACRIFICE_ALL,    // SacrificeAllEffect: every ValidCards$ permanent (or the Defined$ ones) sacrificed
     MTG_API_DEBUFF,           // DebuffEffect: each loses Keywords$ until end of turn (Duration$ Permanent: for good)
     MTG_API_PROTECTION,       // ProtectionEffect: protection from Gains$ colors (Choice: one of Choices$ AnyColor) this turn
     MTG_API_COUNT
@@ -129,6 +130,8 @@ typedef struct {
     uint16_t repeatSub;             // RepeatEach: its RepeatSubAbility$ (0xFFFF: none)
     uint16_t effStatics[3];         // Effect: its StaticAbilities$ (gMtgStatics), parsed at load
     uint8_t effStaticCount;
+    uint16_t effTrigs[2];           // ... and its Triggers$ (gMtgTriggers)
+    uint8_t effTrigCount;
     uint8_t tgtFromSub;             // its tgt is the one target of a sub-ability later in its chain (chosen as it's cast;
                                     // its own effect doesn't act on it: Scent of Ivy's Reveal, then Pump)
     uint8_t tgtShared;              // a sub-ability whose target is its chain's (tgtFromSub on the first)
@@ -198,6 +201,7 @@ typedef struct {
 // translate makes the card unsupported
 void Mtg_ParseTrigger(MtgCardDef *c, int cardId, char *text);
 int Mtg_ParseGrantedTrigger(MtgCardDef *c, int cardId, char *text);   // a static's AddTrigger$: -1 if unsupported
+int Mtg_ParseEffectTrigger(MtgCardDef *c, int cardId, char *text);    // an Effect's Triggers$ (its own zone): -1 likewise
 void Mtg_CheckTriggers(MtgDuel *d, const MtgTrigEvent *ev);
 void Mtg_CheckStateTriggers(MtgDuel *d);   // Mode$ Always whose IsPresent$ holds (not again while one waits)     // the triggers it sets off join d->pending
 int Mtg_TriggerStillTrue(const MtgDuel *d, const MtgStackEntry *e);   // an intervening "if" (IsPresent$) on resolving
