@@ -121,6 +121,8 @@ static EWRAM_DATA bool8 sStatDown = FALSE;
     X(ROCKY_HELMET, "{B_ATK_NAME_WITH_PREFIX} was hurt\nby the {B_LAST_ITEM}!") \
     X(ABILITY_RAISED, "{B_SCR_ACTIVE_NAME_WITH_PREFIX}'s {B_SCR_ACTIVE_ABILITY}\nraised its {B_BUFF1}!") \
     X(ABILITY_LOWERED, "{B_SCR_ACTIVE_NAME_WITH_PREFIX}'s {B_BUFF1}\nfell!") \
+    X(ALL_LOWERED, "Everyone's {B_BUFF1}\nwas lowered!") \
+    X(FOES_LOWERED, "{B_SCR_ACTIVE_NAME_WITH_PREFIX}'s {B_SCR_ACTIVE_ABILITY}\nlowered its foes' {B_BUFF1}!") \
     X(NERVOUS, "{B_SCR_ACTIVE_NAME_WITH_PREFIX}'s foes are too\nnervous to eat BERRIES!") \
     X(SCREENS_CLEANED, "All screens on the field\nwere cleansed!") \
     X(SCR_HP_RESTORED, "{B_SCR_ACTIVE_NAME_WITH_PREFIX}'s HP\nwas restored.") \
@@ -2058,21 +2060,23 @@ u8 MP_Gen59_SwitchInAbility(u8 battler)
     case ABILITY_SUPERSWEET_SYRUP:
     {
         u32 i;
-        u8 first = MAX_BATTLERS_COUNT;
+        u8 first = MAX_BATTLERS_COUNT, mask = 0, n = 0;
         for (i = 0; i < gBattlersCount; i++)
             if (Alive(i) && GetBattlerSide(i) != GetBattlerSide(battler) && gBattleMons[i].statStages[STAT_EVASION] > MIN_STAT_STAGE)
             {
                 gBattleMons[i].statStages[STAT_EVASION]--;
+                mask |= (u8)(1u << i), n++;
                 if (first == MAX_BATTLERS_COUNT)
                     first = i;
             }
         if (first == MAX_BATTLERS_COUNT)
             return 0;
-        gBattleScripting.battler = first;
         PREPARE_STAT_BUFFER(gBattleTextBuff1, STAT_EVASION);
         gBattleScripting.animArg1 = STAT_ANIM_MINUS1 + STAT_EVASION - 1;
-        gBattleScripting.animArg2 = 0;
-        Say(G59_MSG_ABILITY_LOWERED);
+        gBattleScripting.animArg2 = n > 1 ? 0x80 | mask : 0;   // (Moemon Co-op: every foe at once, one line)
+        gLastUsedAbility = ABILITY_SUPERSWEET_SYRUP;
+        gBattleScripting.battler = n > 1 ? battler : first;
+        Say(n > 1 ? G59_MSG_FOES_LOWERED : G59_MSG_ABILITY_LOWERED);
         BattleScriptPushCursorAndCallback(BattleScript_G59AbilityStat);
         return 1;
     }
@@ -2239,10 +2243,25 @@ static const u8 *TargetAbilityOnHit(u8 atk, u8 def, u8 type)
         case ABILITY_COTTON_DOWN:
         {
             u32 i;
+            u8 mask = 0, n = 0, first = MAX_BATTLERS_COUNT;
             for (i = 0; i < gBattlersCount; i++)
-                if (i != def && i != atk && Alive(i) && gBattleMons[i].statStages[STAT_SPEED] > MIN_STAT_STAGE)
+                if (i != def && Alive(i) && gBattleMons[i].statStages[STAT_SPEED] > MIN_STAT_STAGE)
+                {
                     gBattleMons[i].statStages[STAT_SPEED]--;
-            return Alive(atk) ? AbilityStat(atk, STAT_SPEED, -1, ability) : NULL;
+                    mask |= (u8)(1u << i), n++;
+                    if (first == MAX_BATTLERS_COUNT)
+                        first = i;
+                }
+            if (!n)
+                return NULL;
+            // (Moemon Co-op: everyone's at once, one animation and "Everyone's SPEED was lowered!"; one alone: its own)
+            gLastUsedAbility = ability;
+            gBattleScripting.battler = first;
+            PREPARE_STAT_BUFFER(gBattleTextBuff1, STAT_SPEED);
+            gBattleScripting.animArg1 = STAT_ANIM_MINUS1 + STAT_SPEED - 1;
+            gBattleScripting.animArg2 = n > 1 ? 0x80 | mask : 0;
+            Say(n > 1 ? G59_MSG_ALL_LOWERED : G59_MSG_ABILITY_LOWERED);
+            return BattleScript_G59AbilityStatMoveEnd;
         }
         case ABILITY_SAND_SPIT:
             if (WEATHER_HAS_EFFECT2 && (gBattleWeather & B_WEATHER_SANDSTORM))

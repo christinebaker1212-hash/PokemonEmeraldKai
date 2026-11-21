@@ -11671,6 +11671,7 @@ static u8 MpFirstOf(u8 mask, u8 *count)
 // mode 0 / 2: a target's stat changed / can't go lower: record it and jump, if the move groups
 // mode 1: set up the shared animation and line for the changed ones (jump if none)
 // mode 3: set up the line for the ones that can't go lower (jump if none)
+static u8 sMpIntimMask, sMpIntimChanger;   // (INTIMIDATE's foes so far: mpstatgroup 4 / 5)
 static void Cmd_mpstatgroup(void)
 {
     u8 mode = gBattlescriptCurrInstr[DSIZE8BIT];
@@ -11696,6 +11697,43 @@ static void Cmd_mpstatgroup(void)
         return;
     }
 
+    if (mode == 4)
+    {
+        // INTIMIDATE (doubles and triples): each foe it lowers is kept; shown together after the last (mode 5)
+        if (gBattleTypeFlags & BATTLE_TYPE_DOUBLE)
+        {
+            sMpIntimMask |= gBitTable[gBattlerTarget];
+            sMpIntimChanger = gBattleScripting.statChanger;
+            gBattlescriptCurrInstr = jumpPtr;
+        }
+        else
+            gBattlescriptCurrInstr += DSIZE8BIT + DSIZE8BIT + DSIZEPTR;
+        return;
+    }
+    if (mode == 5)
+    {
+        // ... one stat animation over all of them and one line ("cuts the foes' ATTACK!"; one alone: the usual line)
+        first = MpFirstOf(sMpIntimMask, &count);
+        if (count == 0)
+        {
+            gBattlescriptCurrInstr = jumpPtr;
+            return;
+        }
+        changer = sMpIntimChanger;
+        amount = GET_STAT_BUFF_VALUE(changer);
+        down = (changer & STAT_BUFF_NEGATIVE) != 0;
+        gBattlerTarget = first;
+        gBattleScripting.statChanger = changer;
+        gBattleScripting.animArg1 = GET_STAT_BUFF_ID(changer)
+                                  + (down ? (amount >= 2 ? STAT_ANIM_MINUS2 : STAT_ANIM_MINUS1)
+                                          : (amount >= 2 ? STAT_ANIM_PLUS2 : STAT_ANIM_PLUS1));
+        gBattleScripting.animArg2 = (count > 1) ? (0x80 | sMpIntimMask) : 0;
+        gBattleCommunication[MULTISTRING_CHOOSER] = count > 1 ? 0 : 1;
+        MPNet_Log("battle: intimidate on %u at once (mask %x)", count, sMpIntimMask);
+        sMpIntimMask = 0;
+        gBattlescriptCurrInstr += DSIZE8BIT + DSIZE8BIT + DSIZEPTR;
+        return;
+    }
     first = MpFirstOf(mode == 1 ? gMpStatGroupMask : gMpStatGroupFailMask, &count);
     if (count == 0)
     {

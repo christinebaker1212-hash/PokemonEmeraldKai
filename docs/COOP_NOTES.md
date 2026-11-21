@@ -8776,3 +8776,13 @@ res/moves/chatter/anim.s).
 - In the SHARED list while connected, a species caught for the own POKéDEX too has a second, identical ball just
   behind the first (1 right, 2 up: pokedex.c CreateCaughtBall).
 - Scenario coop_mydex (BOB catches a ZIGZAGOON, then ALICE: the line, the list).
+
+## Stat Abilities on everyone at once (2026-11-21, the user)
+- INTIMIDATE in doubles / triples: each foe it lowers is kept (`mpstatgroup 4`, sMpIntimMask) instead of its own
+  animation and line; after the last one (`mpstatgroup 5`) one B_ANIM_STATS_CHANGE over all of them (animArg2 0x80 |
+  mask) and one line, "X's INTIMIDATE cuts the foes' ATTACK!" / "...the party's ATTACK!" per screen
+  (STRINGID_MP_INTIMIDATE_ALL); one foe alone keeps the usual line. CLEAR BODY etc. still say so per foe.
+- COTTON DOWN: "Everyone's SPEED was lowered!" with one animation over all it slowed; SUPERSWEET SYRUP: "X's
+  SUPERSWEET SYRUP lowered its foes' EVASIVENESS!" (battle_gen59.c G59_MSG_ALL_LOWERED / FOES_LOWERED;
+  STRINGID_G59_COUNT 134).
+- Scenario intimidate_all (GABBY & TY's double battle, GYARADOS leads).

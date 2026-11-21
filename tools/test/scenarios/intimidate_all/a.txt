@@ -1,0 +1,8 @@
+pressuntil A field 5000
+wait 30
+mp trainer 51
+watchlog intimidate on
+pressuntillog A 6000 intimidate on
+shotburst i 160 8
+wait 200
+quit

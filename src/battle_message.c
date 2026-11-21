@@ -427,6 +427,10 @@ const u16 gMpStatGroupStringIds[] = {
 // same chooser as gSandStormHailDmgStringIds (0 sandstorm, 1 hail)
 const u16 gMpWeatherAllStringIds[] = {STRINGID_MP_WEATHER_ALL_SAND, STRINGID_MP_WEATHER_ALL_HAIL};
 static const u8 sText_MpWeatherAllSand[] = _("Everyone was buffeted\nby the sandstorm!");
+// Moemon Co-op: INTIMIDATE on several Pokemon at once, one line (the user, 2026-11-21)
+static const u8 sText_MpIntimidatePartyAll[] = _("{B_SCR_ACTIVE_NAME_WITH_PREFIX}'s {B_SCR_ACTIVE_ABILITY}\ncuts the party's ATTACK!");
+static const u8 sText_MpIntimidateFoesAll[] = _("{B_SCR_ACTIVE_NAME_WITH_PREFIX}'s {B_SCR_ACTIVE_ABILITY}\ncuts the foes' ATTACK!");
+const u16 gMpIntimidateStringIds[] = {STRINGID_MP_INTIMIDATE_ALL, STRINGID_PKMNCUTSATTACKWITH};
 static const u8 sText_MpWeatherAllHail[] = _("Everyone was pelted\nby HAIL!");
 static const u8 sText_MpGroupPartyNoLower[] = _("The party's {B_BUFF1}\nwon't go any lower!");
 static const u8 sText_MpGroupFoesNoLower[] = _("The foes' {B_BUFF1}\nwon't go any lower!");
@@ -2603,6 +2607,9 @@ void BufferStringBattle(u16 stringID)
         break;
     case STRINGID_MP_JOIN_HELP:
         stringPtr = sText_MpJoinHelp;
+        break;
+    case STRINGID_MP_INTIMIDATE_ALL:
+        stringPtr = GetBattlerSide(gBattlerTarget) == B_SIDE_PLAYER ? sText_MpIntimidatePartyAll : sText_MpIntimidateFoesAll;
         break;
     case STRINGID_ORRE_TEXT:
     case STRINGID_ORRE_TEXT2:

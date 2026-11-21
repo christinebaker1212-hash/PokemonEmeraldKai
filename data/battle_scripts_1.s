@@ -4201,6 +4201,7 @@ BattleScript_IntimidateActivatesLoop:
 	jumpifability BS_TARGET, ABILITY_WHITE_SMOKE, BattleScript_IntimidatePrevented
 	statbuffchange STAT_CHANGE_NOT_PROTECT_AFFECTED | STAT_CHANGE_ALLOW_PTR, BattleScript_IntimidateActivatesLoopIncrement
 	jumpifbyte CMP_GREATER_THAN, cMULTISTRING_CHOOSER, 1, BattleScript_IntimidateActivatesLoopIncrement
+	mpstatgroup 4, BattleScript_IntimidateActivatesLoopIncrement   @ Moemon Co-op: doubles: all at once, after
 	setgraphicalstatchangevalues
 	playanimation BS_TARGET, B_ANIM_STATS_CHANGE, sB_ANIM_ARG1
 	printstring STRINGID_PKMNCUTSATTACKWITH
@@ -4209,6 +4210,11 @@ BattleScript_IntimidateActivatesLoopIncrement:
 	addbyte gBattlerTarget, 1
 	goto BattleScript_IntimidateActivatesLoop
 BattleScript_IntimidateActivatesReturn:
+	mpstatgroup 5, BattleScript_IntimidateActivatesDone
+	playanimation BS_TARGET, B_ANIM_STATS_CHANGE, sB_ANIM_ARG1
+	printfromtable gMpIntimidateStringIds
+	waitmessage B_WAIT_TIME_LONG
+BattleScript_IntimidateActivatesDone:
 	return
 BattleScript_IntimidatePrevented:
 	pause B_WAIT_TIME_SHORT
