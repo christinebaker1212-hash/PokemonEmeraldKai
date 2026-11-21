@@ -142,10 +142,15 @@ JNIEXPORT jstring JNICALL FN(catalog)(JNIEnv *env, jclass cls)
         Add(&b, ",\"t\":");
         AddStr(&b, c->text);
         Add(&b, ",\"atk\":%d,\"def\":%d,\"f\":%u,\"a\":%u,\"r\":%u,\"lv\":%u,\"p\":%u,\"ab\":%u,\"lim\":%u,\"ra\":%u,\"ok\":%d,"
-                "\"s\":\"%llx\"}",
+                "\"s\":[",
             c->atk == YGO_STAT_UNKNOWN ? -1 : c->atk, c->def == YGO_STAT_UNKNOWN ? -1 : c->def, c->frame, c->attribute,
-            c->race, c->level, c->property, c->abilities, Ygo_CopyLimit(id), c->rarity, Ygo_CardReady(id),
-            (unsigned long long)c->sets);
+            c->race, c->level, c->property, c->abilities, Ygo_CopyLimit(id), c->rarity, Ygo_CardReady(id));
+        {   /* its sets (YGO_SET_*, oldest first) */
+            unsigned k;
+            for (k = 0; k < c->setCount; k++)
+                Add(&b, "%s%u", k ? "," : "", (unsigned)gYgoCardSets[c->setFirst + k]);
+        }
+        Add(&b, "]}");
     }
     Add(&b, "]");
     return Done(env, &b);

@@ -59,7 +59,9 @@
 #define CLEANUP_LIST "update_cleanup.txt"
 #define DOWNLOAD_FILE "update_download.zip"
 #define MAX_MANIFEST 16384
-#define MAX_ZIP (512u * 1024u * 1024u)
+// (512 MB until 1.210.0, whose zip grew past it with the YU-GI-OH! card art: the user, 2026-11-21, raised it, games
+// from before downloading that one by hand once; a zip is written to the disk, then read whole)
+#define MAX_ZIP (2000u * 1024u * 1024u)
 
 int Display_Init(const char *title);
 void Display_Shutdown(void);
