@@ -182,6 +182,12 @@ bool8 MP_DexOwn_Has(u16 nat, bool8 caught)
     return GetSetPokedexFlag(nat, caught ? FLAG_GET_CAUGHT : FLAG_GET_SEEN);
 }
 
+bool8 MP_OwnDexBall(u16 nat)
+{
+    return !gMpConfig.noOwnDexBall && nat >= 1 && nat <= NATIONAL_DEX_COUNT && MP_IsConnected()
+        && GetSetPokedexFlag(nat, FLAG_GET_CAUGHT) && MP_DexOwn_Has(nat, TRUE);
+}
+
 bool8 MP_DexView_Shared(void)
 {
     Load();

@@ -9,6 +9,9 @@ enum { MP_DEXSHOW_ALL, MP_DEXSHOW_NOT_SEEN, MP_DEXSHOW_NOT_CAUGHT, MP_DEXSHOW_CA
 void MP_DexOwn_Reset(void);
 void MP_DexOwn_Mark(u16 nat, bool8 caught);
 bool8 MP_DexOwn_Has(u16 nat, bool8 caught);
+// on a server, a second ball beside the caught one: the shared POKéDEX has it caught and so does the player's own
+// (OPTIONS > CO-OP > MY DEX BALL; the list, the battle boxes)
+bool8 MP_OwnDexBall(u16 nat);
 
 bool8 MP_DexView_Shared(void);   // SHARED (the group's POKéDEX: the save's flags) or OWN
 u8 MP_DexView_Filter(void);

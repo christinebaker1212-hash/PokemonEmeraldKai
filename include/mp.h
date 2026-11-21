@@ -261,6 +261,7 @@ struct MpConfig
     u8 finderStyle;           // OPTIONS > CO-OP > FRIEND FINDER: MP_FINDER_* (mp_compass.c)
     u8 streamer;              // OPTIONS > CO-OP > STREAMER MODE: MP_STREAMER_* (mp_streamer.c)
     u8 finderOn;              // ... shown (the right stick click / G shows and hides it)
+    u8 noOwnDexBall;          // OPTIONS > CO-OP > MY DEX BALL OFF: no second ball for one caught for the own POKéDEX too
     u8 followerSprites;       // OPTIONS > GAME > FOLLOWERS: MP_FOLLOW_SPRITES_*
     u8 unovaSprites;          // Moemon Kai: OPTIONS > DISPLAY > SPRITE SCALING > UNOVA PEOPLE: MP_UNOVA_SPRITES_* (event_object_movement.c)
     u8 sinnohSprites;         // Moemon Kai: OPTIONS > DISPLAY > SPRITE SCALING > SINNOH PEOPLE: MP_SINNOH_SPRITES_* (event_object_movement.c)

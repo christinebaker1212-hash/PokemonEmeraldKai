@@ -3407,6 +3407,12 @@ void MP_TestCommand(const char *cmd, const char *arg)
         MP_AsciiToGame(buf, arg, 190);
         MP_ShowPopupText(buf);
     }
+    else if (strcmp(cmd, "owndexball") == 0)
+    {
+        // owndexball 0|1 - OPTIONS > CO-OP > MY DEX BALL
+        gMpConfig.noOwnDexBall = atoi(arg) == 0;
+        printf("[test] my dex ball %s\n", gMpConfig.noOwnDexBall ? "off" : "on");
+    }
     else if (strcmp(cmd, "uistyle") == 0)
     {
         // uistyle kai|red|crystal|firered|platinum|black - OPTIONS > DISPLAY > UI STYLE (mp_uistyle.c)

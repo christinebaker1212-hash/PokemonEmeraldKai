@@ -44,4 +44,33 @@ press DOWN 3
 wait 10
 wait 30
 rendershot dex
+press B 2
+wait 60
+press B 2
+wait 60
+press B 2
+pressuntil B field 3000
+wait 60
+mp wild 288:3
+pressuntil A action 4000
+wait 30
+rendershot battle_kai
+mp uistyle firered
+mp bstatus 1 0
+wait 30
+rendershot battle_firered
+mp uistyle crystal
+mp bstatus 1 0
+wait 30
+rendershot battle_crystal
+mp gboptions red 2
+mp uistyle red
+mp bstatus 1 0
+wait 30
+rendershot battle_red
+mp uistyle kai
+mp owndexball 0
+mp bstatus 1 0
+wait 30
+rendershot battle_off
 quit

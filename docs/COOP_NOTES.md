@@ -8803,3 +8803,10 @@ res/moves/chatter/anim.s).
 - MP_Spread_Reset at each move (battle_util.c HandleAction_UseMove) logs "spread left unshown" if anything waited.
 - What the move's per-target move-end does (a target's Ability, an item) still happens between targets, before the
   flush. Scenarios spread_at_once (SURF), spread_quake (EARTHQUAKE on three).
+- (2026-11-21, the user) The second ball on the battle screen too: a wild foe's box shows both balls when the player
+  has it in their own POKéDEX too (MP_OwnDexBall, mp_dexplus.c): the KAI healthbox's tile drawn twice (battle_interface.c
+  MP_CaughtBallsGfx: the front ball 1 down, the back one 1 right, in the same 8x8 tile), the Triple Battle cards
+  (MP_CaughtBallGfxFor), and every UI STYLE's own caught ball drawn again just behind it (mp_uistyle.c DrawSpec while
+  sOwnBallBox: 1 right 1 up; RED / CRYSTAL's solid ones 3 right 2 up). OPTIONS > CO-OP > MY DEX BALL ON / OFF
+  (gMpConfig.noOwnDexBall, "own_dex_ball" in the settings, ON for a new game; `mp owndexball 0|1`) turns it off in the
+  list and the battles. Scenario coop_mydex: the list, then a battle box in KAI, FIRERED, CRYSTAL, RED, and OFF.
