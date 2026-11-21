@@ -1,0 +1,232 @@
+Yu-Gi-Oh! card power from text, effects and stats (tools/ygo/text_power.py)
+
+signals: duels (2262 cards, weight 0.25), lists (14054 cards, weight 1.00), tournaments (14054 cards, weight 1.00); tournament decks read: 13306
+the text explains cards it never saw with r = 0.507 (5-fold, held out)
+
+  against duels alone: r = -0.026
+  against lists alone: r = 0.211
+  against tournaments alone: r = 0.583
+
+the features (weight per standard deviation):
+  +0.222  is_extra
+  -0.111  first_year
+  -0.097  material_count
+  +0.069  text_length_k
+  +0.055  search_deck
+  -0.053  named_material
+  -0.045  archetype_refs
+  -0.036  low_level
+  +0.036  quick_effect
+  -0.035  atk_k
+  +0.032  atk_per_cost
+  +0.031  tuner
+  +0.028  generic_materials
+  -0.024  high_level_main
+  +0.023  hard_once
+  +0.021  floodgate_cannot
+  +0.020  cost_pay_lp
+  +0.019  ss_self
+  +0.019  float_on_destroy
+  +0.017  ss_from_deck
+  +0.017  link_rating
+  -0.017  must_be_ss_condition
+  +0.016  def_k
+  +0.016  effect_count
+  +0.016  destroy_target
+  +0.015  quickplay
+  +0.015  floodgate_ss
+  +0.014  ss_self_from_hand
+  +0.014  cost_half_lp
+  +0.013  excavate_mill_self
+  -0.013  is_trap
+  +0.013  generic_support
+  +0.013  negate_activation
+  +0.012  on_summon_trigger
+  +0.012  hand_disrupt
+  -0.012  cost_banish_own
+  +0.012  search_deck_or_gy
+  +0.011  bounce
+  +0.011  take_control
+  -0.010  ritual
+
+the words and phrases that count most:
+  +1.304  maliss
+  +1.177  dracotail
+  +1.096  kashtira
+  +0.889  yummy
+  +0.884  ryzeal
+  +0.868  mitsurugi
+  +0.818  tearlaments
+  +0.804  orcust
+  +0.748  k9
+  +0.747  branded
+  +0.701  dragon ruler of
+  +0.693  spright
+  +0.681  fiendsmith
+  +0.678  bystial
+  +0.659  tribute monster inflict
+  +0.655  memento
+  +0.647  runick
+  +0.642  lunalight
+  +0.631  purrely
+  +0.624  deck
+  +0.623  tune
+  +0.613  kewl tune
+  +0.613  kewl
+  +0.608  snake eye
+  +0.606  level monsters once
+  +0.596  dragon ruler
+  +0.590  the gy spell
+  +0.579  sinful spoils
+  +0.579  spoils
+  +0.579  sinful
+  +0.573  fallen of albaz
+  +0.572  ruler of
+  +0.571  spell card normal
+  +0.570  unchained
+  +0.568  albaz
+  +0.568  of albaz
+  +0.566  yubel
+  +0.557  crystron
+  +0.556  is banished
+  +0.553  player can
+  ...
+  -0.697  insect
+  -0.656  zombie
+  -0.529  of your
+  -0.516  targets
+  -0.506  gouki
+  -0.486  that targets
+  -0.481  normal monster
+  -0.475  battle
+  -0.473  spell card from
+  -0.460  when
+  -0.448  counter
+  -0.443  tuner
+  -0.441  cyberse
+  -0.436  psychic
+  -0.427  zombie monster
+  -0.422  your hand you
+  -0.413  can target monster
+  -0.412  other monsters
+  -0.405  fabled
+  -0.402  activated that targets
+  -0.401  flip
+  -0.396  insect monster
+  -0.396  vampire
+  -0.387  field zone
+  -0.384  level
+
+strongest 80:
+   2795  Herald of the Arc Light
+   2745  Maliss <Q> White Binder
+   2739  Knightmare Gryphon
+   2654  Tearlaments Havnis
+   2645  K9-17 "Ripper"
+   2631  D/D/D Wave High King Caesar
+   2604  Tearlaments Scheiren
+   2591  Tearlaments Merrli
+   2579  Kashtira Arise-Heart
+   2576  Ext Ryzeal
+   2557  Cupsy★Yummy Way
+   2554  Bystial Saronir
+   2542  Maliss <Q> Red Ransom
+   2536  Kewl Tune Rotary
+   2532  Keldo the Sacred Protector
+   2532  Yummy★Snatchy
+   2516  Fiendsmith's Lacrima
+   2510  Dracotail Lukias
+   2502  Tempest, Dragon Ruler of Storms
+   2494  Bystial Magnamhut
+   2469  Vanquish Soul Hollie Sue
+   2468  Fiendsmith's Requiem
+   2467  Sword Ryzeal
+   2464  Kewl Tune Track Maker
+   2461  Tearlaments Kashtira
+   2455  Isolde, Two Tales of the Noble Knights
+   2451  Blaster, Dragon Ruler of Infernos
+   2444  Azamina Ilia Silvia
+   2441  Maliss <P> White Rabbit
+   2441  Mudora the Sword Oracle
+   2441  Albion the Branded Dragon
+   2439  Azamina Mu Rcielago
+   2435  Zenna's Deceiving Doll Maidens
+   2434  Unchained Soul Lord of Yama
+   2433  Tidal, Dragon Ruler of Waterfalls
+   2425  Kashtira Unicorn
+   2424  Triple Tactics Talent
+   2416  Kashtira Fenrir
+   2415  Tearlaments Kitkallos
+   2415  Ice Ryzeal
+   2411  Charmer Quartet in Bloom
+   2411  Foolish Burial
+   2403  Knightmare Goblin
+   2398  Called by the Grave
+   2398  Sky Striker Mobilize - Engage!
+   2398  Crossout Designator
+   2398  Knightmare Mermaid
+   2396  Gigantic Spright
+   2392  Elfnote Lucina
+   2391  Kelbek the Ancient Vanguard
+   2387  Agido the Ancient Sentinel
+   2385  W:P Fancy Ball
+   2381  Cupsy☆Yummy
+   2376  Ancient Fairy Dragon
+   2373  Dragon Ravine
+   2370  Sky Striker Ace = Zero
+   2369  Maliss <P> Dormouse
+   2365  Evilswarm Exciton Knight
+   2360  Ame no Habakiri no Mitsurugi
+   2359  Pressured Planet Wraitsoth
+   2358  Sky Striker Ace - Shizuku
+   2356  True King of All Calamities
+   2352  Fiendsmith Engraver
+   2352  K9-17 Izuna
+   2351  Salamangreat Miragestallio
+   2346  K9-X "Werewolf"
+   2346  Daigusto Emeral
+   2346  Elfnote Fortuna
+   2343  Phantom of Yubel
+   2339  Kewl Tune Reco
+   2339  Cooky★Yummy Way
+   2337  Redox, Dragon Ruler of Boulders
+   2333  S:P Little Knight
+   2332  Knightmare Cerberus
+   2331  Kewl Tune Mix
+   2328  Vanquish Soul Razen
+   2328  The Phantom Knights of Rusty Bardiche
+   2328  Dracotail Mululu
+   2326  Salamangreat Balelynx
+   2325  Ecclesia and the Dark Dragon
+
+weakest 30:
+   1180  Laval Miller
+   1180  Rose Papillon
+   1180  Reanimation Wave
+   1179  Dizzying Winds of Yosen Village
+   1172  White Potan
+   1170  Nomadic Force
+   1170  Libromancer Fireburst
+   1170  Madolche Chickolates
+   1169  World of Prophecy
+   1169  Red-Headed Oni
+   1162  Apprentice Piper
+   1162  Hero Spirit
+   1161  Loge's Flame
+   1161  Hyper-Ancient Shark Megalodon
+   1160  Blizzed, Defender of the Ice Barrier
+   1158  Prima Materiactor
+   1158  Ghostrick Break
+   1157  Tindangle Angel
+   1152  D.D. Jet Iron
+   1152  Raidraptor - Rudder Strix
+   1151  Mekanikal Arkfiend
+   1150  Madolche Marmalmaide
+   1144  Fortune Lady Dark
+   1143  Interplanetarypurplythorny Dragon
+   1133  Lillybot
+   1132  Evilswarm Heliotrope
+   1126  Hexe Trude
+   1111  Valkyrian Knight
+   1101  Moja
+   1095  X-Saber Axel

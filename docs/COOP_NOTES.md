@@ -8810,3 +8810,33 @@ res/moves/chatter/anim.s).
   sOwnBallBox: 1 right 1 up; RED / CRYSTAL's solid ones 3 right 2 up). OPTIONS > CO-OP > MY DEX BALL ON / OFF
   (gMpConfig.noOwnDexBall, "own_dex_ball" in the settings, ON for a new game; `mp owndexball 0|1`) turns it off in the
   list and the battles. Scenario coop_mydex: the list, then a battle box in KAI, FIRERED, CRYSTAL, RED, and OFF.
+
+## YU-GI-OH!'s generic duelists' decks from YGOPRODeck (2026-11-21, the user; in progress)
+The user's decisions: docs/YGO_DECISIONS.md "NPC decks from YGOPRODeck". The pipeline, tools/ygo/npc_pool.sh:
+1. tools/ygo/fetch_ygoprodeck_decks.py: YGOPRODeck's /api/decks/getDecks.php, format by format (each its own window of
+   200,000). Deep offsets are slow on the server (linear: ~5 s a page at 120,000), so a format past 30,000 is cut into
+   slices by staples ("has A", "has B but not A" ... "has none"; several cardcodes don't AND there, so "has B" may
+   overlap: kept once later). Polite (a request every 0.7 s plus the server's time), resumes (slices.done). Cache:
+   ~/.cache/moemon/ygoprodeck_decks (never committed).
+2. tools/ygo/fetch_banlists.py: every TCG / OCG Forbidden & Limited list since 2002 from Yugipedia's list pages (171
+   lists, every name matched to the catalog): tools/ygo/banlists.json. (EDOPro's LFLists only hold today's.)
+3. tools/ygo/text_power.py: every card's power from its text, effects and stats: ~70 features read from the text
+   (searches, draws, Special Summons by place, negation, removal kinds, floodgates, hand traps, costs, once-per-turn,
+   locks, materials, stats against Level) with the text's 1-3 word phrases (TF-IDF), its first printing's year, one
+   ridge regression fitted to what is known (the lists' history, play in tournament decks; the old duel ratings a
+   quarter: they agree with neither). r = 0.51 on cards held out. tools/ygo/card_power.json, docs/audit_ygo_text_power.txt.
+4. tools/ygo/build_npc_pool.py: passcodes to catalog ids (alternate artworks by EDOPro's aliases), Speed / Rush and
+   short decks out, its era = its newest card's first English release, cut to the list in force then (OCG formats the
+   OCG lists, GOAT the April 2005 list, Edison April 2010), refilled with more of its own strongest cards, names the
+   font can show (an unfit name: its cover card's), the same deck kept once. ~/.cache/moemon/npc_pool.json.
+5. tools/ygo/rate_pool.py + rate_pool_worker.c: a prior from the cards' text power (and a tournament placing as an
+   anchor), Swiss rounds of AI duels on EDOPro (a worker a core; one that crashes or hangs past 60 s is started again,
+   the duel unplayed, the decks' crashes counted), a Bradley-Terry fit held toward the prior (sd ~300). ~90 ms a modern
+   duel. The ratings are how the decks do in the game's AI's hands: what an NPC piloting them is worth.
+6. tools/ygo/write_npc_pool.py: graphics/ygo/npc_pool.bin (raw deflate; built in by src/ygo/ygo_npc_pool_pak.c), decks
+   with 2+ crashes left out; src/ygo/ygo_card_ratings.c from the text power for every card, its deck fit to the
+   pool's duel ratings (the player's decks on the same scale).
+In the game: src/ygo/ygo_npc_pool.c inflates it on first use, each deck's GEN its newest card's era (Ygo_PoolPick only
+offers decks the YU-GI-OH! GEN allows); ygo_field.c gives every ordinary duelist a pool deck (YgoOpponent.gba 2), its
+badges' quarter of the GEN's decks the most it may bring, CARD SCALING the one nearest the target; special duelists
+keep theirs; the GBA decks stay as a fallback. `mp ygo pool RATING` (tests); scenario ygo_pool.

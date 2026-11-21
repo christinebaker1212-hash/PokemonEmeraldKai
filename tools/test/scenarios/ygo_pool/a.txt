@@ -1,0 +1,12 @@
+pressuntil A field 5000
+wait 30
+mp ygo starter 0
+mp ygo auto
+mp ygo pool 1500
+wait 120
+rendershot challenge
+press A 2
+wait 600
+rendershot duel
+wait 2400
+quit

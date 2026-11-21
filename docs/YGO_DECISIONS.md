@@ -81,3 +81,17 @@ before changing NPC decks." Their answers:
 - Packs: **boosters by era, by region** (SYNCHRO-era sets in KANTO / JOHTO, XYZ in SINNOH, PENDULUM / LINK in UNOVA;
   the GEN limits decks, not packs).
 - **NPC decks: ask the user before changing any** (special handling).
+
+## NPC decks from YGOPRODeck (the user, 2026-11-21)
+The user: "scrape every ydk file from Ygoprodeck and use all of those as the basis for NPC decks, while rating card
+power based on actual card text, effects, and stats. The cream rises based on the rules." ... "locked and unlocked by
+GENERATION, and include everything from terrible weird leftovers someone uploaded, to sub-YCS winners." Their answers:
+- **How many: every playable deck** (all its cards in the catalog and scripted on EDOPro, a legal size), exact
+  duplicates removed.
+- **They replace the generic duelists' decks** (ordinary card players everywhere); special duelists, Frontier Brains
+  and story opponents keep their own decks.
+- **Banlists: each deck fixed to its era's Forbidden & Limited list** (trimmed, refilled with copies of its own cards).
+- **Rating: text power + duels**: every card a power score from its text, effects and stats; that gives each deck a
+  first estimate; AI-against-AI duels on the real rules (Elo, Swiss pairing) settle the order; tournament placements
+  are anchors.
+- Locked and unlocked by the YU-GI-OH! GEN (a deck plays only where every card is allowed).

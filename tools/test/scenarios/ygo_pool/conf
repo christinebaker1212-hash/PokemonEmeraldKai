@@ -1,0 +1,7 @@
+# The generic duelists' decks from YGOPRODeck (the user, 2026-11-21): a challenger with the pool's deck nearest a
+# rating plays a duel (the AI for both sides). Shots challenge, duel.
+MODE=1
+TMO=200
+ENV_A="MOEMON_YUGIOH_GEN=0"
+EXPECT_A=("ygo] pool: deck" "decks (")
+UNEXPECT_A=("[crash]" "no deck near")
