@@ -85,3 +85,6 @@ moemon_mail.dat
 tools/test/scenarios/orre_scenes_*/
 tools/test/scenarios/orre_story_chain*/
 /unova/
+# Moemon VMU pet: the outside tools (vmu_pet/tools/get_tools.sh) and build output
+vmu_pet/.tools/
+vmu_pet/build/

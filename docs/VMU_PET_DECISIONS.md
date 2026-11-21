@@ -59,10 +59,10 @@ Started 2026-11-20. Nothing is built yet; graphics come from the user.
 
 ## Sprites (determined 2026-11-21)
 
-- **One frame a species**: PMD's Idle, facing down, frame 1 (tools/vmu_pet/pmd_read.py reads Kai's own
+- **One frame a species**: PMD's Idle, facing down, frame 1 (vmu_pet/tools/pmd_read.py reads Kai's own
   graphics/moemon/pmd/pmd.bin). Movement comes from shared moves (bob, hop, turn by mirroring); eating, sleeping, poop,
   ZZZ, food are drawn once for all.
-- **24x24, 1 bit** (tools/vmu_pet/onebit.py: the outline where it meets transparency, dark colours filled; bigger ones
+- **24x24, 1 bit** (vmu_pet/tools/onebit.py: the outline where it meets transparency, dark colours filled; bigger ones
   scaled down to fit). The median Idle frame is 25 px; 16x16 lost too much (docs/vmu_pet/sprites_16.png against
   sprites_24.png; on the screen: docs/vmu_pet/screen_mock.png).
 - All 974 species Kai has PMD sprites for take about 53 KB at 24x24, so the program spills past 64 KB into the second
@@ -88,6 +88,25 @@ Started 2026-11-20. Nothing is built yet; graphics come from the user.
 - About 900 species: a 16x16 1-bit frame is 32 bytes (about 29 KB a frame for all of them), 24x24 is 72 bytes (about
   64 KB). Two 16x16 frames each, or one 24x24, fits only if the program takes nearly the whole VMU (about 190 blocks,
   no other saves beside it). Stats, types and evolutions for 900 species take about 10 KB more; names about 7 KB.
+
+- **The PC side** (2026-11-21): ideally the VM2 plugged into the PC by USB, every valid MOéMON VMU file listed, the
+  player picks which to bring in, and that file / save is deleted in the process. The VM2's USB protocol is
+  unpublished (DreamMods' Windows GUI only), so for now **our own program reads the VM2's SD card directly and handles
+  the transfer**. USB later if DreamMods shares the protocol, or by recording the GUI's traffic.
+- **A VMU manager of our own** (the user, 2026-11-21): every VMU image on an SD card listed, browsed and edited; icons
+  uploaded and edited (both the colour icon and the VMU's 1-bit one); files extracted and loaded back; and a
+  connection to Moemon Kai while it runs (the transfer). After the link test.
+- **Environments from Chao Adventure 2's sprite sheet** may be used (the user, 2026-11-21:
+  https://chao-island.com/guides/sonic-adventure-2/chao-adventure-2/sprite-sheet.html), backgrounds only.
+
+## Built so far (2026-11-21)
+
+- `vmu_pet/` (README): LINK TEST, shared assembly (Sega's GHEAD, the screen and a 3x5 font, VMU-to-VMU serial with
+  every byte echoed, flash saving through the BIOS), vmufs.py (VMU images and .VMI), the two-VMU emulator harness
+  (libevmu, its serial link done by the harness), `make test`. LINK TEST passes in the emulator both ways at speeds 1
+  and 4; the hardware test is in the README.
+- Learned: the 32 kHz crystal runs about 2,700 instructions a second (a line of text took a second to draw), so the
+  programs draw on the RC clock and use the crystal for HALT and the serial link (Sega's advice).
 
 ## How it works (proposed, to confirm as it's built)
 

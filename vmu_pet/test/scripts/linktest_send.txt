@@ -1,0 +1,41 @@
+# LINK TEST: unit a sends to unit b at speed 1 (Sega's rate), then at speed 4; both save what they counted.
+run 1.5
+expect a 3 NO CABLE
+cable on
+run 1
+expect a 3 CABLE OK
+expect b 3 CABLE OK
+press a A 0.3
+run 25
+shot a sent
+shot b got
+expect a 3 SENT OK!
+expect a 1 SENT 001
+expect b 3 GOT IT OK!
+expect b 2 GOT  001
+# speed 4 on both
+press a U 0.6
+run 0.6
+press a U 0.6
+run 0.6
+press a U 0.6
+run 0.6
+press b D 0.6
+run 1
+expect a 4 SPEED 4
+expect b 4 SPEED 4
+press a A 0.3
+run 6
+expect a 3 SENT OK!
+expect a 1 SENT 002
+expect b 2 GOT  002
+# b sends back
+press b A 0.3
+run 6
+expect b 3 SENT OK!
+expect a 2 GOT  001
+save a OUT/a.bin
+save b OUT/b.bin
+cable off
+run 1.5
+expect a 3 NO CABLE
