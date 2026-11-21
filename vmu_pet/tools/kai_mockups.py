@@ -76,10 +76,31 @@ def message(im, lines):
     return im
 
 
+# a 3x5 pixel font for the VMU's few words (as small as the games draw a logo)
+TINY = {
+    'D': ['110', '101', '101', '101', '110'], 'r': ['000', '011', '100', '100', '100'],
+    'e': ['000', '011', '111', '100', '011'], 'a': ['000', '110', '011', '101', '011'],
+    'm': ['00000', '11110', '10101', '10101', '10101'], 'c': ['000', '011', '100', '100', '011'],
+    's': ['000', '011', '110', '001', '110'], 't': ['010', '111', '010', '010', '001'],
+    'A': ['010', '101', '111', '101', '101'], 'B': ['110', '101', '110', '101', '110'],
+}
+
+
+def tiny(d, x, y, text, col):
+    for c in text:
+        g = TINY[c]
+        for yy, row in enumerate(g):
+            for xx, v in enumerate(row):
+                if v == '1':
+                    d.point((x + xx, y + yy), fill=col)
+        x += len(g[0]) + 1
+
+
 def vmu_wallpaper():
-    """The VM2 box's wallpaper at GBA size (153x115): a VMU as the Dreamcast's own (light grey, a curved bottom edge,
-    the screen in the middle at the top, a lavender D-pad on the left, SLEEP and MODE small in the middle, A and B on
-    the right, B lower), drawn as pixel art; its screen is the box's one place."""
+    """The VM2 box's wallpaper at GBA size (153x115): a VMU drawn from the user's photo (docs/user_images/97: the
+    front, straight on), its proportions kept: a tall light-grey body with rails down both sides and an arched cap
+    at the top, "Dreamcast" above a large teal screen, SLEEP / MODE under it on the right, a round D-pad bottom left,
+    A lower and B higher on the right. The screen is the box's one place."""
     w, h = 153, 115
     im = Image.new('RGBA', (w, h), (184, 200, 240, 255))
     d = ImageDraw.Draw(im)
@@ -87,64 +108,58 @@ def vmu_wallpaper():
         for x in range((y // 8) % 2 * 8, w, 16):
             d.point((x, y), fill=(168, 184, 232))
             d.point((x + 1, y), fill=(168, 184, 232))
-    OUT, BODY, LIGHT, SHADE = (64, 64, 80), (220, 220, 224), (244, 244, 248), (184, 184, 196)
-    BTN, BTN_D, BTN_L = (140, 148, 192), (76, 80, 120), (176, 184, 220)
-    bx, bw, top, side_end, bottom = 36, 81, 3, 80, 112
-    cx = bx + bw / 2
-
-    def inside(x, y):
-        if y < top or y > bottom or x < bx or x > bx + bw:
-            return False
-        r = 7                            # the top corners
-        for ccx in (bx + r, bx + bw - r):
-            if y < top + r and abs(x - ccx) > 0 and ((x < bx + r and ccx == bx + r) or (x > bx + bw - r and ccx == bx + bw - r)):
-                if (x - ccx) ** 2 + (y - (top + r)) ** 2 > r * r:
-                    return False
-        if y > side_end:                 # the curved bottom: an ellipse's lower half
-            ry = bottom - side_end
-            rx = bw / 2
-            if ((x - cx) / rx) ** 2 + ((y - side_end) / ry) ** 2 > 1:
-                return False
-        return True
+    OUT, BODY, SEAM, SHADE, LIGHT = (112, 110, 104), (226, 224, 214), (178, 176, 168), (202, 200, 190), (240, 238, 232)
+    BTN, BTN_D, BTN_L, INK = (128, 128, 150), (70, 70, 84), (166, 166, 186), (88, 88, 92)
+    X, Y, W, H = 43, 3, 66, 110          # the body
+    # the body: the rails' tops at y 3, the middle's top arching up to y 0, the bottom corners round
+    d.rounded_rectangle([X, Y + 3, X + W, Y + H], 6, fill=BODY, outline=OUT)
     px = im.load()
-    for y in range(h):
-        for x in range(w):
-            if inside(x + 0.5, y + 0.5):
-                px[x, y] = BODY + (255,)
-    for y in range(h):                   # outline, a light edge top-left, a shade bottom-right
-        for x in range(w):
-            if px[x, y][:3] != BODY:
-                continue
-            n = [inside(x + 0.5 + dx, y + 0.5 + dy) for dx, dy in ((-1, 0), (1, 0), (0, -1), (0, 1))]
-            if not all(n):
-                px[x, y] = OUT + (255,)
-            elif not inside(x - 1.5, y + 0.5) or not inside(x + 0.5, y - 1.5):
-                px[x, y] = LIGHT + (255,)
-            elif not inside(x + 2.5, y + 0.5) or not inside(x + 0.5, y + 2.5):
-                px[x, y] = SHADE + (255,)
-    # the top edge's strip (where the Dreamcast word sits)
-    d.line([bx + 12, top + 6, bx + bw - 12, top + 6], fill=SHADE)
-    # the screen: a grey frame and the LCD
-    sx, sy, sw, sh = int(cx) - 26, top + 13, 51, 34
-    d.rounded_rectangle([sx - 3, sy - 3, sx + sw + 3, sy + sh + 3], 3, fill=(156, 160, 172), outline=(120, 124, 140))
-    d.rectangle([sx, sy, sx + sw, sy + sh], fill=(170, 186, 160))
-    d.line([sx, sy, sx + sw, sy], fill=(140, 156, 132))
-    d.line([sx, sy, sx, sy + sh], fill=(140, 156, 132))
+    for x in range(X + 9, X + W - 8):    # the cap's top: an arch above the rails
+        t = (x - (X + W / 2)) / (W / 2 - 9)
+        top = Y + int(round(3 - 3 * (1 - t * t)))
+        for y in range(top, Y + 4):
+            px[x, y] = BODY + (255,)
+        px[x, top] = OUT + (255,)
+    for x in (X + 9, X + W - 9):         # the rails' seams down both sides
+        d.line([x, Y + 3, x, Y + H - 5], fill=SEAM)
+    for x in range(X + 10, X + W - 9):   # the cap's arched seam
+        t = (x - (X + W / 2)) / (W / 2 - 10)
+        px[x, Y + int(round(15 - 4 * (1 - t * t)))] = SEAM + (255,)
+    d.arc([X + 28, Y + 1, X + 38, Y + 9], 15, 165, fill=SEAM)      # the lid's circle
+    d.line([X + W - 1, Y + 8, X + W - 1, Y + H - 6], fill=SHADE)    # a little shade right and below
+    d.line([X + 6, Y + H - 1, X + W - 6, Y + H - 1], fill=SHADE)
+    d.line([X + 1, Y + 8, X + 1, Y + H - 6], fill=LIGHT)
+    tiny(d, X + 16, Y + 19, 'Dreamcast', INK)
+    # the screen
+    sx, sy, sw, sh = X + 12, Y + 30, 42, 36
+    d.rectangle([sx - 1, sy - 1, sx + sw + 1, sy + sh + 1], fill=SEAM)
+    d.rectangle([sx, sy, sx + sw, sy + sh], fill=(104, 134, 122))
+    d.line([sx, sy, sx + sw, sy], fill=(84, 112, 102))
+    d.line([sx, sy, sx, sy + sh], fill=(84, 112, 102))
+    # SLEEP / MODE: their words as a line of tiny marks, their buttons under
+    for x0 in (X + 32, X + 42):
+        for i in range(0, 8, 2):
+            d.point((x0 + i, Y + 70), fill=INK)
 
-    def button(x, y, r):
-        d.ellipse([x - r, y - r, x + r, y + r], fill=BTN, outline=BTN_D)
-        d.point((x - r // 2, y - r // 2), fill=BTN_L)
-        d.point((x - r // 2 + 1, y - r // 2), fill=BTN_L)
-    # the D-pad (left), SLEEP / MODE (middle), A / B (right, B lower)
-    dx, dy = bx + 17, top + 67
-    for (x0, y0, x1, y1) in ((dx - 9, dy - 3, dx + 9, dy + 3), (dx - 3, dy - 9, dx + 3, dy + 9)):
-        d.rectangle([x0, y0, x1, y1], fill=BTN, outline=BTN_D)
-    d.rectangle([dx - 2, dy - 2, dx + 2, dy + 2], fill=BTN)
-    d.point((dx, dy), fill=BTN_D)
-    button(int(cx) - 2, top + 61, 3)
-    button(int(cx) + 8, top + 64, 3)
-    button(bx + 53, top + 75, 6)
-    button(bx + 66, top + 81, 6)
+    def button(cx, cy, r):
+        d.ellipse([cx - r, cy - r, cx + r, cy + r], fill=BTN, outline=BTN_D)
+        d.point((cx - r // 2, cy - r // 2), fill=BTN_L)
+    button(X + 36, Y + 77, 3)
+    button(X + 46, Y + 77, 3)
+    # the D-pad: a dark round base, a grey cross
+    cx, cy = X + 17, Y + 84
+    d.ellipse([cx - 10, cy - 10, cx + 10, cy + 10], fill=(96, 96, 108), outline=BTN_D)
+    d.ellipse([cx - 9, cy - 9, cx + 9, cy + 9], fill=(118, 118, 134))
+    for (x0, y0, x1, y1) in ((cx - 9, cy - 3, cx + 9, cy + 3), (cx - 3, cy - 9, cx + 3, cy + 9)):
+        d.rectangle([x0, y0, x1, y1], fill=BTN_L)
+    d.line([cx + 1, cy + 4, cx + 3, cy + 4], fill=BTN)   # its arms' lower edges a shade darker
+    d.line([cx + 4, cy + 1, cx + 4, cy + 3], fill=BTN)
+    d.point((cx, cy), fill=BTN)
+    # A lower, B higher, their letters under
+    button(X + 41, Y + 88, 5)
+    button(X + 55, Y + 85, 5)
+    tiny(d, X + 40, Y + 96, 'A', INK)
+    tiny(d, X + 54, Y + 93, 'B', INK)
     return im, (sx + sw // 2 - 16, sy + sh // 2 - 17)
 
 
@@ -173,7 +188,7 @@ def vm2_box(shot, mon, name_lines):
             r, g, b, a = hp[x, y]
             if not ((r > 220 and g > 220 and b > 220) or (r < 140 and g < 140 and b < 160 and abs(r - g) < 30)):
                 hp[x, y] = (0, 0, 0, 0)
-    im.alpha_composite(hand, (ix + 14, iy - 30))
+    im.alpha_composite(hand, (ix + 22, iy - 14))
     # PKMN DATA: its picture and words
     pic = x2(front(mon[2]))
     im.alpha_composite(pic, (16, 32))

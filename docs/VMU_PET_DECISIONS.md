@@ -161,8 +161,9 @@ helps) and type against type (the full type chart): super effective hits for 2, 
 ## Kai's side: mock-ups for review (2026-11-21)
 
 `docs/vmu_pet/kai_vm2_mockups.png` (the user, 2026-11-21: "looks good, but the VMU graphic doesn't look right":
-redrawn after a real VMU: light grey, a curved bottom edge, the screen centred at the top, lavender D-pad, SLEEP /
-MODE, A and B; drawn over the game's own PC menu and box screen with its own font and pictures:
+then "Revise once more. That does not look like a VMU." with a photo: redrawn after it, its proportions kept
+(rails down both sides, an arched cap, "Dreamcast" over a large teal screen, SLEEP / MODE, a round D-pad, A lower and
+B higher); drawn over the game's own PC menu and box screen with its own font and pictures:
 `vmu_pet/tools/kai_mockups.py`, `gbafont.py`; the base shots in docs/vmu_pet/kai_src/). Proposed, waiting on the user:
 1. The PC menu gets **VM2** above LOG OFF, only while a VM2 is connected (the user, 2026-11-21: "should not appear in
    the PC unless a VM2 is connected").
