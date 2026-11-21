@@ -158,6 +158,33 @@ helps) and type against type (the full type chart): super effective hits for 2, 
   The caller attacks first. Counted in the MOéMON's record (battles, wins: bytes $62-$64, which go to Kai with it).
 - Tests: pet_battle (WILD), pet_battle_link (two units: each counts one battle, one wins).
 
+## Kai's side: mock-ups for review (2026-11-21)
+
+`docs/vmu_pet/kai_vm2_mockups.png` (drawn over the game's own PC menu and box screen with its own font and pictures:
+`vmu_pet/tools/kai_mockups.py`, `gbafont.py`; the base shots in docs/vmu_pet/kai_src/). Proposed, waiting on the user:
+1. The PC menu gets **VM2** above LOG OFF; with no VM2 answering (plugged in, GUI-mode) it's greyed and does nothing.
+2. Choosing it reads the VM2 ("Connected to the VM2. It holds a MOéMON EGG.").
+3. The box screen opens at a **VM2 box** (a VMU drawn as its wallpaper, one place: its screen); L / R go on to the
+   player's own boxes, so the EGG or the grown MOéMON can be dropped anywhere, and an EGG of the edition put on it.
+4. CLOSE BOX writes what changed back to the VM2 and restarts it out of GUI-mode ("The VM2 was disconnected.
+   It's safe to unplug it.").
+Built already, not yet used: the link itself in the game (src/platform/vm2.c, include/vm2.h; test
+tools/test/vm2/vm2_test.sh against a pretend VM2).
+Open: an EGG from the VMU comes in as Kai's EGG of its MOéMON (its IVs, personality kept); a grown one as Lv50 with
+its IVs, nature, shiny, POKé BALL, the MASTER / ASTRAL BALLS bought into the BAG; "good care benefits it in Kai":
+proposed friendship 255 less 10 a care mistake (70 at least) and EVs from its trainings. An EGG given from Kai must be
+of the edition's hatchable MOéMON (KANTO: 73).
+
+## Sending the pet to a VMU without a Dreamcast (the user's idea, 2026-11-21)
+
+The VMU's own file menu won't copy a GAME (only saves), so the first copy needs a Dreamcast once. After that, the
+pet on the VMU can take **updates** from the VM2 (the user: "the VMU a slave program to the VM2, the main transfer
+program"): LINK > UPDATE on both, the VM2's newer pet sends its own program over the top connector, the VMU writes it
+into its own file page by page (fm_wrt_ex) and checks it. To be safe: the receiving code sits at a fixed place at
+the end of the file that an update never rewrites (a cut cable leaves a VMU that can try again), and the file is
+made bigger than the pet needs at the first install (a GAME's size can't change later). To decide: how many blocks
+to keep (the pet is 56 now; PICTURES 81 beside it).
+
 ## The VMU manager (built 2026-11-21)
 
 `vmu_pet/manager/` (README.txt; Dear ImGui on SDL2, Windows and Linux): VMU images on the VM2's SD card over USB
