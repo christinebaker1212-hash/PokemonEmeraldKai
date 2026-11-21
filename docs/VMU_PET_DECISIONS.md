@@ -22,6 +22,65 @@ Started 2026-11-20. Nothing is built yet; graphics come from the user.
 - **No Dreamcast** (the user has one but would rather not use it): the program reaches the VM2 from the SD card, and an
   original VMU from the VM2 by the VMU's own file transfer (top to top).
 
+- **Sprites from the PMD Collab** (https://sprites.pmdcollab.org/), as few as possible, converted to 1 bit
+  (2026-11-21). **The Normal portrait is the VMU icon.**
+- **What comes into Kai:** the species it reached, level 50, nature / Ability / gender / IVs rolled at hatching, a
+  1/4096 shiny chance, its four newest level-up moves, the save's trainer as OT; party, or a PC box when the party is
+  full. **Good care benefits it.**
+- **Care decides** the evolutions that need more than a level (stones, trades, friendship, branches like EEVEE's).
+- **It's never lost**: no death, no running away.
+- **Battles** both on the VMU and VMU to VMU, **only when the player starts one**.
+- **The main goal (the user's own words, 2026-11-21):** the person it's for works where electronics aren't allowed and
+  can't check the VMU regularly or answer care in time. **A day's care (by the VMU's clock) must fit in a 5-minute
+  window**, a restroom break.
+
+- **Region editions** (2026-11-21): one program per region, each hatching only its own Pokémon, like versions:
+  **every region, KANTO through PALDEA**, each with its game's own regional POKéDEX (KANTO = FireRed's 151, JOHTO =
+  Crystal's, HOENN = Emerald's, SINNOH = Platinum's, UNOVA = Black's...), evolutions only within the edition.
+  This replaces the one 900-species program: an edition is about 130-200 species, so it takes far fewer blocks and the
+  VMU icon can be the pet's own Normal portrait (proposed: the program rewrites its own file icon).
+- **KANTO is the first edition.**
+- **One week of daily care reaches level 50**, faster with the currency below.
+- **No steps** (2026-11-21: the VMU has no step sensor; a pedometer was ruled out), and not time the program runs
+  either: **the currency comes from a Cookie Clicker-like game inside** (the user's idea; the rest are Claude's
+  recommendations, which the user took whole, 2026-11-21):
+  - **The pet is the cookie**: A taps it (it hops, reacts), each tap earns a little; upgrades raise a tap's worth.
+  - **Helpers** (BERRY trees, a DAY-CARE helper...) earn over time **with the program closed too**, worked out from the
+    clock on opening, **up to 12 hours' worth** since the last visit. The program never needs to run all day (batteries).
+  - Good care makes the helpers earn more. Mashing never beats upgrades (the VMU's buttons are small).
+  - The currency is **SPARKS**.
+  - **Prices**: a workday's earnings buy a level or an IV raise, a week's the shiny, two weeks' a MASTER BALL, a month's
+    an ASTRAL BALL; items come into Kai's BAG with the MOéMON.
+  - **Per pet**: helpers and upgrades reset with each new Egg; each MOéMON sent to the VM2 leaves a small permanent
+    bonus (a clicker's prestige).
+- **Every Egg is equally likely** among the edition's hatchable species.
+- **A day starts at 4 AM** (care late at night counts for that day).
+- **The link test comes first** (VMU-to-VM2, minigame to minigame), then the screen mock-ups.
+
+## Sprites (determined 2026-11-21)
+
+- **One frame a species**: PMD's Idle, facing down, frame 1 (tools/vmu_pet/pmd_read.py reads Kai's own
+  graphics/moemon/pmd/pmd.bin). Movement comes from shared moves (bob, hop, turn by mirroring); eating, sleeping, poop,
+  ZZZ, food are drawn once for all.
+- **24x24, 1 bit** (tools/vmu_pet/onebit.py: the outline where it meets transparency, dark colours filled; bigger ones
+  scaled down to fit). The median Idle frame is 25 px; 16x16 lost too much (docs/vmu_pet/sprites_16.png against
+  sprites_24.png; on the screen: docs/vmu_pet/screen_mock.png).
+- All 974 species Kai has PMD sprites for take about 53 KB at 24x24, so the program spills past 64 KB into the second
+  flash bank: **about 160-170 of the VMU's 200 blocks; the VMU is the pet's alone.**
+- 51 species have no PMD sprite in Kai's import (newer collab sprites may exist for some): list them and fill them
+  before building.
+
+## Care: built for 5-minute windows (proposed)
+
+- **Care is judged by the day, never the minute.** Nothing calls, nothing beeps, nothing goes wrong because the VMU
+  wasn't checked in time. A day (by the VMU's clock) asks for: feeding until full, a few training rounds, cleaning up,
+  medicine if sick. Doing them any time that day counts.
+- **The whole day's care in about 2 minutes**, leaving room in 5: the screen opens on what today still needs; each
+  task is one or two presses, a training round about 10 seconds.
+- **A missed day is a care mistake**, never a loss: it weighs on the bonuses in Kai and on evolutions.
+- **Silent by default**; the VMU sleeps when not in use (batteries); a reset or backwards clock counts as no time
+  passing, never as missed days.
+
 ## Space (from the hardware)
 
 - Code runs from flash bank 0 (64 KB); LDF reads all 128 KB (the bank bit at SFR 0x154). A minigame starts at block 0
