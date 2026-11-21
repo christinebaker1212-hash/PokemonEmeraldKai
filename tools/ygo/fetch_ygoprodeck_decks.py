@@ -11,7 +11,7 @@ A format whose listing goes past 30,000 is cut into slices by staple cards (SPLI
 "has none of them"), each paged from 0, so no request is deep (the server is slow there); slices.done remembers the
 finished ones.
 """
-import json, os, sys, time, urllib.parse, urllib.request
+import json, os, sys, time, urllib.error, urllib.parse, urllib.request
 
 API = 'https://ygoprodeck.com/api/decks/getDecks.php'
 CACHE = os.path.expanduser('~/.cache/moemon/ygoprodeck_decks')
@@ -27,18 +27,34 @@ PAGE = 20      # (the API's own page size)
 DELAY = 0.7
 
 
+class Unreachable(Exception):
+    pass
+
+
 def get(params):
+    """a page of decks; [] past the end (the server answers 400 "No decks matching your query" there); Unreachable
+    when it keeps failing (the fetch stops: nothing is marked done, the next run picks up there)"""
     url = API + '?' + urllib.parse.urlencode(params)
-    for attempt in range(6):
+    for attempt in range(8):
         try:
             req = urllib.request.Request(url, headers={'User-Agent': 'deck-fetcher/1.0'})
-            with urllib.request.urlopen(req, timeout=60) as r:
-                return json.loads(r.read().decode('utf-8', 'replace'))
+            with urllib.request.urlopen(req, timeout=90) as r:
+                d = json.loads(r.read().decode('utf-8', 'replace'))
+                return d if isinstance(d, list) else []
+        except urllib.error.HTTPError as e:
+            if e.code == 400:
+                try:
+                    if 'No decks' in e.read().decode('utf-8', 'replace'):
+                        return []
+                except Exception:
+                    pass
+            err = e
         except Exception as e:   # (a hiccup: wait and again)
-            wait = 5 * (attempt + 1)
-            print('  retry in %ds: %s' % (wait, e), flush=True)
-            time.sleep(wait)
-    return None
+            err = e
+        wait = 5 * (attempt + 1)
+        print('  retry in %ds: %s' % (wait, err), flush=True)
+        time.sleep(wait)
+    raise Unreachable(url)
 
 
 # staples across the eras, to cut a format too big to page shallowly into slices: "has card 1", "has card 2 but not
@@ -79,20 +95,39 @@ def page_slice(fmt, has, hasnt, out, done):
             page_slice(fmt, has, list(hasnt) + [nxt], out, done)
             done.add(key)
             return
-    offset, n = 0, 0
+    offsets = load_offsets()   # (where this slice got to: a run stopped half way picks up there)
+    offset = offsets.get(key, 0)
+    n = 0
     while offset < 200000:
         page = get(dict(base, offset=offset, limit=PAGE))
         time.sleep(DELAY)
-        if not isinstance(page, list) or not page:
+        if not page:
             break
         for d in page:
             out.write(json.dumps({k: d.get(k) for k in KEEP}) + '\n')
         out.flush()
         offset += len(page)
         n += len(page)
+        offsets[key] = offset
+        save_offsets(offsets)
     done.add(key)
     open(os.path.join(CACHE, 'slices.done'), 'a').write(key + '\n')
     print('%s: %d decks' % (key, n), flush=True)
+
+
+def load_offsets():
+    path = os.path.join(CACHE, 'slices.offsets')
+    try:
+        return json.load(open(path))
+    except (OSError, ValueError):
+        return {}
+
+
+def save_offsets(offsets):
+    path = os.path.join(CACHE, 'slices.offsets')
+    with open(path + '.tmp', 'w') as f:
+        json.dump(offsets, f)
+    os.replace(path + '.tmp', path)
 
 
 def fetch(fmt):
