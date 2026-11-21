@@ -462,8 +462,14 @@ static bool8 MetLately(unsigned index)
     return FALSE;
 }
 
+static int sLastPoolDeck = -1;   // the last pool deck PoolDeckAt made
 void Ygo_NoteDeckMet(const struct YgoOpponent *o)
 {
+    if (o->gba == 2)
+    {
+        Ygo_PoolNoteMet(sLastPoolDeck);
+        return;
+    }
     if (!o->gba || sLastGameDeck < 0 || MetLately((unsigned)sLastGameDeck))
         return;
     sRecentDecks[sRecentAt] = sLastGameDeck;
@@ -546,6 +552,31 @@ static int GameDeck(struct YgoOpponent *o, unsigned tier, u32 seed)
         return GameDeckAt(o, i >= 0 ? (unsigned)i : lo + seed % (hi - lo));
     }
 }
+// One of the generic duelists' decks from YGOPRODeck (ygo_npc_pool.c) into o; 0 when it can't make one
+static int PoolDeckAt(struct YgoOpponent *o, int index)
+{
+    char name[32];
+    unsigned rating = 0, year = 0, placing = 0;
+    if (index < 0 || !Ygo_PoolCards((unsigned)index, o->main, o->extra))
+        return 0;
+    Ygo_PoolInfo((unsigned)index, name, sizeof(name), &rating, &year, &placing);
+    sLastPoolDeck = index;
+    o->gba = 2;
+    o->rating = (s16)rating;
+    printf("[ygo] %s plays the deck \"%s\" (%u, rating %u, placing %u)\n", o->name, name, year, rating, placing);
+    return 1;
+}
+// the strongest rating a duelist at tier (0-3, by the badges) may bring: its quarter's top of the decks the GEN allows
+static int PoolCap(unsigned tier)
+{
+    return Ygo_PoolQuantile(MP_YgoGen(), (tier > 3 ? 4 : tier + 1) * 256);
+}
+// ... from the quarter of them that matches tier, near its middle
+static int PoolDeck(struct YgoOpponent *o, unsigned tier, u32 seed)
+{
+    int target = Ygo_PoolQuantile(MP_YgoGen(), (tier > 3 ? 3 : tier) * 256 + 128);
+    return target >= 0 && PoolDeckAt(o, Ygo_PoolPick(target, MP_YgoGen(), seed));
+}
 static int sThemedOnly;   // (the special duelists: their own type always)
 static void Fill(struct YgoOpponent *o, const char *name, const char *title, unsigned theme, unsigned tier, u32 key,
                  u32 seed)
@@ -555,8 +586,11 @@ static void Fill(struct YgoOpponent *o, const char *name, const char *title, uns
     snprintf(o->title, sizeof(o->title), "%s", title ? title : "");
     // most duelists bring a deck from the Game Boy Advance games (by how far the player has come); the rest a deck of
     // their own type; the special duelists (tier past 3) always their own
+    // (the user, 2026-11-21: every ordinary duelist brings one of YGOPRODeck's decks: ygo_npc_pool.c)
     o->gba = 0;
-    if (!sThemedOnly && (seed >> 13) % 5 < 3 && GameDeck(o, tier, seed >> 3))
+    if (!sThemedOnly && PoolDeck(o, tier, seed >> 3))
+        ;
+    else if (!sThemedOnly && (seed >> 13) % 5 < 3 && GameDeck(o, tier, seed >> 3))
         o->gba = 1;
     else
         BuildDeck(o, theme, tier, seed);
@@ -564,7 +598,8 @@ static void Fill(struct YgoOpponent *o, const char *name, const char *title, uns
     o->tier = (u8)tier;
     o->seed = seed;
     o->fit = 1;
-    o->rating = (s16)Ygo_DeckRating(o->main);
+    if (o->gba != 2)
+        o->rating = (s16)Ygo_DeckRating(o->main);
     // how well they play: by the badges, some more loosely (the special duelists play their best: set after)
     o->level = (u8)(tier >= 2 ? 2 : 1);
     if ((seed >> 17) % 4 == 0 && o->level)
@@ -816,7 +851,14 @@ static unsigned Off(int a, int b) { return (unsigned)(a > b ? a - b : b - a); }
 static void FitOnce(struct YgoOpponent *o, int target)
 {
     unsigned cap = o->tier > 3 ? 3 : o->tier, i, best = ~0u;
-    if (o->gba && gYgoNpcDeckCount >= 4)
+    if (o->gba == 2)
+    {
+        // a YGOPRODeck deck near the target, no stronger than the badges' quarter allows
+        int top = PoolCap(cap);
+        if (PoolDeckAt(o, Ygo_PoolPick(top >= 0 && target > top ? top : target, MP_YgoGen(), o->seed >> 3)))
+            return;
+    }
+    if (o->gba == 1 && gYgoNpcDeckCount >= 4)
     {
         // the Game Boy decks up to the badges' quarter (weakest first), the closest; among those nearly as close,
         // their own pick

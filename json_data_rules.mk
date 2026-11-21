@@ -49,6 +49,7 @@ $(C_BUILDDIR)/mp/mp_pass_data.o: graphics/moemon/cards/passes.bin
 $(C_BUILDDIR)/tcg/tcg_art_data.o: graphics/tcg/original.bin graphics/tcg/printed.bin graphics/tcg/regional.bin
 $(C_BUILDDIR)/ygo/ygo_art_data.o: graphics/ygo/printed.0.bin graphics/ygo/printed.1.bin graphics/ygo/printed.2.bin graphics/ygo/sdd_art.bin
 $(C_BUILDDIR)/ygo/ygo_edo_pak.o: graphics/ygo/edo.pak
+$(C_BUILDDIR)/ygo/ygo_npc_pool_pak.o: graphics/ygo/npc_pool.bin
 $(C_BUILDDIR)/mtg/mtg_pak.o: graphics/mtg/forge.pak
 $(C_BUILDDIR)/mtg/mtg_art_data.o: graphics/mtg/printed.bin
 $(C_BUILDDIR)/tt/tt_art_data.o: graphics/tt/cards.bin

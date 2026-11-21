@@ -29,6 +29,15 @@ extern const struct YgoNpcDeck gYgoNpcDecks[];
 extern const unsigned gYgoNpcDeckCount;
 /* one of them as cards that can be played (src/ygo/ygo_rating.c): 0 when it can't make a deck */
 int Ygo_NpcDeckCards(unsigned index, uint16_t main[60], uint16_t extra[15]);
+/* The generic duelists' decks from YGOPRODeck (src/ygo/ygo_npc_pool.c, graphics/ygo/npc_pool.bin; docs/YGO_DECISIONS.md
+ * "NPC decks from YGOPRODeck"), weakest first, each with its duel rating; gen: the YU-GI-OH! GEN (MP_YgoGen) */
+unsigned Ygo_PoolCount(void);
+int Ygo_PoolPick(int target, unsigned gen, uint32_t seed);          /* near target (< 0: any) the GEN allows; -1 none */
+int Ygo_PoolQuantile(unsigned gen, unsigned share);                 /* the rating share/1024 of the way up */
+int Ygo_PoolRange(unsigned gen, int *lo, int *hi);
+int Ygo_PoolCards(unsigned index, uint16_t main[60], uint16_t extra[15]);   /* 0 when it can't make 40 */
+int Ygo_PoolInfo(unsigned index, char *name, size_t size, unsigned *rating, unsigned *year, unsigned *placing);
+void Ygo_PoolNoteMet(int index);
 
 /* Power ratings (src/ygo/ygo_card_ratings.c, made by tools/ygo/rate_cards.sh; never shown as numbers) and what they
  * say (src/ygo/ygo_rating.c): a deck's rating from its main deck's cards, the chance one side beats another, what

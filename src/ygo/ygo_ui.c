@@ -3890,6 +3890,34 @@ void Ygo_Debug(const char *command)
         Practice();
         return;
     }
+    {
+        int target;
+        if (sscanf(command, "pool %d", &target) == 1)
+        {
+            /* pool RATING: a challenger with the generic duelists' deck nearest RATING the GEN allows (tests) */
+            struct YgoOpponent o;
+            int at = Ygo_PoolPick(target, MP_YgoGen(), 12345u);
+            char name[32] = "";
+            unsigned rating = 0, year = 0, placing = 0;
+            memset(&o, 0, sizeof(o));
+            snprintf(o.name, sizeof(o.name), "POOL DUELIST");
+            if (at < 0 || !Ygo_PoolCards((unsigned)at, o.main, o.extra))
+            {
+                printf("[ygo] pool: no deck near %d (%u decks)\n", target, Ygo_PoolCount());
+                return;
+            }
+            Ygo_PoolInfo((unsigned)at, name, sizeof(name), &rating, &year, &placing);
+            printf("[ygo] pool: deck %d \"%s\" (%u, rating %u, placing %u): %u + %u cards\n", at, name, year, rating,
+                   placing, Ygo_DeckCount(o.main, YGO_DECK_MAX), Ygo_DeckCount(o.extra, YGO_FUSION_MAX));
+            o.special = YGO_SPECIAL_NONE;
+            o.key = 0x7e59;
+            o.set = YGO_SET_LOB;
+            o.rating = (int16_t)rating;
+            o.gba = 2;
+            YgoUi_OpenChallenge(&o);
+            return;
+        }
+    }
     if (!strcmp(command, "open"))
     {
         struct YgoOpponent o;
