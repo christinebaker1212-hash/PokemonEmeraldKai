@@ -789,10 +789,60 @@ static int AddStatic(MtgCardDef *c, const MtgStatic *st)
     return 1;
 }
 
+// "Event$ Moved | ValidCard$ Card.Self[+...] | Destination$ Battlefield | ReplaceWith$ SVAR | ReplacementResult$
+// Updated": what it does as it enters, the same as K:ETBReplacement (its ValidCard$ the condition): 1 if it was one
+static int EtbRepl(MtgCardDef *c, const char *text)
+{
+    char buf[400], *p, *k;
+    const char *with = NULL, *valid = NULL, *dest = NULL, *ev = NULL;
+    int other = 0, i;
+    char *t;
+    if (strlen(text) >= sizeof(buf))
+        return 0;
+    strcpy(buf, text);
+    for (p = buf; (k = Mtg_Token(&p, '|')) != NULL;) {
+        char *dollar = strchr(k, '$'), *key = k, *val;
+        if (!dollar)
+            continue;
+        *dollar = 0;
+        val = dollar + 1;
+        while (*key == ' ')
+            key++;
+        for (i = (int)strlen(key) - 1; i >= 0 && key[i] == ' '; i--)
+            key[i] = 0;
+        while (*val == ' ')
+            val++;
+        for (i = (int)strlen(val) - 1; i >= 0 && val[i] == ' '; i--)
+            val[i] = 0;
+        if (strcmp(key, "Event") == 0)
+            ev = val;
+        else if (strcmp(key, "ValidCard") == 0)
+            valid = val;
+        else if (strcmp(key, "Destination") == 0)
+            dest = val;
+        else if (strcmp(key, "ReplaceWith") == 0)
+            with = val;
+        else if (strcmp(key, "ReplacementResult") != 0 && strcmp(key, "Description") != 0 && strcmp(key, "ActiveZones") != 0)
+            other = 1;
+    }
+    if (other || !ev || strcmp(ev, "Moved") || !dest || strcmp(dest, "Battlefield") || !with || !valid
+        || strncmp(valid, "Card.Self", 9) != 0 || (valid[9] && valid[9] != '+'))
+        return 0;
+    if (c->etbReplText[1])
+        return 0;
+    t = malloc(strlen(with) + strlen(valid) + 16);
+    sprintf(t, "%s:Mandatory::%s", with, valid);   // (the condition: itself as written; "Card.Self" holds always)
+    c->etbReplText[c->etbReplText[0] ? 1 : 0] = t;
+    return 1;
+}
+
 void Mtg_ParseReplacement(MtgCardDef *c, int cardId, char *text)
 {
     MtgStatic st;
-    int r = ParseRepl(c, cardId, text, &st);
+    int r;
+    if (EtbRepl(c, text))
+        return;
+    r = ParseRepl(c, cardId, text, &st);
     if (!r || (r == 1 && !AddStatic(c, &st)))
         Mtg_Unsupported(c, "replacement effect");
 }

@@ -1281,6 +1281,19 @@ static int Resolve(MtgDuel *d, MtgResolveCtx *ctx, const MtgAbility *ab)
         const char *prod = Mtg_Param(ab, "Produced"), *amt = Mtg_Param(ab, "Amount");
         int n = amt ? Mtg_Amount(d, ctx, card, amt, &ok) : 1;
         int mask = Mtg_ProducedColors(prod), c;
+        if (mask > 0 && (mask & (mask - 1)) && !(strncmp(prod, "Combo ", 6) && strcmp(prod, "Any"))) {
+            uint16_t opts[MTG_MANA_KINDS];   // ("any color", "Combo W U": its controller picks one)
+            int k = 0;
+            for (c = 0; c < MTG_MANA_KINDS; c++)
+                if (mask & (1 << c))
+                    opts[k++] = (uint16_t)c;
+            if (d->resChoice < 0) {
+                Mtg_AskOption(d, ctx->controller, MTG_OPT_COLOR, opts, k);
+                return 0;
+            }
+            mask = 1 << d->resChoice;
+            d->resChoice = -1;
+        }
         for (c = 0; c < MTG_MANA_KINDS; c++)
             if (mask & (1 << c)) {
                 d->players[ctx->controller].pool[c] += (uint8_t)n;
@@ -1697,6 +1710,32 @@ int Mtg_ResolveStep(MtgDuel *d, MtgResolveCtx *ctx, int ability)
     }
     if (d->resCondSkip)
         return 1;   // (its condition isn't met: passed by, the chain goes on)
+    if (ab->optCost && ability == ctx->e->ability && !(d->resStage & 0x80)) {   // "you may pay ... If you do"
+        const MtgCost *oc = &ab->cost;
+        int p = ctx->controller, src = ctx->source;
+        int ok = Mtg_CanPay(d, p, &oc->mana, 0, oc->tap ? src : MTG_NO_OBJ)
+              && (!oc->tap || (d->objs[src].zone == MTG_ZONE_BATTLEFIELD && !d->objs[src].tapped))
+              && (!oc->sacSelf || d->objs[src].zone == MTG_ZONE_BATTLEFIELD)
+              && Mtg_CostPayable(d, p, oc, src, MTG_NO_OBJ);
+        if (ok && d->resChoice < 0) {
+            Mtg_AskChoice(d, p, MTG_CHOICE_PAY, &oc->mana);
+            return 0;
+        }
+        if (!ok || d->resChoice == 0) {   // (not paid: nothing of it happens)
+            d->resChoice = -1;
+            d->resSkip = 1;
+            return 1;
+        }
+        d->resChoice = -1;
+        d->resStage = 0x80;
+        Mtg_Pay(d, p, &oc->mana, 0, oc->tap ? src : MTG_NO_OBJ);
+        if (oc->tap)
+            Mtg_Tap(d, src, 1);
+        if (oc->sacSelf)
+            Mtg_Sacrifice(d, src);
+        if (Mtg_PayOptCost(d, p, ability, src))
+            return 0;   // (its picks first: the answer goes on with it)
+    }
     if (Mtg_Param(ab, "UnlessCost") && !(d->resStage & 0x80)) {
         Defined payers;
         const char *who = Mtg_Param(ab, "UnlessPayer");
@@ -1771,7 +1810,7 @@ static const char *const sCommon[] = {
     "ConditionDefined", "ConditionPresent", "ConditionCompare", "ConditionCheckSVar", "ConditionSVarCompare",
     "ConditionDescription", "RememberChanged", "RememberMilled", "RememberDiscarded", "RememberDestroyed",
     "RememberSacrificed", "RememberDrawn", "RememberTokens", "RememberTargets", "ForgetOtherRemembered",
-    "UnlessScale", "Condition",
+    "UnlessScale", "Condition", "ETB",
 };
 static const char *const sApiParams[MTG_API_COUNT][12] = {
     [MTG_API_DEAL_DAMAGE] = {"NumDmg"},
@@ -2100,7 +2139,7 @@ int Mtg_ApiParamsKnown(const MtgAbility *ab, const char **why)
             return 0;
         if (Mtg_Param(ab, "GainControl") && strcmp(dz, "Battlefield"))
             return 0;
-        return ab->tgt || Mtg_Param(ab, "Defined") || (strcmp(dz, "Library") == 0 && !grave);   // (CARDNAME to the top)
+        return ab->tgt || Mtg_Param(ab, "Defined") || !grave;   // (no Defined$: CARDNAME itself, Forge's default)
     }
     case MTG_API_SACRIFICE:
         if ((v = Mtg_Param(ab, "SacValid")) && strcmp(v, "Self") && !Mtg_ValidSpecKnown(v))

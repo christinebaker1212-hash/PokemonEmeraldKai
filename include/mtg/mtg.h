@@ -368,10 +368,14 @@ typedef struct MtgDuel {
     uint32_t chosenSeq;
     uint8_t resFlip;                                 // the coin just flipped: 1 won, 2 lost (0: none)
     int16_t resChoice;                               // the answer: 1 / 0, the object picked or the option (-1: not asked yet)
+    uint8_t resSkip;                                 // the resolving chain stops here (its optional cost not paid)
     uint16_t resMode;                                // GenericChoice: the mode chosen + 1, its chain run next (0: none)
     // permanents that just entered with an "as it enters" (etbRepl) still to run, oldest first (mtg_game.c Run)
     uint8_t etbCount;
     uint16_t etbQueue[8];
+    // mana abilities used whose SubAbility$ chain is still to resolve (MtgAbility.manaFx): their source and ability
+    uint8_t fxCount;
+    uint16_t fxObj[8], fxAb[8];
     // a cast or an activation's costs still to pick (sacrifices, then discards): asked as MTG_Q_CHOOSE's PICK with
     // query.forCost set, before anyone gets priority
     uint8_t costSac, costDiscard, costPlayer;

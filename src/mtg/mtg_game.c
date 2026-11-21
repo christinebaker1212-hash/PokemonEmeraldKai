@@ -752,6 +752,10 @@ static int ContinueResolve(MtgDuel *d)
     while (d->resAbility != 0xFFFF && !d->over) {
         if (!Mtg_ResolveStep(d, &ctx, d->resAbility))
             return 1;
+        if (d->resSkip) {   // (its optional cost not paid: the rest of it doesn't happen)
+            d->resSkip = 0;
+            break;
+        }
         if (d->res.extraCount && d->resExtra < d->res.extraCount
             && (d->resAbility == d->res.ability || (Mtg_Param(&gMtgAbilities[d->resAbility], "Defined")
                                                     && (strcmp(Mtg_Param(&gMtgAbilities[d->resAbility], "Defined"), "Targeted") == 0
@@ -823,6 +827,20 @@ static int ContinueResolve(MtgDuel *d)
     return 0;
 }
 
+static int ResolveTop(MtgDuel *d);
+static int ManaByHand(const MtgAbility *ab);
+// a mana ability just activated on its own (ManaByHand): resolved at once, before anyone gets priority
+static int ResolveManaNow(MtgDuel *d)
+{
+    const MtgStackEntry *e;
+    if (!d->stackCount)
+        return 0;
+    e = &d->stack[d->stackCount - 1];
+    if (e->isSpell || e->trigger != 0xFFFF || e->ability == 0xFFFF || !ManaByHand(&gMtgAbilities[e->ability]))
+        return 0;
+    return ResolveTop(d);
+}
+
 static int ResolveTop(MtgDuel *d)
 {
     MtgStackEntry e = d->stack[--d->stackCount];
@@ -876,6 +894,46 @@ static int ResolveTop(MtgDuel *d)
 
 // what permanents that just entered do "as they enter" (ETBReplacement: a choice...), oldest first, each resolving as
 // an ability of its own (nothing to target, no stack); 1 while one asks
+// an ability of OBJ's resolving at once, as its own (nothing to target, no stack): 1 while it asks something
+static int ResolveNow(MtgDuel *d, int obj, int ability, int optional)
+{
+    memset(&d->res, 0, sizeof(d->res));
+    d->res.controller = d->objs[obj].controller;
+    d->res.source = (uint16_t)obj;
+    d->res.ability = (uint16_t)ability;
+    d->res.trigger = 0xFFFF;
+    d->res.trigObj = d->res.trigObj2 = MTG_NO_OBJ;
+    d->res.trigPlayer = d->res.trigCtrl = 0xFF;
+    d->res.optional = (uint8_t)optional;
+    d->resolving = 1;
+    d->resAbility = (uint16_t)ability;
+    d->resReturn = 0xFFFF;
+    d->resFlip = 0;
+    d->resCondAb = 0xFFFF;
+    d->remCount = 0;
+    d->repAb = 0xFFFF;
+    d->repStart = 0;
+    d->resStage = d->resPicks = 0;
+    d->resExtra = 0;
+    d->resChoice = -1;
+    d->resMode = 0;
+    return ContinueResolve(d);
+}
+
+// what mana abilities used do besides their mana (MtgAbility.manaFx), oldest first
+static int RunManaFx(MtgDuel *d)
+{
+    while (d->fxCount && !d->over) {
+        int obj = d->fxObj[0], ab = d->fxAb[0];
+        d->fxCount--;
+        memmove(&d->fxObj[0], &d->fxObj[1], (size_t)d->fxCount * sizeof(d->fxObj[0]));
+        memmove(&d->fxAb[0], &d->fxAb[1], (size_t)d->fxCount * sizeof(d->fxAb[0]));
+        if (ResolveNow(d, obj, ab, 0))
+            return 1;
+    }
+    return 0;
+}
+
 static int RunEtb(MtgDuel *d)
 {
     while (d->etbCount && !d->over) {
@@ -1023,7 +1081,16 @@ static void AddAltCasts(const MtgDuel *d, MtgQuery *q, int obj, int p)
 // a cost's parts that are picked or paid besides mana (sacrifices, discards, life...)
 static int HasOther(const MtgCost *c)
 {
-    return c->sacN || c->discardN || c->payLife || c->exileHandN || c->returnN || c->tapTypeN || c->exileGraveN;
+    return c->sacN || c->discardN || c->payLife || c->exileHandN || c->returnN || c->tapTypeN || c->exileGraveN
+        || c->discardHand || c->millN || c->exileTopN || c->subCtrAll;
+}
+
+// a mana ability that paying never uses (it costs mana, sacrifices itself, or more than {T}): activated on its own,
+// resolving at once (mana abilities don't wait on the stack: Mtg_Answer)
+static int ManaByHand(const MtgAbility *ab)
+{
+    return ab->api == MTG_API_MANA && (!ab->cost.tap || ab->cost.sacSelf || Mtg_ManaCostTotal(&ab->cost.mana)
+                                       || ab->cost.mana.x || HasOther(&ab->cost) || ab->cost.exileSelf || ab->cost.returnSelf);
 }
 
 // the extra cost a cast pays (gMtgAltCosts + 1: its alternative one, a kicker, buyback, flashback; 0 none or two)
@@ -1193,8 +1260,8 @@ static void BuildPriority(MtgDuel *d)
             for (k = 0; k < abilCount; k++) {
                 const MtgAbility *ab = &gMtgAbilities[abil[k]];
                 int x = 0;
-                if (ab->kind != MTG_AB_ACTIVATED || ab->api == MTG_API_MANA || ab->fromHand)
-                    continue;   // (mana abilities are used by paying, never on their own; Cycling only from the hand)
+                if (ab->kind != MTG_AB_ACTIVATED || ab->fromHand || (ab->api == MTG_API_MANA && !ManaByHand(ab)))
+                    continue;   // (mana abilities are used by paying, except those paying can't; Cycling only from the hand)
                 if (Mtg_StaticForbids(d, MTG_STATIC_CANT_BE_ACTIVATED, i, abil[k]))
                     continue;   // (Arrest, Null Rod...)
                 if (!ActivationTimingOk(d, i, abil[k], p))
@@ -1259,6 +1326,8 @@ int Mtg_CostPayable(const MtgDuel *d, int player, const MtgCost *c, int source, 
         return 0;
     if (c->subCtrN && (source == MTG_NO_OBJ || Mtg_Counters(d, source, c->subCtrKind) < c->subCtrN))
         return 0;
+    if ((c->millN || c->exileTopN) && d->players[player].libraryCount < c->millN + c->exileTopN)
+        return 0;
     for (k = 0; k < sizeof(sKinds); k++) {
         int kind = sKinds[k], need = kind == MTG_COSTK_SAC ? c->sacN : kind == MTG_COSTK_DISCARD ? (c->discardN)
                  : kind == MTG_COSTK_EXILE_HAND ? c->exileHandN : kind == MTG_COSTK_RETURN ? c->returnN
@@ -1281,6 +1350,8 @@ static const MtgCost *CostNow(const MtgDuel *d)
 {
     if (d->costAlt == 2)   // (an UnlessCost$ paid as its ability resolves)
         return &gMtgUnlessCosts[gMtgAbilities[d->costAbility].unless - 1];
+    if (d->costAlt == 4)   // (a trigger's own cost, paid as it resolves)
+        return &gMtgAbilities[d->costAbility].cost;
     if (d->costAlt)
         return &gMtgAltCosts[d->costAltIdx - 1].cost;
     return &gMtgAbilities[d->costAbility].cost;
@@ -1357,7 +1428,9 @@ static void PayCostPick(MtgDuel *d, int obj)
         return;
     }
     if (d->costSac) {
-        if (d->stackCount && d->costAlt != 2 && d->costAlt != 3)   // (its last known power, for Sacrificed$CardPower)
+        if (d->costAlt == 4)   // (its last known power, for Sacrificed$CardPower)
+            d->res.sacPower = (int16_t)Mtg_Power(d, obj);
+        else if (d->stackCount && d->costAlt != 2 && d->costAlt != 3)
             d->stack[d->stackCount - 1].sacPower = (int16_t)Mtg_Power(d, obj);
         Mtg_Sacrifice(d, obj);
         d->costSac--;
@@ -1388,6 +1461,23 @@ static void PayCost(MtgDuel *d, int p, const MtgCost *c, int ability, int source
     }
     if (c->subCtrN)   // (SubCounter<n/TYPE>: off its source)
         Mtg_AddCountersKind(d, source, c->subCtrKind, -(int)c->subCtrN);
+    if (c->subCtrAll)   // (SubCounter<All/TYPE>: every one; how many it was, for the ability)
+        Mtg_AddCountersKind(d, source, c->subCtrKind, -Mtg_Counters(d, source, c->subCtrKind));
+    if (c->discardHand) {   // (Discard<1/Hand>: the whole hand)
+        int k;
+        for (k = 0; k < d->objCount; k++)
+            if (d->objs[k].zone == MTG_ZONE_HAND && d->objs[k].owner == p)
+                Mtg_MoveTo(d, k, MTG_ZONE_GRAVEYARD);
+    }
+    if (c->millN || c->exileTopN) {   // (Mill<n>, ExileFromTop<n>: from the top of its player's library)
+        int k;
+        for (k = 0; k < c->millN + c->exileTopN; k++) {
+            int top = Mtg_TopOfLibrary(d, p);
+            if (top == MTG_NO_OBJ || top < 0)
+                break;
+            Mtg_MoveTo(d, top, k < c->millN ? MTG_ZONE_GRAVEYARD : MTG_ZONE_EXILE);
+        }
+    }
     if (c->damageYou) {
         MtgTarget you;
         you.kind = MTG_TGT_PLAYER;
@@ -1424,6 +1514,12 @@ static void PayCost(MtgDuel *d, int p, const MtgCost *c, int ability, int source
 static void PayOtherCosts(MtgDuel *d, int p, const MtgAbility *ab, int source)
 {
     PayCost(d, p, &ab->cost, (int)(ab - gMtgAbilities), source, 0);
+}
+
+int Mtg_PayOptCost(MtgDuel *d, int p, int ability, int source)
+{
+    PayCost(d, p, &gMtgAbilities[ability].cost, ability, source, 4);
+    return AskCost(d);
 }
 
 int Mtg_PayUnlessCost(MtgDuel *d, int p, int ability, int source)
@@ -2011,6 +2107,8 @@ static void Run(MtgDuel *d)
         }
         if (d->etbCount && RunEtb(d))
             return;
+        if (d->fxCount && RunManaFx(d))
+            return;
         if (d->stepStarted == 0 && StartStep(d))
             return;
         if (d->stepStarted == 3 || d->step == MTG_STEP_UNTAP || d->step == MTG_STEP_CLEANUP) {
@@ -2038,7 +2136,7 @@ void Mtg_RefreshQuery(MtgDuel *d)   // (after the state was changed from outside
 {
     if (d->query.kind == MTG_Q_PRIORITY) {
         StateBasedActions(d);
-        if (d->over || d->etbCount)
+        if (d->over || d->etbCount || d->fxCount)
             Run(d);
         else
             BuildPriority(d);
@@ -2070,6 +2168,8 @@ int Mtg_Answer(MtgDuel *d, const MtgAnswer *a)
             DoAction(d, &act);
             d->passes = 0;
             if (AskCost(d))
+                return 1;
+            if (ResolveManaNow(d))
                 return 1;
         }
         break;
@@ -2139,7 +2239,9 @@ int Mtg_Answer(MtgDuel *d, const MtgAnswer *a)
             PayCostPick(d, q->candidates[a->card]);
             if (AskCost(d))
                 return 1;
-            if (d->costAlt == 2) {   // an UnlessCost$ paid: its ability goes on resolving (it does nothing now)
+            if (!d->costAlt && ResolveManaNow(d))
+                return 1;
+            if (d->costAlt == 2 || d->costAlt == 4) {   // an UnlessCost$ (or a trigger's own cost) paid: it goes on resolving
                 d->costAlt = 0;
                 if (d->resolving && ContinueResolve(d))
                     return 1;

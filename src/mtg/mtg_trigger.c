@@ -311,7 +311,7 @@ static int ParseTrig(MtgCardDef *c, int cardId, char *text, int attach)
     // what it does: an SVar "DB$ ..." (an ability of its own kind: it may target, as a spell does)
     v = Mtg_TriggerParam(t, "Execute");
     v = v ? Mtg_Svar(cardId, v) : NULL;
-    if (!v || strncmp(v, "DB$", 3) != 0) {
+    if (!v || (strncmp(v, "DB$", 3) != 0 && strncmp(v, "AB$", 3) != 0)) {   // (AB$: with a cost of its own to pay)
         Mtg_Unsupported(c, Reason("Execute"));
         return -1;
     }
@@ -322,6 +322,8 @@ static int ParseTrig(MtgCardDef *c, int cardId, char *text, int attach)
         memcpy(copy, v, len);
         ab = Mtg_ParseAbilityText(c, cardId, copy, MTG_AB_TRIGGERED);
         gMtgTriggers[idx].execute = (uint16_t)ab;
+        if (gMtgAbilities[ab].optCost && gMtgTriggers[idx].optional == 1)
+            gMtgTriggers[idx].optional = 0;   // ("you may pay": the payment is the "may")
         if (!ChainKnown(ab, mode, &why)) {
             Mtg_Unsupported(c, why);
             return -1;

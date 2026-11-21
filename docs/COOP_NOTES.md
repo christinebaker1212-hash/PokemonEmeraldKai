@@ -8624,3 +8624,19 @@ res/moves/chatter/anim.s).
   the face while the view trails the rules (StartEvent syncs a face-down card first). Menus: CAST FACE DOWN (3), TURN
   FACE UP (cost). The AI casts face down when nothing better, turns up for the bigger card or its trigger.
 - Playable: 3060 -> 3129. Tests: test_rules.c TestMorph; scenario mtg_morph.
+
+## MAGIC: more costs, triggers' own costs, mana abilities that do more (2026-11-21)
+- Costs: Discard<1/Hand> (the whole hand), Mill<n>, ExileFromTop<n/Card>, SubCounter<All/KIND>, tapXType up to 7,
+  "A;B" alternatives in a cost's type (KeepSpec makes them Valid's ','). Mana abilities refuse costs paying can't make.
+- A trigger whose Execute$ is an AB$ with a Cost$ ("you may pay {1}. If you do ..."): MtgAbility.optCost, asked as it
+  resolves (Mtg_ResolveStep: MTG_CHOICE_PAY; its tap / sacrifice / picks paid, Mtg_PayOptCost with costAlt 4); not
+  paid, MtgDuel.resSkip ends the chain. Its OptionalDecider$ is the payment itself.
+- R: Moved ... Destination$ Battlefield | ValidCard$ Card.Self[+...] | ReplaceWith$: the same as ETBReplacement
+  (mtg_static.c EtbRepl), its ValidCard$ the condition (Duskwalker's +kicked).
+- Mana abilities with SubCounter<n/...> costs (paid as auto-pay taps them) and SubAbility$ chains (Draw, a counter,
+  sacrifice when empty, "doesn't untap", delayed triggers: MtgAbility.manaFx) queued in MtgDuel.fxQueue and resolved
+  first thing in Run (mtg_game.c RunManaFx / ResolveNow, shared with RunEtb). Mana abilities paying can't use
+  ({1}, {T}, sacrifice: the Eggs, Chromatic Sphere) are actions of their own resolving at once (ManaByHand,
+  ResolveManaNow), "any color" asked (MTG_OPT_COLOR). Floating mana shows by each life plate.
+- ChangeZone with no Defined$ from the battlefield: the card itself (Forge's default: "return CARDNAME to its owner's hand").
+- Playable: 3129 -> 3234. Tests: test_rules.c TestTriggerCosts, TestManaFx.

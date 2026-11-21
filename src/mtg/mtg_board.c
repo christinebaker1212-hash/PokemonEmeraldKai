@@ -822,6 +822,19 @@ static void DrawLife(int player)
     if (B.lifeFlash[player]) {   // (it just changed: lit, a little shake)
         G_FillAdd(l.x + 1, l.y + 1, l.w - 2, l.h - 2, 0xffffff, (unsigned)(B.lifeFlash[player] * 10));
         G_RoundFrame(l.x + (B.lifeFlash[player] & 2 ? 1 : -1), l.y, l.w, l.h, 0xffffff, 200);
+    }    {   // floating mana (a mana ability used on its own): a disc of its color with how much, beside the plate
+        int c, x = l.x + 1, y = player == ME ? l.y - 11 : l.y + l.h + 2;
+        for (c = 0; c < MTG_MANA_KINDS; c++) {
+            int amount = B.duel.players[player].pool[c];
+            char d[4];
+            if (!amount)
+                continue;
+            snprintf(d, sizeof(d), "%d", amount > 9 ? 9 : amount);
+            G_RoundFill(x, y, 10, 9, MtgGfx_ManaColor(c), 255);
+            G_RoundFrame(x, y, 10, 9, 0x202020, 255);
+            G_Digits(x + 3, y + 2, d, 0, 1, c == MTG_W || c == MTG_C ? 0x202020 : 0xffffff, 255);
+            x += 11;
+        }
     }
 }
 
@@ -1354,6 +1367,12 @@ static void UnlessWords(char *out, unsigned cap, const MtgCost *c)
         UW_PART("exile %d from your hand", c->exileHandN);
     if (c->tapTypeN)
         UW_PART("tap %d %.*s", c->tapTypeN, (int)strcspn(UW_SPEC(c->tapTypeSpec), ".,"), UW_SPEC(c->tapTypeSpec));
+    if (c->discardHand)
+        UW_PART("discard your hand");
+    if (c->millN)
+        UW_PART("mill %d", c->millN);
+    if (c->exileTopN)
+        UW_PART("exile your library's top %d", c->exileTopN);
 #undef UW_PART
 #undef UW_SPEC
 }
@@ -1365,7 +1384,16 @@ static const char *ChooseText(void)
     char name[64], cost[24], words[160];
     Name(name, sizeof(name), q->source);
     AbilityWords(words, sizeof(words), q->source, q->ability, B.duel.res.trigger);
-    if (q->choice == MTG_CHOICE_PAY && q->ability != 0xFFFF && gMtgAbilities[q->ability].unless) {
+    if (q->choice == MTG_CHOICE_PAY && q->ability != 0xFFFF && gMtgAbilities[q->ability].optCost
+        && (gMtgAbilities[q->ability].cost.sacSelf || gMtgAbilities[q->ability].cost.tap
+            || gMtgAbilities[q->ability].cost.payLife || gMtgAbilities[q->ability].cost.sacN
+            || gMtgAbilities[q->ability].cost.discardN)) {   // (a trigger's own cost that isn't only mana)
+        char other[64];
+        const MtgCost *oc = &gMtgAbilities[q->ability].cost;
+        UnlessWords(other, sizeof(other), oc);
+        snprintf(sChooseText, sizeof(sChooseText), "%s: %s%s%s?  %s", name, oc->tap ? "tap it, " : "",
+                 oc->sacSelf ? "sacrifice it" : "", other, words);
+    } else if (q->choice == MTG_CHOICE_PAY && q->ability != 0xFFFF && gMtgAbilities[q->ability].unless) {
         char other[64];
         MtgCost scaled = gMtgUnlessCosts[gMtgAbilities[q->ability].unless - 1];
         if (gMtgAbilities[q->ability].unlessScale) {   // (Cumulative upkeep: for each age counter, as it's paid)

@@ -56,6 +56,8 @@ int Mtg_ManaAbilityColors(const MtgDuel *d, int obj, int *amount)
         if (ab->kind != MTG_AB_ACTIVATED || ab->api != MTG_API_MANA || !ab->cost.tap || ab->cost.sacSelf
             || Mtg_ManaCostTotal(&ab->cost.mana) || ab->cost.mana.x)
             continue;
+        if (ab->cost.subCtrN && Mtg_Counters(d, obj, ab->cost.subCtrKind) < ab->cost.subCtrN)
+            continue;   // (T, remove a depletion counter: only while it has one)
         if (Mtg_StaticForbids(d, MTG_STATIC_CANT_BE_ACTIVATED, obj, abil[i]))
             continue;   // (Null Rod on a Mox, Cursed Totem on Llanowar Elves)
         m = Mtg_ProducedColors(Mtg_Param(ab, "Produced"));
@@ -86,6 +88,35 @@ int Mtg_ManaPain(const MtgDuel *d, int obj, int color)
             best = ab->manaPain;
     }
     return best < 0 ? 0 : best;
+}
+
+// the mana ability a tapped source used for COLOR: its counters removed (SubCounter<n/...>), what else it does queued
+static void ManaAbilityUsed(MtgDuel *d, int obj, int color)
+{
+    uint16_t abil[16];
+    int n, i;
+    if (Mtg_Card(d->objs[obj].def)->intrinsicMana & (1 << color))
+        return;   // (a basic land type's)
+    n = Mtg_ObjAbilities(d, obj, abil, 16);
+    for (i = 0; i < n; i++) {
+        const MtgAbility *ab = &gMtgAbilities[abil[i]];
+        int m;
+        if (ab->kind != MTG_AB_ACTIVATED || ab->api != MTG_API_MANA || !ab->cost.tap || ab->cost.sacSelf
+            || Mtg_ManaCostTotal(&ab->cost.mana) || ab->cost.mana.x)
+            continue;
+        if (ab->cost.subCtrN && Mtg_Counters(d, obj, ab->cost.subCtrKind) < ab->cost.subCtrN)
+            continue;
+        m = Mtg_ProducedColors(Mtg_Param(ab, "Produced"));
+        if (m <= 0 || !(m & (1 << color)))
+            continue;
+        if (ab->cost.subCtrN)
+            Mtg_AddCountersKind(d, obj, ab->cost.subCtrKind, -(int)ab->cost.subCtrN);
+        if (ab->manaFx && ab->sub != 0xFFFF && d->fxCount < 8) {
+            d->fxObj[d->fxCount] = (uint16_t)obj;
+            d->fxAb[d->fxCount++] = ab->sub;
+        }
+        return;
+    }
 }
 
 static int Sources(const MtgDuel *d, int player, int exclude, Source *out)
@@ -245,6 +276,7 @@ int Mtg_Pay(MtgDuel *d, int player, const MtgManaCost *cost, int x, int excludeO
     for (i = 0; i < s.n; i++)
         if (s.chosen[i] >= 0) {
             int pain = Mtg_ManaPain(d, s.src[i].obj, s.chosen[i]);
+            ManaAbilityUsed(d, s.src[i].obj, s.chosen[i]);
             Mtg_Tap(d, s.src[i].obj, 1);
             p->pool[s.chosen[i]] += s.src[i].amount;
             if (pain) {   // (a painland: "deals 1 damage to you")

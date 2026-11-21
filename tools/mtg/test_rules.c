@@ -2768,6 +2768,93 @@ static void TestMorph(void)
           "dies: revealed in the graveyard");
 }
 
+static void TestTriggerCosts(void)
+{
+    int brass, anc, bolt;
+    printf("a trigger's own cost: you may pay, if you do\n");
+    Table();   // Brass Man: at your upkeep, pay {1} to untap it; paid, it untaps; declined, it stays tapped
+    Lands(0, "Plains", 2);
+    brass = Put(0, "Brass Man", MTG_ZONE_BATTLEFIELD);
+    sD.objs[brass].tapped = 1;
+    GoToTurn(1, MTG_STEP_MAIN1);
+    CHECK(UpkeepAsks(0) && Mtg_Query(&sD)->pay.generic == 1, "brass man: pay {1}?");
+    PayAnswer(1);
+    CHECK(!sD.objs[brass].tapped, "paid: untapped");
+    sD.objs[brass].tapped = 1;
+    GoToTurn(1, MTG_STEP_MAIN1);
+    CHECK(UpkeepAsks(0), "asked again");
+    PayAnswer(0);
+    CHECK(sD.objs[brass].tapped, "not paid: still tapped");
+
+    Table();   // Auspicious Ancestor: a white spell cast, pay {1}: 1 life
+    Lands(0, "Plains", 3);
+    anc = Put(0, "Auspicious Ancestor", MTG_ZONE_BATTLEFIELD);
+    bolt = Put(0, "Healing Salve", MTG_ZONE_HAND);
+    Do(MTG_ACT_CAST, bolt, MTG_TGT_PLAYER, 0);
+    PassBoth();   // (the trigger resolves first: it asks)
+    CHECK(Mtg_Query(&sD)->kind == MTG_Q_CHOOSE && Mtg_Query(&sD)->choice == MTG_CHOICE_PAY, "ancestor asks to pay");
+    PayAnswer(1);
+    CHECK(sD.players[0].life == 21, "1 life for {1} (%d)", sD.players[0].life);
+    (void)anc;
+}
+
+static void TestManaFx(void)
+{
+    int lot, bears, sphere, i, k, hand;
+    printf("mana abilities that do more: depletion lands, Chromatic Sphere\n");
+    {   // Amugaba: {2}{U}, discard a card: back to its owner's hand (no Defined$: itself)
+        int amu, card;
+        Table();
+        Lands(0, "Island", 3);
+        amu = Put(0, "Amugaba", MTG_ZONE_BATTLEFIELD);
+        card = Put(0, "Plains", MTG_ZONE_HAND);
+        Do(MTG_ACT_ACTIVATE, amu, -1, 0);
+        if (Mtg_Query(&sD)->kind == MTG_Q_CHOOSE)
+            ChoosePick(card);
+        PassBoth();
+        CHECK(Zone(amu) == MTG_ZONE_HAND && Zone(card) == MTG_ZONE_GRAVEYARD, "amugaba back in its owner's hand");
+    }
+    Table();   // Hickory Woodlot (enters tapped with two depletion counters; T, remove one: GG; none left: sacrificed)
+    lot = Put(0, "Hickory Woodlot", MTG_ZONE_HAND);
+    Mtg_MoveTo(&sD, lot, MTG_ZONE_BATTLEFIELD);
+    Mtg_RefreshQuery(&sD);
+    CHECK(sD.objs[lot].tapped && Mtg_Counters(&sD, lot, Mtg_CounterKind("DEPLETION")) == 2, "enters tapped, two counters");
+    sD.objs[lot].tapped = 0;
+    bears = Put(0, "Grizzly Bears", MTG_ZONE_HAND);
+    Do(MTG_ACT_CAST, bears, -1, 0);
+    CHECK(Mtg_Counters(&sD, lot, Mtg_CounterKind("DEPLETION")) == 1 && sD.objs[lot].tapped, "paid with it: a counter off");
+    PassBoth();
+    sD.objs[lot].tapped = 0;
+    bears = Put(0, "Grizzly Bears", MTG_ZONE_HAND);
+    Do(MTG_ACT_CAST, bears, -1, 0);
+    CHECK(Zone(lot) == MTG_ZONE_GRAVEYARD, "the last counter: sacrificed (zone %d)", Zone(lot));
+
+    Table();   // Chromatic Sphere: {1}, T, sacrifice: a mana of the color chosen, then a card drawn (at once, no stack)
+    Lands(0, "Plains", 1);
+    sphere = Put(0, "Chromatic Sphere", MTG_ZONE_BATTLEFIELD);
+    hand = HandCount(0);
+    k = -1;
+    {
+        const MtgQuery *q;
+        Mtg_RefreshQuery(&sD);
+        q = Mtg_Query(&sD);
+        for (i = 0; i < q->actionCount; i++)
+            if (q->actions[i].kind == MTG_ACT_ACTIVATE && q->actions[i].obj == sphere)
+                k = i;
+    }
+    CHECK(k >= 0, "the sphere can be used on its own");
+    if (k >= 0) {
+        MtgAnswer a;
+        memset(&a, 0, sizeof(a));
+        a.action = (uint16_t)k;
+        Answer(&a);
+        CHECK(Mtg_Query(&sD)->kind == MTG_Q_CHOOSE && Mtg_Query(&sD)->optKind == MTG_OPT_COLOR, "it asks the color");
+        ChooseOption(NULL, MTG_B);
+        CHECK(sD.players[0].pool[MTG_B] == 1 && sD.stackCount == 0, "black mana floating, nothing on the stack");
+        CHECK(HandCount(0) == hand + 1 && Zone(sphere) == MTG_ZONE_GRAVEYARD, "a card drawn, the sphere gone");
+    }
+}
+
 static void TestCantCounter(void)
 {
     int mongoose, bears, cs, herald, istvan, bolt, i;
@@ -3407,6 +3494,8 @@ int main(int argc, char **argv)
     TestUpkeepCosts();
     TestKickerFlashback();
     TestMorph();
+    TestTriggerCosts();
+    TestManaFx();
     TestCantCounter();
     TestTrigModes();
     TestBecomesTarget();

@@ -75,6 +75,9 @@ typedef struct {
     const char *exileGraveSpec;
     uint8_t damageYou;                      // DamageYou<n>: its source deals n damage to its player (CostDamage)
     uint8_t subCtrN, subCtrKind;            // SubCounter<n/TYPE>: counters of a kind removed from its source
+    uint8_t subCtrAll;                      // SubCounter<All/TYPE>: every one of them (subCtrKind)
+    uint8_t discardHand;                    // Discard<1/Hand>: its player's whole hand
+    uint8_t millN, exileTopN;               // Mill<n>, ExileFromTop<n/Card>: its player's library's top cards
 } MtgCost;
 // what a cost's picks come from (Mtg_CostCandidates): 0 discard (hand), 1 sacrifice, 2 exile from the hand, 3 return
 // to the hand, 4 tap (an untapped permanent), 5 exile from the graveyard
@@ -93,6 +96,7 @@ int Mtg_CostPayable(const MtgDuel *d, int player, const MtgCost *c, int source, 
 // pays an ability's non-mana UnlessCost$ as it resolves: its mana and what's paid at once now, then 1 if a pick is asked
 // (d->query: the answer goes on with the resolution once the picks are done)
 int Mtg_PayUnlessCost(MtgDuel *d, int player, int ability, int source);
+int Mtg_PayOptCost(MtgDuel *d, int player, int ability, int source);   // (a trigger's own cost's picks: 1 if asked)
 int Mtg_CostCandidates(const MtgDuel *d, int player, const MtgCost *c, int sac, int source, uint16_t *out);
 
 #define MTG_TGT_X 0xFF
@@ -124,6 +128,10 @@ typedef struct {
     uint8_t actLimit;               // ActivationLimit$ n: n times each turn (0: no limit)
     uint8_t actSorcery, actMyTurn;  // SorcerySpeed$ True ("only any time you could cast a sorcery"); PlayerTurn$ True
     uint16_t actSteps;              // ActivationPhases$: the steps it may be activated in (bits 1 << MTG_STEP_*; 0: any)
+    uint8_t manaFx;                 // a mana ability's SubAbility$ chain besides its mana (Draw, a counter, sacrifice...):
+                                    // queued as it's used (Mtg_Pay), resolved right after (mtg_game.c Run)
+    uint8_t optCost;                // a trigger's AB$ Execute with a Cost$: "you may pay ... If you do": asked as it
+                                    // resolves (mtg_effects.c Mtg_ResolveStep), the chain skipped if not paid
     uint8_t unlessScale;            // UnlessScale$ KIND (Cumulative upkeep's, made in mtg_script.c): its UnlessCost$ once for
                                     // each counter of the kind on its source (Mtg_CounterKind; 0: once)
 } MtgAbility;

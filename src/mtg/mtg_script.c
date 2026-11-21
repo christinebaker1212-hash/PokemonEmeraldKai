@@ -283,9 +283,11 @@ static const char *KeepSpec(const char *s, size_t n)
 {
     static char **sKeep;
     static int sKeepCount;
-    char *t = malloc(n + 1);
+    char *t = malloc(n + 1), *semi;
     memcpy(t, s, n);
     t[n] = 0;
+    while ((semi = strchr(t, ';')) != NULL)   // (a cost's "Creature;Enchantment": either, as Valid's ',')
+        *semi = ',';
     sKeep = realloc(sKeep, (size_t)(sKeepCount + 1) * sizeof(char *));
     sKeep[sKeepCount++] = t;
     return t;
@@ -350,6 +352,30 @@ int Mtg_ParseCost(const char *s, MtgCost *out)
             out->returnSelf = 1;
         else if (strcmp(tok, "Discard<1/CARDNAME>") == 0)
             out->discardSelf = 1;
+        else if (strcmp(tok, "Discard<1/Hand>") == 0 || strcmp(tok, "Discard<0/Hand>") == 0)
+            out->discardHand = 1;   // (CostDiscard's Hand: the whole hand, whatever is in it)
+        else if (strncmp(tok, "SubCounter<All/", 15) == 0 && tok[strlen(tok) - 1] == '>' && !out->subCtrN && !out->subCtrAll) {
+            char kname[16];
+            size_t kl = strlen(tok) - 16;
+            int kind;
+            if (kl == 0 || kl >= sizeof(kname))
+                return 0;
+            memcpy(kname, tok + 15, kl);
+            kname[kl] = 0;
+            if ((kind = Mtg_CounterKind(kname)) <= 0)
+                return 0;
+            out->subCtrAll = 1;   // (every counter of the kind on itself: none is fine)
+            out->subCtrKind = (uint8_t)kind;
+        } else if ((r = CostPart(tok, "Mill", &n, &spec, &specLen)) != 0
+                   || (r = CostPart(tok, "ExileFromTop", &n, &spec, &specLen)) != 0) {   // the library's top cards
+            int exile = tok[0] == 'E';
+            if (r < 0 || n < 1 || n > 10 || (exile ? out->exileTopN : out->millN) || (spec && strncmp(spec, "Card", specLen)))
+                return 0;
+            if (exile)
+                out->exileTopN = (uint8_t)n;
+            else
+                out->millN = (uint8_t)n;
+        }
         else if ((r = CostPart(tok, "SubCounter", &n, &spec, &specLen)) != 0) {   // CostRemoveCounter (from itself)
             char kname[16];
             int kind;
@@ -404,7 +430,7 @@ int Mtg_ParseCost(const char *s, MtgCost *out)
             // (untapped permanents its player controls tapped): CostExile, CostReturn, CostTapType
             uint8_t *num = tok[0] == 'E' ? &out->exileHandN : tok[0] == 'R' ? &out->returnN : &out->tapTypeN;
             const char **sp = tok[0] == 'E' ? &out->exileHandSpec : tok[0] == 'R' ? &out->returnSpec : &out->tapTypeSpec;
-            if (r < 0 || !spec || n < 1 || n > 3 || *num)
+            if (r < 0 || !spec || n < 1 || n > (tok[0] == 't' ? 7 : 3) || *num)
                 return 0;
             *num = (uint8_t)n;
             *sp = KeepSpec(spec, specLen);
@@ -543,7 +569,8 @@ static int ParseAbility(MtgCardDef *c, int cardId, char *text, int kind, int dep
     if (!Mtg_ParseCost(Mtg_Param(ab, "Cost"), &ab->cost))
         Unsupported(c, "cost");
     else if (ab->api == MTG_API_MANA && (ab->cost.sacN || ab->cost.discardN || ab->cost.payLife || ab->cost.exileSelf
-                                         || ab->cost.exileGraveN
+                                         || ab->cost.exileGraveN || ab->cost.discardHand || ab->cost.millN
+                                         || ab->cost.exileTopN || ab->cost.subCtrAll || ab->cost.tapTypeN
                                          || ab->cost.returnSelf))
         Unsupported(c, "cost");   // (mana abilities are used by paying: one with a cost to pick, not yet)
     if (kind == MTG_AB_ACTIVATED && !Mtg_Param(ab, "Cost"))
@@ -560,8 +587,11 @@ static int ParseAbility(MtgCardDef *c, int cardId, char *text, int kind, int dep
             ab->unless = (uint16_t)sUnlessCount;
         }
     }
-    if (kind != MTG_AB_SPELL && kind != MTG_AB_ACTIVATED && Mtg_Param(ab, "Cost"))
-        Unsupported(c, "optional cost");   // (a trigger's "you may pay ...": not yet)
+    if (kind == MTG_AB_TRIGGERED && Mtg_Param(ab, "Cost") && strcmp(gMtgParams[first].key, "AB") == 0
+        && !ab->cost.mana.x && !ab->cost.discardSelf && !ab->cost.subCtrN && !ab->cost.subCtrAll)
+        ab->optCost = 1;   // (a trigger's "you may pay ... If you do": asked as it resolves)
+    else if (kind != MTG_AB_SPELL && kind != MTG_AB_ACTIVATED && Mtg_Param(ab, "Cost"))
+        Unsupported(c, "optional cost");
     if ((v = Mtg_Param(ab, "UnlessScale")) != NULL) {
         int kind2 = Mtg_CounterKind(v);
         if (kind2 <= 0 || !Mtg_Param(ab, "UnlessCost"))
@@ -644,11 +674,24 @@ static int ParseAbility(MtgCardDef *c, int cardId, char *text, int kind, int dep
         if (s >= 0 && gMtgAbilities[idx].api == MTG_API_MANA) {   // only a painland's "deals n damage to you"
             const MtgAbility *pain = &gMtgAbilities[s];
             const char *def = Mtg_Param(pain, "Defined"), *dmg = Mtg_Param(pain, "NumDmg");
-            if (pain->api != MTG_API_DEAL_DAMAGE || pain->sub != 0xFFFF || !def || strcmp(def, "You") || !dmg
-                || dmg[0] < '1' || dmg[0] > '9' || dmg[1] || pain->tgt)
-                Unsupported(c, "Mana");
-            else
+            if (pain->api == MTG_API_DEAL_DAMAGE && pain->sub == 0xFFFF && def && !strcmp(def, "You") && dmg
+                && dmg[0] >= '1' && dmg[0] <= '9' && !dmg[1] && !pain->tgt)
                 gMtgAbilities[idx].manaPain = (uint8_t)(dmg[0] - '0');
+            else {   // what else it does as its mana is made (no target, no choice): queued, resolved right after
+                int k2, ok = 1;   // (mtg_mana.c Mtg_Pay, mtg_game.c Run)
+                for (k2 = s; k2 != 0xFFFF && ok; k2 = gMtgAbilities[k2].sub) {
+                    int api = gMtgAbilities[k2].api;
+                    ok = !gMtgAbilities[k2].tgt && (api == MTG_API_DRAW || api == MTG_API_EFFECT || api == MTG_API_SACRIFICE
+                         || api == MTG_API_PUT_COUNTER || api == MTG_API_DELAYED_TRIGGER || api == MTG_API_GAIN_LIFE
+                         || api == MTG_API_LOSE_LIFE || api == MTG_API_DEAL_DAMAGE || api == MTG_API_TAP)
+                         && !(api == MTG_API_SACRIFICE && Mtg_Param(&gMtgAbilities[k2], "SacValid")
+                              && strcmp(Mtg_Param(&gMtgAbilities[k2], "SacValid"), "Self"));
+                }
+                if (ok)
+                    gMtgAbilities[idx].manaFx = 1;
+                else
+                    Unsupported(c, "Mana");
+            }
         }
     }
     if (gMtgAbilities[idx].api == MTG_API_EFFECT) {   // its statics and replacements: SVars of its card, parsed now, kept on the ability
