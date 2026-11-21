@@ -1,0 +1,10 @@
+# image: build/test/pet_life/a.bin
+# The life test's unit, started again: it remembers (level, days, mistakes, helpers, SPARKS).
+date a 2026 11 22 12 1 0
+run 2
+peek a 41 02
+peek a 4a 01
+peek a 49 01
+peek a 6c 01
+peek a 68 3e
+expect a 4 LV2 62S

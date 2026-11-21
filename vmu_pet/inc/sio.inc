@@ -3,7 +3,7 @@
 ;; serial port up while P7 says another VMU is there (P70 = 0, P72 = 0, P73 = 1), put it back (sio_end) when done or
 ;; when the cable goes. Every byte is echoed back by the other side, so the sender knows it arrived and never sends
 ;; faster than the other side reads (no overruns, no send-wait arithmetic).
-;; Needs (RAM bank 1): ticks (+1 every half second), sio_t0, sio_t1, sio_speed (an SBR value).
+;; Needs (RAM bank 1): ticks (+1 every half second), sio_t0, sio_t1, sio_speed (an SBR value), sio_err.
 
 SIO_SYNC = $4d              ; 'M': a packet starts
 SIO_ACK  = $06
@@ -83,7 +83,7 @@ sio_recv:
   ld ticks
   st sio_t0
 .loop:
-  call sio_poll
+  callf sio_poll
   bz .done
   ld ticks
   sub sio_t0
@@ -93,21 +93,28 @@ sio_recv:
 .done:
   ret
 
-;; sio_xfer: send acc and check its echo: acc = 0 when it came back the same
+;; sio_xfer: send acc and check its echo: acc = 0 when it came back the same; else sio_err = 1 (no answer) or
+;; 2 (b = the different byte that came back)
 sio_xfer:
   st sio_t1
-  call sio_send
-  call sio_recv
+  mov #0, sio_err
+  callf sio_send
+  callf sio_recv
   bnz .fail
   ld b
   sub sio_t1
+  bz .ok
+  mov #2, sio_err
+  ret
+.ok:
   ret
 .fail:
+  mov #1, sio_err
   mov #$ff, acc
   ret
 
 ;; sio_flush: drop anything already received
 sio_flush:
-  call sio_poll
+  callf sio_poll
   bz sio_flush
   ret

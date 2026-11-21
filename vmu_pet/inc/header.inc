@@ -51,7 +51,7 @@ timer_ex:
   clr1 ie, 7
   not1 ext, 0
   jmpf timer_ex
-  call int_base_timer
+  callf int_base_timer      ; the BIOS returns to $139: here (far: the program may put it past 4 KB)
   pop ie
   reti
 

@@ -99,6 +99,48 @@ Started 2026-11-20. Nothing is built yet; graphics come from the user.
 - **Environments from Chao Adventure 2's sprite sheet** may be used (the user, 2026-11-21:
   https://chao-island.com/guides/sonic-adventure-2/chao-adventure-2/sprite-sheet.html), backgrounds only.
 
+- **The Eggs** (the user, 2026-11-21): docs/user_images/96.png is the base and style guide: about 18x20, three or four
+  colours, outlined in a dark shade of the Egg's own colour (no black), a pattern on each (flames, bands, roses,
+  stars). **An Egg looks like the MOéMON inside**: its colours from the species, its pattern from a small library chosen
+  by the species (type and look). Mock-ups before building. (95.png, a yellow spotted Egg, came first and was replaced.)
+
+- **The game talks to the VM2 itself** (the user, 2026-11-21, once its USB protocol was known): no SD card swapping
+  for Moemon Kai; the manager is for managing VMUs in general (any game's).
+- **Kai gives Eggs too** (2026-11-21): both ways. Kai drops an Egg off on the VM2 (a real one: its species, moves,
+  parents, from Kai's boxes) to raise on the VMU, and takes grown MOéMON back. The VMU still makes its own Egg when it
+  has none. (This widens "the Egg comes from the VMU program".)
+- **Where** (the user's words, 2026-11-21): "A PC option that is enabled ONLY if the VMU is connected. It then opens a PC
+  box to grab and drop the Egg from, and place a new egg into if you have one available. After completion, it will
+  disconnect the VM2 via software." So: a VM2 option on the PC's menu, there only while a VM2 is plugged in (and in
+  GUI-mode); it opens a box-like screen with the VM2 as a box: take what's on it (a grown MOéMON, or an Egg) into
+  Kai's boxes, put an Egg from Kai's boxes onto it; leaving ends the connection by software (proposed: @REST00, the
+  VM2 restarts out of GUI-mode, ready to use). This replaces the title menu's TRANSFER MOEMON FROM VMU. Mock-ups first.
+
+## The pet's first draft (2026-11-21)
+
+The user: "fix it on your own, and give me a first draft of the actual program", then "make certain there are basic
+animations for the Pokemon too, as well as at least one positive and negative reaction". `vmu_pet/pet/` (README
+"The pet"): KANTO edition, Egg to level 50, Digimon-style daily care, SPARKS clicker + helpers + shop, evolutions,
+LINK, animations (hop / step / turn, eating, happy with a heart, unhappy with a sweat drop, the Egg's wobble).
+Fixed on the way, without the hardware: the emulator harness now enforces what the user's VMU showed (XRAM's missing
+bytes, VCCR's rules, drawing only on RC, a VM2's receiver garbling slow bytes); LINK TEST 4 and the pet default to the
+fast RC link. Not in this draft: battles, the colour file icon per MOeMON, Kai's side (reading the save page, giving
+Eggs), the per-species Egg colours of the user's style guide beyond the 1-bit patterns. Screens:
+docs/vmu_pet/pet_screens.png.
+
+## The VMU manager (built 2026-11-21)
+
+`vmu_pet/manager/` (README.txt; Dear ImGui on SDL2, Windows and Linux): VMU images on the VM2's SD card over USB
+(the VM2's protocol: docs/VM2_USB_PROTOCOL.md, learned from DreamMods' GUI at the user's request), in a card reader
+or folder, single .bin / .vmu files, and the VM2's internal memory. Files as cards with their animated icons, the 200
+blocks as a map, an inspector (names, descriptions, icons: each save's colour icon, ICONDATA_VMS's 1-bit and colour
+ones, PNG in and out), drag a file onto another VMU to copy it, drop .VMS / .VMI / .DCI / images on the window,
+.VMS + .VMI and .DCI out. Changes stay in the window until Save; whatever is overwritten is copied into backups/
+first. The user found the first version "INCREDIBLY ugly": redone the same day in a light, warm theme, larger
+type, cards, plain words. `vm2cli` does the VM2's commands from a prompt. Tests: `make -C vmu_pet/manager test`
+(the VMU code's self test; every VM2 command against test/fake_vm2.py on a pseudo-terminal). Next: Moemon Kai's
+side (bringing a pet in), once the pet exists.
+
 ## Built so far (2026-11-21)
 
 - `vmu_pet/` (README): LINK TEST, shared assembly (Sega's GHEAD, the screen and a 3x5 font, VMU-to-VMU serial with
