@@ -8556,6 +8556,11 @@ res/moves/chatter/anim.s).
   side). The zone question offers the Extra Monster Zones (the bridge's MSG_SELECT_PLACE reads Monster Zones 0-6).
   `mp ygo extra ID...` sets the active deck's Extra Deck (tests); scenario ygo_new_summons (an Xyz, a Link Summon and
   the Scales, played by the AI).
+- Art: every card's printed picture (tools/ygo/fetch_art.py --from 2312, build_printed.py; a Pendulum card's
+  illustration window ART_PENDULUM). printed.bin is kept as three parts under GitHub's 100 MB a file
+  (graphics/ygo/printed.0.bin .. 2.bin, 95 MB each at most), joined by the assembler's .incbin one after another
+  (src/ygo/ygo_art_data.c) into the same bytes; build_printed.py reads and writes the parts, android/build_assets.py
+  joins them. The labels FUSION DECK / EXTRA DECK follow the GEN (FUSION: the era's word).
 
 ## MAGIC: Shadow, Flanking, Rampage, Fading (2026-11-20)
 - The user: "finish up work on Magic ... incorporating all planned cards" (the whole Premodern pool). This batch:

@@ -146,7 +146,7 @@ int Ygo_DeckAdd(struct YgoCollection *c, unsigned deck, unsigned card, char *rea
         unsigned n = Ygo_DeckCount(d->extra, YGO_FUSION_MAX);
         if (n >= YGO_FUSION_MAX)
         {
-            snprintf(reason, size, "The Fusion Deck holds %u.", YGO_FUSION_MAX);
+            snprintf(reason, size, "The Extra Deck holds %u.", YGO_FUSION_MAX);
             return 0;
         }
         d->extra[n] = card;

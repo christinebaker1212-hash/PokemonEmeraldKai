@@ -18,11 +18,11 @@ The user (2026-11-20): every card to today, the GEN by summon type, NPC decks on
 Next:
 1. ~~The table~~ built (COOP_NOTES "YU-GI-OH! to today"). Left: the phone app still shows five Monster Zones a side
    (ygo_jni.c serializes monsters[0-4]; its duels run without the Extra Monster Zones).
-2. **Art**: tools/ygo/fetch_art.py --from 2312, then build_printed.py (a Pendulum card's illustration window differs).
+2. ~~Art~~ done (printed.bin in parts: COOP_NOTES). The phone's YU-GI-OH! pack grows with it (android/build_assets.py).
 3. **The later Starter / Structure Decks' lists with copies** (Yugipedia, as fetch_wc2006.py does): sold by region
    once known (Ygo_SetIsClassicDeck keeps the GAME CENTER to 2002-2006's).
 4. **NPC decks: ask the user first.** The AI with Synchro / Xyz / Link Summons (EDOPro offers them as Special Summons).
-5. The "Fusion Deck" words where the GEN allows later Extra Deck monsters ("Extra Deck").
+5. ~~"Fusion Deck" / "Extra Deck"~~ by the GEN.
 
 ## What's left (2026-11-04)
 Since 1.48.0 (2026-10-29) the duels run on EDOPro's engine (edopro/ocgcore with every card's script in

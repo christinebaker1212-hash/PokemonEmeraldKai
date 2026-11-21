@@ -47,7 +47,7 @@ $(C_BUILDDIR)/mp/mp_badge_data.o: graphics/moemon/badges/badges.bin
 $(C_BUILDDIR)/mp/mp_pass_data.o: graphics/moemon/cards/passes.bin
 # Moemon Kai: the card game's Game Boy illustrations, the same way
 $(C_BUILDDIR)/tcg/tcg_art_data.o: graphics/tcg/original.bin graphics/tcg/printed.bin graphics/tcg/regional.bin
-$(C_BUILDDIR)/ygo/ygo_art_data.o: graphics/ygo/printed.bin graphics/ygo/sdd_art.bin
+$(C_BUILDDIR)/ygo/ygo_art_data.o: graphics/ygo/printed.0.bin graphics/ygo/printed.1.bin graphics/ygo/printed.2.bin graphics/ygo/sdd_art.bin
 $(C_BUILDDIR)/ygo/ygo_edo_pak.o: graphics/ygo/edo.pak
 $(C_BUILDDIR)/mtg/mtg_pak.o: graphics/mtg/forge.pak
 $(C_BUILDDIR)/mtg/mtg_art_data.o: graphics/mtg/printed.bin

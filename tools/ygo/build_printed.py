@@ -30,6 +30,27 @@ ART = (100, 218, 713, 831)
 ART_PENDULUM = (55, 214, 757, 733)   # (a Pendulum Monster's illustration: wider, above the Pendulum Effect box)
 
 cards = json.load(open(ROOT / 'tools/ygo/catalog.json'))['cards']
+# printed.bin is kept as parts under GitHub's 100 MB a file (graphics/ygo/printed.0.bin ...), joined by the assembler's
+# .incbin one after another (src/ygo/ygo_art_data.c) into the same bytes: PARTS of at most PART_MAX each
+PARTS, PART_MAX = 3, 95 * 1000 * 1000
+
+
+def read_printed():
+    parts = [ROOT / ('graphics/ygo/printed.%d.bin' % i) for i in range(PARTS)]
+    if all(p.exists() for p in parts):
+        return b''.join(p.read_bytes() for p in parts)
+    single = ROOT / 'graphics/ygo/printed.bin'   # (before the parts)
+    return single.read_bytes() if single.exists() else None
+
+
+def write_printed(blob):
+    if len(blob) > PARTS * PART_MAX:
+        raise SystemExit('printed.bin needs more than %d parts: raise PARTS here and in src/ygo/ygo_art_data.c' % PARTS)
+    for i in range(PARTS):
+        (ROOT / ('graphics/ygo/printed.%d.bin' % i)).write_bytes(blob[i * PART_MAX:(i + 1) * PART_MAX])
+    single = ROOT / 'graphics/ygo/printed.bin'
+    if single.exists():
+        single.unlink()
 count = max(c['id'] for c in cards)
 byid = {c['id']: c for c in cards}
 blobs, table = [], []
@@ -43,11 +64,11 @@ def art_rect(card):
 x0, y0, x1, y1 = art_rect(None)
 old = None
 if '--keep-cards' in sys.argv[1:]:
-    old = (ROOT / 'graphics/ygo/printed.bin').read_bytes()
+    old = read_printed()
     if old[:4] != b'YGOP' or struct.unpack_from('<I', old, 4)[0] != count:
         raise SystemExit('--keep-cards: printed.bin is from another catalog')
 # (cards the catalog had before keep their pictures when it grows: only the new ones are encoded)
-grown = (ROOT / 'graphics/ygo/printed.bin').read_bytes() if old is None and (ROOT / 'graphics/ygo/printed.bin').exists() else None
+grown = read_printed() if old is None else None
 if grown is not None and (grown[:4] != b'YGOP' or struct.unpack_from('<I', grown, 4)[0] >= count):
     grown = None
 for cid in range(1, count + 1):
@@ -93,7 +114,7 @@ entries += struct.pack('<IIHHHH', offset + len(body), len(back), 0, 0, STORE_W, 
 body += back
 blob = b'YGOP' + struct.pack('<I', count) + bytes(entries) + bytes(body)
 (ROOT / 'graphics/ygo').mkdir(parents=True, exist_ok=True)
-(ROOT / 'graphics/ygo/printed.bin').write_bytes(blob)
+write_printed(blob)
 print('%d cards, %d missing, %.1f MB -> graphics/ygo/printed.bin' % (count, len(missing), len(blob) / 1048576))
 if missing:
     print('  missing:', ', '.join(missing[:20]))

@@ -151,10 +151,11 @@ def webp_pack(src_name, out_name, quality, more=None):
     import io
     from PIL import Image
     out_path = os.path.join(OUT, out_name)
-    src_paths = [os.path.join(ROOT, n) for n in [src_name] + ([more] if more else [])]
+    parts = src_name if isinstance(src_name, (list, tuple)) else [src_name]   # (a pack kept in parts: joined as they are)
+    src_paths = [os.path.join(ROOT, n) for n in list(parts) + ([more] if more else [])]
     if os.path.exists(out_path) and all(os.path.getmtime(out_path) >= os.path.getmtime(p) for p in src_paths):
         return   # (made already: the WebP encoding takes a while)
-    src = joined_packs(*src_paths) if more else open(src_paths[0], 'rb').read()
+    src = joined_packs(*src_paths) if more else b''.join(open(p, 'rb').read() for p in src_paths)
     count = struct.unpack('<I', src[4:8])[0]
     head = 8 + 16 * (count + 1)
     out = bytearray(src[0:head])
@@ -180,7 +181,7 @@ def tcg_art():
 def ygo_art():
     """YU-GI-OH! for the phone: the printed cards (graphics/ygo/printed.bin, "YGOP") as WebP (about 19 MB instead of
     28), and EDOPro's pack (graphics/ygo/edo.pak: every card's database row and script) as it is"""
-    webp_pack('graphics/ygo/printed.bin', 'ygo_cards.bin', 75)
+    webp_pack(['graphics/ygo/printed.%d.bin' % i for i in range(3)], 'ygo_cards.bin', 75)   # (in parts: build_printed.py)
     shutil.copyfile(os.path.join(ROOT, 'graphics/ygo/edo.pak'), os.path.join(OUT, 'ygo_edo.pak'))
 
 

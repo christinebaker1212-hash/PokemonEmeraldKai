@@ -1557,7 +1557,8 @@ static void DecksScreen(void)
     else if (Y.cursor == DECK_ROW_RECIPES)
         Strip(0, "The Starter Decks, built again from the cards you have.");
     else if ((unsigned)Y.cursor == c->activeDeck)
-        Strip(0, "The deck you duel with. A Main Deck holds 40 to 60 cards, the Fusion Deck up to 15.");
+        Strip(0, MP_YgoGen() == 1 ? "The deck you duel with. A Main Deck holds 40 to 60 cards, the Fusion Deck up to 15."
+                                  : "The deck you duel with. A Main Deck holds 40 to 60 cards, the Extra Deck up to 15.");
     else
         Strip(0, MainCount((unsigned)Y.cursor) ? "{R} DUEL WITH THIS DECK" : "An empty slot: build a deck, or one from a recipe.");
     if (Y.menuOn && Y.cursor < YGO_SAVED_DECKS)

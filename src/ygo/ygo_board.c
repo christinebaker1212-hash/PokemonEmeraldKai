@@ -3059,7 +3059,7 @@ static void Gap(void)
         }
         else if (cur >= 0 && B.spots[cur].kind == SP_PILE && B.mode != M_PICK_GRID && B.mode != M_PILE)
         {
-            static const char *const names[] = {"DECK", "GRAVEYARD", "FUSION DECK", "BANISHED"};
+            const char *const names[] = {"DECK", "GRAVEYARD", MP_YgoGen() == 1 ? "FUSION DECK" : "EXTRA DECK", "BANISHED"};   /* (its era's name) */
             uint8_t list[YGO_OBJS];
             unsigned n = PileList(B.spots[cur].side, B.spots[cur].index, list);
             snprintf(line, sizeof(line), "%s %s: %u card%s", B.spots[cur].side ? "Their" : "Your",
@@ -3625,7 +3625,7 @@ static void Grid(void)
     G_FillA(0, 0, 240, 160, 0x080c14, 210);
     if (B.mode == M_PILE)
     {
-        static const char *const names[] = {"DECK", "GRAVEYARD", "FUSION DECK", "BANISHED"};
+        const char *const names[] = {"DECK", "GRAVEYARD", MP_YgoGen() == 1 ? "FUSION DECK" : "EXTRA DECK", "BANISHED"};   /* (its era's name) */
         snprintf(title, sizeof(title), "%s %s", B.pileSide ? "THEIR" : "YOUR", names[B.pilePile]);
     }
     else
