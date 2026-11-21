@@ -1,232 +1,232 @@
 Yu-Gi-Oh! card power from text, effects and stats (tools/ygo/text_power.py)
 
-signals: duels (2262 cards, weight 0.25), lists (14054 cards, weight 1.00), tournaments (14054 cards, weight 1.00); tournament decks read: 13306
-the text explains cards it never saw with r = 0.507 (5-fold, held out)
+signals: duels (2262 cards, weight 0.25), lists (14054 cards, weight 1.00), tournaments (14054 cards, weight 1.00); tournament decks read: 23883
+the text explains cards it never saw with r = 0.520 (5-fold, held out)
 
-  against duels alone: r = -0.026
-  against lists alone: r = 0.211
-  against tournaments alone: r = 0.583
+  against duels alone: r = -0.025
+  against lists alone: r = 0.208
+  against tournaments alone: r = 0.620
 
 the features (weight per standard deviation):
-  +0.222  is_extra
-  -0.111  first_year
-  -0.097  material_count
-  +0.069  text_length_k
-  +0.055  search_deck
-  -0.053  named_material
-  -0.045  archetype_refs
-  -0.036  low_level
-  +0.036  quick_effect
-  -0.035  atk_k
-  +0.032  atk_per_cost
-  +0.031  tuner
-  +0.028  generic_materials
-  -0.024  high_level_main
-  +0.023  hard_once
-  +0.021  floodgate_cannot
-  +0.020  cost_pay_lp
-  +0.019  ss_self
-  +0.019  float_on_destroy
-  +0.017  ss_from_deck
-  +0.017  link_rating
-  -0.017  must_be_ss_condition
-  +0.016  def_k
-  +0.016  effect_count
-  +0.016  destroy_target
-  +0.015  quickplay
-  +0.015  floodgate_ss
-  +0.014  ss_self_from_hand
-  +0.014  cost_half_lp
-  +0.013  excavate_mill_self
-  -0.013  is_trap
-  +0.013  generic_support
-  +0.013  negate_activation
+  +0.215  is_extra
+  -0.122  first_year
+  -0.089  material_count
+  +0.081  text_length_k
+  +0.054  search_deck
+  -0.052  named_material
+  -0.047  archetype_refs
+  +0.034  quick_effect
+  -0.034  low_level
+  +0.033  generic_materials
+  +0.033  tuner
+  -0.030  high_level_main
+  +0.029  hard_once
+  +0.027  atk_per_cost
+  -0.024  atk_k
+  +0.024  floodgate_cannot
+  +0.024  cost_pay_lp
+  +0.022  float_on_destroy
+  +0.022  ss_self
+  +0.020  floodgate_ss
+  +0.020  ss_from_deck
+  +0.017  excavate_mill_self
+  +0.016  quickplay
+  +0.016  link_rating
+  +0.016  ss_self_from_hand
+  -0.015  is_trap
+  +0.014  effect_count
+  +0.014  destroy_target
+  -0.014  must_be_ss_condition
+  +0.013  send_deck_gy
+  +0.013  bounce
   +0.012  on_summon_trigger
-  +0.012  hand_disrupt
-  -0.012  cost_banish_own
-  +0.012  search_deck_or_gy
-  +0.011  bounce
+  +0.011  def_k
   +0.011  take_control
-  -0.010  ritual
+  +0.011  generic_support
+  +0.011  cost_half_lp
+  -0.011  ritual
+  +0.011  hand_disrupt
+  +0.010  negate_activation
+  -0.010  change_position
 
 the words and phrases that count most:
-  +1.304  maliss
-  +1.177  dracotail
-  +1.096  kashtira
-  +0.889  yummy
-  +0.884  ryzeal
-  +0.868  mitsurugi
-  +0.818  tearlaments
-  +0.804  orcust
-  +0.748  k9
-  +0.747  branded
-  +0.701  dragon ruler of
-  +0.693  spright
-  +0.681  fiendsmith
-  +0.678  bystial
-  +0.659  tribute monster inflict
-  +0.655  memento
-  +0.647  runick
-  +0.642  lunalight
-  +0.631  purrely
-  +0.624  deck
-  +0.623  tune
-  +0.613  kewl tune
-  +0.613  kewl
-  +0.608  snake eye
-  +0.606  level monsters once
-  +0.596  dragon ruler
-  +0.590  the gy spell
-  +0.579  sinful spoils
-  +0.579  spoils
-  +0.579  sinful
-  +0.573  fallen of albaz
-  +0.572  ruler of
-  +0.571  spell card normal
-  +0.570  unchained
-  +0.568  albaz
-  +0.568  of albaz
-  +0.566  yubel
-  +0.557  crystron
-  +0.556  is banished
-  +0.553  player can
+  +1.139  maliss
+  +1.003  dracotail
+  +0.968  kashtira
+  +0.858  tearlaments
+  +0.801  yummy
+  +0.764  ryzeal
+  +0.736  frog
+  +0.724  mitsurugi
+  +0.720  orcust
+  +0.715  dragon ruler of
+  +0.709  spright
+  +0.700  branded
+  +0.673  k9
+  +0.645  deck
+  +0.640  tribute monster inflict
+  +0.623  runick
+  +0.622  zoodiac
+  +0.617  level monsters once
+  +0.609  the gy spell
+  +0.602  dragon ruler
+  +0.601  bystial
+  +0.592  spell card normal
+  +0.585  fiendsmith
+  +0.577  ruler of
+  +0.575  spyral
+  +0.564  purrely
+  +0.559  is banished
+  +0.556  deck but
+  +0.555  look at your
+  +0.554  hand field and
+  +0.552  at your opponent
+  +0.551  player can
+  +0.549  snake eye
+  +0.546  deck face
+  +0.545  tune
+  +0.542  effects on the
+  +0.540  or
+  +0.537  player can special
+  +0.536  at your
+  +0.535  gy
   ...
-  -0.697  insect
-  -0.656  zombie
-  -0.529  of your
-  -0.516  targets
-  -0.506  gouki
-  -0.486  that targets
-  -0.481  normal monster
-  -0.475  battle
-  -0.473  spell card from
-  -0.460  when
-  -0.448  counter
-  -0.443  tuner
-  -0.441  cyberse
-  -0.436  psychic
-  -0.427  zombie monster
-  -0.422  your hand you
-  -0.413  can target monster
-  -0.412  other monsters
-  -0.405  fabled
-  -0.402  activated that targets
-  -0.401  flip
-  -0.396  insect monster
-  -0.396  vampire
-  -0.387  field zone
-  -0.384  level
+  -0.566  of your
+  -0.558  zombie
+  -0.554  insect
+  -0.552  gouki
+  -0.536  battle
+  -0.522  normal monster
+  -0.511  when
+  -0.507  targets
+  -0.489  counter
+  -0.468  that targets
+  -0.456  level
+  -0.446  spell card from
+  -0.444  your hand you
+  -0.430  force
+  -0.426  vampire
+  -0.420  cyberse
+  -0.419  fabled
+  -0.418  mayakashi
+  -0.416  flip
+  -0.410  activated that targets
+  -0.408  other monsters
+  -0.405  by
+  -0.397  monster and
+  -0.397  graveyard
+  -0.395  with
 
 strongest 80:
-   2795  Herald of the Arc Light
-   2745  Maliss <Q> White Binder
-   2739  Knightmare Gryphon
-   2654  Tearlaments Havnis
-   2645  K9-17 "Ripper"
-   2631  D/D/D Wave High King Caesar
-   2604  Tearlaments Scheiren
-   2591  Tearlaments Merrli
-   2579  Kashtira Arise-Heart
-   2576  Ext Ryzeal
-   2557  Cupsy★Yummy Way
-   2554  Bystial Saronir
-   2542  Maliss <Q> Red Ransom
-   2536  Kewl Tune Rotary
-   2532  Keldo the Sacred Protector
-   2532  Yummy★Snatchy
-   2516  Fiendsmith's Lacrima
-   2510  Dracotail Lukias
-   2502  Tempest, Dragon Ruler of Storms
-   2494  Bystial Magnamhut
-   2469  Vanquish Soul Hollie Sue
-   2468  Fiendsmith's Requiem
-   2467  Sword Ryzeal
-   2464  Kewl Tune Track Maker
-   2461  Tearlaments Kashtira
-   2455  Isolde, Two Tales of the Noble Knights
-   2451  Blaster, Dragon Ruler of Infernos
-   2444  Azamina Ilia Silvia
-   2441  Maliss <P> White Rabbit
-   2441  Mudora the Sword Oracle
-   2441  Albion the Branded Dragon
-   2439  Azamina Mu Rcielago
-   2435  Zenna's Deceiving Doll Maidens
-   2434  Unchained Soul Lord of Yama
-   2433  Tidal, Dragon Ruler of Waterfalls
-   2425  Kashtira Unicorn
-   2424  Triple Tactics Talent
-   2416  Kashtira Fenrir
-   2415  Tearlaments Kitkallos
-   2415  Ice Ryzeal
-   2411  Charmer Quartet in Bloom
-   2411  Foolish Burial
-   2403  Knightmare Goblin
-   2398  Called by the Grave
-   2398  Sky Striker Mobilize - Engage!
-   2398  Crossout Designator
-   2398  Knightmare Mermaid
-   2396  Gigantic Spright
-   2392  Elfnote Lucina
-   2391  Kelbek the Ancient Vanguard
-   2387  Agido the Ancient Sentinel
-   2385  W:P Fancy Ball
-   2381  Cupsy☆Yummy
-   2376  Ancient Fairy Dragon
-   2373  Dragon Ravine
-   2370  Sky Striker Ace = Zero
-   2369  Maliss <P> Dormouse
-   2365  Evilswarm Exciton Knight
-   2360  Ame no Habakiri no Mitsurugi
-   2359  Pressured Planet Wraitsoth
-   2358  Sky Striker Ace - Shizuku
-   2356  True King of All Calamities
-   2352  Fiendsmith Engraver
-   2352  K9-17 Izuna
-   2351  Salamangreat Miragestallio
-   2346  K9-X "Werewolf"
-   2346  Daigusto Emeral
-   2346  Elfnote Fortuna
-   2343  Phantom of Yubel
-   2339  Kewl Tune Reco
-   2339  Cooky★Yummy Way
-   2337  Redox, Dragon Ruler of Boulders
-   2333  S:P Little Knight
-   2332  Knightmare Cerberus
-   2331  Kewl Tune Mix
-   2328  Vanquish Soul Razen
-   2328  The Phantom Knights of Rusty Bardiche
-   2328  Dracotail Mululu
-   2326  Salamangreat Balelynx
-   2325  Ecclesia and the Dark Dragon
+   2731  Herald of the Arc Light
+   2670  Maliss <Q> White Binder
+   2665  Knightmare Gryphon
+   2646  Tearlaments Havnis
+   2594  Tearlaments Scheiren
+   2565  Tearlaments Merrli
+   2564  K9-17 "Ripper"
+   2553  D/D/D Wave High King Caesar
+   2532  Kashtira Arise-Heart
+   2519  Tempest, Dragon Ruler of Storms
+   2507  Tearlaments Kitkallos
+   2506  Keldo the Sacred Protector
+   2490  Maliss <Q> Red Ransom
+   2473  Ext Ryzeal
+   2469  Yummy★Snatchy
+   2462  Tearlaments Kashtira
+   2456  Kewl Tune Rotary
+   2450  Bystial Saronir
+   2442  Fiendsmith's Lacrima
+   2438  Blaster, Dragon Ruler of Infernos
+   2431  Tidal, Dragon Ruler of Waterfalls
+   2415  Cupsy★Yummy Way
+   2415  Mudora the Sword Oracle
+   2408  Dracotail Lukias
+   2404  Isolde, Two Tales of the Noble Knights
+   2402  Foolish Burial
+   2395  Agido the Ancient Sentinel
+   2392  True King of All Calamities
+   2389  Kelbek the Ancient Vanguard
+   2384  Zenna's Deceiving Doll Maidens
+   2382  Kewl Tune Track Maker
+   2376  Spright Elf
+   2375  Albion the Branded Dragon
+   2374  Predaplant Verte Anaconda
+   2366  Knightmare Goblin
+   2362  Bystial Magnamhut
+   2360  Dragon Ravine
+   2355  Toadally Awesome
+   2354  Sword Ryzeal
+   2352  Guardragon Elpy
+   2352  Unchained Soul Lord of Yama
+   2352  Ancient Fairy Dragon
+   2351  Vanquish Soul Hollie Sue
+   2344  Azamina Mu Rcielago
+   2343  Maliss <P> White Rabbit
+   2342  Zoodiac Broadbull
+   2342  Knightmare Mermaid
+   2339  W:P Fancy Ball
+   2338  Redox, Dragon Ruler of Boulders
+   2335  Azamina Ilia Silvia
+   2335  Charmer Quartet in Bloom
+   2334  Gigantic Spright
+   2333  Crossout Designator
+   2332  Fiendsmith's Requiem
+   2331  Kashtira Fenrir
+   2331  Sky Striker Mobilize - Engage!
+   2331  Kashtira Unicorn
+   2329  The Phantom Knights of Rusty Bardiche
+   2325  Salamangreat Miragestallio
+   2318  Ice Ryzeal
+   2316  Chaos Ruler, the Chaotic Magical Dragon
+   2315  Primathmech Alembertian
+   2308  Called by the Grave
+   2307  Evilswarm Exciton Knight
+   2305  Reactan, Dragon Ruler of Pebbles
+   2305  Lightning, Dragon Ruler of Drafts
+   2304  Daigusto Emeral
+   2303  Elfnote Lucina
+   2302  Triple Tactics Talent
+   2299  Crystron Halqifibrax
+   2298  Guardragon Agarpain
+   2298  Spright Blue
+   2292  Stream, Dragon Ruler of Droplets
+   2285  Knightmare Cerberus
+   2285  Sky Striker Ace = Zero
+   2285  Burner, Dragon Ruler of Sparks
+   2283  Snake-Eyes Poplar
+   2283  Solemn Accusation
+   2281  Card Destruction
+   2279  Cupsy☆Yummy
 
 weakest 30:
-   1180  Laval Miller
-   1180  Rose Papillon
-   1180  Reanimation Wave
-   1179  Dizzying Winds of Yosen Village
-   1172  White Potan
-   1170  Nomadic Force
-   1170  Libromancer Fireburst
-   1170  Madolche Chickolates
-   1169  World of Prophecy
-   1169  Red-Headed Oni
-   1162  Apprentice Piper
-   1162  Hero Spirit
-   1161  Loge's Flame
-   1161  Hyper-Ancient Shark Megalodon
-   1160  Blizzed, Defender of the Ice Barrier
-   1158  Prima Materiactor
-   1158  Ghostrick Break
-   1157  Tindangle Angel
-   1152  D.D. Jet Iron
-   1152  Raidraptor - Rudder Strix
-   1151  Mekanikal Arkfiend
-   1150  Madolche Marmalmaide
-   1144  Fortune Lady Dark
-   1143  Interplanetarypurplythorny Dragon
-   1133  Lillybot
-   1132  Evilswarm Heliotrope
-   1126  Hexe Trude
-   1111  Valkyrian Knight
-   1101  Moja
-   1095  X-Saber Axel
+   1164  Reanimation Wave
+   1163  World of Prophecy
+   1162  Laval Miller
+   1162  Raidraptor - Rudder Strix
+   1160  Fluffal Leo
+   1159  Madolche Marmalmaide
+   1159  Evolsaur Terias
+   1157  Umbral Horror Ghoul
+   1156  Tindangle Angel
+   1156  Shien's Scheme
+   1154  Hyper-Ancient Shark Megalodon
+   1153  Evoltile Gephyro
+   1151  Breakthrough!
+   1150  Apprentice Piper
+   1150  Loge's Flame
+   1148  Yaiba Robo
+   1143  Mekanikal Arkfiend
+   1140  White Potan
+   1136  Nomadic Force
+   1133  Hero Spirit
+   1130  Blizzed, Defender of the Ice Barrier
+   1129  Ghostrick Break
+   1115  Fortune Lady Dark
+   1114  Hexe Trude
+   1107  Interplanetarypurplythorny Dragon
+   1105  Evilswarm Heliotrope
+   1102  Lillybot
+   1093  Moja
+   1078  Valkyrian Knight
+   1063  X-Saber Axel
