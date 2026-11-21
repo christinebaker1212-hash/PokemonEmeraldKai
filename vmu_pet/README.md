@@ -39,5 +39,12 @@ samples VMT-72..88, flash VMT "Reading and Writing Flash Memory"), libevmu's hea
 4. **Find the save**: put the VM2's SD card in the PC and run `python3 vmu_pet/tools/find_linktest.py <SD card>`.
    The image whose GOT went up is where a program on the VM2 saves.
 
-What to report: whether step 2 worked, which speeds said OK both ways, any error words (NO ANSWER, ECHO WRONG,
-NO ACK, LOST IT, BAD DATA), and what step 4 printed.
+5. **The raw test** (LINK TEST 2): B sends one byte and nothing else. The other side shows `RAW A0 001` (the byte
+   in hex, how many have come); the sender shows `B>A0 BACK xx` (what went, and what its port held afterwards).
+
+What to report: which speeds said OK both ways; the exact words on both screens when it fails (`NO ANSWER`,
+`ECHO 4D>-- ` with `AT BYTE n` under it, `NO ACK`, `LOST IT`, `BAD DATA`); whether B's raw byte shows up on the other
+side (and the `BACK` value); and what step 4 printed.
+
+Hardware notes (learned on the user's VMU, 2026-11-21): the screen broke up at the bottom on a real VMU (not on the
+VM2 or the emulator) because LINK TEST 1 switched clocks without Sega's VCCR bit 6 rule (clk_fast / clk_slow).

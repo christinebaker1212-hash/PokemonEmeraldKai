@@ -34,6 +34,13 @@ press b A 0.3
 run 6
 expect b 3 SENT OK!
 expect a 2 GOT  001
+# one raw byte (B): the other side shows it
+press a B 0.3
+run 2
+expect b 3 RAW A0 001
+press a B 0.3
+run 2
+expect b 3 RAW A1 002
 save a OUT/a.bin
 save b OUT/b.bin
 cable off

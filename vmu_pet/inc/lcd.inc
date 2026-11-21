@@ -23,8 +23,17 @@ lcd_clear:
   pop acc
   ret
 
-;; lcd_char: acc = an ASCII character, c = column 0-11, b = text line 0-4 (6 pixels a line)
+;; lcd_char: acc = an ASCII character, c = column 0-11, b = text line 0-4 (6 pixels a line). Past column 11:
+;; nothing (it would land in the next line's bytes).
 lcd_char:
+  push acc
+  ld c
+  sub #12
+  bp psw, 7, .incol
+  pop acc
+  ret
+.incol:
+  pop acc
   push acc
   push b
   push c
@@ -204,4 +213,32 @@ lcd_clear_line:
   bne #12, .cl
   pop c
   pop acc
+  ret
+
+;; lcd_hex: acc = a byte drawn as 2 hex digits at c, b. Leaves c after it.
+lcd_hex:
+  push acc
+  push acc
+  ror
+  ror
+  ror
+  ror
+  call .digit
+  pop acc
+  call .digit
+  pop acc
+  ret
+.digit:
+  and #$0f
+  push acc
+  sub #10
+  pop acc
+  bp psw, 7, .num
+  add #55                   ; 'A' - 10
+  br .put
+.num:
+  add #48
+.put:
+  call lcd_char
+  inc c
   ret

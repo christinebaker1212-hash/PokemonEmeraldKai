@@ -37,6 +37,10 @@ speed_idx  = $20
 idx        = $21
 chk        = $22
 tmp        = $23
+b_held     = $24
+raw_count  = $25
+raw_sent   = $26
+sio_err    = $27            ; why sio_xfer failed: 1 = no answer, 2 = a different byte came back
 buf        = $30            ; 32 bytes
 PAYLEN     = 32
 
@@ -47,6 +51,9 @@ main:
   mov #0, ticks
   mov #0, connected
   mov #1, a_held            ; ignore an A still held from the menu
+  mov #1, b_held
+  mov #0, raw_count
+  mov #0, raw_sent
   mov #1, ud_held
   mov #0, speed_idx
   call speed_set
@@ -71,22 +78,30 @@ loop:
   bnz .nocable
   ld connected
   bnz .con
+  call clk_fast
   call sio_init
   mov #1, connected
   mov #<s_cable, trl
   mov #>s_cable, trh
   call status
 .con:
+  call clk_slow             ; listening on the crystal (Sega: serial transfers on the crystal)
   call sio_poll
   bnz .noin
   ld b
-  bne #SIO_SYNC, loop
+  be #SIO_SYNC, .packet
+  call clk_fast
+  call raw_got
+  jmp loop
+.packet:
   call recv_packet
   jmp loop
 .noin:
+  call clk_fast             ; drawing (keys) on RC
   call keys
   jmp loop
 .nocable:
+  call clk_fast
   ld connected
   bz .idle
   call sio_end
@@ -106,8 +121,20 @@ finish:
   call batt_on
   jmp game_end
 
-;; keys: A sends (when connected), UP / DOWN the speed
+;; keys: A sends a packet, B one raw byte (when connected), UP / DOWN the speed
 keys:
+  ld p3
+  bp acc, BTN_B, .b_up
+  ld b_held
+  bnz .a
+  mov #1, b_held
+  ld connected
+  bz .a
+  call raw_send
+  br .a
+.b_up:
+  mov #0, b_held
+.a:
   ld p3
   bp acc, BTN_A, .a_up
   ld a_held
@@ -192,9 +219,11 @@ send_packet:
   inc idx
   ld idx
   bne #PAYLEN, .fill
+  mov #0, idx
   mov #SIO_SYNC, acc
   call sio_xfer
   bnz .noans
+  mov #1, idx
   mov #PAYLEN, acc
   call sio_xfer
   bnz .bad
@@ -205,13 +234,21 @@ send_packet:
   st 0
   ld @R0
   call sio_xfer
-  bnz .bad
+  bnz .bad_data
   inc idx
   ld idx
   bne #PAYLEN, .send
+  mov #34, idx
   ld chk
   call sio_xfer
   bnz .bad
+  br .sent
+.bad_data:
+  ld idx
+  add #2
+  st idx
+  br .bad
+.sent:
   call sio_recv             ; the answer, after the other side saves (up to 3 s)
   bz .ans
   call sio_recv
@@ -228,14 +265,14 @@ send_packet:
   jmp status
 .noans:
   call clk_fast
+  ld sio_err
+  be #2, .bad
   mov #<s_noans, trl
   mov #>s_noans, trh
   jmp status
 .bad:
   call clk_fast
-  mov #<s_echo, trl
-  mov #>s_echo, trh
-  jmp status
+  jmp echo_fail
 .noack:
   call clk_fast
   mov #<s_noack, trl
@@ -309,6 +346,103 @@ recv_packet:
   mov #<s_lost, trl
   mov #>s_lost, trh
   jmp status
+
+
+;; raw_send: one byte, no protocol (B): line 3 says what went and what came back in its place (SBUF0 after a
+;; transfer holds what the other side's SO1 shifted in)
+raw_send:
+  ld raw_sent
+  add #$a0
+  st tmp
+  call clk_slow
+  ld tmp
+  call sio_send
+  call sio_sent
+  ld sbuf0
+  st chk
+  call clk_fast
+  inc raw_sent
+  push b
+  push c
+  mov #3, b
+  call lcd_clear_line
+  mov #<s_rawsent, trl
+  mov #>s_rawsent, trh
+  mov #0, c
+  call lcd_text
+  ld tmp
+  call lcd_hex
+  inc c
+  mov #<s_back, trl
+  mov #>s_back, trh
+  call lcd_text
+  ld chk
+  call lcd_hex
+  pop c
+  pop b
+  ret
+
+;; raw_got: a byte that isn't a packet's start arrived (in b): line 3 "RAW xx #nnn"
+raw_got:
+  inc raw_count
+  push b
+  push c
+  ld b
+  st tmp
+  mov #3, b
+  call lcd_clear_line
+  mov #<s_raw, trl
+  mov #>s_raw, trh
+  mov #0, c
+  call lcd_text
+  ld tmp
+  call lcd_hex
+  inc c
+  ld raw_count
+  call lcd_num
+  pop c
+  pop b
+  ret
+
+;; echo_fail: line 3 "ECHO xx>yy" (sent, came back; -- for nothing), line 4 "AT BYTE nnn" (0 = the start, 1 = the
+;; length, 2-33 the data, 34 the checksum)
+echo_fail:
+  push b
+  mov #3, b
+  call lcd_clear_line
+  mov #<s_echo, trl
+  mov #>s_echo, trh
+  mov #0, c
+  call lcd_text
+  ld sio_t1
+  call lcd_hex
+  mov #62, acc
+  call lcd_char
+  inc c
+  ld sio_err
+  be #1, .none
+  pop b
+  push b
+  ld b
+  call lcd_hex
+  br .where
+.none:
+  mov #45, acc
+  call lcd_char
+  inc c
+  call lcd_char
+  inc c
+.where:
+  mov #4, b
+  call lcd_clear_line
+  mov #<s_at, trl
+  mov #>s_at, trh
+  mov #0, c
+  call lcd_text
+  ld idx
+  call lcd_num
+  pop b
+  ret
 
 ;; pause: about 60 ms at the crystal clock (the other side gets ready to listen)
 pause:
@@ -397,12 +531,17 @@ save_write:
   pop acc
   ret
 
-;; clk_fast: the internal RC clock (1/12) for drawing; clk_slow: the 32 kHz crystal for idling and the serial link
+;; clk_fast: the internal RC clock (1/12) for drawing; clk_slow: the 32 kHz crystal for idling and the serial link.
+;; Sega's rule with the screen on (hardware manual VMD-156 / VCCR6): going to the crystal, shut the CPU out of the
+;; screen's memory first (VCCR bit 6 = 1); going back to RC, let it in again (bit 6 = 0). The screen's memory is only
+;; read or written on RC. (The emulator and the VM2 don't mind; a real VMU's screen breaks up.)
 clk_fast:
+  clr1 vccr, 6
   mov #OSC_RC, ocr
   ret
 
 clk_slow:
+  set1 vccr, 6
   mov #OSC_XT, ocr
   ret
 
@@ -476,7 +615,7 @@ int_base_timer:
   ret
 
 s_title:
-  .string 12 "LINK TEST 1"
+  .string 12 "LINK TEST 2"
 s_sent:
   .string 6 "SENT "
 s_got:
@@ -496,7 +635,15 @@ s_gotok:
 s_noans:
   .string 10 "NO ANSWER"
 s_echo:
-  .string 11 "ECHO WRONG"
+  .string 6 "ECHO "
+s_at:
+  .string 9 "AT BYTE "
+s_raw:
+  .string 5 "RAW "
+s_rawsent:
+  .string 3 "B>"
+s_back:
+  .string 6 "BACK "
 s_noack:
   .string 7 "NO ACK"
 s_nak:
