@@ -59,9 +59,11 @@
 #define CLEANUP_LIST "update_cleanup.txt"
 #define DOWNLOAD_FILE "update_download.zip"
 #define MAX_MANIFEST 16384
-// (512 MB until 1.210.0, whose zip grew past it with the YU-GI-OH! card art: the user, 2026-11-21, raised it, games
-// from before downloading that one by hand once; a zip is written to the disk, then read whole)
-#define MAX_ZIP (2000u * 1024u * 1024u)
+// No size limit on a download (the user, 2026-11-21: "make the size limit for auto updating unlimited"; 512 MB until
+// 1.210.0, then 2000 MB): a zip is written to the disk and installed from there a file at a time (ZipEntries /
+// ZipExtract: 64-bit sizes, ZIP64), so neither memory nor a 32-bit long bounds it. Games from before this download
+// one release by hand once.
+typedef long long i64;
 
 int Display_Init(const char *title);
 void Display_Shutdown(void);
@@ -303,11 +305,12 @@ static void ShaHex(struct Sha256 *s, char out[65])
     out[64] = 0;
 }
 
-static uint32_t Crc32(const uint8_t *p, size_t n)
+// Crc32Update: crc (0 to start) carried on over n more bytes
+static uint32_t Crc32Update(uint32_t crc, const uint8_t *p, size_t n)
 {
     static uint32_t table[256];
     static int ready;
-    uint32_t c = 0xFFFFFFFFu;
+    uint32_t c = crc ^ 0xFFFFFFFFu;
     size_t i;
     if (!ready)
     {
@@ -327,6 +330,11 @@ static uint32_t Crc32(const uint8_t *p, size_t n)
     return c ^ 0xFFFFFFFFu;
 }
 
+static uint32_t Crc32(const uint8_t *p, size_t n)
+{
+    return Crc32Update(0, p, n);
+}
+
 // ---------------------------------------------------------------------------
 // The update's state, shared by the screen (main thread) and the download (worker)
 
@@ -342,8 +350,8 @@ static struct
 {
     SDL_atomic_t phase;
     SDL_atomic_t cancel;
-    SDL_atomic_t got;        // bytes downloaded
-    long total;              // the zip's size from update.txt
+    SDL_atomic_t got;        // KB downloaded (an int: KB, so it never runs out)
+    i64 total;               // the zip's size from update.txt
     char channel[16];
     char version[32];
     char tag[48];
@@ -370,7 +378,7 @@ struct Sink
 {
     FILE *file;        // to a file, or
     char *mem;         // to memory (up to cap bytes)
-    long cap, len;
+    i64 cap, len;
     struct Sha256 sha;
     int progress;      // count into U.got
     SDL_atomic_t *got, *cancel;   // (the DANCE machine's songs: their own; NULL: U's)
@@ -380,7 +388,7 @@ static int SinkWrite(struct Sink *k, const void *data, size_t n)
 {
     if (SDL_AtomicGet(k->cancel ? k->cancel : &U.cancel))
         return 0;
-    if (k->len + (long)n > k->cap)
+    if (k->len + (i64)n > k->cap)
         return 0;
     if (k->file)
     {
@@ -392,9 +400,9 @@ static int SinkWrite(struct Sink *k, const void *data, size_t n)
         memcpy(k->mem + k->len, data, n);
     }
     ShaUpdate(&k->sha, data, n);
-    k->len += (long)n;
+    k->len += (i64)n;
     if (k->progress)
-        SDL_AtomicSet(k->got ? k->got : &U.got, (int)k->len);
+        SDL_AtomicSet(k->got ? k->got : &U.got, (int)(k->len >> 10));
     return 1;
 }
 
@@ -763,11 +771,11 @@ static int ParseManifest(char *text)
         if (sscanf(line, "%31s %127s %31s %79s %127s", key, a, b, c, d) == 5 && strcmp(key, UPDATE_PLATFORM) == 0)
         {
             char *end;
-            long size = strtol(b, &end, 10);
+            i64 size = strtoll(b, &end, 10);
             int i, hex = strlen(c) == 64;
             for (i = 0; hex && i < 64; i++)
                 hex = isxdigit((unsigned char)c[i]);
-            if (*end || size <= 0 || (unsigned long)size > MAX_ZIP || !hex || !ValidName(a) || !ValidName(d))
+            if (*end || size <= 0 || !hex || !ValidName(a) || !ValidName(d))
                 return 0;
             snprintf(U.zip, sizeof(U.zip), "%s", a);
             U.total = size;
@@ -809,11 +817,29 @@ static void AssetUrl(char *out, size_t size, const char *name, int latest)
 static uint32_t Rd16(const uint8_t *p) { return p[0] | (p[1] << 8); }
 static uint32_t Rd32(const uint8_t *p) { return p[0] | (p[1] << 8) | (p[2] << 16) | ((uint32_t)p[3] << 24); }
 
+static uint64_t Rd64(const uint8_t *p) { return Rd32(p) | ((uint64_t)Rd32(p + 4) << 32); }
+
 struct Entry
 {
     char name[256];       // relative to the exe's folder, '/' separated
-    uint32_t method, crc, csize, usize, local, mode;
+    uint32_t method, crc, mode;
+    uint64_t csize, usize, local;
 };
+
+// 64-bit file positions (a long is 32 bits on Windows)
+static int USeek(FILE *f, i64 off)
+{
+#ifdef _WIN32
+    return _fseeki64(f, off, SEEK_SET);
+#else
+    return fseeko(f, (off_t)off, SEEK_SET);
+#endif
+}
+
+static int ReadAt(FILE *f, i64 off, void *buf, size_t n)
+{
+    return USeek(f, off) == 0 && fread(buf, 1, n, f) == n;
+}
 
 // A name inside the zip that can only land inside the game's folder
 static int SafeRelative(const char *s)
@@ -847,53 +873,85 @@ static int Protected(const char *name, const char *path)
     return 0;
 }
 
-static int ReadEntries(const uint8_t *z, long size, struct Entry **out, int *count)
+// The zip's entries, from its central directory at the end of the file (ZIP64 too: past 4 GB or 65535 files). The
+// release zip has everything in one top folder: it's dropped from the names.
+static int ZipEntries(FILE *f, i64 size, struct Entry **out, int *count)
 {
-    long eocd = -1, i, off;
-    uint32_t n, cdOff, k;
-    struct Entry *e;
+    uint8_t *tail = NULL, *cd = NULL;
+    i64 tailLen = size < 65557 ? size : 65557, i, eocd = -1;
+    uint64_t n, cdOff, cdLen, k, off;
+    struct Entry *e = NULL;
     char prefix[256] = "";
     int strip = 1;
 
-    for (i = size - 22; i >= 0 && i >= size - 22 - 65535; i--)
-        if (Rd32(z + i) == 0x06054b50)
+    if (size < 22 || (tail = malloc((size_t)tailLen)) == NULL || !ReadAt(f, size - tailLen, tail, (size_t)tailLen))
+        goto bad;
+    for (i = tailLen - 22; i >= 0; i--)
+        if (Rd32(tail + i) == 0x06054b50)
         {
             eocd = i;
             break;
         }
     if (eocd < 0)
-        return 0;
-    n = Rd16(z + eocd + 10);
-    cdOff = Rd32(z + eocd + 16);
-    if (n == 0 || n > 20000 || cdOff >= (uint32_t)size)
-        return 0;
-    e = calloc(n, sizeof(*e));
-    if (!e)
-        return 0;
-    off = cdOff;
+        goto bad;
+    n = Rd16(tail + eocd + 10);
+    cdLen = Rd32(tail + eocd + 12);
+    cdOff = Rd32(tail + eocd + 16);
+    if (eocd >= 20 && Rd32(tail + eocd - 20) == 0x07064b50)
+    {
+        // ZIP64: the real counts in the ZIP64 end record the locator points at
+        uint8_t z64[56];
+        if (!ReadAt(f, (i64)Rd64(tail + eocd - 20 + 8), z64, sizeof(z64)) || Rd32(z64) != 0x06064b50)
+            goto bad;
+        n = Rd64(z64 + 32);
+        cdLen = Rd64(z64 + 40);
+        cdOff = Rd64(z64 + 48);
+    }
+    if (n == 0 || cdOff + cdLen > (uint64_t)size || cdLen < n * 46 || (cd = malloc((size_t)cdLen)) == NULL
+     || !ReadAt(f, (i64)cdOff, cd, (size_t)cdLen) || (e = calloc((size_t)n, sizeof(*e))) == NULL)
+        goto bad;
+    off = 0;
     for (k = 0; k < n; k++)
     {
-        uint32_t nameLen, extraLen, commentLen, flags, made;
-        if (off + 46 > size || Rd32(z + off) != 0x02014b50)
+        uint32_t nameLen, extraLen, commentLen, flags, made, x;
+        const uint8_t *h = cd + off;
+        if (off + 46 > cdLen || Rd32(h) != 0x02014b50)
             goto bad;
-        made = Rd16(z + off + 4);
-        flags = Rd16(z + off + 8);
-        e[k].method = Rd16(z + off + 10);
-        e[k].crc = Rd32(z + off + 16);
-        e[k].csize = Rd32(z + off + 20);
-        e[k].usize = Rd32(z + off + 24);
-        nameLen = Rd16(z + off + 28);
-        extraLen = Rd16(z + off + 30);
-        commentLen = Rd16(z + off + 32);
-        e[k].mode = (made >> 8) == 3 ? (Rd32(z + off + 38) >> 16) : 0;
-        e[k].local = Rd32(z + off + 42);
-        if (nameLen == 0 || nameLen >= sizeof(e[k].name) || off + 46 + nameLen > size || (flags & 1))
+        made = Rd16(h + 4);
+        flags = Rd16(h + 8);
+        e[k].method = Rd16(h + 10);
+        e[k].crc = Rd32(h + 16);
+        e[k].csize = Rd32(h + 20);
+        e[k].usize = Rd32(h + 24);
+        nameLen = Rd16(h + 28);
+        extraLen = Rd16(h + 30);
+        commentLen = Rd16(h + 32);
+        e[k].mode = (made >> 8) == 3 ? (Rd32(h + 38) >> 16) : 0;
+        e[k].local = Rd32(h + 42);
+        if (nameLen == 0 || nameLen >= sizeof(e[k].name) || off + 46 + nameLen + extraLen > cdLen || (flags & 1))
             goto bad;
-        memcpy(e[k].name, z + off + 46, nameLen);
+        memcpy(e[k].name, h + 46, nameLen);
         e[k].name[nameLen] = 0;
+        // ZIP64's extra field: the 64-bit values of those that read 0xFFFFFFFF, in this order
+        for (x = 0; x + 4 <= extraLen; )
+        {
+            const uint8_t *xf = h + 46 + nameLen + x;
+            uint32_t id = Rd16(xf), len = Rd16(xf + 2), at = 4;
+            if (x + 4 + len > extraLen)
+                break;
+            if (id == 0x0001)
+            {
+                if (e[k].usize == 0xFFFFFFFFu && at + 8 <= len + 4)
+                    e[k].usize = Rd64(xf + at), at += 8;
+                if (e[k].csize == 0xFFFFFFFFu && at + 8 <= len + 4)
+                    e[k].csize = Rd64(xf + at), at += 8;
+                if (e[k].local == 0xFFFFFFFFu && at + 8 <= len + 4)
+                    e[k].local = Rd64(xf + at), at += 8;
+            }
+            x += 4 + len;
+        }
         off += 46 + nameLen + extraLen + commentLen;
     }
-    // the release zip has everything in one top folder: drop it
     for (k = 0; k < n && strip; k++)
     {
         char *slash = strchr(e[k].name, '/');
@@ -916,59 +974,19 @@ static int ReadEntries(const uint8_t *z, long size, struct Entry **out, int *cou
         if (!SafeRelative(e[k].name) || (e[k].method != 0 && e[k].method != 8))
             goto bad;
     }
+    free(tail);
+    free(cd);
     *out = e;
     *count = (int)n;
     return 1;
 bad:
+    free(tail);
+    free(cd);
     free(e);
     return 0;
 }
 
-// Unpacks one entry into memory and checks it. The caller frees it.
-static uint8_t *Unpack(const uint8_t *z, long size, const struct Entry *e)
-{
-    uint32_t nameLen, extraLen;
-    const uint8_t *data;
-    uint8_t *out;
-    long start;
-    if ((long)e->local + 30 > size || Rd32(z + e->local) != 0x04034b50)
-        return NULL;
-    nameLen = Rd16(z + e->local + 26);
-    extraLen = Rd16(z + e->local + 28);
-    start = (long)e->local + 30 + nameLen + extraLen;
-    if (start + (long)e->csize > size)
-        return NULL;
-    data = z + start;
-    if (e->method == 0)
-    {
-        if (e->csize != e->usize)
-            return NULL;
-        out = malloc(e->usize ? e->usize : 1);
-        if (!out)
-            return NULL;
-        memcpy(out, data, e->usize);
-    }
-    else
-    {
-        int len = 0;
-        out = (uint8_t *)stbi_zlib_decode_noheader_malloc((const char *)data, (int)e->csize, &len);
-        if (!out)
-            return NULL;
-        if ((uint32_t)len != e->usize)
-        {
-            free(out);
-            return NULL;
-        }
-    }
-    if (Crc32(out, e->usize) != e->crc)
-    {
-        free(out);
-        return NULL;
-    }
-    return out;
-}
-
-static int WriteFileAll(const char *path, const uint8_t *data, uint32_t n, int exec)
+static int WriteFileAll(const char *path, const uint8_t *data, size_t n, int exec)
 {
     FILE *f;
     MakeParents(path);
@@ -994,14 +1012,92 @@ static int WriteFileAll(const char *path, const uint8_t *data, uint32_t n, int e
     return 1;
 }
 
-static int Install(const uint8_t *z, long size)
+// ZipExtract: one entry unpacked to path and checked (its CRC); a stored file is copied across a megabyte at a time,
+// so it can be any size. 0: it isn't right (nothing is left at path), 2: it couldn't be written.
+static int ZipExtract(FILE *f, i64 size, const struct Entry *e, const char *path, int exec)
+{
+    uint8_t head[30], *data = NULL, *out = NULL;
+    i64 start;
+    if (!ReadAt(f, (i64)e->local, head, 30) || Rd32(head) != 0x04034b50)
+        return 0;
+    start = (i64)e->local + 30 + Rd16(head + 26) + Rd16(head + 28);
+    if (start + (i64)e->csize > size)
+        return 0;
+    if (e->method == 0)
+    {
+        static uint8_t buf[1 << 20];
+        uint64_t left = e->usize;
+        uint32_t crc = 0;
+        FILE *o;
+        if (e->csize != e->usize || USeek(f, start) != 0)
+            return 0;
+        MakeParents(path);
+        if ((o = UOpen(path, "wb")) == NULL)
+            return 2;
+        while (left)
+        {
+            size_t n = left < sizeof(buf) ? (size_t)left : sizeof(buf);
+            if (fread(buf, 1, n, f) != n)
+            {
+                fclose(o);
+                URemove(path);
+                return 0;
+            }
+            crc = Crc32Update(crc, buf, n);
+            if (fwrite(buf, 1, n, o) != n)
+            {
+                fclose(o);
+                URemove(path);
+                return 2;
+            }
+            left -= n;
+        }
+        if (fclose(o) != 0)
+        {
+            URemove(path);
+            return 2;
+        }
+        if (crc != e->crc)
+        {
+            URemove(path);
+            return 0;
+        }
+#ifndef _WIN32
+        chmod(path, exec ? 0755 : 0644);
+#endif
+        return 1;
+    }
+    else
+    {
+        // deflated: unpacked in memory (stb's inflate takes an int: 2 GB a file)
+        int len = 0, ok;
+        if (e->csize > 0x7fffffffu || e->usize > 0x7fffffffu
+         || (data = malloc(e->csize ? (size_t)e->csize : 1)) == NULL || !ReadAt(f, start, data, (size_t)e->csize))
+        {
+            free(data);
+            return 0;
+        }
+        out = (uint8_t *)stbi_zlib_decode_noheader_malloc((const char *)data, (int)e->csize, &len);
+        free(data);
+        if (!out || (uint64_t)len != e->usize || Crc32(out, (size_t)e->usize) != e->crc)
+        {
+            free(out);
+            return 0;
+        }
+        ok = WriteFileAll(path, out, (size_t)e->usize, exec) ? 1 : 2;
+        free(out);
+        return ok;
+    }
+}
+
+static int Install(FILE *z, i64 size)
 {
     struct Entry *e = NULL;
     int n = 0, i, ok = 0, swapped = 0, swaps = 0;
     char *oldNames = NULL;   // each file's .upd_old name, 1024 apiece
     FILE *list;
 
-    if (!ReadEntries(z, size, &e, &n))
+    if (!ZipEntries(z, size, &e, &n))
     {
         Fail("THE DOWNLOAD IS NOT A GOOD ZIP");
         return 0;
@@ -1017,7 +1113,7 @@ static int Install(const uint8_t *z, long size)
     for (i = 0; i < n; i++)
     {
         char path[1024], tmp[1100];
-        uint8_t *data;
+        int got;
         if (!e[i].name[0])
             continue;
         JoinPath(path, sizeof(path), sExeDir, e[i].name);
@@ -1027,20 +1123,18 @@ static int Install(const uint8_t *z, long size)
             e[i].name[0] = 0;
             continue;
         }
-        data = Unpack(z, size, &e[i]);
-        if (!data)
+        snprintf(tmp, sizeof(tmp), "%s.upd_new", path);
+        got = ZipExtract(z, size, &e[i], tmp, (e[i].mode & 0111) || strcmp(e[i].name, U.exe) == 0);
+        if (got == 0)
         {
             Fail("BAD FILE IN THE ZIP: %.16s", e[i].name);
             goto cleanup_new;
         }
-        snprintf(tmp, sizeof(tmp), "%s.upd_new", path);
-        if (!WriteFileAll(tmp, data, e[i].usize, (e[i].mode & 0111) || strcmp(e[i].name, U.exe) == 0))
+        if (got != 1)
         {
-            free(data);
             Fail("COULD NOT WRITE %.20s", e[i].name);
             goto cleanup_new;
         }
-        free(data);
     }
     // 2. swap them in, keeping the old ones until the next start
     for (i = 0; i < n; i++)
@@ -1174,8 +1268,7 @@ static int Worker(void *arg)
 {
     struct Sink k;
     char url[512], path[1024], hex[65];
-    int status;
-    uint8_t *zip;
+    int status, ok;
     FILE *f;
     (void)arg;
 
@@ -1228,7 +1321,7 @@ static int Worker(void *arg)
         SDL_AtomicSet(&U.phase, PH_NONE);
         return 0;
     }
-    Log("version %s is out (this is %s): downloading %s, %ld bytes", U.version, MOEMON_BUILD_VERSION, U.zip, U.total);
+    Log("version %s is out (this is %s): downloading %s, %lld bytes", U.version, MOEMON_BUILD_VERSION, U.zip, U.total);
 
     // the zip, to a file next to the exe
     SDL_AtomicSet(&U.phase, PH_DOWNLOAD);
@@ -1273,45 +1366,54 @@ static int Worker(void *arg)
     {
         URemove(path);
         Fail("THE DOWNLOAD IS DAMAGED (CHECKSUM)");
-        Log("got %ld bytes, sha256 %s; expected %ld, %s", k.len, hex, U.total, U.sha);
+        Log("got %lld bytes, sha256 %s; expected %lld, %s", k.len, hex, U.total, U.sha);
         return 0;
     }
-    zip = malloc(U.total);
+    // read back from the disk a megabyte at a time: check it again, then install from the file (any size)
     f = UOpen(path, "rb");
-    if (!zip || !f || fread(zip, 1, U.total, f) != (size_t)U.total)
+    if (f)
     {
-        if (f)
+        static uint8_t buf[1 << 20];
+        struct Sha256 sh;
+        i64 left = U.total;
+        ShaInit(&sh);
+        while (left > 0)
+        {
+            size_t n = left < (i64)sizeof(buf) ? (size_t)left : sizeof(buf);
+            if (fread(buf, 1, n, f) != n)
+                break;
+            ShaUpdate(&sh, buf, n);
+            left -= (i64)n;
+        }
+        ShaHex(&sh, hex);
+        if (left != 0)
+        {
             fclose(f);
-        free(zip);
-        URemove(path);
-        Fail("COULD NOT READ THE DOWNLOAD");
-        return 0;
-    }
-    fclose(f);
-    // read back from the disk: check it again
-    {
-        struct Sha256 s;
-        ShaInit(&s);
-        ShaUpdate(&s, zip, U.total);
-        ShaHex(&s, hex);
+            URemove(path);
+            Fail("COULD NOT READ THE DOWNLOAD");
+            return 0;
+        }
         if (strcmp(hex, U.sha) != 0)
         {
-            free(zip);
+            fclose(f);
             URemove(path);
             Fail("THE DOWNLOAD IS DAMAGED (DISK)");
             return 0;
         }
     }
+    else
+    {
+        URemove(path);
+        Fail("COULD NOT READ THE DOWNLOAD");
+        return 0;
+    }
 
     SDL_AtomicSet(&U.phase, PH_INSTALL);
-    if (!Install(zip, U.total))
-    {
-        free(zip);
-        URemove(path);
-        return 0;   // Install says why
-    }
-    free(zip);
+    ok = Install(f, U.total);
+    fclose(f);
     URemove(path);
+    if (!ok)
+        return 0;   // Install says why
     Log("installed version %s", U.version);
     SDL_AtomicSet(&U.phase, PH_INSTALLED);
     return 0;
@@ -1419,8 +1521,8 @@ static void DrawScreen(int phase)
     case PH_VERIFY:
     case PH_INSTALL:
     {
-        long got = SDL_AtomicGet(&U.got), total = U.total > 0 ? U.total : 1;
-        int w = (int)((long long)got * 176 / total);
+        i64 got = SDL_AtomicGet(&U.got), total = (U.total >> 10) > 0 ? (U.total >> 10) : 1;   // (KB)
+        int w = (int)(got * 176 / total);
         snprintf(line, sizeof(line), "UPDATING TO VERSION %s", U.version);
         TextCentered(66, line, C_TEXT);
         Fill(32, 80, 207, 87, C_EDGE);
@@ -1433,8 +1535,8 @@ static void DrawScreen(int phase)
             Fill(33, 81, 32 + w, 86, C_BAR);
         if (phase == PH_DOWNLOAD)
         {
-            snprintf(line, sizeof(line), "%ld.%ld / %ld.%ld MB", got / 1048576, (got % 1048576) * 10 / 1048576,
-                     total / 1048576, (total % 1048576) * 10 / 1048576);
+            snprintf(line, sizeof(line), "%lld.%lld / %lld.%lld MB", got / 1024, (got % 1024) * 10 / 1024,
+                     total / 1024, (total % 1024) * 10 / 1024);   // (KB)
             TextCentered(94, line, C_DIM);
             TextCentered(106, "ESC: SKIP FOR NOW", C_DIM);
         }
@@ -1500,14 +1602,14 @@ static void FetchTest(const char *url)
     memset(&k, 0, sizeof(k));
     snprintf(path, sizeof(path), "%s/update_fetchtest.bin", sExeDir);
     k.file = UOpen(path, "wb");
-    k.cap = MAX_ZIP;
+    k.cap = (i64)1 << 62;   // (no limit)
     ShaInit(&k.sha);
     if (!k.file)
         return;
     if (HttpGet(url, &k, &status))
     {
         ShaHex(&k.sha, hex);
-        Log("fetch %s: status %d, %ld bytes, sha256 %s", url, status, k.len, hex);
+        Log("fetch %s: status %d, %lld bytes, sha256 %s", url, status, k.len, hex);
     }
     else
     {
@@ -1703,7 +1805,6 @@ int Updater_Run(int argc, char **argv)
 // They go into stepmania/ next to the exe, with the id in stepmania/songs_version.txt. The zip is unpacked a file
 // at a time from the disk (it's a few hundred MB). MOEMON_UPDATE_URL points at a test server here too.
 
-#define MAX_SONGS_ZIP (2000L * 1024L * 1024L)
 
 enum { SONGS_IDLE, SONGS_CHECKING, SONGS_AVAILABLE, SONGS_UPTODATE, SONGS_NONE, SONGS_DOWNLOADING, SONGS_INSTALLING,
        SONGS_DONE, SONGS_FAILED };
@@ -1715,7 +1816,7 @@ struct Extra
 {
     const char *key, *dir, *idFile, *download;
     SDL_atomic_t state, got, cancel, files, filesDone;
-    long total;
+    i64 total;
     char tag[48], zip[128], sha[65], id[80];
     char error[96];
     SDL_Thread *thread;
@@ -1826,11 +1927,11 @@ static int SongsCheckWorker(void *arg)
         if (sscanf(line, "%15s %47s %127s %31s %79s %79s", key, tag, zip, bytes, sha, id) == 6 && !strcmp(key, x->key))
         {
             char *end;
-            long n = strtol(bytes, &end, 10);
+            i64 n = strtoll(bytes, &end, 10);
             int i, hex = strlen(sha) == 64;
             for (i = 0; hex && i < 64; i++)
                 hex = isxdigit((unsigned char)sha[i]);
-            if (*end || n <= 0 || n > MAX_SONGS_ZIP || !hex || !ValidName(zip) || !ValidName(tag) || !ValidName(id))
+            if (*end || n <= 0 || !hex || !ValidName(zip) || !ValidName(tag) || !ValidName(id))
                 break;
             snprintf(x->tag, sizeof(x->tag), "%s", tag);
             snprintf(x->zip, sizeof(x->zip), "%s", zip);
@@ -1850,68 +1951,12 @@ static int SongsCheckWorker(void *arg)
         return 0;
     }
     InstalledId(x, have, sizeof(have));
-    Log("%s: %s on the release (%ld bytes), %s here", x->key, x->id, x->total, have[0] ? have : "none");
+    Log("%s: %s on the release (%lld bytes), %s here", x->key, x->id, x->total, have[0] ? have : "none");
     SDL_AtomicSet(&x->state, strcmp(have, x->id) == 0 ? SONGS_UPTODATE : SONGS_AVAILABLE);
     return 0;
 }
 
-// The zip's entries, from its central directory at the end of the file
-static int SongsEntries(FILE *f, long size, struct Entry **out, int *count)
-{
-    uint8_t *tail, *cd;
-    long tailLen = size < 65536 + 22 ? size : 65536 + 22, i, eocd = -1;
-    uint32_t cdOff, cdLen;
-    int ok;
-    tail = malloc(tailLen);
-    if (!tail || fseek(f, size - tailLen, SEEK_SET) != 0 || fread(tail, 1, tailLen, f) != (size_t)tailLen)
-    {
-        free(tail);
-        return 0;
-    }
-    for (i = tailLen - 22; i >= 0; i--)
-        if (Rd32(tail + i) == 0x06054b50)
-        {
-            eocd = i;
-            break;
-        }
-    if (eocd < 0)
-    {
-        free(tail);
-        return 0;
-    }
-    cdLen = Rd32(tail + eocd + 12);
-    cdOff = Rd32(tail + eocd + 16);
-    free(tail);
-    if ((long)cdOff + (long)cdLen > size || cdLen > 64 * 1024 * 1024)
-        return 0;
-    // ReadEntries wants a zip: the central directory and its end record, as if they were all of it
-    cd = malloc(cdLen + 22);
-    if (!cd || fseek(f, cdOff, SEEK_SET) != 0 || fread(cd, 1, cdLen, f) != cdLen)
-    {
-        free(cd);
-        return 0;
-    }
-    memset(cd + cdLen, 0, 22);
-    cd[cdLen] = 0x50, cd[cdLen + 1] = 0x4b, cd[cdLen + 2] = 0x05, cd[cdLen + 3] = 0x06;
-    {
-        uint32_t n = 0, off = 0;
-        while (off + 46 <= cdLen && Rd32(cd + off) == 0x02014b50)
-        {
-            off += 46 + Rd16(cd + off + 28) + Rd16(cd + off + 30) + Rd16(cd + off + 32);
-            n++;
-        }
-        cd[cdLen + 10] = (uint8_t)n;
-        cd[cdLen + 11] = (uint8_t)(n >> 8);
-        cd[cdLen + 12] = (uint8_t)cdLen, cd[cdLen + 13] = (uint8_t)(cdLen >> 8);
-        cd[cdLen + 14] = (uint8_t)(cdLen >> 16), cd[cdLen + 15] = (uint8_t)(cdLen >> 24);
-        // (offset 0: the directory is where the "zip" starts)
-    }
-    ok = ReadEntries(cd, (long)cdLen + 22, out, count);
-    free(cd);
-    return ok;
-}
-
-static int SongsInstall(struct Extra *x, const char *zipPath, long size)
+static int SongsInstall(struct Extra *x, const char *zipPath, i64 size)
 {
     char root[1100];
     FILE *f = UOpen(zipPath, "rb");
@@ -1922,7 +1967,7 @@ static int SongsInstall(struct Extra *x, const char *zipPath, long size)
         ExtraFail(x, "COULD NOT READ THE DOWNLOAD");
         return 0;
     }
-    if (!SongsEntries(f, size, &e, &n))
+    if (!ZipEntries(f, size, &e, &n))
     {
         fclose(f);
         ExtraFail(x, "THE DOWNLOAD IS NOT A GOOD ZIP");
@@ -1931,57 +1976,24 @@ static int SongsInstall(struct Extra *x, const char *zipPath, long size)
     SDL_AtomicSet(&x->files, n);
     for (i = 0; i < n; i++)
     {
-        uint8_t head[30], *data = NULL, *out;
         char path[1400], tmp[1500];
-        long start;
+        int got;
         SDL_AtomicSet(&x->filesDone, i);
         if (!e[i].name[0])
             continue;
-        if (fseek(f, e[i].local, SEEK_SET) != 0 || fread(head, 1, 30, f) != 30 || Rd32(head) != 0x04034b50)
-            goto bad;
-        start = (long)e[i].local + 30 + Rd16(head + 26) + Rd16(head + 28);
-        if (start + (long)e[i].csize > size || e[i].usize > 256u * 1024u * 1024u)
-            goto bad;
-        data = malloc(e[i].csize ? e[i].csize : 1);
-        if (!data || fseek(f, start, SEEK_SET) != 0 || fread(data, 1, e[i].csize, f) != e[i].csize)
-            goto bad;
-        if (e[i].method == 0)
-            out = data;
-        else
-        {
-            int len = 0;
-            out = (uint8_t *)stbi_zlib_decode_noheader_malloc((const char *)data, (int)e[i].csize, &len);
-            free(data);
-            data = NULL;
-            if (!out || (uint32_t)len != e[i].usize)
-            {
-                free(out);
-                goto bad;
-            }
-        }
-        if ((e[i].method == 0 && e[i].csize != e[i].usize) || Crc32(out, e[i].usize) != e[i].crc)
-        {
-            free(out);
-            goto bad;
-        }
         snprintf(path, sizeof(path), "%s/%s", ExtraRoot(x, root, sizeof(root)), e[i].name);
         snprintf(tmp, sizeof(tmp), "%s.part", path);
-        if (!WriteFileAll(tmp, out, e[i].usize, 0) || URename(tmp, path) != 0)
+        got = ZipExtract(f, size, &e[i], tmp, 0);
+        if (got != 1 || URename(tmp, path) != 0)
         {
-            free(out);
             free(e);
             fclose(f);
-            ExtraFail(x, "COULD NOT WRITE %.20s", e[i].name);
+            if (got == 0)
+                ExtraFail(x, "BAD FILE IN THE ZIP: %.16s", e[i].name);
+            else
+                ExtraFail(x, "COULD NOT WRITE %.20s", e[i].name);
             return 0;
         }
-        free(out);
-        continue;
-    bad:
-        free(data);
-        free(e);
-        fclose(f);
-        ExtraFail(x, "BAD FILE IN THE ZIP: %.16s", e[i].name);
-        return 0;
     }
     free(e);
     fclose(f);
@@ -2072,7 +2084,6 @@ static int SongsDownloadWorker(void *arg)
 // the pack from its next map (src/maker/maker_overrides.c; a PC with the editor's own working copy reads that instead).
 
 #define MAKER_PACK_DIR "MoemonMakerPack"
-#define MAX_MAKER_PACK (256L * 1024L * 1024L)
 static SDL_atomic_t sMakerPackNew;   // a new pack installed: the game reads it again (Updater_TakeMakerPackNew)
 static SDL_atomic_t sMakerPackCancel;
 
@@ -2080,7 +2091,7 @@ static int MakerPackWorker(void *arg)
 {
     struct Sink k;
     char url[600], tag[48], zip[128], bytes[32], sha[80], id[80], have[96] = "", path[1200], dir[1100], hex[65];
-    long n;
+    i64 n;
     int status, i;
     FILE *f;
     struct Entry *e = NULL;
@@ -2109,7 +2120,7 @@ static int MakerPackWorker(void *arg)
     }
     k.mem[k.len] = 0;
     if (sscanf(k.mem, "makerpack %47s %127s %31s %79s %79s", tag, zip, bytes, sha, id) != 5 || !ValidName(tag)
-     || !ValidName(zip) || !ValidName(id) || strlen(sha) != 64 || (n = strtol(bytes, NULL, 10)) <= 0 || n > MAX_MAKER_PACK)
+     || !ValidName(zip) || !ValidName(id) || strlen(sha) != 64 || (n = strtoll(bytes, NULL, 10)) <= 0)
     {
         Log("maker pack: maker-pack.txt isn't right");
         free(k.mem);
@@ -2160,7 +2171,7 @@ static int MakerPackWorker(void *arg)
         return 0;
     }
     // installed: its files replace the pack's (what isn't in it any more goes)
-    if ((f = UOpen(path, "rb")) == NULL || !SongsEntries(f, n, &e, &count))
+    if ((f = UOpen(path, "rb")) == NULL || !ZipEntries(f, n, &e, &count))
     {
         if (f)
             fclose(f);
@@ -2192,43 +2203,12 @@ static int MakerPackWorker(void *arg)
     }
     for (i = 0; i < count; i++)
     {
-        uint8_t head[30], *data = NULL, *out;
         char dest[1400];
-        long start;
         if (!e[i].name[0] || strstr(e[i].name, ".."))
             continue;
-        if (fseek(f, e[i].local, SEEK_SET) != 0 || fread(head, 1, 30, f) != 30 || Rd32(head) != 0x04034b50)
-            break;
-        start = (long)e[i].local + 30 + Rd16(head + 26) + Rd16(head + 28);
-        if (start + (long)e[i].csize > n || e[i].usize > 64u * 1024u * 1024u)
-            break;
-        data = malloc(e[i].csize ? e[i].csize : 1);
-        if (!data || fseek(f, start, SEEK_SET) != 0 || fread(data, 1, e[i].csize, f) != e[i].csize)
-        {
-            free(data);
-            break;
-        }
-        if (e[i].method == 0)
-            out = data;
-        else
-        {
-            int len = 0;
-            out = (uint8_t *)stbi_zlib_decode_noheader_malloc((const char *)data, (int)e[i].csize, &len);
-            free(data);
-            if (!out || (uint32_t)len != e[i].usize)
-            {
-                free(out);
-                break;
-            }
-        }
-        if (Crc32(out, e[i].usize) != e[i].crc)
-        {
-            free(out);
-            break;
-        }
         snprintf(dest, sizeof(dest), "%s/%s", dir, e[i].name);
-        WriteFileAll(dest, out, e[i].usize, 0);
-        free(out);
+        if (ZipExtract(f, n, &e[i], dest, 0) != 1)
+            break;
     }
     fclose(f);
     free(e);
@@ -2299,7 +2279,7 @@ static void ExtraDownload(struct Extra *x)
         ExtraFail(x, "COULD NOT START THE DOWNLOAD");
 }
 
-// SONGS_*; *done / *total: bytes downloaded, or files unpacked while installing; why it failed
+// SONGS_*; *done / *total: KB downloaded, or files unpacked while installing; why it failed
 static int ExtraState(struct Extra *x, long *done, long *total, const char **error)
 {
     int st = SDL_AtomicGet(&x->state);
@@ -2310,8 +2290,8 @@ static int ExtraState(struct Extra *x, long *done, long *total, const char **err
     }
     else
     {
-        *done = SDL_AtomicGet(&x->got);
-        *total = x->total;
+        *done = SDL_AtomicGet(&x->got);          // (KB)
+        *total = (long)(x->total >> 10);
     }
     *error = x->error;
     return st;
