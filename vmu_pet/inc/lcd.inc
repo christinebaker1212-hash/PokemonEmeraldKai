@@ -3,18 +3,29 @@
 ;; pixel. Writes go through @R2 (address $100 + r2).
 ;; Needs (RAM bank 1): lcd_t0 .. lcd_t5 (six bytes of scratch), and font_3x5 (gen_font.py).
 
-;; lcd_clear: every pixel off
+;; lcd_clear: every pixel off. Only the bytes that exist: in each 16 the last 4 (low digit C-F) aren't there (Sega's
+;; simulator manual, "XRAM> ..."): writing them on a real VMU breaks the screen up.
 lcd_clear:
   push acc
   mov #0, xbnk
 .bank:
   mov #$80, 2
 .byte:
+  ld 2
+  and #$0f
+  sub #$0c
+  bp psw, 7, .real          ; low digit 0-B
+  ld 2
+  add #4                    ; skip C-F
+  st 2
+  br .next
+.real:
   mov #0, acc
   st @R2
   inc 2
+.next:
   ld 2
-  bne #$fc, .byte
+  bne #$00, .byte           ; to $FF (+1 wraps to 0)
   ld xbnk
   bnz .done
   mov #1, xbnk

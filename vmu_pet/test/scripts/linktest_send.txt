@@ -20,10 +20,14 @@ press a U 0.6
 run 0.6
 press a U 0.6
 run 0.6
-press b D 0.6
+press b U 0.6
+run 0.6
+press b U 0.6
+run 0.6
+press b U 0.6
 run 1
-expect a 4 SPEED 4
-expect b 4 SPEED 4
+expect a 4 SPEED 4 XT
+expect b 4 SPEED 4 XT
 press a A 0.3
 run 6
 expect a 3 SENT OK!
@@ -34,6 +38,29 @@ press b A 0.3
 run 6
 expect b 3 SENT OK!
 expect a 2 GOT  001
+# speed 8: the link on the RC clock
+press a D 0.6
+run 0.6
+press b D 0.6
+run 0.6
+press a D 0.6
+run 0.6
+press b D 0.6
+run 0.6
+press a D 0.6
+run 0.6
+press b D 0.6
+run 0.6
+press a D 0.6
+run 0.6
+press b D 0.6
+run 1
+expect a 4 SPEED 8 RC
+expect b 4 SPEED 8 RC
+press a A 0.3
+run 4
+expect a 3 SENT OK!
+expect b 2 GOT  003
 # one raw byte (B): the other side shows it
 press a B 0.3
 run 2

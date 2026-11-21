@@ -85,7 +85,7 @@ loop:
   mov #>s_cable, trh
   call status
 .con:
-  call clk_slow             ; listening on the crystal (Sega: serial transfers on the crystal)
+  call clk_link             ; listening on the link's clock (speeds 1-4 the crystal, Sega's advice; 5-8 RC)
   call sio_poll
   bnz .noin
   ld b
@@ -161,7 +161,7 @@ keys:
   inc speed_idx
 .clamp:
   ld speed_idx
-  and #3
+  and #7
   st speed_idx
   call speed_set
   call draw_speed
@@ -184,14 +184,14 @@ speed_set:
   ret
 
 speeds:
-  .byte $dd, $f0, $fa, $fe
+  .byte $dd, $f0, $fa, $fe, $dd, $f0, $fa, $fe   ; 1-4 on the crystal, 5-8 on RC (much faster: the VM2 may need it)
 
 ;; send_packet: SYNC, length, 32 bytes, checksum, each echoed; then the other side's ACK
 send_packet:
   mov #<s_sending, trl
   mov #>s_sending, trh
   call status
-  call clk_slow
+  call clk_link
   call sio_flush
   mov #0, idx               ; the packet: boot count, sent count, then a pattern
   mov #0, chk
@@ -285,7 +285,7 @@ send_packet:
 
 ;; recv_packet: the SYNC has arrived (in b)
 recv_packet:
-  call clk_slow
+  call clk_link
   ld b
   call sio_send             ; echo
   call sio_recv
@@ -354,7 +354,7 @@ raw_send:
   ld raw_sent
   add #$a0
   st tmp
-  call clk_slow
+  call clk_link
   ld tmp
   call sio_send
   call sio_sent
@@ -531,10 +531,10 @@ save_write:
   pop acc
   ret
 
-;; clk_fast: the internal RC clock (1/12) for drawing; clk_slow: the 32 kHz crystal for idling and the serial link.
-;; Sega's rule with the screen on (hardware manual VMD-156 / VCCR6): going to the crystal, shut the CPU out of the
-;; screen's memory first (VCCR bit 6 = 1); going back to RC, let it in again (bit 6 = 0). The screen's memory is only
-;; read or written on RC. (The emulator and the VM2 don't mind; a real VMU's screen breaks up.)
+;; clk_fast: the internal RC clock (1/12) for drawing; clk_slow: the 32 kHz crystal for idling (and the serial link
+;; at speeds 1-4). Sega's rule with the screen on (hardware manual VMD-156 / VCCR6): going to the crystal, shut the CPU
+;; out of the screen's memory first (VCCR bit 6 = 1); going back to RC, let it in again (bit 6 = 0). The screen's
+;; memory is only read or written on RC.
 clk_fast:
   clr1 vccr, 6
   mov #OSC_RC, ocr
@@ -544,6 +544,15 @@ clk_slow:
   set1 vccr, 6
   mov #OSC_XT, ocr
   ret
+
+;; clk_link: the clock the serial link runs on at this speed (1-4 the crystal, 5-8 RC)
+clk_link:
+  push acc
+  ld speed_idx
+  sub #4
+  pop acc
+  bp psw, 7, clk_slow
+  jmp clk_fast
 
 batt_off:
   push psw
@@ -604,6 +613,17 @@ draw_speed:
   ld speed_idx
   add #49
   call lcd_char
+  inc c
+  inc c
+  mov #<s_xt, trl
+  mov #>s_xt, trh
+  ld speed_idx
+  sub #4
+  bp psw, 7, .xt
+  mov #<s_rc, trl
+  mov #>s_rc, trh
+.xt:
+  call lcd_text
   ret
 
 int_base_timer:
@@ -615,7 +635,7 @@ int_base_timer:
   ret
 
 s_title:
-  .string 12 "LINK TEST 2"
+  .string 12 "LINK TEST 3"
 s_sent:
   .string 6 "SENT "
 s_got:
@@ -652,6 +672,10 @@ s_baddata:
   .string 9 "BAD DATA"
 s_lost:
   .string 8 "LOST IT"
+s_xt:
+  .string 3 "XT"
+s_rc:
+  .string 3 "RC"
 s_speed:
   .string 7 "SPEED "
 

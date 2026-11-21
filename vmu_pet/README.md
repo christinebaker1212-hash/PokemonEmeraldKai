@@ -46,5 +46,11 @@ What to report: which speeds said OK both ways; the exact words on both screens 
 `ECHO 4D>-- ` with `AT BYTE n` under it, `NO ACK`, `LOST IT`, `BAD DATA`); whether B's raw byte shows up on the other
 side (and the `BACK` value); and what step 4 printed.
 
-Hardware notes (learned on the user's VMU, 2026-11-21): the screen broke up at the bottom on a real VMU (not on the
+Speeds (LINK TEST 3): 1-4 run the link on the 32 kHz crystal (Sega's advice; XT on the screen), 5-8 on the RC clock
+(about 25 times faster; RC). Both units at the same speed.
+
+Hardware notes (learned on the user's VMU, 2026-11-21): LINK TEST 2 on a VMU and a VM2: bytes from the VM2 reached
+the VMU whole (the VM2's BACK showed its previous byte: the VMU's port handing it back), bytes from the VMU reached the
+VM2 garbled and with extra bytes (crystal speed 1); the RC speeds are for that. The screen still broke up: the clear
+wrote XRAM's unimplemented bytes (low digit C-F of every 16; Sega's simulator manual), fixed in LINK TEST 3. the screen broke up at the bottom on a real VMU (not on the
 VM2 or the emulator) because LINK TEST 1 switched clocks without Sega's VCCR bit 6 rule (clk_fast / clk_slow).
