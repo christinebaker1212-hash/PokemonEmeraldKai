@@ -41,13 +41,21 @@ Started 2026-11-20. Nothing is built yet; graphics come from the user.
   VMU icon can be the pet's own Normal portrait (proposed: the program rewrites its own file icon).
 - **KANTO is the first edition.**
 - **One week of daily care reaches level 50**, faster with the currency below.
-- **No steps** (2026-11-21: the VMU has no step sensor; a pedometer was ruled out). **The currency is time the program
-  runs on the VMU**: the pet earns while it's with him and running, even with the screen off; time with the program
-  closed earns nothing. Spent on faster levels, better IVs, turning it shiny, rare items (MASTER BALL, ASTRAL BALL)
-  that come into Kai with it.
-- Running for hours means the program idles like the VMU's own clock: the slow 32 kHz clock, HALT between the base
-  timer's ticks, the screen off until a button. It saves to flash on care, on leaving and about hourly (flash wears
-  with writes), so pulled batteries lose at most an hour. To measure on hardware.
+- **No steps** (2026-11-21: the VMU has no step sensor; a pedometer was ruled out), and not time the program runs
+  either: **the currency comes from a Cookie Clicker-like game inside** (the user's idea; the rest are Claude's
+  recommendations, which the user took whole, 2026-11-21):
+  - **The pet is the cookie**: A taps it (it hops, reacts), each tap earns a little; upgrades raise a tap's worth.
+  - **Helpers** (BERRY trees, a DAY-CARE helper...) earn over time **with the program closed too**, worked out from the
+    clock on opening, **up to 12 hours' worth** since the last visit. The program never needs to run all day (batteries).
+  - Good care makes the helpers earn more. Mashing never beats upgrades (the VMU's buttons are small).
+  - The currency is **SPARKS**.
+  - **Prices**: a workday's earnings buy a level or an IV raise, a week's the shiny, two weeks' a MASTER BALL, a month's
+    an ASTRAL BALL; items come into Kai's BAG with the MOéMON.
+  - **Per pet**: helpers and upgrades reset with each new Egg; each MOéMON sent to the VM2 leaves a small permanent
+    bonus (a clicker's prestige).
+- **Every Egg is equally likely** among the edition's hatchable species.
+- **A day starts at 4 AM** (care late at night counts for that day).
+- **The link test comes first** (VMU-to-VM2, minigame to minigame), then the screen mock-ups.
 
 ## Sprites (determined 2026-11-21)
 
