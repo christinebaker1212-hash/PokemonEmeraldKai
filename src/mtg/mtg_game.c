@@ -2074,7 +2074,7 @@ static void BuildDiscard(MtgDuel *d)
     memset(q, 0, sizeof(*q));
     q->kind = MTG_Q_DISCARD;
     q->player = d->active;
-    q->discard = (uint8_t)(HandCount(d, d->active) - MTG_HAND_SIZE);
+    q->discard = (uint8_t)(HandCount(d, d->active) - Mtg_MaxHandSize(d, d->active));
     for (i = 0; i < d->objCount && q->candidateCount < MTG_MAX_COMBAT; i++)
         if (d->objs[i].zone == MTG_ZONE_HAND && d->objs[i].owner == d->active)
             q->candidates[q->candidateCount++] = (uint16_t)i;
@@ -2254,7 +2254,7 @@ static int StartStep(MtgDuel *d)
         PruneEffects(d, MTG_EFF_END_COMBAT, 0);
         break;
     case MTG_STEP_CLEANUP:
-        if (HandCount(d, d->active) > MTG_HAND_SIZE) {
+        if (HandCount(d, d->active) > Mtg_MaxHandSize(d, d->active)) {
             BuildDiscard(d);
             d->stepStarted = 2;
             return 1;
@@ -2506,16 +2506,21 @@ int Mtg_Answer(MtgDuel *d, const MtgAnswer *a)
             if (k >= q->attackerCount || !Mtg_CanBlock(d, b, q->attackers[k]))
                 return 0;
         }
-        fixedB = *a;   // (menace: a lone blocker of one doesn't block)
-        for (i = 0; i < q->attackerCount; i++) {
-            int n = 0, k;
-            if (!(Mtg_Keywords(d, q->attackers[i]) & MTG_KW_BIT(MTG_KW_MENACE)))
-                continue;
+        fixedB = *a;   // (menace: a lone blocker of one doesn't block; MinMaxBlocker: too few don't, past the most the
+        for (i = 0; i < q->attackerCount; i++) {   // first ones only)
+            int n = 0, k, min, max;
+            Mtg_BlockerLimits(d, q->attackers[i], &min, &max);
+            if ((Mtg_Keywords(d, q->attackers[i]) & MTG_KW_BIT(MTG_KW_MENACE)) && min < 2)
+                min = 2;
             for (k = 0; k < q->candidateCount; k++)
                 n += fixedB.block[k] == i;
-            if (n == 1)
+            if (n && n < min)
                 for (k = 0; k < q->candidateCount; k++)
                     if (fixedB.block[k] == i)
+                        fixedB.block[k] = -1;
+            if (max && n > max)
+                for (k = 0, n = 0; k < q->candidateCount; k++)
+                    if (fixedB.block[k] == i && ++n > max)
                         fixedB.block[k] = -1;
         }
         a = &fixedB;

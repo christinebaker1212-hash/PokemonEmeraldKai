@@ -930,6 +930,13 @@
 "number": "124",
 "set": "ons"
 },
+"Anvil of Bogardan": {
+"artist": "Roger Raupp",
+"file": "vis_141",
+"frame": "1997",
+"number": "141",
+"set": "vis"
+},
 "Apathy": {
 "artist": "Phil Foglio",
 "file": "wth_33",
@@ -3793,6 +3800,13 @@
 "number": "11",
 "set": "por"
 },
+"Charging Rhino": {
+"artist": "Una Fricker",
+"file": "por_161",
+"frame": "1997",
+"number": "161",
+"set": "por"
+},
 "Charging Slateback": {
 "artist": "Mark Tedin",
 "file": "ons_194",
@@ -4954,6 +4968,13 @@
 "frame": "1997",
 "number": "126",
 "set": "ody"
+},
+"Cursed Rack": {
+"artist": "Richard Thomas",
+"file": "4ed_312",
+"frame": "1993",
+"number": "312",
+"set": "4ed"
 },
 "Cursed Totem": {
 "artist": "D. Alexander Gregory",
@@ -7461,6 +7482,13 @@
 "number": "184",
 "set": "usg"
 },
+"Familiar Ground": {
+"artist": "Jeff Miracola",
+"file": "wth_127",
+"frame": "1997",
+"number": "127",
+"set": "wth"
+},
 "Fanatical Devotion": {
 "artist": "Massimiliano Frezzato",
 "file": "nem_8",
@@ -9462,6 +9490,13 @@
 "frame": "1997",
 "number": "91",
 "set": "jud"
+},
+"Gorilla Berserkers": {
+"artist": "John Matson",
+"file": "all_93a",
+"frame": "1993",
+"number": "93a",
+"set": "all"
 },
 "Gorilla Chieftain": {
 "artist": "Quinton Hoover",
@@ -15252,6 +15287,13 @@
 "number": "58",
 "set": "ulg"
 },
+"Phyrexian Colossus": {
+"artist": "Mark Tedin",
+"file": "usg_305",
+"frame": "1997",
+"number": "305",
+"set": "usg"
+},
 "Phyrexian Debaser": {
 "artist": "Mark Tedin",
 "file": "ulg_59",
@@ -20131,6 +20173,13 @@
 "number": "271",
 "set": "ody"
 },
+"Spellbook": {
+"artist": "Ciruelo",
+"file": "exo_138",
+"frame": "1997",
+"number": "138",
+"set": "exo"
+},
 "Spellgorger Barbarian": {
 "artist": "Mark Romanoski",
 "file": "jud_100",
@@ -20557,6 +20606,13 @@
 "frame": "1997",
 "number": "327",
 "set": "tmp"
+},
+"Stalking Tiger": {
+"artist": "Terese Nielsen",
+"file": "mir_243",
+"frame": "1997",
+"number": "243",
+"set": "mir"
 },
 "Stamina": {
 "artist": "Paolo Parente",
@@ -21796,6 +21852,27 @@
 "frame": "1997",
 "number": "44",
 "set": "ulg"
+},
+"Thought Devourer": {
+"artist": "Jim Nelson",
+"file": "ody_105",
+"frame": "1997",
+"number": "105",
+"set": "ody"
+},
+"Thought Eater": {
+"artist": "Luca Zontini",
+"file": "ody_106",
+"frame": "1997",
+"number": "106",
+"set": "ody"
+},
+"Thought Nibbler": {
+"artist": "Arnie Swekel",
+"file": "ody_107",
+"frame": "1997",
+"number": "107",
+"set": "ody"
 },
 "Thoughtleech": {
 "artist": "Mark Tedin",

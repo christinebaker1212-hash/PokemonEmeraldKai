@@ -3714,6 +3714,40 @@ static void TestUntapLimits(void)
     sD.objs[orb].tapped = 1;   // (Winter Orb tapped: in Forge's text it still works; Static Orb stops)
 }
 
+static void TestHandAndBlockers(void)
+{
+    int rhino, b1, b2, i;
+    printf("maximum hand size, blocker limits\n");
+    Table();   // Thought Nibbler: its controller's maximum hand size is 5
+    Put(0, "Thought Nibbler", MTG_ZONE_BATTLEFIELD);
+    CHECK(Mtg_MaxHandSize(&sD, 0) == 5 && Mtg_MaxHandSize(&sD, 1) == 7, "5 for its controller, 7 for the other");
+    Put(0, "Spellbook", MTG_ZONE_BATTLEFIELD);
+    CHECK(Mtg_MaxHandSize(&sD, 0) > 100, "Spellbook: no maximum");
+    for (i = 0; i < 9; i++)
+        Put(0, "Island", MTG_ZONE_HAND);
+    GoToTurn(1, MTG_STEP_UPKEEP);
+    CHECK(HandCount(0) >= 9, "nothing discarded at the cleanup (%d)", HandCount(0));
+
+    Table();   // Charging Rhino: can't be blocked by more than one creature (the second blocker doesn't block)
+    rhino = Put(0, "Charging Rhino", MTG_ZONE_BATTLEFIELD);
+    b1 = Put(1, "Grizzly Bears", MTG_ZONE_BATTLEFIELD);
+    b2 = Put(1, "Grizzly Bears", MTG_ZONE_BATTLEFIELD);
+    Attack(1);
+    {
+        const MtgQuery *q;
+        MtgAnswer a;
+        while (Mtg_Query(&sD)->kind == MTG_Q_PRIORITY && sD.step == MTG_STEP_COMBAT_ATTACKERS)
+            Pass();
+        q = Mtg_Query(&sD);
+        memset(&a, 0, sizeof(a));
+        memset(a.block, -1, sizeof(a.block));
+        for (i = 0; i < q->candidateCount; i++)
+            a.block[i] = 0;
+        Answer(&a);
+    }
+    CHECK((sD.objs[b1].blocking == rhino) + (sD.objs[b2].blocking == rhino) == 1, "only one blocks the rhino");
+}
+
 static void TestDuels(void)
 {
     static MtgDeck red, green;
@@ -4013,6 +4047,7 @@ int main(int argc, char **argv)
     TestTypeLayer();
     TestNewStaticModes();
     TestUntapLimits();
+    TestHandAndBlockers();
     TestCantCounter();
     TestTrigModes();
     TestBecomesTarget();

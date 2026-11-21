@@ -8749,3 +8749,10 @@ res/moves/chatter/anim.s).
   forCost 10, "Untap" on the table; MtgObj.untapPick bits, MtgDuel.untapStage / untapLimit / untapTight); the rest of
   that type stay tapped, everything else untaps. The AI keeps its best.
 - Playable: 3578 -> 3582. Tests: test_rules.c TestUntapLimits.
+
+## MAGIC: maximum hand size, blocker limits (2026-11-21)
+- SetMaxHandSize$ (N / Unlimited) and RaiseMaxHandSize$ for Affected$ You / Player / Opponent / Player.Chosen
+  (MTG_STATIC_HAND_SIZE; Mtg_MaxHandSize: the latest set, then every raise): the cleanup discards to it.
+- MinMaxBlocker (Min$ / Max$: MTG_STATIC_BLOCKERS, Mtg_BlockerLimits): too few blockers of one don't block (as menace),
+  past the most only the first do.
+- Playable: 3582 -> 3593. Tests: test_rules.c TestHandAndBlockers.

@@ -229,7 +229,9 @@ enum { MTG_STATIC_CONTINUOUS, MTG_STATIC_CANT_BLOCK, MTG_STATIC_CANT_ATTACK, MTG
        // may block ValidAttacker$); and the global ones (no card: global): CantPreventDamage, IgnoreLandWalk, UnspentMana
        MTG_STATIC_NO_COMBAT_DAMAGE, MTG_STATIC_ATTACK_DEFENDER, MTG_STATIC_ATTACK_HASTE, MTG_STATIC_BLOCK_SHADOW,
        MTG_STATIC_CANT_PREVENT, MTG_STATIC_IGNORE_LANDWALK, MTG_STATIC_UNSPENT_MANA,
-       MTG_STATIC_UNTAP_LIMIT };   // AddKeyword$ UntapAdjust:TYPE:N on Affected$ Player / You: untap no more than N TYPE   // (CantAttackUnless: its mana for each creature it affects that attacks)   // (PREVENT_DAMAGE: Event$ DamageDone | Prevent$ True, another R: line)   // (two replacement effects, R: lines, kept here: they test alike)
+       MTG_STATIC_UNTAP_LIMIT,
+       MTG_STATIC_HAND_SIZE,
+       MTG_STATIC_BLOCKERS };   // MinMaxBlocker: ValidCard$ can't be blocked by fewer than Min$ / more than Max$   // SetMaxHandSize$ N / Unlimited, RaiseMaxHandSize$ N for Affected$ You / Player / ...   // AddKeyword$ UntapAdjust:TYPE:N on Affected$ Player / You: untap no more than N TYPE   // (CantAttackUnless: its mana for each creature it affects that attacks)   // (PREVENT_DAMAGE: Event$ DamageDone | Prevent$ True, another R: line)   // (two replacement effects, R: lines, kept here: they test alike)
 typedef struct {
     uint16_t card;
     uint8_t mode;                   // MTG_STATIC_*
@@ -276,7 +278,10 @@ typedef struct {
     uint8_t addTypes, removeLand, removeCreature, setColors;
     uint16_t addSub[2];
     uint8_t global;                 // a mode about no card (CantPreventDamage...): in force while it is (IsPresent$...)
-    uint8_t untapN;                 // UntapLimit: N (affected: the TYPE; taxYou: only its controller's untap step)
+    uint8_t untapN;
+    uint8_t blockMin, blockMax;     // MinMaxBlocker (0: none)
+    int8_t handSet, handRaise;      // HandSize: the maximum set (-1 none, 100 unlimited), raised by; whose: activator
+                                    // (0 every player, 1 its controller, 2 the opponent, 3 its chosen player)                 // UntapLimit: N (affected: the TYPE; taxYou: only its controller's untap step)
     uint8_t protExceptHostPad;         // ...:Card.CardUID_HostCardUID: not from the source itself (an Aura stays on)
     uint8_t taxYou;                 // AttackTax's Target$ You: only for attacks on its controller
     const char *taxX;               // ... its Cost$ an SVar counted now (else costGeneric)
@@ -308,7 +313,9 @@ int Mtg_ObjLostText(const MtgDuel *d, int obj);   // a land made a basic type by
 int Mtg_StaticForbids(const MtgDuel *d, int mode, int obj, int other);
 int Mtg_AttackTax(const MtgDuel *d, int attacker);
 // the untap step's limits for PLAYER now (Winter Orb...): up to max, each a TYPE spec and N; returns how many
-int Mtg_UntapLimits(const MtgDuel *d, int player, const char **spec, int *n, int max);   // the generic mana its attacking costs (Propaganda...)
+int Mtg_UntapLimits(const MtgDuel *d, int player, const char **spec, int *n, int max);
+int Mtg_MaxHandSize(const MtgDuel *d, int player);
+void Mtg_BlockerLimits(const MtgDuel *d, int attacker, int *min, int *max);   // MinMaxBlocker (0: no limit)   // 7, or as statics say (a big number: no maximum)   // the generic mana its attacking costs (Propaganda...)
 // a permanent's abilities now: its card's, then those statics give it (AddAbility$); returns how many (at most max)
 int Mtg_ObjAbilities(const MtgDuel *d, int obj, uint16_t *out, int max);
 int Mtg_ObjTriggers(const MtgDuel *d, int obj, uint16_t *out, int max);

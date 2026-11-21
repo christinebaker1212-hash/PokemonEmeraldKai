@@ -273,7 +273,8 @@ static void ParseOne(MtgCardDef *c, int cardId, char *text)
                                          "Activator", "Type", "Amount", "Cost", "Condition", "Secondary", "UnlessDefender", "Target",
                                          "ValidCreature", "ValidTarget", "ValidSA", "ValidSource", "Caster", "AddAbility", "AddTrigger", "AddSVar", "GainControl",
                                          "CheckSVar", "SVarCompare", "AddHiddenKeyword", "AddType", "SetColor",
-                                         "RemoveLandTypes", "RemoveCreatureTypes"};
+                                         "RemoveLandTypes", "RemoveCreatureTypes", "Min", "Max", "SetMaxHandSize",
+                                         "RaiseMaxHandSize"};
     MtgStatic st;
     int first, count, i, v;
     const char *s;
@@ -306,7 +307,26 @@ static void ParseOne(MtgCardDef *c, int cardId, char *text)
             : strcmp(s, "CanBlockIfShadow") == 0 ? MTG_STATIC_BLOCK_SHADOW
             : strcmp(s, "CantPreventDamage") == 0 ? MTG_STATIC_CANT_PREVENT
             : strcmp(s, "IgnoreLandWalk") == 0 ? MTG_STATIC_IGNORE_LANDWALK
-            : strcmp(s, "UnspentMana") == 0 ? MTG_STATIC_UNSPENT_MANA : 0xFF;
+            : strcmp(s, "UnspentMana") == 0 ? MTG_STATIC_UNSPENT_MANA
+            : strcmp(s, "MinMaxBlocker") == 0 ? MTG_STATIC_BLOCKERS : 0xFF;
+    if (st.mode == MTG_STATIC_BLOCKERS) {   // "can't be blocked by more than one creature" / "except by three or more"
+        const char *mn = ParamOf(first, count, "Min"), *mx = ParamOf(first, count, "Max");
+        st.affected = ParamOf(first, count, "ValidCard");
+        for (i = 0; i < count; i++) {
+            const char *key = gMtgParams[first + i].key;
+            if (strcmp(key, "Mode") && strcmp(key, "Description") && strcmp(key, "ValidCard") && strcmp(key, "Min")
+                && strcmp(key, "Max"))
+                goto unknown;
+        }
+        if (!st.affected || !Mtg_ValidSpecKnown(st.affected) || (!mn && !mx)
+            || (mn && !(Integer(mn, &v) && v > 0 && v < 10 && (st.blockMin = (uint8_t)v, 1)))
+            || (mx && !(Integer(mx, &v) && v > 0 && v < 10 && (st.blockMax = (uint8_t)v, 1))))
+            goto unknown;
+        st.presentNum = 1;
+        if (!AddStatic(c, &st))
+            goto unknown;
+        return;
+    }
     if (st.mode == MTG_STATIC_CONTINUOUS && (s = ParamOf(first, count, "AddKeyword")) && strncmp(s, "UntapAdjust:", 12) == 0) {
         const char *aff = ParamOf(first, count, "Affected"), *colon = strchr(s + 12, ':');
         char spec[24];
@@ -328,6 +348,38 @@ static void ParseOne(MtgCardDef *c, int cardId, char *text)
         strcpy((char *)st.affected, spec);
         st.untapN = (uint8_t)v;
         st.taxYou = aff[0] == 'Y';
+        st.presentNum = 1;
+        if (!AddStatic(c, &st))
+            goto unknown;
+        return;
+    }
+    if (st.mode == MTG_STATIC_CONTINUOUS && (ParamOf(first, count, "SetMaxHandSize") || ParamOf(first, count, "RaiseMaxHandSize"))) {
+        const char *aff = ParamOf(first, count, "Affected"), *set = ParamOf(first, count, "SetMaxHandSize");
+        const char *raise = ParamOf(first, count, "RaiseMaxHandSize");
+        for (i = 0; i < count; i++) {   // (Spellbook: "You have no maximum hand size"; Thought Nibbler: two less)
+            const char *key = gMtgParams[first + i].key;
+            if (strcmp(key, "Mode") && strcmp(key, "Description") && strcmp(key, "Affected") && strcmp(key, "SetMaxHandSize")
+                && strcmp(key, "RaiseMaxHandSize") && strcmp(key, "EffectZone") && strcmp(key, "IsPresent"))
+                goto unknown;
+        }
+        if ((s = ParamOf(first, count, "EffectZone")) && strcmp(s, "Battlefield"))
+            goto unknown;
+        st.activator = !aff ? 0xFF : strcmp(aff, "Player") == 0 ? 0 : strcmp(aff, "You") == 0 ? 1
+                     : strcmp(aff, "Opponent") == 0 ? 2 : strcmp(aff, "Player.Chosen") == 0 ? 3 : 0xFF;
+        if (st.activator == 0xFF || ((st.present = ParamOf(first, count, "IsPresent")) && !Mtg_ValidSpecKnown(st.present)))
+            goto unknown;
+        st.handSet = -1;
+        if (set) {
+            if (strcmp(set, "Unlimited") == 0)
+                st.handSet = 100;
+            else if (Integer(set, &v) && v >= 0 && v < 100)
+                st.handSet = (int8_t)v;
+            else
+                goto unknown;
+        }
+        if (raise && !(Integer(raise, &v) && v > -20 && v < 20 && (st.handRaise = (int8_t)v, 1)))
+            goto unknown;
+        st.mode = MTG_STATIC_HAND_SIZE;
         st.presentNum = 1;
         if (!AddStatic(c, &st))
             goto unknown;
@@ -1514,6 +1566,54 @@ int Mtg_UntapLimits(const MtgDuel *d, int player, const char **spec, int *n, int
         }
     }
     return count;
+}
+
+void Mtg_BlockerLimits(const MtgDuel *d, int attacker, int *min, int *max)
+{
+    int s, k;
+    *min = *max = 0;
+    for (s = 0; s < d->objCount; s++) {
+        const MtgObj *src = &d->objs[s];
+        const MtgCardDef *c;
+        if (src->zone != MTG_ZONE_BATTLEFIELD)
+            continue;
+        c = Mtg_Card(src->def);
+        for (k = 0; k < c->staticCount; k++) {
+            const MtgStatic *st = &gMtgStatics[c->statics[k]];
+            if (st->mode != MTG_STATIC_BLOCKERS || !Applies(d, st, s, attacker))
+                continue;
+            if (st->blockMin > *min)
+                *min = st->blockMin;
+            if (st->blockMax && (!*max || st->blockMax < *max))
+                *max = st->blockMax;
+        }
+    }
+}
+
+int Mtg_MaxHandSize(const MtgDuel *d, int player)
+{
+    int s, k, size = 7, raise = 0;
+    uint32_t setSeq = 0;
+    for (s = 0; s < d->objCount; s++) {
+        const MtgObj *src = &d->objs[s];
+        const MtgCardDef *c;
+        if (src->zone != MTG_ZONE_BATTLEFIELD)
+            continue;
+        c = Mtg_Card(src->def);
+        for (k = 0; k < c->staticCount; k++) {
+            const MtgStatic *st = &gMtgStatics[c->statics[k]];
+            if (st->mode != MTG_STATIC_HAND_SIZE || (st->activator == 1 && src->controller != player)
+                || (st->activator == 2 && src->controller == player)
+                || (st->activator == 3 && src->chosenPlayer != player + 1) || !Present(d, st, s))
+                continue;
+            if (st->handSet >= 0 && src->seq + 1 > setSeq)   // (the latest set wins, then every raise)
+                size = st->handSet, setSeq = src->seq + 1;
+            raise += st->handRaise;
+        }
+    }
+    if (size >= 100)
+        return 1000;
+    return size + raise < 0 ? 0 : size + raise;
 }
 
 int Mtg_AttackTax(const MtgDuel *d, int attacker)
