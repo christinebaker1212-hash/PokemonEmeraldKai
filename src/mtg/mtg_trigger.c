@@ -16,7 +16,7 @@ static int sTrigCount, sTrigCap;
 const char *const gMtgTriggerModes[MTG_TRIG_COUNT] = {
     "", "ChangesZone", "Phase", "SpellCast", "DamageDone", "Attacks", "AttackerBlocked", "AttackerBlockedByCreature",
     "Blocks", "AttackerUnblocked", "Cycled", "Taps", "LandPlayed", "BecomesTarget", "Always", "DamageDoneOnce",
-    "DamageDealtOnce",
+    "DamageDealtOnce", "TurnFaceUp",
 };
 
 // the parameters each mode reads (besides the common ones)
@@ -36,6 +36,7 @@ static const char *const sModeKeys[MTG_TRIG_COUNT][4] = {
     [MTG_TRIG_ATTACKER_BLOCKED_BY] = {"ValidCard", "ValidBlocker"},
     [MTG_TRIG_BLOCKS] = {"ValidCard", "ValidBlocked"},
     [MTG_TRIG_ATTACKER_UNBLOCKED] = {"ValidCard"},
+    [MTG_TRIG_TURN_FACE_UP] = {"ValidCard"},
 };
 static const char *const sCommonKeys[] = {
     "Mode", "Execute", "TriggerDescription", "TriggerZones", "OptionalDecider", "Secondary",
@@ -446,6 +447,7 @@ static int Matches(const MtgDuel *d, const MtgTrigger *t, int host, const MtgTri
     case MTG_TRIG_CYCLED:
     case MTG_TRIG_TAPS:
     case MTG_TRIG_LAND_PLAYED:
+    case MTG_TRIG_TURN_FACE_UP:
         return ObjOk(d, t, "ValidCard", ev->obj, host);
     }
     return 0;

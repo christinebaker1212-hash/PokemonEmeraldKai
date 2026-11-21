@@ -517,7 +517,7 @@ SDL_Texture *MtgGfx_CardTexture(int card, int w, int h)
     struct GSurface s;
     if (!G_R() || w <= 0 || h <= 0)
         return NULL;
-    if (card < 0 || !Mtg_Card(card))
+    if (card < 0 || card == MTG_FACE_DOWN || !Mtg_Card(card))   // (a face-down card: its back)
         card = MTG_GFX_BACK;
     for (i = 0; i < TEXTURES; i++)
         if (sTex[i].texture && sTex[i].card == card && sTex[i].w == w && sTex[i].h == h && sTex[i].mode == sArtMode)

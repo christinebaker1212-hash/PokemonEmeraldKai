@@ -298,6 +298,15 @@ static int ScoreBase(const MtgDuel *d, const MtgAction *a, int me)
     }
     if (a->kind == MTG_ACT_LAND)
         return main ? 1000 : 0;
+    if (a->kind == MTG_ACT_TURN_UP) {   // Morph: worth turning up for what it is (its triggers too), in a main phase or a fight
+        const MtgCardDef *real = Mtg_Card(d->objs[a->obj].faceDownOf - 1);
+        int gain = real->power * 2 + real->toughness - 6 + real->triggerCount * 4;
+        if (!main && !d->objs[a->obj].attacking && d->objs[a->obj].blocking == MTG_NO_OBJ)
+            return 0;
+        return gain > 0 ? 5 + gain : 0;
+    }
+    if (a->kind == MTG_ACT_CAST && a->alt == MTG_ALT_MORPH)   // face down: a 2/2 for {3} (its own cast scores itself)
+        return main ? 14 : 0;
     if (ab && ab->fromHand) {
         // Cycling: a land when there are enough, a spell too dear for a while; best at the end of the other's turn
         int k, lands = 0, good;

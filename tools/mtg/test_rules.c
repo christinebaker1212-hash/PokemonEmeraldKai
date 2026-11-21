@@ -2708,6 +2708,66 @@ static void TestKickerFlashback(void)
     (void)infest;
 }
 
+static int FindKind(int kind, int obj)
+{
+    const MtgQuery *q;
+    int i;
+    Mtg_RefreshQuery(&sD);
+    q = Mtg_Query(&sD);
+    for (i = 0; i < q->actionCount; i++)
+        if (q->actions[i].kind == kind && q->actions[i].obj == obj)
+            return i;
+    return -1;
+}
+
+static void TestMorph(void)
+{
+    int mara, real, i;
+    MtgAnswer a;
+    printf("morph\n");
+    Table();   // Skirk Marauder face down for {3}: a nameless colorless 2/2; turned up for {2}{R}: 2 damage
+    Lands(0, "Mountain", 6);
+    mara = Put(0, "Skirk Marauder", MTG_ZONE_HAND);
+    real = sD.objs[mara].def;
+    DoCast(mara, MTG_ALT_MORPH, -1, 0);
+    CHECK(sD.objs[mara].def == MTG_FACE_DOWN && sD.objs[mara].faceDownOf == real + 1, "on the stack face down");
+    PassBoth();
+    CHECK(Zone(mara) == MTG_ZONE_BATTLEFIELD && Mtg_Power(&sD, mara) == 2 && Mtg_Toughness(&sD, mara) == 2
+          && Mtg_ObjColors(&sD, mara) == 0, "a colorless 2/2 (%d/%d)", Mtg_Power(&sD, mara), Mtg_Toughness(&sD, mara));
+    CHECK(!Mtg_ValidObj(&sD, mara, "Creature.Goblin", MTG_NO_OBJ, 0), "no creature type face down");
+    i = FindKind(MTG_ACT_TURN_UP, mara);
+    CHECK(i >= 0, "it can be turned face up");
+    memset(&a, 0, sizeof(a));
+    a.action = (uint16_t)i;
+    Answer(&a);
+    CHECK(sD.objs[mara].def == real && Mtg_Power(&sD, mara) == 2 && Mtg_Toughness(&sD, mara) == 1,
+          "face up: Skirk Marauder 2/1 (%d/%d)", Mtg_Power(&sD, mara), Mtg_Toughness(&sD, mara));
+    {   // its "when turned face up": a target asked, 2 damage
+        const MtgQuery *q = Mtg_Query(&sD);
+        if (q->kind == MTG_Q_TRIGGER_TARGET) {
+            int k;
+            for (k = 0; k < q->actionCount; k++)
+                if (q->actions[k].target.kind == MTG_TGT_PLAYER && q->actions[k].target.id == 1)
+                    break;
+            memset(&a, 0, sizeof(a));
+            a.action = (uint16_t)k;
+            Answer(&a);
+        }
+        PassBoth();
+        CHECK(sD.players[1].life == 18, "turned up: 2 damage (%d)", sD.players[1].life);
+    }
+
+    Table();   // face down, then destroyed: it goes to the graveyard face up
+    Lands(0, "Mountain", 3);
+    mara = Put(0, "Skirk Marauder", MTG_ZONE_HAND);
+    real = sD.objs[mara].def;
+    DoCast(mara, MTG_ALT_MORPH, -1, 0);
+    PassBoth();
+    Mtg_Destroy(&sD, mara, 0);
+    CHECK(Zone(mara) == MTG_ZONE_GRAVEYARD && sD.objs[mara].def == real && !sD.objs[mara].faceDownOf,
+          "dies: revealed in the graveyard");
+}
+
 static void TestCantCounter(void)
 {
     int mongoose, bears, cs, herald, istvan, bolt, i;
@@ -3346,6 +3406,7 @@ int main(int argc, char **argv)
     TestChoices();
     TestUpkeepCosts();
     TestKickerFlashback();
+    TestMorph();
     TestCantCounter();
     TestTrigModes();
     TestBecomesTarget();

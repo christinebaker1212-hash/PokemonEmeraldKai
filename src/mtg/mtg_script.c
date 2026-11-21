@@ -34,6 +34,10 @@ static int sTokenCount;
 
 const MtgCardDef *Mtg_Card(int id)
 {
+    static const MtgCardDef sFaceDown = {.name = "Face-down creature", .oracle = "", .subtypes = "",
+                                         .types = MTG_T_CREATURE, .power = 2, .toughness = 2, .supported = 1};
+    if (id == MTG_FACE_DOWN)
+        return &sFaceDown;
     if (id >= MTG_TOKEN_BASE)
         return id - MTG_TOKEN_BASE < sTokenCount ? &sTokens[id - MTG_TOKEN_BASE] : NULL;
     return (id >= 0 && id < sCardCount) ? &sCards[id] : NULL;
@@ -882,7 +886,8 @@ static void ParseKeyword(MtgCardDef *c, const char *k)
             Unsupported(c, "ETBReplacement");
         return;
     }
-    if (strncmp(k, "Kicker:", 7) == 0 || strncmp(k, "Buyback:", 8) == 0 || strncmp(k, "Flashback:", 10) == 0)
+    if (strncmp(k, "Kicker:", 7) == 0 || strncmp(k, "Buyback:", 8) == 0 || strncmp(k, "Flashback:", 10) == 0
+        || strncmp(k, "Morph:", 6) == 0)
         return;   // (their costs: once the lines are read, below)
     if (strncmp(k, "Cycling:", 8) == 0) {   // (Forge's CardFactoryUtil: an ability from the hand, made once the lines are read)
         c->cyclingCost = k + 8;
@@ -978,7 +983,7 @@ static void ParseCard(int id, char *text)
 {
     MtgCardDef *c = &sCards[id];
     char *lines[MTG_SCRIPT_LINES], *abilityLines[8], *triggerLines[8], *line, *next;
-    const char *extraKw[3] = {NULL, NULL, NULL};   // (K:Kicker:..., K:Buyback:..., K:Flashback:... as written)
+    const char *extraKw[4] = {NULL, NULL, NULL, NULL};   // (K:Kicker:..., K:Buyback:..., K:Flashback:..., K:Morph:...)
     int nLines = 0, nAbil = 0, nTrig = 0, i, k;
     memset(c, 0, sizeof(*c));
     c->supported = 1;
@@ -1024,6 +1029,10 @@ static void ParseCard(int id, char *text)
         const char *kw = lines[k] && strncmp(lines[k], "K:", 2) == 0 ? lines[k] + 2 : NULL;
         if (kw && (strncmp(kw, "Kicker:", 7) == 0 || strncmp(kw, "Buyback:", 8) == 0 || strncmp(kw, "Flashback:", 10) == 0)) {
             extraKw[kw[0] == 'K' ? 0 : kw[0] == 'B' ? 1 : 2] = kw;
+            continue;
+        }
+        if (kw && strncmp(kw, "Morph:", 6) == 0) {
+            extraKw[3] = kw;
             continue;
         }
         char cost[64], buf[400];
@@ -1173,6 +1182,18 @@ static void ParseCard(int id, char *text)
                 c->etbOptional |= (uint8_t)(1 << i);
         } else
             Unsupported(c, "ETBReplacement");
+    }
+    if (extraKw[3]) {   // Morph: cast face down for {3}, turned up for this (mtg_game.c)
+        char buf[96];
+        const char *end = strchr(extraKw[3] + 6, ':');
+        size_t n = end ? (size_t)(end - extraKw[3] - 6) : strlen(extraKw[3] + 6);
+        if (n < sizeof(buf) && (c->types & MTG_T_CREATURE)) {
+            memcpy(buf, extraKw[3] + 6, n);
+            buf[n] = 0;
+            c->morph = (uint16_t)Mtg_AddExtraCost(buf, "MORPH");
+        }
+        if (!c->morph)
+            Unsupported(c, "Morph");
     }
     if (c->etbCheck && !Mtg_CheckSvarKnown(id, c->etbCheck, NULL))
         Unsupported(c, "etbCounter");

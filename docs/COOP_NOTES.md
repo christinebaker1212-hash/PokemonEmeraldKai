@@ -8612,3 +8612,15 @@ res/moves/chatter/anim.s).
 - The table: the card's menu shows CAST, KICKED (+R), BUYBACK (+3)...; the graveyard viewer's A casts a card with
   flashback ({A} FLASHBACK in its hints). The AI kicks when what it pays besides costs little.
 - Playable: 2907 -> 2961 -> 3060. Tests: test_rules.c TestUpkeepCosts, TestKickerFlashback; scenario mtg_flashback.
+
+## MAGIC: Morph (2026-11-21)
+- A face-down permanent (or spell) takes the definition MTG_FACE_DOWN (mtg_script.c Mtg_Card: a nameless colorless 2/2
+  creature with no abilities) and keeps its real card in MtgObj.faceDownOf (+ 1), so every rule reads it as that 2/2
+  with no special cases. Cast face down for {3} (MtgAction.alt MTG_ALT_MORPH, sorcery timing); turned face up any time
+  its controller has priority for its morph cost (MtgCardDef.morph in gMtgAltCosts; the special action MTG_ACT_TURN_UP,
+  no stack: MTG_EV_TURNED_UP, then the TurnFaceUp trigger mode); revealed whenever it leaves the battlefield or stack
+  (Mtg_MoveTo, after the leave triggers looked at it face down).
+- The table draws its back (MtgGfx_CardTexture), names it "Face-down <card>" to its controller only, and never shows
+  the face while the view trails the rules (StartEvent syncs a face-down card first). Menus: CAST FACE DOWN (3), TURN
+  FACE UP (cost). The AI casts face down when nothing better, turns up for the bigger card or its trigger.
+- Playable: 3060 -> 3129. Tests: test_rules.c TestMorph; scenario mtg_morph.

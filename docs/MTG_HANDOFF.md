@@ -7,8 +7,7 @@ The user's decisions: `docs/MTG_DECISIONS.md` (keep to them). How much of the po
 **The user: "Do not push 500 different Magic updates. Push and only update once everything all at once is finished."**
 MAGIC batches are local commits on the default branch until all 5408 cards play; then one push and one release.
 Done since: choices (2907), Echo / Cumulative upkeep (2961), Kicker / Buyback / Flashback (3060): COOP_NOTES "MAGIC:
-Echo, Cumulative upkeep, Kicker, Buyback, Flashback". Next by cards: Morph (91: face-down 2/2 casts for {3}, turned up
-for its morph cost: a hidden face on MtgObj, the table drawing the back), static abilities (281: the layer pieces below),
+Echo, Cumulative upkeep, Kicker, Buyback, Flashback", Morph (3129: COOP_NOTES "MAGIC: Morph"). Next by cards: static abilities (281: the layer pieces below),
 T:Execute (58), ChangeZone (78), replacement effects (76), Banding (20), Storm (12), Phasing (12).
 
 ## Pick up here (2026-11-20: "finish up work on Magic ... incorporating all planned cards")

@@ -280,6 +280,10 @@ void Mtg_MoveTo(MtgDuel *d, int obj, int zone)
     ev.objCtrl = o->controller;
     if (from == MTG_ZONE_BATTLEFIELD)   // leaving the battlefield: the triggers look back at it as it was (603.10a)
         Mtg_CheckTriggers(d, &ev);
+    if (o->faceDownOf && zone != MTG_ZONE_BATTLEFIELD && zone != MTG_ZONE_STACK) {
+        o->def = (uint16_t)(o->faceDownOf - 1);   // (Morph: a face-down card is turned face up as it leaves)
+        o->faceDownOf = 0;
+    }
     if (from == MTG_ZONE_LIBRARY) {
         MtgPlayer *p = &d->players[o->owner];
         for (i = 0; i < p->libraryCount; i++)
@@ -1131,6 +1135,15 @@ static void BuildPriority(MtgDuel *d)
                     continue;
                 AddWithTargets(d, q, MTG_ACT_ACTIVATE, i, c->abilities[k], 0, p);
             }
+            if (c->morph && SorceryTiming(d, p)) {   // (Morph: face down for {3}, a 2/2 with no name or abilities)
+                MtgManaCost three;
+                memset(&three, 0, sizeof(three));
+                three.generic = 3;
+                if (Mtg_CanPay(d, p, &three, 0, MTG_NO_OBJ)) {
+                    AddAction(q, MTG_ACT_CAST, i, 0xFFFF, 0, none);
+                    q->actions[q->actionCount - 1].alt = MTG_ALT_MORPH;
+                }
+            }
             if (c->types & MTG_T_LAND) {
                 if (SorceryTiming(d, p) && d->players[p].landsPlayed == 0
                     && !Mtg_StaticForbids(d, MTG_STATIC_CANT_PLAY_LAND, i, p))   // (Territorial Dispute...)
@@ -1169,6 +1182,11 @@ static void BuildPriority(MtgDuel *d)
             AddWithTargets(d, q, MTG_ACT_CAST, i, ability, x, p);
         } else if (o->zone == MTG_ZONE_GRAVEYARD && o->owner == p && c->flashback) {
             AddFlashback(d, q, i, p);
+        } else if (o->zone == MTG_ZONE_BATTLEFIELD && o->controller == p && o->faceDownOf
+                   && Mtg_Card(o->faceDownOf - 1)->morph) {   // (turned face up any time it has priority)
+            const MtgCost *mc = &gMtgAltCosts[Mtg_Card(o->faceDownOf - 1)->morph - 1].cost;
+            if (Mtg_CanPay(d, p, &mc->mana, 0, MTG_NO_OBJ) && (!HasOther(mc) || Mtg_CostPayable(d, p, mc, i, MTG_NO_OBJ)))
+                AddAction(q, MTG_ACT_TURN_UP, i, 0xFFFF, 0, none);
         } else if (o->zone == MTG_ZONE_BATTLEFIELD && o->controller == p) {
             uint16_t abil[16];
             int abilCount = Mtg_ObjAbilities(d, i, abil, 16);   // (its card's and those statics give it)
@@ -1339,7 +1357,7 @@ static void PayCostPick(MtgDuel *d, int obj)
         return;
     }
     if (d->costSac) {
-        if (d->stackCount && d->costAlt != 2)   // (its last known power, for Sacrificed$CardPower)
+        if (d->stackCount && d->costAlt != 2 && d->costAlt != 3)   // (its last known power, for Sacrificed$CardPower)
             d->stack[d->stackCount - 1].sacPower = (int16_t)Mtg_Power(d, obj);
         Mtg_Sacrifice(d, obj);
         d->costSac--;
@@ -1427,9 +1445,33 @@ static void DoAction(MtgDuel *d, const MtgAction *a)
         TrigEvent(d, MTG_TRIG_LAND_PLAYED, a->obj, MTG_NO_OBJ, p);   // ("whenever a land is played": TriggerLandPlayed)
         return;
     }
+    if (a->kind == MTG_ACT_TURN_UP) {   // Morph: its cost paid, its real card face up (no stack); "when turned face up"
+        MtgObj *o = &d->objs[a->obj];
+        int idx = Mtg_Card(o->faceDownOf - 1)->morph;
+        const MtgCost *mc = &gMtgAltCosts[idx - 1].cost;
+        Mtg_Pay(d, p, &mc->mana, 0, MTG_NO_OBJ);
+        o->def = (uint16_t)(o->faceDownOf - 1);
+        o->faceDownOf = 0;
+        Mtg_Event(d, MTG_EV_TURNED_UP, a->obj, p, 0);
+        if (HasOther(mc)) {
+            d->costAltIdx = (uint16_t)idx;
+            PayCost(d, p, mc, 0xFFFF, a->obj, 3);
+        }
+        TrigEvent(d, MTG_TRIG_TURN_FACE_UP, a->obj, MTG_NO_OBJ, p);
+        return;
+    }
     if (d->stackCount >= MTG_MAX_STACK)
         return;
-    if (a->kind == MTG_ACT_CAST && (a->alt == MTG_ALT_COST || a->alt == MTG_ALT_FLASHBACK)) {
+    if (a->kind == MTG_ACT_CAST && a->alt == MTG_ALT_MORPH) {   // face down: {3}, then a nameless 2/2 on the stack
+        MtgManaCost three;
+        MtgObj *o = &d->objs[a->obj];
+        memset(&three, 0, sizeof(three));
+        three.generic = 3;
+        Mtg_Pay(d, p, &three, 0, MTG_NO_OBJ);
+        Mtg_MoveTo(d, a->obj, MTG_ZONE_STACK);
+        o->faceDownOf = (uint16_t)(o->def + 1);
+        o->def = MTG_FACE_DOWN;
+    } else if (a->kind == MTG_ACT_CAST && (a->alt == MTG_ALT_COST || a->alt == MTG_ALT_FLASHBACK)) {
         if (a->alt == MTG_ALT_FLASHBACK)   // (its flashback cost's mana instead of its own; the rest paid below)
             Mtg_Pay(d, p, &gMtgAltCosts[Mtg_Card(d->objs[a->obj].def)->flashback - 1].cost.mana, 0, MTG_NO_OBJ);
         Mtg_MoveTo(d, a->obj, MTG_ZONE_STACK);   // (its alternative cost instead of its mana: paid below)

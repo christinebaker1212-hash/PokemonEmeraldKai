@@ -84,6 +84,7 @@ typedef struct MtgCardDef {
     const char *etbCheck;                    // etbCounter's CheckSVar$: its counters only when that SVar is GE1
     uint16_t kicker[2];                      // K:Kicker:COST[:COST2]: gMtgAltCosts + 1 (0: none)
     uint16_t buyback, flashback;             // K:Buyback:COST, K:Flashback:COST (the same)
+    uint16_t morph;                          // K:Morph:COST: its cost to turn face up (the same)
     uint8_t staticCount;
     uint16_t statics[4];                     // indexes into the static table (S: lines; mtg_static.c)
     uint16_t svarFirst, svarCount;           // the card's SVar: lines
@@ -97,6 +98,7 @@ int Mtg_DbLoad(const void *pak, uint32_t size);
 int Mtg_DbCount(void);
 const MtgCardDef *Mtg_Card(int id);         // a pool card, or a token (id >= MTG_TOKEN_BASE)
 #define MTG_TOKEN_BASE 0x7000                // token definitions (made from Forge's token names: Mtg_TokenDef)
+#define MTG_FACE_DOWN 0x6FFF                 // a face-down card (Morph): a nameless colorless 2/2 creature, no abilities
 int Mtg_TokenDef(const char *script);        // "g_1_1_saproling" -> its definition's id, -1 if not understood
 int Mtg_CardByName(const char *name);       // -1 if not in the pool
 // every subtype of the pool's cards, sorted (ChooseType's choices): its name, and what it is (MTG_SUBK_*)
@@ -167,6 +169,7 @@ typedef struct {
                                   // battlefield (Valid kicked, Condition$ Kicked, Count$Kicked); cleared as it leaves
     uint8_t castMode;             // on the stack, cast with Buyback (1: back to the hand as it resolves) or Flashback
                                   // (2: exiled whenever it would leave the stack)
+    uint16_t faceDownOf;          // face down (Morph): its real card + 1 while def is MTG_FACE_DOWN (0: face up)
     uint8_t echoDue;              // Echo: 1 came under its controller since their last upkeep, 2 their upkeep now (its
                                   // trigger's "if": Valid cameUnderControlSinceLastUpkeep), 0 paid for or not new
 } MtgObj;
@@ -257,10 +260,12 @@ enum { MTG_OPT_TYPE,     // opts: Mtg_SubtypeName indexes
        MTG_OPT_NUMBER,   // the numbers
        MTG_OPT_MODE };   // GenericChoice: abilities (gMtgAbilities)
 #define MTG_MAX_OPTIONS 200
-enum { MTG_ACT_PASS, MTG_ACT_LAND, MTG_ACT_CAST, MTG_ACT_ACTIVATE };
+enum { MTG_ACT_PASS, MTG_ACT_LAND, MTG_ACT_CAST, MTG_ACT_ACTIVATE,
+       MTG_ACT_TURN_UP };   // a face-down permanent turned face up for its morph cost (a special action: no stack)
 // MtgAction.alt for a cast: its alternative cost, kicked (with its first / second / both kickers), with buyback,
 // for its flashback cost (from its owner's graveyard)
-enum { MTG_ALT_NONE, MTG_ALT_COST, MTG_ALT_KICK1, MTG_ALT_KICK2, MTG_ALT_KICK12, MTG_ALT_BUYBACK, MTG_ALT_FLASHBACK };
+enum { MTG_ALT_NONE, MTG_ALT_COST, MTG_ALT_KICK1, MTG_ALT_KICK2, MTG_ALT_KICK12, MTG_ALT_BUYBACK, MTG_ALT_FLASHBACK,
+       MTG_ALT_MORPH };   // (face down, for {3}: Morph)
 
 typedef struct {
     uint8_t kind;
@@ -315,7 +320,8 @@ enum {
     MTG_EV_COIN,       // a = the source, b = the player who flipped, c = 1 won / 0 lost
     MTG_EV_REVEAL,     // a = the card revealed (from a hand), b = the player revealing it
     MTG_EV_CHOSEN,     // a = the source chosen (ChooseSource), b = the player choosing it
-    MTG_EV_OPTION      // a = the card it's kept on, b = what (MTG_OPT_*), c = the option chosen (a type, a color...)
+    MTG_EV_OPTION,     // a = the card it's kept on, b = what (MTG_OPT_*), c = the option chosen (a type, a color...)
+    MTG_EV_TURNED_UP   // a = the permanent turned face up (Morph), b = its controller
 };
 typedef struct { uint8_t kind; int16_t a, b, c; } MtgEvent;
 #define MTG_REM_PLAYER 0xFF00   // a remembered player in MtgDuel.rem / repItems   // a, b, c by kind (mtg_game.c Mtg_Event)

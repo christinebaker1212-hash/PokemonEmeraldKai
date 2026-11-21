@@ -148,6 +148,13 @@ static int ShowFocus(void) { return B.still >= STILL_FRAMES; }
 static void CostText(char *out, unsigned cap, const MtgManaCost *c);
 static void Name(char *out, unsigned cap, int obj)
 {
+    const MtgObj *o = obj >= 0 && obj < MTG_MAX_OBJS ? &B.duel.objs[obj] : NULL;
+    if (o && o->faceDownOf && o->controller == ME) {   // (your own face-down card: you know what it is)
+        char real[56];
+        Mtg_PlainText(real, sizeof(real), Mtg_Card(o->faceDownOf - 1)->name);
+        snprintf(out, cap, "Face-down %s", real);
+        return;
+    }
     Mtg_PlainText(out, cap, Def(obj)->name);
 }
 
@@ -1880,7 +1887,21 @@ static int StartEvent(const MtgEvent *e)
     MtgDuel *v = &B.view;
     char a[64], b[64];
     int obj = e->a;
+    if (obj >= 0 && obj < MTG_MAX_OBJS && B.duel.objs[obj].def == MTG_FACE_DOWN) {   // (face down: never its face)
+        v->objs[obj].def = MTG_FACE_DOWN;
+        v->objs[obj].faceDownOf = B.duel.objs[obj].faceDownOf;
+    }
     switch (e->kind) {
+    case MTG_EV_TURNED_UP:   // a face-down card turned face up (Morph)
+        if (obj >= 0 && obj < MTG_MAX_OBJS) {
+            v->objs[obj].def = B.duel.objs[obj].faceDownOf ? (uint16_t)(B.duel.objs[obj].faceDownOf - 1) : B.duel.objs[obj].def;
+            v->objs[obj].faceDownOf = 0;
+            B.flash[obj] = 16;
+            Mtg_PlainText(a, sizeof(a), Mtg_Card(v->objs[obj].def)->name);
+            Ticker("%s %s %s face up.", e->b == ME ? "You" : B.opp, e->b == ME ? "turn" : "turns", a);
+            PlaySE(SE_SELECT);
+        }
+        return Frames(22);
     case MTG_EV_TURN:
         v->active = (uint8_t)e->a, v->turn = (uint16_t)e->b;
         Ticker("Turn %d: %s.", e->b, e->a == ME ? "your turn" : "their turn");
@@ -2366,7 +2387,8 @@ static void AnswerAction(int index)
             Name(target + 4, sizeof(target) - 4, act->target.id);
             memcpy(target, " on ", 4);
         }
-        MPNet_Log("mtg: you: %s %s%s", act->kind == MTG_ACT_LAND ? "played" : act->kind == MTG_ACT_CAST ? "cast"
+        MPNet_Log("mtg: you: %s %s%s", act->kind == MTG_ACT_LAND ? "played" : act->kind == MTG_ACT_TURN_UP ? "turned up"
+                                       : act->kind == MTG_ACT_CAST ? "cast"
                                        : "used", name, target);
     }
     if (act->kind != MTG_ACT_PASS && B.duel.objs[act->obj].zone == MTG_ZONE_HAND && B.duel.objs[act->obj].owner == ME) {
@@ -2568,7 +2590,21 @@ static void MenuLabel(int k, char *out, unsigned cap)
     const MtgAction *a = &B.duel.query.actions[B.menu[k]];
     if (a->kind == MTG_ACT_LAND)
         snprintf(out, cap, "PLAY THE LAND");
-    else if (a->kind == MTG_ACT_CAST && a->alt == MTG_ALT_COST) {   // its alternative cost, in the card's own words
+    else if (a->kind == MTG_ACT_CAST && a->alt == MTG_ALT_MORPH)
+        snprintf(out, cap, "CAST FACE DOWN (3)");
+    else if (a->kind == MTG_ACT_TURN_UP) {   // its morph cost
+        const MtgObj *o = &B.duel.objs[a->obj];
+        char what[64];
+        unsigned u;
+        UnlessWords(what, sizeof(what), &gMtgAltCosts[Mtg_Card(o->faceDownOf - 1)->morph - 1].cost);
+        if (strncmp(what, "pay ", 4) == 0)
+            memmove(what, what + 4, strlen(what + 4) + 1);
+        for (u = 0; what[u]; u++)
+            if (what[u] >= 'a' && what[u] <= 'z')
+                what[u] -= 32;
+        snprintf(out, cap, "TURN FACE UP (%s)", what);
+        TcgUi_FitText(out, 206, TF_SMALL);
+    } else if (a->kind == MTG_ACT_CAST && a->alt == MTG_ALT_COST) {   // its alternative cost, in the card's own words
         const MtgCardDef *c = Mtg_Card(B.duel.objs[a->obj].def);              // ("SACRIFICE A MOUNTAIN")
         snprintf(out, cap, "CAST: %s", gMtgAltCosts[c->altCost - 1].label);
         TcgUi_FitText(out, 206, TF_SMALL);
