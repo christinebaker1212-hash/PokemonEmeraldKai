@@ -175,6 +175,7 @@ typedef struct {
                                   // battlefield (Valid kicked, Condition$ Kicked, Count$Kicked); cleared as it leaves
     uint8_t castMode;             // on the stack, cast with Buyback (1: back to the hand as it resolves) or Flashback
                                   // (2: exiled whenever it would leave the stack)
+    uint16_t attackedTurn;        // the turn it last attacked (+1; 0: never): Valid attackedThisTurn
     uint16_t faceDownOf;          // face down (Morph): its real card + 1 while def is MTG_FACE_DOWN (0: face up)
     uint8_t echoDue;              // Echo: 1 came under its controller since their last upkeep, 2 their upkeep now (its
                                   // trigger's "if": Valid cameUnderControlSinceLastUpkeep), 0 paid for or not new

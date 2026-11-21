@@ -300,6 +300,13 @@
 "number": "64a",
 "set": "all"
 },
+"Aggression": {
+"artist": "Rick Emond",
+"file": "ice_169",
+"frame": "1993",
+"number": "169",
+"set": "ice"
+},
 "Aggressive Urge": {
 "artist": "Christopher Moeller",
 "file": "inv_181",
@@ -985,6 +992,13 @@
 "frame": "1997",
 "number": "26",
 "set": "ulg"
+},
+"Arctic Foxes": {
+"artist": "Mark Poole",
+"file": "ice_2",
+"frame": "1993",
+"number": "2",
+"set": "ice"
 },
 "Arctic Merfolk": {
 "artist": "Ron Spears",
@@ -2624,6 +2638,13 @@
 "number": "51",
 "set": "sth"
 },
+"Bouncing Beebles": {
+"artist": "Jeff Miracola",
+"file": "ulg_28",
+"frame": "1997",
+"number": "28",
+"set": "ulg"
+},
 "Bounty Hunter": {
 "artist": "Brian Snõddy",
 "file": "tmp_110",
@@ -2883,6 +2904,13 @@
 "number": "146",
 "set": "wth"
 },
+"Bubbling Beebles": {
+"artist": "Jeff Miracola",
+"file": "uds_29",
+"frame": "1997",
+"number": "29",
+"set": "uds"
+},
 "Bull Elephant": {
 "artist": "Steve White",
 "file": "mgb_9",
@@ -2945,6 +2973,13 @@
 "frame": "1997",
 "number": "162",
 "set": "mir"
+},
+"Burnout": {
+"artist": "Mike Raabe",
+"file": "all_68",
+"frame": "1993",
+"number": "68",
+"set": "all"
 },
 "Burrowing": {
 "artist": "Mark Poole",
@@ -6845,6 +6880,13 @@
 "number": "32",
 "set": "nem"
 },
+"Ensnaring Bridge": {
+"artist": "Pete Venters",
+"file": "sth_133",
+"frame": "1997",
+"number": "133",
+"set": "sth"
+},
 "Entropic Specter": {
 "artist": "Ron Spencer",
 "file": "exo_61",
@@ -6900,6 +6942,13 @@
 "frame": "1997",
 "number": "132",
 "set": "exo"
+},
+"Ertai's Trickery": {
+"artist": "Kev Walker",
+"file": "pls_24",
+"frame": "1997",
+"number": "24",
+"set": "pls"
 },
 "Ertai, Wizard Adept": {
 "artist": "Terese Nielsen",
@@ -9484,6 +9533,13 @@
 "number": "16",
 "set": "wth"
 },
+"Guiltfeeder": {
+"artist": "Mark Tedin",
+"file": "jud_68",
+"frame": "1997",
+"number": "68",
+"set": "jud"
+},
 "Guilty Conscience": {
 "artist": "Christopher Moeller",
 "file": "scg_17",
@@ -9679,6 +9735,13 @@
 "frame": "1997",
 "number": "268",
 "set": "mir"
+},
+"Hazy Homunculus": {
+"artist": "Anthony S. Waters",
+"file": "pcy_36",
+"frame": "1997",
+"number": "36",
+"set": "pcy"
 },
 "Head Games": {
 "artist": "Terese Nielsen",
@@ -10261,6 +10324,13 @@
 "number": "133",
 "set": "ice"
 },
+"Hydroblast": {
+"artist": "Kaja Foglio",
+"file": "ice_72",
+"frame": "1993",
+"number": "72",
+"set": "ice"
+},
 "Hymn of Rebirth": {
 "artist": "Richard Kane Ferguson",
 "file": "ice_295",
@@ -10609,6 +10679,13 @@
 "file": "mmq_140",
 "frame": "1997",
 "number": "140",
+"set": "mmq"
+},
+"Insubordination": {
+"artist": "Andrew Goldhawk",
+"file": "mmq_141",
+"frame": "1997",
+"number": "141",
 "set": "mmq"
 },
 "Intimidation": {
@@ -11870,6 +11947,13 @@
 "frame": "1997",
 "number": "273",
 "set": "ons"
+},
+"Legacy's Allure": {
+"artist": "Daren Bader",
+"file": "tmp_71",
+"frame": "1997",
+"number": "71",
+"set": "tmp"
 },
 "Leshrac's Rite": {
 "artist": "Richard Thomas",
@@ -13999,6 +14083,13 @@
 "number": "132",
 "set": "mir"
 },
+"Noetic Scales": {
+"artist": "Andrew Robinson",
+"file": "usg_304",
+"frame": "1997",
+"number": "304",
+"set": "usg"
+},
 "Nomadic Elf": {
 "artist": "D. J. Cleland-Hura",
 "file": "inv_200",
@@ -14012,6 +14103,13 @@
 "frame": "1993",
 "number": "37",
 "set": "4ed"
+},
+"Nosy Goblin": {
+"artist": "Thomas M. Baxa",
+"file": "ons_220",
+"frame": "1997",
+"number": "220",
+"set": "ons"
 },
 "Notorious Assassin": {
 "artist": "Heather Hudson",
@@ -15294,6 +15392,13 @@
 "number": "112",
 "set": "sth"
 },
+"Primal Whisperer": {
+"artist": "Greg Staples",
+"file": "lgn_135",
+"frame": "1997",
+"number": "135",
+"set": "lgn"
+},
 "Primeval Shambler": {
 "artist": "Chippy",
 "file": "mmq_152",
@@ -15510,6 +15615,13 @@
 "frame": "1997",
 "number": "187",
 "set": "mir"
+},
+"Pyroblast": {
+"artist": "Kaja Foglio",
+"file": "ice_213",
+"frame": "1993",
+"number": "213",
+"set": "ice"
 },
 "Pyroclasm": {
 "artist": "Pat Lewis",
@@ -19466,6 +19578,13 @@
 "number": "164",
 "set": "mmq"
 },
+"Spectral Bears": {
+"artist": "Pat Lewis",
+"file": "hml_98",
+"frame": "1993",
+"number": "98",
+"set": "hml"
+},
 "Spectral Guardian": {
 "artist": "Mike Dringenberg",
 "file": "mir_41",
@@ -19724,6 +19843,13 @@
 "frame": "1997",
 "number": "72",
 "set": "nem"
+},
+"Spitfire Handler": {
+"artist": "Jim Nelson",
+"file": "ons_236",
+"frame": "1997",
+"number": "236",
+"set": "ons"
 },
 "Spitting Drake": {
 "artist": "Geofrey Darrow & I. Rabarot",
@@ -20109,6 +20235,13 @@
 "frame": "1997",
 "number": "21",
 "set": "lgn"
+},
+"Stone Giant": {
+"artist": "Dameon Willich",
+"file": "4ed_223",
+"frame": "1993",
+"number": "223",
+"set": "4ed"
 },
 "Stone Kavu": {
 "artist": "Adam Rex",
@@ -20858,6 +20991,13 @@
 "frame": "1997",
 "number": "125",
 "set": "apc"
+},
+"Temporary Insanity": {
+"artist": "Mark Romanoski",
+"file": "tor_116",
+"frame": "1997",
+"number": "116",
+"set": "tor"
 },
 "Tempting Wurm": {
 "artist": "Bob Petillo",

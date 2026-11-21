@@ -72,6 +72,27 @@ static int Number(const char *p, size_t n, int *out)
     return 1;
 }
 
+// "cmcLEX", "powerGTX": X is the source card's SVar X (Ensnaring Bridge's cards in hand); a paid X (Count$xPaid, or
+// none) is the cast's being checked (gMtgValidX) or the resolving one's
+static int ValidXOf(const MtgDuel *d, int src)
+{
+    const char *sv = src >= 0 && src < d->objCount ? Mtg_Svar(d->objs[src].def, "X") : NULL;
+    if (sv && strcmp(sv, "Count$xPaid")) {
+        MtgStackEntry e;
+        MtgResolveCtx ctx;
+        int ok;
+        if (d->resolving && d->res.source == src)
+            e = d->res;
+        else
+            memset(&e, 0, sizeof(e));
+        ctx.e = &e;
+        ctx.controller = d->objs[src].controller;
+        ctx.source = src;
+        return Mtg_Amount(d, &ctx, d->objs[src].def, "X", &ok);
+    }
+    return gMtgValidX >= 0 ? gMtgValidX : d->resolving ? d->res.x : 0;
+}
+
 // the card a choice is kept on (ChooseType / Color / Player: the source of the ability or static reading it)
 static const MtgObj *Holder(const MtgDuel *d, int src)
 {
@@ -138,6 +159,25 @@ static int CardProp(const MtgDuel *d, int obj, const char *p, size_t n, int src,
     }
     if (n == 25 && strncmp(p, "blockingTriggeredAttacker", 25) == 0)   // (blocking the attacker that set it off)
         return !d || (d->resolving && d->res.trigObj != MTG_NO_OBJ && o->blocking == d->res.trigObj);
+    if (n == 12 && strncmp(p, "EffectSource", 12) == 0)   // (an Effect's static: the card that made the Effect)
+        return !d || obj == src;
+    if (n == 12 && strncmp(p, "DefenderCtrl", 12) == 0)   // (two players: the one not attacking)
+        return !d || o->controller != d->active;
+    if (n == 16 && strncmp(p, "attackedThisTurn", 16) == 0)
+        return !d || o->attackedTurn == d->turn + 1;
+    if (n == 8 && strncmp(p, "faceDown", 8) == 0)
+        return !d || o->faceDownOf != 0;
+    if (n > 7 && p[n - 1] == 'X' && (strncmp(p, "powerXX", 5) == 0 || strncmp(p, "toughness", 9) == 0 || strncmp(p, "power", 5) == 0)) {
+        size_t l = p[0] == 'p' ? 5 : 9;   // "powerGTX", "toughnessLTX": against X (as cmcLEX)
+        if (n == l + 3 && (p[l] == 'L' || p[l] == 'G' || p[l] == 'E') && (p[l + 1] == 'E' || p[l + 1] == 'T' || p[l + 1] == 'Q')) {
+            int v, x;
+            if (!d)
+                return 1;
+            v = l == 5 ? Mtg_Power(d, obj) : Mtg_Toughness(d, obj);
+            x = ValidXOf(d, src);
+            return p[l] == 'E' ? v == x : p[l] == 'L' ? (p[l + 1] == 'E' ? v <= x : v < x) : (p[l + 1] == 'E' ? v >= x : v > x);
+        }
+    }
     if (n == 6 && strncmp(p, "kicked", 6) == 0)   // (cast kicked: mtg_game.c; "kicked 1" / "kicked 2": with that kicker)
         return !d || o->kicked;
     if (n == 8 && strncmp(p, "kicked ", 7) == 0 && (p[7] == '1' || p[7] == '2'))
@@ -223,7 +263,7 @@ static int CardProp(const MtgDuel *d, int obj, const char *p, size_t n, int src,
         if (!d)
             return 1;
         v = Mtg_ManaCostTotal(&c->cost);
-        x = gMtgValidX >= 0 ? gMtgValidX : d->resolving ? d->res.x : 0;
+        x = ValidXOf(d, src);
         return p[3] == 'E' ? v == x : p[3] == 'L' ? (p[4] == 'E' ? v <= x : v < x) : (p[4] == 'E' ? v >= x : v > x);
     }
     if ((n == 5 && strncmp(p, "Other", 5) == 0) || (n == 13 && strncmp(p, "StrictlyOther", 13) == 0))
@@ -360,6 +400,25 @@ static int Alternative(const MtgDuel *d, int isPlayer, int id, const char *a, si
         if (!isPlayer)
             return 0;
         return a[0] == 'P' || (a[0] == 'O' ? id != controller : id == controller);
+    }
+    if (tn == 5 && strncmp(a, "Spell", 5) == 0) {   // a spell: a card on the stack ("Spell.Blue")
+        if (d && (isPlayer || d->objs[id].zone != MTG_ZONE_STACK))
+            return 0;
+        if (dot) {
+            const char *p = dot + 1, *end = a + n;
+            int ok = 1;
+            while (p < end) {
+                const char *plus = memchr(p, '+', (size_t)(end - p));
+                size_t pn = plus ? (size_t)(plus - p) : (size_t)(end - p);
+                if (!CardProp(d, id, p, pn, src, controller, known))
+                    ok = 0;
+                if (!*known)
+                    return 0;
+                p += pn + 1;
+            }
+            return ok;
+        }
+        return 1;
     }
     bit = TypeBit(a, tn);
     if (!bit) {   // a bare subtype ("Goblin")

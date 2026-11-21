@@ -1013,9 +1013,10 @@ static void AddAction(MtgQuery *q, int kind, int obj, int ability, int x, MtgTar
 static int ValidAt(const MtgDuel *d, const MtgAbility *ab, int target, int obj, int player, int x, int *ax)
 {
     int ok, cmc;
+    const char *sv = Mtg_Svar(d->objs[obj].def, "X");
     *ax = x;
-    if (!strstr(ab->tgt, "cmcEQX") && !strstr(ab->tgt, "cmcLEX"))
-        return Mtg_ValidObj(d, target, ab->tgt, obj, player);
+    if ((!strstr(ab->tgt, "cmcEQX") && !strstr(ab->tgt, "cmcLEX")) || (sv && strcmp(sv, "Count$xPaid")))
+        return Mtg_ValidObj(d, target, ab->tgt, obj, player);   // (X counted, not paid: as it is)
     cmc = Mtg_ManaCostTotal(&Mtg_Card(d->objs[target].def)->cost);
     if (cmc > x)
         return 0;
@@ -1058,7 +1059,8 @@ static void AddWithTargetsX(const MtgDuel *d, MtgQuery *q, int kind, int obj, in
         if (ab->tgtMax == MTG_TGT_X)
             sXFixed = 1;   // (X is how many targets: not asked)
     }
-    if (strstr(ab->tgt, "cmcEQX") || strstr(ab->tgt, "cmcLEX"))
+    if ((strstr(ab->tgt, "cmcEQX") || strstr(ab->tgt, "cmcLEX"))
+        && (!Mtg_Svar(d->objs[obj].def, "X") || !strcmp(Mtg_Svar(d->objs[obj].def, "X"), "Count$xPaid")))
         sXFixed = 1;   // (X is its target's mana value)
     if (ab->tgtZone != MTG_ZONE_BATTLEFIELD) {   // (cards in a graveyard)
         for (i = 0; i < d->objCount; i++)
@@ -2335,6 +2337,7 @@ int Mtg_Answer(MtgDuel *d, const MtgAnswer *a)
             if (a->attack & (1u << i)) {
                 int o = q->candidates[i];
                 d->objs[o].attacking = 1;
+                d->objs[o].attackedTurn = (uint16_t)(d->turn + 1);
                 if (!(Mtg_Keywords(d, o) & MTG_KW_BIT(MTG_KW_VIGILANCE)))
                     Mtg_Tap(d, o, 1);
                 Mtg_Event(d, MTG_EV_ATTACK, o, 0, 0);

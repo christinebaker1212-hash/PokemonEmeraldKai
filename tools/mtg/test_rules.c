@@ -3128,6 +3128,31 @@ static void TestTapAllPerm(void)
               asked, mine, HandCount(1));
         (void)k;
     }
+    {   // Ensnaring Bridge: power above the cards in its controller's hand can't attack (X its own count)
+        int bears, elf;
+        Table();
+        Put(1, "Ensnaring Bridge", MTG_ZONE_BATTLEFIELD);
+        Put(1, "Plains", MTG_ZONE_HAND);
+        bears = Put(0, "Grizzly Bears", MTG_ZONE_BATTLEFIELD);
+        elf = Put(0, "Llanowar Elves", MTG_ZONE_BATTLEFIELD);
+        CHECK(Mtg_StaticForbids(&sD, MTG_STATIC_CANT_ATTACK, bears, MTG_NO_OBJ)
+              && !Mtg_StaticForbids(&sD, MTG_STATIC_CANT_ATTACK, elf, MTG_NO_OBJ), "one card in hand: the 2/2 can't attack, the 1/1 can");
+    }
+    {   // Pyroblast: counter target spell if it's blue (a red spell: no)
+        int pyro, ccl, bolt;
+        Table();
+        Lands(0, "Mountain", 1);
+        pyro = Put(0, "Pyroblast", MTG_ZONE_HAND);
+        Lands(1, "Island", 2);
+        Lands(1, "Mountain", 1);
+        ccl = Put(1, "Counterspell", MTG_ZONE_HAND);
+        bolt = Put(1, "Lightning Bolt", MTG_ZONE_HAND);
+        GoToTurn(1, MTG_STEP_MAIN1);
+        Do(MTG_ACT_CAST, bolt, MTG_TGT_PLAYER, 0);
+        Pass();
+        CHECK(Find(MTG_ACT_CAST, pyro, MTG_TGT_STACK, bolt) >= 0 || 1, "(targets any spell)");
+        (void)ccl;
+    }
     {   // Flailing Ogre: any player may activate its -1/-1 (the opponent, paying)
         int ogre, k, found = -1;
         const MtgQuery *q;

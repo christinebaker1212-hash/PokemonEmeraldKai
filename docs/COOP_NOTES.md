@@ -8696,3 +8696,6 @@ res/moves/chatter/anim.s).
 - ChangeZone's Chooser$ You: from the targeted (or DefinedPlayer$ Targeted) player's library, hand or graveyard, its
   controller picks (mtg_effects.c sChooser in AskPick): Head Games, Jester's Mask.
 - Playable: 3458 -> 3473. Tests: test_rules.c (Balduvian Dead, Head Games).
+- Valid (2026-11-21): EffectSource, DefenderCtrl, attackedThisTurn (MtgObj.attackedTurn), faceDown, power / toughness
+  against X, the Spell type (a card on the stack: "Spell.Blue"). X in a property is the source card's SVar X when it's
+  counted (Ensnaring Bridge's cards in hand: mtg_valid.c ValidXOf), else the paid X. Playable: 3473 -> 3493.
