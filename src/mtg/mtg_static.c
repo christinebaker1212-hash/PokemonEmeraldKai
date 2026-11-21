@@ -299,7 +299,22 @@ static void ParseOne(MtgCardDef *c, int cardId, char *text)
             : strcmp(s, "CantTarget") == 0 ? MTG_STATIC_CANT_TARGET : strcmp(s, "CantPlayLand") == 0 ? MTG_STATIC_CANT_PLAY_LAND
             : strcmp(s, "CantBeActivated") == 0 ? MTG_STATIC_CANT_BE_ACTIVATED
             : strcmp(s, "CantRegenerate") == 0 ? MTG_STATIC_CANT_REGENERATE
-            : strcmp(s, "CantAttackUnless") == 0 ? MTG_STATIC_ATTACK_TAX : 0xFF;
+            : strcmp(s, "CantAttackUnless") == 0 ? MTG_STATIC_ATTACK_TAX
+            : strcmp(s, "AssignNoCombatDamage") == 0 ? MTG_STATIC_NO_COMBAT_DAMAGE
+            : strcmp(s, "CanAttackDefender") == 0 ? MTG_STATIC_ATTACK_DEFENDER
+            : strcmp(s, "CanAttackIfHaste") == 0 ? MTG_STATIC_ATTACK_HASTE
+            : strcmp(s, "CanBlockIfShadow") == 0 ? MTG_STATIC_BLOCK_SHADOW
+            : strcmp(s, "CantPreventDamage") == 0 ? MTG_STATIC_CANT_PREVENT
+            : strcmp(s, "IgnoreLandWalk") == 0 ? MTG_STATIC_IGNORE_LANDWALK
+            : strcmp(s, "UnspentMana") == 0 ? MTG_STATIC_UNSPENT_MANA : 0xFF;
+    if (st.mode == MTG_STATIC_CANT_PREVENT || st.mode == MTG_STATIC_IGNORE_LANDWALK || st.mode == MTG_STATIC_UNSPENT_MANA) {
+        for (i = 0; i < count; i++) {   // (nothing but its mode, maybe IsPresent$: kept below)
+            const char *key = gMtgParams[first + i].key;
+            if (strcmp(key, "Mode") && strcmp(key, "Description") && strcmp(key, "IsPresent") && strcmp(key, "PresentCompare"))
+                goto unknown;
+        }
+        st.global = 1;
+    }
     if (st.mode == MTG_STATIC_ATTACK_TAX) {   // CantAttackUnless: its mana, a number or a counted SVar (no other costs)
         const char *cost = ParamOf(first, count, "Cost"), *tg = ParamOf(first, count, "Target");
         st.affected = ParamOf(first, count, "ValidCard");
@@ -405,7 +420,13 @@ static void ParseOne(MtgCardDef *c, int cardId, char *text)
     st.affected = ParamOf(first, count, st.mode == MTG_STATIC_CONTINUOUS || st.hiddenKw ? "Affected"
                                       : st.mode == MTG_STATIC_CANT_BLOCK_BY ? "ValidAttacker"
                                       : st.mode == MTG_STATIC_MUST_ATTACK ? "ValidCreature"
-                                      : st.mode == MTG_STATIC_CANT_TARGET ? "ValidTarget" : "ValidCard");
+                                      : st.mode == MTG_STATIC_CANT_TARGET ? "ValidTarget"
+                                      : st.mode == MTG_STATIC_BLOCK_SHADOW ? "ValidBlocker" : "ValidCard");
+    if (st.mode == MTG_STATIC_BLOCK_SHADOW && (!(st.blocker = ParamOf(first, count, "ValidAttacker"))
+                                               || !Mtg_ValidSpecKnown(st.blocker)))
+        goto unknown;   // (blocker here: the attackers it may block)
+    if (st.global)
+        st.affected = "Card";
     if (st.mode == MTG_STATIC_CANT_BE_ACTIVATED && !st.affected)
         st.affected = "Card";   // (Stabilizer: every card's Cycling)
     if (st.mode == MTG_STATIC_CANT_PLAY_LAND && !st.affected)
@@ -1415,7 +1436,11 @@ int Mtg_StaticController(const MtgDuel *d, int obj)
 // does this static (from S, controlled by CTRL) forbid it? (Mtg_StaticForbids' test of one)
 static int ForbidBy(const MtgDuel *d, const MtgStatic *st, int s, int ctrl, int mode, int obj, int other)
 {
+    if (st->mode == mode && st->global)
+        return Present(d, st, s);
     if (st->mode != mode || !Applies(d, st, s, obj))
+        return 0;
+    if (mode == MTG_STATIC_BLOCK_SHADOW && !Mtg_ValidObj(d, other, st->blocker, s, ctrl))
         return 0;
     if (mode == MTG_STATIC_CANT_BLOCK_BY && st->blocker && !Mtg_ValidObj(d, other, st->blocker, s, ctrl))
         return 0;

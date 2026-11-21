@@ -3645,6 +3645,50 @@ static void TestTypeLayer(void)
     (void)hour;
 }
 
+static void TestNewStaticModes(void)
+{
+    int oph, fort, staff, wraith, bears, i, hand;
+    printf("statics: no combat damage, attacks with defender, landwalk ignored, mana kept\n");
+    Table();   // Ophidian unblocked: you may draw; if you do, it assigns no combat damage
+    oph = Put(0, "Ophidian", MTG_ZONE_BATTLEFIELD);
+    for (i = 0; i < 3; i++)
+        PutLibTop(0, "Island");
+    hand = HandCount(0);
+    Attack(1);
+    for (i = 0; i < 8 && !(Mtg_Query(&sD)->kind == MTG_Q_CHOOSE && Mtg_Query(&sD)->choice == MTG_CHOICE_YESNO); i++)
+        Pass();
+    CHECK(Mtg_Query(&sD)->kind == MTG_Q_CHOOSE, "you may draw: asked");
+    Choose(1);
+    GoTo(0, MTG_STEP_COMBAT_END);
+    CHECK(HandCount(0) == hand + 1 && sD.players[1].life == 20, "drew, no damage (life %d)", sD.players[1].life);
+    (void)oph;
+
+    Table();   // Mobile Fort: {3}: +3/-1, it can attack this turn as though it didn't have defender
+    Lands(0, "Island", 3);
+    fort = Put(0, "Mobile Fort", MTG_ZONE_BATTLEFIELD);
+    GoTo(0, MTG_STEP_COMBAT_BEGIN);
+    Do(MTG_ACT_ACTIVATE, fort, -1, 0);
+    PassBoth();
+    Pass();
+    Pass();
+    CHECK(Mtg_Query(&sD)->kind == MTG_Q_ATTACKERS && Mtg_Query(&sD)->candidateCount == 1, "the fort may attack");
+
+    Table();   // Staff of the Ages: a swampwalker can be blocked by one who has a Swamp
+    staff = Put(0, "Staff of the Ages", MTG_ZONE_BATTLEFIELD);
+    wraith = Put(0, "Bog Wraith", MTG_ZONE_BATTLEFIELD);
+    bears = Put(1, "Grizzly Bears", MTG_ZONE_BATTLEFIELD);
+    Put(1, "Swamp", MTG_ZONE_BATTLEFIELD);
+    CHECK(Mtg_CanBlock(&sD, bears, wraith), "the bears can block the swampwalker");
+    Mtg_MoveTo(&sD, staff, MTG_ZONE_GRAVEYARD);
+    CHECK(!Mtg_CanBlock(&sD, bears, wraith), "the staff gone: not any more");
+
+    Table();   // Upwelling: mana stays from step to step
+    Put(0, "Upwelling", MTG_ZONE_BATTLEFIELD);
+    sD.players[0].pool[MTG_G] = 2;
+    GoTo(0, MTG_STEP_COMBAT_BEGIN);
+    CHECK(sD.players[0].pool[MTG_G] == 2, "the green mana kept (%d)", sD.players[0].pool[MTG_G]);
+}
+
 static void TestDuels(void)
 {
     static MtgDeck red, green;
@@ -3942,6 +3986,7 @@ int main(int argc, char **argv)
     TestTapAllPerm();
     TestProtectionKinds();
     TestTypeLayer();
+    TestNewStaticModes();
     TestCantCounter();
     TestTrigModes();
     TestBecomesTarget();

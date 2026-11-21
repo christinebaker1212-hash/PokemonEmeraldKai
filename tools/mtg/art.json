@@ -867,6 +867,13 @@
 "number": "101",
 "set": "nem"
 },
+"Animate Wall": {
+"artist": "Dan Frazier",
+"file": "4ed_4",
+"frame": "1993",
+"number": "4",
+"set": "4ed"
+},
 "Ankh of Mishra": {
 "artist": "Amy Weber",
 "file": "4ed_294",
@@ -6432,6 +6439,13 @@
 "number": "72a",
 "set": "hml"
 },
+"Dwarven Vigilantes": {
+"artist": "Pete Venters",
+"file": "vis_77",
+"frame": "1997",
+"number": "77",
+"set": "vis"
+},
 "Dwarven Warriors": {
 "artist": "Douglas Shuler",
 "file": "4ed_187",
@@ -7964,6 +7978,13 @@
 "frame": "1993",
 "number": "185",
 "set": "ice"
+},
+"Flaring Pain": {
+"artist": "Glen Angus",
+"file": "jud_89",
+"frame": "1997",
+"number": "89",
+"set": "jud"
 },
 "Flash Flood": {
 "artist": "Tom Wänerstrand",
@@ -10023,6 +10044,13 @@
 "number": "82",
 "set": "vis"
 },
+"Heartwood Dryad": {
+"artist": "Rebecca Guay",
+"file": "tmp_231",
+"frame": "1997",
+"number": "231",
+"set": "tmp"
+},
 "Heartwood Giant": {
 "artist": "Randy Elliott",
 "file": "tmp_232",
@@ -10884,6 +10912,13 @@
 "number": "140",
 "set": "mmq"
 },
+"Instill Energy": {
+"artist": "Dameon Willich",
+"file": "4ed_252",
+"frame": "1993",
+"number": "252",
+"set": "4ed"
+},
 "Insubordination": {
 "artist": "Andrew Goldhawk",
 "file": "mmq_141",
@@ -11549,6 +11584,13 @@
 "number": "85",
 "set": "vis"
 },
+"Keeper of Tresserhorn": {
+"artist": "Zak Plucinski & D. Alexander Gregory",
+"file": "all_52",
+"frame": "1993",
+"number": "52",
+"set": "all"
+},
 "Keeper of the Nine Gales": {
 "artist": "Jim Nelson",
 "file": "lgn_42",
@@ -11961,6 +12003,34 @@
 "frame": "1997",
 "number": "61",
 "set": "sth"
+},
+"Laccolith Grunt": {
+"artist": "Arnie Swekel",
+"file": "nem_87",
+"frame": "1997",
+"number": "87",
+"set": "nem"
+},
+"Laccolith Titan": {
+"artist": "Tony Szczudlo",
+"file": "nem_89",
+"frame": "1997",
+"number": "89",
+"set": "nem"
+},
+"Laccolith Warrior": {
+"artist": "Mark Zug",
+"file": "nem_90",
+"frame": "1997",
+"number": "90",
+"set": "nem"
+},
+"Laccolith Whelp": {
+"artist": "Dave Dorman",
+"file": "nem_91",
+"frame": "1997",
+"number": "91",
+"set": "nem"
 },
 "Land Cap": {
 "artist": "Allen Williams",
@@ -13432,6 +13502,13 @@
 "number": "114",
 "set": "exo"
 },
+"Mirror Wall": {
+"artist": "Mark Brill",
+"file": "jud_47",
+"frame": "1997",
+"number": "47",
+"set": "jud"
+},
 "Miscalculation": {
 "artist": "Jeff Laubenstein",
 "file": "ulg_36",
@@ -13501,6 +13578,13 @@
 "frame": "1997",
 "number": "90",
 "set": "sth"
+},
+"Mobile Fort": {
+"artist": "Mark Tedin",
+"file": "usg_303",
+"frame": "1997",
+"number": "303",
+"set": "usg"
 },
 "Mobilization": {
 "artist": "Carl Critchlow",
@@ -14517,6 +14601,13 @@
 "number": "331",
 "set": "ice"
 },
+"Ophidian": {
+"artist": "Cliff Nielsen",
+"file": "wth_45",
+"frame": "1997",
+"number": "45",
+"set": "wth"
+},
 "Opportunist": {
 "artist": "Dan Frazier",
 "file": "tmp_194",
@@ -14579,6 +14670,13 @@
 "frame": "1997",
 "number": "112",
 "set": "wth"
+},
+"Orcish Squatters": {
+"artist": "Richard Kane Ferguson",
+"file": "ice_211",
+"frame": "1993",
+"number": "211",
+"set": "ice"
 },
 "Order of Yawgmoth": {
 "artist": "Chippy",
@@ -17211,6 +17309,13 @@
 "frame": "1997",
 "number": "139",
 "set": "wth"
+},
+"Rolling Stones": {
+"artist": "John Matson",
+"file": "sth_11",
+"frame": "1997",
+"number": "11",
+"set": "sth"
 },
 "Root Cage": {
 "artist": "Glen Angus",
@@ -20404,6 +20509,13 @@
 "number": "142",
 "set": "scg"
 },
+"Staff of the Ages": {
+"artist": "Daniel Gelon",
+"file": "ice_340",
+"frame": "1993",
+"number": "340",
+"set": "ice"
+},
 "Stag Beetle": {
 "artist": "Anthony S. Waters",
 "file": "ons_285",
@@ -22756,6 +22868,13 @@
 "number": "113",
 "set": "ody"
 },
+"Upwelling": {
+"artist": "John Avon",
+"file": "scg_131",
+"frame": "1997",
+"number": "131",
+"set": "scg"
+},
 "Urborg Drake": {
 "artist": "Sam Wood",
 "file": "inv_283",
@@ -23519,6 +23638,13 @@
 "number": "49",
 "set": "sth"
 },
+"Walking Wall": {
+"artist": "Anthony S. Waters",
+"file": "ice_346",
+"frame": "1993",
+"number": "346",
+"set": "ice"
+},
 "Wall of Air": {
 "artist": "Richard Thomas",
 "file": "4ed_113",
@@ -23553,6 +23679,13 @@
 "frame": "1997",
 "number": "151",
 "set": "mir"
+},
+"Wall of Diffusion": {
+"artist": "DiTerlizzi",
+"file": "tmp_211",
+"frame": "1997",
+"number": "211",
+"set": "tmp"
 },
 "Wall of Distortion": {
 "artist": "Mark Tedin",
@@ -23700,6 +23833,13 @@
 "frame": "1993",
 "number": "114",
 "set": "4ed"
+},
+"Wall of Wonder": {
+"artist": "Richard Thomas",
+"file": "bchr_28",
+"frame": "1993",
+"number": "28",
+"set": "bchr"
 },
 "Wall of Wood": {
 "artist": "Mark Tedin",

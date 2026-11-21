@@ -8733,3 +8733,11 @@ res/moves/chatter/anim.s).
 - Statics' AddKeyword$ Protection:SPEC (creatures, Gorgons; ...:Card.CardUID_HostCardUID: not from the Aura itself),
   from artifacts, from cardColors (each creature's own colors): MtgStaticMods.protSpec / protExcept, Mtg_ProtectedFrom.
 - Playable: 3527 -> 3558. Tests: test_rules.c TestTypeLayer (Blood Moon on City of Brass, Living Lands, Darkest Hour).
+
+## MAGIC: more static modes (2026-11-21)
+- AssignNoCombatDamage (Ophidian, the Laccoliths: CombatDamage skips it), CanAttackDefender (the walls that attack),
+  CanAttackIfHaste (Instill Energy), CanBlockIfShadow (Heartwood Dryad: ValidBlocker$ may block ValidAttacker$ with
+  shadow), and the modes about no card (MtgStatic.global: in force while present): CantPreventDamage (Flaring Pain: no
+  Fog, shield, prevention static or protection prevents damage), IgnoreLandWalk (Staff of the Ages), UnspentMana
+  (Upwelling: pools aren't emptied between steps).
+- Playable: 3558 -> 3578. Tests: test_rules.c TestNewStaticModes.

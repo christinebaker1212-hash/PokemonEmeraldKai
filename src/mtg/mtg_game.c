@@ -419,16 +419,18 @@ void Mtg_GainLife(MtgDuel *d, int player, int amount)
 void Mtg_DealDamage(MtgDuel *d, int sourceObj, MtgTarget to, int amount, int combat)
 {
     uint8_t *shield;
+    int noPrevent;
     if (amount <= 0)
         return;
+    noPrevent = Mtg_StaticForbids(d, MTG_STATIC_CANT_PREVENT, MTG_NO_OBJ, MTG_NO_OBJ);   // (Flaring Pain: none of these)
     // "prevent all (combat) damage ...": a Fog this turn, or a PreventDamage replacement in force (mtg_static.c)
-    if ((combat && d->fog) || Mtg_DamagePrevented(d, sourceObj, to, combat, amount)) {
+    if (!noPrevent && ((combat && d->fog) || Mtg_DamagePrevented(d, sourceObj, to, combat, amount))) {
         Mtg_Event(d, MTG_EV_PREVENTED, sourceObj, to.kind == MTG_TGT_OBJ ? to.id : -1 - to.id, amount);
         return;
     }
     // "prevent the next n damage" (PreventDamageEffect's shield, used up first)
     shield = to.kind == MTG_TGT_OBJ ? &d->objs[to.id].prevent : to.kind == MTG_TGT_PLAYER ? &d->players[to.id].prevent : NULL;
-    if (shield && *shield && (to.kind != MTG_TGT_OBJ || d->objs[to.id].zone == MTG_ZONE_BATTLEFIELD)) {
+    if (!noPrevent && shield && *shield && (to.kind != MTG_TGT_OBJ || d->objs[to.id].zone == MTG_ZONE_BATTLEFIELD)) {
         int n = *shield < amount ? *shield : amount;
         *shield = (uint8_t)(*shield - n);
         amount -= n;
@@ -439,7 +441,7 @@ void Mtg_DealDamage(MtgDuel *d, int sourceObj, MtgTarget to, int amount, int com
     if (to.kind == MTG_TGT_OBJ) {
         if (d->objs[to.id].zone != MTG_ZONE_BATTLEFIELD)
             return;
-        if (sourceObj != MTG_NO_OBJ && Mtg_ProtectedFrom(d, to.id, sourceObj, 0))
+        if (!noPrevent && sourceObj != MTG_NO_OBJ && Mtg_ProtectedFrom(d, to.id, sourceObj, 0))
             return;
         if (!(Mtg_ObjTypes(d, to.id) & MTG_T_CREATURE))
             return;   // (planeswalkers: not yet)
@@ -1842,7 +1844,9 @@ static int CanAttack(const MtgDuel *d, int obj)
     const MtgObj *o = &d->objs[obj];
     uint32_t kw = Mtg_Keywords(d, obj);
     return IsCreature(d, obj) && o->controller == d->active && !o->tapped
-        && (!o->sick || (kw & MTG_KW_BIT(MTG_KW_HASTE))) && !(kw & MTG_KW_BIT(MTG_KW_DEFENDER)) && !(kw & MTG_KWX_CANT_ATTACK)
+        && (!o->sick || (kw & MTG_KW_BIT(MTG_KW_HASTE)) || Mtg_StaticForbids(d, MTG_STATIC_ATTACK_HASTE, obj, MTG_NO_OBJ))
+        && (!(kw & MTG_KW_BIT(MTG_KW_DEFENDER)) || Mtg_StaticForbids(d, MTG_STATIC_ATTACK_DEFENDER, obj, MTG_NO_OBJ))
+        && !(kw & MTG_KWX_CANT_ATTACK)
         && !Mtg_StaticForbids(d, MTG_STATIC_CANT_ATTACK, obj, MTG_NO_OBJ);
 }
 
@@ -1869,8 +1873,9 @@ int Mtg_CanBlock(const MtgDuel *d, int blocker, int attacker)
     if ((akw & MTG_KW_BIT(MTG_KW_FEAR)) && !(Mtg_ObjTypes(d, blocker) & MTG_T_ARTIFACT) && !(Mtg_ObjColors(d, blocker) & MTG_COLOR_BIT(MTG_B)))
         return 0;
     // (shadow: "can block or be blocked by only creatures with shadow", both ways)
-    if (((akw ^ bkw) & MTG_KW_BIT(MTG_KW_SHADOW)) != 0)
-        return 0;
+    if (((akw ^ bkw) & MTG_KW_BIT(MTG_KW_SHADOW)) != 0
+        && !((akw & MTG_KW_BIT(MTG_KW_SHADOW)) && Mtg_StaticForbids(d, MTG_STATIC_BLOCK_SHADOW, blocker, attacker)))
+        return 0;   // (Heartwood Dryad: "can block creatures with shadow as though it had shadow")
     uint8_t walk = Mtg_Landwalk(d, attacker);
     (void)ac;
     if (Mtg_ProtectedFrom(d, attacker, blocker, 0))
@@ -1878,6 +1883,8 @@ int Mtg_CanBlock(const MtgDuel *d, int blocker, int attacker)
     if (Mtg_StaticForbids(d, MTG_STATIC_CANT_BLOCK, blocker, MTG_NO_OBJ)
         || Mtg_StaticForbids(d, MTG_STATIC_CANT_BLOCK_BY, attacker, blocker))
         return 0;
+    if (walk && Mtg_StaticForbids(d, MTG_STATIC_IGNORE_LANDWALK, MTG_NO_OBJ, MTG_NO_OBJ))
+        walk = 0;   // (Staff of the Ages)
     for (i = 0; i < 5; i++)
         if ((walk & MTG_COLOR_BIT(i)) && ControlsLandType(d, d->objs[blocker].controller, i))
             return 0;
@@ -1943,8 +1950,8 @@ static void CombatDamage(MtgDuel *d, int firstStrikeStep)
         if (!IsCreature(d, i) || !DealsInStep(d, i, firstStrikeStep))
             continue;
         power = Mtg_Power(d, i);
-        if (power <= 0)
-            continue;
+        if (power <= 0 || Mtg_StaticForbids(d, MTG_STATIC_NO_COMBAT_DAMAGE, i, MTG_NO_OBJ))
+            continue;   // (Ophidian: "assigns no combat damage this turn")
         if (d->objs[i].attacking) {
             int left = power, trample = (Mtg_Keywords(d, i) & MTG_KW_BIT(MTG_KW_TRAMPLE)) != 0, last = -1;
             if (!d->objs[i].blocked) {
@@ -2022,8 +2029,9 @@ static void EndOfTurnCleanup(MtgDuel *d)
 static void NextStep(MtgDuel *d)
 {
     int p;
-    for (p = 0; p < MTG_PLAYERS; p++)
-        memset(d->players[p].pool, 0, sizeof(d->players[p].pool));   // mana empties between steps
+    if (!Mtg_StaticForbids(d, MTG_STATIC_UNSPENT_MANA, MTG_NO_OBJ, MTG_NO_OBJ))   // (Upwelling: it stays)
+        for (p = 0; p < MTG_PLAYERS; p++)
+            memset(d->players[p].pool, 0, sizeof(d->players[p].pool));   // mana empties between steps
     d->stepStarted = 0;
     d->passes = 0;
     if (d->step == MTG_STEP_CLEANUP) {

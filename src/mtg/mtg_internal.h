@@ -224,7 +224,11 @@ enum { MTG_STATIC_CONTINUOUS, MTG_STATIC_CANT_BLOCK, MTG_STATIC_CANT_ATTACK, MTG
        MTG_STATIC_MUST_ATTACK, MTG_STATIC_CANT_BE_CAST, MTG_STATIC_CANT_TARGET, MTG_STATIC_CANT_PLAY_LAND, MTG_STATIC_CANT_BE_ACTIVATED,
        MTG_STATIC_ETB_TAPPED, MTG_STATIC_NO_UNTAP, MTG_STATIC_CANT_REGENERATE,
        MTG_STATIC_PREVENT_DAMAGE, MTG_STATIC_CANT_BE_COUNTERED,
-       MTG_STATIC_ATTACK_TAX };   // (CantAttackUnless: its mana for each creature it affects that attacks)   // (PREVENT_DAMAGE: Event$ DamageDone | Prevent$ True, another R: line)   // (two replacement effects, R: lines, kept here: they test alike)
+       MTG_STATIC_ATTACK_TAX,
+       // AssignNoCombatDamage, CanAttackDefender, CanAttackIfHaste (ValidCard$); CanBlockIfShadow (ValidBlocker$ that
+       // may block ValidAttacker$); and the global ones (no card: global): CantPreventDamage, IgnoreLandWalk, UnspentMana
+       MTG_STATIC_NO_COMBAT_DAMAGE, MTG_STATIC_ATTACK_DEFENDER, MTG_STATIC_ATTACK_HASTE, MTG_STATIC_BLOCK_SHADOW,
+       MTG_STATIC_CANT_PREVENT, MTG_STATIC_IGNORE_LANDWALK, MTG_STATIC_UNSPENT_MANA };   // (CantAttackUnless: its mana for each creature it affects that attacks)   // (PREVENT_DAMAGE: Event$ DamageDone | Prevent$ True, another R: line)   // (two replacement effects, R: lines, kept here: they test alike)
 typedef struct {
     uint16_t card;
     uint8_t mode;                   // MTG_STATIC_*
@@ -270,6 +274,7 @@ typedef struct {
     // RemoveCreatureTypes$ True; SetColor$ (setColors: MTG_SETCOLOR | the colors, | MTG_SETCOLOR_CHOSEN its chosen one)
     uint8_t addTypes, removeLand, removeCreature, setColors;
     uint16_t addSub[2];
+    uint8_t global;                 // a mode about no card (CantPreventDamage...): in force while it is (IsPresent$...)
     uint8_t protExceptHostPad;         // ...:Card.CardUID_HostCardUID: not from the source itself (an Aura stays on)
     uint8_t taxYou;                 // AttackTax's Target$ You: only for attacks on its controller
     const char *taxX;               // ... its Cost$ an SVar counted now (else costGeneric)
