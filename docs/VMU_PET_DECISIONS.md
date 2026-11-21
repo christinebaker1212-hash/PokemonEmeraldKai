@@ -34,6 +34,16 @@ Started 2026-11-20. Nothing is built yet; graphics come from the user.
   can't check the VMU regularly or answer care in time. **A day's care (by the VMU's clock) must fit in a 5-minute
   window**, a restroom break.
 
+- **Region editions** (2026-11-21): one program per region, each hatching only its own Pokémon, like versions:
+  **every region, KANTO through PALDEA**, each with its game's own regional POKéDEX (KANTO = FireRed's 151, JOHTO =
+  Crystal's, HOENN = Emerald's, SINNOH = Platinum's, UNOVA = Black's...), evolutions only within the edition.
+  This replaces the one 900-species program: an edition is about 130-200 species, so it takes far fewer blocks and the
+  VMU icon can be the pet's own Normal portrait (proposed: the program rewrites its own file icon).
+- **KANTO is the first edition.**
+- **One week of daily care reaches level 50**, faster with steps.
+- **Steps are a currency**: spent on faster levels, better IVs, turning it shiny, rare items (MASTER BALL, ASTRAL BALL)
+  that come into Kai with it. How steps reach the VMU is open: the VMU has no step sensor.
+
 ## Sprites (determined 2026-11-21)
 
 - **One frame a species**: PMD's Idle, facing down, frame 1 (tools/vmu_pet/pmd_read.py reads Kai's own
