@@ -20,3 +20,10 @@ $C cp '\VMU001.BIN' '\GID001\TWO.BIN' && $C rm '\GID001\TWO.BIN' && [ ! -f $T/sd
 $C mkdir '\NEW' && $C rmdir '\NEW' && [ ! -d $T/sd/NEW ] && echo "PASS folders"
 $C writeint $T/a.bin && $C readint $T/b.bin && cmp -s $T/a.bin $T/b.bin && echo "PASS internal memory"
 $C clock && echo "PASS clock"
+# opening VMUs from the VM2 is instant: copied in the background first (the manager's --test-cache)
+kill $PID 2>/dev/null; sleep 0.5
+rm -rf $T/sd/GID001/OLD.VMU && cp $T/sd/VMU001.BIN $T/sd/GID001/GAME.VMU && cp $T/sd/VMU001.BIN $T/sd/VMU002.BIN
+python3 test/fake_vm2.py $T/sd $T/int.bin $T/port & PID=$!
+sleep 1
+rm -rf $B/cache
+CHANGE_FILE=$T/sd/VMU002.BIN CHANGE_PATH='\VMU002.BIN' $B/vmu_manager --test-cache "$(cat $T/port)"

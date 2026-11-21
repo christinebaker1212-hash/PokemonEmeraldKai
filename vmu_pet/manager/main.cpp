@@ -21,6 +21,8 @@
 #include <memory>
 #include <string>
 #include <thread>
+#include <deque>
+#include <set>
 #include <vector>
 
 #include "imgui.h"
@@ -30,6 +32,7 @@
 
 #include "font_data.h"
 #include "font_bold.h"
+#include "filedlg.h"
 #include "pngio.h"
 #include "vm2link.h"
 #include "vmu.h"
@@ -86,6 +89,8 @@ static std::string nowStamp() {
 }
 
 
+static bool g_shotMode = false;  // --shot: draw a picture of the window and quit
+
 // messages: small notices in the corner (drawToasts; defined near main)
 static void status(const std::string& s, bool bad = false);
 
@@ -118,6 +123,7 @@ struct Job {
     }
 };
 static std::unique_ptr<Job> g_job;
+static std::atomic<bool> g_jobActive{false};  // read by the prefetcher's thread
 
 static bool busy() { return g_job != nullptr; }
 
@@ -127,6 +133,7 @@ static void runJob(const std::string& label, std::function<bool(Job&, std::strin
     g_job->label = label;
     g_job->work = std::move(work);
     g_job->then = std::move(then);
+    g_jobActive = true;
     Job* j = g_job.get();
     j->thread = std::thread([j] {
         j->ok = j->work(*j, &j->err);
@@ -138,7 +145,8 @@ static void pollJob() {
     if(!g_job || !g_job->finished) return;
     g_job->thread.join();
     std::unique_ptr<Job> j = std::move(g_job);
-    if(!j->ok) status(j->label + " failed: " + j->err);
+    g_jobActive = false;
+    if(!j->ok) status(j->label + " failed: " + j->err, true);
     if(j->then) j->then(*j);
 }
 
@@ -168,6 +176,7 @@ struct Doc {
     int selected = -1;    // directory entry
     Editor ed;
     bool open = true;
+    bool checking = false;  // opened from the cache; the VM2's own copy still being read
     bool dirty() const { return img.raw != original; }
     std::string where() const {
         switch(src) {
@@ -229,6 +238,139 @@ static std::string sdJoin(const std::string& folder, const std::string& name) {
     return folder == "\\" ? "\\" + name : folder + "\\" + name;
 }
 
+
+// ---------------------------------------------------------------- the VM2's VMUs kept on this PC (opening is instant)
+// A thread copies every VMU off the VM2 while it's connected (when the UI isn't using it), into memory and into
+// cache/<the VM2's id>/ next to the program. Opening one shows that copy at once; the VM2's own copy is read again
+// right away, and the open VMU follows it if it changed (and has no changes of its own).
+
+struct Prefetch {
+    std::mutex m;
+    std::map<std::string, Bytes> mem;   // "internal" or an SD path -> its latest copy
+    std::set<std::string> fresh;        // read from the VM2 since connecting
+    std::deque<std::string> urgent, queue;
+    std::vector<std::pair<std::string, std::vector<vm2::Entry>>> listings;  // for the UI's tree
+    std::vector<std::string> arrived;   // read since the UI last looked
+    std::atomic<bool> stop{false}, walked{false};
+    std::atomic<int> total{0}, done{0};
+    std::string device;
+    std::thread th;
+};
+static Prefetch g_pf;
+
+static std::string cachePath(const std::string& device, const std::string& path) {
+    std::string safe;
+    for(char c : path) safe += isalnum((unsigned char)c) || c == '.' || c == '-' ? c : '_';
+    return baseDir() + "cache/" + (device.empty() ? "vm2" : device) + "/" + safe + ".bin";
+}
+
+static void prefetchStore(const std::string& path, const Bytes& b) {
+    std::string dev;
+    {
+        std::lock_guard<std::mutex> g(g_pf.m);
+        g_pf.mem[path] = b;
+        g_pf.fresh.insert(path);
+        g_pf.arrived.push_back(path);
+        dev = g_pf.device;
+    }
+    std::string file = cachePath(dev, path);
+    std::error_code ec;
+    fs::create_directories(fs::u8path(file).parent_path(), ec);
+    writeFile(file, b);
+}
+
+static bool cachedCopy(const std::string& path, Bytes& out, bool& fresh) {
+    std::string dev;
+    {
+        std::lock_guard<std::mutex> g(g_pf.m);
+        auto it = g_pf.mem.find(path);
+        fresh = g_pf.fresh.count(path) > 0;
+        if(it != g_pf.mem.end()) { out = it->second; return true; }
+        dev = g_pf.device;
+    }
+    fresh = false;
+    return readFile(cachePath(dev, path), out) && out.size() == (size_t)vmu::kImageSize;
+}
+
+static void prefetchLoop() {
+    using namespace std::chrono_literals;
+    while(!g_pf.stop) {
+        if(!g_vm2.connected() || g_jobActive) { std::this_thread::sleep_for(100ms); continue; }
+        std::string next;
+        {
+            std::lock_guard<std::mutex> g(g_pf.m);
+            while(!g_pf.urgent.empty() && next.empty()) { next = g_pf.urgent.front(); g_pf.urgent.pop_front(); }
+        }
+        if(next.empty() && !g_pf.walked) {
+            std::vector<std::string> folders = {"\\"}, images = {"internal"};
+            bool ok = true;
+            for(size_t i = 0; i < folders.size() && !g_pf.stop; ++i) {
+                std::vector<vm2::Entry> es;
+                std::string err;
+                if(!g_vm2.list(folders[i], es, &err)) { ok = false; break; }
+                {
+                    std::lock_guard<std::mutex> g(g_pf.m);
+                    g_pf.listings.push_back({folders[i], es});
+                }
+                for(auto& e : es) {
+                    if(e.dir && i == 0) folders.push_back(sdJoin(folders[i], e.name));  // the VM2 keeps folders one deep
+                    else if(!e.dir && e.size == (uint32_t)vmu::kImageSize) images.push_back(sdJoin(folders[i], e.name));
+                }
+            }
+            if(!ok) { std::this_thread::sleep_for(1s); continue; }
+            {
+                std::lock_guard<std::mutex> g(g_pf.m);
+                g_pf.queue.clear();
+                int todo = 0;
+                for(auto& im : images) if(!g_pf.fresh.count(im)) { g_pf.queue.push_back(im); ++todo; }
+                g_pf.total = todo;
+                g_pf.done = 0;
+            }
+            g_pf.walked = true;
+            continue;
+        }
+        if(next.empty()) {
+            std::lock_guard<std::mutex> g(g_pf.m);
+            if(!g_pf.queue.empty()) { next = g_pf.queue.front(); g_pf.queue.pop_front(); }
+        }
+        if(next.empty()) { std::this_thread::sleep_for(200ms); continue; }
+        {
+            std::lock_guard<std::mutex> g(g_pf.m);
+            bool urgentAgain = false;
+            for(auto& u : g_pf.urgent) urgentAgain |= u == next;
+            if(g_pf.fresh.count(next) && !urgentAgain) { ++g_pf.done; continue; }
+        }
+        Bytes b;
+        std::string err;
+        bool ok = next == "internal" ? g_vm2.readInternal(b, nullptr, &err) : g_vm2.readFile(next, vmu::kImageSize, b, nullptr, &err);
+        if(ok && b.size() == (size_t)vmu::kImageSize) prefetchStore(next, b);
+        ++g_pf.done;
+    }
+}
+
+static void prefetchReset(const std::string& device) {
+    std::lock_guard<std::mutex> g(g_pf.m);
+    g_pf.device = device;
+    g_pf.mem.clear();
+    g_pf.fresh.clear();
+    g_pf.queue.clear();
+    g_pf.urgent.clear();
+    g_pf.listings.clear();
+    g_pf.walked = false;
+    g_pf.total = g_pf.done = 0;
+    if(!g_pf.th.joinable()) g_pf.th = std::thread(prefetchLoop);
+}
+
+static void prefetchUrgent(const std::string& path) {
+    std::lock_guard<std::mutex> g(g_pf.m);
+    g_pf.urgent.push_front(path);
+}
+
+static void prefetchRelist() { g_pf.walked = false; }
+
+// The UI's side, each frame: listings into the tree; open VMUs follow the VM2's copy when it changed
+static void prefetchPump();
+
 static void vm2Connect() {
     std::string port = g_portPick > 0 && g_portPick <= (int)g_ports.size() ? g_ports[g_portPick - 1].name : "";
     runJob("Connecting to the VM2", [port](Job&, std::string* err) {
@@ -239,7 +381,8 @@ static void vm2Connect() {
     }, [](Job& j) {
         if(!j.ok) return;
         g_sd.clear();
-        status("VM2 connected on " + g_vm2.port + " (firmware " + g_vm2.fw + ")");
+        prefetchReset(g_vm2.id);
+        status("VM2 connected (firmware " + g_vm2.fw + ")");
     });
 }
 
@@ -257,8 +400,39 @@ struct Browser {
 static Browser g_browse;
 static std::string g_lastDir;
 
+// A file / folder to pick: Windows Explorer's own window (zenity on Linux), opened between frames (pumpPick); the
+// manager's own browser where there's none.
+struct PickRequest {
+    bool pending = false, save = false, folders = false;
+    std::string title, name;
+    std::vector<std::string> exts;
+    std::function<void(const std::string&)> done;
+};
+static PickRequest g_pick;
+static void browseBuiltIn(const std::string& title, bool save, bool folders, std::vector<std::string> exts,
+                          const std::string& name, std::function<void(const std::string&)> done);
+
 static void browse(const std::string& title, bool save, bool folders, std::vector<std::string> exts,
                    const std::string& name, std::function<void(const std::string&)> done) {
+    g_pick = PickRequest{true, save, folders, title, name, std::move(exts), std::move(done)};
+}
+
+static void pumpPick() {
+    if(!g_pick.pending) return;
+    PickRequest r = std::move(g_pick);
+    g_pick = PickRequest();
+    std::string out;
+    filedlg::Kind kind = r.folders ? filedlg::Kind::Folder : r.save ? filedlg::Kind::Save : filedlg::Kind::Open;
+    filedlg::Result res = g_shotMode ? filedlg::Result::Unavailable : filedlg::show(kind, r.title, r.exts, r.name, g_lastDir, out);
+    if(res == filedlg::Result::Picked) {
+        fs::path p = fs::u8path(out);
+        g_lastDir = r.folders ? out : p.parent_path().u8string();
+        r.done(out);
+    } else if(res == filedlg::Result::Unavailable) browseBuiltIn(r.title, r.save, r.folders, r.exts, r.name, r.done);
+}
+
+static void browseBuiltIn(const std::string& title, bool save, bool folders, std::vector<std::string> exts,
+                          const std::string& name, std::function<void(const std::string&)> done) {
     g_browse = Browser();
     g_browse.active = true;
     g_browse.title = title;
@@ -562,7 +736,6 @@ static void pngToIcon(const png::Rgba& img, int frameX, vmu::Icon& ic, std::arra
         }
 }
 
-static bool g_shotMode = false;
 static std::string g_startPort;  // --port: connect to the VM2 there at start
 static int g_shotTab = 0;        // --shot: the inspector tab shown (SHOT_TAB)
 
@@ -624,71 +797,279 @@ static bool paletteEditor(std::array<uint16_t, 16>& pal, int& pick) {
 static ImFont* g_fontBold = nullptr;
 static ImFont* g_fontTitle = nullptr;
 
-namespace col {
-static const ImU32 accent = IM_COL32(226, 108, 52, 255);       // warm orange
-static const ImU32 accentDark = IM_COL32(190, 82, 32, 255);
-static const ImU32 ink = IM_COL32(43, 41, 38, 255);
-static const ImU32 soft = IM_COL32(138, 132, 123, 255);
-static const ImU32 card = IM_COL32(255, 255, 255, 255);
-static const ImU32 cardHover = IM_COL32(253, 244, 236, 255);
-static const ImU32 cardSel = IM_COL32(252, 226, 208, 255);
-static const ImU32 line = IM_COL32(226, 221, 213, 255);
-static const ImU32 ok = IM_COL32(66, 160, 96, 255);
-static const ImU32 off = IM_COL32(170, 165, 158, 255);
-static const ImU32 warn = IM_COL32(232, 170, 40, 255);
+namespace col {  // set by applyTheme
+static ImU32 accent, accentDark, ink, soft, card, cardHover, cardSel, line, ok, off, warn, panel, bgTop, bgBottom, glow;
 }  // namespace col
+
+static bool g_dark = false;
 
 static ImVec4 v4(ImU32 c) { return ImGui::ColorConvertU32ToFloat4(c); }
 
-static void applyTheme() {
+// Two looks after the Dreamcast's own menus: light (white and sky blue) and dark (night blue); both with its orange.
+static void applyTheme(bool dark) {
+    g_dark = dark;
+    using namespace col;
+    accent = IM_COL32(242, 107, 29, 255);
+    accentDark = IM_COL32(204, 82, 14, 255);
+    ok = IM_COL32(52, 178, 108, 255);
+    warn = IM_COL32(240, 176, 40, 255);
+    if(!dark) {
+        ink = IM_COL32(28, 40, 58, 255);
+        soft = IM_COL32(110, 124, 144, 255);
+        panel = IM_COL32(255, 255, 255, 222);
+        card = IM_COL32(255, 255, 255, 255);
+        cardHover = IM_COL32(236, 244, 252, 255);
+        cardSel = IM_COL32(255, 232, 214, 255);
+        line = IM_COL32(206, 218, 232, 255);
+        off = IM_COL32(150, 162, 178, 255);
+        bgTop = IM_COL32(236, 243, 250, 255);
+        bgBottom = IM_COL32(198, 214, 232, 255);
+        glow = IM_COL32(255, 255, 255, 90);
+    } else {
+        ink = IM_COL32(226, 236, 248, 255);
+        soft = IM_COL32(130, 152, 182, 255);
+        panel = IM_COL32(16, 30, 52, 226);
+        card = IM_COL32(22, 40, 68, 255);
+        cardHover = IM_COL32(30, 54, 90, 255);
+        cardSel = IM_COL32(74, 46, 34, 255);
+        line = IM_COL32(40, 64, 100, 255);
+        off = IM_COL32(96, 116, 146, 255);
+        bgTop = IM_COL32(14, 30, 58, 255);
+        bgBottom = IM_COL32(4, 10, 24, 255);
+        glow = IM_COL32(80, 140, 255, 40);
+    }
     ImGuiStyle& s = ImGui::GetStyle();
-    ImGui::StyleColorsLight();
+    if(dark) ImGui::StyleColorsDark();
+    else ImGui::StyleColorsLight();
     s.WindowPadding = ImVec2(14, 12);
     s.FramePadding = ImVec2(10, 6);
     s.ItemSpacing = ImVec2(10, 8);
     s.ItemInnerSpacing = ImVec2(8, 6);
-    s.FrameRounding = 6;
-    s.ChildRounding = 10;
-    s.PopupRounding = 8;
-    s.GrabRounding = 6;
-    s.TabRounding = 8;
-    s.WindowRounding = 10;
+    s.FrameRounding = 8;
+    s.ChildRounding = 14;
+    s.PopupRounding = 10;
+    s.GrabRounding = 8;
+    s.TabRounding = 10;
+    s.WindowRounding = 14;
     s.ScrollbarRounding = 8;
     s.ScrollbarSize = 12;
     s.ChildBorderSize = 1;
+    s.PopupBorderSize = 1;
     s.FrameBorderSize = 0;
     s.TabBarBorderSize = 0;
     ImVec4* c = s.Colors;
-    c[ImGuiCol_Text] = v4(col::ink);
-    c[ImGuiCol_TextDisabled] = v4(col::soft);
-    c[ImGuiCol_WindowBg] = ImVec4(0.957f, 0.945f, 0.925f, 1);
-    c[ImGuiCol_ChildBg] = ImVec4(1, 1, 1, 1);
-    c[ImGuiCol_PopupBg] = ImVec4(1, 1, 1, 1);
-    c[ImGuiCol_Border] = v4(col::line);
-    c[ImGuiCol_FrameBg] = ImVec4(0.945f, 0.930f, 0.905f, 1);
-    c[ImGuiCol_FrameBgHovered] = ImVec4(0.925f, 0.905f, 0.875f, 1);
-    c[ImGuiCol_FrameBgActive] = ImVec4(0.905f, 0.880f, 0.845f, 1);
-    c[ImGuiCol_Button] = ImVec4(0.925f, 0.905f, 0.875f, 1);
-    c[ImGuiCol_ButtonHovered] = ImVec4(0.985f, 0.880f, 0.800f, 1);
-    c[ImGuiCol_ButtonActive] = ImVec4(0.965f, 0.800f, 0.690f, 1);
-    c[ImGuiCol_Header] = v4(col::cardSel);
-    c[ImGuiCol_HeaderHovered] = v4(col::cardHover);
-    c[ImGuiCol_HeaderActive] = v4(col::cardSel);
-    c[ImGuiCol_CheckMark] = v4(col::accent);
-    c[ImGuiCol_SliderGrab] = v4(col::accent);
-    c[ImGuiCol_SliderGrabActive] = v4(col::accentDark);
-    c[ImGuiCol_Tab] = ImVec4(0.925f, 0.905f, 0.875f, 1);
-    c[ImGuiCol_TabHovered] = ImVec4(0.985f, 0.880f, 0.800f, 1);
-    c[ImGuiCol_TabSelected] = ImVec4(1, 1, 1, 1);
-    c[ImGuiCol_TabSelectedOverline] = v4(col::accent);
-    c[ImGuiCol_TabDimmedSelected] = ImVec4(1, 1, 1, 1);
-    c[ImGuiCol_Separator] = v4(col::line);
-    c[ImGuiCol_PlotHistogram] = v4(col::accent);
+    auto mix = [](ImU32 a, ImU32 b, float t) {
+        ImVec4 x = v4(a), y = v4(b);
+        return ImVec4(x.x + (y.x - x.x) * t, x.y + (y.y - x.y) * t, x.z + (y.z - x.z) * t, x.w + (y.w - x.w) * t);
+    };
+    c[ImGuiCol_Text] = v4(ink);
+    c[ImGuiCol_TextDisabled] = v4(soft);
+    c[ImGuiCol_WindowBg] = ImVec4(0, 0, 0, 0);  // the backdrop shows through (drawBackdrop)
+    c[ImGuiCol_ChildBg] = v4(panel);
+    c[ImGuiCol_PopupBg] = dark ? v4(IM_COL32(18, 34, 60, 250)) : ImVec4(1, 1, 1, 0.98f);
+    c[ImGuiCol_Border] = v4(line);
+    c[ImGuiCol_FrameBg] = dark ? v4(IM_COL32(10, 22, 42, 255)) : v4(IM_COL32(234, 241, 249, 255));
+    c[ImGuiCol_FrameBgHovered] = dark ? v4(IM_COL32(26, 46, 78, 255)) : v4(IM_COL32(222, 233, 246, 255));
+    c[ImGuiCol_FrameBgActive] = dark ? v4(IM_COL32(34, 58, 96, 255)) : v4(IM_COL32(210, 224, 242, 255));
+    c[ImGuiCol_Button] = dark ? v4(IM_COL32(30, 52, 86, 255)) : v4(IM_COL32(226, 236, 248, 255));
+    c[ImGuiCol_ButtonHovered] = mix(dark ? IM_COL32(30, 52, 86, 255) : IM_COL32(226, 236, 248, 255), accent, 0.35f);
+    c[ImGuiCol_ButtonActive] = mix(dark ? IM_COL32(30, 52, 86, 255) : IM_COL32(226, 236, 248, 255), accent, 0.6f);
+    c[ImGuiCol_Header] = v4(cardSel);
+    c[ImGuiCol_HeaderHovered] = v4(cardHover);
+    c[ImGuiCol_HeaderActive] = v4(cardSel);
+    c[ImGuiCol_CheckMark] = v4(accent);
+    c[ImGuiCol_SliderGrab] = v4(accent);
+    c[ImGuiCol_SliderGrabActive] = v4(accentDark);
+    c[ImGuiCol_Tab] = c[ImGuiCol_Button];
+    c[ImGuiCol_TabHovered] = c[ImGuiCol_ButtonHovered];
+    c[ImGuiCol_TabSelected] = v4(card);
+    c[ImGuiCol_TabSelectedOverline] = v4(accent);
+    c[ImGuiCol_TabDimmed] = c[ImGuiCol_Button];
+    c[ImGuiCol_TabDimmedSelected] = v4(card);
+    c[ImGuiCol_TabDimmedSelectedOverline] = v4(accent);
+    c[ImGuiCol_Separator] = v4(line);
+    c[ImGuiCol_SeparatorHovered] = v4(accent);
+    c[ImGuiCol_ResizeGrip] = ImVec4(0, 0, 0, 0);
+    c[ImGuiCol_PlotHistogram] = v4(accent);
     c[ImGuiCol_ScrollbarBg] = ImVec4(0, 0, 0, 0);
-    c[ImGuiCol_ScrollbarGrab] = ImVec4(0.82f, 0.79f, 0.75f, 1);
-    c[ImGuiCol_ModalWindowDimBg] = ImVec4(0.2f, 0.18f, 0.15f, 0.35f);
-    c[ImGuiCol_DragDropTarget] = v4(col::accent);
-    c[ImGuiCol_MenuBarBg] = ImVec4(1, 1, 1, 1);
+    c[ImGuiCol_ScrollbarGrab] = dark ? v4(IM_COL32(44, 70, 110, 255)) : v4(IM_COL32(190, 206, 226, 255));
+    c[ImGuiCol_ModalWindowDimBg] = dark ? ImVec4(0, 0.02f, 0.06f, 0.6f) : ImVec4(0.1f, 0.16f, 0.25f, 0.35f);
+    c[ImGuiCol_DragDropTarget] = v4(accent);
+    c[ImGuiCol_NavHighlight] = v4(accent);
+    c[ImGuiCol_TableHeaderBg] = c[ImGuiCol_Button];
+}
+
+// The backdrop: the Dreamcast menus' gradient with soft rings of light (drawn behind everything)
+static void drawBackdrop(float w, float h) {
+    ImDrawList* dl = ImGui::GetBackgroundDrawList();
+    dl->AddRectFilledMultiColor(ImVec2(0, 0), ImVec2(w, h), col::bgTop, col::bgTop, col::bgBottom, col::bgBottom);
+    float t = (float)ImGui::GetTime() * 0.05f;
+    struct Ring { float x, y, r, thick; };
+    const Ring rings[] = {{0.86f, 0.18f, 0.46f, 70}, {0.10f, 0.92f, 0.38f, 50}, {0.62f, 1.05f, 0.30f, 34}, {0.95f, 0.75f, 0.16f, 18}};
+    for(int i = 0; i < 4; ++i) {
+        const Ring& r = rings[i];
+        float rr = r.r * std::max(w, h) * (1.f + 0.02f * std::sin(t * 6 + i));
+        dl->AddCircle(ImVec2(r.x * w, r.y * h), rr, col::glow, 96, r.thick);
+        dl->AddCircle(ImVec2(r.x * w, r.y * h), rr * 0.82f, (col::glow & 0x00FFFFFF) | ((col::glow >> 25) << 24), 96, r.thick * 0.4f);
+    }
+    // an orange arc low on the right, the Dreamcast's colour
+    ImVec2 c(w * 0.97f, h * 1.02f);
+    dl->PathArcTo(c, std::min(w, h) * 0.32f, 3.3f, 4.5f, 64);
+    dl->PathStroke(IM_COL32(242, 107, 29, g_dark ? 70 : 60), 0, 22);
+}
+
+
+// ---- a VMU drawn as the real one: its shell in the VMU's own colour, its screen showing its 1-bit icon
+struct VmuLook {
+    ImU32 body = 0;
+    bool hasIcon = false;
+    vmu::MonoIcon icon;
+};
+
+static VmuLook lookOf(const vmu::Image& img) {
+    VmuLook l;
+    uint8_t r, g, b, a;
+    img.colorRgba(r, g, b, a);
+    if(img.customColor()) {  // over the white plastic, by its alpha
+        float k = a / 255.f;
+        l.body = IM_COL32((int)(232 + (r - 232) * k), (int)(232 + (g - 232) * k), (int)(226 + (b - 226) * k), 255);
+    } else l.body = IM_COL32(232, 232, 226, 255);
+    for(auto& f : img.files())
+        if(f.isIconData()) {
+            vmu::IconData id;
+            if(vmu::parseIconData(img.read(f), id)) { l.icon = id.mono; l.hasIcon = true; }
+        }
+    return l;
+}
+
+static ImU32 shade(ImU32 c, float k) {
+    ImVec4 v = ImGui::ColorConvertU32ToFloat4(c);
+    return ImGui::ColorConvertFloat4ToU32(ImVec4(v.x * k, v.y * k, v.z * k, v.w));
+}
+
+// h = the VMU's height; it is 0.62 h wide
+static void drawVmuShell(ImDrawList* dl, ImVec2 p, float h, const VmuLook& l) {
+    float w = h * 0.62f;
+    ImU32 body = l.body ? l.body : IM_COL32(232, 232, 226, 255);
+    dl->AddRectFilled(ImVec2(p.x + 2, p.y + 3), ImVec2(p.x + w + 2, p.y + h + 3), IM_COL32(0, 0, 0, 40), w * 0.22f);  // shadow
+    dl->AddRectFilled(p, ImVec2(p.x + w, p.y + h), body, w * 0.22f);
+    dl->AddRect(p, ImVec2(p.x + w, p.y + h), shade(body, 0.72f), w * 0.22f, 0, std::max(1.f, h / 90));
+    // the screen: a dark bezel, the LCD's green, the icon on it
+    ImVec2 s0(p.x + w * 0.12f, p.y + h * 0.10f), s1(p.x + w * 0.88f, p.y + h * 0.46f);
+    dl->AddRectFilled(s0, s1, IM_COL32(48, 56, 60, 255), w * 0.06f);
+    ImVec2 l0(s0.x + w * 0.06f, s0.y + w * 0.06f), l1(s1.x - w * 0.06f, s1.y - w * 0.06f);
+    dl->AddRectFilled(l0, l1, IM_COL32(158, 186, 150, 255), 2);
+    if(l.hasIcon && h >= 40) {
+        float lw = l1.x - l0.x, lh = l1.y - l0.y;
+        float px = std::min(lw / 48.f, lh / 32.f);  // the VMU's 48x32 screen, the icon in its middle
+        float ox = l0.x + (lw - 32 * px) / 2, oy = l0.y + (lh - 32 * px) / 2;
+        for(int y = 0; y < 32; ++y)
+            for(int x = 0; x < 32; ++x)
+                if(l.icon.at(x, y)) dl->AddRectFilled(ImVec2(ox + x * px, oy + y * px), ImVec2(ox + (x + 1) * px, oy + (y + 1) * px), IM_COL32(36, 46, 40, 255));
+    }
+    // the D-pad and A / B
+    ImU32 dark = IM_COL32(62, 64, 70, 255);
+    ImVec2 dc(p.x + w * 0.28f, p.y + h * 0.70f);
+    float a = w * 0.10f, b = w * 0.035f;
+    dl->AddRectFilled(ImVec2(dc.x - a, dc.y - b), ImVec2(dc.x + a, dc.y + b), dark, 1);
+    dl->AddRectFilled(ImVec2(dc.x - b, dc.y - a), ImVec2(dc.x + b, dc.y + a), dark, 1);
+    dl->AddCircleFilled(ImVec2(p.x + w * 0.62f, p.y + h * 0.74f), w * 0.065f, IM_COL32(200, 60, 50, 255));
+    dl->AddCircleFilled(ImVec2(p.x + w * 0.80f, p.y + h * 0.66f), w * 0.065f, IM_COL32(200, 60, 50, 255));
+    if(h >= 60) {  // MODE and SLEEP
+        dl->AddRectFilled(ImVec2(p.x + w * 0.36f, p.y + h * 0.88f), ImVec2(p.x + w * 0.48f, p.y + h * 0.91f), dark, 2);
+        dl->AddRectFilled(ImVec2(p.x + w * 0.54f, p.y + h * 0.88f), ImVec2(p.x + w * 0.66f, p.y + h * 0.91f), dark, 2);
+    }
+}
+
+// Looks of VMU images on this PC, read again only when the file changes
+static std::map<std::string, std::pair<fs::file_time_type, VmuLook>> g_looks;
+static VmuLook pcLook(const std::string& path) {
+    std::error_code ec;
+    auto mt = fs::last_write_time(fs::u8path(path), ec);
+    auto it = g_looks.find(path);
+    if(it != g_looks.end() && it->second.first == mt) return it->second.second;
+    Bytes b;
+    vmu::Image img;
+    VmuLook l;
+    if(readFile(path, b) && img.load(b, nullptr)) l = lookOf(img);
+    g_looks[path] = {mt, l};
+    return l;
+}
+
+// A row for a VMU image: a little VMU in its colour, its name, a grey line
+static bool vmuRow(const char* id, const VmuLook& look, const std::string& label, const std::string& sub, bool selected) {
+    ImGui::PushID(id);
+    float h = sub.empty() ? 34.f : 44.f;
+    ImVec2 p = ImGui::GetCursorScreenPos();
+    float w = ImGui::GetContentRegionAvail().x;
+    bool clicked = ImGui::InvisibleButton("row", ImVec2(w, h));
+    bool hov = ImGui::IsItemHovered();
+    ImDrawList* dl = ImGui::GetWindowDrawList();
+    if(selected || hov) dl->AddRectFilled(p, ImVec2(p.x + w, p.y + h), selected ? col::cardSel : col::cardHover, 8);
+    if(selected) dl->AddRectFilled(ImVec2(p.x, p.y + 6), ImVec2(p.x + 3, p.y + h - 6), col::accent, 2);
+    drawVmuShell(dl, ImVec2(p.x + 10, p.y + (h - 28) / 2), 28, look);
+    float tx = p.x + 38;
+    if(sub.empty()) dl->AddText(ImVec2(tx, p.y + (h - ImGui::GetTextLineHeight()) / 2), col::ink, label.c_str());
+    else {
+        dl->AddText(ImVec2(tx, p.y + 4), col::ink, label.c_str());
+        dl->AddText(ImVec2(tx, p.y + 23), col::soft, sub.c_str());
+    }
+    ImGui::PopID();
+    return clicked;
+}
+
+// Looks of the VM2's VMUs (from their copies on this PC), made again when a fresh copy arrives
+static std::map<std::string, VmuLook> g_sdLooks;
+static bool cachedCopy(const std::string& path, Bytes& out, bool& fresh);
+static VmuLook sdLook(const std::string& path) {
+    auto it = g_sdLooks.find(path);
+    if(it != g_sdLooks.end()) return it->second;
+    Bytes b;
+    bool fr;
+    vmu::Image img;
+    VmuLook l;
+    if(cachedCopy(path, b, fr) && img.load(b, nullptr)) l = lookOf(img);
+    g_sdLooks[path] = l;
+    return l;
+}
+
+// ---- settings, next to the program (settings.ini): the look, the folders shown
+static std::vector<std::string> g_pcFolders;
+
+static std::string settingsPath() { return baseDir() + "settings.ini"; }
+
+static bool systemPrefersDark() {
+#ifdef _WIN32
+    DWORD v = 1, sz = sizeof v;
+    if(RegGetValueA(HKEY_CURRENT_USER, "Software\\Microsoft\\Windows\\CurrentVersion\\Themes\\Personalize", "AppsUseLightTheme",
+                    RRF_RT_REG_DWORD, nullptr, &v, &sz) == ERROR_SUCCESS)
+        return v == 0;
+#endif
+    return false;
+}
+
+static void loadSettings() {
+    Bytes b;
+    bool dark = systemPrefersDark();
+    if(readFile(settingsPath(), b)) {
+        std::string s(b.begin(), b.end()), line;
+        size_t a = 0;
+        while(a < s.size()) {
+            size_t e = s.find('\n', a);
+            line = s.substr(a, e == std::string::npos ? std::string::npos : e - a);
+            a = e == std::string::npos ? s.size() : e + 1;
+            while(!line.empty() && (line.back() == '\r' || line.back() == ' ')) line.pop_back();
+            if(line.rfind("theme=", 0) == 0) dark = line.substr(6) == "dark";
+            else if(line.rfind("folder=", 0) == 0 && fs::exists(fs::u8path(line.substr(7)))) g_pcFolders.push_back(line.substr(7));
+        }
+    }
+    applyTheme(dark);
+}
+
+static void saveSettings() {
+    std::string s = std::string("theme=") + (g_dark ? "dark" : "light") + "\n";
+    for(auto& f : g_pcFolders) s += "folder=" + f + "\n";
+    writeFile(settingsPath(), Bytes(s.begin(), s.end()));
 }
 
 static bool primaryButton(const char* label, ImVec2 size = ImVec2(0, 0)) {
@@ -1175,12 +1556,14 @@ static void saveDoc(Doc& d, bool saveAs) {
     std::string label = d.src == Src::Vm2Sd ? "Saving " + d.title + " to the VM2's SD card" : "Saving the VM2's own memory";
     backup((d.src == Src::Vm2Sd ? "VM2SD_" + d.path : std::string("VM2_internal")), d.original);
     Src src = d.src;
-    std::string path = d.path;
+    std::string path = d.src == Src::Vm2Internal ? std::string("internal") : d.path;
     Doc* dp = &d;
     runJob(label, [data, src, path](Job& j, std::string* err) {
         return src == Src::Vm2Sd ? g_vm2.writeFile(path, data, j.progress(), err) : g_vm2.writeInternal(data, j.progress(), err);
-    }, [dp, data](Job& j) {
-        for(auto& doc : g_docs) if(doc.get() == dp && j.ok) { dp->original = data; status("Saved on the VM2"); }
+    }, [dp, data, path](Job& j) {
+        if(!j.ok) return;
+        prefetchStore(path, data);
+        for(auto& doc : g_docs) if(doc.get() == dp) { dp->original = data; status("Saved on the VM2"); }
     });
 }
 
@@ -1210,7 +1593,7 @@ static void drawMemoryMap(Doc& d, const std::vector<vmu::File>& files) {
     for(int b = 0; b < 200; ++b) {
         int cx = b % cols, cy = b / cols;
         ImVec2 a(p.x + cx * cell, p.y + cy * cell), z(a.x + cell - gap, a.y + cell - gap);
-        ImU32 c = owner[b] >= 0 ? fileColor(files[owner[b]]) : IM_COL32(236, 232, 225, 255);
+        ImU32 c = owner[b] >= 0 ? fileColor(files[owner[b]]) : (g_dark ? IM_COL32(30, 50, 82, 255) : IM_COL32(222, 232, 244, 255));
         dl->AddRectFilled(a, z, c, 2);
         if(owner[b] >= 0 && files[owner[b]].entry == d.selected) dl->AddRect(ImVec2(a.x - 1, a.y - 1), ImVec2(z.x + 1, z.y + 1), col::ink, 2, 0, 1.5f);
         if(m.x >= a.x && m.x < z.x && m.y >= a.y && m.y < z.y) hover = b;
@@ -1290,35 +1673,42 @@ static void drawDoc(Doc& d, int index) {
         if(x.isIconData() != y.isIconData()) return x.isIconData();
         return x.name < y.name;
     });
-    // the header
-    ImGui::PushFont(g_fontTitle);
-    ImGui::TextUnformatted(d.title.c_str());
-    ImGui::PopFont();
-    ImGui::SameLine();
-    ImGui::SetCursorPosY(ImGui::GetCursorPosY() + 6);
-    ImGui::TextDisabled("%s", d.where().c_str());
-    int used = d.img.usedBlocks();
-    ImGui::Text("%d of 200 blocks used", used);
-    ImGui::SameLine();
-    ImGui::TextDisabled("(%d free)", 200 - used);
-    ImGui::SameLine(0, 24);
-    uint8_t r, g, b, a;
-    d.img.colorRgba(r, g, b, a);
-    float c4[4] = {r / 255.f, g / 255.f, b / 255.f, a / 255.f};
-    bool custom = d.img.customColor();
-    if(ImGui::Checkbox("Colour in the Dreamcast's menu", &custom)) d.img.setColor(custom, r, g, b, a);
-    if(custom) {
+    // the header: the VMU itself (its colour, its icon on its screen), then its name, its memory, its colour
+    {
+        ImVec2 p = ImGui::GetCursorScreenPos();
+        drawVmuShell(ImGui::GetWindowDrawList(), ImVec2(p.x + 4, p.y + 2), 118, lookOf(d.img));
+        ImGui::Dummy(ImVec2(84, 122));
+        ImGui::SameLine(0, 18);
+        ImGui::BeginGroup();
+        ImGui::PushFont(g_fontTitle);
+        ImGui::TextUnformatted(d.title.c_str());
+        ImGui::PopFont();
+        ImGui::TextDisabled("%s%s", d.where().c_str(), d.checking ? "  (checking the VM2's copy...)" : "");
+        int used = d.img.usedBlocks();
+        ImGui::Text("%d blocks used", used);
         ImGui::SameLine();
-        if(ImGui::ColorEdit4("##vcol", c4, ImGuiColorEditFlags_NoInputs | ImGuiColorEditFlags_AlphaPreviewHalf))
-            d.img.setColor(true, (uint8_t)(c4[0] * 255), (uint8_t)(c4[1] * 255), (uint8_t)(c4[2] * 255), (uint8_t)(c4[3] * 255));
+        ImGui::TextDisabled("%d free", 200 - used);
+        ImGui::SameLine(0, 24);
+        uint8_t r, g, b, a;
+        d.img.colorRgba(r, g, b, a);
+        float c4[4] = {r / 255.f, g / 255.f, b / 255.f, a / 255.f};
+        bool custom = d.img.customColor();
+        if(ImGui::Checkbox("Its own colour", &custom)) d.img.setColor(custom, r, g, b, a);
+        ImGui::SetItemTooltip("The colour the Dreamcast shows this VMU in");
+        if(custom) {
+            ImGui::SameLine();
+            if(ImGui::ColorEdit4("##vcol", c4, ImGuiColorEditFlags_NoInputs | ImGuiColorEditFlags_AlphaPreviewHalf))
+                d.img.setColor(true, (uint8_t)(c4[0] * 255), (uint8_t)(c4[1] * 255), (uint8_t)(c4[2] * 255), (uint8_t)(c4[3] * 255));
+        }
+        drawMemoryMap(d, files);
+        ImGui::EndGroup();
     }
-    drawMemoryMap(d, files);
 
     // unsaved changes
     if(d.dirty()) {
         ImVec2 p = ImGui::GetCursorScreenPos();
         float w = ImGui::GetContentRegionAvail().x;
-        ImGui::GetWindowDrawList()->AddRectFilled(p, ImVec2(p.x + w, p.y + 44), IM_COL32(253, 236, 200, 255), 8);
+        ImGui::GetWindowDrawList()->AddRectFilled(p, ImVec2(p.x + w, p.y + 44), (col::accent & 0x00FFFFFF) | 0x38000000, 10);
         ImGui::SetCursorScreenPos(ImVec2(p.x + 12, p.y + 7));
         ImGui::AlignTextToFramePadding();
         ImGui::TextUnformatted("This VMU has changes that aren't saved yet.");
@@ -1392,8 +1782,6 @@ static void drawDoc(Doc& d, int index) {
 
 // ---------------------------------------------------------------- the sources (left)
 
-static std::vector<std::string> g_pcFolders;
-
 static bool isVmuImageFile(const fs::directory_entry& e) {
     std::error_code ec;
     return e.is_regular_file(ec) && e.file_size(ec) == (uintmax_t)vmu::kImageSize;
@@ -1436,12 +1824,21 @@ static void drawPcTree(const fs::path& dir, int depth) {
             }
         } else if(isVmuImageFile(e)) {
             std::string p = e.path().u8string();
-            if(sourceRow(p.c_str(), glyphVmu, IM_COL32(120, 160, 200, 255), n, "", isOpen(Src::PcFile, p), 0)) openPcImage(p);
+            if(vmuRow(p.c_str(), pcLook(p), n, "", isOpen(Src::PcFile, p))) openPcImage(p);
         }
     }
 }
 
 static void openSdImage(const std::string& full, const std::string& name) {
+    Bytes cached;
+    bool fresh = false;
+    if(cachedCopy(full, cached, fresh)) {
+        std::string err;
+        Doc* d = openDoc(name, Src::Vm2Sd, full, cached, &err);
+        if(!d) { status(full + ": " + err, true); return; }
+        if(!fresh) { d->checking = true; prefetchUrgent(full); }
+        return;
+    }
     auto data = std::make_shared<Bytes>();
     runJob("Opening " + name + " from the VM2", [data, full](Job& j, std::string* err) {
         return g_vm2.readFile(full, vmu::kImageSize, *data, j.progress(), err);
@@ -1449,6 +1846,7 @@ static void openSdImage(const std::string& full, const std::string& name) {
         if(!j.ok) return;
         std::string err;
         if(!openDoc(name, Src::Vm2Sd, full, *data, &err)) status(full + ": " + err, true);
+        prefetchStore(full, *data);
     });
 }
 
@@ -1463,12 +1861,12 @@ static void sdEntryMenus(const vm2::Entry& e, const std::string& path, const std
                 if(!readFile(p, b) || b.size() != (size_t)vmu::kImageSize) { status("A VMU image is exactly 128 KB.", true); return; }
                 std::string dst = sdJoin(full, upper(fs::u8path(p).filename().u8string()));
                 runJob("Copying to the SD card", [b, dst](Job& j, std::string* err) { return g_vm2.writeFile(dst, b, j.progress(), err); },
-                       [full](Job& j) { if(j.ok) { g_sd.erase(full); status("Copied to the SD card"); } });
+                       [full](Job& j) { if(j.ok) { prefetchRelist(), g_sd.erase(full); status("Copied to the SD card"); } });
             });
         }
         if(!g_sdClipboard.empty() && ImGui::MenuItem("Paste here")) {
             std::string src = g_sdClipboard, dst = sdJoin(full, g_sdClipboard.substr(g_sdClipboard.rfind('\\') + 1));
-            runJob("Copying", [src, dst](Job&, std::string* err) { return g_vm2.copyFile(src, dst, err); }, [full](Job& j) { if(j.ok) g_sd.erase(full); });
+            runJob("Copying", [src, dst](Job&, std::string* err) { return g_vm2.copyFile(src, dst, err); }, [full](Job& j) { if(j.ok) prefetchRelist(), g_sd.erase(full); });
         }
         if(ImGui::MenuItem("Rename...")) {
             ask("Rename the folder", "A new name: 1-8 letters or numbers, no spaces.", [full](const std::string& n) {
@@ -1494,7 +1892,7 @@ static void sdEntryMenus(const vm2::Entry& e, const std::string& path, const std
         if(ImGui::MenuItem("Rename...")) {
             ask("Rename", "A new name, like VMU002.BIN (8 letters, a dot, 3 letters; no spaces).", [full, path](const std::string& n) {
                 std::string to = sdJoin(path, upper(n));
-                runJob("Renaming", [full, to](Job&, std::string* err) { return g_vm2.rename(full, to, err); }, [path](Job& j) { if(j.ok) g_sd.erase(path); });
+                runJob("Renaming", [full, to](Job&, std::string* err) { return g_vm2.rename(full, to, err); }, [path](Job& j) { if(j.ok) prefetchRelist(), g_sd.erase(path); });
             }, true, e.name);
         }
         if(ImGui::MenuItem("Delete")) {
@@ -1504,7 +1902,7 @@ static void sdEntryMenus(const vm2::Entry& e, const std::string& path, const std
                     if(!g_vm2.readFile(full, vmu::kImageSize, *data, j.progress(), err)) return false;
                     backup("VM2SD_" + full, *data);
                     return g_vm2.removeFile(full, err);
-                }, [path](Job& j) { if(j.ok) g_sd.erase(path); });
+                }, [path](Job& j) { if(j.ok) prefetchRelist(), g_sd.erase(path); });
             });
         }
     }
@@ -1531,7 +1929,7 @@ static void sdFolder(const std::string& path) {
                 ImGui::TreePop();
             }
         } else if(e.size == (uint32_t)vmu::kImageSize) {
-            if(sourceRow("img", glyphVmu, IM_COL32(120, 160, 200, 255), e.name, "", isOpen(Src::Vm2Sd, full), 0)) openSdImage(full, e.name);
+            if(vmuRow("img", sdLook(full), e.name, "", isOpen(Src::Vm2Sd, full))) openSdImage(full, e.name);
             sdEntryMenus(e, path, full);
         }
         ImGui::PopID();
@@ -1566,21 +1964,35 @@ static void drawVm2Section() {
         return;
     }
     ImGui::TextDisabled("%s  -  firmware %s", g_vm2.port.c_str(), g_vm2.fw.c_str());
+    if(g_pf.walked && g_pf.done < g_pf.total) {
+        char b[96];
+        snprintf(b, sizeof b, "Getting VMUs ready to open instantly: %d of %d", (int)g_pf.done, (int)g_pf.total);
+        ImGui::ProgressBar((float)g_pf.done / std::max(1, (int)g_pf.total), ImVec2(-1, 18), b);
+    }
     if(sourceRow("internal", glyphChip, IM_COL32(110, 110, 120, 255), "Its own memory", "the 200 blocks inside the VM2", isOpen(Src::Vm2Internal, "internal"))) {
-        auto data = std::make_shared<Bytes>();
-        runJob("Opening the VM2's own memory", [data](Job& j, std::string* err) { return g_vm2.readInternal(*data, j.progress(), err); },
-               [data](Job& j) {
-                   if(!j.ok) return;
-                   std::string err;
-                   if(!openDoc("VM2 memory", Src::Vm2Internal, "internal", *data, &err)) status("The VM2's memory: " + err, true);
-               });
+        Bytes cached;
+        bool fresh = false;
+        std::string err;
+        if(cachedCopy("internal", cached, fresh)) {
+            Doc* d = openDoc("VM2 memory", Src::Vm2Internal, "internal", cached, &err);
+            if(d && !fresh) { d->checking = true; prefetchUrgent("internal"); }
+        } else {
+            auto data = std::make_shared<Bytes>();
+            runJob("Opening the VM2's own memory", [data](Job& j, std::string* err) { return g_vm2.readInternal(*data, j.progress(), err); },
+                   [data](Job& j) {
+                       if(!j.ok) return;
+                       std::string err;
+                       if(!openDoc("VM2 memory", Src::Vm2Internal, "internal", *data, &err)) status("The VM2's memory: " + err, true);
+                       prefetchStore("internal", *data);
+                   });
+        }
     }
     bool open = ImGui::TreeNodeEx("##sdroot", ImGuiTreeNodeFlags_DefaultOpen | ImGuiTreeNodeFlags_SpanAvailWidth, "SD card");
     if(ImGui::BeginPopupContextItem("sdroot")) {
         if(ImGui::MenuItem("New folder...")) {
             ask("New folder", "A name: 1-8 letters or numbers, no spaces.", [](const std::string& n) {
                 std::string p = "\\" + upper(n);
-                runJob("Making " + p, [p](Job&, std::string* err) { return g_vm2.makeFolder(p, err); }, [](Job& j) { if(j.ok) g_sd.erase("\\"); });
+                runJob("Making " + p, [p](Job&, std::string* err) { return g_vm2.makeFolder(p, err); }, [](Job& j) { if(j.ok) prefetchRelist(), g_sd.erase("\\"); });
             }, true, "MOEMON");
         }
         if(ImGui::MenuItem("Put a VMU from this PC on it...")) {
@@ -1589,12 +2001,12 @@ static void drawVm2Section() {
                 if(!readFile(p, b) || b.size() != (size_t)vmu::kImageSize) { status("A VMU image is exactly 128 KB.", true); return; }
                 std::string dst = "\\" + upper(fs::u8path(p).filename().u8string());
                 runJob("Copying to the SD card", [b, dst](Job& j, std::string* err) { return g_vm2.writeFile(dst, b, j.progress(), err); },
-                       [](Job& j) { if(j.ok) { g_sd.erase("\\"); status("Copied to the SD card"); } });
+                       [](Job& j) { if(j.ok) { prefetchRelist(), g_sd.erase("\\"); status("Copied to the SD card"); } });
             });
         }
         if(!g_sdClipboard.empty() && ImGui::MenuItem("Paste here")) {
             std::string src = g_sdClipboard, dst = "\\" + g_sdClipboard.substr(g_sdClipboard.rfind('\\') + 1);
-            runJob("Copying", [src, dst](Job&, std::string* err) { return g_vm2.copyFile(src, dst, err); }, [](Job& j) { if(j.ok) g_sd.erase("\\"); });
+            runJob("Copying", [src, dst](Job&, std::string* err) { return g_vm2.copyFile(src, dst, err); }, [](Job& j) { if(j.ok) prefetchRelist(), g_sd.erase("\\"); });
         }
         if(ImGui::MenuItem("Refresh")) g_sd.clear();
         ImGui::EndPopup();
@@ -1614,7 +2026,7 @@ static void drawSources() {
     heading("On this PC");
     if(ImGui::Button("Open an SD card or folder...", ImVec2(-1, 0)))
         browse("Pick the SD card (its drive) or a folder", false, true, {}, "", [](const std::string& p) {
-            if(std::find(g_pcFolders.begin(), g_pcFolders.end(), p) == g_pcFolders.end()) g_pcFolders.push_back(p);
+            if(std::find(g_pcFolders.begin(), g_pcFolders.end(), p) == g_pcFolders.end()) { g_pcFolders.push_back(p); saveSettings(); }
         });
     if(ImGui::Button("Open a VMU file...", ImVec2(-1, 0)))
         browse("A VMU image (.bin or .vmu, 128 KB)", false, false, {".bin", ".vmu"}, "", [](const std::string& p) { openPcImage(p); });
@@ -1639,7 +2051,40 @@ static void drawSources() {
             ImGui::TreePop();
         }
         ImGui::PopID();
-        if(closed) { g_pcFolders.erase(g_pcFolders.begin() + i); break; }
+        if(closed) { g_pcFolders.erase(g_pcFolders.begin() + i); saveSettings(); break; }
+    }
+}
+
+
+static void prefetchPump() {
+    std::vector<std::pair<std::string, std::vector<vm2::Entry>>> lists;
+    std::vector<std::string> arrived;
+    {
+        std::lock_guard<std::mutex> g(g_pf.m);
+        lists.swap(g_pf.listings);
+        arrived.swap(g_pf.arrived);
+    }
+    for(auto& l : lists) { g_sd[l.first].entries = l.second; g_sd[l.first].loaded = true; }
+    for(auto& path : arrived) {
+        g_sdLooks.erase(path);
+        Bytes now;
+        bool fresh;
+        if(!cachedCopy(path, now, fresh)) continue;
+        for(auto& dp : g_docs) {
+            Doc& d = *dp;
+            bool mine = (d.src == Src::Vm2Sd && d.path == path) || (d.src == Src::Vm2Internal && path == "internal");
+            if(!mine) continue;
+            bool wasChecking = d.checking;
+            d.checking = false;
+            if(now == d.original) continue;
+            if(!d.dirty()) {
+                std::string sel = d.ed.entry >= 0 ? d.ed.file.name : "";
+                d.img.raw = now;
+                d.original = now;
+                if(!sel.empty()) selectByName(d, sel);
+                if(wasChecking) status(d.title + " was newer on the VM2: showing that.");
+            } else status(d.title + " changed on the VM2 since it was copied. Your changes are kept; saving puts them over the VM2's.", true);
+        }
     }
 }
 
@@ -1650,8 +2095,10 @@ static void drawWelcome() {
     ImGui::SetCursorPos(ImVec2(ImGui::GetCursorPosX() + avail.x / 2 - 220, ImGui::GetCursorPosY() + avail.y / 2 - 170));
     ImGui::BeginGroup();
     ImVec2 p = ImGui::GetCursorScreenPos();
-    glyphVmu(ImGui::GetWindowDrawList(), ImVec2(p.x + 170, p.y), 100, col::accent);
-    ImGui::Dummy(ImVec2(440, 112));
+    VmuLook wl;
+    wl.body = IM_COL32(242, 107, 29, 255);
+    drawVmuShell(ImGui::GetWindowDrawList(), ImVec2(p.x + 184, p.y), 116, wl);
+    ImGui::Dummy(ImVec2(440, 128));
     ImGui::PushFont(g_fontTitle);
     ImGui::TextUnformatted("Your VMUs, all in one place");
     ImGui::PopFont();
@@ -1664,20 +2111,23 @@ static void drawWelcome() {
     ImGui::SameLine();
     if(ImGui::Button("Open an SD card or folder...", ImVec2(220, 38)))
         browse("Pick the SD card (its drive) or a folder", false, true, {}, "", [](const std::string& p) {
-            if(std::find(g_pcFolders.begin(), g_pcFolders.end(), p) == g_pcFolders.end()) g_pcFolders.push_back(p);
+            if(std::find(g_pcFolders.begin(), g_pcFolders.end(), p) == g_pcFolders.end()) { g_pcFolders.push_back(p); saveSettings(); }
         });
     ImGui::EndGroup();
 }
 
 static void drawUi(int w, int h) {
+    drawBackdrop((float)w, (float)h);
     ImGui::SetNextWindowPos(ImVec2(0, 0));
     ImGui::SetNextWindowSize(ImVec2((float)w, (float)h));
     ImGui::Begin("main", nullptr, ImGuiWindowFlags_NoDecoration | ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoBringToFrontOnFocus);
     // the title strip
     {
         ImVec2 p = ImGui::GetCursorScreenPos();
-        glyphVmu(ImGui::GetWindowDrawList(), p, 26, col::accent);
-        ImGui::Dummy(ImVec2(28, 26));
+        VmuLook tl;
+        tl.body = IM_COL32(242, 107, 29, 255);
+        drawVmuShell(ImGui::GetWindowDrawList(), ImVec2(p.x + 2, p.y), 28, tl);
+        ImGui::Dummy(ImVec2(22, 28));
         ImGui::SameLine();
         ImGui::PushFont(g_fontTitle);
         ImGui::TextUnformatted(kTitle);
@@ -1688,8 +2138,10 @@ static void drawUi(int w, int h) {
             char ov[200];
             snprintf(ov, sizeof ov, "%s  %d%%", g_job->label.c_str(), t ? dn * 100 / t : 0);
             ImGui::SetCursorPosY(ImGui::GetCursorPosY() + 4);
-            ImGui::ProgressBar(t ? (float)dn / t : -1.f * (float)ImGui::GetTime(), ImVec2(-1, 22), ov);
+            ImGui::ProgressBar(t ? (float)dn / t : -1.f * (float)ImGui::GetTime(), ImVec2(ImGui::GetContentRegionAvail().x - 130, 22), ov);
         }
+        ImGui::SameLine(ImGui::GetWindowWidth() - 124);
+        if(ImGui::Button(g_dark ? "Light mode" : "Dark mode", ImVec2(110, 0))) { applyTheme(!g_dark); saveSettings(); }
     }
     ImGui::Spacing();
     ImGui::BeginChild("sources", ImVec2(310, 0), ImGuiChildFlags_Borders | ImGuiChildFlags_ResizeX | ImGuiChildFlags_AlwaysUseWindowPadding);
@@ -1826,7 +2278,68 @@ static int selftest() {
     return fails ? 1 : 0;
 }
 
+
+// --test-cache PORT: the VM2's VMUs copied in the background, then each opened (instantly, from the copy); one changed
+// on the VM2 is noticed and shown. No window.
+static int cacheTest(const std::string& port) {
+    std::string err;
+    if(!g_vm2.connect(port, &err)) { printf("FAIL connect: %s\n", err.c_str()); return 1; }
+    prefetchReset(g_vm2.id);
+    auto t0 = std::chrono::steady_clock::now();
+    while(!(g_pf.walked && g_pf.done >= g_pf.total)) {
+        std::this_thread::sleep_for(std::chrono::milliseconds(50));
+        if(std::chrono::steady_clock::now() - t0 > std::chrono::seconds(120)) { printf("FAIL the copying never finished\n"); return 1; }
+    }
+    prefetchPump();
+    double copied = std::chrono::duration<double>(std::chrono::steady_clock::now() - t0).count();
+    printf("ok   copied %d VMUs in the background (%.1f s)\n", (int)g_pf.total, copied);
+    int fails = 0;
+    for(auto& kv : g_sd) for(auto& e : kv.second.entries) {
+        if(e.dir || e.size != (uint32_t)vmu::kImageSize) continue;
+        std::string full = sdJoin(kv.first, e.name);
+        auto a = std::chrono::steady_clock::now();
+        openSdImage(full, e.name);
+        double ms = std::chrono::duration<double, std::milli>(std::chrono::steady_clock::now() - a).count();
+        bool ok = activeDoc() && activeDoc()->path == full && !busy() && !activeDoc()->checking && ms < 50;
+        printf("%s opened %s in %.1f ms\n", ok ? "ok  " : "FAIL", full.c_str(), ms);
+        fails += !ok;
+    }
+    // the VM2's copy changes: a reopened VMU is shown from the copy at once, then follows the VM2
+    const char* changed = getenv("CHANGE_FILE");  // the fake VM2's file to change, and its VM2 path
+    const char* changedPath = getenv("CHANGE_PATH");
+    if(changed && changedPath) {
+        Bytes b;
+        readFile(changed, b);
+        vmu::Image img;
+        img.load(b, nullptr);
+        img.add("NEWSAVE", vmu::kTypeData, Bytes(600, 7), false, vmu::Stamp::now(), nullptr);
+        writeFile(changed, img.raw);
+        {
+            std::lock_guard<std::mutex> g(g_pf.m);
+            g_pf.fresh.erase(changedPath);  // as on the next connection
+        }
+        openSdImage(changedPath, "changed");
+        Doc* d = activeDoc();
+        bool shownAtOnce = d && d->checking && !d->img.find("NEWSAVE");
+        auto a = std::chrono::steady_clock::now();
+        while(d->checking && std::chrono::steady_clock::now() - a < std::chrono::seconds(20)) {
+            std::this_thread::sleep_for(std::chrono::milliseconds(50));
+            prefetchPump();
+        }
+        bool followed = d->img.find("NEWSAVE") != nullptr && !d->dirty();
+        printf("%s a VMU changed on the VM2: shown at once from the copy, then the VM2's (%s, %s)\n",
+               shownAtOnce && followed ? "ok  " : "FAIL", shownAtOnce ? "instant" : "not instant", followed ? "followed" : "didn't follow");
+        fails += !(shownAtOnce && followed);
+    }
+    g_pf.stop = true;
+    if(g_pf.th.joinable()) g_pf.th.join();
+    printf(fails ? "FAILED (%d)\n" : "PASSED\n", fails);
+    return fails ? 1 : 0;
+}
+
 // ---------------------------------------------------------------- main
+
+
 
 
 // ---------------------------------------------------------------- main
@@ -1842,6 +2355,7 @@ int main(int argc, char** argv) {
     std::vector<std::string> shotImages, startImages;
     for(int i = 1; i < argc; ++i) {
         if(!strcmp(argv[i], "--selftest")) return selftest();
+        if(!strcmp(argv[i], "--test-cache") && i + 1 < argc) return cacheTest(argv[i + 1]);
         if(!strcmp(argv[i], "--shot") && i + 1 < argc) { shotPath = argv[++i]; g_shotMode = true; }
         else if(!strcmp(argv[i], "--port") && i + 1 < argc) g_startPort = argv[++i];
         else (g_shotMode ? shotImages : startImages).push_back(argv[i]);
@@ -1863,7 +2377,7 @@ int main(int argc, char** argv) {
     io.Fonts->AddFontFromMemoryTTF((void*)kFontData, (int)sizeof kFontData, 17.f, &fc);
     g_fontBold = io.Fonts->AddFontFromMemoryTTF((void*)kFontBold, (int)sizeof kFontBold, 17.f, &fc);
     g_fontTitle = io.Fonts->AddFontFromMemoryTTF((void*)kFontBold, (int)sizeof kFontBold, 22.f, &fc);
-    applyTheme();
+    loadSettings();
     ImGui_ImplSDL2_InitForSDLRenderer(win, g_ren);
     ImGui_ImplSDLRenderer2_Init(g_ren);
     for(auto& p : startImages) dropped(p);
@@ -1878,7 +2392,7 @@ int main(int argc, char** argv) {
     }
     if(!g_startPort.empty()) {
         std::string err;
-        if(g_vm2.connect(g_startPort, &err)) status("VM2 connected on " + g_vm2.port);
+        if(g_vm2.connect(g_startPort, &err)) { status("VM2 connected on " + g_vm2.port); prefetchReset(g_vm2.id); }
         else status(err, true);
     }
     if(g_shotMode && getenv("SHOT_FOLDER")) g_pcFolders.push_back(getenv("SHOT_FOLDER"));
@@ -1898,6 +2412,8 @@ int main(int argc, char** argv) {
             }
         }
         pollJob();
+        pumpPick();
+        prefetchPump();
         ImGui_ImplSDLRenderer2_NewFrame();
         ImGui_ImplSDL2_NewFrame();
         ImGui::NewFrame();
@@ -1920,6 +2436,9 @@ int main(int argc, char** argv) {
         if(!g_shotMode && !(SDL_GetWindowFlags(win) & SDL_WINDOW_INPUT_FOCUS) && !busy()) SDL_Delay(30);
     }
     if(g_job && g_job->thread.joinable()) g_job->thread.join();
+    g_pf.stop = true;
+    if(g_pf.th.joinable()) g_pf.th.join();
+    if(!g_shotMode) saveSettings();
     ImGui_ImplSDLRenderer2_Shutdown();
     ImGui_ImplSDL2_Shutdown();
     ImGui::DestroyContext();

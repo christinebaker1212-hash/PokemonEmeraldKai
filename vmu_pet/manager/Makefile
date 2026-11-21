@@ -3,7 +3,7 @@
 # `make test` (the self test and the VM2 protocol against a pretend VM2).
 B        := ../build/manager
 IMGUI    := ../../maker/imgui
-SRCS     := main.cpp vmu.cpp vm2link.cpp pngio.cpp
+SRCS     := main.cpp vmu.cpp vm2link.cpp pngio.cpp filedlg.cpp
 IMGUI_SRCS := $(IMGUI)/imgui.cpp $(IMGUI)/imgui_draw.cpp $(IMGUI)/imgui_tables.cpp $(IMGUI)/imgui_widgets.cpp \
               $(IMGUI)/backends/imgui_impl_sdl2.cpp $(IMGUI)/backends/imgui_impl_sdlrenderer2.cpp $(IMGUI)/misc/imgui_stdlib.cpp
 CXXFLAGS := -std=c++17 -O2 -Wall -Wno-unused-function -I$(B) -I$(IMGUI) -I$(IMGUI)/backends -I../../src/mp/third_party
@@ -35,7 +35,7 @@ windows: $(B)/win/vmu_manager.exe $(B)/win/vm2cli.exe
 $(B)/win/vmu_manager.exe: $(SRCS) *.h $(B)/font_data.h $(B)/font_bold.h
 	@mkdir -p $(B)/win
 	$(WINCXX) $(CXXFLAGS) -I$(SDL2_MINGW)/include/SDL2 -Dmain=SDL_main $(SRCS) $(IMGUI_SRCS) -o $@ \
-	  -L$(SDL2_MINGW)/lib -lmingw32 -lSDL2main -lSDL2 -lsetupapi -mwindows -static-libgcc -static-libstdc++ -Wl,-Bstatic,--whole-archive -lwinpthread -Wl,--no-whole-archive,-Bdynamic
+	  -L$(SDL2_MINGW)/lib -lmingw32 -lSDL2main -lSDL2 -lsetupapi -ladvapi32 -lole32 -luuid -lshell32 -mwindows -static-libgcc -static-libstdc++ -Wl,-Bstatic,--whole-archive -lwinpthread -Wl,--no-whole-archive,-Bdynamic
 	cp $(SDL2_MINGW)/bin/SDL2.dll $(B)/win/
 	cp ../../maker/fonts/OFL.txt $(B)/win/FONT_LICENSE.txt
 	cp README.txt $(B)/win/
