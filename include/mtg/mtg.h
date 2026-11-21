@@ -11,6 +11,7 @@
 // ---- the card database (read-only, shared by every duel) ----
 enum { MTG_W, MTG_U, MTG_B, MTG_R, MTG_G, MTG_C, MTG_MANA_KINDS };   // mana and color order (Forge's WUBRG, then colorless)
 #define MTG_COLOR_BIT(c) (1u << (c))
+#define MTG_PROT_ARTIFACT 0x20               // a protection mask's bit past the colors: from artifacts
 
 // card types (CardType.CoreType) and supertypes
 #define MTG_T_LAND         0x01
@@ -59,7 +60,8 @@ typedef struct MtgCardDef {
     uint8_t types, supertypes, colors;
     int8_t power, toughness;                 // -1 = a '*' (computed: not yet supported)
     uint32_t keywords;                       // MTG_KW_BIT
-    uint8_t protection, landwalk;            // protection from colors (MTG_COLOR_BIT); landwalk by basic type W..G
+    uint8_t protection, landwalk;            // protection from colors (MTG_COLOR_BIT, MTG_PROT_ARTIFACT); landwalk by basic type W..G
+    const char *protSpec, *protText;         // K:Protection:SPEC[:TEXT]: from what a Valid spec names ("Creature", "Goblin")
     uint8_t intrinsicMana;                   // basic land types' {T}: add one (MTG_COLOR_BIT), Forge's intrinsic abilities
     uint8_t abilityCount;
     uint16_t abilities[8];                   // indexes into the ability table (A: lines)
@@ -429,7 +431,9 @@ uint8_t Mtg_ObjTypes(const MtgDuel *d, int obj);   // its card types now (an Ani
 int Mtg_Toughness(const MtgDuel *d, int obj);
 uint32_t Mtg_Keywords(const MtgDuel *d, int obj);
 uint8_t Mtg_Landwalk(const MtgDuel *d, int obj);      // by basic land type W..G (MTG_COLOR_BIT)
-uint8_t Mtg_Protection(const MtgDuel *d, int obj);    // from colors (MTG_COLOR_BIT)
+uint8_t Mtg_Protection(const MtgDuel *d, int obj);    // from colors (MTG_COLOR_BIT) and artifacts (MTG_PROT_ARTIFACT)
+// whether obj has protection from source (its colors, artifacts, its card's K:Protection:SPEC), ignoring the ignore mask
+int Mtg_ProtectedFrom(const MtgDuel *d, int obj, int source, uint8_t ignore);
 
 // the stand-in computer player (src/mtg/mtg_ai.c) until forge-ai's translation
 void MtgAi_Answer(const MtgDuel *d, MtgAnswer *out);

@@ -3566,6 +3566,54 @@ static uint32_t PlayOut(MtgDuel *d, int *turns, int *winner)
     return d->hash;
 }
 
+static void TestProtectionKinds(void)
+{
+    int chap, bears, scion, rod, bless, g[5], gc, i;
+    printf("protection from creatures / artifacts, protection for all, choose a card\n");
+    Table();   // Beloved Chaplain: protection from creatures: no creature can block it
+    chap = Put(0, "Beloved Chaplain", MTG_ZONE_BATTLEFIELD);
+    bears = Put(1, "Grizzly Bears", MTG_ZONE_BATTLEFIELD);
+    CHECK(!Mtg_CanBlock(&sD, bears, chap), "the bears can't block the chaplain");
+    scion = Put(1, "Yavimaya Scion", MTG_ZONE_BATTLEFIELD);   // Yavimaya Scion: protection from artifacts
+    Lands(0, "Island", 3);
+    rod = Put(0, "Rod of Ruin", MTG_ZONE_BATTLEFIELD);
+    CHECK(Find(MTG_ACT_ACTIVATE, rod, MTG_TGT_OBJ, scion) < 0 && Find(MTG_ACT_ACTIVATE, rod, MTG_TGT_OBJ, bears) >= 0,
+          "the rod can't target the scion, can the bears");
+
+    Table();   // Akroma's Blessing: choose a color, creatures you control gain protection from it
+    Lands(0, "Plains", 3);
+    bears = Put(0, "Grizzly Bears", MTG_ZONE_BATTLEFIELD);
+    chap = Put(1, "Grizzly Bears", MTG_ZONE_BATTLEFIELD);
+    bless = Put(0, "Akroma's Blessing", MTG_ZONE_HAND);
+    Do(MTG_ACT_CAST, bless, -1, 0);
+    PassBoth();
+    CHECK(Mtg_Query(&sD)->kind == MTG_Q_CHOOSE && Mtg_Query(&sD)->optKind == MTG_OPT_COLOR, "the color asked");
+    ChooseOption(NULL, MTG_R);
+    CHECK((Mtg_Protection(&sD, bears) & MTG_COLOR_BIT(MTG_R)) && !(Mtg_Protection(&sD, chap) & MTG_COLOR_BIT(MTG_R)),
+          "own bears protected from red, theirs not");
+
+    Table();   // Grave Consequences: each exiles any number from their graveyard, then loses 1 per card left
+    Lands(0, "Swamp", 2);
+    for (i = 0; i < 3; i++)
+        g[i] = Put(0, "Grizzly Bears", MTG_ZONE_GRAVEYARD);
+    g[3] = Put(1, "Grizzly Bears", MTG_ZONE_GRAVEYARD);
+    g[4] = Put(1, "Grizzly Bears", MTG_ZONE_GRAVEYARD);
+    gc = Put(0, "Grave Consequences", MTG_ZONE_HAND);
+    Do(MTG_ACT_CAST, gc, -1, 0);
+    PassBoth();
+    for (i = 0; i < 6 && Mtg_Query(&sD)->kind == MTG_Q_CHOOSE; i++) {
+        const MtgQuery *q = Mtg_Query(&sD);
+        if (q->optCount) {   // how many: player 0 two, player 1 none
+            ChooseOption(NULL, q->player == 0 ? 2 : 0);
+        } else
+            ChoosePick(q->candidates[0]);
+    }
+    CHECK(Zone(g[0]) + Zone(g[1]) + Zone(g[2]) == 2 * MTG_ZONE_EXILE + MTG_ZONE_GRAVEYARD
+          && Zone(g[3]) == MTG_ZONE_GRAVEYARD && Zone(g[4]) == MTG_ZONE_GRAVEYARD, "two of player 0's exiled, none of 1's");
+    CHECK(sD.players[0].life == 19 && sD.players[1].life == 18, "life 19 / 18 (%d / %d)",
+          sD.players[0].life, sD.players[1].life);
+}
+
 static void TestDuels(void)
 {
     static MtgDeck red, green;
@@ -3861,6 +3909,7 @@ int main(int argc, char **argv)
     TestTriggerCosts();
     TestManaFx();
     TestTapAllPerm();
+    TestProtectionKinds();
     TestCantCounter();
     TestTrigModes();
     TestBecomesTarget();

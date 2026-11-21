@@ -104,6 +104,15 @@ uint8_t Mtg_Protection(const MtgDuel *d, int obj)
     return Mtg_Card(d->objs[obj].def)->protection | m.protection | d->objs[obj].tempProtection;
 }
 
+int Mtg_ProtectedFrom(const MtgDuel *d, int obj, int source, uint8_t ignore)
+{
+    const char *spec = Mtg_Card(d->objs[obj].def)->protSpec;
+    uint8_t from = (uint8_t)(Mtg_ObjColors(d, source) | ((Mtg_ObjTypes(d, source) & MTG_T_ARTIFACT) ? MTG_PROT_ARTIFACT : 0));
+    if (Mtg_Protection(d, obj) & from & ~ignore)
+        return 1;
+    return spec && d->objs[obj].faceDownOf == 0 && Mtg_ValidObj(d, source, spec, obj, d->objs[obj].controller);
+}
+
 static int IsCreature(const MtgDuel *d, int obj)
 {
     return d->objs[obj].zone == MTG_ZONE_BATTLEFIELD && (Mtg_ObjTypes(d, obj) & MTG_T_CREATURE);
@@ -420,7 +429,7 @@ void Mtg_DealDamage(MtgDuel *d, int sourceObj, MtgTarget to, int amount, int com
     if (to.kind == MTG_TGT_OBJ) {
         if (d->objs[to.id].zone != MTG_ZONE_BATTLEFIELD)
             return;
-        if (sourceObj != MTG_NO_OBJ && (Mtg_Protection(d, to.id) & Mtg_ObjColors(d, sourceObj)))
+        if (sourceObj != MTG_NO_OBJ && Mtg_ProtectedFrom(d, to.id, sourceObj, 0))
             return;
         if (!(Mtg_ObjTypes(d, to.id) & MTG_T_CREATURE))
             return;   // (planeswalkers: not yet)
@@ -571,7 +580,7 @@ static void StateBasedActions(MtgDuel *d)
                 continue;
             if (to == MTG_NO_OBJ || to >= d->objCount || d->objs[to].zone != MTG_ZONE_BATTLEFIELD
                 || !Mtg_ValidObj(d, to, Mtg_Card(o->def)->enchantSpec ? Mtg_Card(o->def)->enchantSpec : "Creature", i, o->controller)
-                || (Mtg_Protection(d, to) & Mtg_ObjColors(d, i) & ~Mtg_AuraOwnProtection(d, i))) {
+                || Mtg_ProtectedFrom(d, to, i, Mtg_AuraOwnProtection(d, i))) {
                 Mtg_MoveTo(d, i, MTG_ZONE_GRAVEYARD);
                 again = 1;
             }
@@ -1853,7 +1862,7 @@ int Mtg_CanBlock(const MtgDuel *d, int blocker, int attacker)
         return 0;
     uint8_t walk = Mtg_Landwalk(d, attacker);
     (void)ac;
-    if (Mtg_Protection(d, attacker) & bc->colors)
+    if (Mtg_ProtectedFrom(d, attacker, blocker, 0))
         return 0;
     if (Mtg_StaticForbids(d, MTG_STATIC_CANT_BLOCK, blocker, MTG_NO_OBJ)
         || Mtg_StaticForbids(d, MTG_STATIC_CANT_BLOCK_BY, attacker, blocker))

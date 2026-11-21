@@ -21,6 +21,7 @@ static const struct { const char *name; uint8_t api; } sApis[] = {
     {"ChooseColor", MTG_API_CHOOSE_COLOR}, {"ChoosePlayer", MTG_API_CHOOSE_PLAYER}, {"ChooseNumber", MTG_API_CHOOSE_NUMBER},
     {"GenericChoice", MTG_API_GENERIC_CHOICE}, {"TapAll", MTG_API_TAP_ALL}, {"UntapAll", MTG_API_UNTAP_ALL},
     {"Protection", MTG_API_PROTECTION}, {"Debuff", MTG_API_DEBUFF}, {"SacrificeAll", MTG_API_SACRIFICE_ALL},
+    {"ChooseCard", MTG_API_CHOOSE_CARD}, {"ProtectionAll", MTG_API_PROTECTION_ALL},
 };
 
 const char *const gMtgApiNames[MTG_API_COUNT] = {
@@ -28,7 +29,7 @@ const char *const gMtgApiNames[MTG_API_COUNT] = {
     "ChangeZone", "Mana", "Discard", "Tap", "Untap", "Counter", "Sacrifice", "PutCounter", "Attach", "Regenerate", "Token", "Charm",
     "ChangeZoneAll", "Animate", "DelayedTrigger", "PreventDamage", "GainControl", "PutCounterAll", "RemoveCounter", "Dig", "Mill", "FlipCoin", "Cleanup", "Reveal", "RepeatEach", "SetLife", "Effect", "Fog", "ChooseSource",
     "RearrangeTopOfLibrary", "ChooseType", "ChooseColor", "ChoosePlayer", "ChooseNumber", "GenericChoice",
-    "TapAll", "UntapAll", "SacrificeAll", "Debuff", "Protection",
+    "TapAll", "UntapAll", "SacrificeAll", "Debuff", "Protection", "ChooseCard", "ProtectionAll",
 };
 
 int Mtg_ApiKnown(const char *name)
@@ -928,6 +929,8 @@ static int ProtectionColors(const char *list)   // "black,red" -> MTG_COLOR_BIT 
         for (k = found = 0; k < 5; k++)
             if (strcmp(t, sColorWords[k]) == 0)
                 mask |= MTG_COLOR_BIT(k), found = 1;
+        if (strcmp(t, "Artifact") == 0 || strcmp(t, "artifacts") == 0)
+            mask |= MTG_PROT_ARTIFACT, found = 1;
         if (!found)
             return -1;
     }
@@ -1446,6 +1449,44 @@ static int Resolve(MtgDuel *d, MtgResolveCtx *ctx, const MtgAbility *ab)
     case MTG_API_CHARM:    // (never on the stack itself: each mode is cast or activated on its own)
     case MTG_API_ATTACH:   // (the Aura enters attached as the spell finishes: mtg_game.c FinishResolve)
         break;
+    case MTG_API_CHOOSE_CARD: {   // Amount$ of the Choices$ cards picked one at a time (resPicks so far): the chosen card
+        const char *spec = Mtg_Param(ab, "Choices"), *zn = Mtg_Param(ab, "ChoiceZone");   // (Defined$ ChosenCard), or
+        int zone = zn && strcmp(zn, "Graveyard") == 0 ? MTG_ZONE_GRAVEYARD : MTG_ZONE_BATTLEFIELD;   // each remembered
+        int amount = Mtg_Param(ab, "Amount") ? Mtg_Amount(d, ctx, card, Mtg_Param(ab, "Amount"), &ok) : 1, chooser = ctx->controller;
+        int remember = Mtg_Param(ab, "RememberChosen") != NULL;
+        Targets(d, ctx, ab, DEF_PLAYER, &who);
+        if (who.n && who.t[0].kind == MTG_TGT_PLAYER)
+            chooser = who.t[0].id;
+        if (d->resPicks == 0)
+            d->chosen1 = 0;
+        while (d->resPicks < amount) {
+            uint16_t list[MTG_MAX_COMBAT];
+            int n = 0, k;
+            for (i = 0; i < d->objCount && n < MTG_MAX_COMBAT; i++)
+                if (d->objs[i].zone == zone && Mtg_ValidObj(d, i, spec, ctx->source, ctx->controller)
+                    && !(remember && Mtg_IsRemembered(d, i)) && !(d->chosen1 && d->chosen1 - 1 == i))
+                    list[n++] = (uint16_t)i;
+            if (!n)
+                break;
+            if (n > 1 && d->resChoice < 0)
+                return AskPick(d, chooser, list, n);
+            for (k = 0; k < n; k++)
+                if (n == 1 || list[k] == d->resChoice) {
+                    if (remember)
+                        Mtg_Remember(d, list[k]);
+                    else {
+                        d->chosen1 = (uint16_t)(list[k] + 1);
+                        d->chosenSeq = d->objs[list[k]].seq;
+                    }
+                    Mtg_Event(d, MTG_EV_CHOSEN, list[k], chooser, 0);
+                    break;
+                }
+            d->resChoice = -1;
+            d->resPicks++;
+        }
+        d->resPicks = 0;
+        break;
+    }
     case MTG_API_SACRIFICE_ALL: {   // every ValidCards$ permanent, or the Defined$ ones (Controller$ You: its own)
         const char *cards = Mtg_Param(ab, "ValidCards");
         int mine = Mtg_Param(ab, "Controller") != NULL;
@@ -1474,7 +1515,8 @@ static int Resolve(MtgDuel *d, MtgResolveCtx *ctx, const MtgAbility *ab)
             }
         break;
     }
-    case MTG_API_PROTECTION: {   // protection from its colors until end of turn (Choice: the controller picks one)
+    case MTG_API_PROTECTION:
+    case MTG_API_PROTECTION_ALL: {   // protection from its colors until end of turn (Choice: the controller picks one)
         const char *g = Mtg_Param(ab, "Gains");
         int colors;
         if (strcmp(g, "Choice") == 0) {
@@ -1489,8 +1531,18 @@ static int Resolve(MtgDuel *d, MtgResolveCtx *ctx, const MtgAbility *ab)
             d->resChoice = -1;
         } else if (strcmp(g, "ChosenColor") == 0)
             colors = d->objs[ctx->source].chosenColors;
-        else
+        else if (strcmp(g, "TargetedCardColor") == 0) {
+            Targets(d, ctx, ab, DEF_CARD, &who);
+            colors = who.n && OnBattlefield(d, &who.t[0]) ? Mtg_ObjColors(d, who.t[0].id) : 0;
+        } else
             colors = ProtectionColors(g);
+        if (ab->api == MTG_API_PROTECTION_ALL) {
+            const char *cards = Mtg_Param(ab, "ValidCards");
+            for (i = 0; i < d->objCount; i++)
+                if (d->objs[i].zone == MTG_ZONE_BATTLEFIELD && Mtg_ValidObj(d, i, cards, ctx->source, ctx->controller))
+                    d->objs[i].tempProtection |= (uint8_t)colors;
+            break;
+        }
         Targets(d, ctx, ab, DEF_CARD, &who);
         for (i = 0; i < who.n; i++)
             if (OnBattlefield(d, &who.t[i]))
@@ -2027,8 +2079,10 @@ static const char *const sApiParams[MTG_API_COUNT][16] = {
     [MTG_API_TAP_ALL] = {"ValidCards", "ValidDescription"},
     [MTG_API_UNTAP_ALL] = {"ValidCards", "ValidDescription"},
     [MTG_API_PROTECTION] = {"Gains", "Choices"},
+    [MTG_API_PROTECTION_ALL] = {"Gains", "Choices", "ValidCards"},
     [MTG_API_DEBUFF] = {"Keywords", "Duration"},
     [MTG_API_SACRIFICE_ALL] = {"ValidCards", "Controller"},
+    [MTG_API_CHOOSE_CARD] = {"Choices", "ChoiceZone", "Amount", "Mandatory", "RememberChosen", "ChoiceTitle"},
 };
 static const char *const sPayersKnown[] = {
     "You", "Opponent", "Player", "Targeted", "TargetedController", "TargetedPlayer", "Player.IsRemembered",
@@ -2172,6 +2226,13 @@ int Mtg_ApiParamsKnown(const MtgAbility *ab, const char **why)
     case MTG_API_TAP_ALL:
     case MTG_API_UNTAP_ALL:
         return (v = Mtg_Param(ab, "ValidCards")) && Mtg_ValidSpecKnown(v) && !ab->tgt;
+    case MTG_API_CHOOSE_CARD:   // one chooser; several only remembered (ChosenCard is one card)
+        if (!(v = Mtg_Param(ab, "Choices")) || !Mtg_ValidSpecKnown(v) || ab->tgt || !AmountKnown(ab, "Amount", 0)
+            || ((v = Mtg_Param(ab, "Defined")) && !strcmp(v, "Player"))
+            || ((v = Mtg_Param(ab, "ChoiceZone")) && strcmp(v, "Battlefield") && strcmp(v, "Graveyard")))
+            return 0;
+        return !Mtg_Param(ab, "Amount") || (Mtg_Param(ab, "Amount")[0] == '1' && !Mtg_Param(ab, "Amount")[1])
+            || Mtg_Param(ab, "RememberChosen");
     case MTG_API_SACRIFICE_ALL:   // ValidCards$ (every one), or Defined$ (those named; Controller$ You: only its own)
         if ((v = Mtg_Param(ab, "Controller")) && strcmp(v, "You"))
             return 0;
@@ -2181,6 +2242,12 @@ int Mtg_ApiParamsKnown(const MtgAbility *ab, const char **why)
     case MTG_API_DEBUFF:
         KeywordList(Mtg_Param(ab, "Keywords"), &ok);
         return ok && Mtg_Param(ab, "Keywords") && (!(v = Mtg_Param(ab, "Duration")) || strcmp(v, "Permanent") == 0);
+    case MTG_API_PROTECTION_ALL:
+        if (!(v = Mtg_Param(ab, "ValidCards")) || !Mtg_ValidSpecKnown(v))
+            return 0;
+        if ((v = Mtg_Param(ab, "Gains")) && strcmp(v, "TargetedCardColor") == 0)
+            return ab->tgt != NULL;
+        /* fall through */
     case MTG_API_PROTECTION:   // colors only: "white", "black,red", Choice of AnyColor, ChosenColor
         if (!(v = Mtg_Param(ab, "Gains")))
             return 0;

@@ -8709,3 +8709,13 @@ res/moves/chatter/anim.s).
   .divide, kept with its target if others become illegal (ResolveTop), used as the effect reaches it (mtg_effects.c
   Divided). The AI gives a creature exactly what finishes it.
 - Playable: 3493 -> 3509. Tests: test_rules.c (Arc Lightning); scenario mtg_divide.
+
+## MAGIC: ChooseCard, protection from artifacts and from kinds of card (2026-11-21)
+- ChooseCard (mtg_effects.c MTG_API_CHOOSE_CARD): a chooser (Defined$, else the controller) picks Amount$ of the
+  Choices$ cards on the battlefield or in a graveyard one at a time: the chosen card (Defined$ ChosenCard) or, with
+  RememberChosen$, each remembered (Grave Consequences, Circle of Protection: Shadow).
+- Protection masks have a bit past the colors, MTG_PROT_ARTIFACT (K:Protection from artifacts, K:Protection:Artifact,
+  Gains$ Artifact); K:Protection:SPEC (creatures, Goblins, legendary creatures...) is MtgCardDef.protSpec (text protText).
+  Every check goes through Mtg_ProtectedFrom (targeting, damage, blocking, Auras falling off). "Protection from each color".
+- ProtectionAll (every ValidCards$ permanent; Gains$ TargetedCardColor: the target's colors).
+- Playable: 3509 -> 3527. Tests: test_rules.c TestProtectionKinds.

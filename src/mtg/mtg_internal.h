@@ -55,6 +55,8 @@ enum {
     MTG_API_GENERIC_CHOICE,   // ChooseGenericEffect: one of Choices$ (chains of their own) runs
     MTG_API_TAP_ALL,          // TapAllEffect: every ValidCards$ permanent tapped
     MTG_API_UNTAP_ALL,        // UntapAllEffect: ... untapped
+    MTG_API_PROTECTION_ALL,   // ProtectionAllEffect: the same for every ValidCards$ permanent (TargetedCardColor: the target's colors)
+    MTG_API_CHOOSE_CARD,      // ChooseCardEffect: Amount$ of Choices$ (battlefield / graveyard) picked: ChosenCard or remembered
     MTG_API_SACRIFICE_ALL,    // SacrificeAllEffect: every ValidCards$ permanent (or the Defined$ ones) sacrificed
     MTG_API_DEBUFF,           // DebuffEffect: each loses Keywords$ until end of turn (Duration$ Permanent: for good)
     MTG_API_PROTECTION,       // ProtectionEffect: protection from Gains$ colors (Choice: one of Choices$ AnyColor) this turn

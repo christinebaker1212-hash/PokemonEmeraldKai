@@ -940,6 +940,29 @@ static void ParseKeyword(MtgCardDef *c, const char *k)
         c->keywords |= MTG_KW_BIT(kw);
         return;
     }
+    if (strcmp(k, "Protection from each color") == 0 || strcmp(k, "Protection from artifacts") == 0) {
+        c->protection |= k[16] == 'e' ? 0x1F : MTG_PROT_ARTIFACT;
+        return;
+    }
+    if (strncmp(k, "Protection:", 11) == 0 && !c->protSpec) {   // "Protection:Creature", "Protection:Goblin:..."
+        char spec[48];
+        const char *e = strchr(k + 11, ':');
+        size_t len = e ? (size_t)(e - (k + 11)) : strlen(k + 11);
+        if (len < sizeof(spec)) {
+            memcpy(spec, k + 11, len);
+            spec[len] = 0;
+            if (strcmp(spec, "Artifact") == 0) {
+                c->protection |= MTG_PROT_ARTIFACT;
+                return;
+            }
+            if (Mtg_ValidSpecKnown(spec)) {
+                c->protSpec = KeepSpec(spec, len);
+                if (e && e[1])   // ("legendary creatures")
+                    c->protText = KeepSpec(e + 1, strlen(e + 1));
+                return;
+            }
+        }
+    }
     if (strncmp(k, "Protection from ", 16) == 0)
         for (i = 0; i < 5; i++)
             if (strcmp(k + 16, sColorNames[i]) == 0) {

@@ -356,6 +356,13 @@
 "number": "186",
 "set": "ons"
 },
+"Akroma's Blessing": {
+"artist": "Adam Rex",
+"file": "ons_1",
+"frame": "1997",
+"number": "1",
+"set": "ons"
+},
 "Akroma's Devoted": {
 "artist": "Dave Dorman",
 "file": "lgn_2",
@@ -768,6 +775,13 @@
 "frame": "1997",
 "number": "3",
 "set": "usg"
+},
+"Angelic Curator": {
+"artist": "Greg Staples",
+"file": "ulg_1",
+"frame": "1997",
+"number": "1",
+"set": "ulg"
 },
 "Angelic Favor": {
 "artist": "Paolo Parente",
@@ -1511,6 +1525,13 @@
 "number": "2",
 "set": "tor"
 },
+"Aven Warcraft": {
+"artist": "Roger Raupp",
+"file": "jud_2",
+"frame": "1997",
+"number": "2",
+"set": "jud"
+},
 "Avenger en-Dal": {
 "artist": "Ron Spencer",
 "file": "nem_2",
@@ -1986,6 +2007,13 @@
 "frame": "1997",
 "number": "108",
 "set": "tmp"
+},
+"Beloved Chaplain": {
+"artist": "Darrell Riche",
+"file": "ody_11",
+"frame": "1997",
+"number": "11",
+"set": "ody"
 },
 "Benalish Emissary": {
 "artist": "Randy Gallegos",
@@ -4003,6 +4031,13 @@
 "number": "17",
 "set": "4ed"
 },
+"Circle of Protection: Shadow": {
+"artist": "Harold McNeill",
+"file": "tmp_12",
+"frame": "1997",
+"number": "12",
+"set": "tmp"
+},
 "Circle of Protection: White": {
 "artist": "Douglas Shuler",
 "file": "4ed_18",
@@ -4303,6 +4338,13 @@
 "frame": "1993",
 "number": "308",
 "set": "4ed"
+},
+"Commander Eesha": {
+"artist": "Rebecca Guay",
+"file": "jud_9",
+"frame": "1997",
+"number": "9",
+"set": "jud"
 },
 "Commander Greven il-Vec": {
 "artist": "Kev Walker",
@@ -6026,6 +6068,13 @@
 "number": "89",
 "set": "scg"
 },
+"Dragonstalker": {
+"artist": "Ron Spencer",
+"file": "scg_11",
+"frame": "1997",
+"number": "11",
+"set": "scg"
+},
 "Drake Hatchling": {
 "artist": "Bradley Williams",
 "file": "mmq_76",
@@ -7286,6 +7335,13 @@
 "number": "59",
 "set": "vis"
 },
+"Fallen Cleric": {
+"artist": "Dave Dorman",
+"file": "ons_145",
+"frame": "1997",
+"number": "145",
+"set": "ons"
+},
 "Fallow Earth": {
 "artist": "Janine Johnston",
 "file": "mir_214",
@@ -8195,6 +8251,13 @@
 "frame": "1993",
 "number": "235",
 "set": "ice"
+},
+"Foothill Guide": {
+"artist": "Eric Peterson",
+"file": "ons_29",
+"frame": "1997",
+"number": "29",
+"set": "ons"
 },
 "Foratog": {
 "artist": "Mark Poole",
@@ -9406,6 +9469,13 @@
 "frame": "1997",
 "number": "327",
 "set": "mir"
+},
+"Grave Consequences": {
+"artist": "Tim Hildebrandt",
+"file": "jud_67",
+"frame": "1997",
+"number": "67",
+"set": "jud"
 },
 "Grave Defiler": {
 "artist": "Tony Szczudlo",
@@ -10799,6 +10869,13 @@
 "frame": "1997",
 "number": "25",
 "set": "tmp"
+},
+"Iridescent Angel": {
+"artist": "Matt Cavotta",
+"file": "ody_288",
+"frame": "1997",
+"number": "288",
+"set": "ody"
 },
 "Irini Sengir": {
 "artist": "Pete Venters",
@@ -16617,6 +16694,13 @@
 "number": "43",
 "set": "mmq"
 },
+"Reverent Mantra": {
+"artist": "Rebecca Guay",
+"file": "mmq_44",
+"frame": "1997",
+"number": "44",
+"set": "mmq"
+},
 "Reverse Damage": {
 "artist": "Dameon Willich",
 "file": "4ed_45",
@@ -16756,6 +16840,13 @@
 "frame": "1997",
 "number": "131",
 "set": "ulg"
+},
+"Riptide Biologist": {
+"artist": "Justin Sweet",
+"file": "ons_106",
+"frame": "1997",
+"number": "106",
+"set": "ons"
 },
 "Riptide Chronologist": {
 "artist": "Roger Raupp",
@@ -17365,6 +17456,13 @@
 "frame": "1997",
 "number": "269",
 "set": "inv"
+},
+"Samite Elder": {
+"artist": "Terese Nielsen",
+"file": "pls_14",
+"frame": "1997",
+"number": "14",
+"set": "pls"
 },
 "Samite Healer": {
 "artist": "Tom Wänerstrand",
@@ -18534,6 +18632,13 @@
 "frame": "1997",
 "number": "204",
 "set": "tmp"
+},
+"Shoreline Raider": {
+"artist": "Nelson DeCastro",
+"file": "inv_73",
+"frame": "1997",
+"number": "73",
+"set": "inv"
 },
 "Show and Tell": {
 "artist": "Jeff Laubenstein",
@@ -21874,6 +21979,13 @@
 "number": "82",
 "set": "inv"
 },
+"Tower of the Magistrate": {
+"artist": "Thomas Gianni",
+"file": "mmq_330",
+"frame": "1997",
+"number": "330",
+"set": "mmq"
+},
 "Towering Baloth": {
 "artist": "Arnie Swekel",
 "file": "ons_292",
@@ -22174,6 +22286,13 @@
 "frame": "1997",
 "number": "98",
 "set": "uds"
+},
+"Tsabo Tavoc": {
+"artist": "Michael Sutfin",
+"file": "inv_281",
+"frame": "1997",
+"number": "281",
+"set": "inv"
 },
 "Tsunami": {
 "artist": "Richard Thomas",
@@ -24316,6 +24435,13 @@
 "frame": "1997",
 "number": "291",
 "set": "inv"
+},
+"Yavimaya Scion": {
+"artist": "DiTerlizzi",
+"file": "ulg_119",
+"frame": "1997",
+"number": "119",
+"set": "ulg"
 },
 "Yavimaya Wurm": {
 "artist": "Melissa A. Benson",

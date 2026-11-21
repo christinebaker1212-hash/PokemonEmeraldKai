@@ -6,6 +6,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <ctype.h>
 #include "mtg/mtg.h"
 #include "../tcg/tcg_gfx.h"
 #include "mtg_gfx.h"
@@ -735,4 +736,15 @@ void MtgGfx_KeywordLine(int card, uint32_t kw, char *out, unsigned cap)
     for (k = 0; k < 5; k++)
         if (c->protection & MTG_COLOR_BIT(k) && n + 1 < cap)
             n += (unsigned)snprintf(out + n, cap - n, "%sPROTECTION FROM %s", n ? "  " : "", colors[k]);
+    if (c->protection & MTG_PROT_ARTIFACT && n + 1 < cap)
+        n += (unsigned)snprintf(out + n, cap - n, "%sPROTECTION FROM ARTIFACTS", n ? "  " : "");
+    if (c->protSpec && n + 1 < cap) {   // ("Creature" -> CREATURES, "Goblin" -> GOBLINS)
+        n += (unsigned)snprintf(out + n, cap - n, "%sPROTECTION FROM ", n ? "  " : "");
+        const char *w = c->protText ? c->protText : c->protSpec;
+        for (k = 0; w[k] && w[k] != '.' && n + 2 < cap; k++)
+            out[n++] = (char)toupper((unsigned char)w[k]);
+        if (!c->protText)
+            out[n++] = 'S';
+        out[n] = 0;
+    }
 }
