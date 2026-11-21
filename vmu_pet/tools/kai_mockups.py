@@ -50,7 +50,7 @@ def x2(im):
     return im.resize((im.width * 2, im.height * 2), Image.NEAREST)
 
 
-def pc_menu(shot, greyed):
+def pc_menu(shot, greyed=False):
     """The PC menu with VM2 above LOG OFF (rows are 32 pixels at 2x; the text at x 32)."""
     im = shot.copy()
     # the window grows a row: the LOG OFF row and the frame under it move down 32
@@ -77,8 +77,9 @@ def message(im, lines):
 
 
 def vmu_wallpaper():
-    """The VM2 box's wallpaper at GBA size (153x115): a VMU drawn as the games draw things, its screen the box's one
-    place."""
+    """The VM2 box's wallpaper at GBA size (153x115): a VMU as the Dreamcast's own (light grey, a curved bottom edge,
+    the screen in the middle at the top, a lavender D-pad on the left, SLEEP and MODE small in the middle, A and B on
+    the right, B lower), drawn as pixel art; its screen is the box's one place."""
     w, h = 153, 115
     im = Image.new('RGBA', (w, h), (184, 200, 240, 255))
     d = ImageDraw.Draw(im)
@@ -86,24 +87,65 @@ def vmu_wallpaper():
         for x in range((y // 8) % 2 * 8, w, 16):
             d.point((x, y), fill=(168, 184, 232))
             d.point((x + 1, y), fill=(168, 184, 232))
-    bx, by, bw, bh = 41, 6, 72, 104      # the VMU's body
-    body = [(bx + 10, by), (bx + bw - 10, by), (bx + bw, by + 10), (bx + bw, by + bh - 34), (bx + bw - 6, by + bh - 14),
-            (bx + bw - 20, by + bh), (bx + 20, by + bh), (bx + 6, by + bh - 14), (bx, by + bh - 34), (bx, by + 10)]
-    d.polygon(body, fill=(232, 236, 244), outline=(56, 64, 104))
-    d.line(body + [body[0]], fill=(56, 64, 104), width=2)
-    d.rounded_rectangle([bx + 4, by + 4, bx + bw - 4, by + bh - 50], 6, fill=(200, 208, 224))
-    sx, sy, sw, sh = bx + 12, by + 10, 48, 40   # the LCD
-    d.rectangle([sx - 2, sy - 2, sx + sw + 2, sy + sh + 2], fill=(72, 80, 112))
-    d.rectangle([sx, sy, sx + sw, sy + sh], fill=(164, 196, 148))
-    d.line([sx, sy + sh, sx + sw, sy + sh], fill=(132, 164, 120))
-    cx, cy = bx + 18, by + 76            # the D-pad
-    d.rectangle([cx - 9, cy - 3, cx + 9, cy + 3], fill=(72, 80, 112))
-    d.rectangle([cx - 3, cy - 9, cx + 3, cy + 9], fill=(72, 80, 112))
-    for ax, ay, l in ((bx + 52, by + 72, 'A'), (bx + 60, by + 82, 'B')):
-        d.ellipse([ax - 6, ay - 6, ax + 6, ay + 6], fill=(216, 88, 88), outline=(120, 40, 56))
-    for i in range(2):                   # SLEEP / MODE
-        d.rounded_rectangle([bx + 22 + i * 18, by + 94, bx + 34 + i * 18, by + 98], 2, fill=(152, 160, 184))
-    return im, (sx + sw // 2 - 16, sy + sh // 2 - 18)
+    OUT, BODY, LIGHT, SHADE = (64, 64, 80), (220, 220, 224), (244, 244, 248), (184, 184, 196)
+    BTN, BTN_D, BTN_L = (140, 148, 192), (76, 80, 120), (176, 184, 220)
+    bx, bw, top, side_end, bottom = 36, 81, 3, 80, 112
+    cx = bx + bw / 2
+
+    def inside(x, y):
+        if y < top or y > bottom or x < bx or x > bx + bw:
+            return False
+        r = 7                            # the top corners
+        for ccx in (bx + r, bx + bw - r):
+            if y < top + r and abs(x - ccx) > 0 and ((x < bx + r and ccx == bx + r) or (x > bx + bw - r and ccx == bx + bw - r)):
+                if (x - ccx) ** 2 + (y - (top + r)) ** 2 > r * r:
+                    return False
+        if y > side_end:                 # the curved bottom: an ellipse's lower half
+            ry = bottom - side_end
+            rx = bw / 2
+            if ((x - cx) / rx) ** 2 + ((y - side_end) / ry) ** 2 > 1:
+                return False
+        return True
+    px = im.load()
+    for y in range(h):
+        for x in range(w):
+            if inside(x + 0.5, y + 0.5):
+                px[x, y] = BODY + (255,)
+    for y in range(h):                   # outline, a light edge top-left, a shade bottom-right
+        for x in range(w):
+            if px[x, y][:3] != BODY:
+                continue
+            n = [inside(x + 0.5 + dx, y + 0.5 + dy) for dx, dy in ((-1, 0), (1, 0), (0, -1), (0, 1))]
+            if not all(n):
+                px[x, y] = OUT + (255,)
+            elif not inside(x - 1.5, y + 0.5) or not inside(x + 0.5, y - 1.5):
+                px[x, y] = LIGHT + (255,)
+            elif not inside(x + 2.5, y + 0.5) or not inside(x + 0.5, y + 2.5):
+                px[x, y] = SHADE + (255,)
+    # the top edge's strip (where the Dreamcast word sits)
+    d.line([bx + 12, top + 6, bx + bw - 12, top + 6], fill=SHADE)
+    # the screen: a grey frame and the LCD
+    sx, sy, sw, sh = int(cx) - 26, top + 13, 51, 34
+    d.rounded_rectangle([sx - 3, sy - 3, sx + sw + 3, sy + sh + 3], 3, fill=(156, 160, 172), outline=(120, 124, 140))
+    d.rectangle([sx, sy, sx + sw, sy + sh], fill=(170, 186, 160))
+    d.line([sx, sy, sx + sw, sy], fill=(140, 156, 132))
+    d.line([sx, sy, sx, sy + sh], fill=(140, 156, 132))
+
+    def button(x, y, r):
+        d.ellipse([x - r, y - r, x + r, y + r], fill=BTN, outline=BTN_D)
+        d.point((x - r // 2, y - r // 2), fill=BTN_L)
+        d.point((x - r // 2 + 1, y - r // 2), fill=BTN_L)
+    # the D-pad (left), SLEEP / MODE (middle), A / B (right, B lower)
+    dx, dy = bx + 17, top + 67
+    for (x0, y0, x1, y1) in ((dx - 9, dy - 3, dx + 9, dy + 3), (dx - 3, dy - 9, dx + 3, dy + 9)):
+        d.rectangle([x0, y0, x1, y1], fill=BTN, outline=BTN_D)
+    d.rectangle([dx - 2, dy - 2, dx + 2, dy + 2], fill=BTN)
+    d.point((dx, dy), fill=BTN_D)
+    button(int(cx) - 2, top + 61, 3)
+    button(int(cx) + 8, top + 64, 3)
+    button(bx + 53, top + 75, 6)
+    button(bx + 66, top + 81, 6)
+    return im, (sx + sw // 2 - 16, sy + sh // 2 - 17)
 
 
 def vm2_box(shot, mon, name_lines):
@@ -152,7 +194,7 @@ def main():
     data = ((255, 255, 255), (98, 98, 98))
     panels = [
         label(pc_menu(menu, False), '1  PC: VM2 plugged in (GUI-mode): VM2 above LOG OFF'),
-        label(pc_menu(menu, True), '2  no VM2: the row greyed, A does nothing'),
+        label(menu.copy(), '2  no VM2 connected: no VM2 row at all'),
         label(message(pc_menu(menu, False), ['Connected to the VM2.', 'It holds a MOéMON EGG.']), '3  VM2 chosen: it is read'),
         label(vm2_box(boxes, ('egg', 1, 'egg'), [('EGG', data), ('VM2', data)]), '4  the VM2 box: an EGG on it'),
         label(vm2_box(boxes, ('venusaur', 1, 'venusaur'), [('VENUSAUR', data), ('Lv50', data)]), '5  a grown MOeMON (Lv50) on it'),

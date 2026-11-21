@@ -160,9 +160,12 @@ helps) and type against type (the full type chart): super effective hits for 2, 
 
 ## Kai's side: mock-ups for review (2026-11-21)
 
-`docs/vmu_pet/kai_vm2_mockups.png` (drawn over the game's own PC menu and box screen with its own font and pictures:
+`docs/vmu_pet/kai_vm2_mockups.png` (the user, 2026-11-21: "looks good, but the VMU graphic doesn't look right":
+redrawn after a real VMU: light grey, a curved bottom edge, the screen centred at the top, lavender D-pad, SLEEP /
+MODE, A and B; drawn over the game's own PC menu and box screen with its own font and pictures:
 `vmu_pet/tools/kai_mockups.py`, `gbafont.py`; the base shots in docs/vmu_pet/kai_src/). Proposed, waiting on the user:
-1. The PC menu gets **VM2** above LOG OFF; with no VM2 answering (plugged in, GUI-mode) it's greyed and does nothing.
+1. The PC menu gets **VM2** above LOG OFF, only while a VM2 is connected (the user, 2026-11-21: "should not appear in
+   the PC unless a VM2 is connected").
 2. Choosing it reads the VM2 ("Connected to the VM2. It holds a MOéMON EGG.").
 3. The box screen opens at a **VM2 box** (a VMU drawn as its wallpaper, one place: its screen); L / R go on to the
    player's own boxes, so the EGG or the grown MOéMON can be dropped anywhere, and an EGG of the edition put on it.
