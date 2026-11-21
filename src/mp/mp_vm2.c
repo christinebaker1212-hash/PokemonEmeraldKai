@@ -33,7 +33,7 @@
 extern char gPlatformSavePath[];
 void MP_AsciiToGame(u8 *dst, const char *src, int maxLen);
 
-#define VM2_SLOT      8          // the box's place on the VMU's screen (row 1, column 2)
+#define VM2_SLOT      14         // the box's place on the VMU's screen (row 2, column 2: gen_wallpaper.py draws it there)
 #define SAVE_PAGE     0xBB80     // in the pet's file
 #define REC           16         // the record's place in the SAVE page (RAM $40)
 #define REC_BYTES     39         // $40-$66 (link.inc's PET_BYTES)
@@ -361,6 +361,17 @@ void MP_Vm2_BoxClosed(void)
         memset(rec, 0, REC_BYTES);
         rec[R_MAGIC] = 'P';
         MPNet_Log("vm2: its %s came in", sRecord[R_STAGE] == 1 ? "EGG" : "MOEMON");
+    }
+    if (GetBoxMonData(slot, MON_DATA_SPECIES) == SPECIES_NONE)
+    {
+        // DEPOSIT puts a POKéMON in the box's first free place: an EGG anywhere in the box counts as on the screen
+        for (p = 0; p < IN_BOX_COUNT; p++)
+            if (GetBoxMonData(&sBoxes.boxes[0][p], MON_DATA_IS_EGG) && EggToRecord(&sBoxes.boxes[0][p], rec))
+            {
+                *slot = sBoxes.boxes[0][p];
+                ZeroBoxMonData(&sBoxes.boxes[0][p]);
+                break;
+            }
     }
     if (GetBoxMonData(slot, MON_DATA_SPECIES) != SPECIES_NONE
      && !(had && GetBoxMonData(slot, MON_DATA_PERSONALITY) == Get32(sRecord + R_PID)))

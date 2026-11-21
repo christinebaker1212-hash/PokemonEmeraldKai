@@ -96,12 +96,11 @@ def tiny(d, x, y, text, col):
         x += len(g[0]) + 1
 
 
-def vmu_wallpaper():
+def vmu_wallpaper(w=153, h=115, X=43, Y=3):
     """The VM2 box's wallpaper at GBA size (153x115): a VMU drawn from the user's photo (docs/user_images/97: the
     front, straight on), its proportions kept: a tall light-grey body with rails down both sides and an arched cap
     at the top, "Dreamcast" above a large teal screen, SLEEP / MODE under it on the right, a round D-pad bottom left,
     A lower and B higher on the right. The screen is the box's one place."""
-    w, h = 153, 115
     im = Image.new('RGBA', (w, h), (184, 200, 240, 255))
     d = ImageDraw.Draw(im)
     for y in range(0, h, 8):            # a soft diamond lattice, as Emerald's wallpapers
@@ -110,7 +109,7 @@ def vmu_wallpaper():
             d.point((x + 1, y), fill=(168, 184, 232))
     OUT, BODY, SEAM, SHADE, LIGHT = (112, 110, 104), (226, 224, 214), (178, 176, 168), (202, 200, 190), (240, 238, 232)
     BTN, BTN_D, BTN_L, INK = (128, 128, 150), (70, 70, 84), (166, 166, 186), (88, 88, 92)
-    X, Y, W, H = 43, 3, 66, 110          # the body
+    W, H = 66, 110                       # the body (X, Y: its top left)
     # the body: the rails' tops at y 3, the middle's top arching up to y 0; the bottom curved, as the photo's (the sides
     # bend in over its last 16 rows: a superellipse, round corners into a gently curved middle)
     px = im.load()

@@ -158,26 +158,26 @@ helps) and type against type (the full type chart): super effective hits for 2, 
   The caller attacks first. Counted in the MOéMON's record (battles, wins: bytes $62-$64, which go to Kai with it).
 - Tests: pet_battle (WILD), pet_battle_link (two units: each counts one battle, one wins).
 
-## Kai's side: mock-ups for review (2026-11-21)
+## Kai's side (built 2026-11-21)
 
-`docs/vmu_pet/kai_vm2_mockups.png` (the user, 2026-11-21: "looks good, but the VMU graphic doesn't look right":
-then "Revise once more. That does not look like a VMU." with a photo: redrawn after it, its proportions kept
-(rails down both sides, an arched cap, "Dreamcast" over a large teal screen, SLEEP / MODE, a round D-pad, A lower and
-B higher); drawn over the game's own PC menu and box screen with its own font and pictures:
-`vmu_pet/tools/kai_mockups.py`, `gbafont.py`; the base shots in docs/vmu_pet/kai_src/). Proposed, waiting on the user:
-1. The PC menu gets **VM2** above LOG OFF, only while a VM2 is connected (the user, 2026-11-21: "should not appear in
-   the PC unless a VM2 is connected").
-2. Choosing it reads the VM2 ("Connected to the VM2. It holds a MOéMON EGG.").
-3. The box screen opens at a **VM2 box** (a VMU drawn as its wallpaper, one place: its screen); L / R go on to the
-   player's own boxes, so the EGG or the grown MOéMON can be dropped anywhere, and an EGG of the edition put on it.
-4. CLOSE BOX writes what changed back to the VM2 and restarts it out of GUI-mode ("The VM2 was disconnected.
-   It's safe to unplug it.").
-Built already, not yet used: the link itself in the game (src/platform/vm2.c, include/vm2.h; test
-tools/test/vm2/vm2_test.sh against a pretend VM2).
-Open: an EGG from the VMU comes in as Kai's EGG of its MOéMON (its IVs, personality kept); a grown one as Lv50 with
-its IVs, nature, shiny, POKé BALL, the MASTER / ASTRAL BALLS bought into the BAG; "good care benefits it in Kai":
-proposed friendship 255 less 10 a care mistake (70 at least) and EVs from its trainings. An EGG given from Kai must be
-of the edition's hatchable MOéMON (KANTO: 73).
+The user approved the mock-ups (`docs/vmu_pet/kai_vm2_mockups.png`; "looks good", then the VMU redrawn after their
+photo, its bottom curved; "The VM2 option should not appear in the PC unless a VM2 is connected"). Built:
+- **PC > VM2**, only while a VM2 answers (CH340 port, GUI-mode): `src/script_menu.c` PCMENU_VM2,
+  `src/mp/mp_vm2.c` MP_Vm2_Present; the link itself `src/platform/vm2.c` (as the VMU manager's).
+- Choosing it reads the VM2 on a thread ("Connected to the VM2. It holds VENUSAUR." / "a MOéMON EGG." / "no
+  MOéMON"), then the PC's own menus open over the **VM2 box**: the VMU drawn as its wallpaper
+  (`tools/moemon_vm2/gen_wallpaper.py` -> graphics/pokemon_storage/wallpapers/vm2, from the mock-up's drawing),
+  its screen the box's place 14.
+- What comes in: an EGG keeps its personality and IVs; a grown MOéMON its level, IVs (+5 to the lowest for each IV
+  UP bought), nature and gender, shiny if bought, friendship 255 less 10 a care mistake (70 at least), EVs from its
+  trainings. Each transfer ID once ("<save>.vmu").
+- What goes out: an EGG of the KANTO EDITION (national 1-151), put on the VMU's screen or DEPOSITed in the box.
+  Anything else left in those boxes goes back to the player's PC (said so).
+- Closing writes the pet's SAVE page with the VM2 mark (its LINK menu) and restarts the VM2 out of GUI-mode ("The VM2
+  was disconnected. It's safe to unplug it.").
+- Tests: tools/test/vm2/vm2_test.sh (the link), kai_vm2_test.sh (a grown VENUSAUR withdrawn), kai_vm2_egg_test.sh
+  (an EGG of CHARMANDER deposited; the pet on that image then hatches it and knows it's a VM2).
+- Still open from before: the MASTER / ASTRAL BALLS bought on the pet aren't given to the BAG yet.
 
 ## One program, LINK the VM2's (built 2026-11-21)
 

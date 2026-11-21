@@ -5776,6 +5776,8 @@ static void LoadWallpaperGfx(u8 boxId, s8 direction)
     if (wallpaperId != WALLPAPER_FRIENDS)
     {
         wallpaper = &sWallpapers[wallpaperId];
+        if (MP_Vm2_BoxOpen() && sStorage->wallpaperLoadBoxId == 0)
+            wallpaper = &sWallpaperVm2;   // Moemon Kai: the VM2's box (mp_vm2.c)
         LZ77UnCompWram(wallpaper->tilemap, sStorage->wallpaperTilemap);
         DrawWallpaper(sStorage->wallpaperTilemap, sStorage->wallpaperLoadDir, sStorage->wallpaperOffset);
 

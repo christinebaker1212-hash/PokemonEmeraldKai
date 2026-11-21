@@ -263,6 +263,9 @@ before building them.
   every single update"): one release for a group of fixes, or when the user asks for one; not one per fix.
 - Dev updates: the dev channel ended (the user, 2026-11-03, with Moemon Maker's first update): every update is a main
   update; don't push dev updates.
+- `vmu_pet/`: the Dreamcast VMU virtual pet (KANTO edition; README there) and the VMU manager (vmu_pet/manager/); the
+  user's decisions in `docs/VMU_PET_DECISIONS.md`; the VM2's USB protocol `docs/VM2_USB_PROTOCOL.md`. Kai's side:
+  PC > VM2 (only while a VM2 answers), src/mp/mp_vm2.c + src/platform/vm2.c; tests tools/test/vm2/, `make -C vmu_pet test`
 - `tools/moemon_import/`: scripts that imported the Kai IPS into the decomp (need the user's ROM; not in the repo)
 - `tools/moemon_music/`: Moemon Music Studio, a separate SDL2 program: plays MIDIs (and PSF/PSF2/USF/GBS/2SF/GSF rips and GameCube streams,
   through vendored emulators in its third_party/ with capture hooks: README there) with the game's own instruments

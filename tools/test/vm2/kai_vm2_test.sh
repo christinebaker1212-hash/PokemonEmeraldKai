@@ -41,6 +41,8 @@ press RIGHT 3
 wait 10
 press DOWN 3
 wait 10
+press DOWN 3
+wait 10
 shot vm2_slot
 press A 3
 wait 30
