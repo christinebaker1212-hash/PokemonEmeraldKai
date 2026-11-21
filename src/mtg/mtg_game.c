@@ -61,7 +61,7 @@ int Mtg_Power(const MtgDuel *d, int obj)
     Mtg_StaticMods(d, obj, &m);
     int base = o->animUntil && o->animPower != MTG_ANIM_NO_PT ? o->animPower : Mtg_Card(o->def)->power;
     return (m.setPower != MTG_STATIC_NO_SET ? m.setPower : base) + m.addPower + o->counters11 + o->tempPower
-         + CounterPT(o, 0);
+         + o->permPower + CounterPT(o, 0);
 }
 
 int Mtg_Toughness(const MtgDuel *d, int obj)
@@ -71,35 +71,56 @@ int Mtg_Toughness(const MtgDuel *d, int obj)
     Mtg_StaticMods(d, obj, &m);
     int base = o->animUntil && o->animToughness != MTG_ANIM_NO_PT ? o->animToughness : Mtg_Card(o->def)->toughness;
     return (m.setToughness != MTG_STATIC_NO_SET ? m.setToughness : base) + m.addToughness + o->counters11
-         + o->tempToughness + CounterPT(o, 1);
+         + o->tempToughness + o->permToughness + CounterPT(o, 1);
 }
 
 uint32_t Mtg_Keywords(const MtgDuel *d, int obj)
 {
     MtgStaticMods m;
     Mtg_StaticMods(d, obj, &m);
-    return Mtg_Card(d->objs[obj].def)->keywords | d->objs[obj].tempKeywords | m.keywords
-         | (d->objs[obj].animUntil ? d->objs[obj].animKeywords : 0);
+    return (Mtg_Card(d->objs[obj].def)->keywords | d->objs[obj].tempKeywords | d->objs[obj].permKeywords | m.keywords
+            | (d->objs[obj].animUntil ? d->objs[obj].animKeywords : 0))
+         & ~(d->objs[obj].loseKeywords | d->objs[obj].permLoseKeywords);   // (Debuff: lost)
 }
 
 uint8_t Mtg_ObjTypes(const MtgDuel *d, int obj)
 {
     const MtgObj *o = &d->objs[obj];
-    return Mtg_Card(o->def)->types | (o->animUntil && o->zone == MTG_ZONE_BATTLEFIELD ? o->animTypes : 0);
+    if (o->zone != MTG_ZONE_BATTLEFIELD)
+        return Mtg_Card(o->def)->types;
+    return Mtg_Card(o->def)->types | (o->animUntil ? o->animTypes : 0) | Mtg_StaticTypes(d, obj);
 }
 
 uint8_t Mtg_Landwalk(const MtgDuel *d, int obj)
 {
     MtgStaticMods m;
     Mtg_StaticMods(d, obj, &m);
-    return Mtg_Card(d->objs[obj].def)->landwalk | m.landwalk | ((d->objs[obj].tempKeywords >> MTG_KWX_WALK_SHIFT) & 0x1F);
+    return Mtg_Card(d->objs[obj].def)->landwalk | m.landwalk
+         | (((d->objs[obj].tempKeywords | d->objs[obj].permKeywords) >> MTG_KWX_WALK_SHIFT) & 0x1F);
 }
 
 uint8_t Mtg_Protection(const MtgDuel *d, int obj)
 {
     MtgStaticMods m;
     Mtg_StaticMods(d, obj, &m);
-    return Mtg_Card(d->objs[obj].def)->protection | m.protection;
+    return Mtg_Card(d->objs[obj].def)->protection | m.protection | d->objs[obj].tempProtection;
+}
+
+int Mtg_ProtectedFrom(const MtgDuel *d, int obj, int source, uint8_t ignore)
+{
+    const char *spec = Mtg_Card(d->objs[obj].def)->protSpec;
+    uint8_t from = (uint8_t)(Mtg_ObjColors(d, source) | ((Mtg_ObjTypes(d, source) & MTG_T_ARTIFACT) ? MTG_PROT_ARTIFACT : 0));
+    MtgStaticMods m;
+    int q;
+    if (Mtg_Protection(d, obj) & from & ~ignore)
+        return 1;
+    if (spec && d->objs[obj].faceDownOf == 0 && Mtg_ValidObj(d, source, spec, obj, d->objs[obj].controller))
+        return 1;
+    Mtg_StaticMods(d, obj, &m);   // (what statics give it: an Aura's "protection from creatures", not from itself)
+    for (q = 0; q < 2 && m.protSpec[q]; q++)
+        if (m.protExcept[q] != source && Mtg_ValidObj(d, source, m.protSpec[q], obj, d->objs[obj].controller))
+            return 1;
+    return 0;
 }
 
 static int IsCreature(const MtgDuel *d, int obj)
@@ -120,6 +141,10 @@ static void ResetPermanentState(MtgObj *o)
     o->damage = 0;
     o->tempPower = o->tempToughness = 0;
     o->tempKeywords = 0;
+    o->permPower = o->permToughness = 0;
+    o->tempProtection = 0;
+    o->loseKeywords = o->permLoseKeywords = 0;
+    o->permKeywords = 0;
     o->counters11 = 0;
     memset(o->ctrKind, 0, sizeof(o->ctrKind));
     memset(o->ctrNum, 0, sizeof(o->ctrNum));
@@ -253,6 +278,8 @@ static int ActivationTimingOk(const MtgDuel *d, int obj, int ability, int player
         return 0;
     if (ab->actMyTurn && d->active != player)
         return 0;
+    if (ab->actNotMyTurn && d->active == player)   // (Activator$ You.NonActive)
+        return 0;
     if (ab->actSteps && !(ab->actSteps & (1u << d->step)))
         return 0;
     return 1;
@@ -266,6 +293,10 @@ void Mtg_MoveTo(MtgDuel *d, int obj, int zone)
     MtgTrigEvent ev;
     if (from == MTG_ZONE_BATTLEFIELD && zone == MTG_ZONE_GRAVEYARD && Mtg_Card(o->def)->diesToLibraryTop)
         zone = MTG_ZONE_LIBRARY;   // "if it would die, put it on top of its owner's library instead" (its top: the end)
+    if (from == MTG_ZONE_STACK && o->castMode == 2)
+        zone = MTG_ZONE_EXILE;     // (Flashback: exiled instead, wherever it would go from the stack)
+    if (from == MTG_ZONE_BATTLEFIELD || (from == MTG_ZONE_STACK && zone != MTG_ZONE_BATTLEFIELD))
+        o->kicked = o->castMode = 0;   // (cast kicked: only while it's the spell, or the permanent it became)
     memset(&ev, 0, sizeof(ev));
     ev.mode = MTG_TRIG_CHANGES_ZONE;
     ev.obj = (uint16_t)obj;
@@ -276,6 +307,10 @@ void Mtg_MoveTo(MtgDuel *d, int obj, int zone)
     ev.objCtrl = o->controller;
     if (from == MTG_ZONE_BATTLEFIELD)   // leaving the battlefield: the triggers look back at it as it was (603.10a)
         Mtg_CheckTriggers(d, &ev);
+    if (o->faceDownOf && zone != MTG_ZONE_BATTLEFIELD && zone != MTG_ZONE_STACK) {
+        o->def = (uint16_t)(o->faceDownOf - 1);   // (Morph: a face-down card is turned face up as it leaves)
+        o->faceDownOf = 0;
+    }
     if (from == MTG_ZONE_LIBRARY) {
         MtgPlayer *p = &d->players[o->owner];
         for (i = 0; i < p->libraryCount; i++)
@@ -293,6 +328,15 @@ void Mtg_MoveTo(MtgDuel *d, int obj, int zone)
         ResetPermanentState(o);
         o->sick = zone == MTG_ZONE_BATTLEFIELD;   // (a permanent arriving: under its controller since this turn)
     }
+    if (zone == MTG_ZONE_BATTLEFIELD) {   // a new object: nothing chosen for it yet ("as it enters": queued, Run)
+        o->chosenType = 0;
+        o->chosenColors = o->chosenPlayer = 0;
+        o->chosenNumber = 0;
+        o->echoDue = 1;
+        for (i = 0; i < 2; i++)   // (each "as it enters" of its card: obj, the second with bit 15)
+            if (Mtg_Card(o->def)->etbRepl[i] && d->etbCount < 8)
+                d->etbQueue[d->etbCount++] = (uint16_t)(obj | (i << 15));
+    }
     if (zone != MTG_ZONE_BATTLEFIELD)
         o->controller = o->owner, o->ctrlBase = 0;
     o->zone = (uint8_t)zone;
@@ -306,7 +350,8 @@ void Mtg_MoveTo(MtgDuel *d, int obj, int zone)
     Mtg_Event(d, MTG_EV_ZONE, obj, from, zone);
     if (zone == MTG_ZONE_BATTLEFIELD && Mtg_StaticForbids(d, MTG_STATIC_ETB_TAPPED, obj, MTG_NO_OBJ))
         Mtg_Tap(d, obj, 1);   // (it enters tapped: ETBTapped)
-    if (zone == MTG_ZONE_BATTLEFIELD && Mtg_Card(o->def)->etbKind && Mtg_Card(o->def)->etbNum)
+    if (zone == MTG_ZONE_BATTLEFIELD && Mtg_Card(o->def)->etbKind && Mtg_Card(o->def)->etbNum
+        && (!Mtg_Card(o->def)->etbCheck || Mtg_CheckSvar(d, o->def, obj, o->controller, Mtg_Card(o->def)->etbCheck, NULL)))
         Mtg_AddCountersKind(d, obj, Mtg_Card(o->def)->etbKind, Mtg_Card(o->def)->etbNum);   // (etbCounter:TYPE:N)
     if (from != MTG_ZONE_BATTLEFIELD)
         Mtg_CheckTriggers(d, &ev);
@@ -374,16 +419,18 @@ void Mtg_GainLife(MtgDuel *d, int player, int amount)
 void Mtg_DealDamage(MtgDuel *d, int sourceObj, MtgTarget to, int amount, int combat)
 {
     uint8_t *shield;
+    int noPrevent;
     if (amount <= 0)
         return;
+    noPrevent = Mtg_StaticForbids(d, MTG_STATIC_CANT_PREVENT, MTG_NO_OBJ, MTG_NO_OBJ);   // (Flaring Pain: none of these)
     // "prevent all (combat) damage ...": a Fog this turn, or a PreventDamage replacement in force (mtg_static.c)
-    if ((combat && d->fog) || Mtg_DamagePrevented(d, sourceObj, to, combat, amount)) {
+    if (!noPrevent && ((combat && d->fog) || Mtg_DamagePrevented(d, sourceObj, to, combat, amount))) {
         Mtg_Event(d, MTG_EV_PREVENTED, sourceObj, to.kind == MTG_TGT_OBJ ? to.id : -1 - to.id, amount);
         return;
     }
     // "prevent the next n damage" (PreventDamageEffect's shield, used up first)
     shield = to.kind == MTG_TGT_OBJ ? &d->objs[to.id].prevent : to.kind == MTG_TGT_PLAYER ? &d->players[to.id].prevent : NULL;
-    if (shield && *shield && (to.kind != MTG_TGT_OBJ || d->objs[to.id].zone == MTG_ZONE_BATTLEFIELD)) {
+    if (!noPrevent && shield && *shield && (to.kind != MTG_TGT_OBJ || d->objs[to.id].zone == MTG_ZONE_BATTLEFIELD)) {
         int n = *shield < amount ? *shield : amount;
         *shield = (uint8_t)(*shield - n);
         amount -= n;
@@ -394,7 +441,7 @@ void Mtg_DealDamage(MtgDuel *d, int sourceObj, MtgTarget to, int amount, int com
     if (to.kind == MTG_TGT_OBJ) {
         if (d->objs[to.id].zone != MTG_ZONE_BATTLEFIELD)
             return;
-        if (sourceObj != MTG_NO_OBJ && (Mtg_Protection(d, to.id) & Mtg_ObjColors(d, sourceObj)))
+        if (!noPrevent && sourceObj != MTG_NO_OBJ && Mtg_ProtectedFrom(d, to.id, sourceObj, 0))
             return;
         if (!(Mtg_ObjTypes(d, to.id) & MTG_T_CREATURE))
             return;   // (planeswalkers: not yet)
@@ -460,14 +507,17 @@ void Mtg_Destroy(MtgDuel *d, int obj, int noRegen)
 }
 
 // the protection an Aura gives its own creature (WHITE WARD's from white: it doesn't push itself off)
-static uint8_t Mtg_AuraOwnProtection(int def)
+static uint8_t Mtg_AuraOwnProtection(const MtgDuel *d, int aura)
 {
-    const MtgCardDef *c = Mtg_Card(def);
+    const MtgCardDef *c = Mtg_Card(d->objs[aura].def);
     uint8_t p = 0;
     int k;
     for (k = 0; k < c->staticCount; k++)
-        if (gMtgStatics[c->statics[k]].enchanted)
+        if (gMtgStatics[c->statics[k]].enchanted) {
             p |= gMtgStatics[c->statics[k]].addProtection;
+            if (gMtgStatics[c->statics[k]].protChosen)   // (FLICKERING WARD: its chosen color)
+                p |= d->objs[aura].chosenColors;
+        }
     return p;
 }
 
@@ -542,7 +592,7 @@ static void StateBasedActions(MtgDuel *d)
                 continue;
             if (to == MTG_NO_OBJ || to >= d->objCount || d->objs[to].zone != MTG_ZONE_BATTLEFIELD
                 || !Mtg_ValidObj(d, to, Mtg_Card(o->def)->enchantSpec ? Mtg_Card(o->def)->enchantSpec : "Creature", i, o->controller)
-                || (Mtg_Protection(d, to) & Mtg_ObjColors(d, i) & ~Mtg_AuraOwnProtection(o->def))) {
+                || Mtg_ProtectedFrom(d, to, i, Mtg_AuraOwnProtection(d, i))) {
                 Mtg_MoveTo(d, i, MTG_ZONE_GRAVEYARD);
                 again = 1;
             }
@@ -644,7 +694,17 @@ void Mtg_ShuffleLibrary(MtgDuel *d, int player)
 }
 
 // ---- the stack ----
+static int TargetStillLegalX(const MtgDuel *d, const MtgStackEntry *e, const MtgAbility *ab);
 static int TargetStillLegal(const MtgDuel *d, const MtgStackEntry *e, const MtgAbility *ab)
+{
+    int r;
+    gMtgValidX = e->x;   // (cmcEQX: against the X it was cast for)
+    r = TargetStillLegalX(d, e, ab);
+    gMtgValidX = -1;
+    return r;
+}
+
+static int TargetStillLegalX(const MtgDuel *d, const MtgStackEntry *e, const MtgAbility *ab)
 {
     int i;
     if (e->target.kind == MTG_TGT_NONE)
@@ -684,14 +744,24 @@ void Mtg_AskChoice(MtgDuel *d, int player, int choice, const MtgManaCost *pay)
         q->pay = *pay;
 }
 
+void Mtg_AskOption(MtgDuel *d, int player, int kind, const uint16_t *opts, int n)
+{
+    Mtg_AskChoice(d, player, MTG_CHOICE_OPTION, NULL);
+    if (n > MTG_MAX_OPTIONS)
+        n = MTG_MAX_OPTIONS;
+    d->query.optKind = (uint8_t)kind;
+    d->query.optCount = (uint16_t)n;
+    memcpy(d->query.opts, opts, (size_t)n * sizeof(opts[0]));
+}
+
 static void FinishResolve(MtgDuel *d)
 {
     const MtgStackEntry *e = &d->res;
     const MtgCardDef *c = Mtg_Card(d->objs[e->source].def);
     d->resolving = 0;
     if (e->isSpell && d->objs[e->source].zone == MTG_ZONE_STACK) {
-        if (c->types & (MTG_T_INSTANT | MTG_T_SORCERY))
-            Mtg_MoveTo(d, e->source, MTG_ZONE_GRAVEYARD);
+        if (c->types & (MTG_T_INSTANT | MTG_T_SORCERY))   // (Buyback: back to its owner's hand)
+            Mtg_MoveTo(d, e->source, d->objs[e->source].castMode == 1 ? MTG_ZONE_HAND : MTG_ZONE_GRAVEYARD);
         else {
             d->objs[e->source].controller = e->controller;
             Mtg_MoveTo(d, e->source, MTG_ZONE_BATTLEFIELD);
@@ -724,16 +794,26 @@ static int ContinueResolve(MtgDuel *d)
     while (d->resAbility != 0xFFFF && !d->over) {
         if (!Mtg_ResolveStep(d, &ctx, d->resAbility))
             return 1;
+        if (d->resSkip) {   // (its optional cost not paid: the rest of it doesn't happen)
+            d->resSkip = 0;
+            break;
+        }
         if (d->res.extraCount && d->resExtra < d->res.extraCount
             && (d->resAbility == d->res.ability || (Mtg_Param(&gMtgAbilities[d->resAbility], "Defined")
                                                     && (strcmp(Mtg_Param(&gMtgAbilities[d->resAbility], "Defined"), "Targeted") == 0
                                                         || strcmp(Mtg_Param(&gMtgAbilities[d->resAbility], "Defined"), "ParentTarget") == 0)))) {
             // the same again, at its next target (and a sub-ability on "Targeted" likewise: HOPE AND GLORY)
             int t = d->res.extra[d->resExtra++];
-            d->res.target.id = (uint16_t)t;
-            d->res.lkiPower = (int16_t)Mtg_Power(d, t);
-            d->res.lkiToughness = (int16_t)Mtg_Toughness(d, t);
-            d->res.lkiController = d->objs[t].controller;
+            if (t >= MTG_REM_PLAYER) {   // (a player)
+                d->res.target.kind = MTG_TGT_PLAYER;
+                d->res.target.id = (uint16_t)(t - MTG_REM_PLAYER);
+            } else {
+                d->res.target.kind = MTG_TGT_OBJ;
+                d->res.target.id = (uint16_t)t;
+                d->res.lkiPower = (int16_t)Mtg_Power(d, t);
+                d->res.lkiToughness = (int16_t)Mtg_Toughness(d, t);
+                d->res.lkiController = d->objs[t].controller;
+            }
             d->resStage = d->resPicks = 0;
             d->resCondAb = 0xFFFF;
             d->resChoice = -1;
@@ -741,6 +821,7 @@ static int ContinueResolve(MtgDuel *d)
         }
         if (d->res.extraCount && d->resExtra) {   // (back to the first target for what follows)
             d->res.target.id = d->resFirst;
+            d->res.target.kind = d->resFirstKind;
             d->resExtra = 0;
         }
         {
@@ -752,6 +833,12 @@ static int ContinueResolve(MtgDuel *d)
                     d->resReturn = next;
                     next = b;
                 }
+            }
+            if (gMtgAbilities[d->resAbility].api == MTG_API_GENERIC_CHOICE && d->resMode) {   // the mode chosen, then on
+                uint16_t b = (uint16_t)(d->resMode - 1);
+                d->resMode = 0;
+                d->resReturn = next;
+                next = b;
             }
             if (gMtgAbilities[d->resAbility].api == MTG_API_REPEAT_EACH && d->repStart) {   // its first item's run
                 d->repStart = 0;
@@ -789,6 +876,20 @@ static int ContinueResolve(MtgDuel *d)
     return 0;
 }
 
+static int ResolveTop(MtgDuel *d);
+static int ManaByHand(const MtgAbility *ab);
+// a mana ability just activated on its own (ManaByHand): resolved at once, before anyone gets priority
+static int ResolveManaNow(MtgDuel *d)
+{
+    const MtgStackEntry *e;
+    if (!d->stackCount)
+        return 0;
+    e = &d->stack[d->stackCount - 1];
+    if (e->isSpell || e->trigger != 0xFFFF || e->ability == 0xFFFF || !ManaByHand(&gMtgAbilities[e->ability]))
+        return 0;
+    return ResolveTop(d);
+}
+
 static int ResolveTop(MtgDuel *d)
 {
     MtgStackEntry e = d->stack[--d->stackCount];
@@ -796,19 +897,28 @@ static int ResolveTop(MtgDuel *d)
     if (ab && ab->tgt && e.extraCount) {   // several targets: those still legal stay; it fizzles only with none
         MtgStackEntry t = e;
         uint16_t all[5];
+        uint8_t share[5];
         int n = 0, k, legal = 0;
-        all[n++] = e.target.id;
-        for (k = 0; k < e.extraCount; k++)
+        all[n] = e.target.kind == MTG_TGT_PLAYER ? MTG_REM_PLAYER + e.target.id : e.target.id;
+        share[n] = e.divide[0];
+        n++;
+        for (k = 0; k < e.extraCount; k++) {
+            share[n] = e.divide[k + 1];
             all[n++] = e.extra[k];
+        }
         e.extraCount = 0;
-        for (k = 0; k < n; k++) {
-            t.target.id = all[k];
+        for (k = 0; k < n; k++) {   // (each share stays with its target)
+            t.target.kind = all[k] >= MTG_REM_PLAYER ? MTG_TGT_PLAYER : MTG_TGT_OBJ;
+            t.target.id = (uint16_t)(all[k] >= MTG_REM_PLAYER ? all[k] - MTG_REM_PLAYER : all[k]);
             if (!TargetStillLegal(d, &t, ab))
                 continue;
-            if (!legal++)
-                e.target.id = all[k];
-            else
+            if (!legal++) {
+                e.target = t.target;
+                e.divide[0] = share[k];
+            } else {
+                e.divide[e.extraCount + 1] = share[k];
                 e.extra[e.extraCount++] = all[k];
+            }
         }
     }
     d->resExtra = 0;
@@ -825,18 +935,99 @@ static int ResolveTop(MtgDuel *d)
     }
     Mtg_Event(d, MTG_EV_RESOLVE, e.source, e.ability, e.isSpell);
     d->resFirst = e.target.id;
+    d->resFirstKind = e.target.kind;
     d->res = e;
     d->resolving = 1;
     d->resAbility = e.ability;
     d->resReturn = 0xFFFF;
     d->resFlip = 0;
     d->resCondAb = 0xFFFF;
-    d->remCount = 0;   // (a new chain remembers its own)
+    d->remCount = 0;   // (a new chain remembers its own; an Effect's trigger, its Effect's)
+    for (; d->remCount < e.effRemCount; d->remCount++)
+        d->rem[d->remCount] = e.effRem[d->remCount];
     d->repAb = 0xFFFF;
     d->repStart = 0;
     d->resStage = d->resPicks = 0;
     d->resChoice = -1;
+    d->resMode = 0;
     return ContinueResolve(d);
+}
+
+// what permanents that just entered do "as they enter" (ETBReplacement: a choice...), oldest first, each resolving as
+// an ability of its own (nothing to target, no stack); 1 while one asks
+// an ability of OBJ's resolving at once, as its own (nothing to target, no stack): 1 while it asks something
+static int ResolveNow(MtgDuel *d, int obj, int ability, int optional)
+{
+    memset(&d->res, 0, sizeof(d->res));
+    d->res.controller = d->objs[obj].controller;
+    d->res.source = (uint16_t)obj;
+    d->res.ability = (uint16_t)ability;
+    d->res.trigger = 0xFFFF;
+    d->res.trigObj = d->res.trigObj2 = MTG_NO_OBJ;
+    d->res.trigPlayer = d->res.trigCtrl = 0xFF;
+    d->res.optional = (uint8_t)optional;
+    d->resolving = 1;
+    d->resAbility = (uint16_t)ability;
+    d->resReturn = 0xFFFF;
+    d->resFlip = 0;
+    d->resCondAb = 0xFFFF;
+    d->remCount = 0;
+    d->repAb = 0xFFFF;
+    d->repStart = 0;
+    d->resStage = d->resPicks = 0;
+    d->resExtra = 0;
+    d->resChoice = -1;
+    d->resMode = 0;
+    return ContinueResolve(d);
+}
+
+// what mana abilities used do besides their mana (MtgAbility.manaFx), oldest first
+static int RunManaFx(MtgDuel *d)
+{
+    while (d->fxCount && !d->over) {
+        int obj = d->fxObj[0], ab = d->fxAb[0];
+        d->fxCount--;
+        memmove(&d->fxObj[0], &d->fxObj[1], (size_t)d->fxCount * sizeof(d->fxObj[0]));
+        memmove(&d->fxAb[0], &d->fxAb[1], (size_t)d->fxCount * sizeof(d->fxAb[0]));
+        if (ResolveNow(d, obj, ab, 0))
+            return 1;
+    }
+    return 0;
+}
+
+static int RunEtb(MtgDuel *d)
+{
+    while (d->etbCount && !d->over) {
+        int obj = d->etbQueue[0] & 0x7FFF, which = d->etbQueue[0] >> 15;
+        const MtgCardDef *c = Mtg_Card(d->objs[obj].def);
+        memmove(&d->etbQueue[0], &d->etbQueue[1], (size_t)(--d->etbCount) * sizeof(d->etbQueue[0]));
+        if (d->objs[obj].zone != MTG_ZONE_BATTLEFIELD || !c->etbRepl[which]
+            || (c->etbCond[which] && !Mtg_ValidObj(d, obj, c->etbCond[which], obj, d->objs[obj].controller)))
+            continue;
+        memset(&d->res, 0, sizeof(d->res));
+        d->res.controller = d->objs[obj].controller;
+        d->res.source = (uint16_t)obj;
+        d->res.ability = (uint16_t)(c->etbRepl[which] - 1);
+        d->res.trigger = 0xFFFF;
+        d->res.trigObj = d->res.trigObj2 = MTG_NO_OBJ;
+        d->res.trigPlayer = d->res.trigCtrl = 0xFF;
+        d->res.optional = (c->etbOptional >> which) & 1;
+        d->resolving = 1;
+        d->resAbility = d->res.ability;
+        d->resReturn = 0xFFFF;
+        d->resFlip = 0;
+        d->resCondAb = 0xFFFF;
+        d->remCount = 0;
+        d->repAb = 0xFFFF;
+        d->repStart = 0;
+        d->resStage = d->resPicks = 0;
+        d->resExtra = 0;
+        d->resChoice = -1;
+        d->resMode = 0;
+        if (ContinueResolve(d))
+            return 1;
+    }
+    return 0;
 }
 
 // ---- priority: the legal actions (what PlayerControllerHuman / AiController choose from) ----
@@ -852,13 +1043,44 @@ static void AddAction(MtgQuery *q, int kind, int obj, int ability, int x, MtgTar
     a->x = (int16_t)x;
     a->target = t;
     a->alt = 0;
+    a->xFixed = 0;
 }
 
+// a target candidate under a spec comparing its mana value with X ("cmcEQX", "cmcLEX": Spell Blast, Detonate): legal
+// with X its own mana value (at most the X that can be paid), *ax that X; otherwise as usual (*ax = x)
+static int ValidAt(const MtgDuel *d, const MtgAbility *ab, int target, int obj, int player, int x, int *ax)
+{
+    int ok, cmc;
+    const char *sv = Mtg_Svar(d->objs[obj].def, "X");
+    *ax = x;
+    if ((!strstr(ab->tgt, "cmcEQX") && !strstr(ab->tgt, "cmcLEX")) || (sv && strcmp(sv, "Count$xPaid")))
+        return Mtg_ValidObj(d, target, ab->tgt, obj, player);   // (X counted, not paid: as it is)
+    cmc = Mtg_ManaCostTotal(&Mtg_Card(d->objs[target].def)->cost);
+    if (cmc > x)
+        return 0;
+    gMtgValidX = cmc;
+    ok = Mtg_ValidObj(d, target, ab->tgt, obj, player);
+    gMtgValidX = -1;
+    *ax = cmc;
+    return ok;
+}
+
+static int sXFixed;   // (AddWithTargets: the actions it adds have their X set by their targets)
+static void AddWithTargetsX(const MtgDuel *d, MtgQuery *q, int kind, int obj, int ability, int x, int player);
 static void AddWithTargets(const MtgDuel *d, MtgQuery *q, int kind, int obj, int ability, int x, int player)
+{
+    int before = q->actionCount, m;
+    sXFixed = 0;
+    AddWithTargetsX(d, q, kind, obj, ability, x, player);
+    for (m = before; m < q->actionCount; m++)
+        q->actions[m].xFixed = (uint8_t)sXFixed;
+}
+
+static void AddWithTargetsX(const MtgDuel *d, MtgQuery *q, int kind, int obj, int ability, int x, int player)
 {
     const MtgAbility *ab = ability != 0xFFFF ? &gMtgAbilities[ability] : NULL;
     MtgTarget t = {MTG_TGT_NONE, 0};
-    int i;
+    int i, ax;
     if (!ab || !ab->tgt) {
         AddAction(q, kind, obj, ability, x, t);
         return;
@@ -872,22 +1094,27 @@ static void AddWithTargets(const MtgDuel *d, MtgQuery *q, int kind, int obj, int
             x = n < 5 ? n : 5;   // ("X target creatures": X no more than there are; the rest of the mana stays)
         if (n < (ab->tgtMin == MTG_TGT_X ? x : ab->tgtMin) || (ab->tgtMax == MTG_TGT_X && x < 1))
             return;
+        if (ab->tgtMax == MTG_TGT_X)
+            sXFixed = 1;   // (X is how many targets: not asked)
     }
+    if ((strstr(ab->tgt, "cmcEQX") || strstr(ab->tgt, "cmcLEX"))
+        && (!Mtg_Svar(d->objs[obj].def, "X") || !strcmp(Mtg_Svar(d->objs[obj].def, "X"), "Count$xPaid")))
+        sXFixed = 1;   // (X is its target's mana value)
     if (ab->tgtZone != MTG_ZONE_BATTLEFIELD) {   // (cards in a graveyard)
         for (i = 0; i < d->objCount; i++)
-            if (d->objs[i].zone == ab->tgtZone && Mtg_ValidObj(d, i, ab->tgt, obj, player)) {
+            if (d->objs[i].zone == ab->tgtZone && ValidAt(d, ab, i, obj, player, x, &ax)) {
                 t.kind = MTG_TGT_OBJ;
                 t.id = (uint16_t)i;
-                AddAction(q, kind, obj, ability, x, t);
+                AddAction(q, kind, obj, ability, ax, t);
             }
         return;
     }
     if (ab->tgtStack) {
         for (i = d->stackCount - 1; i >= 0; i--)
-            if (d->stack[i].isSpell && Mtg_ValidObj(d, d->stack[i].source, ab->tgt, obj, player)) {
+            if (d->stack[i].isSpell && ValidAt(d, ab, d->stack[i].source, obj, player, x, &ax)) {
                 t.kind = MTG_TGT_STACK;
                 t.id = d->stack[i].source;
-                AddAction(q, kind, obj, ability, x, t);
+                AddAction(q, kind, obj, ability, ax, t);
             }
         return;
     }
@@ -898,11 +1125,11 @@ static void AddWithTargets(const MtgDuel *d, MtgQuery *q, int kind, int obj, int
             AddAction(q, kind, obj, ability, x, t);
         }
     for (i = 0; i < d->objCount; i++)
-        if (d->objs[i].zone == MTG_ZONE_BATTLEFIELD && Mtg_ValidObj(d, i, ab->tgt, obj, player)
+        if (d->objs[i].zone == MTG_ZONE_BATTLEFIELD && ValidAt(d, ab, i, obj, player, x, &ax)
             && Mtg_CanTarget(d, i, obj)) {
             t.kind = MTG_TGT_OBJ;
             t.id = (uint16_t)i;
-            AddAction(q, kind, obj, ability, x, t);
+            AddAction(q, kind, obj, ability, ax, t);
         }
 }
 
@@ -948,6 +1175,116 @@ static void AddAltCasts(const MtgDuel *d, MtgQuery *q, int obj, int p)
         q->actions[m].alt = 1;
 }
 
+// a cost's parts that are picked or paid besides mana (sacrifices, discards, life...)
+static int HasOther(const MtgCost *c)
+{
+    return c->sacN || c->discardN || c->payLife || c->exileHandN || c->returnN || c->tapTypeN || c->exileGraveN
+        || c->discardHand || c->millN || c->exileTopN || c->subCtrAll || c->xPart;
+}
+
+int Mtg_CostMaxX(const MtgDuel *d, int player, const MtgCost *c, int source)
+{
+    switch (c->xPart) {
+    case MTG_XPART_LIFE: return d->players[player].life > 0 ? d->players[player].life : 0;
+    case MTG_XPART_DISCARD: return Mtg_CostCandidates(d, player, c, MTG_COSTK_DISCARD, source, NULL);
+    case MTG_XPART_SAC: return Mtg_CostCandidates(d, player, c, MTG_COSTK_SAC, source, NULL);
+    case MTG_XPART_EXILE_GRAVE: return Mtg_CostCandidates(d, player, c, MTG_COSTK_EXILE_GRAVE, source, NULL);
+    case MTG_XPART_COUNTERS: return source != MTG_NO_OBJ ? Mtg_Counters(d, source, c->subCtrKind) : 0;
+    }
+    return 0;
+}
+
+// a mana ability that paying never uses (it costs mana, sacrifices itself, or more than {T}): activated on its own,
+// resolving at once (mana abilities don't wait on the stack: Mtg_Answer)
+static int ManaByHand(const MtgAbility *ab)
+{
+    return ab->api == MTG_API_MANA && (!ab->cost.tap || ab->cost.sacSelf || Mtg_ManaCostTotal(&ab->cost.mana)
+                                       || ab->cost.mana.x || HasOther(&ab->cost) || ab->cost.exileSelf || ab->cost.returnSelf
+                                       || ab->cost.xPart);
+}
+
+// the extra cost a cast pays (gMtgAltCosts + 1: its alternative one, a kicker, buyback, flashback; 0 none or two)
+static int ExtraIdx(const MtgCardDef *c, int alt)
+{
+    switch (alt) {
+    case MTG_ALT_COST: return c->altCost;
+    case MTG_ALT_KICK1: return c->kicker[0];
+    case MTG_ALT_KICK2: return c->kicker[1];
+    case MTG_ALT_BUYBACK: return c->buyback;
+    case MTG_ALT_FLASHBACK: return c->flashback;
+    }
+    return 0;
+}
+
+// the mana a cast pays: its own (with Raise / ReduceCost), and its kickers' or buyback's besides
+static void CastMana(const MtgCardDef *c, int alt, MtgManaCost *cost)
+{
+    int k, j;
+    for (j = 0; j < 2; j++) {
+        int idx = alt == MTG_ALT_KICK12 ? c->kicker[j] : j ? 0 : ExtraIdx(c, alt);
+        const MtgManaCost *m;
+        if (!idx || alt == MTG_ALT_COST || alt == MTG_ALT_FLASHBACK)
+            continue;
+        m = &gMtgAltCosts[idx - 1].cost.mana;
+        cost->generic = (uint8_t)(cost->generic + m->generic);
+        for (k = 0; k < MTG_MANA_KINDS; k++)
+            cost->pip[k] = (uint8_t)(cost->pip[k] + m->pip[k]);
+    }
+}
+
+// a spell's kicked and buyback casts beside its plain one (its cost already payable)
+static void AddExtraCasts(const MtgDuel *d, MtgQuery *q, int obj, int p, const MtgManaCost *base, int ability)
+{
+    const MtgCardDef *c = Mtg_Card(d->objs[obj].def);
+    const MtgCost *own = ability != 0xFFFF ? &gMtgAbilities[ability].cost : NULL;
+    static const uint8_t sAlts[4] = {MTG_ALT_KICK1, MTG_ALT_KICK2, MTG_ALT_KICK12, MTG_ALT_BUYBACK};
+    int k, m;
+    for (k = 0; k < 4; k++) {
+        int alt = sAlts[k], idx = ExtraIdx(c, alt), before = q->actionCount, x = 0;
+        MtgManaCost cost = *base;
+        const MtgCost *extra = idx ? &gMtgAltCosts[idx - 1].cost : NULL;
+        if (alt == MTG_ALT_KICK12) {
+            if (!c->kicker[0] || !c->kicker[1] || HasOther(&gMtgAltCosts[c->kicker[0] - 1].cost)
+                || HasOther(&gMtgAltCosts[c->kicker[1] - 1].cost))
+                continue;
+        } else if (!extra)
+            continue;
+        CastMana(c, alt, &cost);
+        if (cost.x && (x = Mtg_MaxX(d, p, &cost, MTG_NO_OBJ)) == 0)   // (X: the most that can be paid besides it)
+            continue;
+        if (!Mtg_CanPay(d, p, &cost, x, MTG_NO_OBJ))
+            continue;
+        if (extra && HasOther(extra) && ((own && HasOther(own)) || !Mtg_CostPayable(d, p, extra, obj, obj)))
+            continue;
+        AddWithTargets(d, q, MTG_ACT_CAST, obj, ability, x, p);
+        for (m = before; m < q->actionCount; m++)
+            q->actions[m].alt = (uint8_t)alt;
+    }
+}
+
+// a card's flashback cast from its owner's graveyard (its timing, its flashback cost instead of its mana)
+static void AddFlashback(const MtgDuel *d, MtgQuery *q, int obj, int p)
+{
+    const MtgCardDef *c = Mtg_Card(d->objs[obj].def);
+    const MtgCost *fb = &gMtgAltCosts[c->flashback - 1].cost;
+    int ability = MainAbility(c), before = q->actionCount, m;
+    if (!(c->types & MTG_T_INSTANT) && !(c->keywords & MTG_KW_BIT(MTG_KW_FLASH)) && !SorceryTiming(d, p))
+        return;
+    if (Mtg_StaticForbids(d, MTG_STATIC_CANT_BE_CAST, obj, p) || !Mtg_CanPay(d, p, &fb->mana, 0, MTG_NO_OBJ))
+        return;
+    if (HasOther(fb) && !Mtg_CostPayable(d, p, fb, obj, obj))
+        return;
+    if (ability != 0xFFFF) {
+        const MtgAbility *ab = &gMtgAbilities[ability];
+        if (ab->api == MTG_API_CHARM || (HasOther(fb) && HasOther(&ab->cost)) || !Mtg_CostPayable(d, p, &ab->cost, obj, obj)
+            || (ab->actMyTurn && d->active != p) || (ab->actSteps && !(ab->actSteps & (1u << d->step))))
+            return;
+    }
+    AddWithTargets(d, q, MTG_ACT_CAST, obj, ability, 0, p);
+    for (m = before; m < q->actionCount; m++)
+        q->actions[m].alt = MTG_ALT_FLASHBACK;
+}
+
 static void BuildPriority(MtgDuel *d)
 {
     MtgQuery *q = &d->query;
@@ -975,6 +1312,15 @@ static void BuildPriority(MtgDuel *d)
                     continue;
                 AddWithTargets(d, q, MTG_ACT_ACTIVATE, i, c->abilities[k], 0, p);
             }
+            if (c->morph && SorceryTiming(d, p)) {   // (Morph: face down for {3}, a 2/2 with no name or abilities)
+                MtgManaCost three;
+                memset(&three, 0, sizeof(three));
+                three.generic = 3;
+                if (Mtg_CanPay(d, p, &three, 0, MTG_NO_OBJ)) {
+                    AddAction(q, MTG_ACT_CAST, i, 0xFFFF, 0, none);
+                    q->actions[q->actionCount - 1].alt = MTG_ALT_MORPH;
+                }
+            }
             if (c->types & MTG_T_LAND) {
                 if (SorceryTiming(d, p) && d->players[p].landsPlayed == 0
                     && !Mtg_StaticForbids(d, MTG_STATIC_CANT_PLAY_LAND, i, p))   // (Territorial Dispute...)
@@ -998,10 +1344,20 @@ static void BuildPriority(MtgDuel *d)
             ability = MainAbility(c);
             if (ability != 0xFFFF && !Mtg_CostPayable(d, p, &gMtgAbilities[ability].cost, i, i))
                 continue;
+            if (ability != 0xFFFF && gMtgAbilities[ability].cost.xPart) {   // (X also in an additional cost: no more than it pays)
+                int most = Mtg_CostMaxX(d, p, &gMtgAbilities[ability].cost, i);
+                x = cost.x ? (x < most ? x : most) : most;
+                if (gMtgAbilities[ability].cost.xPart == MTG_XPART_DISCARD && x > 0)
+                    x--;   // (the card being cast pays nothing)
+                if (x == 0 && !cost.x)
+                    continue;
+            }
             if (ability != 0xFFFF && ((gMtgAbilities[ability].actMyTurn && d->active != p)
                                       || (gMtgAbilities[ability].actSteps
                                           && !(gMtgAbilities[ability].actSteps & (1u << d->step)))))
                 continue;   // ("cast only during combat before blockers are declared"...)
+            if (ability == 0xFFFF || gMtgAbilities[ability].api != MTG_API_CHARM)
+                AddExtraCasts(d, q, i, p, &cost, ability);   // (kicked, with buyback)
             if (ability != 0xFFFF && gMtgAbilities[ability].api == MTG_API_CHARM) {   // one action per mode
                 const MtgAbility *ch = &gMtgAbilities[ability];
                 for (k = 0; k < ch->choiceCount; k++)
@@ -1009,14 +1365,23 @@ static void BuildPriority(MtgDuel *d)
                 continue;
             }
             AddWithTargets(d, q, MTG_ACT_CAST, i, ability, x, p);
-        } else if (o->zone == MTG_ZONE_BATTLEFIELD && o->controller == p) {
+        } else if (o->zone == MTG_ZONE_GRAVEYARD && o->owner == p && c->flashback) {
+            AddFlashback(d, q, i, p);
+        } else if (o->zone == MTG_ZONE_BATTLEFIELD && o->controller == p && o->faceDownOf
+                   && Mtg_Card(o->faceDownOf - 1)->morph) {   // (turned face up any time it has priority)
+            const MtgCost *mc = &gMtgAltCosts[Mtg_Card(o->faceDownOf - 1)->morph - 1].cost;
+            if (Mtg_CanPay(d, p, &mc->mana, 0, MTG_NO_OBJ) && (!HasOther(mc) || Mtg_CostPayable(d, p, mc, i, MTG_NO_OBJ)))
+                AddAction(q, MTG_ACT_TURN_UP, i, 0xFFFF, 0, none);
+        } else if (o->zone == MTG_ZONE_BATTLEFIELD) {   // (another's: only what any player may activate)
             uint16_t abil[16];
-            int abilCount = Mtg_ObjAbilities(d, i, abil, 16);   // (its card's and those statics give it)
+            int abilCount = Mtg_ObjAbilities(d, i, abil, 16), mine = o->controller == p;   // (its card's and statics')
             for (k = 0; k < abilCount; k++) {
                 const MtgAbility *ab = &gMtgAbilities[abil[k]];
                 int x = 0;
-                if (ab->kind != MTG_AB_ACTIVATED || ab->api == MTG_API_MANA || ab->fromHand)
-                    continue;   // (mana abilities are used by paying, never on their own; Cycling only from the hand)
+                if (!mine && !ab->anyPlayer)
+                    continue;
+                if (ab->kind != MTG_AB_ACTIVATED || ab->fromHand || (ab->api == MTG_API_MANA && !ManaByHand(ab)))
+                    continue;   // (mana abilities are used by paying, except those paying can't; Cycling only from the hand)
                 if (Mtg_StaticForbids(d, MTG_STATIC_CANT_BE_ACTIVATED, i, abil[k]))
                     continue;   // (Arrest, Null Rod...)
                 if (!ActivationTimingOk(d, i, abil[k], p))
@@ -1026,6 +1391,12 @@ static void BuildPriority(MtgDuel *d)
                     continue;
                 if (ab->cost.mana.x) {
                     x = Mtg_MaxX(d, p, &ab->cost.mana, ab->cost.tap ? i : MTG_NO_OBJ);
+                    if (x == 0)
+                        continue;
+                }
+                if (ab->cost.xPart) {   // (X in a part besides mana: no more than that part can pay)
+                    int most = Mtg_CostMaxX(d, p, &ab->cost, i);
+                    x = ab->cost.mana.x ? (x < most ? x : most) : most;
                     if (x == 0)
                         continue;
                 }
@@ -1081,6 +1452,8 @@ int Mtg_CostPayable(const MtgDuel *d, int player, const MtgCost *c, int source, 
         return 0;
     if (c->subCtrN && (source == MTG_NO_OBJ || Mtg_Counters(d, source, c->subCtrKind) < c->subCtrN))
         return 0;
+    if ((c->millN || c->exileTopN) && d->players[player].libraryCount < c->millN + c->exileTopN)
+        return 0;
     for (k = 0; k < sizeof(sKinds); k++) {
         int kind = sKinds[k], need = kind == MTG_COSTK_SAC ? c->sacN : kind == MTG_COSTK_DISCARD ? (c->discardN)
                  : kind == MTG_COSTK_EXILE_HAND ? c->exileHandN : kind == MTG_COSTK_RETURN ? c->returnN
@@ -1103,8 +1476,10 @@ static const MtgCost *CostNow(const MtgDuel *d)
 {
     if (d->costAlt == 2)   // (an UnlessCost$ paid as its ability resolves)
         return &gMtgUnlessCosts[gMtgAbilities[d->costAbility].unless - 1];
+    if (d->costAlt == 4)   // (a trigger's own cost, paid as it resolves)
+        return &gMtgAbilities[d->costAbility].cost;
     if (d->costAlt)
-        return &gMtgAltCosts[Mtg_Card(d->objs[d->costSource].def)->altCost - 1].cost;
+        return &gMtgAltCosts[d->costAltIdx - 1].cost;
     return &gMtgAbilities[d->costAbility].cost;
 }
 
@@ -1138,7 +1513,39 @@ static int AskCost(MtgDuel *d)
         q->candidateCount = (uint8_t)TargetCandidates(d, q->candidates);
         if (!q->candidateCount) {
             d->tgtLeft = d->tgtOpt = 0;
+            return AskCost(d);   // (the division, if any)
+        }
+        return 1;
+    } else if (d->divPending && d->stackCount) {   // DividedAsYouChoose$: each target's share but the last's, asked
+        MtgStackEntry *e = &d->stack[d->stackCount - 1];
+        int count = 1 + e->extraCount, total, given = 0, k, ok;
+        MtgResolveCtx ctx;
+        ctx.e = e;
+        ctx.controller = e->controller;
+        ctx.source = e->source;
+        total = Mtg_Amount(d, &ctx, gMtgAbilities[e->ability].card,
+                           Mtg_Param(&gMtgAbilities[e->ability], "DividedAsYouChoose"), &ok);
+        for (k = 0; k < d->divIdx; k++)
+            given += e->divide[k];
+        if (count == 1 || d->divIdx >= count - 1 || total - given <= count - 1 - d->divIdx) {
+            for (k = d->divIdx; k < count && k < 5; k++)   // (the last one: the rest; none left to give: 1 each, as rules
+                e->divide[k] = (uint8_t)(k == count - 1 ? (total - given > 0 ? total - given : 0) : 1);   // demand)
+            d->divPending = 0;
             return 0;
+        }
+        {
+            uint16_t opts[MTG_MAX_OPTIONS];
+            int most = total - given - (count - 1 - d->divIdx), n = 0, who;
+            for (k = 1; k <= most && n < MTG_MAX_OPTIONS; k++)
+                opts[n++] = (uint16_t)k;
+            who = d->divIdx == 0 ? (e->target.kind == MTG_TGT_PLAYER ? MTG_REM_PLAYER + e->target.id : e->target.id)
+                                 : e->extra[d->divIdx - 1];
+            Mtg_AskOption(d, e->controller, MTG_OPT_NUMBER, opts, n);
+            d->query.forCost = 9;
+            d->query.source = e->source;
+            d->query.ability = e->ability;
+            d->query.candidates[0] = (uint16_t)who;
+            d->query.candidateCount = 1;
         }
         return 1;
     } else
@@ -1168,8 +1575,8 @@ static void PayCostPick(MtgDuel *d, int obj)
         if (e->extraCount < 4) {
             MtgTarget t;
             e->extra[e->extraCount++] = (uint16_t)obj;
-            t.kind = MTG_TGT_OBJ;
-            t.id = (uint16_t)obj;
+            t.kind = obj >= MTG_REM_PLAYER ? MTG_TGT_PLAYER : MTG_TGT_OBJ;
+            t.id = (uint16_t)(obj >= MTG_REM_PLAYER ? obj - MTG_REM_PLAYER : obj);
             TargetEvent(d, t, e->source, e->controller);
         }
         if (d->tgtLeft)
@@ -1179,8 +1586,13 @@ static void PayCostPick(MtgDuel *d, int obj)
         return;
     }
     if (d->costSac) {
-        if (d->stackCount && d->costAlt != 2)   // (its last known power, for Sacrificed$CardPower)
+        if (d->costAlt == 4) {   // (its last known power and toughness, for Sacrificed$CardPower / CardToughness)
+            d->res.sacPower = (int16_t)Mtg_Power(d, obj);
+            d->res.sacToughness = (int16_t)Mtg_Toughness(d, obj);
+        } else if (d->stackCount && d->costAlt != 2 && d->costAlt != 3) {
             d->stack[d->stackCount - 1].sacPower = (int16_t)Mtg_Power(d, obj);
+            d->stack[d->stackCount - 1].sacToughness = (int16_t)Mtg_Toughness(d, obj);
+        }
         Mtg_Sacrifice(d, obj);
         d->costSac--;
     } else if (d->costDiscard) {
@@ -1202,14 +1614,38 @@ static void PayCostPick(MtgDuel *d, int obj)
 }
 
 // the costs paid at once (life, a random discard, the source exiled or returned); the picks are set to be asked
+static int sCostX;   // (the X chosen for the cost being paid: its X part's amount)
 static void PayCost(MtgDuel *d, int p, const MtgCost *c, int ability, int source, int alt)
 {
+    if (c->xPart == MTG_XPART_LIFE && sCostX > 0) {
+        d->players[p].life = (int16_t)(d->players[p].life - sCostX);
+        Mtg_Event(d, MTG_EV_LIFE, p, -sCostX, d->players[p].life);
+    }
+    if (c->xPart == MTG_XPART_COUNTERS && sCostX > 0)
+        Mtg_AddCountersKind(d, source, c->subCtrKind, -sCostX);
     if (c->payLife) {
         d->players[p].life -= c->payLife;
         Mtg_Event(d, MTG_EV_LIFE, p, -c->payLife, d->players[p].life);
     }
     if (c->subCtrN)   // (SubCounter<n/TYPE>: off its source)
         Mtg_AddCountersKind(d, source, c->subCtrKind, -(int)c->subCtrN);
+    if (c->subCtrAll)   // (SubCounter<All/TYPE>: every one; how many it was, for the ability)
+        Mtg_AddCountersKind(d, source, c->subCtrKind, -Mtg_Counters(d, source, c->subCtrKind));
+    if (c->discardHand) {   // (Discard<1/Hand>: the whole hand)
+        int k;
+        for (k = 0; k < d->objCount; k++)
+            if (d->objs[k].zone == MTG_ZONE_HAND && d->objs[k].owner == p)
+                Mtg_MoveTo(d, k, MTG_ZONE_GRAVEYARD);
+    }
+    if (c->millN || c->exileTopN) {   // (Mill<n>, ExileFromTop<n>: from the top of its player's library)
+        int k;
+        for (k = 0; k < c->millN + c->exileTopN; k++) {
+            int top = Mtg_TopOfLibrary(d, p);
+            if (top == MTG_NO_OBJ || top < 0)
+                break;
+            Mtg_MoveTo(d, top, k < c->millN ? MTG_ZONE_GRAVEYARD : MTG_ZONE_EXILE);
+        }
+    }
     if (c->damageYou) {
         MtgTarget you;
         you.kind = MTG_TGT_PLAYER;
@@ -1231,12 +1667,12 @@ static void PayCost(MtgDuel *d, int p, const MtgCost *c, int ability, int source
                 Mtg_MoveTo(d, hand[Mtg_Random(d, (uint32_t)n)], MTG_ZONE_GRAVEYARD);
         }
     }
-    d->costSac = c->sacN;
-    d->costDiscard = c->discardRandom ? 0 : c->discardN;
+    d->costSac = c->xPart == MTG_XPART_SAC ? (uint8_t)sCostX : c->sacN;
+    d->costDiscard = c->xPart == MTG_XPART_DISCARD ? (uint8_t)sCostX : c->discardRandom ? 0 : c->discardN;
     d->costExile = c->exileHandN;
     d->costReturn = c->returnN;
     d->costTap = c->tapTypeN;
-    d->costExileGrave = c->exileGraveN;
+    d->costExileGrave = c->xPart == MTG_XPART_EXILE_GRAVE ? (uint8_t)sCostX : c->exileGraveN;
     d->costPlayer = (uint8_t)p;
     d->costSource = (uint16_t)source;
     d->costAbility = (uint16_t)ability;
@@ -1246,6 +1682,12 @@ static void PayCost(MtgDuel *d, int p, const MtgCost *c, int ability, int source
 static void PayOtherCosts(MtgDuel *d, int p, const MtgAbility *ab, int source)
 {
     PayCost(d, p, &ab->cost, (int)(ab - gMtgAbilities), source, 0);
+}
+
+int Mtg_PayOptCost(MtgDuel *d, int p, int ability, int source)
+{
+    PayCost(d, p, &gMtgAbilities[ability].cost, ability, source, 4);
+    return AskCost(d);
 }
 
 int Mtg_PayUnlessCost(MtgDuel *d, int p, int ability, int source)
@@ -1267,13 +1709,41 @@ static void DoAction(MtgDuel *d, const MtgAction *a)
         TrigEvent(d, MTG_TRIG_LAND_PLAYED, a->obj, MTG_NO_OBJ, p);   // ("whenever a land is played": TriggerLandPlayed)
         return;
     }
+    if (a->kind == MTG_ACT_TURN_UP) {   // Morph: its cost paid, its real card face up (no stack); "when turned face up"
+        MtgObj *o = &d->objs[a->obj];
+        int idx = Mtg_Card(o->faceDownOf - 1)->morph;
+        const MtgCost *mc = &gMtgAltCosts[idx - 1].cost;
+        Mtg_Pay(d, p, &mc->mana, 0, MTG_NO_OBJ);
+        o->def = (uint16_t)(o->faceDownOf - 1);
+        o->faceDownOf = 0;
+        d->seq++;   // (what is on the battlefield changed: Mtg_TypeLayer's cache)
+        Mtg_Event(d, MTG_EV_TURNED_UP, a->obj, p, 0);
+        if (HasOther(mc)) {
+            d->costAltIdx = (uint16_t)idx;
+            PayCost(d, p, mc, 0xFFFF, a->obj, 3);
+        }
+        TrigEvent(d, MTG_TRIG_TURN_FACE_UP, a->obj, MTG_NO_OBJ, p);
+        return;
+    }
     if (d->stackCount >= MTG_MAX_STACK)
         return;
-    if (a->kind == MTG_ACT_CAST && a->alt) {   // (its alternative cost instead of its mana: paid below)
+    if (a->kind == MTG_ACT_CAST && a->alt == MTG_ALT_MORPH) {   // face down: {3}, then a nameless 2/2 on the stack
+        MtgManaCost three;
+        MtgObj *o = &d->objs[a->obj];
+        memset(&three, 0, sizeof(three));
+        three.generic = 3;
+        Mtg_Pay(d, p, &three, 0, MTG_NO_OBJ);
         Mtg_MoveTo(d, a->obj, MTG_ZONE_STACK);
+        o->faceDownOf = (uint16_t)(o->def + 1);
+        o->def = MTG_FACE_DOWN;
+    } else if (a->kind == MTG_ACT_CAST && (a->alt == MTG_ALT_COST || a->alt == MTG_ALT_FLASHBACK)) {
+        if (a->alt == MTG_ALT_FLASHBACK)   // (its flashback cost's mana instead of its own; the rest paid below)
+            Mtg_Pay(d, p, &gMtgAltCosts[Mtg_Card(d->objs[a->obj].def)->flashback - 1].cost.mana, 0, MTG_NO_OBJ);
+        Mtg_MoveTo(d, a->obj, MTG_ZONE_STACK);   // (its alternative cost instead of its mana: paid below)
     } else if (a->kind == MTG_ACT_CAST) {
         MtgManaCost cost;
         Mtg_SpellCost(d, p, a->obj, &cost);
+        CastMana(Mtg_Card(d->objs[a->obj].def), a->alt, &cost);   // (kicked, buyback: theirs besides)
         Mtg_Pay(d, p, &cost, a->x, MTG_NO_OBJ);
         Mtg_MoveTo(d, a->obj, MTG_ZONE_STACK);
     } else {
@@ -1283,6 +1753,11 @@ static void DoAction(MtgDuel *d, const MtgAction *a)
             Mtg_Tap(d, a->obj, 1);
         CountUse(d, a->obj, a->ability);
     }
+    if (a->kind == MTG_ACT_CAST) {   // (how it was cast: before "whenever a player kicks a spell" looks)
+        MtgObj *o = &d->objs[a->obj];
+        o->kicked = (uint8_t)(a->alt == MTG_ALT_KICK1 ? 1 : a->alt == MTG_ALT_KICK2 ? 2 : a->alt == MTG_ALT_KICK12 ? 3 : 0);
+        o->castMode = (uint8_t)(a->alt == MTG_ALT_BUYBACK ? 1 : a->alt == MTG_ALT_FLASHBACK ? 2 : 0);
+    }
     e = &d->stack[d->stackCount++];
     memset(e, 0, sizeof(*e));
     e->isSpell = a->kind == MTG_ACT_CAST;
@@ -1290,6 +1765,7 @@ static void DoAction(MtgDuel *d, const MtgAction *a)
     e->source = a->obj;
     e->ability = a->ability;
     e->x = a->x;
+    sCostX = a->x;   // (an X part of its costs pays this much)
     e->target = a->target;
     e->trigger = 0xFFFF;
     Mtg_Event(d, e->isSpell ? MTG_EV_CAST : MTG_EV_ACTIVATE, a->obj, a->target.kind, a->target.id);
@@ -1301,14 +1777,30 @@ static void DoAction(MtgDuel *d, const MtgAction *a)
     if (!e->isSpell && gMtgAbilities[a->ability].fromHand && gMtgAbilities[a->ability].cost.discardSelf)
         TrigEvent(d, MTG_TRIG_CYCLED, a->obj, MTG_NO_OBJ, p);   // ("when you cycle ...": TriggerCycled)
     if (a->kind == MTG_ACT_CAST && a->alt) {
-        const MtgAltCost *alt = &gMtgAltCosts[Mtg_Card(d->objs[a->obj].def)->altCost - 1];
-        PayCost(d, p, &alt->cost, a->ability, a->obj, 1);
+        const MtgCardDef *c = Mtg_Card(d->objs[a->obj].def);
+        int idx = ExtraIdx(c, a->alt);
+        if (a->alt == MTG_ALT_COST || (idx && HasOther(&gMtgAltCosts[idx - 1].cost))) {
+            d->costAltIdx = (uint16_t)idx;   // (that cost's picks: CostNow)
+            PayCost(d, p, &gMtgAltCosts[idx - 1].cost, a->ability, a->obj, 1);
+        } else if (a->ability != 0xFFFF)
+            PayOtherCosts(d, p, &gMtgAbilities[a->ability], a->obj);
     } else if (a->ability != 0xFFFF)
         PayOtherCosts(d, p, &gMtgAbilities[a->ability], a->obj);
     d->tgtLeft = d->tgtOpt = 0;
-    if (a->ability != 0xFFFF && gMtgAbilities[a->ability].tgtMax > 1 && a->target.kind == MTG_TGT_OBJ) {
+    d->divPending = a->ability != 0xFFFF && Mtg_Param(&gMtgAbilities[a->ability], "DividedAsYouChoose") != NULL;
+    d->divIdx = 0;
+    if (a->ability != 0xFFFF && gMtgAbilities[a->ability].tgtMax > 1
+        && (a->target.kind == MTG_TGT_OBJ || a->target.kind == MTG_TGT_PLAYER)) {
         const MtgAbility *ab = &gMtgAbilities[a->ability];   // (its other targets: asked after the costs)
         int most = ab->tgtMax == MTG_TGT_X ? a->x : ab->tgtMax, least = ab->tgtMin == MTG_TGT_X ? a->x : ab->tgtMin;
+        if (ab->tgtMax == MTG_TGT_SVAR) {   // (MaxTgts: counted now)
+            MtgResolveCtx ctx;
+            int ok;
+            ctx.e = e;
+            ctx.controller = p;
+            ctx.source = a->obj;
+            most = Mtg_Amount(d, &ctx, ab->card, ab->tgtMaxSv, &ok);
+        }
         int need = least > 1 ? least : 1;
         if (most > 5)
             most = 5;   // (the first and four more)
@@ -1325,6 +1817,13 @@ static int TargetCandidates(const MtgDuel *d, uint16_t *out)
     const MtgStackEntry *e = &d->stack[d->stackCount - 1];
     const MtgAbility *ab = &gMtgAbilities[e->ability];
     int i, k, n = 0;
+    for (i = 0; i < MTG_PLAYERS && ab->tgtZone == MTG_ZONE_BATTLEFIELD && !ab->tgtStack; i++) {   // (players: "Any")
+        int taken = e->target.kind == MTG_TGT_PLAYER && e->target.id == i;
+        for (k = 0; k < e->extraCount; k++)
+            taken |= e->extra[k] == MTG_REM_PLAYER + i;
+        if (!taken && !d->players[i].lost && Mtg_ValidPlayer(d, i, ab->tgt, e->controller))
+            out[n++] = (uint16_t)(MTG_REM_PLAYER + i);
+    }
     for (i = 0; i < d->objCount && n < MTG_MAX_COMBAT; i++) {
         int taken = e->target.kind == MTG_TGT_OBJ && e->target.id == i;
         for (k = 0; k < e->extraCount; k++)
@@ -1345,7 +1844,9 @@ static int CanAttack(const MtgDuel *d, int obj)
     const MtgObj *o = &d->objs[obj];
     uint32_t kw = Mtg_Keywords(d, obj);
     return IsCreature(d, obj) && o->controller == d->active && !o->tapped
-        && (!o->sick || (kw & MTG_KW_BIT(MTG_KW_HASTE))) && !(kw & MTG_KW_BIT(MTG_KW_DEFENDER)) && !(kw & MTG_KWX_CANT_ATTACK)
+        && (!o->sick || (kw & MTG_KW_BIT(MTG_KW_HASTE)) || Mtg_StaticForbids(d, MTG_STATIC_ATTACK_HASTE, obj, MTG_NO_OBJ))
+        && (!(kw & MTG_KW_BIT(MTG_KW_DEFENDER)) || Mtg_StaticForbids(d, MTG_STATIC_ATTACK_DEFENDER, obj, MTG_NO_OBJ))
+        && !(kw & MTG_KWX_CANT_ATTACK)
         && !Mtg_StaticForbids(d, MTG_STATIC_CANT_ATTACK, obj, MTG_NO_OBJ);
 }
 
@@ -1354,7 +1855,7 @@ static int ControlsLandType(const MtgDuel *d, int player, int basic)
     int i;
     for (i = 0; i < d->objCount; i++)
         if (d->objs[i].zone == MTG_ZONE_BATTLEFIELD && d->objs[i].controller == player
-            && (Mtg_Card(d->objs[i].def)->intrinsicMana & MTG_COLOR_BIT(basic)))
+            && (Mtg_ObjLandTypes(d, i) & MTG_COLOR_BIT(basic)))
             return 1;
     return 0;
 }
@@ -1363,24 +1864,27 @@ static int ControlsLandType(const MtgDuel *d, int player, int basic)
 int Mtg_CanBlock(const MtgDuel *d, int blocker, int attacker)
 {
     uint32_t akw = Mtg_Keywords(d, attacker), bkw = Mtg_Keywords(d, blocker);
-    const MtgCardDef *ac = Mtg_Card(d->objs[attacker].def), *bc = Mtg_Card(d->objs[blocker].def);
+    const MtgCardDef *ac = Mtg_Card(d->objs[attacker].def);
     int i;
     if (bkw & MTG_KWX_CANT_BLOCK)   // (a Pump's "can't block" this turn)
         return 0;
     if ((akw & MTG_KW_BIT(MTG_KW_FLYING)) && !(bkw & (MTG_KW_BIT(MTG_KW_FLYING) | MTG_KW_BIT(MTG_KW_REACH))))
         return 0;
-    if ((akw & MTG_KW_BIT(MTG_KW_FEAR)) && !(bc->types & MTG_T_ARTIFACT) && !(bc->colors & MTG_COLOR_BIT(MTG_B)))
+    if ((akw & MTG_KW_BIT(MTG_KW_FEAR)) && !(Mtg_ObjTypes(d, blocker) & MTG_T_ARTIFACT) && !(Mtg_ObjColors(d, blocker) & MTG_COLOR_BIT(MTG_B)))
         return 0;
     // (shadow: "can block or be blocked by only creatures with shadow", both ways)
-    if (((akw ^ bkw) & MTG_KW_BIT(MTG_KW_SHADOW)) != 0)
-        return 0;
+    if (((akw ^ bkw) & MTG_KW_BIT(MTG_KW_SHADOW)) != 0
+        && !((akw & MTG_KW_BIT(MTG_KW_SHADOW)) && Mtg_StaticForbids(d, MTG_STATIC_BLOCK_SHADOW, blocker, attacker)))
+        return 0;   // (Heartwood Dryad: "can block creatures with shadow as though it had shadow")
     uint8_t walk = Mtg_Landwalk(d, attacker);
     (void)ac;
-    if (Mtg_Protection(d, attacker) & bc->colors)
+    if (Mtg_ProtectedFrom(d, attacker, blocker, 0))
         return 0;
     if (Mtg_StaticForbids(d, MTG_STATIC_CANT_BLOCK, blocker, MTG_NO_OBJ)
         || Mtg_StaticForbids(d, MTG_STATIC_CANT_BLOCK_BY, attacker, blocker))
         return 0;
+    if (walk && Mtg_StaticForbids(d, MTG_STATIC_IGNORE_LANDWALK, MTG_NO_OBJ, MTG_NO_OBJ))
+        walk = 0;   // (Staff of the Ages)
     for (i = 0; i < 5; i++)
         if ((walk & MTG_COLOR_BIT(i)) && ControlsLandType(d, d->objs[blocker].controller, i))
             return 0;
@@ -1446,8 +1950,8 @@ static void CombatDamage(MtgDuel *d, int firstStrikeStep)
         if (!IsCreature(d, i) || !DealsInStep(d, i, firstStrikeStep))
             continue;
         power = Mtg_Power(d, i);
-        if (power <= 0)
-            continue;
+        if (power <= 0 || Mtg_StaticForbids(d, MTG_STATIC_NO_COMBAT_DAMAGE, i, MTG_NO_OBJ))
+            continue;   // (Ophidian: "assigns no combat damage this turn")
         if (d->objs[i].attacking) {
             int left = power, trample = (Mtg_Keywords(d, i) & MTG_KW_BIT(MTG_KW_TRAMPLE)) != 0, last = -1;
             if (!d->objs[i].blocked) {
@@ -1510,6 +2014,8 @@ static void EndOfTurnCleanup(MtgDuel *d)
         o->damagedBy[0] = o->damagedBy[1] = o->damagedBy[2] = MTG_NO_OBJ;
         o->tempPower = o->tempToughness = 0;
         o->tempKeywords = 0;
+        o->tempProtection = 0;
+        o->loseKeywords = 0;
         o->regen = 0;
         o->prevent = 0;
         if (o->animUntil == 1)
@@ -1523,8 +2029,9 @@ static void EndOfTurnCleanup(MtgDuel *d)
 static void NextStep(MtgDuel *d)
 {
     int p;
-    for (p = 0; p < MTG_PLAYERS; p++)
-        memset(d->players[p].pool, 0, sizeof(d->players[p].pool));   // mana empties between steps
+    if (!Mtg_StaticForbids(d, MTG_STATIC_UNSPENT_MANA, MTG_NO_OBJ, MTG_NO_OBJ))   // (Upwelling: it stays)
+        for (p = 0; p < MTG_PLAYERS; p++)
+            memset(d->players[p].pool, 0, sizeof(d->players[p].pool));   // mana empties between steps
     d->stepStarted = 0;
     d->passes = 0;
     if (d->step == MTG_STEP_CLEANUP) {
@@ -1567,7 +2074,7 @@ static void BuildDiscard(MtgDuel *d)
     memset(q, 0, sizeof(*q));
     q->kind = MTG_Q_DISCARD;
     q->player = d->active;
-    q->discard = (uint8_t)(HandCount(d, d->active) - MTG_HAND_SIZE);
+    q->discard = (uint8_t)(HandCount(d, d->active) - Mtg_MaxHandSize(d, d->active));
     for (i = 0; i < d->objCount && q->candidateCount < MTG_MAX_COMBAT; i++)
         if (d->objs[i].zone == MTG_ZONE_HAND && d->objs[i].owner == d->active)
             q->candidates[q->candidateCount++] = (uint16_t)i;
@@ -1626,25 +2133,78 @@ static int HoldsLock(const MtgDuel *d, int obj)
     return 0;
 }
 
+// a tapped permanent of the active player that untaps in their untap step (nothing keeps it tapped)
+static int WouldUntap(const MtgDuel *d, int i)
+{
+    return d->objs[i].controller == d->active && d->objs[i].zone == MTG_ZONE_BATTLEFIELD && d->objs[i].tapped
+        && !Mtg_StaticForbids(d, MTG_STATIC_NO_UNTAP, i, MTG_NO_OBJ) && !HoldsLock(d, i);
+}
+
 // the step's turn-based actions; returns 1 if it is waiting for a decision (the query is set)
 static int StartStep(MtgDuel *d)
 {
     int i;
     d->stepStarted = 1;
     switch (d->step) {
-    case MTG_STEP_UNTAP:
-        PruneEffects(d, MTG_EFF_NEXT_TURN, d->active);   // ("until your next turn")
-        for (i = 0; i < d->objCount; i++)
-            d->objs[i].usedN[0] = d->objs[i].usedN[1] = 0;   // (ActivationLimit$: each turn)
+    case MTG_STEP_UNTAP: {
+        const char *lspec[8];
+        int lnum[8], limits, k;
+        if (!d->untapStage) {
+            PruneEffects(d, MTG_EFF_NEXT_TURN, d->active);   // ("until your next turn")
+            for (i = 0; i < d->objCount; i++)
+                d->objs[i].usedN[0] = d->objs[i].usedN[1] = 0, d->objs[i].untapPick = 0;   // (ActivationLimit$: each turn)
+            d->untapStage = 1, d->untapLimit = 0, d->untapPicks = 0, d->untapTight = 0;
+        }
+        // the limits (Winter Orb: "can't untap more than one land"): for each in turn, the player picks which of those
+        // that would untap do, when more would than it lets (query CHOOSE PICK, forCost 10)
+        limits = Mtg_UntapLimits(d, d->active, lspec, lnum, 8);
+        while (d->untapLimit < limits) {
+            uint16_t list[MTG_MAX_COMBAT];
+            int n = 0, picked = 0;
+            for (i = 0; i < d->objCount && n < MTG_MAX_COMBAT; i++)
+                if (WouldUntap(d, i) && Mtg_ValidObj(d, i, lspec[d->untapLimit], MTG_NO_OBJ, d->active)) {
+                    if (d->objs[i].untapPick & (1u << d->untapLimit))
+                        picked++;
+                    else
+                        list[n++] = (uint16_t)i;
+                }
+            if (n + picked > lnum[d->untapLimit])
+                d->untapTight |= (uint8_t)(1u << d->untapLimit);
+            if (n + picked <= lnum[d->untapLimit] || picked >= lnum[d->untapLimit] || !n) {
+                d->untapLimit++;
+                d->untapPicks = 0;
+                continue;
+            }
+            memset(&d->query, 0, sizeof(d->query));
+            d->query.kind = MTG_Q_CHOOSE;
+            d->query.choice = MTG_CHOICE_PICK;
+            d->query.forCost = 10;
+            d->query.ability = 0xFFFF;
+            d->query.player = (uint8_t)d->active;
+            memcpy(d->query.candidates, list, (size_t)n * sizeof(list[0]));
+            d->query.candidateCount = (uint8_t)n;
+            d->stepStarted = 2;
+            return 1;
+        }
         for (i = 0; i < d->objCount; i++)
             if (d->objs[i].controller == d->active && d->objs[i].zone == MTG_ZONE_BATTLEFIELD) {
-                if (!d->objs[i].tapped || (!Mtg_StaticForbids(d, MTG_STATIC_NO_UNTAP, i, MTG_NO_OBJ) && !HoldsLock(d, i)))
+                int held = 0;
+                for (k = 0; k < limits; k++)   // (one a limit holds back: of its type, not picked, more than it lets)
+                    if ((d->untapTight & (1u << k)) && !(d->objs[i].untapPick & (1u << k))
+                        && Mtg_ValidObj(d, i, lspec[k], MTG_NO_OBJ, d->active))
+                        held = 1;
+                if (!held && WouldUntap(d, i))
                     Mtg_Tap(d, i, 0);
                 d->objs[i].sick = 0;
             }
+        d->untapStage = 0;
         PruneEffects(d, MTG_EFF_AFTER_UNTAP, d->active);   // ("doesn't untap during your next untap step": done)
         break;
+    }
     case MTG_STEP_UPKEEP:
+        for (i = 0; i < d->objCount; i++)   // (Echo: what came under the player since their last upkeep is due now)
+            if (d->objs[i].controller == d->active && d->objs[i].echoDue == 1)
+                d->objs[i].echoDue = 2;
         // Fading (its upkeep trigger, done as the step begins): a fade counter off, or sacrificed when there's none
         for (i = 0; i < d->objCount; i++)
             if (d->objs[i].controller == d->active && d->objs[i].zone == MTG_ZONE_BATTLEFIELD && Mtg_Card(d->objs[i].def)->fading) {
@@ -1656,6 +2216,9 @@ static int StartStep(MtgDuel *d)
             }
         break;
     case MTG_STEP_DRAW:
+        for (i = 0; i < d->objCount; i++)   // (Echo: due only in that upkeep)
+            if (d->objs[i].controller == d->active && d->objs[i].echoDue == 2)
+                d->objs[i].echoDue = 0;
         if (d->turn > 1)   // the starting player skips the first draw
             Mtg_Draw(d, d->active, 1);
         break;
@@ -1691,7 +2254,7 @@ static int StartStep(MtgDuel *d)
         PruneEffects(d, MTG_EFF_END_COMBAT, 0);
         break;
     case MTG_STEP_CLEANUP:
-        if (HandCount(d, d->active) > MTG_HAND_SIZE) {
+        if (HandCount(d, d->active) > Mtg_MaxHandSize(d, d->active)) {
             BuildDiscard(d);
             d->stepStarted = 2;
             return 1;
@@ -1706,6 +2269,21 @@ static int StartStep(MtgDuel *d)
         TrigEvent(d, MTG_TRIG_PHASE, MTG_NO_OBJ, MTG_NO_OBJ, d->active);
         Mtg_FireDelayed(d);   // ("at the beginning of the next ...": DelayedTrigger)
         break;
+    }
+    if (d->step == MTG_STEP_END && d->eotCount) {   // AtEOT$: what was to go at the beginning of the next end step
+        int k, n = d->eotCount;
+        d->eotCount = 0;
+        for (k = 0; k < n; k++) {
+            int o = d->eotObj[k];
+            if (d->objs[o].zone != MTG_ZONE_BATTLEFIELD || d->objs[o].seq != d->eotSeq[k])
+                continue;   // (gone, or a new object since)
+            if (d->eotAct[k] == 1)
+                Mtg_Sacrifice(d, o);
+            else if (d->eotAct[k] == 2)
+                Mtg_Destroy(d, o, 0);
+            else
+                Mtg_MoveTo(d, o, d->eotAct[k] == 3 ? MTG_ZONE_EXILE : MTG_ZONE_HAND);
+        }
     }
     return 0;
 }
@@ -1733,6 +2311,8 @@ static void PushTrigger(MtgDuel *d, int i, MtgTarget target)
     e->trigCtrl = pd.trigCtrl;
     e->trigAmount = pd.trigAmount;
     e->optional = t->optional;
+    e->effRemCount = pd.effRemCount;
+    memcpy(e->effRem, pd.effRem, sizeof(e->effRem));
     d->passes = 0;
     Mtg_Event(d, MTG_EV_TRIGGER, pd.source, target.kind, target.id);
     TargetEvent(d, target, pd.source, pd.controller);
@@ -1788,6 +2368,10 @@ static void Run(MtgDuel *d)
             d->query.winner = d->winner;
             return;
         }
+        if (d->etbCount && RunEtb(d))
+            return;
+        if (d->fxCount && RunManaFx(d))
+            return;
         if (d->stepStarted == 0 && StartStep(d))
             return;
         if (d->stepStarted == 3 || d->step == MTG_STEP_UNTAP || d->step == MTG_STEP_CLEANUP) {
@@ -1815,7 +2399,7 @@ void Mtg_RefreshQuery(MtgDuel *d)   // (after the state was changed from outside
 {
     if (d->query.kind == MTG_Q_PRIORITY) {
         StateBasedActions(d);
-        if (d->over)
+        if (d->over || d->etbCount || d->fxCount)
             Run(d);
         else
             BuildPriority(d);
@@ -1844,9 +2428,23 @@ int Mtg_Answer(MtgDuel *d, const MtgAnswer *a)
             } else
                 d->priority ^= 1;
         } else {
+            if (act.x > 0 && !act.xFixed) {   // an X: asked first (0 up to the most it can pay)
+                uint16_t opts[MTG_MAX_OPTIONS];
+                int k, n = act.x + 1 < MTG_MAX_OPTIONS ? act.x + 1 : MTG_MAX_OPTIONS;
+                for (k = 0; k < n; k++)
+                    opts[k] = (uint16_t)k;
+                d->pendAct = act;
+                Mtg_AskOption(d, d->priority, MTG_OPT_NUMBER, opts, n);
+                d->query.forCost = 8;
+                d->query.source = act.obj;
+                d->query.ability = act.ability;
+                return 1;
+            }
             DoAction(d, &act);
             d->passes = 0;
             if (AskCost(d))
+                return 1;
+            if (ResolveManaNow(d))
                 return 1;
         }
         break;
@@ -1857,10 +2455,34 @@ int Mtg_Answer(MtgDuel *d, const MtgAnswer *a)
             if (Mtg_StaticForbids(d, MTG_STATIC_MUST_ATTACK, q->candidates[i], MTG_NO_OBJ))
                 forced.attack |= 1u << i;
         a = &forced;
+        {   // attack taxes (Propaganda): what can't be paid for is dropped, the last chosen first, then the rest paid
+            int tax, k;
+            MtgManaCost m;
+            for (;;) {
+                tax = 0;
+                for (k = 0; k < q->candidateCount && k < 32; k++)
+                    if (forced.attack & (1u << k))
+                        tax += Mtg_AttackTax(d, q->candidates[k]);
+                memset(&m, 0, sizeof(m));
+                m.generic = (uint8_t)(tax > 255 ? 255 : tax);
+                if (!tax || Mtg_CanPay(d, q->player, &m, 0, MTG_NO_OBJ))
+                    break;
+                for (k = (q->candidateCount < 32 ? q->candidateCount : 32) - 1; k >= 0; k--)
+                    if ((forced.attack & (1u << k)) && Mtg_AttackTax(d, q->candidates[k])) {
+                        forced.attack &= ~(1u << k);
+                        break;
+                    }
+                if (k < 0)
+                    break;
+            }
+            if (tax)
+                Mtg_Pay(d, q->player, &m, 0, MTG_NO_OBJ);
+        }
         for (i = 0; i < q->candidateCount; i++)
             if (a->attack & (1u << i)) {
                 int o = q->candidates[i];
                 d->objs[o].attacking = 1;
+                d->objs[o].attackedTurn = (uint16_t)(d->turn + 1);
                 if (!(Mtg_Keywords(d, o) & MTG_KW_BIT(MTG_KW_VIGILANCE)))
                     Mtg_Tap(d, o, 1);
                 Mtg_Event(d, MTG_EV_ATTACK, o, 0, 0);
@@ -1875,7 +2497,8 @@ int Mtg_Answer(MtgDuel *d, const MtgAnswer *a)
         }
         break;
     }
-    case MTG_Q_BLOCKERS:
+    case MTG_Q_BLOCKERS: {
+        static MtgAnswer fixedB;
         for (i = 0; i < q->candidateCount; i++) {
             int b = q->candidates[i], k = a->block[i];
             if (k < 0)
@@ -1883,6 +2506,24 @@ int Mtg_Answer(MtgDuel *d, const MtgAnswer *a)
             if (k >= q->attackerCount || !Mtg_CanBlock(d, b, q->attackers[k]))
                 return 0;
         }
+        fixedB = *a;   // (menace: a lone blocker of one doesn't block; MinMaxBlocker: too few don't, past the most the
+        for (i = 0; i < q->attackerCount; i++) {   // first ones only)
+            int n = 0, k, min, max;
+            Mtg_BlockerLimits(d, q->attackers[i], &min, &max);
+            if ((Mtg_Keywords(d, q->attackers[i]) & MTG_KW_BIT(MTG_KW_MENACE)) && min < 2)
+                min = 2;
+            for (k = 0; k < q->candidateCount; k++)
+                n += fixedB.block[k] == i;
+            if (n && n < min)
+                for (k = 0; k < q->candidateCount; k++)
+                    if (fixedB.block[k] == i)
+                        fixedB.block[k] = -1;
+            if (max && n > max)
+                for (k = 0, n = 0; k < q->candidateCount; k++)
+                    if (fixedB.block[k] == i && ++n > max)
+                        fixedB.block[k] = -1;
+        }
+        a = &fixedB;
         for (i = 0; i < q->candidateCount; i++) {
             int b = q->candidates[i], k = a->block[i];
             if (k < 0)
@@ -1894,6 +2535,7 @@ int Mtg_Answer(MtgDuel *d, const MtgAnswer *a)
         BlocksDeclared(d);
         d->stepStarted = 1;
         break;
+    }
     case MTG_Q_DISCARD:
         if (a->card >= q->candidateCount)
             return 0;
@@ -1906,9 +2548,40 @@ int Mtg_Answer(MtgDuel *d, const MtgAnswer *a)
         PushTrigger(d, NextPending(d), q->actions[a->action].target);
         break;
     case MTG_Q_CHOOSE:
+        if (q->forCost == 10) {   // one to untap under the untap step's limit: the step goes on
+            if (a->card >= q->candidateCount)
+                return 0;
+            d->objs[q->candidates[a->card]].untapPick |= (uint8_t)(1u << d->untapLimit);
+            d->untapPicks++;
+            d->stepStarted = 0;
+            break;
+        }
+        if (q->forCost == 9) {   // a share of a divided amount, to the next target
+            if (a->card >= q->optCount || !d->stackCount)
+                return 0;
+            d->stack[d->stackCount - 1].divide[d->divIdx++] = (uint8_t)q->opts[a->card];
+            if (AskCost(d))
+                return 1;
+            break;
+        }
+        if (q->forCost == 8) {   // the X of the action chosen: now it's done
+            MtgAction act = d->pendAct;
+            if (a->card >= q->optCount)
+                return 0;
+            act.x = (int16_t)q->opts[a->card];
+            DoAction(d, &act);
+            d->passes = 0;
+            if (AskCost(d))
+                return 1;
+            if (ResolveManaNow(d))
+                return 1;
+            break;
+        }
         if (q->forCost) {   // a cost's sacrifice / discard (or another target)
             if (q->forCost == 7 && a->card == q->candidateCount && !d->tgtLeft) {
-                d->tgtOpt = 0;   // (no more targets: it may stop here)
+                d->tgtOpt = 0;   // (no more targets: it may stop here; then its division, if any)
+                if (AskCost(d))
+                    return 1;
                 break;
             }
             if (a->card >= q->candidateCount)
@@ -1916,7 +2589,9 @@ int Mtg_Answer(MtgDuel *d, const MtgAnswer *a)
             PayCostPick(d, q->candidates[a->card]);
             if (AskCost(d))
                 return 1;
-            if (d->costAlt == 2) {   // an UnlessCost$ paid: its ability goes on resolving (it does nothing now)
+            if (!d->costAlt && ResolveManaNow(d))
+                return 1;
+            if (d->costAlt == 2 || d->costAlt == 4) {   // an UnlessCost$ (or a trigger's own cost) paid: it goes on resolving
                 d->costAlt = 0;
                 if (d->resolving && ContinueResolve(d))
                     return 1;
@@ -1929,6 +2604,10 @@ int Mtg_Answer(MtgDuel *d, const MtgAnswer *a)
             if (a->card >= q->candidateCount)
                 return 0;
             d->resChoice = (int16_t)q->candidates[a->card];
+        } else if (q->choice == MTG_CHOICE_OPTION) {
+            if (a->card >= q->optCount)
+                return 0;
+            d->resChoice = (int16_t)q->opts[a->card];
         } else
             d->resChoice = a->card ? 1 : 0;
         if (ContinueResolve(d))

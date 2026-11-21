@@ -264,9 +264,18 @@ static int ScoreAction(const MtgDuel *d, const MtgAction *a, int me)
         int price = CostPrice(d, &gMtgAbilities[a->ability], me, a->obj);
         s = s > price ? s - price : 0;
     }
-    if (s > 0 && s < 500 && a->alt) {   // the alternative cost's price: the mana cast wins when both are there
+    if (s > 0 && s < 500 && a->alt == MTG_ALT_COST) {   // the alternative cost's price: the mana cast wins when both are there
         int price = 1 + CostPriceOf(d, &gMtgAltCosts[Mtg_Card(d->objs[a->obj].def)->altCost - 1].cost, me, a->obj);
         s = s > price ? s - price : 0;
+    } else if (s > 0 && s < 500 && a->alt && a->alt != MTG_ALT_FLASHBACK) {
+        // kicked or with buyback: worth it when what else it pays costs little (Forge's AI kicks whenever it can pay)
+        const MtgCardDef *c = Mtg_Card(d->objs[a->obj].def);
+        int idx = a->alt == MTG_ALT_KICK1 ? c->kicker[0] : a->alt == MTG_ALT_KICK2 ? c->kicker[1]
+                : a->alt == MTG_ALT_BUYBACK ? c->buyback : 0;
+        int price = idx ? CostPriceOf(d, &gMtgAltCosts[idx - 1].cost, me, a->obj) : 0;
+        s += (a->alt == MTG_ALT_KICK12 ? 6 : 3) - price;
+        if (s < 1)
+            s = 1;
     }
     return s;
 }
@@ -289,6 +298,15 @@ static int ScoreBase(const MtgDuel *d, const MtgAction *a, int me)
     }
     if (a->kind == MTG_ACT_LAND)
         return main ? 1000 : 0;
+    if (a->kind == MTG_ACT_TURN_UP) {   // Morph: worth turning up for what it is (its triggers too), in a main phase or a fight
+        const MtgCardDef *real = Mtg_Card(d->objs[a->obj].faceDownOf - 1);
+        int gain = real->power * 2 + real->toughness - 6 + real->triggerCount * 4;
+        if (!main && !d->objs[a->obj].attacking && d->objs[a->obj].blocking == MTG_NO_OBJ)
+            return 0;
+        return gain > 0 ? 5 + gain : 0;
+    }
+    if (a->kind == MTG_ACT_CAST && a->alt == MTG_ALT_MORPH)   // face down: a 2/2 for {3} (its own cast scores itself)
+        return main ? 14 : 0;
     if (ab && ab->fromHand) {
         // Cycling: a land when there are enough, a spell too dear for a while; best at the end of the other's turn
         int k, lands = 0, good;
@@ -616,10 +634,107 @@ static int GivesUpOwn(const MtgAbility *ab)
     return o && (strcmp(o, "Battlefield") == 0 || (strcmp(o, "Graveyard") == 0 && (!dz || strcmp(dz, "Battlefield"))));
 }
 
+// how many of the cards it may look at have the subtype / color: AILogic says whose ("Opp", "Human": the opponent's
+// on the battlefield and in the graveyard; "Graveyard": its own graveyard; else its own cards, its library's too)
+static int OptionCount(const MtgDuel *d, int me, const char *logic, int kind, int opt)
+{
+    int i, n = 0, theirs = logic && (strstr(logic, "Opp") || strstr(logic, "Human") || strstr(logic, "Attackers")
+                                     || strstr(logic, "ActivePlayer"));
+    int grave = logic && strstr(logic, "Graveyard"), all = logic && (strstr(logic, "InGame") || strstr(logic, "Permanent"));
+    for (i = 0; i < d->objCount; i++) {
+        const MtgObj *o = &d->objs[i];
+        const MtgCardDef *c = Mtg_Card(o->def);
+        int owner = o->zone == MTG_ZONE_BATTLEFIELD ? o->controller : o->owner, hit;
+        if (all ? o->zone != MTG_ZONE_BATTLEFIELD
+                : theirs ? (owner == me || (o->zone != MTG_ZONE_BATTLEFIELD && o->zone != MTG_ZONE_GRAVEYARD))
+                : grave ? (owner != me || o->zone != MTG_ZONE_GRAVEYARD) : owner != me)
+            continue;
+        if (kind == MTG_OPT_COLOR)
+            hit = (Mtg_ObjColors(d, i) & MTG_COLOR_BIT(opt)) != 0;
+        else {
+            const char *name = Mtg_SubtypeName(opt), *f = c->subtypes ? strstr(c->subtypes, name) : NULL;
+            size_t l = strlen(name);
+            hit = 0;
+            while (f && !hit) {
+                hit = (f == c->subtypes || f[-1] == ' ') && (f[l] == ' ' || f[l] == 0);
+                f = strstr(f + 1, name);
+            }
+        }
+        n += hit;
+    }
+    return n;
+}
+
+static int LookaheadOption(const MtgDuel *d, int k, int me)   // the mode k answered on a copy, the rest as this AI would
+{
+    static MtgDuel copy;
+    MtgAnswer ans;
+    int guard = 0, v;
+    copy = *d;
+    sSimulating = 1;
+    memset(&ans, 0, sizeof(ans));
+    ans.card = (uint16_t)k;
+    if (Mtg_Answer(&copy, &ans))
+        while (guard++ < 300 && !copy.over) {
+            const MtgQuery *q = Mtg_Query(&copy);
+            if (q->kind == MTG_Q_PRIORITY && !copy.resolving)
+                break;
+            memset(&ans, 0, sizeof(ans));
+            if (q->kind != MTG_Q_PRIORITY)
+                MtgAi_Answer(&copy, &ans);
+            if (!Mtg_Answer(&copy, &ans))
+                break;
+        }
+    v = Eval(&copy, me);
+    sSimulating = 0;
+    return v;
+}
+
+// an option (a creature type, a color, a player, a number, a mode): Forge's AILogic where it says whose cards count
+static void ChooseOption(const MtgDuel *d, const MtgQuery *q, MtgAnswer *out)
+{
+    const MtgAbility *ab = q->ability != 0xFFFF ? &gMtgAbilities[q->ability] : NULL;
+    const char *logic = ab ? Mtg_Param(ab, "AILogic") : NULL;
+    int i, best = 0, bestV = -(1 << 30), me = q->player;
+    if (ab && ab->api == MTG_API_PROTECTION && !logic)
+        logic = "MostProminentOppControls";   // (protection: from what the opponent has)
+    for (i = 0; i < q->optCount; i++) {
+        int v = 0, o = q->opts[i];
+        switch (q->optKind) {
+        case MTG_OPT_TYPE:
+        case MTG_OPT_COLOR:
+            v = OptionCount(d, me, logic, q->optKind, o) * 4 + (OptionCount(d, me, NULL, q->optKind, o) > 0);
+            break;
+        case MTG_OPT_PLAYER:   // (Curse, MostCardsInHand...: the opponent when it may)
+            v = o != me;
+            break;
+        case MTG_OPT_NUMBER:   // the least for what costs it, else the most (an X: the most it can pay; a division: just
+            if (q->forCost == 9 && q->candidates[0] < MTG_REM_PLAYER) {   // enough to finish a creature off)
+                int t = q->candidates[0], need = Mtg_Toughness(d, t) - d->objs[t].damage;
+                v = o == (need < 1 ? 1 : need) ? 1000 : o < need ? o : -o;
+                break;
+            }
+            v = q->forCost != 8 && logic && (strcmp(logic, "Min") == 0 || strstr(logic, "Lowest") || strcmp(logic, "LoseLife") == 0)
+                ? -o : o;
+            break;
+        case MTG_OPT_MODE:
+            v = sSimulating ? -i : LookaheadOption(d, i, me);
+            break;
+        }
+        if (v > bestV)
+            bestV = v, best = i;
+    }
+    out->card = (uint16_t)best;
+}
+
 // a choice while resolving: "you may" yes, pay to keep its own things or to save its spell, the least to lose
 static void Choose(const MtgDuel *d, const MtgQuery *q, MtgAnswer *out)
 {
     int i, best = 0, bestV = 1 << 30;
+    if (q->choice == MTG_CHOICE_OPTION) {
+        ChooseOption(d, q, out);
+        return;
+    }
     if (q->choice == MTG_CHOICE_PAY && q->ability != 0xFFFF && gMtgAbilities[q->ability].unless) {
         // a cost that isn't only mana: paid unless it costs too much life or too many permanents
         const MtgCost *c = &gMtgUnlessCosts[gMtgAbilities[q->ability].unless - 1];
@@ -668,14 +783,34 @@ static void Choose(const MtgDuel *d, const MtgQuery *q, MtgAnswer *out)
         out->card = (uint8_t)best;
         return;
     }
+    if (q->forCost == 10) {   // one to untap (Winter Orb): its best (a land of a color it lacks counts as a 3-drop)
+        int bestS = -1;
+        for (i = 0; i < q->candidateCount; i++) {
+            int c = q->candidates[i];
+            int sc = (Mtg_ObjTypes(d, c) & MTG_T_CREATURE) ? Value(d, c) : Mtg_ManaCostTotal(&Mtg_Card(d->objs[c].def)->cost) + 3;
+            if (sc > bestS)
+                bestS = sc, best = i;
+        }
+        out->card = (uint8_t)best;
+        return;
+    }
     if (q->forCost == 7) {   // another target: the opponent's best for what harms, its own best for what helps
         int helps = Helps(&gMtgAbilities[q->ability]), bestS = -1000;
         for (i = 0; i < q->candidateCount; i++) {
-            const MtgObj *o = &d->objs[q->candidates[i]];
-            int mine = (o->zone == MTG_ZONE_BATTLEFIELD ? o->controller : o->owner) == q->player;
-            int worth = o->zone == MTG_ZONE_BATTLEFIELD && (Mtg_ObjTypes(d, q->candidates[i]) & MTG_T_CREATURE)
+            int c = q->candidates[i], mine, worth, sc;
+            const MtgObj *o;
+            if (c >= MTG_REM_PLAYER) {   // (a player: worth a little, the creatures first)
+                mine = c - MTG_REM_PLAYER == q->player;
+                sc = mine == helps ? 100 + 3 : -3;
+                if (sc > bestS)
+                    bestS = sc, best = i;
+                continue;
+            }
+            o = &d->objs[c];
+            mine = (o->zone == MTG_ZONE_BATTLEFIELD ? o->controller : o->owner) == q->player;
+            worth = o->zone == MTG_ZONE_BATTLEFIELD && (Mtg_ObjTypes(d, q->candidates[i]) & MTG_T_CREATURE)
                       ? Value(d, q->candidates[i]) : Mtg_ManaCostTotal(&Mtg_Card(o->def)->cost);
-            int sc = mine == helps ? 100 + worth : -worth;
+            sc = mine == helps ? 100 + worth : -worth;
             if (sc > bestS)
                 bestS = sc, best = i;
         }

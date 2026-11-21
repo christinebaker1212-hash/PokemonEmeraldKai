@@ -1,0 +1,9 @@
+pressuntil A field 5000
+wait 30
+mp ygo starter 0
+mp ygo auto
+mp ygo practice
+wait 200
+rendershotburst ph 1200 4
+wait 1500
+quit

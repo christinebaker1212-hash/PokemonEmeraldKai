@@ -402,6 +402,7 @@
 #define STRINGID_ORRE_TEXT                  407   // Moemon Kai: Colosseum's battle words the Shadow code chose (orre_shadow.c)
 #define STRINGID_ORRE_TEXT2                 408   // (a second line of them: CALL's outcome)
 #define STRINGID_MPCOOP_ITEM_PP             409   // Moemon Co-op: "...'s PP was restored." (an ETHER in a co-op battle)
+#define STRINGID_MP_INTIMIDATE_ALL          410   // Moemon Co-op: "X's INTIMIDATE cuts the foes' ATTACK!" (all at once)
 
 // Moemon Kai: Gen 4 messages, 420 on (handled in BufferStringBattle, not the table)
 #include "constants/battle_gen4_strings.h"

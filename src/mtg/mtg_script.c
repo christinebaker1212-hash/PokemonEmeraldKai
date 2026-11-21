@@ -34,6 +34,10 @@ static int sTokenCount;
 
 const MtgCardDef *Mtg_Card(int id)
 {
+    static const MtgCardDef sFaceDown = {.name = "Face-down creature", .oracle = "", .subtypes = "",
+                                         .types = MTG_T_CREATURE, .power = 2, .toughness = 2, .supported = 1};
+    if (id == MTG_FACE_DOWN)
+        return &sFaceDown;
     if (id >= MTG_TOKEN_BASE)
         return id - MTG_TOKEN_BASE < sTokenCount ? &sTokens[id - MTG_TOKEN_BASE] : NULL;
     return (id >= 0 && id < sCardCount) ? &sCards[id] : NULL;
@@ -44,9 +48,17 @@ const MtgCardDef *Mtg_Card(int id)
 int Mtg_TokenDef(const char *script)
 {
     static const char sCol[] = "wubrg";
+    // Forge's tokens named for their card (res/tokenscripts), as the colors_power_toughness_type words they are
+    static const char *const sNamed[][2] = {
+        {"butterfly", "g_1_1_insect_flying"}, {"wood", "g_0_1_wall_defender"}, {"wasp", "c_1_1_a_insect_flying"},
+        {"kelp", "u_0_1_plant_wall_defender"}, {"carnivore", "r_3_1_beast"}, {"tombspawn", "b_2_2_zombie_haste"},
+    };
     char buf[40], *p, *tok, *save;
     MtgCardDef *c;
     int i, part = 0;
+    for (i = 0; script && i < (int)(sizeof(sNamed) / sizeof(sNamed[0])); i++)
+        if (strcmp(script, sNamed[i][0]) == 0)
+            return Mtg_TokenDef(sNamed[i][1]);
     if (!script || strlen(script) >= sizeof(buf))
         return -1;
     for (i = 0; i < sTokenCount; i++)
@@ -88,7 +100,7 @@ int Mtg_TokenDef(const char *script)
             snprintf(word, sizeof(word), "%s", tok);
             word[0] = (char)(word[0] >= 'a' && word[0] <= 'z' ? word[0] - 32 : word[0]);
             static const char *const sWalk[5] = {"plainswalk", "islandwalk", "swampwalk", "mountainwalk", "forestwalk"};
-            static const char *const sNot[] = {"banding", "menace", "provoke", "flanking", "shadow", "horsemanship",
+            static const char *const sNot[] = {"banding", "provoke", "flanking", "shadow", "horsemanship",
                                                "indestructible", "deathtouch", "hexproof", "changeling", "phasing"};
             int w, other = 0;
             for (w = 0; w < (int)(sizeof(sNot) / sizeof(sNot[0])); w++)
@@ -279,9 +291,11 @@ static const char *KeepSpec(const char *s, size_t n)
 {
     static char **sKeep;
     static int sKeepCount;
-    char *t = malloc(n + 1);
+    char *t = malloc(n + 1), *semi;
     memcpy(t, s, n);
     t[n] = 0;
+    while ((semi = strchr(t, ';')) != NULL)   // (a cost's "Creature;Enchantment": either, as Valid's ',')
+        *semi = ',';
     sKeep = realloc(sKeep, (size_t)(sKeepCount + 1) * sizeof(char *));
     sKeep[sKeepCount++] = t;
     return t;
@@ -295,8 +309,21 @@ static int CostPart(const char *tok, const char *name, int *n, const char **spec
     if (strncmp(tok, name, len) != 0 || tok[len] != '<' || !(end = strchr(tok, '>')))
         return 0;
     p = tok + len + 1;
+    if (*p == 'X' && (p[1] == '>' || p[1] == '/')) {   // (X: as chosen; 2 says so, *n is 0)
+        *n = 0;
+        p++;
+        if (*p == '>') {
+            *spec = NULL, *specLen = 0;
+            return 2;
+        }
+        p++;
+        slash = strchr(p, '/');
+        *spec = p;
+        *specLen = (size_t)((slash && slash < end ? slash : end) - p);
+        return 2;
+    }
     if (*p < '0' || *p > '9')
-        return -1;   // (X and the like: not yet)
+        return -1;   // (the likes of XMin1: not yet)
     *n = atoi(p);
     while (*p >= '0' && *p <= '9')
         p++;
@@ -346,10 +373,43 @@ int Mtg_ParseCost(const char *s, MtgCost *out)
             out->returnSelf = 1;
         else if (strcmp(tok, "Discard<1/CARDNAME>") == 0)
             out->discardSelf = 1;
+        else if (strcmp(tok, "Discard<1/Hand>") == 0 || strcmp(tok, "Discard<0/Hand>") == 0)
+            out->discardHand = 1;   // (CostDiscard's Hand: the whole hand, whatever is in it)
+        else if (strncmp(tok, "SubCounter<All/", 15) == 0 && tok[strlen(tok) - 1] == '>' && !out->subCtrN && !out->subCtrAll) {
+            char kname[16];
+            size_t kl = strlen(tok) - 16;
+            int kind;
+            if (kl == 0 || kl >= sizeof(kname))
+                return 0;
+            memcpy(kname, tok + 15, kl);
+            kname[kl] = 0;
+            if ((kind = Mtg_CounterKind(kname)) <= 0)
+                return 0;
+            out->subCtrAll = 1;   // (every counter of the kind on itself: none is fine)
+            out->subCtrKind = (uint8_t)kind;
+        } else if ((r = CostPart(tok, "Mill", &n, &spec, &specLen)) != 0
+                   || (r = CostPart(tok, "ExileFromTop", &n, &spec, &specLen)) != 0) {   // the library's top cards
+            int exile = tok[0] == 'E';
+            if (r < 0 || n < 1 || n > 10 || (exile ? out->exileTopN : out->millN) || (spec && strncmp(spec, "Card", specLen)))
+                return 0;
+            if (exile)
+                out->exileTopN = (uint8_t)n;
+            else
+                out->millN = (uint8_t)n;
+        }
         else if ((r = CostPart(tok, "SubCounter", &n, &spec, &specLen)) != 0) {   // CostRemoveCounter (from itself)
             char kname[16];
             int kind;
-            if (r < 0 || !spec || n < 1 || n > 20 || out->subCtrN || specLen >= sizeof(kname))
+            if (r == 2 && !out->xPart && spec && specLen < sizeof(kname) && !out->subCtrN) {   // SubCounter<X/TYPE>
+                memcpy(kname, spec, specLen);
+                kname[specLen] = 0;
+                if ((kind = Mtg_CounterKind(kname)) <= 0)
+                    return 0;
+                out->xPart = MTG_XPART_COUNTERS;
+                out->subCtrKind = (uint8_t)kind;
+                continue;
+            }
+            if (r < 0 || r == 2 || !spec || n < 1 || n > 20 || out->subCtrN || specLen >= sizeof(kname))
                 return 0;
             memcpy(kname, spec, specLen);
             kname[specLen] = 0;
@@ -362,18 +422,36 @@ int Mtg_ParseCost(const char *s, MtgCost *out)
                 return 0;
             out->damageYou = (uint8_t)n;
         } else if ((r = CostPart(tok, "PayLife", &n, &spec, &specLen)) != 0) {
-            if (r < 0 || spec || n < 1 || n > 20 || out->payLife)
+            if (r == 2 && !spec && !out->xPart && !out->payLife) {   // PayLife<X>
+                out->xPart = MTG_XPART_LIFE;
+                continue;
+            }
+            if (r < 0 || r == 2 || spec || n < 1 || n > 20 || out->payLife)
                 return 0;
             out->payLife = (uint8_t)n;
         } else if ((r = CostPart(tok, "Sac", &n, &spec, &specLen)) != 0) {
-            if (r < 0 || !spec || n < 1 || n > 3 || out->sacN)
+            if (r == 2 && spec && !out->xPart && !out->sacN) {   // Sac<X/Type>
+                out->xPart = MTG_XPART_SAC;
+                out->sacSpec = KeepSpec(spec, specLen);
+                if (!Mtg_ValidSpecKnown(out->sacSpec))
+                    return 0;
+                continue;
+            }
+            if (r < 0 || r == 2 || !spec || n < 1 || n > 3 || out->sacN)
                 return 0;
             out->sacN = (uint8_t)n;
             out->sacSpec = KeepSpec(spec, specLen);
             if (!Mtg_ValidSpecKnown(out->sacSpec))
                 return 0;
         } else if ((r = CostPart(tok, "Discard", &n, &spec, &specLen)) != 0) {
-            if (r < 0 || !spec || n < 1 || n > 3 || out->discardN)
+            if (r == 2 && spec && !out->xPart && !out->discardN && strncmp(spec, "Random", 6) && strncmp(spec, "Hand", 4)) {
+                out->xPart = MTG_XPART_DISCARD;   // Discard<X/Type>
+                out->discardSpec = KeepSpec(spec, specLen);
+                if (!Mtg_ValidSpecKnown(out->discardSpec))
+                    return 0;
+                continue;
+            }
+            if (r < 0 || r == 2 || !spec || n < 1 || n > 3 || out->discardN)
                 return 0;
             out->discardN = (uint8_t)n;
             if (specLen == 6 && strncmp(spec, "Random", 6) == 0)
@@ -386,7 +464,14 @@ int Mtg_ParseCost(const char *s, MtgCost *out)
                     return 0;
             }
         } else if ((r = CostPart(tok, "ExileFromGrave", &n, &spec, &specLen)) != 0) {   // CostExile from the graveyard
-            if (r < 0 || !spec || n < 1 || n > 5 || out->exileGraveN)
+            if (r == 2 && spec && !out->xPart && !out->exileGraveN) {   // ExileFromGrave<X/Type>
+                out->xPart = MTG_XPART_EXILE_GRAVE;
+                out->exileGraveSpec = KeepSpec(spec, specLen);
+                if (!Mtg_ValidSpecKnown(out->exileGraveSpec) || strstr(out->exileGraveSpec, "CARDNAME"))
+                    return 0;
+                continue;
+            }
+            if (r < 0 || r == 2 || !spec || n < 1 || n > 5 || out->exileGraveN)
                 return 0;
             out->exileGraveN = (uint8_t)n;
             out->exileGraveSpec = specLen == 4 && strncmp(spec, "card", 4) == 0 ? "Card"   // (Psychatog's spelling)
@@ -400,7 +485,7 @@ int Mtg_ParseCost(const char *s, MtgCost *out)
             // (untapped permanents its player controls tapped): CostExile, CostReturn, CostTapType
             uint8_t *num = tok[0] == 'E' ? &out->exileHandN : tok[0] == 'R' ? &out->returnN : &out->tapTypeN;
             const char **sp = tok[0] == 'E' ? &out->exileHandSpec : tok[0] == 'R' ? &out->returnSpec : &out->tapTypeSpec;
-            if (r < 0 || !spec || n < 1 || n > 3 || *num)
+            if (r < 0 || !spec || n < 1 || n > (tok[0] == 't' ? 7 : 3) || *num)
                 return 0;
             *num = (uint8_t)n;
             *sp = KeepSpec(spec, specLen);
@@ -539,7 +624,8 @@ static int ParseAbility(MtgCardDef *c, int cardId, char *text, int kind, int dep
     if (!Mtg_ParseCost(Mtg_Param(ab, "Cost"), &ab->cost))
         Unsupported(c, "cost");
     else if (ab->api == MTG_API_MANA && (ab->cost.sacN || ab->cost.discardN || ab->cost.payLife || ab->cost.exileSelf
-                                         || ab->cost.exileGraveN
+                                         || ab->cost.exileGraveN || ab->cost.discardHand || ab->cost.millN
+                                         || ab->cost.exileTopN || ab->cost.subCtrAll || ab->cost.tapTypeN
                                          || ab->cost.returnSelf))
         Unsupported(c, "cost");   // (mana abilities are used by paying: one with a cost to pick, not yet)
     if (kind == MTG_AB_ACTIVATED && !Mtg_Param(ab, "Cost"))
@@ -549,15 +635,33 @@ static int ParseAbility(MtgCardDef *c, int cardId, char *text, int kind, int dep
         MtgManaCost m;
         MtgCost uc;
         if (!(Mtg_ParseManaCost(v, &m) && !m.x) && Mtg_ParseCost(v, &uc) && !uc.tap && !uc.sacSelf && !uc.exileSelf
-            && !uc.returnSelf && !uc.discardSelf && !uc.mana.x) {
+            && !uc.returnSelf && !uc.discardSelf && !uc.mana.x && !uc.xPart) {
             gMtgUnlessCosts = Grow(gMtgUnlessCosts, &sUnlessCap, sUnlessCount + 1, sizeof(MtgCost));
             gMtgUnlessCosts[sUnlessCount++] = uc;
             ab = &gMtgAbilities[idx];
             ab->unless = (uint16_t)sUnlessCount;
         }
     }
-    if (kind != MTG_AB_SPELL && kind != MTG_AB_ACTIVATED && Mtg_Param(ab, "Cost"))
-        Unsupported(c, "optional cost");   // (a trigger's "you may pay ...": not yet)
+    if (kind == MTG_AB_TRIGGERED && Mtg_Param(ab, "Cost") && strcmp(gMtgParams[first].key, "AB") == 0
+        && !ab->cost.mana.x && !ab->cost.discardSelf && !ab->cost.subCtrN && !ab->cost.subCtrAll && !ab->cost.xPart)
+        ab->optCost = 1;   // (a trigger's "you may pay ... If you do": asked as it resolves)
+    else if (kind != MTG_AB_SPELL && kind != MTG_AB_ACTIVATED && Mtg_Param(ab, "Cost"))
+        Unsupported(c, "optional cost");
+    if ((v = Mtg_Param(ab, "UnlessScale")) != NULL) {
+        int kind2 = Mtg_CounterKind(v);
+        if (kind2 <= 0 || !Mtg_Param(ab, "UnlessCost"))
+            Unsupported(c, "UnlessScale");
+        else
+            ab->unlessScale = (uint8_t)kind2;
+    }
+    if ((v = Mtg_Param(ab, "Activator")) != NULL) {   // who may activate it besides its controller
+        if (kind == MTG_AB_ACTIVATED && strcmp(v, "Player") == 0)
+            ab->anyPlayer = 1;
+        else if (kind == MTG_AB_ACTIVATED && strcmp(v, "You.NonActive") == 0)
+            ab->actNotMyTurn = 1;
+        else
+            Unsupported(c, "Activator");
+    }
     ab->tgt = Mtg_Param(ab, "ValidTgts");
     if (!ActivationRestrictions(ab, kind))
         Unsupported(c, "activation restriction");
@@ -580,9 +684,12 @@ static int ParseAbility(MtgCardDef *c, int cardId, char *text, int kind, int dep
     if (ab->tgt && !Mtg_ValidSpecKnown(ab->tgt))
         Unsupported(c, "ValidTgts");
     ab->tgtMin = ab->tgtMax = 1;
-    if ((v = Mtg_Param(ab, "TargetMax")) && ((v[0] >= '1' && v[0] <= '4') || strcmp(v, "X") == 0)) {
+    if ((v = Mtg_Param(ab, "TargetMax")) && ((v[0] >= '1' && v[0] <= '9' && !v[1]) || strcmp(v, "X") == 0
+                                              || (Mtg_Svar(cardId, v) && strcmp(Mtg_Svar(cardId, v), "Count$xPaid")))) {
         const char *mn = Mtg_Param(ab, "TargetMin");   // (checked by Mtg_ApiParamsKnown; MTG_TGT_X: as many as X)
-        ab->tgtMax = v[0] == 'X' ? MTG_TGT_X : (uint8_t)(v[0] - '0');
+        ab->tgtMax = v[0] == 'X' && !v[1] ? MTG_TGT_X : v[0] >= '1' && v[0] <= '9' && !v[1] ? (uint8_t)(v[0] - '0') : MTG_TGT_SVAR;
+        if (ab->tgtMax == MTG_TGT_SVAR)
+            ab->tgtMaxSv = v;
         ab->tgtMin = (uint8_t)(mn && mn[0] >= '0' && mn[0] <= '4' ? mn[0] - '0' : mn && mn[0] == 'X' ? MTG_TGT_X : 1);
         if (ab->tgtMax == MTG_TGT_X && !(kind == MTG_AB_SPELL ? c->cost.x : ab->cost.mana.x))   // (X paid, not counted)
             Unsupported(c, "TargetMin");
@@ -633,17 +740,30 @@ static int ParseAbility(MtgCardDef *c, int cardId, char *text, int kind, int dep
         if (s >= 0 && gMtgAbilities[idx].api == MTG_API_MANA) {   // only a painland's "deals n damage to you"
             const MtgAbility *pain = &gMtgAbilities[s];
             const char *def = Mtg_Param(pain, "Defined"), *dmg = Mtg_Param(pain, "NumDmg");
-            if (pain->api != MTG_API_DEAL_DAMAGE || pain->sub != 0xFFFF || !def || strcmp(def, "You") || !dmg
-                || dmg[0] < '1' || dmg[0] > '9' || dmg[1] || pain->tgt)
-                Unsupported(c, "Mana");
-            else
+            if (pain->api == MTG_API_DEAL_DAMAGE && pain->sub == 0xFFFF && def && !strcmp(def, "You") && dmg
+                && dmg[0] >= '1' && dmg[0] <= '9' && !dmg[1] && !pain->tgt)
                 gMtgAbilities[idx].manaPain = (uint8_t)(dmg[0] - '0');
+            else {   // what else it does as its mana is made (no target, no choice): queued, resolved right after
+                int k2, ok = 1;   // (mtg_mana.c Mtg_Pay, mtg_game.c Run)
+                for (k2 = s; k2 != 0xFFFF && ok; k2 = gMtgAbilities[k2].sub) {
+                    int api = gMtgAbilities[k2].api;
+                    ok = !gMtgAbilities[k2].tgt && (api == MTG_API_DRAW || api == MTG_API_EFFECT || api == MTG_API_SACRIFICE
+                         || api == MTG_API_PUT_COUNTER || api == MTG_API_DELAYED_TRIGGER || api == MTG_API_GAIN_LIFE
+                         || api == MTG_API_LOSE_LIFE || api == MTG_API_DEAL_DAMAGE || api == MTG_API_TAP)
+                         && !(api == MTG_API_SACRIFICE && Mtg_Param(&gMtgAbilities[k2], "SacValid")
+                              && strcmp(Mtg_Param(&gMtgAbilities[k2], "SacValid"), "Self"));
+                }
+                if (ok)
+                    gMtgAbilities[idx].manaFx = 1;
+                else
+                    Unsupported(c, "Mana");
+            }
         }
     }
     if (gMtgAbilities[idx].api == MTG_API_EFFECT) {   // its statics and replacements: SVars of its card, parsed now, kept on the ability
-        static const char *const sLists[2] = {"StaticAbilities", "ReplacementEffects"};
+        static const char *const sLists[3] = {"StaticAbilities", "ReplacementEffects", "Triggers"};
         int li;
-        for (li = 0; li < 2; li++) {
+        for (li = 0; li < 3; li++) {
             char names[96], *p = names, *k;
             const char *list = Mtg_Param(&gMtgAbilities[idx], sLists[li]);
             if (!list)
@@ -659,12 +779,20 @@ static int ParseAbility(MtgCardDef *c, int cardId, char *text, int kind, int dep
                 int st;
                 while (*k == ' ')
                     k++;
-                if (!(sv = Mtg_Svar(cardId, k)) || gMtgAbilities[idx].effStaticCount >= 3) {
+                if (!(sv = Mtg_Svar(cardId, k)) || gMtgAbilities[idx].effStaticCount >= 3
+                    || (li == 2 && gMtgAbilities[idx].effTrigCount >= 2)) {
                     Unsupported(c, "Effect");
                     break;
                 }
                 copy = malloc(strlen(sv) + 1);
                 strcpy(copy, sv);
+                if (li == 2) {   // (its own trigger)
+                    int tr = Mtg_ParseEffectTrigger(c, cardId, copy);
+                    if (tr < 0)
+                        break;   // (it said why)
+                    gMtgAbilities[idx].effTrigs[gMtgAbilities[idx].effTrigCount++] = (uint16_t)tr;
+                    continue;
+                }
                 st = li ? Mtg_ParseEffectReplacement(c, cardId, copy) : Mtg_ParseEffectStatic(c, cardId, copy);
                 if (st < 0)
                     break;   // (it said why)
@@ -692,7 +820,7 @@ static int ParseAbility(MtgCardDef *c, int cardId, char *text, int kind, int dep
                 continue;
             s = SubAbility(c, cardId, name, depth);
             for (k = s; k >= 0 && k != 0xFFFF; k = gMtgAbilities[k].sub)
-                if (gMtgAbilities[k].api == MTG_API_FLIP_COIN)
+                if (gMtgAbilities[k].api == MTG_API_FLIP_COIN || gMtgAbilities[k].api == MTG_API_GENERIC_CHOICE)
                     s = -1;
             if (s < 0) {
                 Unsupported(c, "FlipCoin");
@@ -702,6 +830,29 @@ static int ParseAbility(MtgCardDef *c, int cardId, char *text, int kind, int dep
                 gMtgAbilities[idx].loseSub = (uint16_t)s;
             else
                 gMtgAbilities[idx].winSub = (uint16_t)s;
+        }
+    }
+    if (gMtgAbilities[idx].api == MTG_API_GENERIC_CHOICE) {   // its modes: chains of their own (one runs, as a coin's branch)
+        char buf[160], *tok, *save;
+        const char *ch = Mtg_Param(&gMtgAbilities[idx], "Choices");
+        if (!ch || strlen(ch) >= sizeof(buf)) {
+            Unsupported(c, "GenericChoice");
+            return idx;
+        }
+        strcpy(buf, ch);
+        for (save = buf, tok = Mtg_Token(&save, ','); tok; tok = Mtg_Token(&save, ',')) {
+            int m, k;
+            while (*tok == ' ')
+                tok++;
+            m = SubAbility(c, cardId, tok, depth);
+            for (k = m; k >= 0 && k != 0xFFFF; k = gMtgAbilities[k].sub)
+                if (gMtgAbilities[k].api == MTG_API_GENERIC_CHOICE || gMtgAbilities[k].api == MTG_API_FLIP_COIN)
+                    m = -1;
+            if (m < 0 || gMtgAbilities[idx].choiceCount >= 5) {
+                Unsupported(c, "GenericChoice");
+                break;
+            }
+            gMtgAbilities[idx].choices[gMtgAbilities[idx].choiceCount++] = (uint16_t)m;
         }
     }
     if (gMtgAbilities[idx].api == MTG_API_CHARM) {   // its modes: parsed as spells, then given the charm's kind and cost
@@ -749,6 +900,7 @@ static const struct { const char *name; int kw; } sKeywords[] = {
     {"Defender", MTG_KW_DEFENDER}, {"First Strike", MTG_KW_FIRST_STRIKE}, {"Double Strike", MTG_KW_DOUBLE_STRIKE},
     {"Trample", MTG_KW_TRAMPLE}, {"Shroud", MTG_KW_SHROUD}, {"Fear", MTG_KW_FEAR}, {"Flash", MTG_KW_FLASH},
     {"Lifelink", MTG_KW_LIFELINK}, {"Shadow", MTG_KW_SHADOW}, {"Flanking", MTG_KW_FLANKING},
+    {"Menace", MTG_KW_MENACE},
 };
 static const char *const sColorNames[5] = {"white", "blue", "black", "red", "green"};
 static const char *const sBasicTypes[5] = {"Plains", "Island", "Swamp", "Mountain", "Forest"};
@@ -764,10 +916,52 @@ int Mtg_KeywordByName(const char *s)
 
 static void ParseKeyword(MtgCardDef *c, const char *k)
 {
+    if (strncmp(k, "Echo:", 5) == 0 || strncmp(k, "Cumulative upkeep:", 18) == 0) {
+        // (made into a trigger as the card loads: only mana, life, or both for Cumulative upkeep's)
+        const char *cost = k + (k[0] == 'E' ? 5 : 18), *end = strchr(cost, ':');
+        char buf[64];
+        size_t n = end ? (size_t)(end - cost) : strlen(cost);
+        MtgManaCost m;
+        MtgCost full;
+        if (n && n < sizeof(buf)) {
+            memcpy(buf, cost, n);
+            buf[n] = 0;
+            if ((Mtg_ParseManaCost(buf, &m) && !m.x)
+                || (k[0] == 'C' && Mtg_ParseCost(buf, &full) && !full.mana.x && !full.tap && !full.sacSelf && !full.sacN
+                    && !full.discardN && !full.exileSelf && !full.returnSelf && !full.returnN && !full.exileHandN
+                    && !full.exileGraveN && !full.tapTypeN && !full.damageYou && !full.subCtrN && !full.discardSelf))
+                return;
+        }
+        Unsupported(c, k[0] == 'E' ? "Echo" : "Cumulative upkeep");
+        return;
+    }
     int i, kw = Mtg_KeywordByName(k);
     if (kw >= 0) {
         c->keywords |= MTG_KW_BIT(kw);
         return;
+    }
+    if (strcmp(k, "Protection from each color") == 0 || strcmp(k, "Protection from artifacts") == 0) {
+        c->protection |= k[16] == 'e' ? 0x1F : MTG_PROT_ARTIFACT;
+        return;
+    }
+    if (strncmp(k, "Protection:", 11) == 0 && !c->protSpec) {   // "Protection:Creature", "Protection:Goblin:..."
+        char spec[48];
+        const char *e = strchr(k + 11, ':');
+        size_t len = e ? (size_t)(e - (k + 11)) : strlen(k + 11);
+        if (len < sizeof(spec)) {
+            memcpy(spec, k + 11, len);
+            spec[len] = 0;
+            if (strcmp(spec, "Artifact") == 0) {
+                c->protection |= MTG_PROT_ARTIFACT;
+                return;
+            }
+            if (Mtg_ValidSpecKnown(spec)) {
+                c->protSpec = KeepSpec(spec, len);
+                if (e && e[1])   // ("legendary creatures")
+                    c->protText = KeepSpec(e + 1, strlen(e + 1));
+                return;
+            }
+        }
     }
     if (strncmp(k, "Protection from ", 16) == 0)
         for (i = 0; i < 5; i++)
@@ -785,10 +979,23 @@ static void ParseKeyword(MtgCardDef *c, const char *k)
         return;
     }
     if (strncmp(k, "etbCounter:", 11) == 0) {   // "etbCounter:P1P1:3": enters with that many (X: as paid)
-        char buf[40], *num;
+        char buf[160], *num, *rest;
         int kind;
-        if (strlen(k + 11) < sizeof(buf) && (strcpy(buf, k + 11), num = strchr(buf, ':')) && !strchr(num + 1, ':')) {
+        if (strlen(k + 11) < sizeof(buf) && (strcpy(buf, k + 11), num = strchr(buf, ':'))) {
             *num++ = 0;
+            if ((rest = strchr(num, ':')) != NULL) {   // ":CheckSVar$ NAME:words" (only when it's GE1), ":no Condition:words"
+                char *end;
+                *rest++ = 0;
+                if (strncmp(rest, "CheckSVar$ ", 11) == 0) {
+                    rest += 11;
+                    if ((end = strchr(rest, ':')) != NULL)
+                        *end = 0;
+                    c->etbCheck = KeepSpec(rest, strlen(rest));
+                } else if (strncmp(rest, "no Condition", 12) != 0) {
+                    Unsupported(c, "etbCounter");
+                    return;
+                }
+            }
             kind = Mtg_CounterKind(buf);
             if (kind > 0 && (strcmp(num, "X") == 0 || (num[0] >= '1' && num[0] <= '9' && strspn(num, "0123456789") == strlen(num)))) {
                 c->etbKind = (uint8_t)kind;
@@ -811,6 +1018,18 @@ static void ParseKeyword(MtgCardDef *c, const char *k)
         c->rampage = (uint8_t)(k[8] - '0');
         return;
     }
+    if (strncmp(k, "ETBReplacement:Other:", 21) == 0) {   // "ETBReplacement:Other:SVAR[:Mandatory|:Optional]": parsed
+        if (!c->etbReplText[0])                             // once the SVars are read (below); two at most
+            c->etbReplText[0] = k + 21;
+        else if (!c->etbReplText[1])
+            c->etbReplText[1] = k + 21;
+        else
+            Unsupported(c, "ETBReplacement");
+        return;
+    }
+    if (strncmp(k, "Kicker:", 7) == 0 || strncmp(k, "Buyback:", 8) == 0 || strncmp(k, "Flashback:", 10) == 0
+        || strncmp(k, "Morph:", 6) == 0)
+        return;   // (their costs: once the lines are read, below)
     if (strncmp(k, "Cycling:", 8) == 0) {   // (Forge's CardFactoryUtil: an ability from the hand, made once the lines are read)
         c->cyclingCost = k + 8;
         return;
@@ -884,10 +1103,28 @@ static int HasWordI(const char *s, const char *word)   // (case-insensitive: For
 
 #define MTG_SCRIPT_LINES 160
 
+static char *Dup(const char *t)   // (a copy kept for the pool's life: made-up script text)
+{
+    size_t n = strlen(t) + 1;
+    char *p = malloc(n);
+    memcpy(p, t, n);
+    return p;
+}
+
+static void AddSvar(MtgCardDef *c, const char *name, const char *value)   // (the card's SVars: still its own run)
+{
+    gMtgSvars = Grow(gMtgSvars, &sSvarCap, sSvarCount + 1, sizeof(MtgParam));
+    gMtgSvars[sSvarCount].key = Dup(name);
+    gMtgSvars[sSvarCount].value = Dup(value);
+    sSvarCount++;
+    c->svarCount++;
+}
+
 static void ParseCard(int id, char *text)
 {
     MtgCardDef *c = &sCards[id];
     char *lines[MTG_SCRIPT_LINES], *abilityLines[8], *triggerLines[8], *line, *next;
+    const char *extraKw[4] = {NULL, NULL, NULL, NULL};   // (K:Kicker:..., K:Buyback:..., K:Flashback:..., K:Morph:...)
     int nLines = 0, nAbil = 0, nTrig = 0, i, k;
     memset(c, 0, sizeof(*c));
     c->supported = 1;
@@ -926,6 +1163,46 @@ static void ParseCard(int id, char *text)
         gMtgSvars[sSvarCount].value = Trim(val);
         sSvarCount++;
         c->svarCount++;
+    }
+    // keywords that are triggers in Forge (CardFactoryUtil: Echo, Cumulative upkeep): their SVars and T: lines made
+    // here, as Forge makes them, then read as the card's own; Kicker / Buyback / Flashback kept for after the lines
+    for (k = 0; k < nLines; k++) {
+        const char *kw = lines[k] && strncmp(lines[k], "K:", 2) == 0 ? lines[k] + 2 : NULL;
+        if (kw && (strncmp(kw, "Kicker:", 7) == 0 || strncmp(kw, "Buyback:", 8) == 0 || strncmp(kw, "Flashback:", 10) == 0)) {
+            extraKw[kw[0] == 'K' ? 0 : kw[0] == 'B' ? 1 : 2] = kw;
+            continue;
+        }
+        if (kw && strncmp(kw, "Morph:", 6) == 0) {
+            extraKw[3] = kw;
+            continue;
+        }
+        char cost[64], buf[400];
+        const char *end;
+        size_t n;
+        int cum;
+        if (!kw || !((cum = strncmp(kw, "Cumulative upkeep:", 18) == 0) || strncmp(kw, "Echo:", 5) == 0))
+            continue;
+        kw += cum ? 18 : 5;
+        end = strchr(kw, ':');   // (Cumulative upkeep:PayLife<1>:Pay 1 life.: the cost, then its words)
+        n = end ? (size_t)(end - kw) : strlen(kw);
+        if (n == 0 || n >= sizeof(cost) || nTrig >= 8)
+            continue;   // (ParseKeyword: unsupported)
+        memcpy(cost, kw, n);
+        cost[n] = 0;
+        if (cum) {
+            AddSvar(c, "MtgCuPut", "DB$ PutCounter | Defined$ Self | CounterType$ AGE | CounterNum$ 1 | SubAbility$ MtgCuSac");
+            snprintf(buf, sizeof(buf), "DB$ Sacrifice | SacValid$ Self | UnlessCost$ %s | UnlessPayer$ You | UnlessScale$ AGE", cost);
+            AddSvar(c, "MtgCuSac", buf);
+            triggerLines[nTrig++] = Dup("Mode$ Phase | Phase$ Upkeep | ValidPlayer$ You | TriggerZones$ Battlefield | "
+                                        "Execute$ MtgCuPut | TriggerDescription$ Cumulative upkeep: an age counter on "
+                                        "CARDNAME, then sacrifice it unless you pay its upkeep for each age counter.");
+        } else {
+            snprintf(buf, sizeof(buf), "DB$ Sacrifice | SacValid$ Self | UnlessCost$ %s | UnlessPayer$ You", cost);
+            AddSvar(c, "MtgEchoPay", buf);
+            triggerLines[nTrig++] = Dup("Mode$ Phase | Phase$ Upkeep | ValidPlayer$ You | TriggerZones$ Battlefield | "
+                                        "IsPresent$ Card.Self+cameUnderControlSinceLastUpkeep | Execute$ MtgEchoPay | "
+                                        "TriggerDescription$ Echo: sacrifice CARDNAME unless you pay its echo cost.");
+        }
     }
     for (k = 0; k < nLines; k++) {
         char *colon, *val;
@@ -1010,6 +1287,93 @@ static void ParseCard(int id, char *text)
         else
             c->abilities[c->abilityCount++] = (uint16_t)ParseAbility(c, id, text, MTG_AB_ACTIVATED, 0);
     }
+    for (i = 0; i < 2; i++) {   // "as it enters": its SVar an ability of its own, run as it lands (no target to aim)
+        // "SVAR[:Mandatory|:Optional[:words[:Condition]]]": the condition a Valid spec on itself ("Card.Self+kicked 1")
+        char name[96], *opt = NULL, *desc = NULL, *cond = NULL;
+        const char *sv;
+        size_t len;
+        if (!c->etbReplText[i])
+            continue;
+        len = strlen(c->etbReplText[i]);
+        if (len >= sizeof(name)) {
+            Unsupported(c, "ETBReplacement");
+            continue;
+        }
+        memcpy(name, c->etbReplText[i], len + 1);
+        if ((opt = strchr(name, ':')) != NULL) {
+            *opt++ = 0;
+            if ((desc = strchr(opt, ':')) != NULL) {
+                *desc++ = 0;
+                if ((cond = strchr(desc, ':')) != NULL)
+                    *cond++ = 0;
+            }
+        }
+        sv = Mtg_Svar(id, name);
+        if (sv && strncmp(sv, "DB$", 3) == 0 && (!opt || strcmp(opt, "Mandatory") == 0 || strcmp(opt, "Optional") == 0)
+            && (!cond || !*cond || Mtg_ValidSpecKnown(cond))) {
+            char *copy = malloc(strlen(sv) + 1);
+            int a;
+            strcpy(copy, sv);
+            a = ParseAbility(c, id, copy, MTG_AB_TRIGGERED, 0);
+            if (gMtgAbilities[a].tgt)
+                Unsupported(c, "ETBReplacement");
+            c->etbRepl[i] = (uint16_t)(a + 1);
+            c->etbCond[i] = cond && *cond ? KeepSpec(cond, strlen(cond)) : NULL;
+            if (opt && strcmp(opt, "Optional") == 0)
+                c->etbOptional |= (uint8_t)(1 << i);
+        } else
+            Unsupported(c, "ETBReplacement");
+    }
+    if (extraKw[3]) {   // Morph: cast face down for {3}, turned up for this (mtg_game.c)
+        char buf[96];
+        const char *end = strchr(extraKw[3] + 6, ':');
+        size_t n = end ? (size_t)(end - extraKw[3] - 6) : strlen(extraKw[3] + 6);
+        if (n < sizeof(buf) && (c->types & MTG_T_CREATURE)) {
+            memcpy(buf, extraKw[3] + 6, n);
+            buf[n] = 0;
+            c->morph = (uint16_t)Mtg_AddExtraCost(buf, "MORPH");
+        }
+        if (!c->morph)
+            Unsupported(c, "Morph");
+    }
+    if (c->etbCheck && !Mtg_CheckSvarKnown(id, c->etbCheck, NULL))
+        Unsupported(c, "etbCounter");
+    {   // Kicker, Buyback, Flashback: their costs (gMtgAltCosts), cast as the spell's other ways (mtg_game.c)
+        static const char *const sKw[3] = {"Kicker:", "Buyback:", "Flashback:"};
+        int kk;
+        for (k = 0; k < 3; k++) {
+            const char *kw = extraKw[k];
+            for (kk = 0; kw && kk < 3; kk++)
+                if (strncmp(kw, sKw[kk], strlen(sKw[kk])) == 0) {
+                    char buf[96], *second;
+                    const char *cost = kw + strlen(sKw[kk]);
+                    int a1, a2 = 0;
+                    if (strlen(cost) >= sizeof(buf)) {
+                        Unsupported(c, sKw[kk]);
+                        break;
+                    }
+                    strcpy(buf, cost);
+                    second = strchr(buf, ':');   // (Kicker:1 U:B: two kickers; the others' words after it)
+                    if (second)
+                        *second++ = 0;
+                    a1 = Mtg_AddExtraCost(buf, kk == 0 ? "KICKER" : kk == 1 ? "BUYBACK" : "FLASHBACK");
+                    if (kk == 0 && second)
+                        a2 = Mtg_AddExtraCost(second, "KICKER");
+                    if (!a1 || (kk == 0 && second && !a2) || (kk != 2 && (c->types & MTG_T_LAND))
+                        || (kk == 2 && !(c->types & (MTG_T_INSTANT | MTG_T_SORCERY))) || (kk == 1 && !(c->types & (MTG_T_INSTANT | MTG_T_SORCERY)))) {
+                        Unsupported(c, sKw[kk]);
+                        break;
+                    }
+                    if (kk == 0) {
+                        c->kicker[0] = (uint16_t)a1;
+                        c->kicker[1] = (uint16_t)a2;
+                    } else if (kk == 1)
+                        c->buyback = (uint16_t)a1;
+                    else
+                        c->flashback = (uint16_t)a1;
+                }
+        }
+    }
     if (c->starPT) {   // a */* side no static sets
         int k, set = 0;
         for (k = 0; k < c->staticCount; k++) {
@@ -1050,11 +1414,13 @@ static void ParseCard(int id, char *text)
 // Every subtype a card of the pool has (from each Types: line, before the cards are parsed: the cards' Valid specs are
 // checked against it as they load), sorted
 static char **sSubtypes;
+static uint8_t *sSubtypeKind;   // MTG_SUBK_* (what the cards it's on are)
 static int sSubtypeCount;
 
-static int CmpStr(const void *a, const void *b)
+typedef struct { char *w; uint8_t kind; } SubWord;
+static int CmpSub(const void *a, const void *b)
 {
-    return strcmp(*(char *const *)a, *(char *const *)b);
+    return strcmp(((const SubWord *)a)->w, ((const SubWord *)b)->w);
 }
 
 static void CollectSubtypes(const char *text, int cardCount, const uint8_t *table)
@@ -1062,9 +1428,11 @@ static void CollectSubtypes(const char *text, int cardCount, const uint8_t *tabl
     static const char *const sNot[] = {"Land", "Creature", "Artifact", "Enchantment", "Instant", "Sorcery",
                                        "Planeswalker", "Tribal", "Kindred", "Basic", "Legendary", "Snow", "World"};
     int i, cap = 0, k, n = 0;
+    SubWord *words = NULL;
     for (i = 0; i < cardCount; i++) {
         uint32_t e[4];
-        const char *t, *line, *end;
+        const char *t, *line, *end, *lineStart;
+        uint8_t kind = 0;
         memcpy(e, table + 16 * i, 16);
         t = text + e[1];
         line = strstr(t, "Types:");
@@ -1076,6 +1444,17 @@ static void CollectSubtypes(const char *text, int cardCount, const uint8_t *tabl
         end = strchr(line, '\n');
         if (!end)
             end = line + strlen(line);
+        lineStart = line;
+        {
+            char buf[160];
+            size_t len = (size_t)(end - lineStart) < sizeof(buf) - 1 ? (size_t)(end - lineStart) : sizeof(buf) - 1;
+            memcpy(buf, lineStart, len);
+            buf[len] = 0;
+            if (strstr(buf, "Creature") || strstr(buf, "Tribal") || strstr(buf, "Kindred"))
+                kind |= MTG_SUBK_CREATURE;
+            if (strstr(buf, "Land"))
+                kind |= MTG_SUBK_LAND;
+        }
         while (line < end) {
             const char *w = line;
             size_t len;
@@ -1092,24 +1471,41 @@ static void CollectSubtypes(const char *text, int cardCount, const uint8_t *tabl
             if (k < (int)(sizeof(sNot) / sizeof(sNot[0])))
                 continue;
             if (n == cap)
-                cap = cap ? cap * 2 : 1024, sSubtypes = realloc(sSubtypes, cap * sizeof(char *));
-            sSubtypes[n] = malloc(len + 1);
-            memcpy(sSubtypes[n], w, len);
-            sSubtypes[n++][len] = 0;
+                cap = cap ? cap * 2 : 1024, words = realloc(words, cap * sizeof(*words));
+            words[n].w = malloc(len + 1);
+            memcpy(words[n].w, w, len);
+            words[n].w[len] = 0;
+            words[n++].kind = kind;
         }
     }
-    qsort(sSubtypes, n, sizeof(char *), CmpStr);
-    for (i = k = 0; i < n; i++) {   // (each once)
-        if (k && strcmp(sSubtypes[k - 1], sSubtypes[i]) == 0) {
-            free(sSubtypes[i]);
+    qsort(words, n, sizeof(*words), CmpSub);
+    sSubtypes = malloc((n ? n : 1) * sizeof(char *));
+    sSubtypeKind = malloc(n ? n : 1);
+    for (i = k = 0; i < n; i++) {   // (each once, with every kind it's of)
+        if (k && strcmp(sSubtypes[k - 1], words[i].w) == 0) {
+            sSubtypeKind[k - 1] |= words[i].kind;
+            free(words[i].w);
             continue;
         }
-        sSubtypes[k++] = sSubtypes[i];
+        sSubtypeKind[k] = words[i].kind;
+        sSubtypes[k++] = words[i].w;
+    }
+    free(words);
+    for (i = 0; i < k; i++) {
+        static const char *const sBasic[5] = {"Plains", "Island", "Swamp", "Mountain", "Forest"};
+        int b;
+        for (b = 0; b < 5; b++)
+            if (strcmp(sSubtypes[i], sBasic[b]) == 0)
+                sSubtypeKind[i] |= MTG_SUBK_BASIC | MTG_SUBK_LAND;
     }
     sSubtypeCount = k;
 }
 
-int Mtg_IsSubtype(const char *t, size_t n)
+int Mtg_SubtypeCount(void) { return sSubtypeCount; }
+const char *Mtg_SubtypeName(int i) { return i >= 0 && i < sSubtypeCount ? sSubtypes[i] : ""; }
+int Mtg_SubtypeKinds(int i) { return i >= 0 && i < sSubtypeCount ? sSubtypeKind[i] : 0; }
+
+int Mtg_SubtypeIndex(const char *t, unsigned n)
 {
     int lo = 0, hi = sSubtypeCount - 1;
     while (lo <= hi) {
@@ -1117,13 +1513,18 @@ int Mtg_IsSubtype(const char *t, size_t n)
         if (c == 0 && sSubtypes[mid][n])
             c = 1;
         if (c == 0)
-            return 1;
+            return mid;
         if (c < 0)
             lo = mid + 1;
         else
             hi = mid - 1;
     }
-    return 0;
+    return -1;
+}
+
+int Mtg_IsSubtype(const char *t, size_t n)
+{
+    return Mtg_SubtypeIndex(t, (unsigned)n) >= 0;
 }
 
 int Mtg_DbLoad(const void *pak, uint32_t size)

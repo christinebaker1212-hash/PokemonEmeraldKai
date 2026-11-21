@@ -1,0 +1,36 @@
+pressuntil A field 5000
+wait 60
+mp mtg starter 0
+mp mtg duel 1
+wait 30
+press A 2
+waitlog 3000 mtg: your move: priority
+wait 10
+mp mtg put 0 field Mountain
+mp mtg put 0 field Mountain
+mp mtg put 0 field Mountain
+mp mtg put 0 field Mountain
+mp mtg put 0 field Mountain
+mp mtg put 0 field Mountain
+mp mtg put 0 hand Skirk Marauder
+wait 10
+mp mtg focus Skirk Marauder
+press A 2
+wait 20
+rendershot mo_menu
+press DOWN 2
+wait 4
+press A 2
+wait 150
+rendershot mo_facedown
+mp mtg focus Face-down creature
+press A 2
+wait 20
+rendershot mo_turnup_menu
+press A 2
+wait 60
+rendershot mo_target
+press A 2
+wait 200
+rendershot mo_after
+quit

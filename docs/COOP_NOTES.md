@@ -8570,3 +8570,219 @@ res/moves/chatter/anim.s).
   etbKind / etbNum; StartStep's upkeep takes one off or sacrifices it). Those "triggers" resolve at once, not on the
   stack. Keyword words on the card: MtgGfx_KeywordLine's SHADOW / FLANKING. Playable: 2793 -> 2850 (docs/MTG_SCOPE.md).
   Tests: tools/mtg/test_rules.c TestShadow (shadow, flanking, fading). What comes next: docs/MTG_HANDOFF.md.
+
+## MAGIC: choices as something resolves or enters (2026-11-21)
+- "Choose a creature type / a color / an opponent / a number", "choose one of these" and "as CARDNAME enters, choose
+  ...": the query MTG_Q_CHOOSE's MTG_CHOICE_OPTION (MtgQuery.optKind, optCount, opts: MTG_OPT_TYPE / COLOR / PLAYER /
+  NUMBER / MODE; the answer's card is an index into opts, 16 bits now). Forge keeps a choice on the card that made it,
+  and so does this: MtgObj chosenType (a subtype index + 1: Mtg_SubtypeName, the pool's subtypes with their kinds,
+  MTG_SUBK_CREATURE / LAND / BASIC), chosenColors, chosenPlayer, chosenNumber; cleared as it enters the battlefield;
+  an Effect takes its source's as it begins (MtgEffect, read through mtg_valid.c Holder while gMtgEffCtx is set).
+  Read by the Valid properties ChosenType / ChosenColor / ChosenCtrl / Player.Chosen, Defined$ ChosenPlayer and
+  Count$ChosenNumber. GenericChoice's modes are chains of their own (mtg_script.c), the one chosen run next as a
+  coin's branch (MtgDuel.resMode, ContinueResolve).
+- K:ETBReplacement:Other:SVAR[:Mandatory|:Optional]: the SVar parsed as an ability of its own (MtgCardDef.etbRepl;
+  no targets), queued by Mtg_MoveTo as the card lands (MtgDuel.etbQueue) and resolved by mtg_game.c RunEtb first thing
+  in Run, before the step, state-based actions and triggers (so ENGINEERED PLAGUE's choice is made before its -1/-1
+  kills anything, and before its own enters triggers go on the stack). Optional: asked as a "you may".
+- The table: a list menu over the board (mtg_board.c MODE_OPTION, OptionMenu: 8 rows, UP / DOWN, LEFT / RIGHT a page,
+  arrows where there's more), the asking card big at the left, the prompt saying what to choose (a mode's own words,
+  the highlighted one's in full). Creature types in the game come first, then the rest, each part A to Z.
+- The AI (mtg_ai.c ChooseOption): types and colors counted where Forge's AILogic says (the opponent's cards, its own,
+  its graveyard), the opponent as the player, the least or most of a number by AILogic, a mode by a look-ahead on a copy.
+- Also: CharacteristicDefining statics on cards with a printed P/T (LOST ORDER OF JARKELD) and EffectZone$ Battlefield.
+  Playable: 2870 -> 2907. Tests: tools/mtg/test_rules.c TestChoices; scenario mtg_choices (shots ch_type, ch_mode2).
+
+## MAGIC: Echo, Cumulative upkeep, Kicker, Buyback, Flashback (2026-11-21)
+- **The user (2026-11-21): no pushes or releases of MAGIC work until every card plays; then one push, one update.**
+  These batches are local commits until then.
+- Echo and Cumulative upkeep are made into upkeep triggers as the card loads (mtg_script.c, after the SVars: SVars
+  MtgEchoPay / MtgCuPut / MtgCuSac and T: lines, as Forge's CardFactoryUtil writes them): "sacrifice it unless you pay"
+  through the UnlessCost$ machinery. Echo's "if it came under your control since your last upkeep" is MtgObj.echoDue
+  (1 on entering or a GainControl, 2 during that controller's upkeep, 0 after; Valid cameUnderControlSinceLastUpkeep).
+  Cumulative upkeep: an AGE counter, then its cost once per counter (MtgAbility.unlessScale from UnlessScale$ AGE;
+  mana and life costs; the table's prompt says the scaled amount).
+- Kicker / Buyback / Flashback: their costs in gMtgAltCosts (Mtg_AddExtraCost), MtgCardDef kicker[2] / buyback /
+  flashback. Casts are MtgAction.alt MTG_ALT_KICK1 / KICK2 / KICK12 / BUYBACK / FLASHBACK beside the plain one
+  (mtg_game.c AddExtraCasts, AddFlashback from the graveyard; CastMana adds their mana, HasOther their other parts,
+  paid through costAltIdx / CostNow). MtgObj.kicked (kept onto the battlefield: Valid kicked / kicked 1 / kicked 2,
+  Condition$ Kicked, Count$Kicked.A.B, etbCounter's CheckSVar$) and castMode (Buyback: back to the hand as it
+  resolves; Flashback: exiled whenever it leaves the stack, Mtg_MoveTo). Also ETBReplacement's fourth part (a
+  condition: Anavolver's "Card.Self+kicked 1") and two per card, Condition$ Threshold.
+- The table: the card's menu shows CAST, KICKED (+R), BUYBACK (+3)...; the graveyard viewer's A casts a card with
+  flashback ({A} FLASHBACK in its hints). The AI kicks when what it pays besides costs little.
+- Playable: 2907 -> 2961 -> 3060. Tests: test_rules.c TestUpkeepCosts, TestKickerFlashback; scenario mtg_flashback.
+
+## MAGIC: Morph (2026-11-21)
+- A face-down permanent (or spell) takes the definition MTG_FACE_DOWN (mtg_script.c Mtg_Card: a nameless colorless 2/2
+  creature with no abilities) and keeps its real card in MtgObj.faceDownOf (+ 1), so every rule reads it as that 2/2
+  with no special cases. Cast face down for {3} (MtgAction.alt MTG_ALT_MORPH, sorcery timing); turned face up any time
+  its controller has priority for its morph cost (MtgCardDef.morph in gMtgAltCosts; the special action MTG_ACT_TURN_UP,
+  no stack: MTG_EV_TURNED_UP, then the TurnFaceUp trigger mode); revealed whenever it leaves the battlefield or stack
+  (Mtg_MoveTo, after the leave triggers looked at it face down).
+- The table draws its back (MtgGfx_CardTexture), names it "Face-down <card>" to its controller only, and never shows
+  the face while the view trails the rules (StartEvent syncs a face-down card first). Menus: CAST FACE DOWN (3), TURN
+  FACE UP (cost). The AI casts face down when nothing better, turns up for the bigger card or its trigger.
+- Playable: 3060 -> 3129. Tests: test_rules.c TestMorph; scenario mtg_morph.
+
+## MAGIC: more costs, triggers' own costs, mana abilities that do more (2026-11-21)
+- Costs: Discard<1/Hand> (the whole hand), Mill<n>, ExileFromTop<n/Card>, SubCounter<All/KIND>, tapXType up to 7,
+  "A;B" alternatives in a cost's type (KeepSpec makes them Valid's ','). Mana abilities refuse costs paying can't make.
+- A trigger whose Execute$ is an AB$ with a Cost$ ("you may pay {1}. If you do ..."): MtgAbility.optCost, asked as it
+  resolves (Mtg_ResolveStep: MTG_CHOICE_PAY; its tap / sacrifice / picks paid, Mtg_PayOptCost with costAlt 4); not
+  paid, MtgDuel.resSkip ends the chain. Its OptionalDecider$ is the payment itself.
+- R: Moved ... Destination$ Battlefield | ValidCard$ Card.Self[+...] | ReplaceWith$: the same as ETBReplacement
+  (mtg_static.c EtbRepl), its ValidCard$ the condition (Duskwalker's +kicked).
+- Mana abilities with SubCounter<n/...> costs (paid as auto-pay taps them) and SubAbility$ chains (Draw, a counter,
+  sacrifice when empty, "doesn't untap", delayed triggers: MtgAbility.manaFx) queued in MtgDuel.fxQueue and resolved
+  first thing in Run (mtg_game.c RunManaFx / ResolveNow, shared with RunEtb). Mana abilities paying can't use
+  ({1}, {T}, sacrifice: the Eggs, Chromatic Sphere) are actions of their own resolving at once (ManaByHand,
+  ResolveManaNow), "any color" asked (MTG_OPT_COLOR). Floating mana shows by each life plate.
+- ChangeZone with no Defined$ from the battlefield: the card itself (Forge's default: "return CARDNAME to its owner's hand").
+- Playable: 3129 -> 3234. Tests: test_rules.c TestTriggerCosts, TestManaFx.
+
+## MAGIC: TapAll, any player's abilities, protection this turn, permanent pumps, counted amounts (2026-11-21)
+- TapAll / UntapAll (every ValidCards$ permanent). Defined$ Player.Opponent / Player.Other (two players: the other).
+- Pump's Duration$ Permanent: MtgObj permPower / permToughness / permKeywords, for as long as it stays (the Chimeras).
+- Activator$ Player: MtgAbility.anyPlayer, offered to the other player too (they pay, and control it on the stack:
+  the Flailing creatures, Aether Storm); Activator$ You.NonActive: actNotMyTurn (Ghost Town).
+- ProtectionEffect (MTG_API_PROTECTION): Gains$ colors, ChosenColor, or Choice of AnyColor (MTG_OPT_COLOR; the AI
+  picks the opponent's most common color) into MtgObj.tempProtection until end of turn (Mother of Runes).
+- Amounts: TriggeredCard$CardPower / CardToughness, Sacrificed$CardToughness (MtgStackEntry.sacToughness), Count$Valid
+  modifiers /Twice /LimitMax.N /NMinus.N; Valid named<Name>, TargetedPlayerCtrl / TargetedPlayerOwn (the resolving
+  ability's target player), blockingTriggeredAttacker.
+- ChangeZone DefinedPlayer$: each of them chooses from their own cards (Exhume, Curfew, Show and Tell).
+- Playable: 3234 -> 3350. Tests: test_rules.c TestTapAllPerm (Deluge, Tin-Wing Chimera, Mother of Runes, Kindle, Exhume,
+  Flailing Ogre).
+
+## MAGIC: Debuff, chosen colors in Animate, Threshold amounts, X-valued targets, named tokens (2026-11-21)
+- DebuffEffect (MTG_API_DEBUFF): MtgObj loseKeywords until end of turn / permLoseKeywords (Duration$ Permanent),
+  taken off in Mtg_Keywords. Animate's Colors$ ChosenColor (its source's choice). Count$Threshold.A.B.
+- Valid StrictlyOther, cmcLEX / cmcLTX / cmcGEX / cmcGTX / cmcEQX against X (gMtgValidX while a cast's targets are
+  checked, else the resolving one's). A target spec comparing with X (Spell Blast, Detonate) offers each candidate with
+  X its own mana value, if affordable (mtg_game.c ValidAt); TargetStillLegal checks against the X paid.
+- Forge's tokens named for their card (butterfly, wood, wasp, kelp, carnivore, tombspawn) as their colors_P_T_type
+  words (Mtg_TokenDef).
+- Playable: 3350 -> 3407. Tests: test_rules.c TestTapAllPerm (Spell Blast, Canopy Claws).
+- X chosen (2026-11-21): an action with an X its targets don't set (MtgAction.xFixed: X targets, cmcEQX) asks
+  "choose X" first, 0 up to the most it can pay (query CHOOSE OPTION NUMBER with forCost 8, MtgDuel.pendAct; then
+  DoAction). The table's list starts on the most; the AI takes the most, as before.
+- X costs (2026-11-21): PayLife<X>, Discard<X/...>, Sac<X/...>, SubCounter<X/...>, ExileFromGrave<X/...>
+  (MtgCost.xPart): the X offered is at most what that part can pay (Mtg_CostMaxX: the life, the cards, the
+  permanents, the counters), paid with the X chosen (PayCost's sCostX). Mana abilities with one (the storage lands)
+  are activated on their own (ManaByHand), X asked. Playable: 3407 -> 3424.
+
+## MAGIC: attack taxes, "can't attack you", protection from the chosen color, Menace (2026-11-21)
+- CantAttackUnless with a mana Cost$ (a number or a counted SVar): MTG_STATIC_ATTACK_TAX, Mtg_AttackTax per attacker;
+  the declared attackers' taxes are paid together, the last chosen dropped while it can't all be paid (mtg_game.c
+  ATTACKERS); the table's attack prompt says "pay N". Target$ You: only for attacks on its controller (MtgStatic.taxYou;
+  CantAttack's too: Teferi's Moat, Form of the Dragon).
+- AddKeyword$ Protection:Card.ChosenColor: protection from its source's chosen color (MtgStatic.protChosen; an Aura's own
+  color doesn't push it off: Mtg_AuraOwnProtection).
+- Menace (MTG_KW_MENACE): a lone blocker of a menace attacker doesn't block (BLOCKERS answer).
+- Playable: 3424 -> 3444. Tests: test_rules.c TestTapAllPerm (Propaganda, Form of the Dragon, Viashino Runner, Voice of All).
+
+## MAGIC: Effects' own triggers, SacrificeAll (2026-11-21)
+- An Effect's Triggers$ (MtgAbility.effTrigs, Mtg_ParseEffectTrigger: TriggerZones$ Command, its zones any): checked
+  while the Effect lasts with its source as their card (mtg_trigger.c, gMtgEffCtx set while matching: IsRemembered,
+  ChosenColor read the Effect's), the Effect's remembered objects carried onto the stack (MtgPending / MtgStackEntry
+  effRem) and remembered as it resolves; Defined$ EffectSource is its source. An Effect with only triggers is made too.
+- SacrificeAllEffect: every ValidCards$ permanent, or the Defined$ ones (Controller$ You: its controller's own).
+- Playable: 3444 -> 3458. Test: test_rules.c (Mountain Titan).
+
+## MAGIC: at end of turn, another's cards you choose (2026-11-21)
+- AtEOT$ on Pump / Animate / Token (Sacrifice, Destroy, Exile, Hand): MtgDuel.eot* (the object as it was), done as the
+  next end step begins (mtg_game.c StartStep) unless it has left or become a new object.
+- ChangeZone's Chooser$ You: from the targeted (or DefinedPlayer$ Targeted) player's library, hand or graveyard, its
+  controller picks (mtg_effects.c sChooser in AskPick): Head Games, Jester's Mask.
+- Playable: 3458 -> 3473. Tests: test_rules.c (Balduvian Dead, Head Games).
+- Valid (2026-11-21): EffectSource, DefenderCtrl, attackedThisTurn (MtgObj.attackedTurn), faceDown, power / toughness
+  against X, the Spell type (a card on the stack: "Spell.Blue"). X in a property is the source card's SVar X when it's
+  counted (Ensnaring Bridge's cards in hand: mtg_valid.c ValidXOf), else the paid X. Playable: 3473 -> 3493.
+
+## MAGIC: players among several targets, divided amounts (2026-11-21)
+- A spell's other targets (TargetMin$ / TargetMax$, now up to 9 or a counted SVar: MTG_TGT_SVAR) may be players for
+  DealDamage / PreventDamage ("any target"): MtgStackEntry.extra holds MTG_REM_PLAYER + the player; the table lights the
+  life plate (mtg_board.c CandRect / CandName), the AI weighs them below creatures.
+- DividedAsYouChoose$ (DealDamage, PreventDamage, PutCounter): once the targets are picked, the caster gives each but
+  the last a share (query CHOOSE OPTION NUMBER, forCost 9, candidates[0] the target; the last gets the rest): MtgStackEntry
+  .divide, kept with its target if others become illegal (ResolveTop), used as the effect reaches it (mtg_effects.c
+  Divided). The AI gives a creature exactly what finishes it.
+- Playable: 3493 -> 3509. Tests: test_rules.c (Arc Lightning); scenario mtg_divide.
+
+## MAGIC: ChooseCard, protection from artifacts and from kinds of card (2026-11-21)
+- ChooseCard (mtg_effects.c MTG_API_CHOOSE_CARD): a chooser (Defined$, else the controller) picks Amount$ of the
+  Choices$ cards on the battlefield or in a graveyard one at a time: the chosen card (Defined$ ChosenCard) or, with
+  RememberChosen$, each remembered (Grave Consequences, Circle of Protection: Shadow).
+- Protection masks have a bit past the colors, MTG_PROT_ARTIFACT (K:Protection from artifacts, K:Protection:Artifact,
+  Gains$ Artifact); K:Protection:SPEC (creatures, Goblins, legendary creatures...) is MtgCardDef.protSpec (text protText).
+  Every check goes through Mtg_ProtectedFrom (targeting, damage, blocking, Auras falling off). "Protection from each color".
+- ProtectionAll (every ValidCards$ permanent; Gains$ TargetedCardColor: the target's colors).
+- Playable: 3509 -> 3527. Tests: test_rules.c TestProtectionKinds.
+
+## MAGIC: statics that change types and colors, protection they give (2026-11-21)
+- AddType$ (card types; subtypes by index, ChosenType: its source's), RemoveLandTypes$ / RemoveCreatureTypes$, SetColor$
+  (a color, Colorless, ChosenColor) on Continuous statics (MtgStatic addTypes / addSub / setColors).
+- The type layer is worked out alone first (mtg_static.c TypeMods, its own guard sTypeDepth) so other statics see it
+  (Darkest Hour's "all creatures" includes Living Lands' Forests); Mtg_ObjTypes, Mtg_ObjHasSubtype (every subtype test in
+  mtg_valid.c), Mtg_ObjLandTypes (the basic types' mana: mtg_mana.c, Domain, landwalk) read it; colors through
+  Mtg_StaticMods (the latest SetColor$, then an Animate's). A land made a basic type with RemoveLandTypes$ loses its own
+  abilities and triggers (305.7: Blood Moon, Evil Presence; Mtg_ObjLostText).
+- Mtg_TypeLayer: whether any such static is on the battlefield, kept while d->seq (every move, a morph turned up) holds:
+  without one nothing is asked (the tests' time stays as it was).
+- Statics' AddKeyword$ Protection:SPEC (creatures, Gorgons; ...:Card.CardUID_HostCardUID: not from the Aura itself),
+  from artifacts, from cardColors (each creature's own colors): MtgStaticMods.protSpec / protExcept, Mtg_ProtectedFrom.
+- Playable: 3527 -> 3558. Tests: test_rules.c TestTypeLayer (Blood Moon on City of Brass, Living Lands, Darkest Hour).
+
+## MAGIC: more static modes (2026-11-21)
+- AssignNoCombatDamage (Ophidian, the Laccoliths: CombatDamage skips it), CanAttackDefender (the walls that attack),
+  CanAttackIfHaste (Instill Energy), CanBlockIfShadow (Heartwood Dryad: ValidBlocker$ may block ValidAttacker$ with
+  shadow), and the modes about no card (MtgStatic.global: in force while present): CantPreventDamage (Flaring Pain: no
+  Fog, shield, prevention static or protection prevents damage), IgnoreLandWalk (Staff of the Ages), UnspentMana
+  (Upwelling: pools aren't emptied between steps).
+- Playable: 3558 -> 3578. Tests: test_rules.c TestNewStaticModes.
+
+## MAGIC: untap limits (Winter Orb, Static Orb, Smoke, Mungha Wurm) (2026-11-21)
+- AddKeyword$ UntapAdjust:TYPE:N on Affected$ Player / You is its own static (MTG_STATIC_UNTAP_LIMIT; You: only its
+  controller's untap step; IsPresent$ kept: the Orbs only while untapped). In the untap step (mtg_game.c StartStep), for
+  each limit in force, when more of that type would untap than it lets, the player picks which (query CHOOSE PICK,
+  forCost 10, "Untap" on the table; MtgObj.untapPick bits, MtgDuel.untapStage / untapLimit / untapTight); the rest of
+  that type stay tapped, everything else untaps. The AI keeps its best.
+- Playable: 3578 -> 3582. Tests: test_rules.c TestUntapLimits.
+
+## MAGIC: maximum hand size, blocker limits (2026-11-21)
+- SetMaxHandSize$ (N / Unlimited) and RaiseMaxHandSize$ for Affected$ You / Player / Opponent / Player.Chosen
+  (MTG_STATIC_HAND_SIZE; Mtg_MaxHandSize: the latest set, then every raise): the cleanup discards to it.
+- MinMaxBlocker (Min$ / Max$: MTG_STATIC_BLOCKERS, Mtg_BlockerLimits): too few blockers of one don't block (as menace),
+  past the most only the first do.
+- Playable: 3582 -> 3593. Tests: test_rules.c TestHandAndBlockers.
+
+## YU-GI-OH!: the Tribute Summon's zone, the phase bands, CHECK (2026-11-21, the user's list)
+- A Tribute Summon from the table answers with zone 0x40 (YgoAnswer.zone): the bridge doesn't place it by itself
+  (ygo_edo.c MSG_SELECT_PLACE) and asks the zone after the Tributes; the board's cursor starts on the last Tribute's
+  Monster Zone (ygo_board.c B.tribZone from its TO_GRAVE event). TCG_LINK_VERSION 20. Test: test_edo_cards.c
+  "tribute summon zone".
+- Turn / phase bands: a new one clears the last (they overlapped: 52 frames each, the next after 40, the new band's
+  dark fill dimming the old text), and the middle line's text is never drawn under a band. Scenario ygo_phase_sweep.
+- A chance to chain: the window lists the cards, CHECK, PASS (item -3). CHECK puts it away (mode M_CHECK): the cursor
+  goes round the table, A / LOOK shows a card, B (CANCEL) brings the window back. "mp ygo autochain" (tests: the
+  harness plays for you but leaves chances to chain to the table). Scenario ygo_chain_check.
+
+## The player's own POKéDEX on a server: the second ball, "my MOéDEX" (2026-11-21, the user)
+- A catch of a species a friend on the server already put in the shared POKéDEX, but not yet in the player's own
+  ("<save>.owndex"): it goes in the own POKéDEX with "<NAME>'s data was added to my MOéDEX." and its page, as a first
+  catch has (battle_script_commands.c Cmd_trysetcaughtmondexflags, gMpCatchMyDex picks the line in battle_message.c).
+  Before, such a catch skipped the dex flags altogether and never reached the own POKéDEX.
+- In the SHARED list while connected, a species caught for the own POKéDEX too has a second, identical ball just
+  behind the first (1 right, 2 up: pokedex.c CreateCaughtBall).
+- Scenario coop_mydex (BOB catches a ZIGZAGOON, then ALICE: the line, the list).
+
+## Stat Abilities on everyone at once (2026-11-21, the user)
+- INTIMIDATE in doubles / triples: each foe it lowers is kept (`mpstatgroup 4`, sMpIntimMask) instead of its own
+  animation and line; after the last one (`mpstatgroup 5`) one B_ANIM_STATS_CHANGE over all of them (animArg2 0x80 |
+  mask) and one line, "X's INTIMIDATE cuts the foes' ATTACK!" / "...the party's ATTACK!" per screen
+  (STRINGID_MP_INTIMIDATE_ALL); one foe alone keeps the usual line. CLEAR BODY etc. still say so per foe.
+- COTTON DOWN: "Everyone's SPEED was lowered!" with one animation over all it slowed; SUPERSWEET SYRUP: "X's
+  SUPERSWEET SYRUP lowered its foes' EVASIVENESS!" (battle_gen59.c G59_MSG_ALL_LOWERED / FOES_LOWERED;
+  STRINGID_G59_COUNT 134).
+- Scenario intimidate_all (GABBY & TY's double battle, GYARADOS leads).

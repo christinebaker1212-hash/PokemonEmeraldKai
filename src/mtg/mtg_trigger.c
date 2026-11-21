@@ -16,7 +16,7 @@ static int sTrigCount, sTrigCap;
 const char *const gMtgTriggerModes[MTG_TRIG_COUNT] = {
     "", "ChangesZone", "Phase", "SpellCast", "DamageDone", "Attacks", "AttackerBlocked", "AttackerBlockedByCreature",
     "Blocks", "AttackerUnblocked", "Cycled", "Taps", "LandPlayed", "BecomesTarget", "Always", "DamageDoneOnce",
-    "DamageDealtOnce",
+    "DamageDealtOnce", "TurnFaceUp",
 };
 
 // the parameters each mode reads (besides the common ones)
@@ -36,6 +36,7 @@ static const char *const sModeKeys[MTG_TRIG_COUNT][4] = {
     [MTG_TRIG_ATTACKER_BLOCKED_BY] = {"ValidCard", "ValidBlocker"},
     [MTG_TRIG_BLOCKS] = {"ValidCard", "ValidBlocked"},
     [MTG_TRIG_ATTACKER_UNBLOCKED] = {"ValidCard"},
+    [MTG_TRIG_TURN_FACE_UP] = {"ValidCard"},
 };
 static const char *const sCommonKeys[] = {
     "Mode", "Execute", "TriggerDescription", "TriggerZones", "OptionalDecider", "Secondary",
@@ -245,7 +246,9 @@ static int ParseTrig(MtgCardDef *c, int cardId, char *text, int attach)
     }
     // where the card must be: TriggerZones$, else TriggerChangesZone.correctZones' (leaving the battlefield: from
     // there; its own arrival: where it arrives), else the battlefield
-    if ((v = Mtg_TriggerParam(t, "TriggerZones")) != NULL) {
+    if (attach == 2 && (!(v = Mtg_TriggerParam(t, "TriggerZones")) || strcmp(v, "Command") == 0))
+        t->zones = 0xFF;   // (an Effect's: it lives with the Effect, wherever its source is)
+    else if ((v = Mtg_TriggerParam(t, "TriggerZones")) != NULL) {
         t->zones = (uint8_t)Zones(v);
         if (!t->zones || strcmp(v, "Any") == 0) {
             Mtg_Unsupported(c, Reason("TriggerZones"));
@@ -310,7 +313,7 @@ static int ParseTrig(MtgCardDef *c, int cardId, char *text, int attach)
     // what it does: an SVar "DB$ ..." (an ability of its own kind: it may target, as a spell does)
     v = Mtg_TriggerParam(t, "Execute");
     v = v ? Mtg_Svar(cardId, v) : NULL;
-    if (!v || strncmp(v, "DB$", 3) != 0) {
+    if (!v || (strncmp(v, "DB$", 3) != 0 && strncmp(v, "AB$", 3) != 0)) {   // (AB$: with a cost of its own to pay)
         Mtg_Unsupported(c, Reason("Execute"));
         return -1;
     }
@@ -321,6 +324,8 @@ static int ParseTrig(MtgCardDef *c, int cardId, char *text, int attach)
         memcpy(copy, v, len);
         ab = Mtg_ParseAbilityText(c, cardId, copy, MTG_AB_TRIGGERED);
         gMtgTriggers[idx].execute = (uint16_t)ab;
+        if (gMtgAbilities[ab].optCost && gMtgTriggers[idx].optional == 1)
+            gMtgTriggers[idx].optional = 0;   // ("you may pay": the payment is the "may")
         if (!ChainKnown(ab, mode, &why)) {
             Mtg_Unsupported(c, why);
             return -1;
@@ -337,6 +342,11 @@ void Mtg_ParseTrigger(MtgCardDef *c, int cardId, char *text)
 int Mtg_ParseGrantedTrigger(MtgCardDef *c, int cardId, char *text)
 {
     return ParseTrig(c, cardId, text, 0);
+}
+
+int Mtg_ParseEffectTrigger(MtgCardDef *c, int cardId, char *text)
+{
+    return ParseTrig(c, cardId, text, 2);
 }
 
 
@@ -446,6 +456,7 @@ static int Matches(const MtgDuel *d, const MtgTrigger *t, int host, const MtgTri
     case MTG_TRIG_CYCLED:
     case MTG_TRIG_TAPS:
     case MTG_TRIG_LAND_PLAYED:
+    case MTG_TRIG_TURN_FACE_UP:
         return ObjOk(d, t, "ValidCard", ev->obj, host);
     }
     return 0;
@@ -513,6 +524,40 @@ void Mtg_CheckTriggers(MtgDuel *d, const MtgTrigEvent *ev)
             p->trigPlayer = ev->player;
             p->trigCtrl = ev->objCtrl;
             p->trigAmount = ev->amount;
+            p->effRemCount = 0;
+        }
+    }
+    for (i = 0; i < d->effCount; i++) {   // the Effects' own triggers ("whenever a creature blocks this turn")
+        const MtgEffect *e = &d->effects[i];
+        const MtgAbility *ab = &gMtgAbilities[e->ability];
+        if (!Mtg_EffectAlive(d, e))
+            continue;
+        for (k = 0; k < ab->effTrigCount; k++) {
+            const MtgTrigger *t = &gMtgTriggers[ab->effTrigs[k]];
+            MtgPending *p;
+            int ok, r;
+            if (t->mode != ev->mode)
+                continue;
+            gMtgEffCtx = e;   // (IsRemembered: the Effect's own)
+            ok = Matches(d, t, e->source, ev) && Present(d, t, e->source);
+            gMtgEffCtx = NULL;
+            if (!ok)
+                continue;
+            if (d->pendingCount >= MTG_MAX_PENDING)
+                return;
+            p = &d->pending[d->pendingCount++];
+            p->source = e->source;
+            p->trigger = ab->effTrigs[k];
+            p->trigObj = ev->obj;
+            p->trigObj2 = ev->obj2;
+            p->controller = e->controller;
+            p->trigPlayer = ev->player;
+            p->trigCtrl = ev->objCtrl;
+            p->trigAmount = ev->amount;
+            p->effRemCount = 0;
+            for (r = 0; r < e->remCount && r < 4; r++)   // (what the Effect remembers: Defined$ Remembered as it resolves)
+                if (e->rem[r] >= MTG_REM_PLAYER || d->objs[e->rem[r]].seq == e->remSeq[r])
+                    p->effRem[p->effRemCount++] = e->rem[r];
         }
     }
 }

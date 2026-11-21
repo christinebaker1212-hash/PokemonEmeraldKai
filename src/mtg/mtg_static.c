@@ -26,6 +26,7 @@ static const char *ParamOf(int first, int count, const char *key)
     return NULL;
 }
 
+static int AddStatic(MtgCardDef *c, const MtgStatic *st);
 static int Integer(const char *s, int *out)
 {
     char *end;
@@ -84,6 +85,34 @@ static int Keywords(MtgStatic *st, const char *text)
             st->addKeywords |= MTG_KW_BIT(kw);
             continue;
         }
+        if (strncmp(k, "Protection:Card.ChosenColor:", 28) == 0) {   // (its source's chosen color, as it is now)
+            st->protChosen = 1;
+            continue;
+        }
+        if (strcmp(k, "Protection from cardColors") == 0) {   // (EARNEST FELLOWSHIP)
+            st->protOwnColors = 1;
+            continue;
+        }
+        if (strcmp(k, "Protection from artifacts") == 0 || strncmp(k, "Protection:Artifact", 19) == 0) {
+            st->addProtection |= MTG_PROT_ARTIFACT;
+            continue;
+        }
+        if (strncmp(k, "Protection:", 11) == 0 && strncmp(k, "Protection:Card.", 16) != 0 && !st->addProtSpec) {
+            char spec[48], *e = strchr(k + 11, ':');   // "Protection:Creature", "Protection:Enchantment:enchantments:
+            size_t len = e ? (size_t)(e - (k + 11)) : strlen(k + 11);   // Card.CardUID_HostCardUID"
+            const char *ex = e ? strchr(e + 1, ':') : NULL;
+            if (len < sizeof(spec) && (!ex || strcmp(ex + 1, "Card.CardUID_HostCardUID") == 0)) {
+                memcpy(spec, k + 11, len);
+                spec[len] = 0;
+                if (Mtg_ValidSpecKnown(spec)) {
+                    char *t = malloc(len + 1);
+                    memcpy(t, spec, len + 1);
+                    st->addProtSpec = t;
+                    st->protExceptHost = ex != NULL;
+                    continue;
+                }
+            }
+        }
         for (i = 0; i < 5; i++) {
             if (strcmp(k, sWalk[i]) == 0 || (strncmp(k, "Landwalk:", 9) == 0 && strcmp(k + 9, sBasic[i]) == 0))
                 st->addLandwalk |= MTG_COLOR_BIT(i), found = 1;
@@ -119,6 +148,24 @@ static char *Kept(size_t len)
 // card unsupported
 MtgAltCost *gMtgAltCosts;
 static int sAltCount, sAltCap;
+
+// Kicker / Buyback / Flashback's cost ("1 R", "Sac<1/Land>", "1 G PayLife<3>"): gMtgAltCosts index + 1, 0 if it isn't
+// one the engine pays (an X, {T}, itself)
+int Mtg_AddExtraCost(const char *text, const char *label)
+{
+    MtgAltCost alt;
+    memset(&alt, 0, sizeof(alt));
+    if (!Mtg_ParseCost(text, &alt.cost) || alt.cost.mana.x || alt.cost.tap || alt.cost.sacSelf || alt.cost.exileSelf
+        || alt.cost.returnSelf || alt.cost.discardSelf || alt.cost.subCtrN || alt.cost.damageYou || alt.cost.xPart)
+        return 0;
+    snprintf(alt.label, sizeof(alt.label), "%s", label);
+    if (sAltCount + 1 > sAltCap) {
+        sAltCap = sAltCap ? sAltCap * 2 : 64;
+        gMtgAltCosts = realloc(gMtgAltCosts, (size_t)sAltCap * sizeof(MtgAltCost));
+    }
+    gMtgAltCosts[sAltCount++] = alt;
+    return sAltCount;
+}
 
 // "S:Mode$ AlternativeCost | ValidSA$ Spell.Self | EffectZone$ All | Cost$ ... [| IsPresent$ ...] | Description$ ...":
 // the spell may be cast paying that instead of its mana cost (StaticAbilityAlternativeCost). Costs without mana only.
@@ -159,7 +206,7 @@ static void ParseAlt(MtgCardDef *c, int cardId, char *text)
         || !(s = ParamOf(first, count, "EffectZone")) || strcmp(s, "All") != 0
         || !(s = ParamOf(first, count, "Cost")) || !Mtg_ParseCost(s, &alt.cost)
         || Mtg_ManaCostTotal(&alt.cost.mana) || alt.cost.mana.x || alt.cost.tap || alt.cost.sacSelf || alt.cost.exileSelf
-        || alt.cost.returnSelf || alt.cost.discardSelf || alt.cost.discardRandom)
+        || alt.cost.returnSelf || alt.cost.discardSelf || alt.cost.discardRandom || alt.cost.xPart)
         goto unknown;
     if ((alt.present = ParamOf(first, count, "IsPresent")) && !Mtg_ValidSpecKnown(alt.present))
         goto unknown;
@@ -223,9 +270,11 @@ static void ParseOne(MtgCardDef *c, int cardId, char *text)
     static const char *const sKnown[] = {"Mode", "Affected", "AddPower", "AddToughness", "AddKeyword", "SetPower",
                                          "SetToughness", "Description", "AffectedZone", "EffectZone", "AffectedDefined",
                                          "IsPresent", "PresentCompare", "ValidCard", "ValidAttacker", "ValidBlocker", "CharacteristicDefining",
-                                         "Activator", "Type", "Amount", "Cost", "Condition", "Secondary", "UnlessDefender",
+                                         "Activator", "Type", "Amount", "Cost", "Condition", "Secondary", "UnlessDefender", "Target",
                                          "ValidCreature", "ValidTarget", "ValidSA", "ValidSource", "Caster", "AddAbility", "AddTrigger", "AddSVar", "GainControl",
-                                         "CheckSVar", "SVarCompare", "AddHiddenKeyword"};
+                                         "CheckSVar", "SVarCompare", "AddHiddenKeyword", "AddType", "SetColor",
+                                         "RemoveLandTypes", "RemoveCreatureTypes", "Min", "Max", "SetMaxHandSize",
+                                         "RaiseMaxHandSize"};
     MtgStatic st;
     int first, count, i, v;
     const char *s;
@@ -250,7 +299,127 @@ static void ParseOne(MtgCardDef *c, int cardId, char *text)
             : strcmp(s, "MustAttack") == 0 ? MTG_STATIC_MUST_ATTACK : strcmp(s, "CantBeCast") == 0 ? MTG_STATIC_CANT_BE_CAST
             : strcmp(s, "CantTarget") == 0 ? MTG_STATIC_CANT_TARGET : strcmp(s, "CantPlayLand") == 0 ? MTG_STATIC_CANT_PLAY_LAND
             : strcmp(s, "CantBeActivated") == 0 ? MTG_STATIC_CANT_BE_ACTIVATED
-            : strcmp(s, "CantRegenerate") == 0 ? MTG_STATIC_CANT_REGENERATE : 0xFF;
+            : strcmp(s, "CantRegenerate") == 0 ? MTG_STATIC_CANT_REGENERATE
+            : strcmp(s, "CantAttackUnless") == 0 ? MTG_STATIC_ATTACK_TAX
+            : strcmp(s, "AssignNoCombatDamage") == 0 ? MTG_STATIC_NO_COMBAT_DAMAGE
+            : strcmp(s, "CanAttackDefender") == 0 ? MTG_STATIC_ATTACK_DEFENDER
+            : strcmp(s, "CanAttackIfHaste") == 0 ? MTG_STATIC_ATTACK_HASTE
+            : strcmp(s, "CanBlockIfShadow") == 0 ? MTG_STATIC_BLOCK_SHADOW
+            : strcmp(s, "CantPreventDamage") == 0 ? MTG_STATIC_CANT_PREVENT
+            : strcmp(s, "IgnoreLandWalk") == 0 ? MTG_STATIC_IGNORE_LANDWALK
+            : strcmp(s, "UnspentMana") == 0 ? MTG_STATIC_UNSPENT_MANA
+            : strcmp(s, "MinMaxBlocker") == 0 ? MTG_STATIC_BLOCKERS : 0xFF;
+    if (st.mode == MTG_STATIC_BLOCKERS) {   // "can't be blocked by more than one creature" / "except by three or more"
+        const char *mn = ParamOf(first, count, "Min"), *mx = ParamOf(first, count, "Max");
+        st.affected = ParamOf(first, count, "ValidCard");
+        for (i = 0; i < count; i++) {
+            const char *key = gMtgParams[first + i].key;
+            if (strcmp(key, "Mode") && strcmp(key, "Description") && strcmp(key, "ValidCard") && strcmp(key, "Min")
+                && strcmp(key, "Max"))
+                goto unknown;
+        }
+        if (!st.affected || !Mtg_ValidSpecKnown(st.affected) || (!mn && !mx)
+            || (mn && !(Integer(mn, &v) && v > 0 && v < 10 && (st.blockMin = (uint8_t)v, 1)))
+            || (mx && !(Integer(mx, &v) && v > 0 && v < 10 && (st.blockMax = (uint8_t)v, 1))))
+            goto unknown;
+        st.presentNum = 1;
+        if (!AddStatic(c, &st))
+            goto unknown;
+        return;
+    }
+    if (st.mode == MTG_STATIC_CONTINUOUS && (s = ParamOf(first, count, "AddKeyword")) && strncmp(s, "UntapAdjust:", 12) == 0) {
+        const char *aff = ParamOf(first, count, "Affected"), *colon = strchr(s + 12, ':');
+        char spec[24];
+        for (i = 0; i < count; i++) {   // ("You can't untap more than one land during your untap step")
+            const char *key = gMtgParams[first + i].key;
+            if (strcmp(key, "Mode") && strcmp(key, "Description") && strcmp(key, "IsPresent") && strcmp(key, "Affected")
+                && strcmp(key, "AddKeyword"))
+                goto unknown;
+        }
+        if (!aff || (strcmp(aff, "Player") && strcmp(aff, "You")) || !colon || (size_t)(colon - (s + 12)) >= sizeof(spec)
+            || !Integer(colon + 1, &v) || v < 0 || v > 20)
+            goto unknown;
+        memcpy(spec, s + 12, (size_t)(colon - (s + 12)));
+        spec[colon - (s + 12)] = 0;
+        if (!Mtg_ValidSpecKnown(spec) || ((st.present = ParamOf(first, count, "IsPresent")) && !Mtg_ValidSpecKnown(st.present)))
+            goto unknown;
+        st.mode = MTG_STATIC_UNTAP_LIMIT;
+        st.affected = Kept(strlen(spec) + 1);
+        strcpy((char *)st.affected, spec);
+        st.untapN = (uint8_t)v;
+        st.taxYou = aff[0] == 'Y';
+        st.presentNum = 1;
+        if (!AddStatic(c, &st))
+            goto unknown;
+        return;
+    }
+    if (st.mode == MTG_STATIC_CONTINUOUS && (ParamOf(first, count, "SetMaxHandSize") || ParamOf(first, count, "RaiseMaxHandSize"))) {
+        const char *aff = ParamOf(first, count, "Affected"), *set = ParamOf(first, count, "SetMaxHandSize");
+        const char *raise = ParamOf(first, count, "RaiseMaxHandSize");
+        for (i = 0; i < count; i++) {   // (Spellbook: "You have no maximum hand size"; Thought Nibbler: two less)
+            const char *key = gMtgParams[first + i].key;
+            if (strcmp(key, "Mode") && strcmp(key, "Description") && strcmp(key, "Affected") && strcmp(key, "SetMaxHandSize")
+                && strcmp(key, "RaiseMaxHandSize") && strcmp(key, "EffectZone") && strcmp(key, "IsPresent"))
+                goto unknown;
+        }
+        if ((s = ParamOf(first, count, "EffectZone")) && strcmp(s, "Battlefield"))
+            goto unknown;
+        st.activator = !aff ? 0xFF : strcmp(aff, "Player") == 0 ? 0 : strcmp(aff, "You") == 0 ? 1
+                     : strcmp(aff, "Opponent") == 0 ? 2 : strcmp(aff, "Player.Chosen") == 0 ? 3 : 0xFF;
+        if (st.activator == 0xFF || ((st.present = ParamOf(first, count, "IsPresent")) && !Mtg_ValidSpecKnown(st.present)))
+            goto unknown;
+        st.handSet = -1;
+        if (set) {
+            if (strcmp(set, "Unlimited") == 0)
+                st.handSet = 100;
+            else if (Integer(set, &v) && v >= 0 && v < 100)
+                st.handSet = (int8_t)v;
+            else
+                goto unknown;
+        }
+        if (raise && !(Integer(raise, &v) && v > -20 && v < 20 && (st.handRaise = (int8_t)v, 1)))
+            goto unknown;
+        st.mode = MTG_STATIC_HAND_SIZE;
+        st.presentNum = 1;
+        if (!AddStatic(c, &st))
+            goto unknown;
+        return;
+    }
+    if (st.mode == MTG_STATIC_CANT_PREVENT || st.mode == MTG_STATIC_IGNORE_LANDWALK || st.mode == MTG_STATIC_UNSPENT_MANA) {
+        for (i = 0; i < count; i++) {   // (nothing but its mode, maybe IsPresent$: kept below)
+            const char *key = gMtgParams[first + i].key;
+            if (strcmp(key, "Mode") && strcmp(key, "Description") && strcmp(key, "IsPresent") && strcmp(key, "PresentCompare"))
+                goto unknown;
+        }
+        st.global = 1;
+    }
+    if (st.mode == MTG_STATIC_ATTACK_TAX) {   // CantAttackUnless: its mana, a number or a counted SVar (no other costs)
+        const char *cost = ParamOf(first, count, "Cost"), *tg = ParamOf(first, count, "Target");
+        st.affected = ParamOf(first, count, "ValidCard");
+        if (!cost || !st.affected || !Mtg_ValidSpecKnown(st.affected) || (tg && strcmp(tg, "You")))
+            goto unknown;
+        for (i = 0; i < count; i++) {
+            const char *key = gMtgParams[first + i].key;
+            if (strcmp(key, "Mode") && strcmp(key, "ValidCard") && strcmp(key, "Target") && strcmp(key, "Cost")
+                && strcmp(key, "Description"))
+                goto unknown;
+        }
+        st.taxYou = tg != NULL;
+        if (Integer(cost, &v))
+            st.costGeneric = (uint8_t)v;
+        else if (CountedAmount(cardId, cost))
+            st.taxX = cost;
+        else
+            goto unknown;
+        if (!AddStatic(c, &st))
+            goto unknown;
+        return;
+    }
+    if ((s = ParamOf(first, count, "Target"))) {   // "can't attack you" (CantAttack only)
+        if (st.mode != MTG_STATIC_CANT_ATTACK || strcmp(s, "You"))
+            goto unknown;
+        st.taxYou = 1;
+    }
     if ((s = ParamOf(first, count, "AddHiddenKeyword"))) {   // "CARDNAME can't block." / "can't attack.": those modes
         if (st.mode != MTG_STATIC_CONTINUOUS || ParamOf(first, count, "AddPower") || ParamOf(first, count, "AddToughness")
             || ParamOf(first, count, "AddKeyword") || ParamOf(first, count, "SetPower") || !ParamOf(first, count, "Affected"))
@@ -303,10 +472,10 @@ static void ParseOne(MtgCardDef *c, int cardId, char *text)
     }
     if ((s = ParamOf(first, count, "CharacteristicDefining"))) {   // */*: on the card itself, wherever it is
         if (strcmp(s, "True") != 0 || st.mode != MTG_STATIC_CONTINUOUS || ParamOf(first, count, "Affected")
-            || ParamOf(first, count, "AffectedDefined") || !c->starPT)
+            || ParamOf(first, count, "AffectedDefined"))   // (a printed P/T too: Lost Order of Jarkeld's 1/1)
             goto unknown;
-        st.self = 1;
-        if ((s = ParamOf(first, count, "EffectZone")) && strcmp(s, "All") != 0)
+        st.self = 1;   // (EffectZone$ Battlefield too: it's only counted there, Mtg_StaticMods)
+        if ((s = ParamOf(first, count, "EffectZone")) && strcmp(s, "All") != 0 && strcmp(s, "Battlefield") != 0)
             goto unknown;
     } else if ((s = ParamOf(first, count, "EffectZone")) && strcmp(s, "All") == 0
                && (st.mode == MTG_STATIC_REDUCE_COST || st.mode == MTG_STATIC_RAISE_COST)
@@ -329,7 +498,13 @@ static void ParseOne(MtgCardDef *c, int cardId, char *text)
     st.affected = ParamOf(first, count, st.mode == MTG_STATIC_CONTINUOUS || st.hiddenKw ? "Affected"
                                       : st.mode == MTG_STATIC_CANT_BLOCK_BY ? "ValidAttacker"
                                       : st.mode == MTG_STATIC_MUST_ATTACK ? "ValidCreature"
-                                      : st.mode == MTG_STATIC_CANT_TARGET ? "ValidTarget" : "ValidCard");
+                                      : st.mode == MTG_STATIC_CANT_TARGET ? "ValidTarget"
+                                      : st.mode == MTG_STATIC_BLOCK_SHADOW ? "ValidBlocker" : "ValidCard");
+    if (st.mode == MTG_STATIC_BLOCK_SHADOW && (!(st.blocker = ParamOf(first, count, "ValidAttacker"))
+                                               || !Mtg_ValidSpecKnown(st.blocker)))
+        goto unknown;   // (blocker here: the attackers it may block)
+    if (st.global)
+        st.affected = "Card";
     if (st.mode == MTG_STATIC_CANT_BE_ACTIVATED && !st.affected)
         st.affected = "Card";   // (Stabilizer: every card's Cycling)
     if (st.mode == MTG_STATIC_CANT_PLAY_LAND && !st.affected)
@@ -422,6 +597,53 @@ static void ParseOne(MtgCardDef *c, int cardId, char *text)
     }
     if ((s = ParamOf(first, count, "AddKeyword")) && !Keywords(&st, s))
         goto unknown;
+    if ((s = ParamOf(first, count, "AddType"))) {   // "Creature & Elf", "Mountain", "ChosenType"
+        char names[96], *p = names, *k;
+        if (st.mode != MTG_STATIC_CONTINUOUS || strlen(s) >= sizeof(names))
+            goto unknown;
+        strcpy(names, s);
+        while ((k = Mtg_Token(&p, '&')) != NULL) {
+            static const struct { const char *name; uint8_t bit; } sTypes[] = {
+                {"Creature", MTG_T_CREATURE}, {"Artifact", MTG_T_ARTIFACT}, {"Land", MTG_T_LAND}, {"Enchantment", MTG_T_ENCHANTMENT}};
+            unsigned q;
+            int idx;
+            while (*k == ' ')
+                k++;
+            for (i = (int)strlen(k); i > 0 && k[i - 1] == ' '; i--)
+                k[i - 1] = 0;
+            for (q = 0; q < sizeof(sTypes) / sizeof(sTypes[0]) && strcmp(k, sTypes[q].name); q++)
+                ;
+            if (q < sizeof(sTypes) / sizeof(sTypes[0])) {
+                st.addTypes |= sTypes[q].bit;
+                continue;
+            }
+            idx = strcmp(k, "ChosenType") == 0 ? MTG_SUB_CHOSEN - 1 : Mtg_SubtypeIndex(k, (unsigned)strlen(k));
+            if (idx < 0 || (st.addSub[0] && st.addSub[1]))
+                goto unknown;
+            st.addSub[st.addSub[0] ? 1 : 0] = (uint16_t)(idx + 1);
+        }
+    }
+    if ((s = ParamOf(first, count, "RemoveLandTypes")))
+        st.removeLand = strcmp(s, "True") == 0;
+    if ((s = ParamOf(first, count, "RemoveCreatureTypes")))
+        st.removeCreature = strcmp(s, "True") == 0;
+    if ((st.removeLand || st.removeCreature) && !st.addSub[0])
+        goto unknown;
+    if ((s = ParamOf(first, count, "SetColor"))) {   // "Black", "Colorless", "ChosenColor"
+        static const char *const sNames[5] = {"White", "Blue", "Black", "Red", "Green"};
+        if (st.mode != MTG_STATIC_CONTINUOUS)
+            goto unknown;
+        st.setColors = MTG_SETCOLOR;
+        if (strcmp(s, "ChosenColor") == 0)
+            st.setColors |= MTG_SETCOLOR_CHOSEN;
+        else if (strcmp(s, "Colorless") != 0) {
+            for (i = 0; i < 5 && strcmp(s, sNames[i]); i++)
+                ;
+            if (i == 5)
+                goto unknown;
+            st.setColors |= (uint8_t)MTG_COLOR_BIT(i);
+        }
+    }
     if ((st.check = ParamOf(first, count, "CheckSVar"))) {   // (StaticAbility.checkConditions' CheckSVar)
         st.compare = ParamOf(first, count, "SVarCompare");
         if (!Mtg_CheckSvarKnown(cardId, st.check, st.compare))
@@ -771,10 +993,60 @@ static int AddStatic(MtgCardDef *c, const MtgStatic *st)
     return 1;
 }
 
+// "Event$ Moved | ValidCard$ Card.Self[+...] | Destination$ Battlefield | ReplaceWith$ SVAR | ReplacementResult$
+// Updated": what it does as it enters, the same as K:ETBReplacement (its ValidCard$ the condition): 1 if it was one
+static int EtbRepl(MtgCardDef *c, const char *text)
+{
+    char buf[400], *p, *k;
+    const char *with = NULL, *valid = NULL, *dest = NULL, *ev = NULL;
+    int other = 0, i;
+    char *t;
+    if (strlen(text) >= sizeof(buf))
+        return 0;
+    strcpy(buf, text);
+    for (p = buf; (k = Mtg_Token(&p, '|')) != NULL;) {
+        char *dollar = strchr(k, '$'), *key = k, *val;
+        if (!dollar)
+            continue;
+        *dollar = 0;
+        val = dollar + 1;
+        while (*key == ' ')
+            key++;
+        for (i = (int)strlen(key) - 1; i >= 0 && key[i] == ' '; i--)
+            key[i] = 0;
+        while (*val == ' ')
+            val++;
+        for (i = (int)strlen(val) - 1; i >= 0 && val[i] == ' '; i--)
+            val[i] = 0;
+        if (strcmp(key, "Event") == 0)
+            ev = val;
+        else if (strcmp(key, "ValidCard") == 0)
+            valid = val;
+        else if (strcmp(key, "Destination") == 0)
+            dest = val;
+        else if (strcmp(key, "ReplaceWith") == 0)
+            with = val;
+        else if (strcmp(key, "ReplacementResult") != 0 && strcmp(key, "Description") != 0 && strcmp(key, "ActiveZones") != 0)
+            other = 1;
+    }
+    if (other || !ev || strcmp(ev, "Moved") || !dest || strcmp(dest, "Battlefield") || !with || !valid
+        || strncmp(valid, "Card.Self", 9) != 0 || (valid[9] && valid[9] != '+'))
+        return 0;
+    if (c->etbReplText[1])
+        return 0;
+    t = malloc(strlen(with) + strlen(valid) + 16);
+    sprintf(t, "%s:Mandatory::%s", with, valid);   // (the condition: itself as written; "Card.Self" holds always)
+    c->etbReplText[c->etbReplText[0] ? 1 : 0] = t;
+    return 1;
+}
+
 void Mtg_ParseReplacement(MtgCardDef *c, int cardId, char *text)
 {
     MtgStatic st;
-    int r = ParseRepl(c, cardId, text, &st);
+    int r;
+    if (EtbRepl(c, text))
+        return;
+    r = ParseRepl(c, cardId, text, &st);
     if (!r || (r == 1 && !AddStatic(c, &st)))
         Mtg_Unsupported(c, "replacement effect");
 }
@@ -910,6 +1182,7 @@ static int Applies(const MtgDuel *d, const MtgStatic *st, int src, int obj)
 
 // What every static on the battlefield does to OBJ now
 // one static's share of what OBJ is now (SRC its source, CTRL that source's controller)
+static int sModsObj;   // (the object Mtg_StaticMods works out)
 static void ModsBy(const MtgDuel *d, const MtgStatic *st, int s, int ctrl, uint32_t srcSeq, MtgStaticMods *m,
                    uint32_t *setPowerSeqP, uint32_t *setToughSeqP)
 {
@@ -932,6 +1205,23 @@ static void ModsBy(const MtgDuel *d, const MtgStatic *st, int s, int ctrl, uint3
     m->keywords |= st->addKeywords;
     m->landwalk |= st->addLandwalk;
     m->protection |= st->addProtection;
+    if (st->protOwnColors)
+        m->protection |= Mtg_Card(d->objs[sModsObj].def)->colors;   // (its printed colors: no static asked again)
+    if (st->setColors) {
+        m->colorsSet = 1;
+        m->colors = st->setColors & 0x1F;
+        if ((st->setColors & MTG_SETCOLOR_CHOSEN) && s >= 0 && s < d->objCount)
+            m->colors = gMtgEffCtx ? gMtgEffCtx->chosenColors : d->objs[s].chosenColors;
+    }
+    if (st->addProtSpec)
+        for (int q = 0; q < 2; q++)
+            if (!m->protSpec[q]) {
+                m->protSpec[q] = st->addProtSpec;
+                m->protExcept[q] = (int16_t)(st->protExceptHost ? s : -1);
+                break;
+            }
+    if (st->protChosen && s >= 0 && s < d->objCount)
+        m->protection |= gMtgEffCtx ? gMtgEffCtx->chosenColors : d->objs[s].chosenColors;
     if (st->setPower != MTG_STATIC_NO_SET && srcSeq + 1 > setPowerSeq)
         m->setPower = st->setPower, setPowerSeq = srcSeq + 1;
     if (st->setToughness != MTG_STATIC_NO_SET && srcSeq + 1 > setToughSeq)
@@ -962,6 +1252,7 @@ void Mtg_StaticMods(const MtgDuel *d, int obj, MtgStaticMods *m)
     if (sDepth || d->objs[obj].zone != MTG_ZONE_BATTLEFIELD)
         return;
     sDepth++;
+    sModsObj = obj;
     for (s = 0; s < d->objCount; s++) {
         const MtgObj *src = &d->objs[s];
         const MtgCardDef *c;
@@ -992,10 +1283,153 @@ void Mtg_StaticMods(const MtgDuel *d, int obj, MtgStaticMods *m)
     sDepth--;
 }
 
+// the type-changing layer alone (613.1d), worked out before the others: what statics add to OBJ's types and subtypes
+// (its own guard: Darkest Hour's "creatures" asks for Living Lands' Forests, P/T and colors after it)
+static int sTypeDepth;
+static void TypeModsBy(const MtgDuel *d, const MtgStatic *st, int s, MtgStaticMods *m)
+{
+    int q, r;
+    m->addTypes |= st->addTypes;
+    m->removeLand |= st->removeLand;
+    m->removeCreature |= st->removeCreature;
+    for (q = 0; q < 2 && st->addSub[q]; q++) {
+        uint16_t sub = st->addSub[q];
+        if (sub == MTG_SUB_CHOSEN) {   // (its source's chosen type, as it is now)
+            if (s < 0 || s >= d->objCount || !d->objs[s].chosenType)
+                continue;
+            sub = d->objs[s].chosenType;
+        }
+        for (r = 0; r < 4; r++)
+            if (!m->addSub[r] || m->addSub[r] == sub) {
+                m->addSub[r] = sub;
+                break;
+            }
+    }
+}
+
+static void TypeMods(const MtgDuel *d, int obj, MtgStaticMods *m)
+{
+    int s, k;
+    memset(m, 0, sizeof(*m));
+    if (sTypeDepth || d->objs[obj].zone != MTG_ZONE_BATTLEFIELD || !Mtg_TypeLayer(d))
+        return;
+    sTypeDepth++;
+    for (s = 0; s < d->objCount; s++) {
+        const MtgObj *src = &d->objs[s];
+        const MtgCardDef *c;
+        if (src->zone != MTG_ZONE_BATTLEFIELD)
+            continue;
+        c = Mtg_Card(src->def);
+        for (k = 0; k < c->staticCount; k++) {
+            const MtgStatic *st = &gMtgStatics[c->statics[k]];
+            if (st->mode == MTG_STATIC_CONTINUOUS && !st->fromGrave && (st->addTypes || st->addSub[0])
+                && Applies(d, st, s, obj))
+                TypeModsBy(d, st, s, m);
+        }
+    }
+    sTypeDepth--;
+}
+
+uint8_t Mtg_StaticTypes(const MtgDuel *d, int obj)
+{
+    MtgStaticMods m;
+    TypeMods(d, obj, &m);
+    return m.addTypes;
+}
+
+static int CardHasSub(const MtgCardDef *c, const char *t, size_t n)
+{
+    const char *s = c->subtypes;
+    while (s && *s) {
+        const char *e = strchr(s, ' ');
+        size_t len = e ? (size_t)(e - s) : strlen(s);
+        if (len == n && strncmp(s, t, n) == 0)
+            return 1;
+        if (!e)
+            break;
+        s = e + 1;
+    }
+    return 0;
+}
+
+static const char *const sBasicNames[5] = {"Plains", "Island", "Swamp", "Mountain", "Forest"};
+
+int Mtg_TypeLayer(const MtgDuel *d)
+{
+    static const MtgDuel *sD;   // (kept while nothing has moved: d->seq counts every move)
+    static uint32_t sSeq;
+    static int sCount = -1, sResult;
+    int i, k;
+    if (sD == d && sSeq == d->seq && sCount == d->objCount)
+        return sResult;
+    sD = d, sSeq = d->seq, sCount = d->objCount, sResult = 0;
+    for (i = 0; i < d->objCount; i++)
+        if (d->objs[i].zone == MTG_ZONE_BATTLEFIELD) {
+            const MtgCardDef *c = Mtg_Card(d->objs[i].def);
+            for (k = 0; k < c->staticCount; k++) {
+                const MtgStatic *st = &gMtgStatics[c->statics[k]];
+                if (st->addTypes || st->addSub[0] || st->setColors)
+                    return sResult = 1;
+            }
+        }
+    return 0;
+}
+
+// the basic land types the statics add (MTG_COLOR_BIT W..G)
+static uint8_t AddedBasics(const MtgStaticMods *m)
+{
+    uint8_t b = 0;
+    int r, i;
+    for (r = 0; r < 4 && m->addSub[r]; r++)
+        for (i = 0; i < 5; i++)
+            if (strcmp(Mtg_SubtypeName(m->addSub[r] - 1), sBasicNames[i]) == 0)
+                b |= (uint8_t)MTG_COLOR_BIT(i);
+    return b;
+}
+
+uint8_t Mtg_ObjLandTypes(const MtgDuel *d, int obj)
+{
+    MtgStaticMods m;
+    uint8_t own = Mtg_Card(d->objs[obj].def)->intrinsicMana;
+    if (d->objs[obj].zone != MTG_ZONE_BATTLEFIELD || !Mtg_TypeLayer(d))
+        return own;
+    TypeMods(d, obj, &m);
+    return (uint8_t)((m.removeLand ? 0 : own) | AddedBasics(&m));
+}
+
+int Mtg_ObjLostText(const MtgDuel *d, int obj)
+{
+    MtgStaticMods m;
+    if (d->objs[obj].zone != MTG_ZONE_BATTLEFIELD || !(Mtg_Card(d->objs[obj].def)->types & MTG_T_LAND) || !Mtg_TypeLayer(d))
+        return 0;
+    TypeMods(d, obj, &m);
+    return m.removeLand && AddedBasics(&m);
+}
+
+int Mtg_ObjHasSubtype(const MtgDuel *d, int obj, const char *t, size_t n)
+{
+    const MtgCardDef *c = Mtg_Card(d->objs[obj].def);
+    MtgStaticMods m;
+    int idx, r, kinds;
+    if (d->objs[obj].zone != MTG_ZONE_BATTLEFIELD || !Mtg_TypeLayer(d))
+        return CardHasSub(c, t, n);
+    TypeMods(d, obj, &m);
+    idx = Mtg_SubtypeIndex(t, (unsigned)n);
+    for (r = 0; r < 4 && m.addSub[r]; r++)
+        if (m.addSub[r] - 1 == idx)
+            return 1;
+    if (!CardHasSub(c, t, n))
+        return 0;
+    kinds = idx >= 0 ? Mtg_SubtypeKinds(idx) : 0;
+    return !((m.removeLand && (kinds & MTG_SUBK_LAND)) || (m.removeCreature && (kinds & MTG_SUBK_CREATURE)));
+}
+
 int Mtg_ObjAbilities(const MtgDuel *d, int obj, uint16_t *out, int max)
 {
     const MtgCardDef *c = Mtg_Card(d->objs[obj].def);
     int n = 0, s, k, g;
+    if (!sDepth && Mtg_ObjLostText(d, obj))
+        c = Mtg_Card(MTG_FACE_DOWN);   // (none of its own: Blood Moon's nonbasic lands)
     for (k = 0; k < c->abilityCount && n < max; k++)
         out[n++] = c->abilities[k];
     if (sDepth || d->objs[obj].zone != MTG_ZONE_BATTLEFIELD)
@@ -1025,6 +1459,8 @@ int Mtg_ObjTriggers(const MtgDuel *d, int obj, uint16_t *out, int max)
 {
     const MtgCardDef *c = Mtg_Card(d->objs[obj].def);
     int n = 0, s, k, g;
+    if (!sDepth && Mtg_ObjLostText(d, obj))
+        c = Mtg_Card(MTG_FACE_DOWN);
     for (k = 0; k < c->triggerCount && n < max; k++)
         out[n++] = c->triggers[k];
     if (sDepth || d->objs[obj].zone != MTG_ZONE_BATTLEFIELD)
@@ -1078,12 +1514,18 @@ int Mtg_StaticController(const MtgDuel *d, int obj)
 // does this static (from S, controlled by CTRL) forbid it? (Mtg_StaticForbids' test of one)
 static int ForbidBy(const MtgDuel *d, const MtgStatic *st, int s, int ctrl, int mode, int obj, int other)
 {
+    if (st->mode == mode && st->global)
+        return Present(d, st, s);
     if (st->mode != mode || !Applies(d, st, s, obj))
+        return 0;
+    if (mode == MTG_STATIC_BLOCK_SHADOW && !Mtg_ValidObj(d, other, st->blocker, s, ctrl))
         return 0;
     if (mode == MTG_STATIC_CANT_BLOCK_BY && st->blocker && !Mtg_ValidObj(d, other, st->blocker, s, ctrl))
         return 0;
     if (st->unlessDefender && DefenderIs(d, st, s, obj))
         return 0;   // (the defending player is as it says: it may attack)
+    if (mode == MTG_STATIC_CANT_ATTACK && st->taxYou && d->objs[obj].controller == ctrl)
+        return 0;   // ("can't attack you": its controller's own creatures attack the other player)
     // CantBeCast: OTHER is the player casting it (Caster$: anyone / its controller / an opponent / remembered)
     if (mode == MTG_STATIC_CANT_BE_CAST && ((st->activator == 1 && other != ctrl)
                                             || (st->activator == 2 && other == ctrl)
@@ -1104,6 +1546,104 @@ static int ForbidBy(const MtgDuel *d, const MtgStatic *st, int s, int ctrl, int 
             return 0;
     }
     return 1;
+}
+
+int Mtg_UntapLimits(const MtgDuel *d, int player, const char **spec, int *n, int max)
+{
+    int s, k, count = 0;
+    for (s = 0; s < d->objCount && count < max; s++) {
+        const MtgObj *src = &d->objs[s];
+        const MtgCardDef *c;
+        if (src->zone != MTG_ZONE_BATTLEFIELD)
+            continue;
+        c = Mtg_Card(src->def);
+        for (k = 0; k < c->staticCount && count < max; k++) {
+            const MtgStatic *st = &gMtgStatics[c->statics[k]];
+            if (st->mode != MTG_STATIC_UNTAP_LIMIT || (st->taxYou && src->controller != player) || !Present(d, st, s))
+                continue;
+            spec[count] = st->affected;
+            n[count++] = st->untapN;
+        }
+    }
+    return count;
+}
+
+void Mtg_BlockerLimits(const MtgDuel *d, int attacker, int *min, int *max)
+{
+    int s, k;
+    *min = *max = 0;
+    for (s = 0; s < d->objCount; s++) {
+        const MtgObj *src = &d->objs[s];
+        const MtgCardDef *c;
+        if (src->zone != MTG_ZONE_BATTLEFIELD)
+            continue;
+        c = Mtg_Card(src->def);
+        for (k = 0; k < c->staticCount; k++) {
+            const MtgStatic *st = &gMtgStatics[c->statics[k]];
+            if (st->mode != MTG_STATIC_BLOCKERS || !Applies(d, st, s, attacker))
+                continue;
+            if (st->blockMin > *min)
+                *min = st->blockMin;
+            if (st->blockMax && (!*max || st->blockMax < *max))
+                *max = st->blockMax;
+        }
+    }
+}
+
+int Mtg_MaxHandSize(const MtgDuel *d, int player)
+{
+    int s, k, size = 7, raise = 0;
+    uint32_t setSeq = 0;
+    for (s = 0; s < d->objCount; s++) {
+        const MtgObj *src = &d->objs[s];
+        const MtgCardDef *c;
+        if (src->zone != MTG_ZONE_BATTLEFIELD)
+            continue;
+        c = Mtg_Card(src->def);
+        for (k = 0; k < c->staticCount; k++) {
+            const MtgStatic *st = &gMtgStatics[c->statics[k]];
+            if (st->mode != MTG_STATIC_HAND_SIZE || (st->activator == 1 && src->controller != player)
+                || (st->activator == 2 && src->controller == player)
+                || (st->activator == 3 && src->chosenPlayer != player + 1) || !Present(d, st, s))
+                continue;
+            if (st->handSet >= 0 && src->seq + 1 > setSeq)   // (the latest set wins, then every raise)
+                size = st->handSet, setSeq = src->seq + 1;
+            raise += st->handRaise;
+        }
+    }
+    if (size >= 100)
+        return 1000;
+    return size + raise < 0 ? 0 : size + raise;
+}
+
+int Mtg_AttackTax(const MtgDuel *d, int attacker)
+{
+    int s, k, total = 0;
+    for (s = 0; s < d->objCount; s++) {
+        const MtgObj *src = &d->objs[s];
+        const MtgCardDef *c;
+        if (src->zone != MTG_ZONE_BATTLEFIELD)
+            continue;
+        c = Mtg_Card(src->def);
+        for (k = 0; k < c->staticCount; k++) {
+            const MtgStatic *st = &gMtgStatics[c->statics[k]];
+            if (st->mode != MTG_STATIC_ATTACK_TAX || (st->taxYou && src->controller == d->objs[attacker].controller)
+                || !Mtg_ValidObj(d, attacker, st->affected, s, src->controller))
+                continue;
+            if (st->taxX) {
+                MtgStackEntry e;
+                MtgResolveCtx ctx;
+                int ok;
+                memset(&e, 0, sizeof(e));
+                ctx.e = &e;
+                ctx.controller = src->controller;
+                ctx.source = s;
+                total += Mtg_Amount(d, &ctx, st->card, st->taxX, &ok);
+            } else
+                total += st->costGeneric;
+        }
+    }
+    return total;
 }
 
 int Mtg_StaticForbids(const MtgDuel *d, int mode, int obj, int other)

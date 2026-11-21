@@ -1,0 +1,19 @@
+pressuntil A field 5000
+waitfor online 6000
+mp item 1 3
+mp savedata ball:last 1
+wait 200
+mp wild 288:3
+pressuntil A action 4000
+wait 10
+press L 2
+wait 600
+rendershot b1
+press A 2
+wait 300
+rendershot b2
+pressuntil A field 9000
+wait 200
+barrier caught 2
+wait 1500
+quit

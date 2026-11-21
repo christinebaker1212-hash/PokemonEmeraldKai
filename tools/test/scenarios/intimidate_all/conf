@@ -1,0 +1,7 @@
+# INTIMIDATE on both foes at once (the user, 2026-11-21): GABBY & TY's double battle, GYARADOS leads: one stat animation over
+# both foes and one line ("...'s INTIMIDATE cuts the foes' ATTACK!"). Shots i0-i?.
+MODE=1
+TMO=120
+ENV_A="MOEMON_DEBUG_PARTY=130:60,26:60"
+EXPECT_A=("battle: intimidate on 2 at once")
+UNEXPECT_A=("[crash]" "TIMEOUT")

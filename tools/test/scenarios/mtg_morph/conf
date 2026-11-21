@@ -1,0 +1,6 @@
+# MAGIC's Morph on the table: SKIRK MARAUDER cast face down for {3} (its back on the table, "Face-down Skirk Marauder"
+# to you), then TURN FACE UP ({2}{R}) and its 2 damage. Shots mo_menu, mo_facedown, mo_turnup_menu, mo_target, mo_after.
+MODE=1
+TMO=240
+EXPECT_A=("mtg: you: cast Skirk Marauder" "mtg: focus Face-down creature" "mtg: you: turned up")
+UNEXPECT_A=("[crash]" "mtg: can't put" "mtg: no Face-down creature to focus")

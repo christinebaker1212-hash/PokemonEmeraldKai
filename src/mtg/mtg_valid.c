@@ -6,13 +6,24 @@
 #include "mtg_internal.h"
 
 static const char *const sColorProps[5] = {"White", "Blue", "Black", "Red", "Green"};
+int gMtgValidX = -1;
 
 uint8_t Mtg_ObjColors(const MtgDuel *d, int obj)
 {
     const MtgObj *o = &d->objs[obj];
-    if (o->animUntil && o->zone == MTG_ZONE_BATTLEFIELD)   // (an Animate's colors: instead, or besides)
-        return o->animOverwrite ? o->animColors : (uint8_t)(Mtg_Card(o->def)->colors | o->animColors);
-    return Mtg_Card(o->def)->colors;
+    uint8_t col = Mtg_Card(o->def)->colors;
+    MtgStaticMods m;
+    if (o->zone != MTG_ZONE_BATTLEFIELD)
+        return col;
+    if (!Mtg_TypeLayer(d))
+        m.colorsSet = 0;
+    else
+        Mtg_StaticMods(d, obj, &m);
+    if (m.colorsSet)   // (a static's SetColor$: the latest; an Animate's colors besides or instead, after it)
+        col = m.colors;
+    if (o->animUntil)
+        return o->animOverwrite ? o->animColors : (uint8_t)(col | o->animColors);
+    return col;
 }
 
 static int TypeBit(const char *t, size_t n)
@@ -28,21 +39,6 @@ static int TypeBit(const char *t, size_t n)
     for (i = 0; i < sizeof(sT) / sizeof(sT[0]); i++)
         if (strlen(sT[i].name) == n && strncmp(t, sT[i].name, n) == 0)
             return sT[i].bit;
-    return 0;
-}
-
-static int HasSubtype(const MtgCardDef *c, const char *t, size_t n)
-{
-    const char *s = c->subtypes;
-    while (*s) {
-        const char *e = strchr(s, ' ');
-        size_t len = e ? (size_t)(e - s) : strlen(s);
-        if (len == n && strncmp(s, t, n) == 0)
-            return 1;
-        if (!e)
-            break;
-        s = e + 1;
-    }
     return 0;
 }
 
@@ -71,6 +67,40 @@ static int Number(const char *p, size_t n, int *out)
     return 1;
 }
 
+// "cmcLEX", "powerGTX": X is the source card's SVar X (Ensnaring Bridge's cards in hand); a paid X (Count$xPaid, or
+// none) is the cast's being checked (gMtgValidX) or the resolving one's
+static int ValidXOf(const MtgDuel *d, int src)
+{
+    const char *sv = src >= 0 && src < d->objCount ? Mtg_Svar(d->objs[src].def, "X") : NULL;
+    if (sv && strcmp(sv, "Count$xPaid")) {
+        MtgStackEntry e;
+        MtgResolveCtx ctx;
+        int ok;
+        if (d->resolving && d->res.source == src)
+            e = d->res;
+        else
+            memset(&e, 0, sizeof(e));
+        ctx.e = &e;
+        ctx.controller = d->objs[src].controller;
+        ctx.source = src;
+        return Mtg_Amount(d, &ctx, d->objs[src].def, "X", &ok);
+    }
+    return gMtgValidX >= 0 ? gMtgValidX : d->resolving ? d->res.x : 0;
+}
+
+// the card a choice is kept on (ChooseType / Color / Player: the source of the ability or static reading it)
+static const MtgObj *Holder(const MtgDuel *d, int src)
+{
+    static MtgObj sFromEffect;
+    if (gMtgEffCtx) {   // (an Effect's statics: what its source had chosen as it began)
+        sFromEffect.chosenType = gMtgEffCtx->chosenType;
+        sFromEffect.chosenColors = gMtgEffCtx->chosenColors;
+        sFromEffect.chosenPlayer = gMtgEffCtx->chosenPlayer;
+        return &sFromEffect;
+    }
+    return src >= 0 && src < d->objCount ? &d->objs[src] : NULL;
+}
+
 // one card property ("nonBlack", "YouCtrl", "powerLE2"...); *known = 0 if it isn't translated
 static int CardProp(const MtgDuel *d, int obj, const char *p, size_t n, int src, int controller, int *known)
 {
@@ -91,6 +121,64 @@ static int CardProp(const MtgDuel *d, int obj, const char *p, size_t n, int src,
             return !d || (Mtg_ObjColors(d, obj) & MTG_COLOR_BIT(i)) != 0;
     if ((n == 10 && strncmp(p, "ChosenCard", 10) == 0) || (n == 16 && strncmp(p, "ChosenCardStrict", 16) == 0))
         return !d || obj == Mtg_ChosenCard(d);   // (ChooseSource's pick)
+    if (n == 10 && strncmp(p, "ChosenType", 10) == 0) {   // of the type chosen for the source
+        const MtgObj *h;
+        if (!d)
+            return 1;
+        h = Holder(d, src);
+        return h && h->chosenType && Mtg_ObjHasSubtype(d, obj, Mtg_SubtypeName(h->chosenType - 1), strlen(Mtg_SubtypeName(h->chosenType - 1)));
+    }
+    if (n == 11 && strncmp(p, "ChosenColor", 11) == 0) {   // of the color chosen for the source
+        const MtgObj *h;
+        if (!d)
+            return 1;
+        h = Holder(d, src);
+        return h && (Mtg_ObjColors(d, obj) & h->chosenColors) != 0;
+    }
+    if (n == 10 && strncmp(p, "ChosenCtrl", 10) == 0) {   // controlled by the player chosen for the source
+        const MtgObj *h;
+        if (!d)
+            return 1;
+        h = Holder(d, src);
+        return h && h->chosenPlayer && o->controller == h->chosenPlayer - 1;
+    }
+    if (n > 5 && strncmp(p, "named", 5) == 0) {   // "namedKindle": a card of that name
+        const char *nm = c ? c->name : "";
+        return !d || (strlen(nm) == n - 5 && strncmp(nm, p + 5, n - 5) == 0);
+    }
+    if ((n == 18 && strncmp(p, "TargetedPlayerCtrl", 18) == 0) || (n == 17 && strncmp(p, "TargetedPlayerOwn", 17) == 0)) {
+        if (!d)   // (the player the resolving spell or ability targets)
+            return 1;
+        return d->resolving && d->res.target.kind == MTG_TGT_PLAYER
+            && (p[14] == 'C' ? o->controller : o->owner) == d->res.target.id;
+    }
+    if (n == 25 && strncmp(p, "blockingTriggeredAttacker", 25) == 0)   // (blocking the attacker that set it off)
+        return !d || (d->resolving && d->res.trigObj != MTG_NO_OBJ && o->blocking == d->res.trigObj);
+    if (n == 12 && strncmp(p, "EffectSource", 12) == 0)   // (an Effect's static: the card that made the Effect)
+        return !d || obj == src;
+    if (n == 12 && strncmp(p, "DefenderCtrl", 12) == 0)   // (two players: the one not attacking)
+        return !d || o->controller != d->active;
+    if (n == 16 && strncmp(p, "attackedThisTurn", 16) == 0)
+        return !d || o->attackedTurn == d->turn + 1;
+    if (n == 8 && strncmp(p, "faceDown", 8) == 0)
+        return !d || o->faceDownOf != 0;
+    if (n > 7 && p[n - 1] == 'X' && (strncmp(p, "powerXX", 5) == 0 || strncmp(p, "toughness", 9) == 0 || strncmp(p, "power", 5) == 0)) {
+        size_t l = p[0] == 'p' ? 5 : 9;   // "powerGTX", "toughnessLTX": against X (as cmcLEX)
+        if (n == l + 3 && (p[l] == 'L' || p[l] == 'G' || p[l] == 'E') && (p[l + 1] == 'E' || p[l + 1] == 'T' || p[l + 1] == 'Q')) {
+            int v, x;
+            if (!d)
+                return 1;
+            v = l == 5 ? Mtg_Power(d, obj) : Mtg_Toughness(d, obj);
+            x = ValidXOf(d, src);
+            return p[l] == 'E' ? v == x : p[l] == 'L' ? (p[l + 1] == 'E' ? v <= x : v < x) : (p[l + 1] == 'E' ? v >= x : v > x);
+        }
+    }
+    if (n == 6 && strncmp(p, "kicked", 6) == 0)   // (cast kicked: mtg_game.c; "kicked 1" / "kicked 2": with that kicker)
+        return !d || o->kicked;
+    if (n == 8 && strncmp(p, "kicked ", 7) == 0 && (p[7] == '1' || p[7] == '2'))
+        return !d || (o->kicked & (p[7] == '1' ? 1 : 2));
+    if (n == 31 && strncmp(p, "cameUnderControlSinceLastUpkeep", 31) == 0)   // (Echo's "if": mtg_game.c StartStep)
+        return !d || o->echoDue == 2;
     if (n == 17 && strncmp(p, "inZoneBattlefield", 17) == 0)   // ("by creatures": on the battlefield, not a spell)
         return !d || o->zone == MTG_ZONE_BATTLEFIELD;
     if (n == 10 && strncmp(p, "MultiColor", 10) == 0)
@@ -163,7 +251,17 @@ static int CardProp(const MtgDuel *d, int obj, const char *p, size_t n, int src,
     }
     if (n == 22 && strncmp(p, "wasDealtDamageThisTurn", 22) == 0)   // (marked damage lasts the turn)
         return !d || o->damage > 0;
-    if (n == 5 && strncmp(p, "Other", 5) == 0)
+    if (n > 5 && strncmp(p, "cmc", 3) == 0 && p[n - 1] == 'X' && n == 6
+        && ((p[3] == 'L' && (p[4] == 'E' || p[4] == 'T')) || (p[3] == 'G' && (p[4] == 'E' || p[4] == 'T'))
+            || (p[3] == 'E' && p[4] == 'Q'))) {   // "cmcLEX": against the resolving spell's X
+        int v, x;
+        if (!d)
+            return 1;
+        v = Mtg_ManaCostTotal(&c->cost);
+        x = ValidXOf(d, src);
+        return p[3] == 'E' ? v == x : p[3] == 'L' ? (p[4] == 'E' ? v <= x : v < x) : (p[4] == 'E' ? v >= x : v > x);
+    }
+    if ((n == 5 && strncmp(p, "Other", 5) == 0) || (n == 13 && strncmp(p, "StrictlyOther", 13) == 0))
         return !d || obj != src;
     if ((n == 4 && strncmp(p, "Self", 4) == 0) || (n == 12 && strncmp(p, "StrictlySelf", 12) == 0))   // (the card the ability or trigger belongs to)
         return !d || obj == src;
@@ -254,7 +352,7 @@ static int CardProp(const MtgDuel *d, int obj, const char *p, size_t n, int src,
             if (!((p[i] >= 'a' && p[i] <= 'z') || (p[i] >= 'A' && p[i] <= 'Z')))
                 break;
         if (i == (int)n && KnownSubtype(p, n))
-            return !d || HasSubtype(c, p, n);
+            return !d || Mtg_ObjHasSubtype(d, obj, p, n);
     }
     *known = 0;
     return 0;
@@ -279,6 +377,8 @@ static int Alternative(const MtgDuel *d, int isPlayer, int id, const char *a, si
             const char *pp = dot + 1;
             if (pn == 12 && strncmp(pp, "IsRemembered", 12) == 0)   // (a player the resolving chain or Effect remembers)
                 return !d || (isPlayer && Mtg_IsRememberedPlayer(d, id));
+            if (pn == 6 && strncmp(pp, "Chosen", 6) == 0)   // (the player chosen for the source: ChoosePlayer)
+                return !d || (isPlayer && Holder(d, src) && Holder(d, src)->chosenPlayer == id + 1);
             if (pn == 19 && strncmp(pp, "EnchantedController", 19) == 0)   // (the controller of the creature its Aura holds)
                 return !d || (isPlayer && src != MTG_NO_OBJ && d->objs[src].attachedTo != MTG_NO_OBJ
                               && d->objs[d->objs[src].attachedTo].controller == id);
@@ -296,6 +396,25 @@ static int Alternative(const MtgDuel *d, int isPlayer, int id, const char *a, si
             return 0;
         return a[0] == 'P' || (a[0] == 'O' ? id != controller : id == controller);
     }
+    if (tn == 5 && strncmp(a, "Spell", 5) == 0) {   // a spell: a card on the stack ("Spell.Blue")
+        if (d && (isPlayer || d->objs[id].zone != MTG_ZONE_STACK))
+            return 0;
+        if (dot) {
+            const char *p = dot + 1, *end = a + n;
+            int ok = 1;
+            while (p < end) {
+                const char *plus = memchr(p, '+', (size_t)(end - p));
+                size_t pn = plus ? (size_t)(plus - p) : (size_t)(end - p);
+                if (!CardProp(d, id, p, pn, src, controller, known))
+                    ok = 0;
+                if (!*known)
+                    return 0;
+                p += pn + 1;
+            }
+            return ok;
+        }
+        return 1;
+    }
     bit = TypeBit(a, tn);
     if (!bit) {   // a bare subtype ("Goblin")
         if (!(a[0] >= 'A' && a[0] <= 'Z') || !KnownSubtype(a, tn)) {
@@ -306,10 +425,9 @@ static int Alternative(const MtgDuel *d, int isPlayer, int id, const char *a, si
     if (d && isPlayer)
         return 0;
     if (d) {
-        const MtgCardDef *c = Mtg_Card(d->objs[id].def);
         if (bit && bit != 0xFF && !(Mtg_ObjTypes(d, id) & bit))
             return 0;
-        if (!bit && !HasSubtype(c, a, tn))
+        if (!bit && !Mtg_ObjHasSubtype(d, id, a, tn))
             return 0;
     }
     if (dot) {
@@ -388,7 +506,7 @@ int Mtg_CanTarget(const MtgDuel *d, int obj, int sourceObj)
     if (Mtg_Keywords(d, obj) & MTG_KW_BIT(MTG_KW_SHROUD))
         return 0;
     (void)c;
-    if (sourceObj != MTG_NO_OBJ && (Mtg_Protection(d, obj) & Mtg_ObjColors(d, sourceObj)))
+    if (sourceObj != MTG_NO_OBJ && Mtg_ProtectedFrom(d, obj, sourceObj, 0))
         return 0;
     if (Mtg_StaticForbids(d, MTG_STATIC_CANT_TARGET, obj, sourceObj))   // ("can't be the target of ...": mtg_static.c)
         return 0;

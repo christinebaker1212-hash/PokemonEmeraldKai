@@ -3,14 +3,47 @@
 The user's decisions: `docs/MTG_DECISIONS.md` (keep to them). How much of the pool plays: `docs/MTG_SCOPE.md`
 (generated: `tools/mtg/scope.py`). This file: what is built, how it is built, what comes next.
 
+## Pick up here (2026-11-21, end of day): 3424 of 5408
+**The user: "Do not push 500 different Magic updates. Push and only update once everything all at once is finished."**
+MAGIC batches are LOCAL commits on the default branch (`git log origin/claude/clever-clarke-hqati2..HEAD`) until all
+5408 cards play; then one push and one release (its notes: everything since 1.210.0's MAGIC line).
+Done today, each in COOP_NOTES ("MAGIC: choices...", "Echo, Cumulative upkeep, Kicker, Buyback, Flashback", "Morph",
+"more costs, triggers' own costs, mana abilities that do more", "TapAll, any player's abilities...", "Debuff, ... X"):
+2870 -> 3424. Tests: test_rules.c (918 checks), scenarios mtg_choices, mtg_flashback, mtg_morph.
+How each batch goes: the blockers (`/tmp/mtg-tests/scope_dump graphics/mtg/forge.pak`, grouped by reason; for
+"static ability" an instrumented copy of mtg_static.c whose `goto unknown`s note their line), translate, check the
+newly playable cards' scripts for anything half-understood, a test in test_rules.c, then tools/mtg/fetch_art.py &&
+build_printed.py && tools/mtg/test.sh, scope.py, a COOP_NOTES line, a local commit.
+Next, by cards: static abilities (292: AddKeyword Banding / Phasing / Menace / Protection:<types>, modes
+CantAttackUnless / CantBlockUnless / AttackRequirement / MinMaxBlocker, counted Add/SetPower), damage replacements
+(R: DamageDone with ReplaceWith ReplaceEffect / ReplaceDamage / PutCounter / RemoveCounter: 30ish), Effects with
+Triggers$ (33: an Effect's own triggers, reading its remembered objects), multiple targets on triggers and more APIs
+(TargetMin 32, "a second target" 19), DividedAsYouChoose (19), Pump's UntilUntaps / UntilEndOfCombat durations,
+ChooseCard (25), Banding (20), Storm (12, needs spell copies), Phasing (12), Defined ReplacedCard / ExiledWith.
+
+## Pick up here (2026-11-21, later)
+**The user: "Do not push 500 different Magic updates. Push and only update once everything all at once is finished."**
+MAGIC batches are local commits on the default branch until all 5408 cards play; then one push and one release.
+Done since: choices (2907), Echo / Cumulative upkeep (2961), Kicker / Buyback / Flashback (3060): COOP_NOTES "MAGIC:
+Echo, Cumulative upkeep, Kicker, Buyback, Flashback", Morph (3129: COOP_NOTES "MAGIC: Morph"), costs / triggers' own costs / mana abilities that do more (3234: COOP_NOTES "MAGIC: more costs, triggers' own costs..."). Next by cards: static abilities (an instrumented copy of mtg_static.c, every `goto unknown` noting its line, finds which check: CantAttackUnless, AttackRequirement, Banding, Phasing, Menace, protection from types, counted amounts), damage replacements (ReplaceEffect / ReplaceDamage, R: DamageDone), X costs the player picks (SubCounter<X/...>, PayLife<X>, Discard<X/...>), DividedAsYouChoose, (281: the layer pieces below),
+T:Execute (58), ChangeZone (78), replacement effects (76), Banding (20), Storm (12), Phasing (12).
+
 ## Pick up here (2026-11-20: "finish up work on Magic ... incorporating all planned cards")
 The user (2026-11-20) asked for every planned card: the whole Premodern pool (docs/MTG_SCOPE.md). This session:
 Shadow (MTG_KW_SHADOW, mtg_game.c Mtg_CanBlock), Flanking (MTG_KW_FLANKING) and Rampage (MtgCardDef.rampage) in
 BlocksDeclared, Fading (MtgCardDef.fading: etbKind FADE, StartStep's upkeep): 2793 -> 2850 playable; then Valid properties Snow / nonSnow,
 blocked / unblocked, "AttachedTo <spec>" (mtg_valid.c): 2870; tests in tools/mtg/test_rules.c TestShadow.
-**The biggest next piece: a choice asked during resolution** (a query and the table's menu, the AI's pick): ChooseType
-(37), ChooseColor (23, and ETBReplacement:Other:ChooseColor 19), ChoosePlayer (23), ChooseCard (20), GenericChoice
-(16), NameCard (14), ChooseNumber (13): about 150 cards. Then an X picker (SubCounter<X/...>, PayLife<X>, X costs the
+**Done (2026-11-21): choices asked during resolution, and "as it enters"** (2870 -> 2907): MTG_CHOICE_OPTION
+(MtgQuery optKind / opts, MtgAnswer.card now 16 bits; Mtg_AskOption), ChooseType / ChooseColor / ChoosePlayer /
+ChooseNumber kept on the card that chose (MtgObj chosenType / chosenColors / chosenPlayer / chosenNumber, copied
+into an Effect as it begins: MtgEffect), GenericChoice's modes run as a coin's branch (MtgDuel.resMode), Valid
+ChosenType / ChosenColor / ChosenCtrl / Player.Chosen, Defined$ ChosenPlayer, Count$ChosenNumber;
+K:ETBReplacement:Other:SVAR (MtgCardDef.etbRepl, queued by Mtg_MoveTo, run by mtg_game.c RunEtb before anything
+else in Run); the table's list menu (mtg_board.c MODE_OPTION, OptionMenu: the creature types in the game first);
+the AI by Forge's AILogic (mtg_ai.c ChooseOption; modes by a look-ahead). Tests test_rules.c TestChoices, scenario
+mtg_choices. Still out of these: ChooseCard (20), NameCard (14), "each player chooses" (Defined$ Player),
+ChooseType Type$ Card, ChooseNumber Secretly / ChooseAnyNumber, ChooseColor OrColors, Animate's Types$ ChosenType
+(Mistform), ETBReplacement:Copy (Clone). Then an X picker (SubCounter<X/...>, PayLife<X>, X costs the
 player chooses rather than the most that can be paid). (The three combat ones resolve as blocks are declared rather than as triggers on
 the stack: nothing in the pool answers them in a way that matters.)
 How to find the next piece: tools/mtg/scope.py's table, and for "static ability" an instrumented copy of

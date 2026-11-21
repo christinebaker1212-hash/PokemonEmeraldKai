@@ -11,6 +11,7 @@ u16 MP_RegionVictorySong(u16 song);   // Moemon Kai (pokemon.c)
 #include "battle_gimmick.h"
 #include "mp_region.h"   // Moemon Kai: Gen 5-9
 #include "mp.h"
+#include "mp_dexplus.h"   // Moemon Co-op: the player's own POKéDEX
 #include "mp_uistyle.h"
 #include "mp/mp_join.h"
 #include "battle.h"
@@ -11345,7 +11346,19 @@ static void Cmd_trysetcaughtmondexflags(void)
     u16 species = GetMonData(&gEnemyParty[gBattlerPartyIndexes[MpCatchBattler()]], MON_DATA_SPECIES, NULL);
     u32 personality = GetMonData(&gEnemyParty[gBattlerPartyIndexes[MpCatchBattler()]], MON_DATA_PERSONALITY, NULL);
 
-    if (GetSetPokedexFlag(SpeciesToNationalPokedexNum(species), FLAG_GET_CAUGHT))
+    extern bool8 gMpCatchMyDex;
+    u16 nat = SpeciesToNationalPokedexNum(species);
+    gMpCatchMyDex = FALSE;
+    if (GetSetPokedexFlag(nat, FLAG_GET_CAUGHT) && MP_IsConnected() && !MP_DexOwn_Has(nat, TRUE))
+    {
+        // Moemon Co-op: a friend on the server caught one before: it goes in the player's own POKéDEX now, with its
+        // message ("my MOéDEX") and page as a first catch has (the user, 2026-11-21)
+        GetSetPokedexFlag(nat, FLAG_SET_CAUGHT);
+        gMpCatchMyDex = TRUE;
+        MPNet_Log("dex: %u into my own POKeDEX (a friend's catch before)", nat);
+        gBattlescriptCurrInstr += DSIZE8BIT + DSIZEPTR;
+    }
+    else if (GetSetPokedexFlag(nat, FLAG_GET_CAUGHT))
     {
         gBattlescriptCurrInstr = T1_READ_PTR(gBattlescriptCurrInstr + DSIZE8BIT);
     }
@@ -11658,6 +11671,7 @@ static u8 MpFirstOf(u8 mask, u8 *count)
 // mode 0 / 2: a target's stat changed / can't go lower: record it and jump, if the move groups
 // mode 1: set up the shared animation and line for the changed ones (jump if none)
 // mode 3: set up the line for the ones that can't go lower (jump if none)
+static u8 sMpIntimMask, sMpIntimChanger;   // (INTIMIDATE's foes so far: mpstatgroup 4 / 5)
 static void Cmd_mpstatgroup(void)
 {
     u8 mode = gBattlescriptCurrInstr[DSIZE8BIT];
@@ -11683,6 +11697,43 @@ static void Cmd_mpstatgroup(void)
         return;
     }
 
+    if (mode == 4)
+    {
+        // INTIMIDATE (doubles and triples): each foe it lowers is kept; shown together after the last (mode 5)
+        if (gBattleTypeFlags & BATTLE_TYPE_DOUBLE)
+        {
+            sMpIntimMask |= gBitTable[gBattlerTarget];
+            sMpIntimChanger = gBattleScripting.statChanger;
+            gBattlescriptCurrInstr = jumpPtr;
+        }
+        else
+            gBattlescriptCurrInstr += DSIZE8BIT + DSIZE8BIT + DSIZEPTR;
+        return;
+    }
+    if (mode == 5)
+    {
+        // ... one stat animation over all of them and one line ("cuts the foes' ATTACK!"; one alone: the usual line)
+        first = MpFirstOf(sMpIntimMask, &count);
+        if (count == 0)
+        {
+            gBattlescriptCurrInstr = jumpPtr;
+            return;
+        }
+        changer = sMpIntimChanger;
+        amount = GET_STAT_BUFF_VALUE(changer);
+        down = (changer & STAT_BUFF_NEGATIVE) != 0;
+        gBattlerTarget = first;
+        gBattleScripting.statChanger = changer;
+        gBattleScripting.animArg1 = GET_STAT_BUFF_ID(changer)
+                                  + (down ? (amount >= 2 ? STAT_ANIM_MINUS2 : STAT_ANIM_MINUS1)
+                                          : (amount >= 2 ? STAT_ANIM_PLUS2 : STAT_ANIM_PLUS1));
+        gBattleScripting.animArg2 = (count > 1) ? (0x80 | sMpIntimMask) : 0;
+        gBattleCommunication[MULTISTRING_CHOOSER] = count > 1 ? 0 : 1;
+        MPNet_Log("battle: intimidate on %u at once (mask %x)", count, sMpIntimMask);
+        sMpIntimMask = 0;
+        gBattlescriptCurrInstr += DSIZE8BIT + DSIZE8BIT + DSIZEPTR;
+        return;
+    }
     first = MpFirstOf(mode == 1 ? gMpStatGroupMask : gMpStatGroupFailMask, &count);
     if (count == 0)
     {

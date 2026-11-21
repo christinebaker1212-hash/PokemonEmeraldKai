@@ -6,6 +6,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <ctype.h>
 #include "mtg/mtg.h"
 #include "../tcg/tcg_gfx.h"
 #include "mtg_gfx.h"
@@ -517,7 +518,7 @@ SDL_Texture *MtgGfx_CardTexture(int card, int w, int h)
     struct GSurface s;
     if (!G_R() || w <= 0 || h <= 0)
         return NULL;
-    if (card < 0 || !Mtg_Card(card))
+    if (card < 0 || card == MTG_FACE_DOWN || !Mtg_Card(card))   // (a face-down card: its back)
         card = MTG_GFX_BACK;
     for (i = 0; i < TEXTURES; i++)
         if (sTex[i].texture && sTex[i].card == card && sTex[i].w == w && sTex[i].h == h && sTex[i].mode == sArtMode)
@@ -715,7 +716,7 @@ int MtgGfx_Cost(int card, int x, int y, int right, int big)
 void MtgGfx_KeywordLine(int card, uint32_t kw, char *out, unsigned cap)
 {
     static const char *const words[MTG_KW_COUNT] = {"FLYING", "REACH", "HASTE", "VIGILANCE", "DEFENDER", "FIRST STRIKE",
-                                                    "DOUBLE STRIKE", "TRAMPLE", "SHROUD", "FEAR", "FLASH", "LIFELINK", "SHADOW", "FLANKING"};
+                                                    "DOUBLE STRIKE", "TRAMPLE", "SHROUD", "FEAR", "FLASH", "LIFELINK", "SHADOW", "FLANKING", "MENACE"};
     static const char *const walks[5] = {"PLAINSWALK", "ISLANDWALK", "SWAMPWALK", "MOUNTAINWALK", "FORESTWALK"};
     static const char *const colors[5] = {"WHITE", "BLUE", "BLACK", "RED", "GREEN"};
     const MtgCardDef *c = card >= 0 ? Mtg_Card(card) : NULL;
@@ -735,4 +736,15 @@ void MtgGfx_KeywordLine(int card, uint32_t kw, char *out, unsigned cap)
     for (k = 0; k < 5; k++)
         if (c->protection & MTG_COLOR_BIT(k) && n + 1 < cap)
             n += (unsigned)snprintf(out + n, cap - n, "%sPROTECTION FROM %s", n ? "  " : "", colors[k]);
+    if (c->protection & MTG_PROT_ARTIFACT && n + 1 < cap)
+        n += (unsigned)snprintf(out + n, cap - n, "%sPROTECTION FROM ARTIFACTS", n ? "  " : "");
+    if (c->protSpec && n + 1 < cap) {   // ("Creature" -> CREATURES, "Goblin" -> GOBLINS)
+        n += (unsigned)snprintf(out + n, cap - n, "%sPROTECTION FROM ", n ? "  " : "");
+        const char *w = c->protText ? c->protText : c->protSpec;
+        for (k = 0; w[k] && w[k] != '.' && n + 2 < cap; k++)
+            out[n++] = (char)toupper((unsigned char)w[k]);
+        if (!c->protText)
+            out[n++] = 'S';
+        out[n] = 0;
+    }
 }

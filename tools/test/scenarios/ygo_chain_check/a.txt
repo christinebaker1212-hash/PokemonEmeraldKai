@@ -1,0 +1,30 @@
+pressuntil A field 5000
+wait 30
+mp ygo starter 0
+mp ygo seed 7
+mp ygo autochain
+mp ygo practice
+watchlog ygo board: chain window
+waitlog 30000 ygo board: chain window
+wait 60
+rendershot w1
+press DOWN 1
+wait 4
+press DOWN 1
+wait 4
+rendershot w2
+press A 1
+wait 20
+rendershot c1
+press UP 1
+wait 6
+press A 1
+wait 30
+rendershot c2
+press B 1
+wait 20
+rendershot c3
+press B 1
+wait 20
+rendershot c4
+quit

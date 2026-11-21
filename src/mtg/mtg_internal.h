@@ -48,6 +48,18 @@ enum {
     MTG_API_FOG,              // FogEffect: all combat damage this turn is prevented (MtgDuel.fog)
     MTG_API_CHOOSE_SOURCE,    // ChooseSourceEffect: its controller picks a source (Choices$): MtgDuel.chosen1
     MTG_API_REARRANGE_TOP,    // RearrangeTopOfLibraryEffect: the top NumCards$ put back in the order their owner picks
+    MTG_API_CHOOSE_TYPE,      // ChooseTypeEffect: a creature / land type (Type$) kept on its source (MtgObj.chosenType)
+    MTG_API_CHOOSE_COLOR,     // ChooseColorEffect: a color (Choices$ some) kept on its source (chosenColors)
+    MTG_API_CHOOSE_PLAYER,    // ChoosePlayerEffect: a player (Choices$) kept on its source (chosenPlayer)
+    MTG_API_CHOOSE_NUMBER,    // ChooseNumberEffect: Min$..Max$ kept on its source (chosenNumber)
+    MTG_API_GENERIC_CHOICE,   // ChooseGenericEffect: one of Choices$ (chains of their own) runs
+    MTG_API_TAP_ALL,          // TapAllEffect: every ValidCards$ permanent tapped
+    MTG_API_UNTAP_ALL,        // UntapAllEffect: ... untapped
+    MTG_API_PROTECTION_ALL,   // ProtectionAllEffect: the same for every ValidCards$ permanent (TargetedCardColor: the target's colors)
+    MTG_API_CHOOSE_CARD,      // ChooseCardEffect: Amount$ of Choices$ (battlefield / graveyard) picked: ChosenCard or remembered
+    MTG_API_SACRIFICE_ALL,    // SacrificeAllEffect: every ValidCards$ permanent (or the Defined$ ones) sacrificed
+    MTG_API_DEBUFF,           // DebuffEffect: each loses Keywords$ until end of turn (Duration$ Permanent: for good)
+    MTG_API_PROTECTION,       // ProtectionEffect: protection from Gains$ colors (Choice: one of Choices$ AnyColor) this turn
     MTG_API_COUNT
 };
 
@@ -70,7 +82,12 @@ typedef struct {
     const char *exileGraveSpec;
     uint8_t damageYou;                      // DamageYou<n>: its source deals n damage to its player (CostDamage)
     uint8_t subCtrN, subCtrKind;            // SubCounter<n/TYPE>: counters of a kind removed from its source
+    uint8_t subCtrAll;                      // SubCounter<All/TYPE>: every one of them (subCtrKind)
+    uint8_t discardHand;                    // Discard<1/Hand>: its player's whole hand
+    uint8_t millN, exileTopN;               // Mill<n>, ExileFromTop<n/Card>: its player's library's top cards
+    uint8_t xPart;                          // one part's amount is X (as chosen: MtgAction.x): MTG_XPART_*
 } MtgCost;
+enum { MTG_XPART_NONE, MTG_XPART_LIFE, MTG_XPART_DISCARD, MTG_XPART_SAC, MTG_XPART_COUNTERS, MTG_XPART_EXILE_GRAVE };
 // what a cost's picks come from (Mtg_CostCandidates): 0 discard (hand), 1 sacrifice, 2 exile from the hand, 3 return
 // to the hand, 4 tap (an untapped permanent), 5 exile from the graveyard
 enum { MTG_COSTK_DISCARD, MTG_COSTK_SAC, MTG_COSTK_EXILE_HAND, MTG_COSTK_RETURN, MTG_COSTK_TAP, MTG_COSTK_EXILE_GRAVE };
@@ -83,13 +100,17 @@ typedef struct {
     char label[40];        // the menu's words ("SACRIFICE A MOUNTAIN"), from its Description$
 } MtgAltCost;
 extern MtgAltCost *gMtgAltCosts;
+int Mtg_AddExtraCost(const char *text, const char *label);   // Kicker / Buyback / Flashback's: index + 1 (0: not paid here)
 int Mtg_CostPayable(const MtgDuel *d, int player, const MtgCost *c, int source, int casting);
 // pays an ability's non-mana UnlessCost$ as it resolves: its mana and what's paid at once now, then 1 if a pick is asked
 // (d->query: the answer goes on with the resolution once the picks are done)
 int Mtg_PayUnlessCost(MtgDuel *d, int player, int ability, int source);
+int Mtg_PayOptCost(MtgDuel *d, int player, int ability, int source);   // (a trigger's own cost's picks: 1 if asked)
 int Mtg_CostCandidates(const MtgDuel *d, int player, const MtgCost *c, int sac, int source, uint16_t *out);
+int Mtg_CostMaxX(const MtgDuel *d, int player, const MtgCost *c, int source);   // its X part's most (the life, the cards...)
 
 #define MTG_TGT_X 0xFF
+#define MTG_TGT_SVAR 0xFE
 typedef struct {
     uint8_t kind, api;
     uint16_t card;                  // the card it belongs to
@@ -104,7 +125,8 @@ typedef struct {
     uint16_t charmOf;               // a Charm's mode: the charm (0xFFFF: none)
     uint8_t fromHand;               // ActivationZone$ Hand: activated from its owner's hand (Cycling)
     uint8_t manaPain;               // a mana ability's "CARDNAME deals n damage to you" (SubAbility$ DealDamage, Defined$ You)
-    uint8_t tgtMin, tgtMax;         // TargetMin$ / TargetMax$ (objects only; 1 / 1 without them; MTG_TGT_X: X of them)
+    uint8_t tgtMin, tgtMax;         // TargetMin$ / TargetMax$ (1 / 1 without them; MTG_TGT_X: X of them; MTG_TGT_SVAR: an
+    const char *tgtMaxSv;           // SVar counted as it's cast, tgtMaxSv)
     uint16_t unless;                // UnlessCost$ that isn't only mana (Return<1/Land>, Discard<1/Random>, DamageYou<5>...):
                                     // gMtgUnlessCosts[unless - 1] (0: none, or a mana one: Mtg_Param)
     uint16_t delayed;               // DelayedTrigger: its trigger (gMtgTriggers[delayed - 1]), built from its own params
@@ -112,12 +134,22 @@ typedef struct {
     uint16_t repeatSub;             // RepeatEach: its RepeatSubAbility$ (0xFFFF: none)
     uint16_t effStatics[3];         // Effect: its StaticAbilities$ (gMtgStatics), parsed at load
     uint8_t effStaticCount;
+    uint16_t effTrigs[2];           // ... and its Triggers$ (gMtgTriggers)
+    uint8_t effTrigCount;
     uint8_t tgtFromSub;             // its tgt is the one target of a sub-ability later in its chain (chosen as it's cast;
                                     // its own effect doesn't act on it: Scent of Ivy's Reveal, then Pump)
     uint8_t tgtShared;              // a sub-ability whose target is its chain's (tgtFromSub on the first)
     uint8_t actLimit;               // ActivationLimit$ n: n times each turn (0: no limit)
     uint8_t actSorcery, actMyTurn;  // SorcerySpeed$ True ("only any time you could cast a sorcery"); PlayerTurn$ True
+    uint8_t anyPlayer;              // Activator$ Player: any player may activate it (and controls it on the stack)
+    uint8_t actNotMyTurn;           // Activator$ You.NonActive: only when it isn't its controller's turn
     uint16_t actSteps;              // ActivationPhases$: the steps it may be activated in (bits 1 << MTG_STEP_*; 0: any)
+    uint8_t manaFx;                 // a mana ability's SubAbility$ chain besides its mana (Draw, a counter, sacrifice...):
+                                    // queued as it's used (Mtg_Pay), resolved right after (mtg_game.c Run)
+    uint8_t optCost;                // a trigger's AB$ Execute with a Cost$: "you may pay ... If you do": asked as it
+                                    // resolves (mtg_effects.c Mtg_ResolveStep), the chain skipped if not paid
+    uint8_t unlessScale;            // UnlessScale$ KIND (Cumulative upkeep's, made in mtg_script.c): its UnlessCost$ once for
+                                    // each counter of the kind on its source (Mtg_CounterKind; 0: once)
 } MtgAbility;
 int Mtg_AbilityUses(const MtgDuel *d, int obj, int ability);
 void Mtg_Remember(MtgDuel *d, int obj);   // onto the resolving chain's remembered objects (once each)
@@ -148,6 +180,7 @@ enum {
     MTG_TRIG_CYCLED, MTG_TRIG_TAPS, MTG_TRIG_LAND_PLAYED, MTG_TRIG_BECOMES_TARGET,
     MTG_TRIG_ALWAYS, MTG_TRIG_DAMAGE_DONE_ONCE,   // (Always: a state trigger, IsPresent$; DamageDoneOnce: as DamageDone)   // (Taps: a permanent became tapped; LandPlayed: a land played)
     MTG_TRIG_DAMAGE_DEALT_ONCE,   // ("whenever it deals damage": each damage it deals, here, as DamageDoneOnce)
+    MTG_TRIG_TURN_FACE_UP,        // ("when CARDNAME is turned face up": Morph)
     MTG_TRIG_COUNT
 };
 typedef struct {
@@ -172,6 +205,7 @@ typedef struct {
 // translate makes the card unsupported
 void Mtg_ParseTrigger(MtgCardDef *c, int cardId, char *text);
 int Mtg_ParseGrantedTrigger(MtgCardDef *c, int cardId, char *text);   // a static's AddTrigger$: -1 if unsupported
+int Mtg_ParseEffectTrigger(MtgCardDef *c, int cardId, char *text);    // an Effect's Triggers$ (its own zone): -1 likewise
 void Mtg_CheckTriggers(MtgDuel *d, const MtgTrigEvent *ev);
 void Mtg_CheckStateTriggers(MtgDuel *d);   // Mode$ Always whose IsPresent$ holds (not again while one waits)     // the triggers it sets off join d->pending
 int Mtg_TriggerStillTrue(const MtgDuel *d, const MtgStackEntry *e);   // an intervening "if" (IsPresent$) on resolving
@@ -189,7 +223,15 @@ enum { MTG_STATIC_CONTINUOUS, MTG_STATIC_CANT_BLOCK, MTG_STATIC_CANT_ATTACK, MTG
        MTG_STATIC_RAISE_COST, MTG_STATIC_REDUCE_COST,
        MTG_STATIC_MUST_ATTACK, MTG_STATIC_CANT_BE_CAST, MTG_STATIC_CANT_TARGET, MTG_STATIC_CANT_PLAY_LAND, MTG_STATIC_CANT_BE_ACTIVATED,
        MTG_STATIC_ETB_TAPPED, MTG_STATIC_NO_UNTAP, MTG_STATIC_CANT_REGENERATE,
-       MTG_STATIC_PREVENT_DAMAGE, MTG_STATIC_CANT_BE_COUNTERED };   // (PREVENT_DAMAGE: Event$ DamageDone | Prevent$ True, another R: line)   // (two replacement effects, R: lines, kept here: they test alike)
+       MTG_STATIC_PREVENT_DAMAGE, MTG_STATIC_CANT_BE_COUNTERED,
+       MTG_STATIC_ATTACK_TAX,
+       // AssignNoCombatDamage, CanAttackDefender, CanAttackIfHaste (ValidCard$); CanBlockIfShadow (ValidBlocker$ that
+       // may block ValidAttacker$); and the global ones (no card: global): CantPreventDamage, IgnoreLandWalk, UnspentMana
+       MTG_STATIC_NO_COMBAT_DAMAGE, MTG_STATIC_ATTACK_DEFENDER, MTG_STATIC_ATTACK_HASTE, MTG_STATIC_BLOCK_SHADOW,
+       MTG_STATIC_CANT_PREVENT, MTG_STATIC_IGNORE_LANDWALK, MTG_STATIC_UNSPENT_MANA,
+       MTG_STATIC_UNTAP_LIMIT,
+       MTG_STATIC_HAND_SIZE,
+       MTG_STATIC_BLOCKERS };   // MinMaxBlocker: ValidCard$ can't be blocked by fewer than Min$ / more than Max$   // SetMaxHandSize$ N / Unlimited, RaiseMaxHandSize$ N for Affected$ You / Player / ...   // AddKeyword$ UntapAdjust:TYPE:N on Affected$ Player / You: untap no more than N TYPE   // (CantAttackUnless: its mana for each creature it affects that attacks)   // (PREVENT_DAMAGE: Event$ DamageDone | Prevent$ True, another R: line)   // (two replacement effects, R: lines, kept here: they test alike)
 typedef struct {
     uint16_t card;
     uint8_t mode;                   // MTG_STATIC_*
@@ -228,11 +270,30 @@ typedef struct {
     uint8_t tgtKind, combatOnly, damageMax;
     uint8_t gainLife;               // ... and its controller gains the damage prevented as life
     uint8_t oneShot;                // an Effect's "the next time ...": ReplaceWith$ exiling the Effect (PreventionEffect$)
+    uint8_t protChosen;             // AddKeyword$ Protection:Card.ChosenColor: from its source's chosen color
+    const char *addProtSpec;        // AddKeyword$ Protection:SPEC (creatures, enchantments, Gorgons); protExceptHost: its
+    uint8_t protExceptHost, protOwnColors;   // (Protection from cardColors: each from its own colors)
+    // AddType$ (card types, subtypes: subtype index + 1; MTG_SUB_CHOSEN its source's chosen type), RemoveLandTypes$ /
+    // RemoveCreatureTypes$ True; SetColor$ (setColors: MTG_SETCOLOR | the colors, | MTG_SETCOLOR_CHOSEN its chosen one)
+    uint8_t addTypes, removeLand, removeCreature, setColors;
+    uint16_t addSub[2];
+    uint8_t global;                 // a mode about no card (CantPreventDamage...): in force while it is (IsPresent$...)
+    uint8_t untapN;
+    uint8_t blockMin, blockMax;     // MinMaxBlocker (0: none)
+    int8_t handSet, handRaise;      // HandSize: the maximum set (-1 none, 100 unlimited), raised by; whose: activator
+                                    // (0 every player, 1 its controller, 2 the opponent, 3 its chosen player)                 // UntapLimit: N (affected: the TYPE; taxYou: only its controller's untap step)
+    uint8_t protExceptHostPad;         // ...:Card.CardUID_HostCardUID: not from the source itself (an Aura stays on)
+    uint8_t taxYou;                 // AttackTax's Target$ You: only for attacks on its controller
+    const char *taxX;               // ... its Cost$ an SVar counted now (else costGeneric)
 } MtgStatic;
 typedef struct {
     int addPower, addToughness, setPower, setToughness;
     uint32_t keywords;
     uint8_t landwalk, protection;
+    uint8_t addTypes, removeLand, removeCreature, colorsSet, colors;   // (the type / color layers: latest SetColor wins)
+    uint16_t addSub[4];             // subtype index + 1
+    const char *protSpec[2];        // protection from what a Valid spec names (AddKeyword$ Protection:SPEC)...
+    int16_t protExcept[2];          // ... but not from this object (-1: none)
 } MtgStaticMods;
 extern MtgStatic *gMtgStatics;
 void Mtg_ParseStatic(MtgCardDef *c, int cardId, char *text);
@@ -241,7 +302,20 @@ int Mtg_ParseEffectReplacement(MtgCardDef *c, int cardId, char *text);   // an E
 int Mtg_DamagePrevented(MtgDuel *d, int src, MtgTarget to, int combat, int amount);   // (a one-time one is used up)
 int Mtg_ChosenCard(const MtgDuel *d);   // ChooseSource's pick (the Effect's own while one is read), MTG_NO_OBJ: none   // a PreventDamage in force says so   // R: lines (only the forms above)
 void Mtg_StaticMods(const MtgDuel *d, int obj, MtgStaticMods *m);
+#define MTG_SUB_CHOSEN 0xFFFF
+#define MTG_SETCOLOR 0x40
+#define MTG_SETCOLOR_CHOSEN 0x80
+int Mtg_TypeLayer(const MtgDuel *d);   // a static that changes types or colors is on the battlefield (else none is asked)
+uint8_t Mtg_ObjLandTypes(const MtgDuel *d, int obj);
+uint8_t Mtg_StaticTypes(const MtgDuel *d, int obj);   // the card types statics add to it now (the type layer alone)   // its basic land types now (MTG_COLOR_BIT W..G: the mana they make)
+int Mtg_ObjHasSubtype(const MtgDuel *d, int obj, const char *t, size_t n);   // (statics' AddType$ / Remove...Types$ too)
+int Mtg_ObjLostText(const MtgDuel *d, int obj);   // a land made a basic type by a static (305.7): its own abilities gone
 int Mtg_StaticForbids(const MtgDuel *d, int mode, int obj, int other);
+int Mtg_AttackTax(const MtgDuel *d, int attacker);
+// the untap step's limits for PLAYER now (Winter Orb...): up to max, each a TYPE spec and N; returns how many
+int Mtg_UntapLimits(const MtgDuel *d, int player, const char **spec, int *n, int max);
+int Mtg_MaxHandSize(const MtgDuel *d, int player);
+void Mtg_BlockerLimits(const MtgDuel *d, int attacker, int *min, int *max);   // MinMaxBlocker (0: no limit)   // 7, or as statics say (a big number: no maximum)   // the generic mana its attacking costs (Propaganda...)
 // a permanent's abilities now: its card's, then those statics give it (AddAbility$); returns how many (at most max)
 int Mtg_ObjAbilities(const MtgDuel *d, int obj, uint16_t *out, int max);
 int Mtg_ObjTriggers(const MtgDuel *d, int obj, uint16_t *out, int max);
@@ -255,6 +329,7 @@ void Mtg_SpellCost(const MtgDuel *d, int player, int obj, MtgManaCost *out);   /
 
 // mtg_valid.c: Forge's "Valid" properties (CardProperty.java, PlayerProperty.java)
 int Mtg_ValidObj(const MtgDuel *d, int obj, const char *spec, int sourceObj, int controller);
+extern int gMtgValidX;   // the X "cmcEQX" / "cmcLEX" compare against while a cast's targets are checked (-1: the resolving one's)
 int Mtg_ValidPlayer(const MtgDuel *d, int player, const char *spec, int controller);
 int Mtg_ValidPlayerSpecKnown(const char *spec);
 int Mtg_ValidPlayerFrom(const MtgDuel *d, int player, const char *spec, int src, int controller);   // (SRC: its source)                  // (a player's spec: You, Player.IsRemembered...)
@@ -284,6 +359,8 @@ void Mtg_RefreshQuery(MtgDuel *d);
 int Mtg_CanBlock(const MtgDuel *d, int blocker, int attacker);   // CombatUtil.canBlock
 // a choice while resolving (d->query becomes MTG_Q_CHOOSE for player)
 void Mtg_AskChoice(MtgDuel *d, int player, int choice, const MtgManaCost *pay);
+// an MTG_CHOICE_OPTION among n options of a kind (MTG_OPT_*); the answer's option lands in d->resChoice
+void Mtg_AskOption(MtgDuel *d, int player, int kind, const uint16_t *opts, int n);
 
 // mtg_effects.c: one resolve per API (forge/game/ability/effects)
 typedef struct {

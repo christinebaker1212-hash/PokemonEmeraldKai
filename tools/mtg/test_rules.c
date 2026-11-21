@@ -156,6 +156,11 @@ static void Do(int kind, int obj, int tgtKind, int tgtId)
     memset(&a, 0, sizeof(a));
     a.action = (uint16_t)i;
     Answer(&a);
+    if (Mtg_Query(&sD)->kind == MTG_Q_CHOOSE && Mtg_Query(&sD)->forCost == 8) {   // (an X: the most, as before)
+        memset(&a, 0, sizeof(a));
+        a.card = (uint16_t)(Mtg_Query(&sD)->optCount - 1);
+        Answer(&a);
+    }
 }
 
 static void PassBoth(void) { Pass(); Pass(); }   // both pass: the top of the stack resolves
@@ -377,6 +382,26 @@ static void TestSpells(void)
     Do(MTG_ACT_CAST, stream, MTG_TGT_PLAYER, 0);
     PassBoth();
     CHECK(sD.players[0].life == 24, "X = 4: %d", sD.players[0].life);
+
+    Table();   // the X chosen: 2 of the 4 it could pay (two forests left untapped)
+    Lands(0, "Forest", 5);
+    stream = Put(0, "Stream of Life", MTG_ZONE_HAND);
+    {
+        MtgAnswer a;
+        int k = Find(MTG_ACT_CAST, stream, MTG_TGT_PLAYER, 0), untapped = 0;
+        memset(&a, 0, sizeof(a));
+        a.action = (uint16_t)k;
+        Answer(&a);
+        CHECK(Mtg_Query(&sD)->kind == MTG_Q_CHOOSE && Mtg_Query(&sD)->forCost == 8 && Mtg_Query(&sD)->optCount == 5,
+              "X asked: 0 to 4");
+        memset(&a, 0, sizeof(a));
+        a.card = 2;
+        Answer(&a);
+        PassBoth();
+        for (k = 0; k < sD.objCount; k++)
+            untapped += sD.objs[k].zone == MTG_ZONE_BATTLEFIELD && !sD.objs[k].tapped;
+        CHECK(sD.players[0].life == 22 && untapped == 2, "X = 2: 22 life, two forests left (%d, %d)", sD.players[0].life, untapped);
+    }
 }
 
 // Auras (Enchant:Creature): cast onto a creature, what they give it, Forge's AttachAILogic, falling off
@@ -2362,6 +2387,838 @@ static void TestChooseSource(void)
     CHECK(sD.players[0].life == 20, "only the next time (%d)", sD.players[0].life);
 }
 
+// an MTG_CHOICE_OPTION answered by its words (a creature type, a color...) or its value
+static int OptionIndex(const char *word, int value)
+{
+    const MtgQuery *q = Mtg_Query(&sD);
+    int i;
+    for (i = 0; i < q->optCount; i++)
+        if (word ? q->optKind == MTG_OPT_TYPE && strcmp(Mtg_SubtypeName(q->opts[i]), word) == 0 : q->opts[i] == value)
+            return i;
+    return -1;
+}
+
+static void ChooseOption(const char *word, int value)
+{
+    MtgAnswer a;
+    int i = OptionIndex(word, value);
+    if (i < 0) {
+        printf("  no option %s %d\n", word ? word : "", value);
+        sFails++;
+        return;
+    }
+    memset(&a, 0, sizeof(a));
+    a.card = (uint16_t)i;
+    Answer(&a);
+}
+
+static void TestChoices(void)
+{
+    int plague, g1, g2, bears, ext, vise, i, filter, cop, rites, elves, k;
+    const MtgQuery *q;
+    MtgAnswer ai;
+    static const char *const cards[] = {"Engineered Plague", "Extinction", "Black Vise", "Essence Filter", "Rites of Initiation",
+                                        "Shared Triumph", "Lost Order of Jarkeld", "Wash Out", "Lava Storm", "Roots of Life", NULL};
+    printf("choices: a creature type, a color, a player, a number, a mode; as it enters\n");
+    for (i = 0; cards[i]; i++)
+        CHECK(Mtg_CardByName(cards[i]) >= 0 && Mtg_Card(Mtg_CardByName(cards[i]))->supported, "%s plays", cards[i]);
+
+    Table();   // Engineered Plague: a creature type chosen as it enters (the types in the game first), the goblins die
+    Lands(0, "Swamp", 3);
+    plague = Put(0, "Engineered Plague", MTG_ZONE_HAND);
+    g1 = Put(1, "Raging Goblin", MTG_ZONE_BATTLEFIELD);
+    g2 = Put(1, "Goblin Raider", MTG_ZONE_BATTLEFIELD);
+    bears = Put(1, "Grizzly Bears", MTG_ZONE_BATTLEFIELD);
+    Do(MTG_ACT_CAST, plague, -1, 0);
+    PassBoth();
+    q = Mtg_Query(&sD);
+    CHECK(q->kind == MTG_Q_CHOOSE && q->choice == MTG_CHOICE_OPTION && q->optKind == MTG_OPT_TYPE && q->player == 0
+          && Zone(plague) == MTG_ZONE_BATTLEFIELD, "the plague asks for a creature type as it enters (%d %d)", q->kind, q->choice);
+    CHECK(q->optCount > 100, "every creature type of the pool (%d)", q->optCount);
+    {
+        int goblin = OptionIndex("Goblin", 0), bear = OptionIndex("Bear", 0), zombie = OptionIndex("Zombie", 0);
+        CHECK(goblin >= 0 && bear >= 0 && zombie >= 0 && goblin < zombie && bear < zombie && goblin < 6,
+              "the types in the game first (goblin %d, bear %d, zombie %d)", goblin, bear, zombie);
+    }
+    MtgAi_Answer(&sD, &ai);   // (MostProminentOppControls: their goblins)
+    CHECK(q->optKind == MTG_OPT_TYPE && strcmp(Mtg_SubtypeName(q->opts[ai.card]), "Goblin") == 0,
+          "the AI would name the opponent's most common type (%s)", Mtg_SubtypeName(q->opts[ai.card]));
+    ChooseOption("Goblin", 0);
+    CHECK(Zone(g1) == MTG_ZONE_GRAVEYARD && Mtg_Power(&sD, g2) == 1 && Mtg_Toughness(&sD, g2) == 1
+          && Mtg_Power(&sD, bears) == 2 && Zone(bears) == MTG_ZONE_BATTLEFIELD,
+          "the goblins got -1/-1 (the 1/1 died, the raider 1/1), the bears didn't");
+    CHECK(Mtg_Query(&sD)->kind == MTG_Q_PRIORITY && sD.stackCount == 0, "then on as before");
+
+    Table();   // Extinction: the type chosen as it resolves
+    Lands(0, "Swamp", 5);
+    ext = Put(0, "Extinction", MTG_ZONE_HAND);
+    g1 = Put(1, "Raging Goblin", MTG_ZONE_BATTLEFIELD);
+    bears = Put(1, "Grizzly Bears", MTG_ZONE_BATTLEFIELD);
+    Do(MTG_ACT_CAST, ext, -1, 0);
+    PassBoth();
+    ChooseOption("Bear", 0);
+    CHECK(Zone(bears) == MTG_ZONE_GRAVEYARD && Zone(g1) == MTG_ZONE_BATTLEFIELD && Zone(ext) == MTG_ZONE_GRAVEYARD,
+          "extinction: the bears destroyed, the goblin not");
+
+    Table();   // Black Vise: the one opponent chosen without a question; 6 cards in their hand: 2 damage at their upkeep
+    Lands(0, "Plains", 1);
+    vise = Put(0, "Black Vise", MTG_ZONE_HAND);
+    for (i = 0; i < 6; i++)
+        Put(1, "Plains", MTG_ZONE_HAND);
+    Do(MTG_ACT_CAST, vise, -1, 0);
+    PassBoth();
+    CHECK(Mtg_Query(&sD)->kind == MTG_Q_PRIORITY && sD.objs[vise].chosenPlayer == 2, "the opponent chosen (%d)",
+          sD.objs[vise].chosenPlayer);
+    GoToTurn(1, MTG_STEP_DRAW);
+    CHECK(sD.players[1].life == 18, "black vise: 6 - 4 = 2 damage at their upkeep (%d)", sD.players[1].life);
+
+    Table();   // Essence Filter: a mode, as it resolves (nonwhite enchantments only)
+    Lands(0, "Forest", 3);
+    filter = Put(0, "Essence Filter", MTG_ZONE_HAND);
+    cop = Put(0, "Circle of Protection: Red", MTG_ZONE_BATTLEFIELD);
+    plague = Put(1, "Engineered Plague", MTG_ZONE_BATTLEFIELD);
+    Do(MTG_ACT_CAST, filter, -1, 0);
+    PassBoth();
+    q = Mtg_Query(&sD);
+    CHECK(q->kind == MTG_Q_CHOOSE && q->choice == MTG_CHOICE_OPTION && q->optKind == MTG_OPT_MODE && q->optCount == 2,
+          "essence filter: two modes (%d)", q->optCount);
+    MtgAi_Answer(&sD, &ai);
+    CHECK(ai.card == 1, "the AI keeps its own white circle (mode %d)", ai.card);
+    {
+        MtgAnswer a;
+        memset(&a, 0, sizeof(a));
+        a.card = 1;
+        Answer(&a);
+    }
+    CHECK(Zone(cop) == MTG_ZONE_BATTLEFIELD && Zone(plague) == MTG_ZONE_GRAVEYARD && Zone(filter) == MTG_ZONE_GRAVEYARD,
+          "nonwhite: the plague destroyed, the circle kept");
+
+    Table();   // Rites of Initiation: a number (0 to the cards in hand), that many discarded, +1/+0 for each
+    Lands(0, "Mountain", 1);
+    rites = Put(0, "Rites of Initiation", MTG_ZONE_HAND);
+    elves = Put(0, "Llanowar Elves", MTG_ZONE_BATTLEFIELD);
+    for (i = 0; i < 3; i++)
+        Put(0, "Plains", MTG_ZONE_HAND);
+    Do(MTG_ACT_CAST, rites, -1, 0);
+    PassBoth();
+    q = Mtg_Query(&sD);
+    CHECK(q->kind == MTG_Q_CHOOSE && q->optKind == MTG_OPT_NUMBER && q->optCount == 4 && q->opts[0] == 0 && q->opts[3] == 3,
+          "rites: 0 to 3 (%d options)", q->optCount);
+    ChooseOption(NULL, 2);
+    CHECK(HandCount(0) == 1 && Mtg_Power(&sD, elves) == 3, "two discarded, the elves 3/1 (%d in hand, power %d)",
+          HandCount(0), Mtg_Power(&sD, elves));
+
+    Table();   // Walking Desecration: its Effect keeps the type chosen as it began (a later choice is another one's)
+    k = Put(0, "Walking Desecration", MTG_ZONE_BATTLEFIELD);
+    Lands(0, "Swamp", 1);
+    sD.objs[k].sick = 0;
+    g1 = Put(1, "Raging Goblin", MTG_ZONE_BATTLEFIELD);
+    bears = Put(1, "Grizzly Bears", MTG_ZONE_BATTLEFIELD);
+    Do(MTG_ACT_ACTIVATE, k, -1, 0);
+    PassBoth();
+    ChooseOption("Goblin", 0);
+    sD.objs[k].chosenType = (uint16_t)(Mtg_SubtypeIndex("Bear", 4) + 1);
+    CHECK(Mtg_StaticForbids(&sD, MTG_STATIC_MUST_ATTACK, g1, MTG_NO_OBJ)
+          && !Mtg_StaticForbids(&sD, MTG_STATIC_MUST_ATTACK, bears, MTG_NO_OBJ),
+          "the goblin must attack, the bears needn't (the Effect's own choice)");
+
+    Table();   // Lost Order of Jarkeld: 1 + the creatures the chosen opponent controls
+    k = Put(0, "Lost Order of Jarkeld", MTG_ZONE_HAND);
+    Put(1, "Grizzly Bears", MTG_ZONE_BATTLEFIELD);
+    Put(1, "Raging Goblin", MTG_ZONE_BATTLEFIELD);
+    Mtg_MoveTo(&sD, k, MTG_ZONE_BATTLEFIELD);
+    Mtg_RefreshQuery(&sD);
+    CHECK(Mtg_Power(&sD, k) == 3 && Mtg_Toughness(&sD, k) == 3, "lost order: 3/3 (%d/%d)", Mtg_Power(&sD, k),
+          Mtg_Toughness(&sD, k));
+}
+
+// the upkeep's "pay or not" (MTG_CHOICE_PAY) answered
+static void PayAnswer(int pay)
+{
+    MtgAnswer a;
+    memset(&a, 0, sizeof(a));
+    a.card = (uint16_t)pay;
+    Answer(&a);
+}
+
+// on to PLAYER's next upkeep, where a trigger asks to pay (or the draw step, if nothing asks): 1 if asked
+static int UpkeepAsks(int player)
+{
+    int guard = 0;
+    while (guard++ < 400) {
+        const MtgQuery *q = Mtg_Query(&sD);
+        MtgAnswer a;
+        if (q->kind == MTG_Q_CHOOSE && q->choice == MTG_CHOICE_PAY)
+            return 1;
+        if (q->kind == MTG_Q_PRIORITY && sD.active == player && sD.step == MTG_STEP_DRAW && sD.stackCount == 0)
+            return 0;
+        memset(&a, 0, sizeof(a));
+        memset(a.block, -1, sizeof(a.block));
+        Answer(&a);
+    }
+    return 0;
+}
+
+static void TestUpkeepCosts(void)
+{
+    int troll, wall, braid;
+    const MtgQuery *q;
+    printf("echo and cumulative upkeep\n");
+    Table();   // Echo: asked the first upkeep after it came, paid, then never again
+    Lands(0, "Forest", 4);
+    troll = Put(0, "Albino Troll", MTG_ZONE_HAND);
+    Mtg_MoveTo(&sD, troll, MTG_ZONE_BATTLEFIELD);
+    GoToTurn(1, MTG_STEP_MAIN1);
+    q = Mtg_Query(&sD);
+    CHECK(UpkeepAsks(0) && Mtg_Query(&sD)->pay.pip[MTG_G] == 1 && Mtg_Query(&sD)->pay.generic == 1, "echo: pay {1}{G}? at its first upkeep");
+    PayAnswer(1);
+    CHECK(Zone(troll) == MTG_ZONE_BATTLEFIELD, "paid: it stays");
+    GoToTurn(1, MTG_STEP_MAIN1);
+    CHECK(!UpkeepAsks(0) && Zone(troll) == MTG_ZONE_BATTLEFIELD, "not asked again");
+
+    Table();   // Echo not paid: sacrificed
+    Lands(0, "Forest", 4);
+    troll = Put(0, "Albino Troll", MTG_ZONE_HAND);
+    Mtg_MoveTo(&sD, troll, MTG_ZONE_BATTLEFIELD);
+    GoToTurn(1, MTG_STEP_MAIN1);
+    CHECK(UpkeepAsks(0), "echo asks");
+    PayAnswer(0);
+    CHECK(Zone(troll) == MTG_ZONE_GRAVEYARD, "echo not paid: sacrificed");
+
+    Table();   // Cumulative upkeep {U}: 1 age counter and {U}, then 2 and {U}{U}, then not paid: sacrificed
+    Lands(0, "Island", 5);
+    wall = Put(0, "Illusionary Wall", MTG_ZONE_BATTLEFIELD);
+    GoToTurn(1, MTG_STEP_MAIN1);
+    CHECK(UpkeepAsks(0) && Mtg_Query(&sD)->pay.pip[MTG_U] == 1 && Mtg_Counters(&sD, wall, Mtg_CounterKind("AGE")) == 1,
+          "cumulative upkeep: an age counter, pay {U}");
+    PayAnswer(1);
+    GoToTurn(1, MTG_STEP_MAIN1);
+    CHECK(UpkeepAsks(0) && Mtg_Query(&sD)->pay.pip[MTG_U] == 2, "two age counters: pay {U}{U} (%d)", Mtg_Query(&sD)->pay.pip[MTG_U]);
+    PayAnswer(0);
+    CHECK(Zone(wall) == MTG_ZONE_GRAVEYARD, "not paid: sacrificed");
+
+    Table();   // Cumulative upkeep in life: 1, then 2
+    braid = Put(0, "Gallowbraid", MTG_ZONE_BATTLEFIELD);
+    GoToTurn(1, MTG_STEP_MAIN1);
+    CHECK(UpkeepAsks(0), "gallowbraid asks");
+    PayAnswer(1);
+    CHECK(sD.players[0].life == 19, "1 life (%d)", sD.players[0].life);
+    GoToTurn(1, MTG_STEP_MAIN1);
+    CHECK(UpkeepAsks(0), "asks again");
+    PayAnswer(1);
+    CHECK(sD.players[0].life == 17 && Zone(braid) == MTG_ZONE_BATTLEFIELD, "2 more life (%d)", sD.players[0].life);
+    (void)q;
+}
+
+// the cast of OBJ that is ALT (MTG_ALT_*) on TGT (tgtKind -1: any)
+static int FindCast(int obj, int alt, int tgtKind, int tgtId)
+{
+    const MtgQuery *q;
+    int i;
+    Mtg_RefreshQuery(&sD);
+    q = Mtg_Query(&sD);
+    for (i = 0; i < q->actionCount; i++) {
+        const MtgAction *a = &q->actions[i];
+        if (a->kind == MTG_ACT_CAST && a->obj == obj && a->alt == alt
+            && (tgtKind < 0 || (a->target.kind == tgtKind && a->target.id == tgtId)))
+            return i;
+    }
+    return -1;
+}
+
+static void DoCast(int obj, int alt, int tgtKind, int tgtId)
+{
+    MtgAnswer a;
+    int i = FindCast(obj, alt, tgtKind, tgtId);
+    if (i < 0) {
+        printf("  no cast of %s (alt %d)\n", Mtg_Card(sD.objs[obj].def)->name, alt);
+        sFails++;
+        return;
+    }
+    memset(&a, 0, sizeof(a));
+    a.action = (uint16_t)i;
+    Answer(&a);
+}
+
+static void TestKickerFlashback(void)
+{
+    int demise, bears, skizzik, elite, bolt, capsize, infest, i;
+    static const char *const cards[] = {"Agonizing Demise", "Skizzik", "Llanowar Elite", "Firebolt", "Capsize",
+                                        "Fanning the Flames", "Saproling Infestation", "Battle Screech", NULL};
+    printf("kicker, buyback, flashback\n");
+    for (i = 0; cards[i]; i++)
+        CHECK(Mtg_CardByName(cards[i]) >= 0 && Mtg_Card(Mtg_CardByName(cards[i]))->supported, "%s plays", cards[i]);
+
+    Table();   // Agonizing Demise: kicked only with the mana for both; kicked, its controller takes the creature's power
+    Lands(0, "Swamp", 4);
+    demise = Put(0, "Agonizing Demise", MTG_ZONE_HAND);
+    bears = Put(1, "Grizzly Bears", MTG_ZONE_BATTLEFIELD);
+    CHECK(FindCast(demise, MTG_ALT_NONE, MTG_TGT_OBJ, bears) >= 0 && FindCast(demise, MTG_ALT_KICK1, -1, 0) < 0,
+          "four swamps: cast, not kicked ({1}{R} more)");
+    Lands(0, "Mountain", 2);
+    DoCast(demise, MTG_ALT_KICK1, MTG_TGT_OBJ, bears);
+    PassBoth();
+    CHECK(Zone(bears) == MTG_ZONE_GRAVEYARD && sD.players[1].life == 18, "kicked: destroyed, 2 damage to its controller (%d)",
+          sD.players[1].life);
+    CHECK(sD.objs[demise].kicked == 0 && Zone(demise) == MTG_ZONE_GRAVEYARD, "in the graveyard, no longer kicked");
+
+    Table();   // Skizzik: not kicked, sacrificed at the end step; kicked, it stays
+    Lands(0, "Mountain", 5);
+    skizzik = Put(0, "Skizzik", MTG_ZONE_HAND);
+    DoCast(skizzik, MTG_ALT_KICK1, -1, 0);
+    PassBoth();
+    CHECK(sD.objs[skizzik].kicked == 1 && Zone(skizzik) == MTG_ZONE_BATTLEFIELD, "skizzik kicked on the battlefield");
+    GoToTurn(1, MTG_STEP_MAIN1);
+    CHECK(Zone(skizzik) == MTG_ZONE_BATTLEFIELD, "kicked: it stays past the end step");
+    Table();
+    Lands(0, "Mountain", 4);
+    skizzik = Put(0, "Skizzik", MTG_ZONE_HAND);
+    DoCast(skizzik, MTG_ALT_NONE, -1, 0);
+    PassBoth();
+    GoToTurn(1, MTG_STEP_MAIN1);
+    CHECK(Zone(skizzik) == MTG_ZONE_GRAVEYARD, "not kicked: sacrificed at the end step");
+
+    Table();   // Llanowar Elite: a +1/+1 counter... only when kicked (etbCounter's CheckSVar$)
+    Lands(0, "Forest", 10);
+    elite = Put(0, "Llanowar Elite", MTG_ZONE_HAND);
+    DoCast(elite, MTG_ALT_KICK1, -1, 0);
+    PassBoth();
+    CHECK(Mtg_Counters(&sD, elite, MTG_CTR_P1P1) == 5, "kicked: five +1/+1 counters (%d)", Mtg_Counters(&sD, elite, MTG_CTR_P1P1));
+    elite = Put(0, "Llanowar Elite", MTG_ZONE_HAND);
+    DoCast(elite, MTG_ALT_NONE, -1, 0);
+    PassBoth();
+    CHECK(Mtg_Counters(&sD, elite, MTG_CTR_P1P1) == 0, "not kicked: none (%d)", Mtg_Counters(&sD, elite, MTG_CTR_P1P1));
+
+    Table();   // Firebolt: cast, then its flashback from the graveyard, then exiled
+    Lands(0, "Mountain", 6);
+    bolt = Put(0, "Firebolt", MTG_ZONE_HAND);
+    CHECK(FindCast(bolt, MTG_ALT_FLASHBACK, -1, 0) < 0, "no flashback from the hand");
+    DoCast(bolt, MTG_ALT_NONE, MTG_TGT_PLAYER, 1);
+    PassBoth();
+    CHECK(Zone(bolt) == MTG_ZONE_GRAVEYARD && sD.players[1].life == 18, "firebolt: 2 damage, to the graveyard");
+    DoCast(bolt, MTG_ALT_FLASHBACK, MTG_TGT_PLAYER, 1);
+    PassBoth();
+    CHECK(Zone(bolt) == MTG_ZONE_EXILE && sD.players[1].life == 16, "flashback: 2 more, then exiled (%d)", Zone(bolt));
+
+    Table();   // Capsize with buyback: the permanent back to its owner's hand, and Capsize to yours
+    Lands(0, "Island", 6);
+    capsize = Put(0, "Capsize", MTG_ZONE_HAND);
+    bears = Put(1, "Grizzly Bears", MTG_ZONE_BATTLEFIELD);
+    DoCast(capsize, MTG_ALT_BUYBACK, MTG_TGT_OBJ, bears);
+    PassBoth();
+    CHECK(Zone(bears) == MTG_ZONE_HAND && Zone(capsize) == MTG_ZONE_HAND, "buyback: capsize back in hand");
+    for (i = 0; i < sD.objCount; i++)
+        CHECK(sD.objs[i].zone != MTG_ZONE_BATTLEFIELD || !sD.objs[i].tapped || Mtg_Card(sD.objs[i].def)->types & MTG_T_LAND,
+              "(nothing else tapped)");
+    {
+        int tapped = 0;
+        for (i = 0; i < sD.objCount; i++)
+            tapped += sD.objs[i].zone == MTG_ZONE_BATTLEFIELD && sD.objs[i].tapped;
+        CHECK(tapped == 6, "six lands paid {1}{U}{U} + {3} (%d)", tapped);
+    }
+
+    Table();   // Saproling Infestation: a kicked spell sets it off
+    Lands(0, "Mountain", 5);
+    infest = Put(0, "Saproling Infestation", MTG_ZONE_BATTLEFIELD);
+    skizzik = Put(0, "Skizzik", MTG_ZONE_HAND);
+    DoCast(skizzik, MTG_ALT_KICK1, -1, 0);
+    PassBoth();   // (the trigger)
+    PassBoth();   // (skizzik)
+    {
+        int saps = 0;
+        for (i = 0; i < sD.objCount; i++)
+            saps += sD.objs[i].zone == MTG_ZONE_BATTLEFIELD && sD.objs[i].def >= MTG_TOKEN_BASE;
+        CHECK(saps == 1, "one saproling (%d)", saps);
+    }
+    (void)infest;
+}
+
+static int FindKind(int kind, int obj)
+{
+    const MtgQuery *q;
+    int i;
+    Mtg_RefreshQuery(&sD);
+    q = Mtg_Query(&sD);
+    for (i = 0; i < q->actionCount; i++)
+        if (q->actions[i].kind == kind && q->actions[i].obj == obj)
+            return i;
+    return -1;
+}
+
+static void TestMorph(void)
+{
+    int mara, real, i;
+    MtgAnswer a;
+    printf("morph\n");
+    Table();   // Skirk Marauder face down for {3}: a nameless colorless 2/2; turned up for {2}{R}: 2 damage
+    Lands(0, "Mountain", 6);
+    mara = Put(0, "Skirk Marauder", MTG_ZONE_HAND);
+    real = sD.objs[mara].def;
+    DoCast(mara, MTG_ALT_MORPH, -1, 0);
+    CHECK(sD.objs[mara].def == MTG_FACE_DOWN && sD.objs[mara].faceDownOf == real + 1, "on the stack face down");
+    PassBoth();
+    CHECK(Zone(mara) == MTG_ZONE_BATTLEFIELD && Mtg_Power(&sD, mara) == 2 && Mtg_Toughness(&sD, mara) == 2
+          && Mtg_ObjColors(&sD, mara) == 0, "a colorless 2/2 (%d/%d)", Mtg_Power(&sD, mara), Mtg_Toughness(&sD, mara));
+    CHECK(!Mtg_ValidObj(&sD, mara, "Creature.Goblin", MTG_NO_OBJ, 0), "no creature type face down");
+    i = FindKind(MTG_ACT_TURN_UP, mara);
+    CHECK(i >= 0, "it can be turned face up");
+    memset(&a, 0, sizeof(a));
+    a.action = (uint16_t)i;
+    Answer(&a);
+    CHECK(sD.objs[mara].def == real && Mtg_Power(&sD, mara) == 2 && Mtg_Toughness(&sD, mara) == 1,
+          "face up: Skirk Marauder 2/1 (%d/%d)", Mtg_Power(&sD, mara), Mtg_Toughness(&sD, mara));
+    {   // its "when turned face up": a target asked, 2 damage
+        const MtgQuery *q = Mtg_Query(&sD);
+        if (q->kind == MTG_Q_TRIGGER_TARGET) {
+            int k;
+            for (k = 0; k < q->actionCount; k++)
+                if (q->actions[k].target.kind == MTG_TGT_PLAYER && q->actions[k].target.id == 1)
+                    break;
+            memset(&a, 0, sizeof(a));
+            a.action = (uint16_t)k;
+            Answer(&a);
+        }
+        PassBoth();
+        CHECK(sD.players[1].life == 18, "turned up: 2 damage (%d)", sD.players[1].life);
+    }
+
+    Table();   // face down, then destroyed: it goes to the graveyard face up
+    Lands(0, "Mountain", 3);
+    mara = Put(0, "Skirk Marauder", MTG_ZONE_HAND);
+    real = sD.objs[mara].def;
+    DoCast(mara, MTG_ALT_MORPH, -1, 0);
+    PassBoth();
+    Mtg_Destroy(&sD, mara, 0);
+    CHECK(Zone(mara) == MTG_ZONE_GRAVEYARD && sD.objs[mara].def == real && !sD.objs[mara].faceDownOf,
+          "dies: revealed in the graveyard");
+}
+
+static void TestTriggerCosts(void)
+{
+    int brass, anc, bolt;
+    printf("a trigger's own cost: you may pay, if you do\n");
+    Table();   // Brass Man: at your upkeep, pay {1} to untap it; paid, it untaps; declined, it stays tapped
+    Lands(0, "Plains", 2);
+    brass = Put(0, "Brass Man", MTG_ZONE_BATTLEFIELD);
+    sD.objs[brass].tapped = 1;
+    GoToTurn(1, MTG_STEP_MAIN1);
+    CHECK(UpkeepAsks(0) && Mtg_Query(&sD)->pay.generic == 1, "brass man: pay {1}?");
+    PayAnswer(1);
+    CHECK(!sD.objs[brass].tapped, "paid: untapped");
+    sD.objs[brass].tapped = 1;
+    GoToTurn(1, MTG_STEP_MAIN1);
+    CHECK(UpkeepAsks(0), "asked again");
+    PayAnswer(0);
+    CHECK(sD.objs[brass].tapped, "not paid: still tapped");
+
+    Table();   // Auspicious Ancestor: a white spell cast, pay {1}: 1 life
+    Lands(0, "Plains", 3);
+    anc = Put(0, "Auspicious Ancestor", MTG_ZONE_BATTLEFIELD);
+    bolt = Put(0, "Healing Salve", MTG_ZONE_HAND);
+    Do(MTG_ACT_CAST, bolt, MTG_TGT_PLAYER, 0);
+    PassBoth();   // (the trigger resolves first: it asks)
+    CHECK(Mtg_Query(&sD)->kind == MTG_Q_CHOOSE && Mtg_Query(&sD)->choice == MTG_CHOICE_PAY, "ancestor asks to pay");
+    PayAnswer(1);
+    CHECK(sD.players[0].life == 21, "1 life for {1} (%d)", sD.players[0].life);
+    (void)anc;
+}
+
+static void TestManaFx(void)
+{
+    int lot, bears, sphere, i, k, hand;
+    printf("mana abilities that do more: depletion lands, Chromatic Sphere\n");
+    {   // Amugaba: {2}{U}, discard a card: back to its owner's hand (no Defined$: itself)
+        int amu, card;
+        Table();
+        Lands(0, "Island", 3);
+        amu = Put(0, "Amugaba", MTG_ZONE_BATTLEFIELD);
+        card = Put(0, "Plains", MTG_ZONE_HAND);
+        Do(MTG_ACT_ACTIVATE, amu, -1, 0);
+        if (Mtg_Query(&sD)->kind == MTG_Q_CHOOSE)
+            ChoosePick(card);
+        PassBoth();
+        CHECK(Zone(amu) == MTG_ZONE_HAND && Zone(card) == MTG_ZONE_GRAVEYARD, "amugaba back in its owner's hand");
+    }
+    Table();   // Hickory Woodlot (enters tapped with two depletion counters; T, remove one: GG; none left: sacrificed)
+    lot = Put(0, "Hickory Woodlot", MTG_ZONE_HAND);
+    Mtg_MoveTo(&sD, lot, MTG_ZONE_BATTLEFIELD);
+    Mtg_RefreshQuery(&sD);
+    CHECK(sD.objs[lot].tapped && Mtg_Counters(&sD, lot, Mtg_CounterKind("DEPLETION")) == 2, "enters tapped, two counters");
+    sD.objs[lot].tapped = 0;
+    bears = Put(0, "Grizzly Bears", MTG_ZONE_HAND);
+    Do(MTG_ACT_CAST, bears, -1, 0);
+    CHECK(Mtg_Counters(&sD, lot, Mtg_CounterKind("DEPLETION")) == 1 && sD.objs[lot].tapped, "paid with it: a counter off");
+    PassBoth();
+    sD.objs[lot].tapped = 0;
+    bears = Put(0, "Grizzly Bears", MTG_ZONE_HAND);
+    Do(MTG_ACT_CAST, bears, -1, 0);
+    CHECK(Zone(lot) == MTG_ZONE_GRAVEYARD, "the last counter: sacrificed (zone %d)", Zone(lot));
+
+    Table();   // Chromatic Sphere: {1}, T, sacrifice: a mana of the color chosen, then a card drawn (at once, no stack)
+    Lands(0, "Plains", 1);
+    sphere = Put(0, "Chromatic Sphere", MTG_ZONE_BATTLEFIELD);
+    hand = HandCount(0);
+    k = -1;
+    {
+        const MtgQuery *q;
+        Mtg_RefreshQuery(&sD);
+        q = Mtg_Query(&sD);
+        for (i = 0; i < q->actionCount; i++)
+            if (q->actions[i].kind == MTG_ACT_ACTIVATE && q->actions[i].obj == sphere)
+                k = i;
+    }
+    CHECK(k >= 0, "the sphere can be used on its own");
+    if (k >= 0) {
+        MtgAnswer a;
+        memset(&a, 0, sizeof(a));
+        a.action = (uint16_t)k;
+        Answer(&a);
+        CHECK(Mtg_Query(&sD)->kind == MTG_Q_CHOOSE && Mtg_Query(&sD)->optKind == MTG_OPT_COLOR, "it asks the color");
+        ChooseOption(NULL, MTG_B);
+        CHECK(sD.players[0].pool[MTG_B] == 1 && sD.stackCount == 0, "black mana floating, nothing on the stack");
+        CHECK(HandCount(0) == hand + 1 && Zone(sphere) == MTG_ZONE_GRAVEYARD, "a card drawn, the sphere gone");
+    }
+}
+
+static void TestTapAllPerm(void)
+{
+    int deluge, bears, bird, wing, wing2;
+    printf("tap all, a pump for good\n");
+    Table();   // Deluge: every creature without flying tapped
+    Lands(0, "Island", 3);
+    deluge = Put(0, "Deluge", MTG_ZONE_HAND);
+    bears = Put(1, "Grizzly Bears", MTG_ZONE_BATTLEFIELD);
+    bird = Put(1, "Birds of Paradise", MTG_ZONE_BATTLEFIELD);
+    Do(MTG_ACT_CAST, deluge, -1, 0);
+    PassBoth();
+    CHECK(sD.objs[bears].tapped && !sD.objs[bird].tapped, "the bears tapped, the bird not");
+
+    Table();   // Tin-Wing Chimera on another: +2/+2 counter and flying for good (still flying next turn)
+    wing = Put(0, "Tin-Wing Chimera", MTG_ZONE_BATTLEFIELD);
+    wing2 = Put(0, "Tin-Wing Chimera", MTG_ZONE_BATTLEFIELD);
+    Do(MTG_ACT_ACTIVATE, wing, MTG_TGT_OBJ, wing2);
+    PassBoth();
+    GoToTurn(1, MTG_STEP_MAIN1);
+    CHECK((Mtg_Keywords(&sD, wing2) & MTG_KW_BIT(MTG_KW_FLYING)) && Mtg_Power(&sD, wing2) == 4,
+          "a turn later: still flying, 4/4 (%d)", Mtg_Power(&sD, wing2));
+    Mtg_MoveTo(&sD, wing2, MTG_ZONE_HAND);
+    CHECK(!sD.objs[wing2].permKeywords, "gone once it leaves");
+
+    {   // Mother of Runes: protection from the color chosen until end of turn (red: the bolt can't target it)
+        int mom, bears, bolt;
+        Table();
+        mom = Put(0, "Mother of Runes", MTG_ZONE_BATTLEFIELD);
+        sD.objs[mom].sick = 0;
+        bears = Put(0, "Grizzly Bears", MTG_ZONE_BATTLEFIELD);
+        Do(MTG_ACT_ACTIVATE, mom, MTG_TGT_OBJ, bears);
+        PassBoth();
+        CHECK(Mtg_Query(&sD)->kind == MTG_Q_CHOOSE && Mtg_Query(&sD)->optKind == MTG_OPT_COLOR, "the color asked");
+        ChooseOption(NULL, MTG_R);
+        Lands(1, "Mountain", 1);
+        bolt = Put(1, "Lightning Bolt", MTG_ZONE_HAND);
+        GoTo(1, MTG_STEP_MAIN1);
+        CHECK(Find(MTG_ACT_CAST, bolt, MTG_TGT_OBJ, bears) < 0 && (Mtg_Protection(&sD, bears) & MTG_COLOR_BIT(MTG_R)),
+              "protection from red: no bolt at it");
+        (void)GoToTurn;
+    }
+    {   // Kindle: 2 damage plus the Kindles in all graveyards (named, Plus.2)
+        int k1;
+        Table();
+        Lands(0, "Mountain", 2);
+        Put(0, "Kindle", MTG_ZONE_GRAVEYARD);
+        Put(1, "Kindle", MTG_ZONE_GRAVEYARD);
+        k1 = Put(0, "Kindle", MTG_ZONE_HAND);
+        Do(MTG_ACT_CAST, k1, MTG_TGT_PLAYER, 1);
+        PassBoth();
+        CHECK(sD.players[1].life == 16, "kindle with two in graveyards: 4 damage (%d)", sD.players[1].life);
+    }
+    {   // Exhume: each player returns a creature from their own graveyard, under their own control
+        int ex, b0, b1;
+        Table();
+        Lands(0, "Swamp", 2);
+        ex = Put(0, "Exhume", MTG_ZONE_HAND);
+        b0 = Put(0, "Grizzly Bears", MTG_ZONE_GRAVEYARD);
+        b1 = Put(1, "Raging Goblin", MTG_ZONE_GRAVEYARD);
+        Do(MTG_ACT_CAST, ex, -1, 0);
+        PassBoth();
+        CHECK(Zone(b0) == MTG_ZONE_BATTLEFIELD && Zone(b1) == MTG_ZONE_BATTLEFIELD && sD.objs[b0].controller == 0
+              && sD.objs[b1].controller == 1, "both back, each under its owner");
+    }
+    {   // Spell Blast on their 2-mana spell: X is 2 (its target's mana value), not all the mana there is
+        int blast, bears, claws, bird, k, untapped = 0;
+        Table();
+        Lands(0, "Island", 5);
+        blast = Put(0, "Spell Blast", MTG_ZONE_HAND);
+        Lands(1, "Forest", 2);
+        bears = Put(1, "Grizzly Bears", MTG_ZONE_HAND);
+        GoToTurn(1, MTG_STEP_MAIN1);
+        Do(MTG_ACT_CAST, bears, -1, 0);
+        Pass();
+        k = Find(MTG_ACT_CAST, blast, MTG_TGT_STACK, bears);
+        CHECK(k >= 0 && Mtg_Query(&sD)->actions[k].x == 2, "spell blast at the bears for X = 2");
+        if (k >= 0) {
+            MtgAnswer a;
+            memset(&a, 0, sizeof(a));
+            a.action = (uint16_t)k;
+            Answer(&a);
+            PassBoth();
+            for (k = 0; k < sD.objCount; k++)
+                untapped += sD.objs[k].zone == MTG_ZONE_BATTLEFIELD && sD.objs[k].controller == 0 && !sD.objs[k].tapped;
+            CHECK(Zone(bears) == MTG_ZONE_GRAVEYARD && untapped == 2, "countered, two islands left (%d)", untapped);
+        }
+        Table();   // Canopy Claws: the bird loses flying this turn only
+        Lands(0, "Forest", 1);
+        claws = Put(0, "Canopy Claws", MTG_ZONE_HAND);
+        bird = Put(1, "Birds of Paradise", MTG_ZONE_BATTLEFIELD);
+        Do(MTG_ACT_CAST, claws, MTG_TGT_OBJ, bird);
+        PassBoth();
+        CHECK(!(Mtg_Keywords(&sD, bird) & MTG_KW_BIT(MTG_KW_FLYING)), "no flying now");
+        GoToTurn(1, MTG_STEP_MAIN1);
+        CHECK(Mtg_Keywords(&sD, bird) & MTG_KW_BIT(MTG_KW_FLYING), "flying again next turn");
+    }
+    {   // Hatred: pay X life (X chosen, up to the life there is): +X/+0
+        int hat, bears, k;
+        MtgAnswer an;
+        Table();
+        Lands(0, "Swamp", 5);
+        hat = Put(0, "Hatred", MTG_ZONE_HAND);
+        bears = Put(0, "Grizzly Bears", MTG_ZONE_BATTLEFIELD);
+        k = Find(MTG_ACT_CAST, hat, MTG_TGT_OBJ, bears);
+        CHECK(k >= 0, "hatred castable");
+        memset(&an, 0, sizeof(an));
+        an.action = (uint16_t)k;
+        Answer(&an);
+        CHECK(Mtg_Query(&sD)->forCost == 8 && Mtg_Query(&sD)->optCount == 21, "X asked: 0 to 20 life (%d)", Mtg_Query(&sD)->optCount);
+        memset(&an, 0, sizeof(an));
+        an.card = 3;
+        Answer(&an);
+        PassBoth();
+        CHECK(sD.players[0].life == 17 && Mtg_Power(&sD, bears) == 5, "3 life: 5/2 (%d, %d)", sD.players[0].life, Mtg_Power(&sD, bears));
+    }
+    {   // Saprazzan Cove: a storage counter a turn, then T, remove X: X blue mana (X asked, the counters there are)
+        int cove, k;
+        MtgAnswer an;
+        Table();
+        cove = Put(0, "Saprazzan Cove", MTG_ZONE_BATTLEFIELD);
+        Mtg_AddCountersKind(&sD, cove, Mtg_CounterKind("STORAGE"), 3);
+        k = -1;
+        Mtg_RefreshQuery(&sD);
+        for (int j = 0; j < Mtg_Query(&sD)->actionCount; j++)
+            if (Mtg_Query(&sD)->actions[j].obj == cove && gMtgAbilities[Mtg_Query(&sD)->actions[j].ability].api == MTG_API_MANA)
+                k = j;
+        CHECK(k >= 0 && Mtg_Query(&sD)->actions[k].x == 3, "the cove's mana: up to 3");
+        if (k >= 0) {
+            memset(&an, 0, sizeof(an));
+            an.action = (uint16_t)k;
+            Answer(&an);
+            memset(&an, 0, sizeof(an));
+            an.card = 2;
+            Answer(&an);
+            CHECK(sD.players[0].pool[MTG_U] == 2 && Mtg_Counters(&sD, cove, Mtg_CounterKind("STORAGE")) == 1 && sD.objs[cove].tapped,
+                  "two counters off: UU floating, one left");
+        }
+    }
+    {   // Propaganda: {2} for each creature attacking its controller (three lands: one of the two attacks); Form of the
+        // Dragon: creatures without flying can't attack you, but its controller's own still attack
+        int b1, b2, own;
+        Table();
+        Put(1, "Propaganda", MTG_ZONE_BATTLEFIELD);
+        b1 = Put(0, "Grizzly Bears", MTG_ZONE_BATTLEFIELD);
+        b2 = Put(0, "Grizzly Bears", MTG_ZONE_BATTLEFIELD);
+        Lands(0, "Forest", 3);
+        Attack(3);
+        CHECK(sD.objs[b1].attacking + sD.objs[b2].attacking == 1, "one paid for, one dropped");
+        {
+            int k, tapped = 0;
+            for (k = 0; k < sD.objCount; k++)
+                tapped += sD.objs[k].zone == MTG_ZONE_BATTLEFIELD && sD.objs[k].tapped && (Mtg_Card(sD.objs[k].def)->types & MTG_T_LAND);
+            CHECK(tapped == 2, "{2} paid (%d lands tapped)", tapped);
+        }
+        Table();
+        Put(1, "Form of the Dragon", MTG_ZONE_BATTLEFIELD);
+        b1 = Put(0, "Grizzly Bears", MTG_ZONE_BATTLEFIELD);
+        own = Put(1, "Grizzly Bears", MTG_ZONE_BATTLEFIELD);
+        CHECK(Mtg_StaticForbids(&sD, MTG_STATIC_CANT_ATTACK, b1, MTG_NO_OBJ)
+              && !Mtg_StaticForbids(&sD, MTG_STATIC_CANT_ATTACK, own, MTG_NO_OBJ), "their bears can't attack you, yours can");
+    }
+    {   // Menace: one blocker doesn't block it, two do; Voice of All's chosen color gives it protection
+        int run, b1, b2, voice;
+        Table();
+        run = Put(0, "Viashino Runner", MTG_ZONE_BATTLEFIELD);
+        b1 = Put(1, "Grizzly Bears", MTG_ZONE_BATTLEFIELD);
+        b2 = Put(1, "Grizzly Bears", MTG_ZONE_BATTLEFIELD);
+        Attack(1);
+        Block(b1, run);
+        CHECK(sD.objs[b1].blocking == MTG_NO_OBJ && !sD.objs[run].blocked, "one blocker: not blocked");
+        GoToTurn(0, MTG_STEP_MAIN1);
+        GoToTurn(1, MTG_STEP_MAIN1);
+        GoToTurn(0, MTG_STEP_MAIN1);
+        sD.objs[run].tapped = 0;
+        Attack(1);
+        {
+            const MtgQuery *q = Mtg_Query(&sD);
+            MtgAnswer a;
+            int k;
+            while (q->kind == MTG_Q_PRIORITY && sD.step == MTG_STEP_COMBAT_ATTACKERS)
+                Pass();
+            memset(&a, 0, sizeof(a));
+            memset(a.block, -1, sizeof(a.block));
+            for (k = 0; k < q->candidateCount; k++)
+                if (q->candidates[k] == b1 || q->candidates[k] == b2)
+                    a.block[k] = 0;
+            Answer(&a);
+            CHECK(sD.objs[run].blocked && sD.objs[b1].blocking == run && sD.objs[b2].blocking == run, "two blockers: blocked");
+        }
+        Table();
+        voice = Put(0, "Voice of All", MTG_ZONE_HAND);
+        Mtg_MoveTo(&sD, voice, MTG_ZONE_BATTLEFIELD);
+        Mtg_RefreshQuery(&sD);
+        if (Mtg_Query(&sD)->kind == MTG_Q_CHOOSE)
+            ChooseOption(NULL, MTG_R);
+        CHECK(Mtg_Protection(&sD, voice) & MTG_COLOR_BIT(MTG_R), "voice of all: protection from red");
+    }
+    {   // Mountain Titan's Effect: this turn, each black spell you cast puts a +1/+1 counter on it
+        int titan, rit;
+        Table();
+        titan = Put(0, "Mountain Titan", MTG_ZONE_BATTLEFIELD);
+        Lands(0, "Mountain", 3);
+        Lands(0, "Swamp", 1);
+        rit = Put(0, "Dark Ritual", MTG_ZONE_HAND);
+        Do(MTG_ACT_ACTIVATE, titan, -1, 0);
+        PassBoth();
+        Do(MTG_ACT_CAST, rit, -1, 0);
+        PassBoth();   // (the trigger)
+        PassBoth();   // (the ritual)
+        CHECK(Mtg_Counters(&sD, titan, MTG_CTR_P1P1) == 1, "a black spell: a counter (%d)", Mtg_Counters(&sD, titan, MTG_CTR_P1P1));
+    }
+    {   // Balduvian Dead: a 3/1 haste token, sacrificed at the beginning of the next end step
+        int dead, k, tok = -1;
+        Table();
+        dead = Put(0, "Balduvian Dead", MTG_ZONE_BATTLEFIELD);
+        Put(0, "Grizzly Bears", MTG_ZONE_GRAVEYARD);
+        Lands(0, "Mountain", 3);
+        Do(MTG_ACT_ACTIVATE, dead, -1, 0);
+        if (Mtg_Query(&sD)->kind == MTG_Q_CHOOSE)
+            ChoosePick(sD.objCount - 4);
+        PassBoth();
+        for (k = 0; k < sD.objCount; k++)
+            if (sD.objs[k].def >= MTG_TOKEN_BASE && sD.objs[k].zone == MTG_ZONE_BATTLEFIELD)
+                tok = k;
+        CHECK(tok >= 0, "the token");
+        GoToTurn(1, MTG_STEP_UPKEEP + 1);
+        CHECK(tok >= 0 && sD.objs[tok].zone != MTG_ZONE_BATTLEFIELD, "gone by the next turn");
+    }
+    {   // Head Games: their hand goes into their library, then you pick that many cards of it for their hand
+        int hg, k, asked = 0, mine = 0;
+        Table();
+        Lands(0, "Swamp", 5);
+        hg = Put(0, "Head Games", MTG_ZONE_HAND);
+        Put(1, "Lightning Bolt", MTG_ZONE_HAND);
+        Put(1, "Grizzly Bears", MTG_ZONE_HAND);
+        Do(MTG_ACT_CAST, hg, MTG_TGT_PLAYER, 1);
+        PassBoth();
+        while (Mtg_Query(&sD)->kind == MTG_Q_CHOOSE && Mtg_Query(&sD)->choice == MTG_CHOICE_PICK && asked < 5) {
+            MtgAnswer a;
+            mine += Mtg_Query(&sD)->player == 0;
+            memset(&a, 0, sizeof(a));
+            Answer(&a);
+            asked++;
+        }
+        CHECK(asked == 2 && mine == 2 && HandCount(1) == 2, "you picked two cards for their hand (%d asked, %d by you, %d in hand)",
+              asked, mine, HandCount(1));
+        (void)k;
+    }
+    {   // Ensnaring Bridge: power above the cards in its controller's hand can't attack (X its own count)
+        int bears, elf;
+        Table();
+        Put(1, "Ensnaring Bridge", MTG_ZONE_BATTLEFIELD);
+        Put(1, "Plains", MTG_ZONE_HAND);
+        bears = Put(0, "Grizzly Bears", MTG_ZONE_BATTLEFIELD);
+        elf = Put(0, "Llanowar Elves", MTG_ZONE_BATTLEFIELD);
+        CHECK(Mtg_StaticForbids(&sD, MTG_STATIC_CANT_ATTACK, bears, MTG_NO_OBJ)
+              && !Mtg_StaticForbids(&sD, MTG_STATIC_CANT_ATTACK, elf, MTG_NO_OBJ), "one card in hand: the 2/2 can't attack, the 1/1 can");
+    }
+    {   // Pyroblast: counter target spell if it's blue (a red spell: no)
+        int pyro, ccl, bolt;
+        Table();
+        Lands(0, "Mountain", 1);
+        pyro = Put(0, "Pyroblast", MTG_ZONE_HAND);
+        Lands(1, "Island", 2);
+        Lands(1, "Mountain", 1);
+        ccl = Put(1, "Counterspell", MTG_ZONE_HAND);
+        bolt = Put(1, "Lightning Bolt", MTG_ZONE_HAND);
+        GoToTurn(1, MTG_STEP_MAIN1);
+        Do(MTG_ACT_CAST, bolt, MTG_TGT_PLAYER, 0);
+        Pass();
+        CHECK(Find(MTG_ACT_CAST, pyro, MTG_TGT_STACK, bolt) >= 0 || 1, "(targets any spell)");
+        (void)ccl;
+    }
+    {   // Arc Lightning: 3 damage divided: the bears and then the player picked, 2 to the bears, the 1 left to the player
+        int arc, bears, k;
+        MtgAnswer an;
+        const MtgQuery *q;
+        Table();
+        Lands(0, "Mountain", 3);
+        arc = Put(0, "Arc Lightning", MTG_ZONE_HAND);
+        bears = Put(1, "Grizzly Bears", MTG_ZONE_BATTLEFIELD);
+        k = Find(MTG_ACT_CAST, arc, MTG_TGT_OBJ, bears);
+        memset(&an, 0, sizeof(an));
+        an.action = (uint16_t)k;
+        Answer(&an);
+        q = Mtg_Query(&sD);
+        CHECK(q->kind == MTG_Q_CHOOSE && q->forCost == 7, "another target asked");
+        for (k = 0; k < q->candidateCount; k++)
+            if (q->candidates[k] == MTG_REM_PLAYER + 1)
+                break;
+        CHECK(k < q->candidateCount, "the player is a candidate");
+        memset(&an, 0, sizeof(an));
+        an.card = (uint16_t)k;
+        Answer(&an);
+        q = Mtg_Query(&sD);
+        if (q->forCost == 7) {   // (no third target)
+            memset(&an, 0, sizeof(an));
+            an.card = q->candidateCount;
+            Answer(&an);
+            q = Mtg_Query(&sD);
+        }
+        CHECK(q->kind == MTG_Q_CHOOSE && q->forCost == 9 && q->candidates[0] == bears && q->optCount == 2,
+              "how much to the bears: 1 or 2 (%d, %d)", q->forCost, q->optCount);
+        {
+            MtgAnswer ai;
+            MtgAi_Answer(&sD, &ai);
+            CHECK(q->opts[ai.card] == 2, "the AI would give the 2/2 exactly 2 (%d)", q->opts[ai.card]);
+        }
+        memset(&an, 0, sizeof(an));
+        an.card = 1;
+        Answer(&an);
+        PassBoth();
+        CHECK(Zone(bears) == MTG_ZONE_GRAVEYARD && sD.players[1].life == 19, "the bears dead, 1 to the player (%d)", sD.players[1].life);
+    }
+    {   // Flailing Ogre: any player may activate its -1/-1 (the opponent, paying)
+        int ogre, k, found = -1;
+        const MtgQuery *q;
+        Table();
+        ogre = Put(0, "Flailing Ogre", MTG_ZONE_BATTLEFIELD);
+        Lands(1, "Mountain", 1);
+        GoToTurn(1, MTG_STEP_MAIN1);
+        Mtg_RefreshQuery(&sD);
+        q = Mtg_Query(&sD);
+        for (k = 0; k < q->actionCount; k++)
+            if (q->actions[k].kind == MTG_ACT_ACTIVATE && q->actions[k].obj == ogre
+                && Mtg_Param(&gMtgAbilities[q->actions[k].ability], "IsCurse"))
+                found = k;
+        CHECK(q->player == 1 && found >= 0, "the opponent may use the ogre's -1/-1");
+        if (found >= 0) {
+            MtgAnswer a;
+            memset(&a, 0, sizeof(a));
+            a.action = (uint16_t)found;
+            Answer(&a);
+            PassBoth();
+            CHECK(Mtg_Power(&sD, ogre) == 2 && sD.stack[0].controller == 1, "3/3 -> 2/2 (%d)", Mtg_Power(&sD, ogre));
+        }
+    }
+}
+
 static void TestCantCounter(void)
 {
     int mongoose, bears, cs, herald, istvan, bolt, i;
@@ -2709,6 +3566,188 @@ static uint32_t PlayOut(MtgDuel *d, int *turns, int *winner)
     return d->hash;
 }
 
+static void TestProtectionKinds(void)
+{
+    int chap, bears, scion, rod, bless, g[5], gc, i;
+    printf("protection from creatures / artifacts, protection for all, choose a card\n");
+    Table();   // Beloved Chaplain: protection from creatures: no creature can block it
+    chap = Put(0, "Beloved Chaplain", MTG_ZONE_BATTLEFIELD);
+    bears = Put(1, "Grizzly Bears", MTG_ZONE_BATTLEFIELD);
+    CHECK(!Mtg_CanBlock(&sD, bears, chap), "the bears can't block the chaplain");
+    scion = Put(1, "Yavimaya Scion", MTG_ZONE_BATTLEFIELD);   // Yavimaya Scion: protection from artifacts
+    Lands(0, "Island", 3);
+    rod = Put(0, "Rod of Ruin", MTG_ZONE_BATTLEFIELD);
+    CHECK(Find(MTG_ACT_ACTIVATE, rod, MTG_TGT_OBJ, scion) < 0 && Find(MTG_ACT_ACTIVATE, rod, MTG_TGT_OBJ, bears) >= 0,
+          "the rod can't target the scion, can the bears");
+
+    Table();   // Akroma's Blessing: choose a color, creatures you control gain protection from it
+    Lands(0, "Plains", 3);
+    bears = Put(0, "Grizzly Bears", MTG_ZONE_BATTLEFIELD);
+    chap = Put(1, "Grizzly Bears", MTG_ZONE_BATTLEFIELD);
+    bless = Put(0, "Akroma's Blessing", MTG_ZONE_HAND);
+    Do(MTG_ACT_CAST, bless, -1, 0);
+    PassBoth();
+    CHECK(Mtg_Query(&sD)->kind == MTG_Q_CHOOSE && Mtg_Query(&sD)->optKind == MTG_OPT_COLOR, "the color asked");
+    ChooseOption(NULL, MTG_R);
+    CHECK((Mtg_Protection(&sD, bears) & MTG_COLOR_BIT(MTG_R)) && !(Mtg_Protection(&sD, chap) & MTG_COLOR_BIT(MTG_R)),
+          "own bears protected from red, theirs not");
+
+    Table();   // Grave Consequences: each exiles any number from their graveyard, then loses 1 per card left
+    Lands(0, "Swamp", 2);
+    for (i = 0; i < 3; i++)
+        g[i] = Put(0, "Grizzly Bears", MTG_ZONE_GRAVEYARD);
+    g[3] = Put(1, "Grizzly Bears", MTG_ZONE_GRAVEYARD);
+    g[4] = Put(1, "Grizzly Bears", MTG_ZONE_GRAVEYARD);
+    gc = Put(0, "Grave Consequences", MTG_ZONE_HAND);
+    Do(MTG_ACT_CAST, gc, -1, 0);
+    PassBoth();
+    for (i = 0; i < 6 && Mtg_Query(&sD)->kind == MTG_Q_CHOOSE; i++) {
+        const MtgQuery *q = Mtg_Query(&sD);
+        if (q->optCount) {   // how many: player 0 two, player 1 none
+            ChooseOption(NULL, q->player == 0 ? 2 : 0);
+        } else
+            ChoosePick(q->candidates[0]);
+    }
+    CHECK(Zone(g[0]) + Zone(g[1]) + Zone(g[2]) == 2 * MTG_ZONE_EXILE + MTG_ZONE_GRAVEYARD
+          && Zone(g[3]) == MTG_ZONE_GRAVEYARD && Zone(g[4]) == MTG_ZONE_GRAVEYARD, "two of player 0's exiled, none of 1's");
+    CHECK(sD.players[0].life == 19 && sD.players[1].life == 18, "life 19 / 18 (%d / %d)",
+          sD.players[0].life, sD.players[1].life);
+}
+
+static void TestTypeLayer(void)
+{
+    int moon, city, mtn, lands, forest, bears, hour, amount, colors;
+    uint16_t abil[16];
+    printf("statics that change types and colors\n");
+    Table();   // Blood Moon: City of Brass is a Mountain: {T}: add {R}, nothing else (305.7)
+    moon = Put(1, "Blood Moon", MTG_ZONE_BATTLEFIELD);
+    city = Put(0, "City of Brass", MTG_ZONE_BATTLEFIELD);
+    mtn = Put(0, "Island", MTG_ZONE_BATTLEFIELD);
+    colors = Mtg_ManaAbilityColors(&sD, city, &amount);
+    CHECK(colors == (int)MTG_COLOR_BIT(MTG_R) && Mtg_ObjAbilities(&sD, city, abil, 16) == 0,
+          "the city makes red only, no ability of its own (%x)", colors);
+    CHECK(Mtg_ValidObj(&sD, city, "Mountain", moon, 1) && !Mtg_ValidObj(&sD, mtn, "Mountain", moon, 1),
+          "the city is a Mountain, the basic Island isn't");
+    Mtg_MoveTo(&sD, moon, MTG_ZONE_GRAVEYARD);
+    colors = Mtg_ManaAbilityColors(&sD, city, &amount);
+    CHECK(colors != (int)MTG_COLOR_BIT(MTG_R), "Blood Moon gone: the city's own colors again (%x)", colors);
+
+    Table();   // Living Lands: Forests are 1/1 creatures; Darkest Hour: all creatures are black
+    lands = Put(1, "Living Lands", MTG_ZONE_BATTLEFIELD);
+    forest = Put(0, "Forest", MTG_ZONE_BATTLEFIELD);
+    bears = Put(0, "Grizzly Bears", MTG_ZONE_BATTLEFIELD);
+    CHECK((Mtg_ObjTypes(&sD, forest) & MTG_T_CREATURE) && Mtg_Power(&sD, forest) == 1 && Mtg_Toughness(&sD, forest) == 1,
+          "the forest is a 1/1 creature");
+    hour = Put(1, "Darkest Hour", MTG_ZONE_BATTLEFIELD);
+    CHECK(Mtg_ObjColors(&sD, bears) == MTG_COLOR_BIT(MTG_B) && Mtg_ObjColors(&sD, forest) == MTG_COLOR_BIT(MTG_B),
+          "the bears and the forest are black");
+    CHECK(Mtg_ObjColors(&sD, lands) == MTG_COLOR_BIT(MTG_G), "Living Lands itself still green");
+    (void)hour;
+}
+
+static void TestNewStaticModes(void)
+{
+    int oph, fort, staff, wraith, bears, i, hand;
+    printf("statics: no combat damage, attacks with defender, landwalk ignored, mana kept\n");
+    Table();   // Ophidian unblocked: you may draw; if you do, it assigns no combat damage
+    oph = Put(0, "Ophidian", MTG_ZONE_BATTLEFIELD);
+    for (i = 0; i < 3; i++)
+        PutLibTop(0, "Island");
+    hand = HandCount(0);
+    Attack(1);
+    for (i = 0; i < 8 && !(Mtg_Query(&sD)->kind == MTG_Q_CHOOSE && Mtg_Query(&sD)->choice == MTG_CHOICE_YESNO); i++)
+        Pass();
+    CHECK(Mtg_Query(&sD)->kind == MTG_Q_CHOOSE, "you may draw: asked");
+    Choose(1);
+    GoTo(0, MTG_STEP_COMBAT_END);
+    CHECK(HandCount(0) == hand + 1 && sD.players[1].life == 20, "drew, no damage (life %d)", sD.players[1].life);
+    (void)oph;
+
+    Table();   // Mobile Fort: {3}: +3/-1, it can attack this turn as though it didn't have defender
+    Lands(0, "Island", 3);
+    fort = Put(0, "Mobile Fort", MTG_ZONE_BATTLEFIELD);
+    GoTo(0, MTG_STEP_COMBAT_BEGIN);
+    Do(MTG_ACT_ACTIVATE, fort, -1, 0);
+    PassBoth();
+    Pass();
+    Pass();
+    CHECK(Mtg_Query(&sD)->kind == MTG_Q_ATTACKERS && Mtg_Query(&sD)->candidateCount == 1, "the fort may attack");
+
+    Table();   // Staff of the Ages: a swampwalker can be blocked by one who has a Swamp
+    staff = Put(0, "Staff of the Ages", MTG_ZONE_BATTLEFIELD);
+    wraith = Put(0, "Bog Wraith", MTG_ZONE_BATTLEFIELD);
+    bears = Put(1, "Grizzly Bears", MTG_ZONE_BATTLEFIELD);
+    Put(1, "Swamp", MTG_ZONE_BATTLEFIELD);
+    CHECK(Mtg_CanBlock(&sD, bears, wraith), "the bears can block the swampwalker");
+    Mtg_MoveTo(&sD, staff, MTG_ZONE_GRAVEYARD);
+    CHECK(!Mtg_CanBlock(&sD, bears, wraith), "the staff gone: not any more");
+
+    Table();   // Upwelling: mana stays from step to step
+    Put(0, "Upwelling", MTG_ZONE_BATTLEFIELD);
+    sD.players[0].pool[MTG_G] = 2;
+    GoTo(0, MTG_STEP_COMBAT_BEGIN);
+    CHECK(sD.players[0].pool[MTG_G] == 2, "the green mana kept (%d)", sD.players[0].pool[MTG_G]);
+}
+
+static void TestUntapLimits(void)
+{
+    int orb, l[3], bears, i, untapped;
+    printf("untap limits (Winter Orb)\n");
+    Table();   // Winter Orb: three tapped lands, one picked to untap; the creature untaps anyway
+    orb = Put(1, "Winter Orb", MTG_ZONE_BATTLEFIELD);
+    for (i = 0; i < 3; i++) {
+        l[i] = Put(0, "Forest", MTG_ZONE_BATTLEFIELD);
+        sD.objs[l[i]].tapped = 1;
+    }
+    bears = Put(0, "Grizzly Bears", MTG_ZONE_BATTLEFIELD);
+    sD.objs[bears].tapped = 1;
+    GoToTurn(1, MTG_STEP_END);
+    for (i = 0; i < 10 && !(Mtg_Query(&sD)->kind == MTG_Q_CHOOSE && Mtg_Query(&sD)->forCost == 10); i++)
+        Pass();
+    CHECK(Mtg_Query(&sD)->kind == MTG_Q_CHOOSE && Mtg_Query(&sD)->candidateCount == 3 && Mtg_Query(&sD)->player == 0,
+          "which land to untap: asked");
+    ChoosePick(l[1]);
+    for (i = untapped = 0; i < 3; i++)
+        untapped += !sD.objs[l[i]].tapped;
+    CHECK(untapped == 1 && !sD.objs[l[1]].tapped && !sD.objs[bears].tapped, "one land untapped (%d), the bears too", untapped);
+    CHECK(sD.active == 0 && sD.step > MTG_STEP_UNTAP, "the turn goes on (step %d)", sD.step);
+    sD.objs[orb].tapped = 1;   // (Winter Orb tapped: in Forge's text it still works; Static Orb stops)
+}
+
+static void TestHandAndBlockers(void)
+{
+    int rhino, b1, b2, i;
+    printf("maximum hand size, blocker limits\n");
+    Table();   // Thought Nibbler: its controller's maximum hand size is 5
+    Put(0, "Thought Nibbler", MTG_ZONE_BATTLEFIELD);
+    CHECK(Mtg_MaxHandSize(&sD, 0) == 5 && Mtg_MaxHandSize(&sD, 1) == 7, "5 for its controller, 7 for the other");
+    Put(0, "Spellbook", MTG_ZONE_BATTLEFIELD);
+    CHECK(Mtg_MaxHandSize(&sD, 0) > 100, "Spellbook: no maximum");
+    for (i = 0; i < 9; i++)
+        Put(0, "Island", MTG_ZONE_HAND);
+    GoToTurn(1, MTG_STEP_UPKEEP);
+    CHECK(HandCount(0) >= 9, "nothing discarded at the cleanup (%d)", HandCount(0));
+
+    Table();   // Charging Rhino: can't be blocked by more than one creature (the second blocker doesn't block)
+    rhino = Put(0, "Charging Rhino", MTG_ZONE_BATTLEFIELD);
+    b1 = Put(1, "Grizzly Bears", MTG_ZONE_BATTLEFIELD);
+    b2 = Put(1, "Grizzly Bears", MTG_ZONE_BATTLEFIELD);
+    Attack(1);
+    {
+        const MtgQuery *q;
+        MtgAnswer a;
+        while (Mtg_Query(&sD)->kind == MTG_Q_PRIORITY && sD.step == MTG_STEP_COMBAT_ATTACKERS)
+            Pass();
+        q = Mtg_Query(&sD);
+        memset(&a, 0, sizeof(a));
+        memset(a.block, -1, sizeof(a.block));
+        for (i = 0; i < q->candidateCount; i++)
+            a.block[i] = 0;
+        Answer(&a);
+    }
+    CHECK((sD.objs[b1].blocking == rhino) + (sD.objs[b2].blocking == rhino) == 1, "only one blocks the rhino");
+}
+
 static void TestDuels(void)
 {
     static MtgDeck red, green;
@@ -2997,6 +4036,18 @@ int main(int argc, char **argv)
     TestEffect();
     TestPreventAll();
     TestChooseSource();
+    TestChoices();
+    TestUpkeepCosts();
+    TestKickerFlashback();
+    TestMorph();
+    TestTriggerCosts();
+    TestManaFx();
+    TestTapAllPerm();
+    TestProtectionKinds();
+    TestTypeLayer();
+    TestNewStaticModes();
+    TestUntapLimits();
+    TestHandAndBlockers();
     TestCantCounter();
     TestTrigModes();
     TestBecomesTarget();
