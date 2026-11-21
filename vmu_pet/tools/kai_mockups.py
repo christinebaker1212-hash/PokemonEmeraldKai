@@ -111,9 +111,36 @@ def vmu_wallpaper():
     OUT, BODY, SEAM, SHADE, LIGHT = (112, 110, 104), (226, 224, 214), (178, 176, 168), (202, 200, 190), (240, 238, 232)
     BTN, BTN_D, BTN_L, INK = (128, 128, 150), (70, 70, 84), (166, 166, 186), (88, 88, 92)
     X, Y, W, H = 43, 3, 66, 110          # the body
-    # the body: the rails' tops at y 3, the middle's top arching up to y 0, the bottom corners round
-    d.rounded_rectangle([X, Y + 3, X + W, Y + H], 6, fill=BODY, outline=OUT)
+    # the body: the rails' tops at y 3, the middle's top arching up to y 0; the bottom curved, as the photo's (the sides
+    # bend in over its last 16 rows: a superellipse, round corners into a gently curved middle)
     px = im.load()
+    cxb, low = X + W / 2, 16
+
+    def body(x, y):
+        if y < Y + 3 or y > Y + H or x < X or x > X + W:
+            return False
+        if y < Y + 6:                    # the top corners
+            r = 3
+            for ccx in (X + r, X + W - r):
+                if abs(x - ccx) > 0 and (x - ccx) * (1 if ccx > cxb else -1) > 0:
+                    if (x - ccx) ** 2 + (y - (Y + 3 + r)) ** 2 > r * r + 1:
+                        return False
+        y0 = Y + H - low
+        if y > y0:
+            return (abs(x - cxb) / (W / 2)) ** 3 + ((y - y0) / low) ** 2 <= 1.0
+        return True
+    for y in range(Y, Y + H + 1):
+        for x in range(X, X + W + 1):
+            if body(x + 0.5, y + 0.5):
+                px[x, y] = BODY + (255,)
+    for y in range(Y, Y + H + 1):        # its outline, and a shade along the curve inside it
+        for x in range(X, X + W + 1):
+            if px[x, y][:3] != BODY:
+                continue
+            if not all(body(x + 0.5 + dx, y + 0.5 + dy) for dx, dy in ((-1, 0), (1, 0), (0, -1), (0, 1))):
+                px[x, y] = OUT + (255,)
+            elif y > Y + H - low and not body(x + 0.5, y + 2.5):
+                px[x, y] = SHADE + (255,)
     for x in range(X + 9, X + W - 8):    # the cap's top: an arch above the rails
         t = (x - (X + W / 2)) / (W / 2 - 9)
         top = Y + int(round(3 - 3 * (1 - t * t)))
@@ -121,14 +148,13 @@ def vmu_wallpaper():
             px[x, y] = BODY + (255,)
         px[x, top] = OUT + (255,)
     for x in (X + 9, X + W - 9):         # the rails' seams down both sides
-        d.line([x, Y + 3, x, Y + H - 5], fill=SEAM)
+        d.line([x, Y + 3, x, Y + H - low + 2], fill=SEAM)
     for x in range(X + 10, X + W - 9):   # the cap's arched seam
         t = (x - (X + W / 2)) / (W / 2 - 10)
         px[x, Y + int(round(15 - 4 * (1 - t * t)))] = SEAM + (255,)
     d.arc([X + 28, Y + 1, X + 38, Y + 9], 15, 165, fill=SEAM)      # the lid's circle
-    d.line([X + W - 1, Y + 8, X + W - 1, Y + H - 6], fill=SHADE)    # a little shade right and below
-    d.line([X + 6, Y + H - 1, X + W - 6, Y + H - 1], fill=SHADE)
-    d.line([X + 1, Y + 8, X + 1, Y + H - 6], fill=LIGHT)
+    d.line([X + W - 1, Y + 8, X + W - 1, Y + H - low], fill=SHADE)  # a little shade on the right
+    d.line([X + 1, Y + 8, X + 1, Y + H - low], fill=LIGHT)
     tiny(d, X + 16, Y + 19, 'Dreamcast', INK)
     # the screen
     sx, sy, sw, sh = X + 12, Y + 30, 42, 36
