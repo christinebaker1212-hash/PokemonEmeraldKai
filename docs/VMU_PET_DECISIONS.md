@@ -22,6 +22,42 @@ Started 2026-11-20. Nothing is built yet; graphics come from the user.
 - **No Dreamcast** (the user has one but would rather not use it): the program reaches the VM2 from the SD card, and an
   original VMU from the VM2 by the VMU's own file transfer (top to top).
 
+- **Sprites from the PMD Collab** (https://sprites.pmdcollab.org/), as few as possible, converted to 1 bit
+  (2026-11-21). **The Normal portrait is the VMU icon.**
+- **What comes into Kai:** the species it reached, level 50, nature / Ability / gender / IVs rolled at hatching, a
+  1/4096 shiny chance, its four newest level-up moves, the save's trainer as OT; party, or a PC box when the party is
+  full. **Good care benefits it.**
+- **Care decides** the evolutions that need more than a level (stones, trades, friendship, branches like EEVEE's).
+- **It's never lost**: no death, no running away.
+- **Battles** both on the VMU and VMU to VMU, **only when the player starts one**.
+- **The main goal (the user's own words, 2026-11-21):** the person it's for works where electronics aren't allowed and
+  can't check the VMU regularly or answer care in time. **A day's care (by the VMU's clock) must fit in a 5-minute
+  window**, a restroom break.
+
+## Sprites (determined 2026-11-21)
+
+- **One frame a species**: PMD's Idle, facing down, frame 1 (tools/vmu_pet/pmd_read.py reads Kai's own
+  graphics/moemon/pmd/pmd.bin). Movement comes from shared moves (bob, hop, turn by mirroring); eating, sleeping, poop,
+  ZZZ, food are drawn once for all.
+- **24x24, 1 bit** (tools/vmu_pet/onebit.py: the outline where it meets transparency, dark colours filled; bigger ones
+  scaled down to fit). The median Idle frame is 25 px; 16x16 lost too much (docs/vmu_pet/sprites_16.png against
+  sprites_24.png; on the screen: docs/vmu_pet/screen_mock.png).
+- All 974 species Kai has PMD sprites for take about 53 KB at 24x24, so the program spills past 64 KB into the second
+  flash bank: **about 160-170 of the VMU's 200 blocks; the VMU is the pet's alone.**
+- 51 species have no PMD sprite in Kai's import (newer collab sprites may exist for some): list them and fill them
+  before building.
+
+## Care: built for 5-minute windows (proposed)
+
+- **Care is judged by the day, never the minute.** Nothing calls, nothing beeps, nothing goes wrong because the VMU
+  wasn't checked in time. A day (by the VMU's clock) asks for: feeding until full, a few training rounds, cleaning up,
+  medicine if sick. Doing them any time that day counts.
+- **The whole day's care in about 2 minutes**, leaving room in 5: the screen opens on what today still needs; each
+  task is one or two presses, a training round about 10 seconds.
+- **A missed day is a care mistake**, never a loss: it weighs on the bonuses in Kai and on evolutions.
+- **Silent by default**; the VMU sleeps when not in use (batteries); a reset or backwards clock counts as no time
+  passing, never as missed days.
+
 ## Space (from the hardware)
 
 - Code runs from flash bank 0 (64 KB); LDF reads all 128 KB (the bank bit at SFR 0x154). A minigame starts at block 0
