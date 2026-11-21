@@ -2123,6 +2123,21 @@ static int StartStep(MtgDuel *d)
         Mtg_FireDelayed(d);   // ("at the beginning of the next ...": DelayedTrigger)
         break;
     }
+    if (d->step == MTG_STEP_END && d->eotCount) {   // AtEOT$: what was to go at the beginning of the next end step
+        int k, n = d->eotCount;
+        d->eotCount = 0;
+        for (k = 0; k < n; k++) {
+            int o = d->eotObj[k];
+            if (d->objs[o].zone != MTG_ZONE_BATTLEFIELD || d->objs[o].seq != d->eotSeq[k])
+                continue;   // (gone, or a new object since)
+            if (d->eotAct[k] == 1)
+                Mtg_Sacrifice(d, o);
+            else if (d->eotAct[k] == 2)
+                Mtg_Destroy(d, o, 0);
+            else
+                Mtg_MoveTo(d, o, d->eotAct[k] == 3 ? MTG_ZONE_EXILE : MTG_ZONE_HAND);
+        }
+    }
     return 0;
 }
 

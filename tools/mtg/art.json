@@ -762,6 +762,13 @@
 "number": "3",
 "set": "usg"
 },
+"Angelic Favor": {
+"artist": "Paolo Parente",
+"file": "nem_1",
+"frame": "1997",
+"number": "1",
+"set": "nem"
+},
 "Angelic Page": {
 "artist": "Rebecca Guay",
 "file": "usg_4",
@@ -922,6 +929,13 @@
 "frame": "1997",
 "number": "162",
 "set": "tmp"
+},
+"Apprentice Necromancer": {
+"artist": "Pete Venters",
+"file": "uds_51",
+"frame": "1997",
+"number": "51",
+"set": "uds"
 },
 "Apprentice Wizard": {
 "artist": "Dan Frazier",
@@ -1587,6 +1601,13 @@
 "frame": "1993",
 "number": "58",
 "set": "ice"
+},
+"Balduvian Dead": {
+"artist": "Mike Kimble",
+"file": "all_43",
+"frame": "1993",
+"number": "43",
+"set": "all"
 },
 "Balduvian Horde": {
 "artist": "Brian Snõddy",
@@ -4507,6 +4528,13 @@
 "number": "238",
 "set": "4ed"
 },
+"Crazed Armodon": {
+"artist": "Gary Leach",
+"file": "tmp_220",
+"frame": "1997",
+"number": "220",
+"set": "tmp"
+},
 "Crazed Skirge": {
 "artist": "Ron Spencer",
 "file": "usg_125",
@@ -5094,6 +5122,13 @@
 "frame": "1997",
 "number": "59",
 "set": "exo"
+},
+"Dawn of the Dead": {
+"artist": "Pete Venters",
+"file": "tor_59",
+"frame": "1997",
+"number": "59",
+"set": "tor"
 },
 "Dawnstrider": {
 "artist": "rk post",
@@ -9645,6 +9680,13 @@
 "number": "268",
 "set": "mir"
 },
+"Head Games": {
+"artist": "Terese Nielsen",
+"file": "ons_155",
+"frame": "1997",
+"number": "155",
+"set": "ons"
+},
 "Headhunter": {
 "artist": "Matt Cavotta",
 "file": "ons_156",
@@ -10835,6 +10877,13 @@
 "number": "93",
 "set": "jud"
 },
+"Jester's Mask": {
+"artist": "Dan Frazier",
+"file": "ice_325",
+"frame": "1993",
+"number": "325",
+"set": "ice"
+},
 "Jet Medallion": {
 "artist": "Sue Ellen Brown",
 "file": "tmp_292",
@@ -11541,6 +11590,13 @@
 "frame": "1997",
 "number": "123",
 "set": "jud"
+},
+"Krovikan Elementalist": {
+"artist": "Douglas Shuler",
+"file": "ice_139",
+"frame": "1993",
+"number": "139",
+"set": "ice"
 },
 "Krovikan Fetish": {
 "artist": "Heather Hudson",
@@ -13089,6 +13145,13 @@
 "number": "302",
 "set": "usg"
 },
+"Misinformation": {
+"artist": "Richard Kane Ferguson",
+"file": "all_56",
+"frame": "1993",
+"number": "56",
+"set": "all"
+},
 "Misshapen Fiend": {
 "artist": "Adam Rex",
 "file": "mmq_147",
@@ -13130,6 +13193,13 @@
 "frame": "1997",
 "number": "91",
 "set": "sth"
+},
+"Mogg Cannon": {
+"artist": "Mike Raabe",
+"file": "tmp_298",
+"frame": "1997",
+"number": "298",
+"set": "tmp"
 },
 "Mogg Fanatic": {
 "artist": "Brom",
@@ -15329,6 +15399,13 @@
 "number": "96",
 "set": "4ed"
 },
+"Puffer Extract": {
+"artist": "Heather Hudson",
+"file": "mmq_310",
+"frame": "1997",
+"number": "310",
+"set": "mmq"
+},
 "Pulsating Illusion": {
 "artist": "Arnie Swekel",
 "file": "ody_96",
@@ -15426,6 +15503,13 @@
 "frame": "1993",
 "number": "258",
 "set": "ice"
+},
+"Pyric Salamander": {
+"artist": "Tony Roberts",
+"file": "mir_187",
+"frame": "1997",
+"number": "187",
+"set": "mir"
 },
 "Pyroclasm": {
 "artist": "Pat Lewis",
@@ -19004,6 +19088,13 @@
 "number": "283",
 "set": "ons"
 },
+"Sneak Attack": {
+"artist": "Jerry Tiritilli",
+"file": "usg_218",
+"frame": "1997",
+"number": "218",
+"set": "usg"
+},
 "Sneaky Homunculus": {
 "artist": "Scott M. Fischer",
 "file": "nem_44",
@@ -19325,6 +19416,13 @@
 "frame": "1997",
 "number": "158",
 "set": "tmp"
+},
+"Soulshriek": {
+"artist": "John Bolton",
+"file": "mir_145",
+"frame": "1997",
+"number": "145",
+"set": "mir"
 },
 "Southern Paladin": {
 "artist": "Douglas Shuler",
@@ -21243,6 +21341,13 @@
 "frame": "1997",
 "number": "80",
 "set": "inv"
+},
+"Tidal Wave": {
+"artist": "Brian Snõddy",
+"file": "mir_100",
+"frame": "1997",
+"number": "100",
+"set": "mir"
 },
 "Tiger Claws": {
 "artist": "Adam Rex",

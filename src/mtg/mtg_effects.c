@@ -504,9 +504,12 @@ static const char *CardsOnly(const char *spec)
     return o == buf ? NULL : buf;
 }
 
+static int sChooser = -1;   // (Chooser$ You: the player picking from another's cards; -1: their owner)
 static int AskPick(MtgDuel *d, int player, const uint16_t *list, int n)
 {
     int i;
+    if (sChooser >= 0)
+        player = sChooser;
     Mtg_AskChoice(d, player, MTG_CHOICE_PICK, NULL);
     for (i = 0; i < n && i < MTG_MAX_COMBAT; i++)
         d->query.candidates[i] = list[i];
@@ -836,6 +839,23 @@ static uint32_t KeywordList(const char *s, int *ok)   // "Flying & First Strike"
     return mask;
 }
 
+// AtEOT$: OBJ sacrificed / destroyed / exiled / returned at the beginning of the next end step (mtg_game.c StartStep)
+static int EotAct(const char *v)
+{
+    return !v ? 0 : strcmp(v, "Sacrifice") == 0 ? 1 : strcmp(v, "Destroy") == 0 ? 2 : strcmp(v, "Exile") == 0 ? 3
+         : strcmp(v, "Hand") == 0 ? 4 : -1;
+}
+
+static void AtEot(MtgDuel *d, const MtgAbility *ab, int obj)
+{
+    int act = EotAct(Mtg_Param(ab, "AtEOT"));
+    if (act <= 0 || d->eotCount >= 12)
+        return;
+    d->eotObj[d->eotCount] = (uint16_t)obj;
+    d->eotSeq[d->eotCount] = d->objs[obj].seq;
+    d->eotAct[d->eotCount++] = (uint8_t)act;
+}
+
 static int sPumpForGood;   // (Duration$ Permanent: the Pump resolving lasts while it stays)
 static void Pump(MtgDuel *d, int obj, int att, int def, uint32_t kw)
 {
@@ -1104,6 +1124,7 @@ static int Resolve(MtgDuel *d, MtgResolveCtx *ctx, const MtgAbility *ab)
             o->animColors = (uint8_t)(colors > 0 ? colors : 0);
             o->animOverwrite = (uint8_t)(Mtg_Param(ab, "OverwriteColors") != NULL || (colors >= 0 && Mtg_Param(ab, "Colors")));
             o->animKeywords = kw & ((1u << MTG_KW_COUNT) - 1);
+            AtEot(d, ab, who.t[i].id);
             Mtg_Event(d, MTG_EV_COUNTERS, who.t[i].id, 0, o->counters11);   // (the table redraws it)
         }
         break;
@@ -1201,6 +1222,7 @@ static int Resolve(MtgDuel *d, MtgResolveCtx *ctx, const MtgAbility *ab)
                 o->blocking = o->attachedTo = MTG_NO_OBJ;
                 o->damagedBy[0] = o->damagedBy[1] = o->damagedBy[2] = MTG_NO_OBJ;
                 Mtg_MoveTo(d, obj, MTG_ZONE_BATTLEFIELD);
+                AtEot(d, ab, obj);
             }
         }
         break;
@@ -1286,8 +1308,10 @@ static int Resolve(MtgDuel *d, MtgResolveCtx *ctx, const MtgAbility *ab)
         }
         Targets(d, ctx, ab, DEF_CARD, &who);
         for (i = 0; i < who.n; i++)
-            if (OnBattlefield(d, &who.t[i]))
+            if (OnBattlefield(d, &who.t[i])) {
                 Pump(d, who.t[i].id, att, def, kw);
+                AtEot(d, ab, who.t[i].id);
+            }
         sPumpForGood = 0;
         break;
     }
@@ -1306,6 +1330,11 @@ static int Resolve(MtgDuel *d, MtgResolveCtx *ctx, const MtgAbility *ab)
             me.t[0].id = (uint16_t)ctx->controller;
             if (dp)   // (DefinedPlayer$: each of them chooses from their own cards)
                 DefinedBy(d, ctx, dp, &me);
+            if (Mtg_Param(ab, "Chooser")) {   // (Chooser$ You: from the targeted player's cards, its controller picks)
+                if (!dp && ctx->e->target.kind == MTG_TGT_PLAYER)
+                    me.t[0].id = ctx->e->target.id;
+                sChooser = ctx->controller;
+            }
             sFoundZone = strcmp(dest, "Hand") == 0 ? MTG_ZONE_HAND : strcmp(dest, "Battlefield") == 0 ? MTG_ZONE_BATTLEFIELD
                        : strcmp(dest, "Exile") == 0 ? MTG_ZONE_EXILE : strcmp(dest, "Library") == 0 ? MTG_ZONE_LIBRARY
                        : MTG_ZONE_GRAVEYARD;
@@ -1316,8 +1345,11 @@ static int Resolve(MtgDuel *d, MtgResolveCtx *ctx, const MtgAbility *ab)
                 sFoundCtrl = ctx->controller;   // (its own card back under its control)
             if (dp)
                 sFoundCtrl = -1;
-            if (!EachChooses(d, ctx, &me, n, fromZone, Mtg_Param(ab, "ChangeType"), FoundOne))
+            if (!EachChooses(d, ctx, &me, n, fromZone, Mtg_Param(ab, "ChangeType"), FoundOne)) {
+                sChooser = -1;
                 return 0;
+            }
+            sChooser = -1;
             if (lib && sFoundZone == MTG_ZONE_LIBRARY)   // (the find stays on top: Enlightened Tutor)
                 Mtg_ShuffleLibraryBelow(d, ctx->controller, (d->resStage & 0x20) ? 1 : 0);
             else if (lib)
@@ -1937,7 +1969,7 @@ static const char *const sCommon[] = {
     "ConditionDefined", "ConditionPresent", "ConditionCompare", "ConditionCheckSVar", "ConditionSVarCompare",
     "ConditionDescription", "RememberChanged", "RememberMilled", "RememberDiscarded", "RememberDestroyed",
     "RememberSacrificed", "RememberDrawn", "RememberTokens", "RememberTargets", "ForgetOtherRemembered",
-    "UnlessScale", "Condition", "ETB", "Activator",
+    "UnlessScale", "Condition", "ETB", "Activator", "AtEOT",
 };
 static const char *const sApiParams[MTG_API_COUNT][16] = {
     [MTG_API_DEAL_DAMAGE] = {"NumDmg"},
@@ -1972,7 +2004,7 @@ static const char *const sApiParams[MTG_API_COUNT][16] = {
     [MTG_API_PUMP] = {"NumAtt", "NumDef", "KW", "Duration"},
     [MTG_API_PUMP_ALL] = {"NumAtt", "NumDef", "KW", "ValidCards", "Duration"},
     [MTG_API_CHANGE_ZONE] = {"Origin", "Destination", "GainControl", "ChangeType", "ChangeNum", "ChangeTypeDesc", "Tapped",
-                             "Mandatory", "ShuffleNonMandatory", "Optional", "LibraryPosition", "Hidden", "DefinedPlayer"},
+                             "Mandatory", "ShuffleNonMandatory", "Optional", "LibraryPosition", "Hidden", "DefinedPlayer", "Chooser"},
     [MTG_API_MANA] = {"Produced", "Amount"},
     [MTG_API_DISCARD] = {"NumCards", "Mode", "DiscardValid"},
     [MTG_API_SACRIFICE] = {"SacValid", "Amount", "SacMessage"},
@@ -2018,6 +2050,11 @@ int Mtg_ApiParamsKnown(const MtgAbility *ab, const char **why)
     int i, ok;
     const char *v;
     *why = gMtgApiNames[ab->api];   // (an unhandled value of a known parameter: the API is named)
+    if ((v = Mtg_Param(ab, "AtEOT")) && (EotAct(v) <= 0
+                                         || (ab->api != MTG_API_PUMP && ab->api != MTG_API_ANIMATE && ab->api != MTG_API_TOKEN))) {
+        *why = "AtEOT";
+        return 0;
+    }
     for (i = 0; i < ab->paramCount; i++) {
         const char *key = gMtgParams[ab->paramFirst + i].key;
         if (strncmp(key, "AI", 2) == 0)
@@ -2257,7 +2294,17 @@ int Mtg_ApiParamsKnown(const MtgAbility *ab, const char **why)
         if (!LibPosKnown(ab, &pos) || (Mtg_Param(ab, "LibraryPosition") && (!dz || strcmp(dz, "Library"))))
             return 0;
         if ((v = Mtg_Param(ab, "ChangeType"))) {   // a search (Hidden: the library or the hand) for ChangeNum$ cards
-            const char *n = Mtg_Param(ab, "ChangeNum"), *dp = Mtg_Param(ab, "DefinedPlayer");
+            const char *n = Mtg_Param(ab, "ChangeNum"), *dp = Mtg_Param(ab, "DefinedPlayer"), *ch = Mtg_Param(ab, "Chooser");
+            if (ch) {   // Chooser$ You: from the targeted (or Defined) player's library, hand or graveyard, its controller picks
+                if (strcmp(ch, "You") || (dp && strcmp(dp, "Targeted")) || (!dp && (!ab->tgt || !Mtg_ValidPlayerSpecKnown(ab->tgt)
+                                                                                    || !strstr(ab->tgt, "pponent")))
+                    || !o || !dz || (strcmp(o, "Library") && strcmp(o, "Hand") && strcmp(o, "Graveyard"))
+                    || (strcmp(dz, "Hand") && strcmp(dz, "Graveyard") && strcmp(dz, "Exile")) || Mtg_Param(ab, "Optional")
+                    || Mtg_Param(ab, "Defined") || !Mtg_ValidSpecKnown(v) || (n && !AmountKnown(ab, "ChangeNum", 0))
+                    || Mtg_Param(ab, "Tapped") || Mtg_Param(ab, "GainControl"))
+                    return 0;
+                return 1;
+            }
             if (dp) {   // each Defined player chooses from their own (Exhume, Curfew): never optional, nobody else choosing
                 if (!InList(dp, sDefinedKnown, (int)(sizeof(sDefinedKnown) / sizeof(sDefinedKnown[0])))
                     && !(ab->kind != MTG_AB_SPELL && ab->kind != MTG_AB_ACTIVATED && Mtg_TriggeredDefinedKnown(0, dp)))

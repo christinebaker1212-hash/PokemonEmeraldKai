@@ -8689,3 +8689,10 @@ res/moves/chatter/anim.s).
   effRem) and remembered as it resolves; Defined$ EffectSource is its source. An Effect with only triggers is made too.
 - SacrificeAllEffect: every ValidCards$ permanent, or the Defined$ ones (Controller$ You: its controller's own).
 - Playable: 3444 -> 3458. Test: test_rules.c (Mountain Titan).
+
+## MAGIC: at end of turn, another's cards you choose (2026-11-21)
+- AtEOT$ on Pump / Animate / Token (Sacrifice, Destroy, Exile, Hand): MtgDuel.eot* (the object as it was), done as the
+  next end step begins (mtg_game.c StartStep) unless it has left or become a new object.
+- ChangeZone's Chooser$ You: from the targeted (or DefinedPlayer$ Targeted) player's library, hand or graveyard, its
+  controller picks (mtg_effects.c sChooser in AskPick): Head Games, Jester's Mask.
+- Playable: 3458 -> 3473. Tests: test_rules.c (Balduvian Dead, Head Games).

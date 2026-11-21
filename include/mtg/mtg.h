@@ -390,6 +390,11 @@ typedef struct MtgDuel {
     // mana abilities used whose SubAbility$ chain is still to resolve (MtgAbility.manaFx): their source and ability
     uint8_t fxCount;
     uint16_t fxObj[8], fxAb[8];
+    // "... at the beginning of the next end step" (AtEOT$): the object (as it was then), and what happens to it
+    uint8_t eotCount;
+    uint16_t eotObj[12];
+    uint32_t eotSeq[12];
+    uint8_t eotAct[12];               // 1 sacrifice, 2 destroy, 3 exile, 4 to its owner's hand
     // a cast or an activation's costs still to pick (sacrifices, then discards): asked as MTG_Q_CHOOSE's PICK with
     // query.forCost set, before anyone gets priority
     uint8_t costSac, costDiscard, costPlayer;

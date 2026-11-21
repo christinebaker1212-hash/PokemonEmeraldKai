@@ -3091,6 +3091,43 @@ static void TestTapAllPerm(void)
         PassBoth();   // (the ritual)
         CHECK(Mtg_Counters(&sD, titan, MTG_CTR_P1P1) == 1, "a black spell: a counter (%d)", Mtg_Counters(&sD, titan, MTG_CTR_P1P1));
     }
+    {   // Balduvian Dead: a 3/1 haste token, sacrificed at the beginning of the next end step
+        int dead, k, tok = -1;
+        Table();
+        dead = Put(0, "Balduvian Dead", MTG_ZONE_BATTLEFIELD);
+        Put(0, "Grizzly Bears", MTG_ZONE_GRAVEYARD);
+        Lands(0, "Mountain", 3);
+        Do(MTG_ACT_ACTIVATE, dead, -1, 0);
+        if (Mtg_Query(&sD)->kind == MTG_Q_CHOOSE)
+            ChoosePick(sD.objCount - 4);
+        PassBoth();
+        for (k = 0; k < sD.objCount; k++)
+            if (sD.objs[k].def >= MTG_TOKEN_BASE && sD.objs[k].zone == MTG_ZONE_BATTLEFIELD)
+                tok = k;
+        CHECK(tok >= 0, "the token");
+        GoToTurn(1, MTG_STEP_UPKEEP + 1);
+        CHECK(tok >= 0 && sD.objs[tok].zone != MTG_ZONE_BATTLEFIELD, "gone by the next turn");
+    }
+    {   // Head Games: their hand goes into their library, then you pick that many cards of it for their hand
+        int hg, k, asked = 0, mine = 0;
+        Table();
+        Lands(0, "Swamp", 5);
+        hg = Put(0, "Head Games", MTG_ZONE_HAND);
+        Put(1, "Lightning Bolt", MTG_ZONE_HAND);
+        Put(1, "Grizzly Bears", MTG_ZONE_HAND);
+        Do(MTG_ACT_CAST, hg, MTG_TGT_PLAYER, 1);
+        PassBoth();
+        while (Mtg_Query(&sD)->kind == MTG_Q_CHOOSE && Mtg_Query(&sD)->choice == MTG_CHOICE_PICK && asked < 5) {
+            MtgAnswer a;
+            mine += Mtg_Query(&sD)->player == 0;
+            memset(&a, 0, sizeof(a));
+            Answer(&a);
+            asked++;
+        }
+        CHECK(asked == 2 && mine == 2 && HandCount(1) == 2, "you picked two cards for their hand (%d asked, %d by you, %d in hand)",
+              asked, mine, HandCount(1));
+        (void)k;
+    }
     {   // Flailing Ogre: any player may activate its -1/-1 (the opponent, paying)
         int ogre, k, found = -1;
         const MtgQuery *q;
