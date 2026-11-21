@@ -12,6 +12,8 @@ national 1-151. In the edition a MOeMON is its index (0..n-1):
   ed_evo_to   (1 each)          what it becomes ($ff = nothing), ed_evo_lv (1 each) at which level
   ed_evo_kind (1 each)          0 by level, 1 a stone / trade / friendship (care: at ed_evo_lv), 2 EEVEE (care picks)
   ed_egg      (1 each)          its Egg (eggs.py): bits 0-3 the design (kind * 2 + phase), bit 4 mirrored
+  ed_type1, ed_type2 (1 each)   its types (eggs.TYPES' order), type_chart: 19 x 19 (attacker's row), 0 no effect,
+                                1 not very effective, 2 normal, 3 super effective
   ed_egg_rgb  (6 each)          its Egg's colours for the file icon: outline, shell, pattern (ARGB4444, little-endian)
   ed_name     (2 each)          -> a 0-terminated name
   ed_sprite   (2 each)          -> its sprite: a row count h, then h rows of 3 bytes (24 pixels, bit 7 left), the
@@ -75,6 +77,37 @@ def evolutions(nums):
         evs = re.findall(r'\{\s*(EVO_\w+)\s*,\s*(\w+)\s*,\s*SPECIES_(\w+)\s*\}', chunk)
         out[nums[m.group(1)]] = [(k, a, nums.get(t)) for k, a, t in evs if t in nums]
     return out
+
+
+# The type chart (Gen 6 on, FAIRY included): attacker -> {defender: multiplier}; MYSTERY (Kai's ???) is neutral
+CHART = {
+    'NORMAL': {'ROCK': .5, 'GHOST': 0, 'STEEL': .5},
+    'FIGHTING': {'NORMAL': 2, 'FLYING': .5, 'POISON': .5, 'ROCK': 2, 'BUG': .5, 'GHOST': 0, 'STEEL': 2,
+                 'PSYCHIC': .5, 'ICE': 2, 'DARK': 2, 'FAIRY': .5},
+    'FLYING': {'FIGHTING': 2, 'ROCK': .5, 'BUG': 2, 'STEEL': .5, 'GRASS': 2, 'ELECTRIC': .5},
+    'POISON': {'POISON': .5, 'GROUND': .5, 'ROCK': .5, 'GHOST': .5, 'STEEL': 0, 'GRASS': 2, 'FAIRY': 2},
+    'GROUND': {'FLYING': 0, 'POISON': 2, 'ROCK': 2, 'BUG': .5, 'STEEL': 2, 'FIRE': 2, 'GRASS': .5, 'ELECTRIC': 2},
+    'ROCK': {'FIGHTING': .5, 'FLYING': 2, 'GROUND': .5, 'BUG': 2, 'STEEL': .5, 'FIRE': 2, 'ICE': 2},
+    'BUG': {'FIGHTING': .5, 'FLYING': .5, 'POISON': .5, 'GHOST': .5, 'STEEL': .5, 'FIRE': .5, 'GRASS': 2,
+            'PSYCHIC': 2, 'DARK': 2, 'FAIRY': .5},
+    'GHOST': {'NORMAL': 0, 'GHOST': 2, 'PSYCHIC': 2, 'DARK': .5},
+    'STEEL': {'ROCK': 2, 'STEEL': .5, 'FIRE': .5, 'WATER': .5, 'ELECTRIC': .5, 'ICE': 2, 'FAIRY': 2},
+    'FIRE': {'ROCK': .5, 'BUG': 2, 'STEEL': 2, 'FIRE': .5, 'WATER': .5, 'GRASS': 2, 'ICE': 2, 'DRAGON': .5},
+    'WATER': {'GROUND': 2, 'ROCK': 2, 'FIRE': 2, 'WATER': .5, 'GRASS': .5, 'DRAGON': .5},
+    'GRASS': {'FLYING': .5, 'POISON': .5, 'GROUND': 2, 'ROCK': 2, 'BUG': .5, 'STEEL': .5, 'FIRE': .5, 'WATER': 2,
+              'GRASS': .5, 'DRAGON': .5},
+    'ELECTRIC': {'FLYING': 2, 'GROUND': 0, 'WATER': 2, 'GRASS': .5, 'ELECTRIC': .5, 'DRAGON': .5},
+    'PSYCHIC': {'FIGHTING': 2, 'POISON': 2, 'STEEL': .5, 'PSYCHIC': .5, 'DARK': 0},
+    'ICE': {'FLYING': 2, 'GROUND': 2, 'STEEL': .5, 'FIRE': .5, 'WATER': .5, 'GRASS': 2, 'ICE': .5, 'DRAGON': 2},
+    'DRAGON': {'STEEL': .5, 'DRAGON': 2, 'FAIRY': 0},
+    'DARK': {'FIGHTING': .5, 'GHOST': 2, 'PSYCHIC': 2, 'DARK': .5, 'FAIRY': .5},
+    'FAIRY': {'FIGHTING': 2, 'POISON': .5, 'STEEL': .5, 'FIRE': .5, 'DRAGON': 2, 'DARK': 2},
+}
+
+
+def type_code(a, d):
+    m = CHART.get(a, {}).get(d, 1)
+    return {0: 0, .5: 1, 1: 2, 2: 3}[m]
 
 
 def main():
@@ -144,6 +177,14 @@ def main():
         L.append('  .byte %d' % h)
         for y in range(0, h, 4):
             L.append('  .byte ' + ', '.join('$%02x, $%02x, $%02x' % ((v >> 16) & 255, (v >> 8) & 255, v & 255) for v in rows[y:y + 4]))
+    for label, n in (('ed_type1', 0), ('ed_type2', 1)):
+        L.append(label + ':')
+        vals = [eggs.TYPES.index(info[d]['types'][n]) if info[d]['types'][n] in eggs.TYPES else 0 for d in dex]
+        for i in range(0, len(vals), 16):
+            L.append('  .byte ' + ', '.join(str(v) for v in vals[i:i + 16]))
+    L.append('type_chart:')
+    for a in eggs.TYPES:
+        L.append('  .byte ' + ', '.join(str(type_code(a, d)) for d in eggs.TYPES))
     L.append('ed_egg_rgb:')
     for d in dex:
         L.append('  .word ' + ', '.join('$%04x' % eggs.to4444(c)[0] for c in eggs.palette(*eggs.body_colours(d))))

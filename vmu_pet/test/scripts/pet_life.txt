@@ -61,6 +61,8 @@ press a D 0.2
 run 0.4
 press a D 0.2
 run 0.4
+press a D 0.2
+run 0.4
 press a A 0.2
 run 1.0
 expect a 4 CLEAN!
@@ -108,6 +110,8 @@ peek a 45 00
 poke a 68 64
 press a B 0.2
 run 0.5
+press a D 0.2
+run 0.3
 press a D 0.2
 run 0.3
 press a D 0.2

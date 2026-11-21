@@ -1,0 +1,76 @@
+# image: build/pet.bin
+# A LINK battle (LINK > BATTLE) between two units joined by the cable: both wait, A on unit a calls, they swap cards and
+# play out the same battle (each counts one battle, P_BATTLES $64; one wins: P_WINALL $63).
+date a 2026 11 21 10 0 0
+date b 2026 11 21 10 0 0
+cable on
+run 3
+date a 2026 11 21 10 31 0
+date b 2026 11 21 10 31 0
+run 4
+peek a 41 02
+peek b 41 02
+press a B 0.2
+run 0.5
+press a D 0.2
+run 0.3
+press a D 0.2
+run 0.3
+press a D 0.2
+run 0.3
+press a D 0.2
+run 0.3
+press a D 0.2
+run 0.3
+press a D 0.2
+run 0.3
+press a D 0.2
+run 0.3
+press a A 0.2
+run 0.6
+press a D 0.2
+run 0.3
+press a D 0.2
+run 0.3
+press a A 0.2
+run 0.6
+press b B 0.2
+run 0.5
+press b D 0.2
+run 0.3
+press b D 0.2
+run 0.3
+press b D 0.2
+run 0.3
+press b D 0.2
+run 0.3
+press b D 0.2
+run 0.3
+press b D 0.2
+run 0.3
+press b D 0.2
+run 0.3
+press b A 0.2
+run 0.6
+press b D 0.2
+run 0.3
+press b D 0.2
+run 0.3
+press b A 0.2
+run 0.6
+shot a waiting
+expect a 4 A CALLS IT
+press a A 0.2
+run 0.8
+shot a vs_a
+shot b vs_b
+expect a 0 VS
+expect b 0 VS
+run 3
+shot a scene_a
+shot b scene_b
+run 60
+peek a 64 01
+peek b 64 01
+peek a 63 00
+peek b 63 01

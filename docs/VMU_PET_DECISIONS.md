@@ -144,6 +144,20 @@ The user: "let's continue battles, color file icon, species specific eggs, and K
   the pet finds it by its mark wherever its blocks are. Without it, a hatched MOéMON's icon is its LCD sprite in its
   Egg's outline colour. Checked pixel for pixel in the emulator (`tools/icon_check.py`, test pet_icon).
 
+## Battles (built 2026-11-21)
+
+`vmu_pet/pet/battle.inc` (screens: docs/vmu_pet/battle_screens.png). Only when the player starts one; nothing is ever
+lost (a loss only means no prize). The two face each other (ours on the left), 3 HP each, taking turns. A hit comes
+from power against power (level + today's STRENGTH x 2 + IVs / 16, +3 with no care mistakes, so the day's training
+helps) and type against type (the full type chart): super effective hits for 2, not very effective less often.
+- **WILD** (MENU > BATTLE): a MOéMON of the edition within 2 levels; on our turns a marker runs along
+  [....##....] and A on ## is a sure hit. Prizes: SPARKS (the foe's level x 4) and 2 EXP for each of the first 3 wins
+  of a day (so battles help without breaking the week to level 50).
+- **LINK** (LINK > BATTLE, two units top to top): both wait, A on either calls; they swap a card (edition, MOéMON,
+  level, power, a seed) and both play out the same battle from the shared seed, each with its own MOéMON on the left.
+  The caller attacks first. Counted in the MOéMON's record (battles, wins: bytes $62-$64, which go to Kai with it).
+- Tests: pet_battle (WILD), pet_battle_link (two units: each counts one battle, one wins).
+
 ## The VMU manager (built 2026-11-21)
 
 `vmu_pet/manager/` (README.txt; Dear ImGui on SDL2, Windows and Linux): VMU images on the VM2's SD card over USB

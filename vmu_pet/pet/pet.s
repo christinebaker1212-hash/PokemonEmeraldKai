@@ -86,6 +86,9 @@ P_TID      = $5b            ; 4 bytes: the transfer ID (Kai takes each MOeMON on
 P_EDITION  = $5f            ; 1 = KANTO
 P_MASTER   = $60            ; MASTER BALLS bought (they come to Kai with it)
 P_ASTRAL   = $61            ; ASTRAL BALLS bought
+P_WINDAY   = $62            ; battles won today (the first 3 give EXP)
+P_WINALL   = $63            ; battles won ever (to 255)
+P_BATTLES  = $64            ; battles ever (to 255)
 P_END      = $68
 PET_BYTES  = 40
 ;; The owner ($68-$7b: stays on this VMU)
@@ -656,7 +659,7 @@ hatch_anim:
 
 ;; ---------------------------------------------------------------- the menu
 
-MENU_ITEMS = 8
+MENU_ITEMS = 9
 
 key_menu:
   ld keys_new
@@ -700,16 +703,19 @@ key_menu:
   ld cursor
   be #0, .feed
   be #1, .train
-  be #2, .clean
-  be #3, .meds
-  be #4, .status
-  be #5, .shop
-  be #6, .link
+  be #2, .battle
+  be #3, .clean
+  be #4, .meds
+  be #5, .status
+  be #6, .shop
+  be #7, .link
   jmpf about
 .feed:
   jmpf act_feed_menu
 .train:
   jmpf act_train
+.battle:
+  jmpf battle_wild
 .clean:
   jmpf act_clean
 .meds:
@@ -776,7 +782,7 @@ draw_menu:
   ret
 
 menu_texts:
-  .word s_m_feed, s_m_train, s_m_clean, s_m_meds, s_m_status, s_m_shop, s_m_link, s_m_about
+  .word s_m_feed, s_m_train, s_m_battle, s_m_clean, s_m_meds, s_m_status, s_m_shop, s_m_link, s_m_about
 
 ;; ---------------------------------------------------------------- care
 
@@ -1403,6 +1409,7 @@ day_end:
   mov #0, P_STRENGTH
   mov #0, P_FED
   mov #0, P_TRAINED
+  mov #0, P_WINDAY
   ld P_DAYS
   be #255, .r
   inc P_DAYS
@@ -1962,8 +1969,8 @@ key_shop:
   ret
 .back:
   mov #SCR_MENU, screen
-  mov #5, cursor
-  mov #2, scroll
+  mov #6, cursor
+  mov #3, scroll
   mov #1, redraw
   ret
 .up:
@@ -2235,22 +2242,34 @@ key_link:
   ret
 .back:
   mov #SCR_MENU, screen
-  mov #6, cursor
-  mov #3, scroll
+  mov #7, cursor
+  mov #4, scroll
   mov #1, redraw
   ret
 .flip:
+  ld keys_new
+  bp acc, BTN_UP, .up
   ld cursor
-  xor #1
-  st cursor
+  be #2, .r
+  inc cursor
+  br .moved
+.up:
+  ld cursor
+  bz .r
+  dec cursor
+.moved:
   mov #1, redraw
+.r:
   ret
 .go:
   ld cursor
-  bnz .recv
+  be #1, .recv
+  be #2, .battle
   jmpf link_send
 .recv:
   jmpf link_receive
+.battle:
+  jmpf battle_link
 
 draw_link:
   mov #<s_link, trl
@@ -2268,6 +2287,11 @@ draw_link:
   mov #1, c
   mov #2, b
   callf lcd_text
+  mov #<s_m_battle, trl
+  mov #>s_m_battle, trh
+  mov #1, c
+  mov #3, b
+  callf lcd_text
   mov #<s_link_hint, trl
   mov #>s_link_hint, trh
   mov #0, c
@@ -2281,16 +2305,16 @@ draw_link:
   callf lcd_char
   ret
 
-;; link_status: trh:trl = a line for line 3 of the LINK screen
+;; link_status: trh:trl = a line for the LINK screen's bottom line (in place of TOP TO TOP)
 link_status:
   push trl
   push trh
-  mov #3, b
+  mov #4, b
   callf lcd_clear_line
   pop trh
   pop trl
   mov #0, c
-  mov #3, b
+  mov #4, b
   callf lcd_text
   ret
 
@@ -2678,6 +2702,8 @@ s_m_shop:
   .string 5 "SHOP"
 s_m_link:
   .string 5 "LINK"
+s_m_battle:
+  .string 7 "BATTLE"
 s_m_about:
   .string 6 "ABOUT"
 s_feed:
@@ -2827,6 +2853,7 @@ ic_overlays:                ; 1 a heart, 2 a sweat drop, 3-5 a meal: whole, bitt
   .include "../inc/rev_bits.inc"
   .include "kanto.inc"
   .include "icon.inc"
+  .include "battle.inc"
 
   ;; The SAVE page: 128 bytes on a 128-byte boundary (the magic, then $40-$7b)
   .cnop 0, $80

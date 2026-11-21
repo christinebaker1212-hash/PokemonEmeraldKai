@@ -33,7 +33,7 @@ pet/kanto.inc: tools/gen_edition.py tools/eggs.py tools/onebit.py tools/pmd_read
 pet/font.inc: build/font.inc
 	cp $< $@
 
-build/PET.VMS: pet/pet.s pet/icon.inc pet/kanto.inc pet/font.inc pet/icon.png inc/*.inc
+build/PET.VMS: pet/pet.s pet/icon.inc pet/battle.inc pet/kanto.inc pet/font.inc pet/icon.png inc/*.inc
 	@mkdir -p build
 	cd pet && ../$(WATERBEAR) assemble pet.s -o ../$@
 
