@@ -519,6 +519,9 @@ static int GlyphIndex(char c)
 
 static void DrawText(u16 *buf, int x, int y, const char *text, u16 color, int scale)
 {
+    char shown[128];
+    MP_Streamer_FilterAscii(text, shown, sizeof(shown));   // (STREAMER MODE: a friend's name as its stand-in)
+    text = shown;
     for (; *text; text++, x += 4 * scale)
     {
         int g = GlyphIndex(*text), gx, gy, sx, sy;
@@ -965,8 +968,12 @@ static void Panel_DrawLabel(u8 id)
     bool8 battle = gMpPlayers[id].hasState && (gMpPlayers[id].state.flags & MPF_IN_BATTLE);
     int i, x, w, y;
 
-    StringCopyN(name, gMpPlayers[id].name, PLAYER_NAME_LENGTH);
-    name[PLAYER_NAME_LENGTH] = EOS;
+    {
+        u8 raw[PLAYER_NAME_LENGTH + 1];
+        StringCopyN(raw, gMpPlayers[id].name, PLAYER_NAME_LENGTH);
+        raw[PLAYER_NAME_LENGTH] = EOS;
+        MP_Streamer_FilterN(raw, 0xFFFF, name, sizeof(name));   // (STREAMER MODE's stand-in; the key follows it)
+    }
     MP_Friends_LocationName(id, where);
     for (i = 0; name[i] != EOS; i++)
         key = key * 33 + name[i];
@@ -1058,9 +1065,11 @@ void MP_Spectate_PanelSync(void)
             card->scale = fr->size;
             card->popout = fr->popout;
             card->id = id;
+            char shown[MP_NAME_LEN + 16];
             MP_GameToAscii(name, gMpPlayers[id].name, MP_NAME_LEN);
             name[MP_NAME_LEN] = 0;
-            snprintf(sTitles[n], sizeof(sTitles[n]), "%s - Moemon Co-op", name);
+            MP_Streamer_FilterAscii(name, shown, sizeof(shown));   // (the window's title too: it's on the stream)
+            snprintf(sTitles[n], sizeof(sTitles[n]), "%s - Moemon Co-op", shown);
             card->title = sTitles[n];
         }
         sPanel.changed[id] = FALSE;

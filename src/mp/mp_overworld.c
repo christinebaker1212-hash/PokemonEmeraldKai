@@ -57,6 +57,7 @@ struct RemoteObj
     u8 tagSpriteId;
     u8 tagLevel;
     u8 tagStatus;           // TAG_STATUS_*: the line over the name
+    u8 tagStreamer;         // STREAMER MODE when it was drawn (a change redraws it)
     u32 tagVersion;
     u8 blobSpriteId;
     s16 lastX, lastY;   // last position applied (current map frame)
@@ -271,8 +272,13 @@ static void BuildNametag(u8 id, const u16 *pal)
     int i, n = 0, tx, ty;
     u8 fg, outline;
 
-    for (i = 0; i < MP_NAME_LEN && p->name[i] != EOS; i++)
-        text[n++] = p->name[i];
+    {
+        u8 raw[MP_NAME_LEN + 1];
+        for (i = 0; i < MP_NAME_LEN && p->name[i] != EOS; i++)
+            raw[i] = p->name[i];
+        raw[i] = EOS;
+        n = MP_Streamer_FilterN(raw, 0xFFFF, text, 18);   // STREAMER MODE: their stand-in (mp_streamer.c)
+    }
     MP_NameCase_Recase(text, n, MP_NameCaseMode());   // OPTIONS > NAME CASE
     if (p->hasState && p->state.topLevel > 0)
     {
@@ -370,11 +376,12 @@ static void UpdateNametag(u8 id, struct ObjectEvent *obj, const u16 *pal)
         gSprites[r->tagSpriteId].coordOffsetEnabled = TRUE;
         r->tagLevel = p->hasState ? p->state.topLevel : 0;
         r->tagStatus = RemoteTagStatus(id);
+        r->tagStreamer = gMpConfig.streamer;
         r->tagVersion = p->appearanceVersion;
         tileStart = GetSpriteTileStartByTag(TAG_NAMETAG_BASE + id);
     }
     else if (r->tagLevel != (p->hasState ? p->state.topLevel : 0) || r->tagVersion != p->appearanceVersion
-          || r->tagStatus != RemoteTagStatus(id))
+          || r->tagStatus != RemoteTagStatus(id) || r->tagStreamer != gMpConfig.streamer)
     {
         rebuild = TRUE;
     }
@@ -384,6 +391,7 @@ static void UpdateNametag(u8 id, struct ObjectEvent *obj, const u16 *pal)
         memcpy((void *)(OBJ_VRAM0 + tileStart * TILE_SIZE_4BPP), sNametagTiles, sizeof(sNametagTiles));
         r->tagLevel = p->hasState ? p->state.topLevel : 0;
         r->tagStatus = RemoteTagStatus(id);
+        r->tagStreamer = gMpConfig.streamer;
         r->tagVersion = p->appearanceVersion;
     }
 

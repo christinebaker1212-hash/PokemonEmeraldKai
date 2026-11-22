@@ -8,6 +8,8 @@
 // nickname (one that isn't the species' own name) of the party, the foe's party and the PC's open box. A trainer's
 // stand-in is picked by their TID / SID from their gender's list of the style; a POKéMON's from its species' three
 // by its OT's TID / SID and its nature. The naming screen shows what is typed.
+#include <stdio.h>
+#include <string.h>
 #include "global.h"
 #include "battle.h"
 #include "data.h"
@@ -20,6 +22,7 @@
 #include "mp.h"
 
 void MP_AsciiToGame(u8 *dst, const char *src, int maxLen);
+void MP_GameToAscii(char *dst, const u8 *src, int maxLen);
 
 bool8 MP_Streamer_On(void)
 {
@@ -136,7 +139,7 @@ static void MonAlias(u16 species, u32 otId, u8 nature, u8 *out)
 }
 
 // ------------------------------------------------------------------------------------------------ what's on screen
-#define MAX_PAIRS 64
+#define MAX_PAIRS 128   // (the players, then up to two a POKeMON: its nickname and its Original Trainer)
 static struct { u8 name[POKEMON_NAME_LENGTH + 2], alias[POKEMON_NAME_LENGTH + 2]; u8 len, aliasLen; } sPairs[MAX_PAIRS];
 static u8 sPairCount;
 
@@ -174,6 +177,14 @@ static void AddMon(struct BoxPokemon *box)
     u32 otId;
     if (species == SPECIES_NONE || species >= NUM_SPECIES || GetBoxMonData(box, MON_DATA_IS_EGG))
         return;
+    {
+        // its Original Trainer too (a friend's, traded: the summary's OT line), by their own TID / SID and gender
+        u8 ot[PLAYER_NAME_LENGTH + 1];
+        GetBoxMonData(box, MON_DATA_OT_NAME, ot);
+        ot[PLAYER_NAME_LENGTH] = EOS;
+        AddTrainer(ot, PLAYER_NAME_LENGTH, GetBoxMonData(box, MON_DATA_OT_ID),
+                   GetBoxMonData(box, MON_DATA_OT_GENDER) ? FEMALE : MALE);
+    }
     GetBoxMonData(box, MON_DATA_NICKNAME, nick);
     nick[POKEMON_NAME_LENGTH] = EOS;
     GetSpeciesName(own, species);
@@ -188,6 +199,12 @@ static void AddMon(struct BoxPokemon *box)
 void MP_Streamer_Build(void)
 {
     u8 i;
+    static u32 sBuiltAt = 0xFFFFFFFF;
+    static u8 sBuiltStyle;
+    if (sBuiltAt == gMain.vblankCounter1 && sBuiltStyle == gMpConfig.streamer)
+        return;   // (once a frame is enough: the overlays' labels ask for every one they draw)
+    sBuiltAt = gMain.vblankCounter1;
+    sBuiltStyle = gMpConfig.streamer;
     sPairCount = 0;
     if (gSaveBlock2Ptr == NULL)
         return;
@@ -237,4 +254,64 @@ u8 MP_Streamer_At(const u8 *s, u8 *out, u16 *used)
         }
     }
     return 0;
+}
+
+// The game's own drawn labels, outside the text printer (the user, 2026-11-22: "Streamer mode doesn't affect these
+// names"): the name tags over players, the speech bubbles (pings, door labels), the FRIEND FINDER's arrows, the
+// SPECTATE panel's labels and windows' titles, the Triple Battle cards, the battle chat, the PC's grids, the POKeDEX's
+// catchers. Each passes its text through here first: every name on screen becomes its stand-in, as in the text boxes.
+
+// IN (N letters, or to its EOS when N is 0xFFFF) into OUT (CAP bytes with its EOS), names swapped; its length
+u16 MP_Streamer_FilterN(const u8 *in, u16 n, u8 *out, u16 cap)
+{
+    u16 i = 0, o = 0, used;
+    bool8 prevWord = FALSE, on = MP_Streamer_On();
+    if (cap == 0)
+        return 0;
+    if (on)
+        MP_Streamer_Build();
+    while (i < n && in[i] != EOS && o + 1 < cap)
+    {
+        u8 buf[POKEMON_NAME_LENGTH + 4], k;
+        if (on && !prevWord && (k = MP_Streamer_At(&in[i], buf, &used)) != 0 && used <= n - i)
+        {
+            if (o + k + 1 > cap)
+                break;
+            memcpy(&out[o], buf, k);
+            o += k;
+            i += used;
+            prevWord = TRUE;
+            continue;
+        }
+        prevWord = IsNameChar(in[i]);
+        out[o++] = in[i++];
+    }
+    out[o] = EOS;
+    return o;
+}
+
+// The same for an EOS-ended string: OUT, or IN itself when STREAMER MODE is off
+const u8 *MP_Streamer_Filter(const u8 *in, u8 *out, u16 cap)
+{
+    if (!MP_Streamer_On() || in == NULL)
+        return in;
+    MP_Streamer_FilterN(in, 0xFFFF, out, cap);
+    return out;
+}
+
+// The same for an ASCII line (the SPECTATE windows' titles, the POKeDEX's own lettering)
+void MP_Streamer_FilterAscii(const char *in, char *out, size_t cap)
+{
+    u8 g[96], f[96];
+    if (cap == 0)
+        return;
+    if (!MP_Streamer_On())
+    {
+        snprintf(out, cap, "%s", in);
+        return;
+    }
+    MP_AsciiToGame(g, in, sizeof(g) - 1);
+    MP_Streamer_FilterN(g, 0xFFFF, f, sizeof(f));
+    MP_GameToAscii(out, f, (int)cap - 1);
+    out[cap - 1] = 0;
 }

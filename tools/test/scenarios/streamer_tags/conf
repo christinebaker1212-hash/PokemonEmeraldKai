@@ -1,0 +1,12 @@
+# STREAMER MODE on the game's own drawn labels (the user, 2026-11-22: "Streamer mode doesn't affect these names"):
+# BOB stands beside ALICE in OLDALE TOWN: his name tag as it is (tag_off), then with STREAMER MODE (tag_on: his
+# stand-in); then he's inside the POKéMON CENTER: the door label over its door and the FRIEND FINDER's arrow show his
+# stand-in too (door_on). mp streamertags logs what each friend's tag says
+MODE=2
+WARP=0,10,4,14
+WARP_B=0,10,6,14
+
+
+TMO=150
+EXPECT_A=("streamer 1" "streamertag 1: BOB -> ")
+UNEXPECT_A=("[crash]" "streamertag 1: BOB -> BOB")

@@ -235,10 +235,10 @@ static void LabelPut(struct Mark *m, int x, int y, u8 c)
 // The game's small font into the label (name, then the steps)
 static void BuildLabel(struct Mark *m, const u8 *name, s32 steps)
 {
-    u8 text[24], *end;
+    u8 text[24], *end, shown[20];
     int i, x = 1;
     char key[24];
-    end = StringCopy(text, name);
+    end = StringCopy(text, MP_Streamer_Filter(name, shown, sizeof(shown)));   // (STREAMER MODE's stand-in)
     if (steps >= 0)
     {
         *end++ = CHAR_SPACE;

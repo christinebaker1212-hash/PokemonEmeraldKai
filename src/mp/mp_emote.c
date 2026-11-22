@@ -343,7 +343,8 @@ static void BuildBubble(struct Bubble *b)
     }
     else
     {
-        FitText(b->text, fitted, sizeof(fitted));
+        u8 shown[BUBBLE_TEXT + 24];
+        FitText(MP_Streamer_Filter(b->text, shown, sizeof(shown)), fitted, sizeof(fitted));   // (STREAMER MODE's stand-ins)
         nLines = SplitLines(fitted, lines, lens);
         if (nLines == 0)
             return;
@@ -1273,9 +1274,16 @@ static void ShowSpeedNotice(void)
 void MP_Emote_Update(void)
 {
     u8 i;
+    static u8 sStreamerSeen;
     InitIfNeeded();
     if (!MP_IsInOverworld())
         return;
+    if (sStreamerSeen != gMpConfig.streamer)   // STREAMER MODE changed: every bubble is drawn again with its names
+    {
+        sStreamerSeen = gMpConfig.streamer;
+        for (i = 0; i < NUM_BUBBLES; i++)
+            sBubbles[i].dirty = TRUE;
+    }
     // Battle bubbles end with the battle
     for (i = 0; i < 1 + MP_MAX_PLAYERS; i++)
         if (sBubbles[i].battler != MAX_BATTLERS_COUNT)

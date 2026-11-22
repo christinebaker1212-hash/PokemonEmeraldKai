@@ -11979,9 +11979,12 @@ static void MpBuildLabel(u8 player, const u8 *name)
     u8 text[PLAYER_NAME_LENGTH + 1];
     int i, n, width = 0, x, o, tx, ty;
     struct SpriteSheet sheet;
+    u8 raw[PLAYER_NAME_LENGTH + 1];
     memset(sPixels, 0, sizeof(sPixels));
     for (n = 0; n < PLAYER_NAME_LENGTH && name[n] != EOS; n++)
-        text[n] = name[n];
+        raw[n] = name[n];
+    raw[n] = EOS;
+    n = MP_Streamer_FilterN(raw, 0xFFFF, text, sizeof(text));   // (STREAMER MODE: the friend's stand-in)
     for (i = 0; i < n; i++)
         width += (text[i] == CHAR_SPACE) ? 3 : MP_RenderSmallGlyph(text[i], 1, 0, 2);
     x = (64 - width) / 2;

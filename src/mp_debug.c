@@ -4002,6 +4002,23 @@ void MP_TestCommand(const char *cmd, const char *arg)
             gSaveBlock2Ptr->optionsNameCase = atoi(arg) % MP_NAMECASE_COUNT;
         printf("[test] creatures %d namecase %d\n", gSaveBlock2Ptr->optionsPokemonArt, gSaveBlock2Ptr->optionsNameCase);
     }
+    else if (strcmp(cmd, "streamertags") == 0)
+    {
+        // streamertags - what each friend's drawn labels (name tag, door label, FRIEND FINDER) say under STREAMER MODE
+        u8 id;
+        for (id = 0; id < MP_MAX_PLAYERS; id++)
+            if (gMpPlayers[id].present && id != gMpLocalId)
+            {
+                u8 raw[MP_NAME_LEN + 1], shown[24];
+                char a[24], b[24];
+                memcpy(raw, gMpPlayers[id].name, MP_NAME_LEN);
+                raw[MP_NAME_LEN] = EOS;
+                MP_Streamer_FilterN(raw, 0xFFFF, shown, sizeof(shown));
+                MP_GameToAscii(a, raw, 20);
+                MP_GameToAscii(b, shown, 20);
+                printf("[test] streamertag %d: %s -> %s\n", id, a, b);
+            }
+    }
     else if (strcmp(cmd, "streamer") == 0)
     {
         // streamer N - OPTIONS > CO-OP > STREAMER MODE (0 off, 1 game, 2 anime, 3 original)

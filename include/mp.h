@@ -434,6 +434,9 @@ void MP_Theme_FrontierPass(s8 stars);       // THEME DARK: the FRONTIER PASS (fr
 bool8 MP_Streamer_On(void);
 void MP_Streamer_Build(void);
 u8 MP_Streamer_At(const u8 *s, u8 *out, u16 *used);
+u16 MP_Streamer_FilterN(const u8 *in, u16 n, u8 *out, u16 cap);   // names swapped in a drawn label (STREAMER MODE)
+const u8 *MP_Streamer_Filter(const u8 *in, u8 *out, u16 cap);     // the same, EOS-ended: OUT, or IN when off
+void MP_Streamer_FilterAscii(const char *in, char *out, size_t cap);
 u16 MP_RegionTripAllowed(void);   // online, only the room's host leads the way to another region (qz_specials.c)
 void MP_AsciiToGame(u8 *dst, const char *src, int maxLen);
 // pokemon_storage_system.c: TAG mode in the PC boxes (the west button / F while the PC is open)

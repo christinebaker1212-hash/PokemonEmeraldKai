@@ -1,0 +1,18 @@
+pressuntil A field 5000
+waitfor online 6000
+vpad
+wait 200
+rendershot tag_off
+mp streamer 1
+wait 30
+mp streamertags
+rendershot tag_on
+barrier inside 2
+wait 240
+vbtn rstick 1
+wait 2
+vbtn rstick 0
+wait 60
+rendershot door_on
+barrier done 2
+quit

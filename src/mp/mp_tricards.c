@@ -211,7 +211,10 @@ static void Render(struct Card *c)
         DrawText(c, tag, right - 6, ROW_NAME, right + 1, TC_TEXT);
         nameMax = right - 7;
     }
-    x = DrawText(c, c->name, lx, ROW_NAME, nameMax, TC_TEXT);
+    {
+        u8 shown[POKEMON_NAME_LENGTH + 4];
+        x = DrawText(c, MP_Streamer_Filter(c->name, shown, sizeof(shown)), lx, ROW_NAME, nameMax, TC_TEXT);   // (STREAMER MODE)
+    }
     if (c->gender != GENDER_NONE)
     {
         static const u8 sMale[] = {CHAR_MALE, EOS}, sFemale[] = {CHAR_FEMALE, EOS};
