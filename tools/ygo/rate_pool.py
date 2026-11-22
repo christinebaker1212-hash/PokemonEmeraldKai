@@ -12,7 +12,7 @@
      stays near what its cards say), as Elo with the average deck at 1500.
 
 Every result goes to ~/.cache/moemon/npc_pool_results.txt as it comes (a rerun picks up from there: the rounds already
-played are not played again). Writes ~/.cache/moemon/npc_pool_rated.json (the pool with "rating", "prior", "games",
+played are not played again, and a round stopped half way is paired again without the duels it already had). Writes ~/.cache/moemon/npc_pool_rated.json (the pool with "rating", "prior", "games",
 "wins") and docs/audit_ygo_npc_pool.txt.
 
   tools/ygo/rate_pool.py [ROUNDS] [JOBS]
@@ -126,9 +126,11 @@ class Workers:
             self.done.put(got)
 
     def play(self, pairs):
+        """each result as it comes (a run stopped half way keeps what it played: the caller writes each down)"""
         for job in pairs:
             self.todo.put(job)
-        return [self.done.get() for _ in pairs]
+        for _ in pairs:
+            yield self.done.get()
 
     def close(self):
         for _ in range(64):
@@ -203,11 +205,17 @@ def main():
                         used.update((i, j))
                         pairs.append((i, j, rng.randrange(1 << 30), rd % 2))
                         break
-            out = w.play(pairs)
             K = max(16.0, 64.0 / math.sqrt(rd))
-            for a, b, res, turns in out:
+            n_done = n_bad = 0
+            for a, b, res, turns in w.play(pairs):
+                n_done += 1
+                if n_done % 5000 == 0:
+                    log.flush()
+                    print('  round %d: %d of %d duels, %.1f a second, %d unplayed' % (
+                        rd, n_done, len(pairs), n_done / max(1e-9, time.time() - t0), n_bad), flush=True)
                 met.add((min(a, b), max(a, b)))
                 if res < 0:   # (the engine crashed on it: not a result)
+                    n_bad += 1
                     log.write('%d %d -1 0\n' % (key[a], key[b]))
                     for x in (key[a], key[b]):
                         crashes[x] = crashes.get(x, 0) + 1
@@ -218,9 +226,9 @@ def main():
                 sa = 1.0 if res == 0 else 0.0 if res == 1 else 0.5
                 elo[a] += K * (sa - ea)
                 elo[b] -= K * (sa - ea)
-            log.write('round %d %d %.0f\n' % (rd, len(out), time.time() - t0))
+            log.write('round %d %d %.0f\n' % (rd, n_done, time.time() - t0))
             log.flush()
-            print('round %d: %d duels in %.0f s' % (rd, len(out), time.time() - t0), flush=True)
+            print('round %d: %d duels in %.0f s (%d unplayed)' % (rd, n_done, time.time() - t0, n_bad), flush=True)
     finally:
         w.close()
     final = bt_fit(n, results, pri)
