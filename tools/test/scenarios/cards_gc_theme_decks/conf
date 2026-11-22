@@ -1,0 +1,8 @@
+# The GAME CENTER CARD SHOP's decks (the user, 2026-11-22: "more structure decks for purchase with money ... One per
+# customer"): the 14 structure decks and, coming in from JOHTO, its Neo theme decks (gTcgThemeDecks of the region the
+# player came from); the last one bought for money, then sold out ("One of each deck per customer!"). Shot decks.
+MODE=1
+TMO=200
+ENV_A="MOEMON_DEBUG_REGION=1"
+EXPECT_A=("gc shelf: 20 decks" "game center: bought deck 45" "Neo" ", sold")
+UNEXPECT_A=("[crash]" "TIMEOUT")

@@ -575,7 +575,7 @@ void Tcg_RecordResult(struct TcgCollection *c, uint32_t key, int won, unsigned d
  * game's 228 cards and its 4 boosters; 8 adds Pokemon Card GB2's (TCG_CARD_COUNT, TCG_PACK_TYPES) and the
  * milestones' upper bits; 11 the regional sets' cards. A save of an older format loads into the new collection (the added
  * cards at 0). */
-#define FORMAT 11
+#define FORMAT 12
 #define OLD_CARDS 228
 #define OLD_PACKS 4
 /* 11: the regional sets' cards (TCG_CARD_COUNT; docs/TCG_REGIONS.md) */
@@ -601,11 +601,13 @@ void Tcg_RecordResult(struct TcgCollection *c, uint32_t key, int won, unsigned d
 #define EXTRA10_SIZE TCG_SAVED_DECKS
 /* 11: the regional boosters' milestones, the special trainers past 31 (beaten, promo given) */
 #define EXTRA11_SIZE (4 + 12 + 12)
+/* 12: the GAME CENTER's regional theme decks sold */
+#define EXTRA12_SIZE 4
 #define FILE_SIZE(format)                                                                                              \
     (12u + PAYLOAD_SIZE(format) + ((format) >= 3 ? EXTRA_SIZE : 0) + ((format) >= 4 ? EXTRA4_SIZE : 0) +               \
      ((format) >= 5 ? EXTRA5_SIZE(format) : 0) + ((format) >= 6 ? EXTRA6_SIZE(format) : 0) +                           \
      ((format) >= 7 ? EXTRA7_SIZE : 0) + ((format) >= 8 ? EXTRA8_SIZE : 0) + ((format) >= 9 ? EXTRA9_SIZE : 0) +      \
-     ((format) >= 10 ? EXTRA10_SIZE : 0) + ((format) >= 11 ? EXTRA11_SIZE : 0))
+     ((format) >= 10 ? EXTRA10_SIZE : 0) + ((format) >= 11 ? EXTRA11_SIZE : 0) + ((format) >= 12 ? EXTRA12_SIZE : 0))
 static uint32_t Crc(const unsigned char *bytes, size_t size)
 {
     uint32_t crc = ~0u;
@@ -749,6 +751,8 @@ int Tcg_CollectionLoad(struct TcgCollection *c, const char *path)
             for (i = 0; i < 3; i++)
                 next.promoGivenHi[i] = Get(&p, 4);
         }
+        if (format >= 12)
+            next.gcThemeDecks = Get(&p, 4);
     }
     else if (next.optedIn)
         next.flags = TCG_FLAG_TUTORIAL | TCG_FLAG_CLUB_MET; /* they started before the CARD CLUB */
@@ -827,6 +831,7 @@ int Tcg_CollectionSave(const struct TcgCollection *c, const char *path)
         Put(&p, c->specialBeatenHi[i], 4);
     for (i = 0; i < 3; i++)
         Put(&p, c->promoGivenHi[i], 4);
+    Put(&p, c->gcThemeDecks, 4);
     p = data;
     memcpy(p, "MTCG", 4);
     p += 4;

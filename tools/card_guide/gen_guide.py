@@ -20,7 +20,7 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parents[2]
 DATA, OUT = Path(sys.argv[1]), Path(sys.argv[2])
 tcg = json.load(open(DATA / 'tcg.json'))
-ygo = json.load(open(DATA / 'ygo.json'))
+ygo = json.load(open(DATA / 'ygo.json', encoding='latin-1'))   # (the catalog's text is in the game font's Latin-1)
 tt = json.load(open(DATA / 'tt.json'))
 VERSION = re.search(r'#define MOEMON_VERSION "([^"]+)"', (ROOT / 'include/mp_version.h').read_text()).group(1)
 
@@ -231,7 +231,8 @@ def tcg_row(c):
     if k in struct_of:
         decks_.append('GAME CENTER deck: ' + ', '.join(struct_of[k]))
     if k in theme_of:
-        decks_.append('Theme deck at the CARD CLUB counters, 250 CP: ' + ', '.join(theme_of[k]))
+        decks_.append('Theme deck at the CARD CLUB counters (250 CP) and the GAME CENTER 2F (¥18000, once): ' +
+                      ', '.join(theme_of[k]))
     special = ' '.join(promo_src.get(k, []))
     if c['set'] == 4 and not special:
         special = 'No way to get this card in this version of the game.'
@@ -244,7 +245,8 @@ tcg_rows = [tcg_row(c) for c in tcg['cards']]
 # ---------------------------------------------------------------------------------------------------------------
 # YU-GI-OH! cards
 # ---------------------------------------------------------------------------------------------------------------
-FRAMES = ['Normal Monster', 'Effect Monster', 'Fusion Monster', 'Ritual Monster', 'Spell', 'Trap', 'Token']
+FRAMES = ['Normal Monster', 'Effect Monster', 'Fusion Monster', 'Ritual Monster', 'Spell', 'Trap', 'Token', 'Synchro Monster',
+          'Xyz Monster', 'Link Monster']
 YRARITY = ['Common', 'Short Print', 'Super Short Print', 'Rare', 'Super Rare', 'Ultra Rare', 'Secret Rare']
 # (ygo_field.c sDuelists: their theme's Signature(), as `mp ygo deck THEME 0` prints it)
 YGO_SPECIALS = [
@@ -480,13 +482,15 @@ Packs are the only way to get <b>holo</b> cards (apart from trading with a frien
 <li><b>CARD CLUB counters</b> (Oldale and Mauville POKéMON MARTS, the Lilycove DEPARTMENT STORE): trade in spare
 cards for CARD POINTS (CP) and buy any common or uncommon card with them.</li>
 <li><b>GAME CENTER 2F CARD SHOP</b> (Rustboro City; in JOHTO and KANTO, by the attendant in GOLDENROD's and
-CELADON's GAME CORNERS): one copy of every non-holo card of the booster sets for money, the structure and theme decks, and the CARD CLUB counter's services.</li>
+CELADON's GAME CORNERS): one copy of every non-holo card of the booster sets for money, the structure decks and the
+theme decks of the region you came in from (one of each deck per customer), and the CARD CLUB counter's services.</li>
 <li><b>Starter deck.</b> Your first deck (Ember, Tidal or Garden Friends). Basic Energy is always free.</li></ul>
 <h3>YU-GI-OH!</h3><ul>
 <li><b>Booster packs</b> from every win, and from the CARD CLUB for CP.</li>
 <li><b>A card from their deck</b>, the first time each day you beat someone.</li>
 <li><b>The CARD CLUB</b> sells every collectible card for CP, and the GAME CENTER 2F clerk sells one copy of each for
-money, plus the Starter and Structure Decks. So no YU-GI-OH! card is out of reach. The special duelists'
+money, plus every Starter and Structure Deck that came out whole, from 2002 to today, as many as the YU-GI-OH! GEN
+allows (one of each per customer). So no YU-GI-OH! card is out of reach. The special duelists'
 <b>signature cards</b> are a free bonus for your first win over them.</li></ul>
 <h3>TRIPLE TRIAD</h3><ul>
 <li><b>Winning cards.</b> When you win, you take cards from your opponent's hand. The town's trade rule decides how

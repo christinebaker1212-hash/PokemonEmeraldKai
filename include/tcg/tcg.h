@@ -222,6 +222,8 @@ struct TcgCollection
      * the first 32 beaten and promos given (bit special - 32) */
     uint32_t milestonesRegion;
     uint32_t specialBeatenHi[3], promoGivenHi[3];
+    /* Format 12: the GAME CENTER CARD SHOP's regional theme decks sold (bit i: gTcgThemeDecks[i]) */
+    uint32_t gcThemeDecks;
 };
 /* The special trainers' bits (TcgCollection.specialBeaten / promoGiven and their Hi words: up to 128) */
 int Tcg_SpecialBeaten(const struct TcgCollection *c, unsigned special);

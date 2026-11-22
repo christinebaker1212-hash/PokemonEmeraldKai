@@ -545,10 +545,11 @@ void Ygo_DailyTake(struct YgoCollection *c, uint32_t key, unsigned day)
 }
 
 /* ---- the file: "MYGO", u32 format, u32 crc of the rest, then the fields, little-endian */
-#define YGO_FILE_FORMAT 6   /* 2 (1.36.0): the GAME CENTER clerk's sold singles and decks; 3 (1.38.0): each deck's
+#define YGO_FILE_FORMAT 7   /* 2 (1.36.0): the GAME CENTER clerk's sold singles and decks; 3 (1.38.0): each deck's
                                    ACE CARD; 4 (1.48.0): the Forbidden & Limited list; 5 (1.49.0): the skill
                                    correction; 6 (1.56.0): the card and set counts it was saved with (the catalog grows),
-                                   32 bits of sold decks; 1-5 still load (1509 cards, 13 sets) */
+                                   32 bits of sold decks; 7 (1.217.0): 96 more sold decks; 1-6 still load (1509 cards,
+                                   13 sets) */
 #define FORMAT5_CARDS 1509
 #define FORMAT5_SETS 13
 static void Put(unsigned char **p, uint32_t v, unsigned n)
@@ -593,11 +594,13 @@ static size_t PayloadSize(unsigned format, unsigned cards, unsigned sets)
         n += 4;
     if (format >= 6)
         n += 4;   /* the counts */
+    if (format >= 7)
+        n += 12;
     return n;
 }
 #define PAYLOAD_SIZE (4 * 10 + 3 + 6 * YGO_DAILY_SLOTS + 2 * (YGO_CARD_COUNT + 1) +                                    \
                       YGO_SAVED_DECKS * (YGO_NAME_LEN + 2 * (YGO_DECK_MAX + YGO_FUSION_MAX)) + 2 * YGO_SET_COUNT +     \
-                      YGO_GC_SINGLE_BYTES + 4 + 2 * YGO_SAVED_DECKS + 32 + 4 + 4)
+                      YGO_GC_SINGLE_BYTES + 4 + 2 * YGO_SAVED_DECKS + 32 + 4 + 4 + 12)
 /* (the biggest file loaded: today's, or a format 5 one if the catalog were ever smaller) */
 #define LOAD_MAX (PAYLOAD_SIZE + 2 * (FORMAT5_CARDS + 1) + 2 * FORMAT5_SETS + (FORMAT5_CARDS + 8) / 8)
 
@@ -657,6 +660,8 @@ int Ygo_CollectionSave(const struct YgoCollection *c, const char *path)
     p += 32;
     Put(&p, (uint16_t)c->skill, 2);
     Put(&p, c->rated, 2);
+    for (i = 0; i < 3; i++)
+        Put(&p, c->gcDecksMore[i], 4);
     if (p != data + 12 + PayloadSize(YGO_FILE_FORMAT, YGO_CARD_COUNT, YGO_SET_COUNT))
         return 0;
     p = data;
@@ -769,6 +774,9 @@ int Ygo_CollectionLoad(struct YgoCollection *c, const char *path)
         c->skill = (int16_t)(skill > YGO_SKILL_MAX ? YGO_SKILL_MAX : skill < -YGO_SKILL_MAX ? -YGO_SKILL_MAX : skill);
         c->rated = (uint16_t)Get(&p, 2);
     }
+    if (format >= 7)
+        for (i = 0; i < 3; i++)
+            c->gcDecksMore[i] = Get(&p, 4);
     if (c->starter && !Ygo_SetIsDeck(c->starter - 1u))
         c->starter = 0;
     /* sanity: ids in range */

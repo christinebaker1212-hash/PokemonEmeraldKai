@@ -23,6 +23,7 @@ IDS = ROOT / 'tools/ygo/ids.json'
 OUT = ROOT / 'tools/ygo/catalog.json'
 
 WC6 = ROOT / 'tools/ygo/wc2006.json'
+COUNTS = ROOT / 'tools/ygo/deck_counts.json'   # (the later decks' copies: tools/ygo/fetch_deck_counts.py)
 KEPT = set()
 # Promos with passwords of their own that EDOPro's database hasn't got (no script: they couldn't be played)
 NO_SCRIPT = {111000561, 501000006, 501000007, 662853, 662857, 662854, 662855}
@@ -184,6 +185,7 @@ def main():
             c = byid.get(int(s['password'])) if s['password'] else byname.get(norm(s['name']))
             limits[c['id']] = l['limit']
     wc6 = json.load(open(WC6))
+    counts = json.load(open(COUNTS))['decks'] if COUNTS.exists() else {}
     # World Championship 2006's list for the cards new since 1.56.0 (the 2003 pool keeps the limits it had: 3 when
     # Stairway hasn't got the card), so no saved deck changes
     old2003 = {c['id'] for c in db for p in c.get('card_sets', []) if re.match(r'^(%s)-\d+$' % '|'.join(OLD_SETS), p['set_code'])}
@@ -302,11 +304,18 @@ def main():
             else:
                 rar.setdefault(cid, rarity)
         copies = {byid[p]['id']: n for p, n in wc6['decks'].get(code, [])}   # (a deck's copies of each card)
+        later = {byid[p]['id']: n for p, n in counts.get(code, []) if p in byid and byid[p]['id'] in byours}
         if kind != 'booster' and copies:
             missing = set(copies) - set(rows)
             if missing:
                 raise SystemExit('%s: the deck list has %s, the printings not' % (code, missing))
             rows = Counter(copies)
+        elif kind != 'booster' and later:
+            # a reprint the card database didn't list in the set: printed in it all the same
+            for cid in set(later) - set(rows):
+                printings[code].append(('~', cid, 'Common'))
+                rar[cid] = 'Common'
+            rows = Counter(later)
         entries = []
         for num, cid, rarity in sorted(set(printings[code])):
             if any(e[0] == ids[str(cid)] for e in entries):

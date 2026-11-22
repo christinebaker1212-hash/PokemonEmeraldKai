@@ -1855,12 +1855,94 @@ struct TcgRecipe
     const char *name, *blurb;
     const uint16_t *cards;
 };
-/* (the GAME CENTER's structure decks only once bought there: gcDecks) */
+/* The GAME CENTER clerk's decks (the user, 2026-11-22: "more structure decks for purchase with money ... One per
+ * customer"): the structure decks (k 0-31: bit k of gcDecks), then the regional sets' theme decks (k 32 on:
+ * gTcgThemeDecks[k - 32], bit k - 32 of gcThemeDecks), those of the region the player came in from on the shelf (the
+ * GAME CENTER is every region's) */
+#define GC_THEME0 32
+#define GC_DECK_ROWS (GC_THEME0 + 32)
+static unsigned GcStructCount(void) { return ARRAY_COUNT(sStructureDecks) < GC_THEME0 ? ARRAY_COUNT(sStructureDecks) : GC_THEME0; }
+static int GcDeckReal(unsigned k)
+{
+    return k < GcStructCount() || (k >= GC_THEME0 && k - GC_THEME0 < gTcgThemeDeckCount && k < GC_DECK_ROWS);
+}
+static int GcDeckSold(unsigned k)
+{
+    const struct TcgCollection *c = Tcg_GetCollection();
+    return k < GC_THEME0 ? (c->gcDecks >> k) & 1 : k < GC_DECK_ROWS ? (c->gcThemeDecks >> (k - GC_THEME0)) & 1 : 0;
+}
+static int GcDeckShelved(unsigned k)
+{
+    return k < GcStructCount() ||
+           (GcDeckReal(k) && k >= GC_THEME0 && (gTcgThemeDeckRegions[k - GC_THEME0] >> MP_Region_Current()) & 1);
+}
+static const char *GcDeckName(unsigned k) { return k < GC_THEME0 ? sStructureDecks[k].name : gTcgThemeDecks[k - GC_THEME0].name; }
+static const uint16_t *GcDeckCards(unsigned k)
+{
+    return k < GC_THEME0 ? sStructureDecks[k].cards : gTcgThemeDecks[k - GC_THEME0].cards;
+}
+static unsigned GcDeckPrice(unsigned k) { return k < GC_THEME0 ? sStructureDecks[k].price : 18000; }
+static const char *GcDeckSetName(unsigned k) { return k < GC_THEME0 ? sStructureDecks[k].set : gTcgThemeDeckSet[k - GC_THEME0]; }
+/* A theme deck's line as the structure decks': its two main Energy types and its biggest POKeMON (as many as fit) */
+static const char *GcDeckBlurb(unsigned k)
+{
+    static const char *const types[7] = {"", "GRASS", "FIRE", "WATER", "LIGHTNING", "FIGHTING", "PSYCHIC"};
+    static char b[80];
+    const uint16_t *cards;
+    unsigned count[7] = {0}, i, j, t1 = 0, t2 = 0, n = 0;
+    const struct TcgCard *top[3] = {NULL, NULL, NULL};
+    if (k < GC_THEME0)
+        return sStructureDecks[k].blurb;
+    cards = gTcgThemeDecks[k - GC_THEME0].cards;
+    for (i = 0; i < TCG_DECK_SIZE; i++)
+    {
+        const struct TcgCard *c = cards[i] ? Tcg_Card(cards[i]) : NULL;
+        if (cards[i] >= 1 && cards[i] <= 6)
+            count[cards[i]]++;
+        else if (c && c->kind == TCG_POKEMON)
+        {
+            /* (the three with the most HP, a name once) */
+            const struct TcgCard *put = c, *t;
+            int dup = 0;
+            for (j = 0; j < 3; j++)
+                dup |= top[j] && !strcmp(top[j]->name, c->name);
+            for (j = 0; j < 3 && put && !dup; j++)
+                if (!top[j] || put->hp > top[j]->hp)
+                    t = top[j], top[j] = put, put = t;
+        }
+    }
+    for (i = 1; i < 7; i++)
+        if (count[i] > count[t1])
+            t2 = t1, t1 = i;
+        else if (count[i] > count[t2] && i != t1)
+            t2 = i;
+    n = (unsigned)snprintf(b, sizeof(b), "%s%s%s:", types[t1], t2 && count[t2] ? " and " : "", t2 && count[t2] ? types[t2] : "");
+    for (j = 0; j < 3 && top[j] && n < sizeof(b); j++)
+    {
+        char name[24];
+        for (i = 0; top[j]->name[i] && i < sizeof(name) - 1; i++)
+            name[i] = (char)toupper((unsigned char)top[j]->name[i]);
+        name[i] = 0;
+        if (j && n + 2 + strlen(name) > 38)   /* (one line of the strip: the set's name goes under it) */
+            break;
+        n += (unsigned)snprintf(b + n, sizeof(b) - n, "%s %s", j ? "," : "", name);
+    }
+    return b;
+}
+static unsigned GcShelf(uint8_t rows[GC_DECK_ROWS])
+{
+    unsigned k, n = 0;
+    for (k = 0; k < GC_DECK_ROWS; k++)
+        if (GcDeckReal(k) && GcDeckShelved(k))
+            rows[n++] = (uint8_t)k;
+    return n;
+}
+/* (the GAME CENTER's decks in DECK RECIPES only once bought there) */
 static int RecipeBought(void)
 {
-    unsigned i, n = 0;
-    for (i = 0; i < ARRAY_COUNT(sStructureDecks) && i < 32; i++)
-        n += (Tcg_GetCollection()->gcDecks >> i) & 1;
+    unsigned k, n = 0;
+    for (k = 0; k < GC_DECK_ROWS; k++)
+        n += GcDeckReal(k) && GcDeckSold(k);
     return (int)n;
 }
 #define RECIPE_FIXED (3 + RecipeBought())
@@ -1907,14 +1989,16 @@ static int Recipe(int k, struct TcgRecipe *r)
     }
     if (k >= 3)
     {
-        /* the (k - 3)-th structure deck bought */
+        /* the (k - 3)-th deck bought from the GAME CENTER clerk */
         unsigned i, left = (unsigned)(k - 3);
-        for (i = 0; i < ARRAY_COUNT(sStructureDecks) && i < 32; i++)
-            if ((Tcg_GetCollection()->gcDecks >> i) & 1 && !left--)
+        for (i = 0; i < GC_DECK_ROWS; i++)
+            if (GcDeckReal(i) && GcDeckSold(i) && !left--)
             {
-                r->name = sStructureDecks[i].name;
-                r->blurb = sStructureDecks[i].blurb;
-                r->cards = sStructureDecks[i].cards;
+                static char blurb[64];
+                snprintf(blurb, sizeof(blurb), "%s", GcDeckBlurb(i));
+                r->name = GcDeckName(i);
+                r->blurb = blurb;
+                r->cards = GcDeckCards(i);
                 return 1;
             }
         return 0;
@@ -2970,8 +3054,6 @@ static void MoveCursor(unsigned pressed, int count, int step);
 static void CounterLists(int tab);
 static void ShopTabs(const char *const *names, int count, unsigned fill, unsigned edge, unsigned ink, const char *balance,
                      const char *what, unsigned color);
-/* Sold: each structure deck once, one copy of each single */
-static int GcDeckSold(unsigned k) { return (Tcg_GetCollection()->gcDecks >> k) & 1; }
 static void GcShopScreen(void)
 {
     struct TcgCollection *c = Tcg_GetCollection();
@@ -3001,17 +3083,23 @@ static void GcShopScreen(void)
     else
     {
         /* (a scrolling list: 6 rows at a time) */
-        int top = U.cursor < 6 ? 0 : U.cursor - 5;
-        for (i = top; i < (int)ARRAY_COUNT(sStructureDecks) && i < top + 6; i++)
+        uint8_t shelf[GC_DECK_ROWS];
+        int n = (int)GcShelf(shelf), top = U.cursor < 6 ? 0 : U.cursor - 5;
+        for (i = top; i < n && i < top + 6; i++)
         {
-            int sold = GcDeckSold((unsigned)i);
-            snprintf(right, sizeof(right), sold ? "SOLD OUT" : "\xa5%u", sStructureDecks[i].price);
+            unsigned k = shelf[i];
+            int sold = GcDeckSold(k);
+            snprintf(right, sizeof(right), sold ? "SOLD OUT" : "\xa5%u", GcDeckPrice(k));
             Row(LIST_X + 2, 8 + (i - top) * ROW_H, LIST_W - 4, i == U.cursor,
-                !sold && IsEnoughMoney(&gSaveBlock1Ptr->money, sStructureDecks[i].price), sStructureDecks[i].name, right);
+                !sold && IsEnoughMoney(&gSaveBlock1Ptr->money, GcDeckPrice(k)), GcDeckName(k), right);
         }
-        snprintf(line, sizeof(line), "%s\n%s", sStructureDecks[U.cursor].blurb,
-                 GcDeckSold((unsigned)U.cursor) ? "SOLD OUT: one of each deck." : sStructureDecks[U.cursor].set);
-        Strip(0, line);
+        if (n)
+        {
+            unsigned k = shelf[U.cursor < n ? U.cursor : 0];
+            snprintf(line, sizeof(line), "%s\n%s", GcDeckBlurb(k),
+                     GcDeckSold(k) ? "SOLD OUT: one of each deck per customer." : GcDeckSetName(k));
+            Strip(0, line);
+        }
     }
     Hints("{A} CHOOSE  {L}{R} COUNTER  {B} LEAVE");
 }
@@ -3038,24 +3126,25 @@ static void GcShopStep(unsigned pressed)
     }
     else
     {
-        MoveCursor(pressed, (int)ARRAY_COUNT(sStructureDecks), 1);
-        if (pressed & KEY_A)
+        uint8_t shelf[GC_DECK_ROWS];
+        unsigned n = GcShelf(shelf), k;
+        MoveCursor(pressed, (int)n, 1);
+        k = n ? shelf[U.cursor < (int)n ? U.cursor : 0] : 0;
+        if (n && (pressed & KEY_A))
         {
-            if (GcDeckSold((unsigned)U.cursor))
+            if (GcDeckSold(k))
             {
                 PlaySE(SE_FAILURE);
-                Say(ACT_NONE, "The %s deck is sold out. One of each deck per customer!", sStructureDecks[U.cursor].name);
-                printf("[tcg] game center: deck %d sold out\n", U.cursor);
+                Say(ACT_NONE, "The %s deck is sold out. One of each deck per customer!", GcDeckName(k));
+                printf("[tcg] game center: deck %u sold out\n", k);
             }
-            else if (!IsEnoughMoney(&gSaveBlock1Ptr->money, sStructureDecks[U.cursor].price))
+            else if (!IsEnoughMoney(&gSaveBlock1Ptr->money, GcDeckPrice(k)))
             {
                 PlaySE(SE_FAILURE);
-                Say(ACT_NONE, "The %s deck is \xa5%u. You don't have enough money.", sStructureDecks[U.cursor].name,
-                    sStructureDecks[U.cursor].price);
+                Say(ACT_NONE, "The %s deck is \xa5%u. You don't have enough money.", GcDeckName(k), GcDeckPrice(k));
             }
             else
-                Ask(ACT_GC_DECK, U.cursor, "The %s deck for \xa5%u?", sStructureDecks[U.cursor].name,
-                    sStructureDecks[U.cursor].price);
+                Ask(ACT_GC_DECK, (int)k, "The %s deck for \xa5%u?", GcDeckName(k), GcDeckPrice(k));
         }
     }
     if (pressed & KEY_B)
@@ -3444,14 +3533,17 @@ static void Act(int action)
     case ACT_GC_DECK:
     {
         unsigned k = (unsigned)U.askArg, i, slot;
-        if (k >= ARRAY_COUNT(sStructureDecks) || GcDeckSold(k) ||
-            !IsEnoughMoney(&gSaveBlock1Ptr->money, sStructureDecks[k].price))
+        const uint16_t *cards = GcDeckReal(k) ? GcDeckCards(k) : NULL;
+        if (!cards || GcDeckSold(k) || !IsEnoughMoney(&gSaveBlock1Ptr->money, GcDeckPrice(k)))
             break;
-        RemoveMoney(&gSaveBlock1Ptr->money, sStructureDecks[k].price);
-        c->gcDecks |= 1u << k;
+        RemoveMoney(&gSaveBlock1Ptr->money, GcDeckPrice(k));
+        if (k < GC_THEME0)
+            c->gcDecks |= 1u << k;
+        else
+            c->gcThemeDecks |= 1u << (k - GC_THEME0);
         for (i = 0; i < TCG_DECK_SIZE; i++)
-            if (sStructureDecks[k].cards[i] > 6)
-                AddCard(sStructureDecks[k].cards[i]);
+            if (cards[i] > 6)
+                AddCard(cards[i]);
         for (slot = 0; slot < TCG_SAVED_DECKS; slot++)
             if (!DeckCount(slot, 0))
                 break;
@@ -3460,15 +3552,14 @@ static void Act(int action)
         printf("[tcg] game center: bought deck %u, slot %u\n", k, slot);
         if (slot < TCG_SAVED_DECKS)
         {
-            memcpy(c->decks[slot].cards, sStructureDecks[k].cards, sizeof(c->decks[slot].cards));
-            snprintf(c->decks[slot].name, TCG_NAME_LEN, "%s", sStructureDecks[k].name);
+            memcpy(c->decks[slot].cards, cards, sizeof(c->decks[slot].cards));
+            snprintf(c->decks[slot].name, TCG_NAME_LEN, "%s", GcDeckName(k));
             c->ace[slot] = 0;
-            Say(ACT_NONE, "You got the %s deck! It's in DECKS, slot %u, ready to play.", sStructureDecks[k].name,
-                slot + 1);
+            Say(ACT_NONE, "You got the %s deck! It's in DECKS, slot %u, ready to play.", GcDeckName(k), slot + 1);
         }
         else
             Say(ACT_NONE, "You got the %s deck! Its cards are in your collection (your deck slots are full).",
-                sStructureDecks[k].name);
+                GcDeckName(k));
         CollectionChanged();
         break;
     }
@@ -4966,6 +5057,27 @@ void Tcg_Debug(const char *command)
     if (sscanf(command, "drought %u %u", &n, &m) == 2 && n < TCG_PACK_TYPES)
     {
         c->drought[n] = (uint8_t)m;   /* packs of set n since its last new holo */
+        return;
+    }
+    if (!strcmp(command, "gamecenter"))
+    {
+        Tcg_OpenGameCenterShop();   /* the GAME CENTER clerk (tests) */
+        U.fromScript = 0;
+        return;
+    }
+    if (!strcmp(command, "gcshelf"))
+    {
+        /* the clerk's decks on the shelf here: number, name, sold (tests) */
+        uint8_t shelf[GC_DECK_ROWS];
+        unsigned i, k2, cnt, sh = GcShelf(shelf);
+        for (i = 0; i < sh; i++)
+        {
+            for (k2 = cnt = 0; k2 < TCG_DECK_SIZE; k2++)
+                cnt += GcDeckCards(shelf[i])[k2] != 0;
+            printf("[tcg] gc shelf %u: deck %u %s (%s), %u cards%s\n", i, shelf[i], GcDeckName(shelf[i]),
+                   GcDeckSetName(shelf[i]), cnt, GcDeckSold(shelf[i]) ? ", sold" : "");
+        }
+        printf("[tcg] gc shelf: %u decks\n", sh);
         return;
     }
     if (!strcmp(command, "giveall"))

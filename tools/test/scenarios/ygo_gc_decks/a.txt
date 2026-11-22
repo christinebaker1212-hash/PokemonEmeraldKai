@@ -1,0 +1,23 @@
+pressuntil A field 5000
+wait 30
+mp money 999999
+mp ygo starter 0
+mp ygo gcshelf
+mp ygo gamecenter
+wait 60
+press R 1
+wait 20
+rendershot decks
+press UP 1
+wait 10
+rendershot last
+press A 1
+wait 20
+press A 1
+wait 60
+mp ygo gcshelf
+press A 1
+wait 30
+press B 1
+wait 30
+quit

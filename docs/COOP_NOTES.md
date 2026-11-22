@@ -8914,3 +8914,25 @@ decks based on your ELO, their ELO, and their position in the Pokemon world"):
   (ygo_board.c RespondingTo), the window says "Respond to <card>?" and its first row SEE <card> shows that card whole
   (the look up close, from the chain link's card: a hand card too); the window takes no A / B for half a second
   (CHAIN_WINDOW_HOLD) so a held or mashed button never answers it unseen. Scenario ygo_chain_see.
+
+## More decks for money at the GAME CENTER, one each (2026-11-22)
+The user: "Let's add more structure decks for purchase with money, both Yugioh and Pokemon. One per customer, of course."
+- YU-GI-OH!: the GAME CENTER clerk's DECKS hold every Starter and Structure Deck of 2002-2006 (as before, bits 0-14) and
+  then every later one (rows in set order, so a deck released later takes the next row; ygo_ui.c GcDeckRow /
+  GcDeckSet), each row a bit of the sold decks: gcDecks, then YgoCollection.gcDecksMore[3] (".ygo" format 7). The
+  shelf (GcShelf) shows those that came whole (40+ Main Deck cards as they came, every card playable) inside the
+  YU-GI-OH! GEN: 60 of 85 at ALL. Their copies: tools/ygo/fetch_deck_counts.py reads Yugipedia's set lists
+  (tools/ygo/deck_counts.json; tokens, Speed Duel Skills and Field Centers left out; a reprint the card database didn't
+  list in the set is printed in it), which tools/ygo/build_catalog.py gives the catalog's later decks (the 2002-2006
+  ones keep wc2006.json's); rerun it, then build_catalog.py and gen_catalog.py. A bought deck's slot is cut to the
+  Forbidden & Limited list in use (FitToList: Black Luster Soldier - Envoy of the Beginning, a third Call of the
+  Haunted), every card still added. `mp ygo gamecenter`, `mp ygo gcshelf`; scenario ygo_gc_decks.
+- POKeMON: the GAME CENTER CARD SHOP's DECKS hold the 14 structure decks and the regional sets' theme decks
+  (gTcgThemeDecks, ¥18000) of the region the player came in from (the GAME CENTER is every region's: JOHTO's six Neo
+  decks from GOLDENROD, KANTO's eight Gym decks from CELADON, the e-Card six in HOENN, SINNOH and UNOVA); the clerk's
+  deck numbers k 0-31 the structure decks (gcDecks), 32 on the theme decks (TcgCollection.gcThemeDecks, ".cards"
+  format 12). A theme deck's line: its two main Energy types and biggest POKeMON (GcDeckBlurb). Bought ones join DECK
+  RECIPES. The CARD CLUB counters still sell them for 250 CP. `mp cards gamecenter`, `mp cards gcshelf`; scenario
+  cards_gc_theme_decks (MOEMON_DEBUG_REGION=1).
+- The card guide (tools/card_guide/build.sh) builds again: the YU-GI-OH! dump is the game font's Latin-1 (it failed on
+  "Beast Machine King Barbaros Ür" since the catalog went to today), and the newer frames have names.

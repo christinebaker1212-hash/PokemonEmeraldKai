@@ -1,0 +1,9 @@
+# The GAME CENTER clerk's decks (the user, 2026-11-22: "more structure decks for purchase with money ... One per
+# customer"): 2002-2006's and every later Starter / Structure Deck that came whole (copies from Yugipedia:
+# tools/ygo/fetch_deck_counts.py) on the shelf at ALL, each a legal deck; the last one bought for money is sold out
+# after. Shots decks, last.
+MODE=1
+TMO=200
+ENV_A="MOEMON_YUGIOH_GEN=0"
+EXPECT_A=("gc shelf: " "game center: bought deck" ", sold")
+UNEXPECT_A=("[crash]" "valid 0")

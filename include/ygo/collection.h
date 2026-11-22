@@ -55,6 +55,8 @@ struct YgoCollection
     /* format 5: how the player does against the computer past what the decks say (rating points), games it learned from */
     int16_t skill;
     uint16_t rated;
+    /* format 7: the clerk's decks past the first 32 (the later Starter and Structure Decks, 2006 on) */
+    uint32_t gcDecksMore[3];
 };
 #define YGO_SKILL_MAX 300
 

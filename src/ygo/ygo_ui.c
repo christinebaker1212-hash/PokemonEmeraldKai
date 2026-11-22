@@ -666,23 +666,79 @@ static void AddCard(unsigned id)
 }
 /* The GAME CENTER clerk sold their one copy of this single / this Starter Deck */
 static int GcSingleSold(unsigned id) { return id && id <= YGO_CARD_COUNT && (C()->gcSingles[id / 8] >> (id % 8)) & 1; }
-static int GcDeckSold(unsigned k) { return k < 32 && (C()->gcDecks >> k) & 1; }
-/* The clerk's decks: every Starter and Structure Deck, oldest first (row k is bit k of gcDecks, so the four 2002-2003
- * Starter Decks keep bits 0-3) */
+#define GC_DECK_BITS (32 + 32 * 3)
+static int GcDeckSold(unsigned k)
+{
+    return k < 32 ? (C()->gcDecks >> k) & 1 : k < GC_DECK_BITS ? (C()->gcDecksMore[(k - 32) / 32] >> (k % 32)) & 1 : 0;
+}
+static void GcDeckMarkSold(unsigned k)
+{
+    if (k < 32)
+        C()->gcDecks |= 1u << k;
+    else if (k < GC_DECK_BITS)
+        C()->gcDecksMore[(k - 32) / 32] |= 1u << (k % 32);
+}
+/* The clerk's decks: every Starter and Structure Deck of 2002-2006, oldest first, then every later one (the user,
+ * 2026-11-22: "more structure decks for purchase with money ... One per customer"). Row k is bit k of the sold decks,
+ * so the four 2002-2003 Starter Decks keep bits 0-3 and a deck released later takes the next row. */
+static int GcDeckRow(unsigned set)
+{
+    return Ygo_SetIsClassicDeck(set) ? 1 : Ygo_SetIsDeck(set) ? 2 : 0;
+}
 static unsigned GcDeckCount(void)
 {
     unsigned i, n = 0;
     for (i = 0; i < YGO_SET_COUNT; i++)
-        n += Ygo_SetIsClassicDeck(i);
-    return n;
+        n += GcDeckRow(i) != 0;
+    return n > GC_DECK_BITS ? GC_DECK_BITS : n;
 }
 static unsigned GcDeckSet(unsigned k)
 {
-    unsigned i;
-    for (i = 0; i < YGO_SET_COUNT; i++)
-        if (Ygo_SetIsClassicDeck(i) && !k--)
-            return i;
+    unsigned i, pass;
+    for (pass = 1; pass <= 2; pass++)
+        for (i = 0; i < YGO_SET_COUNT; i++)
+            if (GcDeckRow(i) == (int)pass && !k--)
+                return i;
     return YGO_SET_SDY;
+}
+static void StarterDeckOf(unsigned set, uint16_t *main, uint16_t *extra);
+/* ... on the clerk's shelf: a whole deck (40 cards or more as it came, every card playable) the YU-GI-OH! GEN allows */
+static int GcDeckShelved(unsigned k)
+{
+    unsigned set = GcDeckSet(k), i, n = 0;
+    uint16_t main[YGO_DECK_MAX], extra[YGO_FUSION_MAX];
+    const struct YgoSet *s = &gYgoSets[set];
+    for (i = 0; i < s->count; i++)
+        if (!Ygo_CardReady(s->cards[i].card))
+            return 0;
+    StarterDeckOf(set, main, extra);
+    n = Ygo_DeckCount(main, YGO_DECK_MAX);
+    return n >= YGO_DECK_MIN && Ygo_DeckInGen(main, extra, MP_YgoGen(), NULL);
+}
+/* A deck as it came, cut to the Forbidden & Limited list the player's decks follow (the cards over it stay in the
+ * collection: only the deck slot leaves them out) */
+static void FitToList(uint16_t *cards, unsigned max)
+{
+    unsigned i, j, n = 0;
+    for (i = 0; i < max && cards[i]; i++)
+    {
+        unsigned have = 0;
+        for (j = 0; j < n; j++)
+            have += cards[j] == cards[i];
+        if (have < Ygo_CopyLimit(cards[i]))
+            cards[n++] = cards[i];
+    }
+    for (i = n; i < max; i++)
+        cards[i] = 0;
+}
+/* The rows shown, as the clerk's deck numbers (k) */
+static unsigned GcShelf(uint8_t rows[GC_DECK_BITS])
+{
+    unsigned k, n = 0;
+    for (k = 0; k < GcDeckCount(); k++)
+        if (GcDeckShelved(k))
+            rows[n++] = (uint8_t)k;
+    return n;
 }
 static unsigned GcDeckPrice(unsigned k)
 {
@@ -2296,20 +2352,23 @@ static void CounterScreen(void)
     }
     else if (CounterKind() == 1)
     {
-        int top = Y.cursor < 3 ? 0 : Y.cursor - 3, n = (int)GcDeckCount();
+        uint8_t shelf[GC_DECK_BITS];
+        int top = Y.cursor < 3 ? 0 : Y.cursor - 3, n = (int)GcShelf(shelf);
         if (top > n - 6)
             top = n > 6 ? n - 6 : 0;
         for (i = 0; i < 6 && top + i < n; i++)
         {
-            unsigned k = (unsigned)(top + i);
+            unsigned k = shelf[top + i];
             int sold = GcDeckSold(k);
             char right[24];
             snprintf(right, sizeof(right), sold ? "SOLD OUT" : "\xa5%u", GcDeckPrice(k));
             TcgUi_Row(LIST_X + 2, 8 + i * ROW_H, LIST_W - 4, top + i == Y.cursor,
                       !sold && IsEnoughMoney(&gSaveBlock1Ptr->money, GcDeckPrice(k)), SetName(GcDeckSet(k)), right);
         }
-        snprintf(line, sizeof(line), "%s\n%s", gYgoSets[GcDeckSet((unsigned)Y.cursor)].name,
-                 GcDeckSold((unsigned)Y.cursor) ? "SOLD OUT: one of each deck per customer." : "Ready to duel in an empty deck slot.");
+        if (n)
+            snprintf(line, sizeof(line), "%s\n%s", gYgoSets[GcDeckSet(shelf[Y.cursor < n ? Y.cursor : 0])].name,
+                     GcDeckSold(shelf[Y.cursor < n ? Y.cursor : 0]) ? "SOLD OUT: one of each deck per customer."
+                                                                     : "Ready to duel in an empty deck slot.");
         Strip(0, line);
     }
     else if (CounterKind() == 2)
@@ -2941,10 +3000,10 @@ static void Act(int action)
     {
         unsigned k = (unsigned)Y.askArg, i, slot;
         uint16_t main[YGO_DECK_MAX], extra[YGO_FUSION_MAX];
-        if (k >= GcDeckCount() || k >= 32 || GcDeckSold(k) || !IsEnoughMoney(&gSaveBlock1Ptr->money, GcDeckPrice(k)))
+        if (k >= GcDeckCount() || GcDeckSold(k) || !IsEnoughMoney(&gSaveBlock1Ptr->money, GcDeckPrice(k)))
             break;
         RemoveMoney(&gSaveBlock1Ptr->money, GcDeckPrice(k));
-        c->gcDecks |= 1u << k;
+        GcDeckMarkSold(k);
         StarterDeckOf(GcDeckSet(k), main, extra);
         for (i = 0; i < YGO_DECK_MAX && main[i]; i++)
             AddCard(main[i]);
@@ -2958,6 +3017,8 @@ static void Act(int action)
         printf("[ygo] game center: bought deck %u, slot %u\n", k, slot);
         if (slot < YGO_SAVED_DECKS)
         {
+            FitToList(main, YGO_DECK_MAX);
+            FitToList(extra, YGO_FUSION_MAX);
             memcpy(Deck(slot)->main, main, sizeof(main));
             memcpy(Deck(slot)->extra, extra, sizeof(extra));
             snprintf(Deck(slot)->name, YGO_NAME_LEN, "%s", SetName(GcDeckSet(k)));
@@ -3610,10 +3671,13 @@ int YgoUi_Step(unsigned keys)
         }
         else if (CounterKind() == 1)
         {
-            unsigned k;
-            MoveCursor(pressed, (int)GcDeckCount(), 1);
-            k = (unsigned)Y.cursor;
-            if (pressed & KEY_A)
+            uint8_t shelf[GC_DECK_BITS];
+            unsigned k, n = GcShelf(shelf);
+            MoveCursor(pressed, (int)n, 1);
+            k = n ? shelf[Y.cursor < (int)n ? Y.cursor : 0] : 0;
+            if (!n)
+                ;
+            else if (pressed & KEY_A)
             {
                 if (GcDeckSold(k))
                 {
@@ -3624,7 +3688,7 @@ int YgoUi_Step(unsigned keys)
                     Say(ACT_NONE, "The %s is \xa5%u. You don't have enough money.", gYgoSets[GcDeckSet(k)].name,
                         GcDeckPrice(k));
                 else
-                    Ask(ACT_GC_DECK, Y.cursor, "The %s for \xa5%u?", gYgoSets[GcDeckSet(k)].name, GcDeckPrice(k));
+                    Ask(ACT_GC_DECK, (int)k, "The %s for \xa5%u?", gYgoSets[GcDeckSet(k)].name, GcDeckPrice(k));
             }
             else if (pressed & (KEY_START | KEY_INSPECT))
             {
@@ -3856,6 +3920,32 @@ void Ygo_Debug(const char *command)
         for (i = 0; i < n && i < 12; i++)
             printf(" %s,", Ygo_Card(ListCard((int)i))->name);
         printf("\n");
+        return;
+    }
+    if (!strcmp(command, "gamecenter"))
+    {
+        /* the GAME CENTER clerk's counter (tests) */
+        YgoUi_OpenGameCenter();
+        return;
+    }
+    if (!strcmp(command, "gcshelf"))
+    {
+        /* the clerk's decks on the shelf: each one's number, the deck, its cards, sold or not (tests) */
+        uint8_t shelf[GC_DECK_BITS];
+        unsigned i, n = GcShelf(shelf);
+        for (i = 0; i < n; i++)
+        {
+            uint16_t main[YGO_DECK_MAX], extra[YGO_FUSION_MAX];
+            char why[120] = "";
+            StarterDeckOf(GcDeckSet(shelf[i]), main, extra);
+            FitToList(main, YGO_DECK_MAX);
+            FitToList(extra, YGO_FUSION_MAX);
+            int ok = Ygo_DeckValidate(main, extra, NULL, why, sizeof(why));
+            printf("[ygo] gc shelf %u: deck %u %s, %u + %u cards, valid %d%s %s\n", i, shelf[i],
+                   gYgoSets[GcDeckSet(shelf[i])].code, Ygo_DeckCount(main, YGO_DECK_MAX),
+                   Ygo_DeckCount(extra, YGO_FUSION_MAX), ok, GcDeckSold(shelf[i]) ? ", sold" : "", ok ? "" : why);
+        }
+        printf("[ygo] gc shelf: %u of %u decks\n", n, GcDeckCount());
         return;
     }
     if (!strcmp(command, "club"))

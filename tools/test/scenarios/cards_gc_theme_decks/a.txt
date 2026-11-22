@@ -1,0 +1,25 @@
+pressuntil A field 5000
+wait 30
+mp money 999999
+mp cards gcshelf
+mp cards gamecenter
+wait 60
+press R 1
+wait 20
+press UP 1
+wait 10
+rendershot decks
+press A 1
+wait 20
+press A 1
+wait 60
+mp cards gcshelf
+press A 1
+wait 30
+press UP 1
+wait 10
+press A 1
+wait 30
+press B 1
+wait 30
+quit
