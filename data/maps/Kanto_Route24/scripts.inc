@@ -169,8 +169,9 @@ Kanto_Route24_EventScript_8459B25::
 
 @ Kanto_Route24 object 8 (local id 8, gfx 0x3F0E) at 11,4
 Kanto_Route24_EventScript_846BAFA::
-	@ Moemon Kai: FireRed's TM (tools/quetzal_port/fix_kanto_tms.py) (Quetzal had ITEM_DESTINY_KNOT here)
-	setorcopyvar VAR_0x8000, ITEM_TM45
+	@ Moemon Kai: RED's TM45 THUNDER WAVE here (Kai's TM73; the user, 2026-11-22: SILPH CO. 2F gives RED's SELFDESTRUCT
+	@ again, tools/quetzal_port/tutors_to_tms.py); FireRed's TM45 ATTRACT is at CELADON 2F (Quetzal had ITEM_DESTINY_KNOT)
+	setorcopyvar VAR_0x8000, ITEM_TM73
 	setorcopyvar VAR_0x8001, 1
 	callstd STD_FIND_ITEM
 	end

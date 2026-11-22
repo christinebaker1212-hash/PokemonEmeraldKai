@@ -1,7 +1,7 @@
 # KANTO's tutors give TMs, as RED's people did (tools/quetzal_port/tutors_to_tms.py): SILPH CO. 2F's worker gives
 # TM126 SELFDESTRUCT (RED's TM36) with RED's words, once, even to a save her THUNDER WAVE tutor had taught (its flag
-# 0x210E set first); ROUTE 4's MEGA PUNCH man gives TM93 (RED's TM01). Shots: silph_words, silph_after
+# 0x210E set first); ROUTE 4's MEGA PUNCH man gives TM93 (RED's TM01); ROUTE 24's ball is RED's THUNDER WAVE (TM73). Shots: silph_words, silph_after
 MODE=1
 TMO=150
-EXPECT_A=("hasitem 730: 1" "hasitem 730: 0" "hasitem 697: 1")
+EXPECT_A=("hasitem 730: 1" "hasitem 730: 0" "hasitem 697: 1" "hasitem 640: 1")
 UNEXPECT_A=("[crash]")

@@ -34,4 +34,12 @@ shot route4_words
 mash A 60 12
 wait 120
 mp hasitem 697
+mp warp 37,100,11,5
+wait 120
+press UP 4
+wait 20
+press A 4
+mash A 20 12
+wait 60
+mp hasitem 640
 quit

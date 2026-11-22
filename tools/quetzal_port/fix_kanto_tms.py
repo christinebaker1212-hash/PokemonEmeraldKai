@@ -10,6 +10,7 @@ fix_leader_tms.py). Quetzal put held items and stones in their places; FireRed c
 - People: the CERULEAN CITY grunt (TM28), ROUTE 12's little girl (TM27), MR. PSYCHIC (TM29), the CELADON roof's girl
   (TM16 / 20 / 33) and the man at FIVE ISLAND's MEMORIAL PILLAR (TM42) give FireRed's TM
   with FireRed's words (pokefirered data/maps/<map>/text.inc, POKéMON spelt MOéMON, ' as ’).
+ROUTE 24's ball is RED's THUNDER WAVE (TM73 here; the user, 2026-11-22), not FireRed's ATTRACT (sold at CELADON 2F).
 What Quetzal gave there stays obtainable elsewhere (tools/moemon_gen59/item_audit.py).
 """
 import os
@@ -23,7 +24,7 @@ BALLS = [   # map, x, y (Quetzal's ball), TM
     ('PokemonMansion_B1F', 23, 4, 'ITEM_TM14'), ('PowerPlant', 40, 22, 'ITEM_TM17'), ('PowerPlant', 46, 37, 'ITEM_TM25'),
     ('RocketHideout_B2F', 5, 13, 'ITEM_TM12'), ('RocketHideout_B3F', 19, 14, 'ITEM_TM21'),
     ('RocketHideout_B4F', 1, 6, 'ITEM_TM49'), ('Route12', 18, 36, 'ITEM_TM48'), ('Route15', 20, 6, 'ITEM_TM18'),
-    ('Route24', 11, 4, 'ITEM_TM45'), ('Route25', 26, 2, 'ITEM_TM43'), ('Route4', 67, 5, 'ITEM_TM05'),
+    ('Route24', 11, 4, 'ITEM_TM73'), ('Route25', 26, 2, 'ITEM_TM43'), ('Route4', 67, 5, 'ITEM_TM05'),
     ('Route9', 12, 17, 'ITEM_TM40'), ('SSAnne_1F_Room2', 2, 7, 'ITEM_TM31'), ('SSAnne_B1F_Room2', 3, 2, 'ITEM_TM44'),
     ('SafariZone_East', 31, 18, 'ITEM_TM11'), ('SafariZone_North', 28, 9, 'ITEM_TM47'),
     ('SafariZone_West', 17, 13, 'ITEM_TM32'), ('SilphCo_4F', 30, 18, 'ITEM_TM41'), ('SilphCo_5F', 1, 18, 'ITEM_TM01'),
