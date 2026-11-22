@@ -5840,6 +5840,29 @@ void MP_TestCommand(const char *cmd, const char *arg)
             }
         }
     }
+    else if (strcmp(cmd, "evoaudit") == 0)
+    {
+        // evoaudit - every evolution table entry leads to a real POKeMON (MP_EvoTargetValid: a name, stats, a
+        // picture), and every species with an evolution has its own data (a broken entry once made a "??????????")
+        extern const struct Evolution gEvolutionTable[][EVOS_PER_MON];
+        u32 sp, k, entries = 0, bad = 0;
+        for (sp = 1; sp < NUM_SPECIES; sp++)
+            for (k = 0; k < EVOS_PER_MON; k++)
+            {
+                const struct Evolution *e = &gEvolutionTable[sp][k];
+                if (e->method == 0)
+                    continue;
+                entries++;
+                if (!MP_EvoTargetValid(e->targetSpecies) || !MP_EvoTargetValid(sp)
+                 || gSpeciesNames[e->targetSpecies][0] == CHAR_QUESTION_MARK || gSpeciesNames[e->targetSpecies][0] == EOS)
+                {
+                    bad++;
+                    printf("[test] evoaudit bad: species %u entry %u method %u param %u -> %u\n", sp, k, e->method,
+                           e->param, e->targetSpecies);
+                }
+            }
+        printf("[test] evoaudit: %u entries, %u bad\n", entries, bad);
+    }
     else if (strcmp(cmd, "useitemon") == 0)
     {
         // useitemon SLOT ITEM - use an item from the field on a party POKéMON as the party menu does (its table effect,

@@ -1,0 +1,22 @@
+pressuntil A field 5000
+mp evoaudit
+mp item 522 1
+mp useitemon 0 522
+wait 30
+shot evo_sachet
+mash A 60 15
+mash B 20 15
+pressuntil B field 3000
+mp monid 0
+mp hold 1 522
+mp item 523 1
+mp useitemon 1 523
+mash A 60 15
+mash B 20 15
+pressuntil B field 3000
+mp monid 1
+mp monmoves 1
+mp evolve 2
+mp useitemon 2 1
+mp monid 2
+quit

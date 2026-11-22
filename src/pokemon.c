@@ -5944,12 +5944,10 @@ u16 GetEvolutionTargetSpecies(struct Pokemon *mon, u8 mode, u16 evolutionItem)
                 targetSpecies = gEvolutionTable[species][i].targetSpecies;
                 break;
             case EVO_TRADE_ITEM:
+                // (Moemon Kai: the item is used up when the evolution happens, MP_AfterEvolution: asking twice, as
+                // the co-op trade did, found no item the second time and "evolved" into nothing, HP 0)
                 if (gEvolutionTable[species][i].param == heldItem)
-                {
-                    heldItem = ITEM_NONE;
-                    SetMonData(mon, MON_DATA_HELD_ITEM, &heldItem);
                     targetSpecies = gEvolutionTable[species][i].targetSpecies;
-                }
                 break;
             }
         }
@@ -5972,12 +5970,7 @@ u16 GetEvolutionTargetSpecies(struct Pokemon *mon, u8 mode, u16 evolutionItem)
              && (gEvolutionTable[species][i].method == EVO_TRADE
               || (gEvolutionTable[species][i].method == EVO_TRADE_ITEM && gEvolutionTable[species][i].param == heldItem)))
             {
-                if (gEvolutionTable[species][i].method == EVO_TRADE_ITEM && mode == EVO_MODE_ITEM_USE)
-                {
-                    heldItem = ITEM_NONE;
-                    SetMonData(mon, MON_DATA_HELD_ITEM, &heldItem);
-                }
-                targetSpecies = gEvolutionTable[species][i].targetSpecies;
+                targetSpecies = gEvolutionTable[species][i].targetSpecies;   // (its held item goes in MP_AfterEvolution)
                 break;
             }
         }
@@ -5986,11 +5979,25 @@ u16 GetEvolutionTargetSpecies(struct Pokemon *mon, u8 mode, u16 evolutionItem)
 
     if (targetSpecies != SPECIES_NONE && !MP_Gen_Allowed(targetSpecies))
         targetSpecies = SPECIES_NONE;   // Moemon Kai: a later generation than the region shows waits (MP_Gen_Cap)
+    if (targetSpecies != SPECIES_NONE && !MP_EvoTargetValid(targetSpecies))
+        targetSpecies = SPECIES_NONE;   // Moemon Kai: never into an empty slot (no name, no stats: it would faint)
 
     return targetSpecies;
 }
 
-// Moemon Kai: an evolution that came from holding an item (Gen 4) uses the item up
+// Moemon Kai: a species a POKéMON can become: a real one (a Moemon Maker slot only once the Maker filled it), with
+// stats; an empty slot has no name, no picture and 0 HP
+bool8 MP_EvoTargetValid(u16 species)
+{
+    if (species == SPECIES_NONE || species == SPECIES_EGG || species >= NUM_SPECIES)
+        return FALSE;
+    if (IS_MAKER_SPECIES(species))
+        return Maker_SpeciesBase(species) != SPECIES_NONE;
+    return gSpeciesInfo[species].baseHP != 0;
+}
+
+// Moemon Kai: an evolution that came from holding an item (Gen 4's, or a trade's: METAL COAT, SACHET...; a LINKING
+// CORD's trade) uses the item up, once the evolution has happened
 void MP_AfterEvolution(struct Pokemon *mon, u16 preSpecies, u16 postSpecies)
 {
     int i;
@@ -5999,7 +6006,8 @@ void MP_AfterEvolution(struct Pokemon *mon, u16 preSpecies, u16 postSpecies)
     {
         const struct Evolution *evo = &gEvolutionTable[preSpecies][i];
         if (evo->targetSpecies == postSpecies && heldItem != ITEM_NONE && evo->param == heldItem
-         && (evo->method == EVO_ITEM_HOLD || evo->method == EVO_ITEM_HOLD_DAY || evo->method == EVO_ITEM_HOLD_NIGHT))
+         && (evo->method == EVO_ITEM_HOLD || evo->method == EVO_ITEM_HOLD_DAY || evo->method == EVO_ITEM_HOLD_NIGHT
+          || evo->method == EVO_TRADE_ITEM))
         {
             heldItem = ITEM_NONE;
             SetMonData(mon, MON_DATA_HELD_ITEM, &heldItem);

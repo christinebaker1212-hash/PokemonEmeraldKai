@@ -1,0 +1,9 @@
+# Every evolution leads to a real POKeMON (mp evoaudit: each evolution table entry's target has a name and stats; the
+# user, 2026-11-22: a SPRITZEE "evolved into ??????????" and fainted), and SPRITZEE's two ways by an item: a SACHET used
+# on it, and a LINKING CORD on one holding a SACHET (the SACHET used up once it evolved: held 0). A third SPRITZEE
+# never evolves by level, and an item that isn't its own does nothing. Shot: evo_sachet
+MODE=1
+TMO=200
+ENV_A="MOEMON_DEBUG_PARTY=707:30,707:30,707:30"
+EXPECT_A=("evoaudit: " " 0 bad" "useitemon 0 item 522: used" "mon 0: species 708" "useitemon 1 item 523: used" "mon 1: species 708" "slot 1 species 708 moves" "evolve 2: 0" "mon 2: species 707")
+UNEXPECT_A=("[crash]" "evoaudit bad" "held 522")

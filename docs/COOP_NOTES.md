@@ -8853,3 +8853,16 @@ In the game: src/ygo/ygo_npc_pool.c inflates it on first use, each deck's GEN it
 offers decks the YU-GI-OH! GEN allows); ygo_field.c gives every ordinary duelist a pool deck (YgoOpponent.gba 2), its
 badges' quarter of the GEN's decks the most it may bring, CARD SCALING the one nearest the target; special duelists
 keep theirs; the GBA decks stay as a fallback. `mp ygo pool RATING` (tests); scenario ygo_pool.
+
+## Evolutions never into nothing (2026-11-22)
+- The user's SPRITZEE, traded in CO-OP holding a SACHET, "evolved into ??????????" and fainted: mp_trade.c asked
+  GetEvolutionTargetSpecies(EVO_MODE_TRADE) once to see whether it evolves and again to start the scene, and the
+  first ask took the held item (the stock code did it there), so the second found none and the scene ran with species
+  0. Every EVO_TRADE_ITEM species was hit (METAL COAT, KING'S ROCK, DRAGON SCALE, UP-GRADE, SACHET...).
+- GetEvolutionTargetSpecies has no side effects now: a trade's held item (and a LINKING CORD's) is used up in
+  MP_AfterEvolution, once the evolution has happened, as Gen 4's held-item evolutions already were. mp_trade.c keeps
+  the species it worked out (sTrade.evolveSpecies).
+- MP_EvoTargetValid (pokemon.c): a real species with stats (a Maker slot only once filled). GetEvolutionTargetSpecies
+  never returns anything else and BeginEvolutionScene refuses anything else (back to gCB2_AfterEvolution).
+- `mp evoaudit` checks every evolution table entry (512, none bad); scenarios evo_all (SACHET, LINKING CORD + SACHET,
+  the item used up), trade_evo (the CO-OP trade).

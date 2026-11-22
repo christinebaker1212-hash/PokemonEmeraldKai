@@ -1,0 +1,10 @@
+# A trade evolution with a held item in a CO-OP trade (the user, 2026-11-22: a SPRITZEE traded holding a SACHET
+# "evolved into ??????????" with 0 HP: the trade asked what it becomes twice, and the first ask used the SACHET up). BOB
+# sends a SPRITZEE holding a SACHET: ALICE's becomes AROMATISSE (708), the SACHET used up. Shot: evolving
+MODE=2
+TMO=200
+ENV_A="MOEMON_DEBUG_PARTY=280:12"
+ENV_B="MOEMON_DEBUG_PARTY=707:30 MOEMON_DEBUG_PID_SALT=7"
+EXPECT_A=("trade with player 2 complete" "party: 708(" "mon 0: species 708" "species 708 moves")
+EXPECT_B=("trade with player 1 complete" "party: 280(")
+UNEXPECT_A=("[crash]" "no species" "party: 0(" "held 522")

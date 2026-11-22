@@ -100,6 +100,7 @@ static EWRAM_DATA struct
     s8 askedBy;            // someone asked us
     u16 askedTimer;
     u8 evolveSlot;
+    u16 evolveSpecies;   // (what it becomes, worked out when the trade ended)
     char note[72];
     bool8 dirty;
 } sTrade = {0};
@@ -540,7 +541,9 @@ static void ApplyTrade(void)
     MPNet_Log("trade with player %d complete", sTrade.partner + 1);
 
     // A Pokemon that evolves by trading evolves now
-    if (gotSlot != 0xFF && GetEvolutionTargetSpecies(&gPlayerParty[gotSlot], EVO_MODE_TRADE, ITEM_NONE) != SPECIES_NONE)
+    // (what it becomes is worked out once, here, and kept: asked again it could answer differently)
+    if (gotSlot != 0xFF
+     && (sTrade.evolveSpecies = GetEvolutionTargetSpecies(&gPlayerParty[gotSlot], EVO_MODE_TRADE, ITEM_NONE)) != SPECIES_NONE)
     {
         CloseUi();
         sTrade.state = ST_EVOLVE;
@@ -567,7 +570,7 @@ static void Task_TradeEvolve(u8 taskId)
         return;
     {
         u8 slot = sTrade.evolveSlot;
-        u16 species = GetEvolutionTargetSpecies(&gPlayerParty[slot], EVO_MODE_TRADE, ITEM_NONE);
+        u16 species = sTrade.evolveSpecies;
         DestroyTask(taskId);
         ResetTrade();
         sTrade.askedBy = -1;
