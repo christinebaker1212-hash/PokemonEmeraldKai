@@ -8879,3 +8879,11 @@ keep theirs; the GBA decks stay as a fallback. `mp ygo pool RATING` (tests); sce
   the panel's labels, the pop-out windows' titles), the Triple Battle cards (mp_tricards.c), the shared PC's friends'
   cursors (pokemon_storage_system.c MpBuildLabel). The pairs are built once a frame and include the Original Trainers
   of the POKeMON on screen. A new drawn label with a name must pass through these too. Scenario streamer_tags.
+
+## YU-GI-OH!: Quick Effects at a phase change (2026-11-22)
+- The user: "Witchcrafter's effects are not triggering as written." The engine runs them right (tools/ygo/
+  test_edo_cards.c "witchcrafter": Schmietta's Quick Effect, Creation's search, Holiday's End Phase return, Pittore's
+  Quick Effect offered in the opponent's Main Phase), but the board passed every quiet chain chance (a phase changing)
+  for the player unless L was held (ygo_board.c), and the Witchcrafters' "During the Main Phase (Quick Effect)" is used
+  just there, at the start of the opponent's Main Phase. Now a quiet chance is passed by itself only when nothing but
+  Spells and Traps are offered (set cards, ready at every phase); a monster's effect among them asks (QuietMonsterEffect).

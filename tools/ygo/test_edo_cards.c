@@ -697,6 +697,141 @@ int main(void)
     }
     printf("ok   %s\n", sScenario);
 
+    /* Witchcrafter (the user, 2026-11-22: "Witchcrafter's effects are not triggering as written"): Schmietta's Main
+     * Phase Quick Effect (Tribute it, discard a Spell: a Witchcrafter from the Deck), Creation's search, and in the
+     * End Phase Holiday's "add this card from the GY to your hand" while a Witchcrafter is there (not Creation's: one
+     * Creation effect a turn, and it was activated); then in the opponent's Main Phase, Pittore's Quick Effect is
+     * offered to its player (a quiet chain chance with a monster's effect: the board asks, never passes it) */
+    sScenario = "witchcrafter";
+    Start(LIST("Witchcrafter Schmietta", "Witchcrafter Creation", "Witchcrafter Holiday", "Mystical Space Typhoon",
+               "Giant Soldier of Stone", "Witchcrafter Pittore", "Witchcrafter Potterie", "Witchcrafter Edel"),
+          LIST("Feral Imp"), NULL);
+    Until(0, YGO_Q_IDLE);
+    Act(YGO_ACT_SUMMON, "Witchcrafter Schmietta");
+    Until(0, YGO_Q_IDLE);
+    if (getenv("TRACE"))
+    {
+        unsigned i;
+        for (i = 0; i < D.query.count; i++)
+            printf("  idle: [%u] kind %u %s\n", i, D.query.items[i].kind, ItemName(i));
+    }
+    Act(YGO_ACT_ACTIVATE, "Witchcrafter Schmietta");
+    {
+        unsigned guard = 0;
+        while (!(D.query.player == 0 && D.query.type == YGO_Q_IDLE) && guard++ < 40)
+        {
+            struct YgoAnswer a;
+            unsigned i;
+            if (getenv("TRACE"))
+            {
+                printf("  q%u p%u prompt %u min %u max %u:", D.query.type, D.query.player, D.query.prompt, D.query.min, D.query.max);
+                for (i = 0; i < D.query.count; i++)
+                    printf(" [%s]", ItemName(i));
+                printf("\n");
+            }
+            if (D.query.player == 0 && D.query.type == YGO_Q_CARDS)
+            {
+                const char *want = NULL;
+                for (i = 0; i < D.query.count && !want; i++)
+                    if (!strcmp(ItemName(i), "Witchcrafter Holiday"))
+                        want = "Witchcrafter Holiday";
+                for (i = 0; i < D.query.count && !want; i++)
+                    if (!strcmp(ItemName(i), "Witchcrafter Pittore"))
+                        want = "Witchcrafter Pittore";
+                if (want)
+                {
+                    Choose((const char *const[]){want, NULL});
+                    continue;
+                }
+            }
+            if (D.query.type == YGO_Q_CHAIN && !D.query.min)
+            {
+                Pass();
+                continue;
+            }
+            YgoDuel_AiAnswer(&D, &a);
+            Answer(&a);
+        }
+    }
+    CHECK(HasMonster(0, "Witchcrafter Pittore") && !HasMonster(0, "Witchcrafter Schmietta"));
+    CHECK(InGrave(0, "Witchcrafter Holiday") && InGrave(0, "Witchcrafter Schmietta"));
+    Act(YGO_ACT_ACTIVATE, "Witchcrafter Creation");
+    {
+        unsigned guard = 0;
+        while (!(D.query.player == 0 && D.query.type == YGO_Q_IDLE) && guard++ < 40)
+        {
+            struct YgoAnswer a;
+            if (D.query.player == 0 && D.query.type == YGO_Q_CARDS)
+            {
+                Choose(LIST("Witchcrafter Potterie"));
+                continue;
+            }
+            if (D.query.type == YGO_Q_CHAIN && !D.query.min)
+            {
+                Pass();
+                continue;
+            }
+            YgoDuel_AiAnswer(&D, &a);
+            Answer(&a);
+        }
+    }
+    CHECK(InGrave(0, "Witchcrafter Creation"));
+    Act(YGO_ACT_END_TURN, NULL);
+    {
+        unsigned guard = 0, offeredHoliday = 0, offeredCreation = 0, offeredQuick = 0;
+        while (!(D.query.player == 0 && D.query.type == YGO_Q_IDLE) && guard++ < 200)
+        {
+            struct YgoAnswer a;
+            unsigned i;
+            if (getenv("TRACE"))
+            {
+                printf("  end: q%u p%u prompt %u min %u max %u quiet %d:", D.query.type, D.query.player, D.query.prompt,
+                       D.query.min, D.query.max, YgoDuel_QuietChance(&D));
+                for (i = 0; i < D.query.count; i++)
+                    printf(" [%s]", ItemName(i));
+                printf("\n");
+            }
+            if (D.query.player == 0 && D.query.type == YGO_Q_YESNO && D.query.count
+             && !strcmp(ItemName(0), "Witchcrafter Holiday"))
+            {
+                offeredHoliday = 1;
+                Pick(1);
+                continue;
+            }
+            if (D.query.player == 0 && (D.query.type == YGO_Q_YESNO || D.query.type == YGO_Q_CHAIN))
+                for (i = 0; i < D.query.count; i++)
+                    offeredCreation |= !strcmp(ItemName(i), "Witchcrafter Creation");
+            if (D.query.player == 0 && D.query.type == YGO_Q_CHAIN && D.s.current == 1 && D.s.phase == YGO_PHASE_MAIN1)
+                for (i = 0; i < D.query.count; i++)
+                    offeredQuick |= !strcmp(ItemName(i), "Witchcrafter Pittore");
+            if (D.query.type == YGO_Q_CHAIN && !D.query.min)
+            {
+                Pass();
+                continue;
+            }
+            if (D.query.type == YGO_Q_IDLE || D.query.type == YGO_Q_BATTLE)
+            {
+                unsigned pick = D.query.count - 1;
+                for (i = 0; i < D.query.count; i++)
+                    if (D.query.items[i].kind == YGO_ACT_END_TURN)
+                        pick = i;
+                Pick(pick);
+                continue;
+            }
+            YgoDuel_AiAnswer(&D, &a);
+            Answer(&a);
+        }
+        CHECK(offeredHoliday && !offeredCreation);
+        CHECK(offeredQuick);
+    }
+    {
+        unsigned i, inHand = 0;
+        for (i = 0; i < D.s.players[0].handCount; i++)
+            inHand |= !strcmp(Ygo_Card(D.s.objs[D.s.players[0].hand[i]].card)->name, "Witchcrafter Holiday");
+        CHECK(inHand);
+    }
+    printf("ok   %s\n", sScenario);
+
     YgoDuel_Free(&D);
     CHECK(gYgoEdoRebuilds == 0);
     puts("ygo card scenarios passed");

@@ -1074,6 +1074,16 @@ static int MyQuestion(void)
     const struct YgoDuel *d = B.d;
     return d && !d->s.over && d->query.type != YGO_Q_NONE && d->query.player == B.me && YgoBoard_Idle() && !B.waiting;
 }
+
+/* A quiet chain chance (a phase changing) that offers a monster's effect: asked, not passed for the player */
+static int QuietMonsterEffect(const struct YgoQuery *q)
+{
+    unsigned i;
+    for (i = 0; i < q->count; i++)
+        if (Ygo_IsMonster(Ygo_Card(q->items[i].card)))
+            return 1;
+    return 0;
+}
 static const char *KindLabel(const struct YgoChoice *c)
 {
     const struct YgoCard *card = ObjCard(c->obj);
@@ -2002,8 +2012,11 @@ int YgoBoard_Step(unsigned pressed, unsigned held, struct YgoAnswer *answer, uns
         }
         return YB_NONE;
     }
-    /* A chance to chain at a quiet moment (a phase changing): passed for you, unless L is held */
-    if (MyQuestion() && q->type == YGO_Q_CHAIN && !(held & KEY_L) && YgoDuel_QuietChance(B.d))
+    /* A chance to chain at a quiet moment (a phase changing): passed for you, unless L is held, or unless a monster's
+     * effect is among what can be used (a Quick Effect such as the Witchcrafters' "During the Main Phase", meant for
+     * the start of the opponent's Main Phase: the user, 2026-11-22, "Witchcrafter's effects are not triggering");
+     * only set Spells and Traps, ready at every phase, are passed by themselves */
+    if (MyQuestion() && q->type == YGO_Q_CHAIN && !(held & KEY_L) && YgoDuel_QuietChance(B.d) && !QuietMonsterEffect(q))
     {
         memset(answer, 0, sizeof(*answer));
         return YB_ANSWER;
