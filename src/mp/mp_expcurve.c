@@ -181,8 +181,9 @@ u16 MP_ExpCurve_Percent(u8 level, u8 ceiling)
     return pct < FLOOR_PERCENT ? FLOOR_PERCENT : pct;
 }
 
-// SCALED (the user, 2026-11-19: trainer battles still worth fighting, wild ones good EXP): no cut and no boost by the
-// ceiling; a beaten POKeMON gives the EXP it would give at the level LEVEL SCALING set it to, 5 levels lower
+// SCALED (the user, 2026-11-19: trainer battles still worth fighting, wild ones good EXP): no cut by the ceiling (a
+// POKeMON below it keeps its boost, 2026-11-22); a beaten POKeMON gives the EXP it would give at the level LEVEL
+// SCALING set it to, 5 levels lower
 bool8 MP_ExpCurve_Scaled(void)
 {
     return MP_ExpCurve_Active() && MP_LevelScaleRule(MP_SCALE_EXP) == 3;
@@ -202,10 +203,12 @@ u32 MP_ExpCurve_Apply(u32 exp, u8 level, u8 ceiling, bool8 *boosted)
     u16 pct;
     if (boosted)
         *boosted = FALSE;
-    if (exp == 0 || !MP_ExpCurve_Active() || MP_ExpCurve_Scaled())
+    if (exp == 0 || !MP_ExpCurve_Active())
         return exp;
     pct = MP_ExpCurve_Percent(level, ceiling);
-    if (pct == 100)
+    // SCALED: never a cut for being past the area (the user, 2026-11-19), but a POKeMON behind it still gets its boost
+    // (the user, 2026-11-22: a Lv18 VICTINI in a Lv41-45 team got next to nothing for a Lv31 foe)
+    if (pct == 100 || (pct < 100 && MP_ExpCurve_Scaled()))
         return exp;
     if (pct > 100 && boosted)
         *boosted = TRUE;
@@ -231,6 +234,13 @@ u16 MP_ExpCurve_CatchUp(void)
     return (target - mine) * CATCHUP_PER > CATCHUP_MAX ? CATCHUP_MAX : (target - mine) * CATCHUP_PER;
 }
 
+// What a POKeMON at LEVEL gets under the mode in use (SCALED: the boost only)
+static u16 ScaledPercent(u8 level, u8 ceiling)
+{
+    u16 pct = MP_ExpCurve_Percent(level, ceiling);
+    return MP_ExpCurve_Scaled() && pct < 100 ? 100 : pct;
+}
+
 // Tests: `mp expcurve`: the area, the frontier, the ceiling and what each party POKeMON would get
 void MP_ExpCurve_Debug(void)
 {
@@ -241,5 +251,5 @@ void MP_ExpCurve_Debug(void)
     for (i = 0; i < PARTY_SIZE; i++)
         if (GetMonData(&gPlayerParty[i], MON_DATA_SPECIES) && !GetMonData(&gPlayerParty[i], MON_DATA_IS_EGG))
             printf("[test] expcurve: slot %d Lv%d -> %d%%\n", i, GetMonData(&gPlayerParty[i], MON_DATA_LEVEL),
-                   MP_ExpCurve_Scaled() ? 100 : MP_ExpCurve_Percent(GetMonData(&gPlayerParty[i], MON_DATA_LEVEL), c));
+                   ScaledPercent(GetMonData(&gPlayerParty[i], MON_DATA_LEVEL), c));
 }

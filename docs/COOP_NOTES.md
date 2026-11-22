@@ -7740,7 +7740,9 @@ SCALED (1.207.0, the user's design, 2026-11-19; the default): players overlevele
 that trainers stopped being worth fighting ("100 exp is not enough EXP to feel good for a trainer battle"). The user:
 trainer battles should still be worth it and wild battles still give good EXP. MP_SCALE_EXP 3: no cut and no boost by
 the ceiling (MP_ExpCurve_Apply returns the EXP as it is); a beaten POKeMON's EXP is worked out 5 levels under the level
-LEVEL SCALING set it to (MP_ExpCurve_FoeLevel in Cmd_getexp: yield x (level - 5) / 7). The catch-up stays. A config
+LEVEL SCALING set it to (MP_ExpCurve_FoeLevel in Cmd_getexp: yield x (level - 5) / 7). The catch-up stays, and so does
+the boost for a POKeMON below the ceiling (+5% a level, +100% at most: the user, 2026-11-22, a Lv18 VICTINI in a
+Lv41-45 team got next to nothing for a Lv31 foe); only the cut for being past it is gone. A config
 still on GENTLE (the old default) moves to SCALED once (exp_curve_rev = 2 marks a config written since); the canonical
 list for a new game has it. OPTIONS > GAME > LEVEL SCALING > EXP CURVE: OFF / GENTLE / STRONG / SCALED; online the
 host's (protocol 88). Tests set GENTLE with MOEMON_LEVEL_RULES=2,2,0,1,0,1 (commas or spaces). Scenario exp_curve_scaled.
@@ -8866,3 +8868,14 @@ keep theirs; the GBA decks stay as a fallback. `mp ygo pool RATING` (tests); sce
   never returns anything else and BeginEvolutionScene refuses anything else (back to gCB2_AfterEvolution).
 - `mp evoaudit` checks every evolution table entry (512, none bad); scenarios evo_all (SACHET, LINKING CORD + SACHET,
   the item used up), trade_evo (the CO-OP trade).
+
+## STREAMER MODE on the drawn labels (2026-11-22)
+- The user: "Streamer mode doesn't affect these names" (docs/user_images/99.png: a friend's name tag "COOKIE Lv35" and
+  a door label "Kazuya"). STREAMER MODE swapped names only in the text printer (mp_textopts.c); the game's own drawn
+  labels skipped it. Now each passes its text through mp_streamer.c first: MP_Streamer_FilterN (a run of letters),
+  MP_Streamer_Filter (EOS-ended), MP_Streamer_FilterAscii (ASCII lettering). Callers: the name tags (mp_overworld.c
+  BuildNametag, redrawn when the mode changes: tagStreamer), the speech bubbles (mp_emote.c RedrawBubble: door labels,
+  pings; all redrawn on a change), the FRIEND FINDER (mp_compass.c BuildLabel), SPECTATE (mp_spectate.c: its lettering,
+  the panel's labels, the pop-out windows' titles), the Triple Battle cards (mp_tricards.c), the shared PC's friends'
+  cursors (pokemon_storage_system.c MpBuildLabel). The pairs are built once a frame and include the Original Trainers
+  of the POKeMON on screen. A new drawn label with a name must pass through these too. Scenario streamer_tags.
