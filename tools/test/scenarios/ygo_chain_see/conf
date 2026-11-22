@@ -1,0 +1,9 @@
+# YU-GI-OH!: answering the opponent's card (the user, 2026-11-22: "let me have a moment to check what I am responding
+# to"): the chance to chain names it ("Respond to CHANGE OF HEART?") and its first row SEE shows that card whole, even
+# one from their hand; the window takes no A / B for half a second. A practice duel the harness plays for ALICE
+# (autochain) passes the chances until one answers the opponent's card. Shots: see1 the window, see2 the card (SEE),
+# see3 the window again
+MODE=1
+TMO=400
+EXPECT_A=("responding to" "board: chain window")
+UNEXPECT_A=("[crash]" "TIMEOUT")

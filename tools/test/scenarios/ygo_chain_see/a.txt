@@ -1,0 +1,17 @@
+pressuntil A field 5000
+wait 30
+mp ygo starter 1
+mp ygo seed 13
+mp ygo autochain
+mp ygo fast
+mp ygo practice
+pressuntillog B 80000 responding to
+wait 40
+rendershot see1
+press A 1
+wait 30
+rendershot see2
+press B 1
+wait 30
+rendershot see3
+quit

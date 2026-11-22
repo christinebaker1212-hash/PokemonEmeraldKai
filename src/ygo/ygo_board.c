@@ -261,7 +261,8 @@ static struct
     int zoneItem, zoneSpell;   /* M_ZONE: the menu's choice, and Spell & Trap Zones (1) or Monster Zones (0) */
     int tribZone;              /* our last Tribute's Monster Zone + 1: a Tribute Summon's zone question starts there */
     int pickPrefer;            /* a pick on the table: the item the cursor starts on (PreferredPick) */
-    int windowItems[YGO_QUERY_MAX + 1], windowCount, windowCursor;
+    int windowItems[YGO_QUERY_MAX + 4], windowCount, windowCursor;
+    int windowOpened;   /* B.frame the chain window opened (a moment before it takes A / B) */
     uint8_t picked[YGO_QUERY_MAX];
     int pickedCount;
     int gridCursor, pileSide, pilePile;
@@ -1075,6 +1076,19 @@ static int MyQuestion(void)
     return d && !d->s.over && d->query.type != YGO_Q_NONE && d->query.player == B.me && YgoBoard_Idle() && !B.waiting;
 }
 
+/* The opponent's chain link a chance to chain answers (the last link, theirs): its link + 1, 0 none. The chain window
+   names it, and SEE shows the card whole, even one played from their hand (the user, 2026-11-22: "let me have a
+   moment to check what I am responding to") */
+static unsigned RespondingTo(void)
+{
+    const struct YgoState *s = &B.d->s;
+    if (B.d->query.type != YGO_Q_CHAIN || !s->chainCount || s->chain[s->chainCount - 1].player == B.me)
+        return 0;
+    return s->chainCount;
+}
+/* How long the chain window waits before it takes A / B (a held or mashed button never answers it unseen) */
+#define CHAIN_WINDOW_HOLD 30
+
 /* A quiet chain chance (a phase changing) that offers a monster's effect: asked, not passed for the player */
 static int QuietMonsterEffect(const struct YgoQuery *q)
 {
@@ -1278,10 +1292,20 @@ static void NewQuestion(void)
         break;
     case YGO_Q_CHAIN:
         B.mode = M_WINDOW;
+        B.windowOpened = B.frame;
+        if (RespondingTo())
+            B.windowItems[B.windowCount++] = -4;   /* SEE: the opponent's card being answered (the user, 2026-11-22) */
         for (i = 0; i < q->count; i++)
             B.windowItems[B.windowCount++] = (int)i;
         B.windowItems[B.windowCount++] = -3;   /* CHECK: look at the field first (the user, 2026-11-21) */
-        MPNet_Log("ygo board: chain window, %u to activate", q->count);
+        if (RespondingTo())
+        {
+            const struct YgoLink *l = &T()->chain[RespondingTo() - 1];
+            const struct YgoCard *c = Ygo_Card(l->card ? l->card : (l->obj < B.objCount ? T()->objs[l->obj].card : 0));
+            MPNet_Log("ygo board: chain window, %u to activate, responding to %s", q->count, c ? c->name : "?");
+        }
+        else
+            MPNet_Log("ygo board: chain window, %u to activate", q->count);
         B.windowItems[B.windowCount++] = -1;   /* pass */
         Tip("You can respond! A Trap or Quick-Play Spell can be activated now, in a chain. Or pass with {B}. "
             "You're asked when something happens: hold {L} to be asked at every chance.");
@@ -2429,6 +2453,19 @@ int YgoBoard_Step(unsigned pressed, unsigned held, struct YgoAnswer *answer, uns
                 *card = id;
                 return YB_INSPECT;
             }
+        }
+        if (q->type == YGO_Q_CHAIN && B.frame - B.windowOpened < CHAIN_WINDOW_HOLD)
+            return YB_NONE;   /* (a moment to see what's being answered first) */
+        if ((pressed & (KEY_A | KEY_INSPECT)) && B.windowItems[B.windowCursor] == -4 && RespondingTo())
+        {
+            /* SEE: the opponent's card in this chain, whole */
+            const struct YgoLink *l = &T()->chain[RespondingTo() - 1];
+            PlaySE(SE_SELECT);
+            sInspectObj = l->obj < B.objCount ? (int)l->obj : -1;
+            *card = l->card ? l->card : (l->obj < B.objCount ? T()->objs[l->obj].card : 0);
+            if (*card)
+                return YB_INSPECT;
+            return YB_NONE;
         }
         if (pressed & KEY_A && B.windowItems[B.windowCursor] == -3)
         {
@@ -3625,7 +3662,13 @@ static void Menus(void)
         {
             int item = B.windowItems[i];
             rows[i] = names[i];
-            if (item == -3)
+            if (item == -4)
+            {
+                const struct YgoLink *l = RespondingTo() ? &T()->chain[RespondingTo() - 1] : NULL;
+                const struct YgoCard *c = l ? Ygo_Card(l->card ? l->card : (l->obj < B.objCount ? T()->objs[l->obj].card : 0)) : NULL;
+                snprintf(names[i], sizeof(names[i]), "SEE %.30s", c ? c->name : "THEIR CARD");
+            }
+            else if (item == -3)
                 snprintf(names[i], sizeof(names[i]), "CHECK");
             else if (item < 0)
                 snprintf(names[i], sizeof(names[i]), "PASS");
@@ -3667,7 +3710,15 @@ static void Menus(void)
                 }
             }
         }
-        if (q->type == YGO_Q_CHAIN)
+        if (q->type == YGO_Q_CHAIN && RespondingTo())
+        {
+            /* what's being answered: their card and the effect it activated */
+            const struct YgoLink *l = &T()->chain[RespondingTo() - 1];
+            const struct YgoCard *c = Ygo_Card(l->card ? l->card : (l->obj < B.objCount ? T()->objs[l->obj].card : 0));
+            snprintf(title, sizeof(title), "Respond to %.40s?", c ? c->name : "their card");
+            w = 200;
+        }
+        else if (q->type == YGO_Q_CHAIN)
             snprintf(title, sizeof(title), "Activate a card?");
         else if (*YgoDuel_QueryText(B.d, title, sizeof(title)))
         {

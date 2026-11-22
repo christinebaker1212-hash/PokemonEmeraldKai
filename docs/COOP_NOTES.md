@@ -8887,3 +8887,8 @@ keep theirs; the GBA decks stay as a fallback. `mp ygo pool RATING` (tests); sce
   for the player unless L was held (ygo_board.c), and the Witchcrafters' "During the Main Phase (Quick Effect)" is used
   just there, at the start of the opponent's Main Phase. Now a quiet chance is passed by itself only when nothing but
   Spells and Traps are offered (set cards, ready at every phase); a monster's effect among them asks (QuietMonsterEffect).
+- Answering the opponent's card (the user, 2026-11-22: "let me have a moment to check what I am responding to.
+  Especially if it's a card that was in their hand"): when a chance to chain answers the opponent's chain link
+  (ygo_board.c RespondingTo), the window says "Respond to <card>?" and its first row SEE <card> shows that card whole
+  (the look up close, from the chain link's card: a hand card too); the window takes no A / B for half a second
+  (CHAIN_WINDOW_HOLD) so a held or mashed button never answers it unseen. Scenario ygo_chain_see.
