@@ -8855,6 +8855,10 @@ In the game: src/ygo/ygo_npc_pool.c inflates it on first use, each deck's GEN it
 offers decks the YU-GI-OH! GEN allows); ygo_field.c gives every ordinary duelist a pool deck (YgoOpponent.gba 2), its
 badges' quarter of the GEN's decks the most it may bring, CARD SCALING the one nearest the target; special duelists
 keep theirs; the GBA decks stay as a fallback. `mp ygo pool RATING` (tests); scenario ygo_pool.
+The full run (2026-11-22): 179,062 decks, 1,093,632 duels over 12 Swiss rounds (about 23-33 duels a second on four
+cores, an hour a round; resumed after each stop a duel at a time); the text prior and the duels agree with r = 0.51;
+179,023 decks in the pack (13 MB, 22 MB inflated), the player's deck fit r = 0.52. Strongest: Branded / Kashtira /
+Tearlament meta decks of 2022-2026 (docs/audit_ygo_npc_pool.txt).
 
 ## Evolutions never into nothing (2026-11-22)
 - The user's SPRITZEE, traded in CO-OP holding a SACHET, "evolved into ??????????" and fainted: mp_trade.c asked
