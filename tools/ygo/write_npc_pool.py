@@ -3,10 +3,19 @@
 (~/.cache/moemon/npc_pool_rated.json, tools/ygo/rate_pool.py) as graphics/ygo/npc_pool.bin, built in by
 src/ygo/ygo_npc_pool_pak.c and read by src/ygo/ygo_npc_pool.c.
 
-  "NPCP", u32 version (1), u32 decks, u32 the payload's size inflated, then the payload, raw deflate:
-    each deck, weakest first: u16 rating, u8 format (FORMATS below), u16 era (its year), u8 placing (0 none, else
-    1 a win .. 9 a top 256), u8 name length, the name (ASCII), u8 distinct Main Deck cards, u8 distinct Extra Deck
-    cards, then (u16 catalog id, u8 copies) for each
+  "NPCP", u32 version (2), u32 decks, u32 the payload's size inflated, then the payload, raw deflate:
+    each deck, weakest first: u16 rating, u8 format (FORMATS below), u8 how competitive it is (COMP_*), u16 era
+    (its year), u8 placing (0 none, else 1 a win .. 9 a top 256), u8 name length, the name (ASCII), u8 distinct Main
+    Deck cards, u8 distinct Extra Deck cards, then (u16 catalog id, u8 copies) for each
+
+How competitive (the user, 2026-11-22: "Tearlaments and meta decks shouldn't be played by random people"; who may
+bring which: src/ygo/ygo_field.c's standings):
+  0 casual      a home-made deck with little of the tournament archetypes' cards
+  1 strong      a home-made deck with some of them (4-7 copies)
+  2 meta        a meta deck: 8+ copies of them, or uploaded as a Meta / Master Duel deck
+  3 tournament  a tournament deck (a Tournament Meta format, the Worlds, or a placing)
+The tournament archetypes' cards: those not in 6% of every deck (the staples: Ash Blossom, Called by the Grave...)
+in 40+ tournament decks, at least 15% of the decks that hold them being tournament decks.
 
 Also writes src/ygo/ygo_card_ratings.c from tools/ygo/card_power.json (every card's power from its text: the scale
 the player's deck is rated on, Ygo_DeckRating), its deck fit A + B * average fitted so a pool deck's cards give its
@@ -28,6 +37,8 @@ PLACINGS = [('winner', 1), ('1st', 1), ('runner', 2), ('2nd', 2), ('top 4', 3), 
 
 def fmt_code(f):
     f = (f or '').lower()
+    if 'non-meta' in f:   # (before 'meta')
+        return FORMATS.index('non-meta')
     if 'tournament' in f:
         return FORMATS.index('tournament ocg') if 'ocg' in f else FORMATS.index('tournament')
     for i, k in enumerate(FORMATS):
@@ -41,6 +52,36 @@ def placing_code(p):
     if not p:
         return 0
     return next((c for k, c in PLACINGS if k in p), 9)
+
+
+def tournament_deck(d):
+    f = (d.get('format') or '').lower()
+    return bool(placing_code(d.get('placing'))) or 'tournament' in f or 'world' in f
+
+
+def competitive(pool):
+    """each deck's COMP_* (0-3), by the tournament archetypes' cards it holds and how it was uploaded"""
+    every, tour = Counter(), Counter()
+    for d in pool:
+        cards = set(d['main'])
+        every.update(cards)
+        if tournament_deck(d):
+            tour.update(cards)
+    staple = {c for c, n in every.items() if n >= 0.06 * len(pool)}
+    meta = {c for c, n in tour.items() if c not in staple and n >= 40 and n / every[c] >= 0.15}
+    out = []
+    for d in pool:
+        held = sum(1 for c in d['main'] if c in meta)
+        f = FORMATS[fmt_code(d.get('format'))]
+        if tournament_deck(d):
+            out.append(3)
+        elif held >= 8 or f in ('meta', 'master duel'):
+            out.append(2)
+        elif held >= 4:
+            out.append(1)
+        else:
+            out.append(0)
+    return out
 
 
 def card_ratings(pool, cat):
@@ -80,25 +121,27 @@ def main():
     cat = json.load(open(os.path.join(ROOT, 'tools/ygo/catalog.json')))['cards']
     pool = [d for d in pool if d.get('crashes', 0) < 2]   # (decks the engine fell over on, twice: left out)
     pool.sort(key=lambda d: (d['rating'], d['num']))
+    comp = competitive(pool)
     payload = bytearray()
-    for d in pool:
+    for d, cp in zip(pool, comp):
         name = d['name'].encode('ascii', 'replace')[:28]
         main, extra = Counter(d['main']), Counter(d['extra'])
-        payload += struct.pack('<HBHBB', max(0, min(65535, d['rating'])), fmt_code(d['format']), int(d['era'][:4]),
-                               placing_code(d.get('placing')), len(name))
+        payload += struct.pack('<HBBHBB', max(0, min(65535, d['rating'])), fmt_code(d['format']), cp,
+                               int(d['era'][:4]), placing_code(d.get('placing')), len(name))
         payload += name
         payload += struct.pack('<BB', len(main), len(extra))
         for ids in (main, extra):
             for cid in sorted(ids):
                 payload += struct.pack('<HB', cid, ids[cid])
-    comp = zlib.compressobj(9, zlib.DEFLATED, -15)
-    blob = comp.compress(bytes(payload)) + comp.flush()
+    z = zlib.compressobj(9, zlib.DEFLATED, -15)
+    blob = z.compress(bytes(payload)) + z.flush()
     path = os.path.join(ROOT, 'graphics/ygo/npc_pool.bin')
     with open(path, 'wb') as f:
-        f.write(b'NPCP' + struct.pack('<III', 1, len(pool), len(payload)) + blob)
+        f.write(b'NPCP' + struct.pack('<III', 2, len(pool), len(payload)) + blob)
     a, b, r = card_ratings(pool, cat)
     print('%d decks, %d KB inflated, %d KB in the pack; deck fit A %.0f B %.3f (r %.3f)' % (
         len(pool), len(payload) // 1024, (len(blob) + 16) // 1024, a, b, r))
+    print('casual %d, strong %d, meta %d, tournament %d' % tuple(comp.count(k) for k in range(4)))
 
 
 if __name__ == '__main__':

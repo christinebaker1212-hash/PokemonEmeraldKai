@@ -3,5 +3,5 @@
 # one under the cursor (looked at). Shots binder_before, binder_new, binder_moved.
 MODE=1
 TMO=120
-EXPECT_A=("cardnew: 0 new" "cardnew: 410 new")
+EXPECT_A=("cardnew: 0 new" "cardnew: 1637 new")
 UNEXPECT_A=("[crash]" "TIMEOUT")

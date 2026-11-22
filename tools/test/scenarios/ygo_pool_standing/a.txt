@@ -1,0 +1,11 @@
+pressuntil A field 5000
+wait 30
+mp ygo standing 0 0
+mp ygo standing 0 3
+mp ygo standing 1 0
+mp ygo standing 1 3
+mp ygo standing 2 0
+mp ygo standing 2 3
+mp ygo standing 3 3
+wait 30
+quit

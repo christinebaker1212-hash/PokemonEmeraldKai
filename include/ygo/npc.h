@@ -19,6 +19,8 @@ struct YgoOpponent
     uint8_t level;          /* the AI's level: 0 a beginner .. 3 the best */
     uint8_t tier, theme, fit, gba;   /* badge tier (4+: special), their type, may be fitted, a Game Boy deck */
     int16_t rating;         /* their deck's rating */
+    uint8_t standing;       /* where they stand in the world (ygo_field.c STAND_*): what they may bring */
+    int16_t elo;            /* their own rating: the deck they'd bring with CARD SCALING off */
     uint32_t seed;          /* (who they are today: their decks come from it) */
     uint8_t portraitW, portraitH;
     uint8_t voice;          /* what they say: include/tcg/quotes.h QUOTE_VOICE_*, and who a special duelist is */
@@ -29,7 +31,8 @@ struct YgoOpponent
 
 /* CARD SCALING (ygo_field.c): the deck they bring against a player `mine` strong (deck rating plus skill; the
  * player counted as the SKILLED level): a touch weaker than the player's for most, a real test from the special
- * duelists; a Game Boy deck up to what the badges allow, or their own type's at the tier that comes closest. An
+ * duelists; a YGOPRODeck deck halfway between their own rating and that, inside what their standing in the world
+ * allows; a Game Boy deck up to what the badges allow, or their own type's at the tier that comes closest. An
  * ordinary duelist whose decks fall well short plays a level better instead. Sets o->main/extra/rating/level. */
 void Ygo_FitOpponent(struct YgoOpponent *o, int mine);
 /* The duelist's Game Boy Advance deck about to be dueled: passed over for a while where others fit as well */

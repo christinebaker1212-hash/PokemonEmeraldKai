@@ -2,8 +2,9 @@
 // YGOPRODeck"): every playable deck uploaded to YGOPRODeck, cut to its era's Forbidden & Limited list, rated by
 // AI-against-AI duels on the rules (tools/ygo/rate_pool.py). graphics/ygo/npc_pool.bin (tools/ygo/write_npc_pool.py,
 // built in by ygo_npc_pool_pak.c) is inflated the first time a duelist needs a deck; each deck's GEN (its newest
-// card's era) worked out then. A duelist picks one near the rating CARD SCALING asks for, among those the
-// YU-GI-OH! GEN allows (MP_YgoGen), not one met lately.
+// card's era) worked out then. A duelist picks one near their own rating, inside what their standing in the world
+// allows (how strong, how competitive: ygo_field.c), among those the YU-GI-OH! GEN allows (MP_YgoGen), not one met
+// lately.
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -18,7 +19,7 @@ struct PoolDeck
     uint32_t off;        // its cards in the payload
     uint32_t nameAt;     // its name in the payload (nameLen bytes)
     uint16_t rating, year;
-    uint8_t format, placing, era, nameLen;
+    uint8_t format, comp, placing, era, nameLen;   // comp: 0 casual .. 3 a tournament deck (write_npc_pool.py)
 };
 
 static struct
@@ -44,7 +45,7 @@ static int Load(void)
     if (P.tried)
         return P.ok;
     P.tried = 1;
-    if (size < 16 || memcmp(gYgoNpcPoolPak, "NPCP", 4) || U32(gYgoNpcPoolPak + 4) != 1)
+    if (size < 16 || memcmp(gYgoNpcPoolPak, "NPCP", 4) || U32(gYgoNpcPoolPak + 4) != 2)
         return 0;
     P.count = U32(gYgoNpcPoolPak + 8);
     P.data = (uint8_t *)stbi_zlib_decode_noheader_malloc((const char *)gYgoNpcPoolPak + 16, (int)(size - 16), &out);
@@ -62,16 +63,17 @@ static int Load(void)
         struct PoolDeck *d = &P.decks[i];
         uint8_t nlen, nm, nx, era = 0;
         unsigned k;
-        if (at + 9 > P.size)
+        if (at + 10 > P.size)
             break;
         d->rating = U16(P.data + at);
         d->format = P.data[at + 2];
-        d->year = U16(P.data + at + 3);
-        d->placing = P.data[at + 5];
-        nlen = P.data[at + 6];
-        d->nameAt = at + 7;
+        d->comp = P.data[at + 3];
+        d->year = U16(P.data + at + 4);
+        d->placing = P.data[at + 6];
+        nlen = P.data[at + 7];
+        d->nameAt = at + 8;
         d->nameLen = nlen;
-        at += 7 + nlen;
+        at += 8 + nlen;
         if (at + 2 > P.size)
             break;
         nm = P.data[at];
@@ -101,6 +103,14 @@ unsigned Ygo_PoolCount(void)
 static int InGen(const struct PoolDeck *d, unsigned gen)
 {
     return !gen || gen > YGO_GEN_STEPS || d->era < gen;
+}
+
+// what the duelist picking may bring (Ygo_PoolPickIn): how competitive at most, the ratings between
+static struct { unsigned comp; int lo, hi; } sAllow = {3, -1, -1};
+static int Allowed(const struct PoolDeck *d, unsigned gen)
+{
+    return InGen(d, gen) && d->comp <= sAllow.comp && (sAllow.lo < 0 || d->rating >= sAllow.lo) &&
+           (sAllow.hi < 0 || d->rating <= sAllow.hi);
 }
 
 static int MetLately(uint32_t i)
@@ -136,6 +146,10 @@ int Ygo_PoolInfo(unsigned index, char *name, size_t size, unsigned *rating, unsi
     if (placing)
         *placing = d->placing;
     return 1;
+}
+unsigned Ygo_PoolComp(unsigned index)
+{
+    return Load() && index < P.count ? P.decks[index].comp : 0;
 }
 
 // The deck as cards that can be played now: the game's own list's limits kept (more copies of its own cards when
@@ -184,7 +198,7 @@ int Ygo_PoolCards(unsigned index, uint16_t main[YGO_DECK_MAX], uint16_t extra[YG
 
 // A deck near target (target < 0: any) the GEN allows, by the person's own number (seed): the nearer the likelier,
 // those met lately only when nothing else fits; -1 when there's none
-int Ygo_PoolPick(int target, unsigned gen, uint32_t seed)
+static int Pick(int target, unsigned gen, uint32_t seed)
 {
     uint32_t i, lo = 0, hi, best = ~0u, window, n;
     uint64_t total = 0, pick;
@@ -213,7 +227,7 @@ int Ygo_PoolPick(int target, unsigned gen, uint32_t seed)
             while (h < n && (int)P.decks[h].rating - target <= (int)window)
                 h++;
             for (i = l; i < h && ok < 8; i++)
-                ok += InGen(&P.decks[i], gen) && !MetLately(i);
+                ok += Allowed(&P.decks[i], gen) && !MetLately(i);
             if (ok >= 8 || window > 2000 || (l == 0 && h == n))
             {
                 lo = l, hi = h;
@@ -223,15 +237,15 @@ int Ygo_PoolPick(int target, unsigned gen, uint32_t seed)
         (void)best;
     }
     for (i = lo; i < hi; i++)
-        fresh |= InGen(&P.decks[i], gen) && !MetLately(i);
+        fresh |= Allowed(&P.decks[i], gen) && !MetLately(i);
     for (i = lo; i < hi; i++)
-        if (InGen(&P.decks[i], gen) && (!fresh || !MetLately(i)))
+        if (Allowed(&P.decks[i], gen) && (!fresh || !MetLately(i)))
             total += target < 0 ? 1 : 1 + 2000 / (8 + (uint32_t)abs((int)P.decks[i].rating - target));
     if (!total)
         return -1;
     pick = ((uint64_t)seed * 2654435761u) % total;
     for (i = lo; i < hi; i++)
-        if (InGen(&P.decks[i], gen) && (!fresh || !MetLately(i)))
+        if (Allowed(&P.decks[i], gen) && (!fresh || !MetLately(i)))
         {
             uint64_t w = target < 0 ? 1 : 1 + 2000 / (8 + (uint32_t)abs((int)P.decks[i].rating - target));
             if (pick < w)
@@ -239,6 +253,21 @@ int Ygo_PoolPick(int target, unsigned gen, uint32_t seed)
             pick -= w;
         }
     return -1;
+}
+
+int Ygo_PoolPick(int target, unsigned gen, uint32_t seed)
+{
+    sAllow.comp = 3, sAllow.lo = sAllow.hi = -1;
+    return Pick(target, gen, seed);
+}
+// ... no more competitive than comp (0 casual .. 3 a tournament deck), its rating between lo and hi (< 0: no bound)
+int Ygo_PoolPickIn(int target, unsigned gen, unsigned comp, int lo, int hi, uint32_t seed)
+{
+    int at;
+    sAllow.comp = comp, sAllow.lo = lo, sAllow.hi = hi;
+    at = Pick(target, gen, seed);
+    sAllow.comp = 3, sAllow.lo = sAllow.hi = -1;
+    return at;
 }
 
 // the weakest and the strongest rating the GEN allows (a duelist early on picks from the lower part)

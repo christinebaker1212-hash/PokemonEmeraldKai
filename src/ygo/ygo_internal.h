@@ -33,6 +33,10 @@ int Ygo_NpcDeckCards(unsigned index, uint16_t main[60], uint16_t extra[15]);
  * "NPC decks from YGOPRODeck"), weakest first, each with its duel rating; gen: the YU-GI-OH! GEN (MP_YgoGen) */
 unsigned Ygo_PoolCount(void);
 int Ygo_PoolPick(int target, unsigned gen, uint32_t seed);          /* near target (< 0: any) the GEN allows; -1 none */
+/* ... no more competitive than comp (0 casual, 1 strong, 2 meta, 3 tournament), rated lo-hi (< 0: no bound) */
+int Ygo_PoolPickIn(int target, unsigned gen, unsigned comp, int lo, int hi, uint32_t seed);
+unsigned Ygo_PoolComp(unsigned index);
+void Ygo_FieldDebugStanding(unsigned standing, unsigned tier);   /* tests: mp ygo standing S TIER */
 int Ygo_PoolQuantile(unsigned gen, unsigned share);                 /* the rating share/1024 of the way up */
 int Ygo_PoolRange(unsigned gen, int *lo, int *hi);
 int Ygo_PoolCards(unsigned index, uint16_t main[60], uint16_t extra[15]);   /* 0 when it can't make 40 */

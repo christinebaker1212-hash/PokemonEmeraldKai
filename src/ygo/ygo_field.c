@@ -10,6 +10,7 @@
 #include "event_object_movement.h"
 #include "item.h"
 #include "mp.h"
+#include "mp_region.h"
 #include "script.h"
 #include "constants/event_objects.h"
 #include "constants/flags.h"
@@ -309,16 +310,9 @@ static unsigned Signature(unsigned theme)
 // ---------------------------------------------------------------------------
 // Who plays
 
-static u8 Badges(void)
-{
-    u8 i, n = 0;
-    for (i = 0; i < NUM_BADGES; i++)
-        n += FlagGet(FLAG_BADGE01_GET + i) != 0;
-    return n;
-}
 static unsigned TierOfBadges(void)
 {
-    u8 b = Badges();
+    u8 b = MP_Badges();   // (the region the player is in: HOENN is never the default)
     return b >= 7 ? 3 : b >= 4 ? 2 : b >= 2 ? 1 : 0;
 }
 
@@ -387,54 +381,74 @@ static const struct Duelist sDuelists[YGO_SPECIAL_COUNT] = {
 };
 #define YGO_SPECIAL_CLUB 31   /* (specialBeaten bit) the CARD CLUB's duelist */
 
-// Trainer classes that duel with Yu-Gi-Oh! cards, and their themes
+// Where a duelist stands in the world (the user, 2026-11-22: "Tearlaments and meta decks shouldn't be played by
+// random people. Assign NPCs decks based on your ELO, their ELO, and their position in the Pokemon world"): how
+// strong a YGOPRODeck deck they may bring (shares of the way up the decks the GEN allows, of 1024) and how
+// competitive (ygo_npc_pool.c: 0 casual, 1 strong home-made, 2 meta, 3 tournament)
+enum { STAND_TOWN, STAND_TRAINER, STAND_SKILLED, STAND_ACE, STAND_COUNT };
 static const struct
 {
-    u8 trainerClass, theme, alt;
+    u16 lo, hi;
+    u8 comp;
+} sStandings[STAND_COUNT] = {
+    [STAND_TOWN] = {51, 461, 0},      // townsfolk: home-made casual decks, never past the middle
+    [STAND_TRAINER] = {154, 666, 1},  // trainers and the TEAMS' grunts: home-made, some strong
+    [STAND_SKILLED] = {358, 870, 2},  // COOLTRAINERS, EXPERTS, the TEAMS' ADMINS: meta decks
+    [STAND_ACE] = {563, 1024, 3},     // ... once the region's LEAGUE is beaten: tournament decks too
+};
+static unsigned StandingNow(unsigned standing)
+{
+    return standing == STAND_SKILLED && MP_Region_ClearedHere() ? STAND_ACE : standing;
+}
+
+// Trainer classes that duel with Yu-Gi-Oh! cards, their themes and where they stand
+static const struct
+{
+    u8 trainerClass, theme, alt, standing;
 } sClasses[] = {
-    {TRAINER_CLASS_PSYCHIC, TH_SPELLCASTER, TH_FAIRY},
-    {TRAINER_CLASS_HEX_MANIAC, TH_ZOMBIE, TH_FIEND},
-    {TRAINER_CLASS_NINJA_BOY, TH_INSECT, TH_WARRIOR},
-    {TRAINER_CLASS_BLACK_BELT, TH_WARRIOR, TH_BEAST_WARRIOR},
-    {TRAINER_CLASS_BATTLE_GIRL, TH_HARPIE, TH_WARRIOR},
-    {TRAINER_CLASS_COOLTRAINER, TH_DRAGON, TH_SPELLCASTER},
-    {TRAINER_CLASS_COOLTRAINER_2, TH_DRAGON, TH_HARPIE},
-    {TRAINER_CLASS_RUIN_MANIAC, TH_ROCK, TH_ZOMBIE},
-    {TRAINER_CLASS_KINDLER, TH_PYRO, TH_DINO},
-    {TRAINER_CLASS_COLLECTOR, TH_TOON, TH_DRAGON},
-    {TRAINER_CLASS_EXPERT, TH_MACHINE, TH_BEAST_WARRIOR},
-    {TRAINER_CLASS_GUITARIST, TH_FIEND, TH_WARRIOR},
-    {TRAINER_CLASS_TEAM_AQUA, TH_SEA, TH_AQUA},
-    {TRAINER_CLASS_AQUA_ADMIN, TH_SEA, TH_AQUA},
-    {TRAINER_CLASS_TEAM_MAGMA, TH_DINO, TH_PYRO},
-    {TRAINER_CLASS_MAGMA_ADMIN, TH_DINO, TH_PYRO},
+    {TRAINER_CLASS_PSYCHIC, TH_SPELLCASTER, TH_FAIRY, STAND_TRAINER},
+    {TRAINER_CLASS_HEX_MANIAC, TH_ZOMBIE, TH_FIEND, STAND_TRAINER},
+    {TRAINER_CLASS_NINJA_BOY, TH_INSECT, TH_WARRIOR, STAND_TRAINER},
+    {TRAINER_CLASS_BLACK_BELT, TH_WARRIOR, TH_BEAST_WARRIOR, STAND_TRAINER},
+    {TRAINER_CLASS_BATTLE_GIRL, TH_HARPIE, TH_WARRIOR, STAND_TRAINER},
+    {TRAINER_CLASS_COOLTRAINER, TH_DRAGON, TH_SPELLCASTER, STAND_SKILLED},
+    {TRAINER_CLASS_COOLTRAINER_2, TH_DRAGON, TH_HARPIE, STAND_SKILLED},
+    {TRAINER_CLASS_RUIN_MANIAC, TH_ROCK, TH_ZOMBIE, STAND_TRAINER},
+    {TRAINER_CLASS_KINDLER, TH_PYRO, TH_DINO, STAND_TRAINER},
+    {TRAINER_CLASS_COLLECTOR, TH_TOON, TH_DRAGON, STAND_TRAINER},
+    {TRAINER_CLASS_EXPERT, TH_MACHINE, TH_BEAST_WARRIOR, STAND_SKILLED},
+    {TRAINER_CLASS_GUITARIST, TH_FIEND, TH_WARRIOR, STAND_TRAINER},
+    {TRAINER_CLASS_TEAM_AQUA, TH_SEA, TH_AQUA, STAND_TRAINER},
+    {TRAINER_CLASS_AQUA_ADMIN, TH_SEA, TH_AQUA, STAND_SKILLED},
+    {TRAINER_CLASS_TEAM_MAGMA, TH_DINO, TH_PYRO, STAND_TRAINER},
+    {TRAINER_CLASS_MAGMA_ADMIN, TH_DINO, TH_PYRO, STAND_SKILLED},
 };
 // Townsfolk who duel with Yu-Gi-Oh! cards: the teens and young adults (and the ones a class above dresses as)
 static const struct
 {
     u16 gfx;
-    u8 theme, alt;
+    u8 theme, alt, standing;
     const char *label;
 } sTownsfolk[] = {
-    {OBJ_EVENT_GFX_BOY_3, TH_WARRIOR, TH_DRAGON, "TEEN"},
-    {OBJ_EVENT_GFX_GIRL_2, TH_FAIRY, TH_HARPIE, "TEEN"},
-    {OBJ_EVENT_GFX_MAN_2, TH_BEAST, TH_WARRIOR, "YOUNG MAN"},
-    {OBJ_EVENT_GFX_MAN_3, TH_WARRIOR, TH_DRAGON, "YOUNG MAN"},
-    {OBJ_EVENT_GFX_MAN_4, TH_MACHINE, TH_FIEND, "YOUNG MAN"},
-    {OBJ_EVENT_GFX_MAN_5, TH_SPELLCASTER, TH_WARRIOR, "YOUNG MAN"},
-    {OBJ_EVENT_GFX_WOMAN_2, TH_HARPIE, TH_FAIRY, "WOMAN"},
-    {OBJ_EVENT_GFX_WOMAN_3, TH_SPELLCASTER, TH_PLANT, "WOMAN"},
-    {OBJ_EVENT_GFX_WOMAN_5, TH_FAIRY, TH_AQUA, "WOMAN"},
-    {OBJ_EVENT_GFX_PSYCHIC_M, TH_SPELLCASTER, TH_FIEND, "PSYCHIC"},
-    {OBJ_EVENT_GFX_HEX_MANIAC, TH_ZOMBIE, TH_FIEND, "HEX MANIAC"},
-    {OBJ_EVENT_GFX_NINJA_BOY, TH_INSECT, TH_WARRIOR, "NINJA BOY"},
-    {OBJ_EVENT_GFX_BLACK_BELT, TH_WARRIOR, TH_BEAST_WARRIOR, "BLACK BELT"},
-    {OBJ_EVENT_GFX_EXPERT_M, TH_MACHINE, TH_BEAST_WARRIOR, "EXPERT"},
-    {OBJ_EVENT_GFX_EXPERT_F, TH_SPELLCASTER, TH_FAIRY, "EXPERT"},
-    {OBJ_EVENT_GFX_AQUA_MEMBER_M, TH_SEA, TH_AQUA, "TEAM AQUA GRUNT"},
-    {OBJ_EVENT_GFX_AQUA_MEMBER_F, TH_SEA, TH_AQUA, "TEAM AQUA GRUNT"},
-    {OBJ_EVENT_GFX_MAGMA_MEMBER_M, TH_DINO, TH_PYRO, "TEAM MAGMA GRUNT"},
-    {OBJ_EVENT_GFX_MAGMA_MEMBER_F, TH_DINO, TH_PYRO, "TEAM MAGMA GRUNT"},
+    {OBJ_EVENT_GFX_BOY_3, TH_WARRIOR, TH_DRAGON, STAND_TOWN, "TEEN"},
+    {OBJ_EVENT_GFX_GIRL_2, TH_FAIRY, TH_HARPIE, STAND_TOWN, "TEEN"},
+    {OBJ_EVENT_GFX_MAN_2, TH_BEAST, TH_WARRIOR, STAND_TOWN, "YOUNG MAN"},
+    {OBJ_EVENT_GFX_MAN_3, TH_WARRIOR, TH_DRAGON, STAND_TOWN, "YOUNG MAN"},
+    {OBJ_EVENT_GFX_MAN_4, TH_MACHINE, TH_FIEND, STAND_TOWN, "YOUNG MAN"},
+    {OBJ_EVENT_GFX_MAN_5, TH_SPELLCASTER, TH_WARRIOR, STAND_TOWN, "YOUNG MAN"},
+    {OBJ_EVENT_GFX_WOMAN_2, TH_HARPIE, TH_FAIRY, STAND_TOWN, "WOMAN"},
+    {OBJ_EVENT_GFX_WOMAN_3, TH_SPELLCASTER, TH_PLANT, STAND_TOWN, "WOMAN"},
+    {OBJ_EVENT_GFX_WOMAN_5, TH_FAIRY, TH_AQUA, STAND_TOWN, "WOMAN"},
+    {OBJ_EVENT_GFX_PSYCHIC_M, TH_SPELLCASTER, TH_FIEND, STAND_TRAINER, "PSYCHIC"},
+    {OBJ_EVENT_GFX_HEX_MANIAC, TH_ZOMBIE, TH_FIEND, STAND_TRAINER, "HEX MANIAC"},
+    {OBJ_EVENT_GFX_NINJA_BOY, TH_INSECT, TH_WARRIOR, STAND_TRAINER, "NINJA BOY"},
+    {OBJ_EVENT_GFX_BLACK_BELT, TH_WARRIOR, TH_BEAST_WARRIOR, STAND_TRAINER, "BLACK BELT"},
+    {OBJ_EVENT_GFX_EXPERT_M, TH_MACHINE, TH_BEAST_WARRIOR, STAND_SKILLED, "EXPERT"},
+    {OBJ_EVENT_GFX_EXPERT_F, TH_SPELLCASTER, TH_FAIRY, STAND_SKILLED, "EXPERT"},
+    {OBJ_EVENT_GFX_AQUA_MEMBER_M, TH_SEA, TH_AQUA, STAND_TRAINER, "TEAM AQUA GRUNT"},
+    {OBJ_EVENT_GFX_AQUA_MEMBER_F, TH_SEA, TH_AQUA, STAND_TRAINER, "TEAM AQUA GRUNT"},
+    {OBJ_EVENT_GFX_MAGMA_MEMBER_M, TH_DINO, TH_PYRO, STAND_TRAINER, "TEAM MAGMA GRUNT"},
+    {OBJ_EVENT_GFX_MAGMA_MEMBER_F, TH_DINO, TH_PYRO, STAND_TRAINER, "TEAM MAGMA GRUNT"},
 };
 static const u8 sText_Duel1[] = _("A CARD CASE! You play Yu-Gi-Oh!?\nAll right... It's time to duel!");
 static const u8 sText_Duel2[] = _("I've been waiting for a real duelist.\nGet your game on!");
@@ -563,32 +577,59 @@ static int PoolDeckAt(struct YgoOpponent *o, int index)
     sLastPoolDeck = index;
     o->gba = 2;
     o->rating = (s16)rating;
-    printf("[ygo] %s plays the deck \"%s\" (%u, rating %u, placing %u)\n", o->name, name, year, rating, placing);
+    printf("[ygo] %s (standing %u, rating %d) plays the deck \"%s\" (%u, rating %u, %s, placing %u)\n", o->name,
+           o->standing, o->elo, name, year, rating,
+           (const char *const[]){"casual", "strong", "meta", "tournament"}[Ygo_PoolComp((unsigned)index) & 3], placing);
     return 1;
 }
-// the strongest rating a duelist at tier (0-3, by the badges) may bring: its quarter's top of the decks the GEN allows
-static int PoolCap(unsigned tier)
+// What a duelist may bring from YGOPRODeck's decks: the ratings between *lo and *hi (their standing's share of the
+// decks the GEN allows; below the LEAGUE the badges keep the top back: 512 of 1024 with none, all with seven) and how
+// competitive at most. Their own rating (*elo): a point in that span by the badges, and their own number's lean
+// (a person a little better or worse than others like them, the same every day).
+static int Band(const struct YgoOpponent *o, int *lo, int *hi, int *elo, unsigned *comp)
 {
-    return Ygo_PoolQuantile(MP_YgoGen(), (tier > 3 ? 4 : tier + 1) * 256);
+    unsigned st = o->standing < STAND_COUNT ? o->standing : STAND_TRAINER, tier = o->tier > 3 ? 3 : o->tier;
+    unsigned gen = MP_YgoGen(), a = sStandings[st].lo, b = sStandings[st].hi, cap = 512 + tier * 171, span;
+    u32 own = o->key * 2654435761u;
+    int at;
+    if (st < STAND_ACE && b > cap)
+        b = cap;
+    if (a > b)
+        a = b;
+    span = b - a;
+    at = (int)a + (int)(span * (320 + 110 * tier) / 1024) + (int)span * ((int)((own >> 11) % 241) - 120) / 1024;
+    at = at < (int)a ? (int)a : at > (int)b ? (int)b : at;
+    *lo = Ygo_PoolQuantile(gen, a);
+    *hi = Ygo_PoolQuantile(gen, b);
+    *elo = Ygo_PoolQuantile(gen, (unsigned)at);
+    *comp = sStandings[st].comp;
+    return *lo >= 0 && *hi >= 0 && *elo >= 0;
 }
-// ... from the quarter of them that matches tier, near its middle
-static int PoolDeck(struct YgoOpponent *o, unsigned tier, u32 seed)
+// ... a deck near their own rating, inside it
+static int PoolDeck(struct YgoOpponent *o, u32 seed)
 {
-    int target = Ygo_PoolQuantile(MP_YgoGen(), (tier > 3 ? 3 : tier) * 256 + 128);
-    return target >= 0 && PoolDeckAt(o, Ygo_PoolPick(target, MP_YgoGen(), seed));
+    int lo, hi, elo;
+    unsigned comp;
+    if (!Band(o, &lo, &hi, &elo, &comp))
+        return 0;
+    o->elo = (s16)elo;
+    return PoolDeckAt(o, Ygo_PoolPickIn(elo, MP_YgoGen(), comp, lo, hi, seed));
 }
 static int sThemedOnly;   // (the special duelists: their own type always)
-static void Fill(struct YgoOpponent *o, const char *name, const char *title, unsigned theme, unsigned tier, u32 key,
-                 u32 seed)
+static void Fill(struct YgoOpponent *o, const char *name, const char *title, unsigned theme, unsigned tier,
+                 unsigned standing, u32 key, u32 seed)
 {
     memset(o, 0, sizeof(*o) - sizeof(o->portrait));
+    o->tier = (u8)tier;
+    o->key = key;
+    o->standing = (u8)StandingNow(standing);
     snprintf(o->name, sizeof(o->name), "%s", name);
     snprintf(o->title, sizeof(o->title), "%s", title ? title : "");
     // most duelists bring a deck from the Game Boy Advance games (by how far the player has come); the rest a deck of
     // their own type; the special duelists (tier past 3) always their own
     // (the user, 2026-11-21: every ordinary duelist brings one of YGOPRODeck's decks: ygo_npc_pool.c)
     o->gba = 0;
-    if (!sThemedOnly && PoolDeck(o, tier, seed >> 3))
+    if (!sThemedOnly && PoolDeck(o, seed >> 3))
         ;
     else if (!sThemedOnly && (seed >> 13) % 5 < 3 && GameDeck(o, tier, seed >> 3))
         o->gba = 1;
@@ -650,7 +691,8 @@ int Ygo_SpecialRecipe(unsigned special, uint16_t *main, uint16_t *extra, char *n
         if (!o)
             return 0;
         sThemedOnly = 1;
-        Fill(o, s->name ? s->name : "RIVAL", s->title, s->theme, 3, 0xFE000000u | special, 0x5EC1A1u * (special + 1));
+        Fill(o, s->name ? s->name : "RIVAL", s->title, s->theme, 3, STAND_ACE, 0xFE000000u | special,
+             0x5EC1A1u * (special + 1));
         sThemedOnly = 0;
         o->signature = (u16)Signature(s->theme);
         PutSignature(o);
@@ -716,7 +758,7 @@ int Ygo_FieldPick(struct ObjectEvent *npc, const uint8_t *script, uint32_t h, ui
         tier = s->play == PLAY_BOTH ? TierOfBadges() + 1 : 3;
         sThemedOnly = 1;
         Fill(o, s->name ? s->name : OBJ_GFX_ID(npc) == OBJ_EVENT_GFX_RIVAL_MAY_NORMAL ? "MAY" : "BRENDAN", s->title,
-             s->theme, tier, 0xFE000000u | i, h ^ (Tcg_Today() * 0x9e3779b9u));
+             s->theme, tier, STAND_ACE, 0xFE000000u | i, h ^ (Tcg_Today() * 0x9e3779b9u));
         sThemedOnly = 0;
         o->special = (u8)i;
         o->level = 3;
@@ -732,7 +774,7 @@ int Ygo_FieldPick(struct ObjectEvent *npc, const uint8_t *script, uint32_t h, ui
         return s->play;
     }
     {
-        u8 theme = 0xFF;
+        u8 theme = 0xFF, standing = STAND_TRAINER;
         const char *label = NULL;
         int team = 0;
         if (npc->trainerType != TRAINER_TYPE_NONE && script && script[0] == 0x5C)   // trainerbattle: a real trainer
@@ -741,7 +783,10 @@ int Ygo_FieldPick(struct ObjectEvent *npc, const uint8_t *script, uint32_t h, ui
             u8 cls = Tcg_IsTrainerId(id) ? gTrainers[id].trainerClass : 0;
             for (i = 0; i < ARRAY_COUNT(sClasses); i++)
                 if (sClasses[i].trainerClass == cls)
+                {
                     theme = ThemeAt(sClasses[i].theme, sClasses[i].alt, h);
+                    standing = sClasses[i].standing;
+                }
             if (theme == 0xFF)
                 return 0;
             team = cls == TRAINER_CLASS_TEAM_AQUA || cls == TRAINER_CLASS_TEAM_MAGMA || cls == TRAINER_CLASS_AQUA_ADMIN ||
@@ -757,7 +802,7 @@ int Ygo_FieldPick(struct ObjectEvent *npc, const uint8_t *script, uint32_t h, ui
                 MP_GameToAscii(clsName, gTrainerClassNames[cls], sizeof(clsName));
                 MP_GameToAscii(who, gTrainers[id].trainerName, sizeof(who));
                 snprintf(name, sizeof(name), "%s %s", clsName, who);
-                Fill(o, name, NULL, theme, TierOfBadges(), key, h);
+                Fill(o, name, NULL, theme, TierOfBadges(), standing, key, h);
             }
         }
         else
@@ -766,6 +811,7 @@ int Ygo_FieldPick(struct ObjectEvent *npc, const uint8_t *script, uint32_t h, ui
                 if (sTownsfolk[i].gfx == Tcg_LookGfx(npc))
                 {
                     theme = ThemeAt(sTownsfolk[i].theme, sTownsfolk[i].alt, h);
+                    standing = sTownsfolk[i].standing;
                     label = sTownsfolk[i].label;
                     team = Tcg_LookGfx(npc) == OBJ_EVENT_GFX_AQUA_MEMBER_M || Tcg_LookGfx(npc) == OBJ_EVENT_GFX_AQUA_MEMBER_F ||
                            Tcg_LookGfx(npc) == OBJ_EVENT_GFX_MAGMA_MEMBER_M || Tcg_LookGfx(npc) == OBJ_EVENT_GFX_MAGMA_MEMBER_F;
@@ -778,7 +824,7 @@ int Ygo_FieldPick(struct ObjectEvent *npc, const uint8_t *script, uint32_t h, ui
                 *refused = 1;
                 return PLAY_YGO;
             }
-            Fill(o, label, NULL, theme, TierOfBadges(), key, h);
+            Fill(o, label, NULL, theme, TierOfBadges(), standing, key, h);
         }
         if (team)
             o->music = MUS_VS_AQUA_MAGMA;
@@ -830,13 +876,54 @@ void Ygo_FieldDebugDeck(unsigned theme, unsigned tier)
         free(o);
         return;
     }
-    Fill(o, "TEST", NULL, theme, tier, 1, 12345 + theme * 7919u);
+    Fill(o, "TEST", NULL, theme, tier, STAND_TRAINER, 1, 12345 + theme * 7919u);
     n = Ygo_DeckCount(o->main, YGO_DECK_MAX);
     printf("[ygo] theme %u tier %u: %u cards + %u, valid %d, signature %s\n", theme, tier, n,
            Ygo_DeckCount(o->extra, YGO_FUSION_MAX), Ygo_DeckValidate(o->main, o->extra, NULL, reason, sizeof(reason)),
            Signature(theme) ? Ygo_Card(Signature(theme))->name : "-");
     for (i = 0; i < n; i++)
         printf("[ygo]   %s\n", Ygo_Card(o->main[i])->name);
+    free(o);
+}
+
+static void FitOnce(struct YgoOpponent *o, int target);
+// Test harness (mp ygo standing STANDING TIER): what a duelist of that standing brings, 24 people, scaling off, and
+// with the player at their best and their weakest
+void Ygo_FieldDebugStanding(unsigned standing, unsigned tier)
+{
+    struct YgoOpponent *o = malloc(sizeof(*o));
+    unsigned k, worst = 0, past = 0;
+    int lo, hi, elo, top = 0;
+    unsigned comp;
+    if (!o || standing >= STAND_COUNT)
+    {
+        free(o);
+        return;
+    }
+    for (k = 0; k < 24; k++)
+    {
+        unsigned c;
+        memset(o, 0, sizeof(*o) - sizeof(o->portrait));
+        o->standing = (u8)standing, o->tier = (u8)tier, o->key = 0x1234567u * (k + 1), o->seed = 0x9e3779b9u * (k + 7);
+        o->special = YGO_SPECIAL_NONE;
+        if (!Band(o, &lo, &hi, &elo, &comp) || !PoolDeck(o, o->seed >> 3))
+            continue;
+        c = Ygo_PoolComp((unsigned)sLastPoolDeck);
+        worst = c > worst ? c : worst;
+        top = o->rating > top ? o->rating : top;
+        past += o->rating < lo || o->rating > hi;
+        // against the strongest and the weakest player CARD SCALING could ask for
+        o->gba = 2, o->fit = 1;
+        FitOnce(o, 4000);
+        c = Ygo_PoolComp((unsigned)sLastPoolDeck);
+        worst = c > worst ? c : worst;
+        top = o->rating > top ? o->rating : top;
+        past += o->rating < lo || o->rating > hi;
+        FitOnce(o, 0);
+        past += o->rating < lo || o->rating > hi;
+    }
+    printf("[ygo] standing %u tier %u: ratings %d-%d, competitive up to %u; brought up to %d, competitive up to %u, "
+           "%u outside\n", standing, tier, lo, hi, comp, top, worst, past);
     free(o);
 }
 
@@ -853,10 +940,18 @@ static void FitOnce(struct YgoOpponent *o, int target)
     unsigned cap = o->tier > 3 ? 3 : o->tier, i, best = ~0u;
     if (o->gba == 2)
     {
-        // a YGOPRODeck deck near the target, no stronger than the badges' quarter allows
-        int top = PoolCap(cap);
-        if (PoolDeckAt(o, Ygo_PoolPick(top >= 0 && target > top ? top : target, MP_YgoGen(), o->seed >> 3)))
-            return;
+        // a YGOPRODeck deck halfway between their own rating and the player's (CARD SCALING's target), inside what
+        // their standing allows: a townsperson stays a townsperson against the best player
+        int lo, hi, elo;
+        unsigned comp;
+        if (Band(o, &lo, &hi, &elo, &comp))
+        {
+            int want = elo + (target - elo) / 2;
+            want = want < lo ? lo : want > hi ? hi : want;
+            o->elo = (s16)elo;
+            if (PoolDeckAt(o, Ygo_PoolPickIn(want, MP_YgoGen(), comp, lo, hi, o->seed >> 3)))
+                return;
+        }
     }
     if (o->gba == 1 && gYgoNpcDeckCount >= 4)
     {

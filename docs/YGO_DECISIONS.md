@@ -95,3 +95,9 @@ GENERATION, and include everything from terrible weird leftovers someone uploade
   first estimate; AI-against-AI duels on the real rules (Elo, Swiss pairing) settle the order; tournament placements
   are anchors.
 - Locked and unlocked by the YU-GI-OH! GEN (a deck plays only where every card is allowed).
+- **Who brings what (the user, 2026-11-22)**: "Tearlaments and meta decks shouldn't be played by random people. Assign
+  NPCs decks based on your ELO, their ELO, and their position in the Pokemon world." Each duelist has a standing
+  (townsfolk; trainers and grunts; COOLTRAINERS, EXPERTS and ADMINS; the last once the region's LEAGUE is beaten),
+  which bounds how strong and how competitive a deck they may bring (casual / strong home-made / meta / tournament),
+  their own rating inside it, and the deck they bring lies between their rating and the player's (CARD SCALING),
+  never outside their standing.

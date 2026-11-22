@@ -3891,6 +3891,14 @@ void Ygo_Debug(const char *command)
         return;
     }
     {
+        unsigned st, tier;
+        if (sscanf(command, "standing %u %u", &st, &tier) == 2)
+        {
+            Ygo_FieldDebugStanding(st, tier);
+            return;
+        }
+    }
+    {
         int target;
         if (sscanf(command, "pool %d", &target) == 1)
         {

@@ -8859,6 +8859,24 @@ The full run (2026-11-22): 179,062 decks, 1,093,632 duels over 12 Swiss rounds (
 cores, an hour a round; resumed after each stop a duel at a time); the text prior and the duels agree with r = 0.51;
 179,023 decks in the pack (13 MB, 22 MB inflated), the player's deck fit r = 0.52. Strongest: Branded / Kashtira /
 Tearlament meta decks of 2022-2026 (docs/audit_ygo_npc_pool.txt).
+Who brings what (the user, 2026-11-22: "Tearlaments and meta decks shouldn't be played by random people. Assign NPCs
+decks based on your ELO, their ELO, and their position in the Pokemon world"):
+- Each deck in the pack has how competitive it is (pack version 2, write_npc_pool.py competitive()): 0 casual, 1 strong
+  (4-7 copies of the tournament archetypes' cards), 2 meta (8+, or uploaded as a Meta / Master Duel deck), 3 a
+  tournament deck (a Tournament Meta format, the Worlds, a placing). The archetypes' cards: not staples (in 6% of all
+  decks: Ash Blossom, Called by the Grave...), in 40+ tournament decks, 15%+ of the decks holding them tournament ones
+  (Kashtira, Snake-Eye, Labrynth, Sky Striker yes; Blue-Eyes, Dark Magician, Cyber Dragon no). ("Non-Meta Decks" were
+  read as "Meta" before: fixed.)
+- ygo_field.c sStandings: STAND_TOWN (the townsfolk: casual only, shares 51-461 of 1024 of the decks the GEN allows),
+  STAND_TRAINER (trainers, grunts and the looks dressed as them: strong at most, 154-666), STAND_SKILLED (COOLTRAINERS,
+  EXPERTS, the ADMINS: meta, 358-870), STAND_ACE (STAND_SKILLED once the region's LEAGUE is beaten: tournament decks,
+  563-1024). Below the LEAGUE the badges keep the top back (512 of 1024 with none, all with seven; the region's own
+  badges: MP_Badges).
+- Band(): their own rating (YgoOpponent.elo) a point in their span by the badges, leaning by their own number (map +
+  person: the same every day); with CARD SCALING off they bring a deck near it; on, halfway between it and the
+  player's target, clamped to the span (FitOnce). A townsperson against a strong player plays more carefully instead.
+- `mp ygo standing STANDING TIER` prints a standing's span and what 24 people bring (scaling off, against the best and
+  the weakest player); scenario ygo_pool_standing.
 
 ## Evolutions never into nothing (2026-11-22)
 - The user's SPRITZEE, traded in CO-OP holding a SACHET, "evolved into ??????????" and fainted: mp_trade.c asked

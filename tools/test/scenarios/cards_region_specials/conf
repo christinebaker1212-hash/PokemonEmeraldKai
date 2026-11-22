@@ -1,8 +1,8 @@
 # JOHTO's and KANTO's special card trainers (tcg_field.c sQzSpecials): FALKNER turns the CARD CASE down before his
-# BADGE, then duels with WINONA's slot (5: her deck and promo card, given once in any region); BROCK with ROXANNE's
-# (0). The GAME CENTER doesn't sell promo cards
+# BADGE, then duels with his own deck (special 24, his promo FLYING PIKACHU 1601: docs/TCG_REGIONS.md); BROCK with his
+# own (40, MEOWTH 1586). The GAME CENTER doesn't sell promo cards
 MODE=1
 TMO=200
 ENV_A="MOEMON_DEBUG_REGION=1 MOEMON_DEBUG_PARTY=6:50"
-EXPECT_A=("challenge: FALKNER, special 5, promo 100" "challenge: BROCK, special 0, promo 206")
+EXPECT_A=("challenge: FALKNER, special 24, promo 1601" "challenge: BROCK, special 40, promo 1586")
 UNEXPECT_A=("[crash]" "TIMEOUT")

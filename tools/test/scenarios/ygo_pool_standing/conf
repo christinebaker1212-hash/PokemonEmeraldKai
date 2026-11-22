@@ -1,0 +1,9 @@
+# The generic duelists' decks by where they stand in the world (the user, 2026-11-22: "Tearlaments and meta decks
+# shouldn't be played by random people"): townsfolk bring casual decks under the middle, trainers home-made ones,
+# COOLTRAINERS / EXPERTS / ADMINS meta decks, and tournament decks only once the LEAGUE is beaten; never outside their
+# span, whatever CARD SCALING asks for.
+MODE=1
+TMO=200
+ENV_A="MOEMON_YUGIOH_GEN=0"
+EXPECT_A=("standing 0 tier 3: ratings" "competitive up to 0; brought up to" "standing 1 tier 3: ratings" "standing 2 tier 0: ratings" "standing 3 tier 3: ratings" "competitive up to 3, 0 outside")
+UNEXPECT_A=("[crash]" "competitive up to 0; brought up to 1[5-9][0-9][0-9], competitive up to [1-3]" "[1-9][0-9]* outside")
