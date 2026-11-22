@@ -177,12 +177,17 @@ def main():
     index = {k: i for i, k in enumerate(key)}
     results, played_rounds = [], 0
     crashes = {}
+    partial = set()   # (decks that played in a round stopped half way: that round goes on without them)
     if os.path.exists(RESULTS):   # (a result is kept by the decks' numbers: still good after the pool changes)
         for line in open(RESULTS):
             f = line.split()
             if len(f) >= 4 and f[0] == 'round':
                 played_rounds = max(played_rounds, int(f[1]))
-            elif len(f) >= 4 and int(f[2]) < 0:
+                partial = set()
+                continue
+            if len(f) >= 4:
+                partial.update((int(f[0]), int(f[1])))
+            if len(f) >= 4 and int(f[2]) < 0:
                 for x in (int(f[0]), int(f[1])):
                     crashes[x] = crashes.get(x, 0) + 1
             elif len(f) >= 4 and int(f[0]) in index and int(f[1]) in index:
@@ -197,6 +202,9 @@ def main():
             t0 = time.time()
             order = sorted(range(n), key=lambda i: elo[i] + rng.gauss(0, 25))
             used, pairs = set(), []
+            if rd == played_rounds + 1 and partial:   # (the round a run stopped in: the decks that played sit out)
+                used = set(index[k] for k in partial if k in index)
+                print('round %d goes on: %d decks already played in it' % (rd, len(used)), flush=True)
             for pos, i in enumerate(order):
                 if i in used:
                     continue
