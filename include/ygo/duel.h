@@ -175,6 +175,8 @@ struct YgoQuery
                           * when it can be backed out of) */
     uint8_t sumMode;
     uint8_t cancelable;  /* CARDS / SUM: no pick backs out */
+    uint8_t meant;       /* CHAIN: offers meant for this moment (EDOPro's spe_count: optional triggers, such as an End
+                          * Phase effect in the Graveyard, and effects whose scripts hint this timing) */
     struct YgoChoice items[YGO_QUERY_MAX];
 };
 struct YgoAnswer

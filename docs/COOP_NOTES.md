@@ -8946,3 +8946,15 @@ The user: "Let's add more structure decks for purchase with money, both Yugioh a
   USE EFFECT; B back to the field). The pile on the table is framed too when one of its cards can do something
   (PileActs). `mp ygo focus 4 PILE` puts the cursor on your pile (tests). Test tools/ygo/test_ui.sh "grave" (FOOLISH
   BURIAL, then PLAGUESPREADER ZOMBIE's effect from the Graveyard).
+- The audit (the user, 2026-11-23: "There may be other effects that should be able to trigger that don't. Find them"):
+  tools/ygo/audit_reach.c plays AI duels between the pool's decks (/tmp/ygo-tests/pool.txt from rate_pool.py) and
+  checks every Main / Battle Phase offer against what the table can open, and every chain chance it passes for you.
+  Found and fixed: (1) a monster Special Summoned from the Deck by its own rule (the Awakening of the Possessed
+  monsters): A on your Deck now lists what its cards can do ("<card>: SUMMON") above CONCEDE, the hint "{A}USE"
+  (scenario ygo_deck_menu); (2) the phase-change chances the table passed for you dropped what was meant for them: the
+  engine's spe_count (YgoQuery.meant: optional triggers such as the Witchcrafter Spells' and Golden Land Traps' End
+  Phase / Graveyard effects, and effects whose scripts hint the timing, as Call of the Haunted's End Phase) now always
+  asks, and so does any effect of a card out of sight (Graveyard, Banished, Extra Deck: Phantom Knights' Fog Blade...).
+  After the fixes, 1,000 duels: no offer out of reach; the chances still passed by themselves are only your own visible
+  Spells and Traps (Set, in hand, face-up) with nothing meant for the moment (hold L to stop at those, as before).
+  Build: gcc as tools/ygo/npc_pool.sh's worker line with tools/ygo/audit_reach.c; `audit_reach POOL.txt DUELS [SEED]`.

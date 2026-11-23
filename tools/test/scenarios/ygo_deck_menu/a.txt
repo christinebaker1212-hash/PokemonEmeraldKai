@@ -1,0 +1,17 @@
+pressuntil A field 5000
+wait 30
+mp ygo starter 0
+mp ygo seed 7
+mp ygo first 0
+mp ygo fast
+mp ygo practice
+wait 500
+wait 120
+mp ygo focus 4 0
+wait 10
+press A 1
+wait 20
+rendershot deckmenu
+press B 1
+wait 20
+quit

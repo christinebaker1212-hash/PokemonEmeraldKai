@@ -1,0 +1,7 @@
+# A on your Deck in your Main Phase: the menu of what its cards can do now (a monster Special Summoned from the Deck by
+# its own rule, as the Awakening of the Possessed monsters: the user, 2026-11-23, "other effects that should be able to
+# trigger that don't"), then CONCEDE; none from a Starter Deck. Shot deckmenu.
+MODE=1
+TMO=200
+EXPECT_A=("deck menu: 0 from the Deck, CONCEDE")
+UNEXPECT_A=("[crash]")

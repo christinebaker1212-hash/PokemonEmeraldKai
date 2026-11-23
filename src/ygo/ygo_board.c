@@ -1094,8 +1094,14 @@ static int QuietMonsterEffect(const struct YgoQuery *q)
 {
     unsigned i;
     for (i = 0; i < q->count; i++)
+    {
+        unsigned o = q->items[i].obj, loc = o < T()->objCount ? T()->objs[o].location : YGO_LOC_NONE;
         if (Ygo_IsMonster(Ygo_Card(q->items[i].card)))
             return 1;
+        /* (an effect from the Graveyard, Banished or the Extra Deck: out of sight, so it asks too) */
+        if (loc == YGO_LOC_GRAVE || loc == YGO_LOC_BANISHED || loc == YGO_LOC_EXTRA)
+            return 1;
+    }
     return 0;
 }
 static const char *KindLabel(const struct YgoChoice *c)
@@ -2069,8 +2075,13 @@ int YgoBoard_Step(unsigned pressed, unsigned held, struct YgoAnswer *answer, uns
     /* A chance to chain at a quiet moment (a phase changing): passed for you, unless L is held, or unless a monster's
      * effect is among what can be used (a Quick Effect such as the Witchcrafters' "During the Main Phase", meant for
      * the start of the opponent's Main Phase: the user, 2026-11-22, "Witchcrafter's effects are not triggering");
-     * only set Spells and Traps, ready at every phase, are passed by themselves */
-    if (MyQuestion() && q->type == YGO_Q_CHAIN && !(held & KEY_L) && YgoDuel_QuietChance(B.d) && !QuietMonsterEffect(q))
+     * only set Spells and Traps, ready at every phase, are passed by themselves; and never when the engine says
+     * something is meant for this moment (the user, 2026-11-23, "other effects that should be able to trigger that
+     * don't": an optional trigger such as the Witchcrafter Spells' End Phase return from the Graveyard, or an effect
+     * whose script hints this timing, as Call of the Haunted's End Phase: YgoQuery.meant, EDOPro's spe_count), or when
+     * a card out of sight can do something (in the Graveyard, Banished or the Extra Deck) */
+    if (MyQuestion() && q->type == YGO_Q_CHAIN && !(held & KEY_L) && YgoDuel_QuietChance(B.d) && !QuietMonsterEffect(q) &&
+        !q->meant)
     {
         memset(answer, 0, sizeof(*answer));
         return YB_ANSWER;
@@ -2159,14 +2170,19 @@ int YgoBoard_Step(unsigned pressed, unsigned held, struct YgoAnswer *answer, uns
             const struct Spot *s = &B.spots[cur];
             if (s->kind == SP_PILE && s->index == PILE_DECK && !s->side)
             {
-                /* your deck: CONCEDE (asks first) */
-                B.menuCount = 1;
-                B.menuItems[0] = -2;
+                /* your deck: what its cards can do now (a monster Special Summoned from the Deck by its own rule:
+                 * the Awakening of the Possessed monsters...), then CONCEDE (asks first) */
+                unsigned k;
+                B.menuCount = 0;
+                for (k = 0; B.mode == M_FREE && MyQuestion() && k < q->count && B.menuCount < 15; k++)
+                    if (q->items[k].obj < B.objCount && T()->objs[q->items[k].obj].location == YGO_LOC_DECK)
+                        B.menuItems[B.menuCount++] = (int)k;
+                B.menuItems[B.menuCount++] = -2;
                 B.menuCursor = 0;
                 B.deckMenu = 1;
                 B.mode = M_PHASE;
                 PlaySE(SE_SELECT);
-                printf("[ygo] deck menu: CONCEDE\n");
+                printf("[ygo] deck menu: %d from the Deck, CONCEDE\n", B.menuCount - 1);
                 return YB_NONE;
             }
             if (s->kind == SP_PILE)
@@ -3235,7 +3251,7 @@ static void Gap(void)
             if (B.mode == M_WATCH && B.waiting)
                 hint = "Waiting...";
             else if (onDeck)
-                hint = "{A}CONCEDE {B}MENU";
+                hint = B.mode == M_FREE && PileActs(0, PILE_DECK) ? "{A}USE {B}MENU" : "{A}CONCEDE {B}MENU";
             else
                 hint = rightTaken ? (B.mode == M_FREE ? "{A}ACT {B}MENU" : "{B}MENU")
                        : B.mode == M_FREE ? "{A}ACT {INSPECT}LOOK {B}MENU" : "{INSPECT}LOOK {B}MENU";
@@ -3634,6 +3650,14 @@ static void Menus(void)
         {
             int item = B.menuItems[i], k, same = 0;
             rows[i] = item == -2 ? "CONCEDE" : KindLabel(&q->items[item]);
+            if (item >= 0 && B.deckMenu && ObjCard(q->items[item].obj))
+            {
+                /* (a card in the Deck: its name, it isn't on the table) */
+                snprintf(names[i], sizeof(names[i]), "%.22s: %s", ObjCard(q->items[item].obj)->name,
+                         q->items[item].kind == YGO_ACT_SPECIAL ? "SUMMON" : KindLabel(&q->items[item]));
+                rows[i] = names[i];
+                continue;
+            }
             if (item < 0 || q->items[item].kind != YGO_ACT_ACTIVATE)
                 continue;
             /* a card with more than one effect to use: each by its own words */

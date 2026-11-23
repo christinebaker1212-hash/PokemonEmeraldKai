@@ -1514,8 +1514,8 @@ static int Ask(struct YgoDuel *d)
     }
     case MSG_SELECT_CHAIN:
     {
-        unsigned forced;
-        R8(&r);   /* (spe_count) */
+        unsigned forced, meant;
+        meant = R8(&r);   /* (spe_count: what's meant for this moment) */
         forced = R8(&r);
         R32(&r);
         R32(&r);
@@ -1525,6 +1525,7 @@ static int Ask(struct YgoDuel *d)
         Q(d, YGO_Q_CHAIN, cp, YGO_P_CHAIN);
         e->kind = K_CHAIN;
         d->query.min = forced ? 1 : 0;
+        d->query.meant = (uint8_t)(meant > 255 ? 255 : meant);
         for (i = 0; i < n && !r.bad; i++)
         {
             uint32_t code = R32(&r);
