@@ -4219,6 +4219,16 @@ void Ygo_Debug(const char *command)
         YgoBoard_DebugFocus((int)n, (int)m);
         return;
     }
+    if (!strcmp(command, "monsters"))
+    {
+        /* your Monster Zones (tests) */
+        const struct YgoState *s = &Y.duel.s;
+        unsigned k;
+        for (k = 0; k < YGO_MZONES; k++)
+            if (s->players[0].monsters[k])
+                printf("[ygo] monster %u: %s\n", k, Ygo_Card(s->objs[s->players[0].monsters[k] - 1].card)->name);
+        return;
+    }
     if (!strcmp(command, "state"))
     {
         const struct YgoState *s = &Y.duel.s;

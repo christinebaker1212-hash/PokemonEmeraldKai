@@ -538,6 +538,79 @@ expect grave 'hands 3/5'
 echo 'PASS a Graveyard effect used from the pile: its menu, the effect, the Special Summon asked (screenshots grave_pile, grave_menu, grave_zone)'
 fi
 
+# A Link Summon from the Extra Deck through the table (the user, 2026-11-23: "XYZ summons, Synchros, Pendulums, Links,
+# please check them all"; the engine's offers of each: tools/ygo/test_edo_cards.c "extra deck summons"): the Decks
+# unshuffled; MARAUDING CAPTAIN's trigger ("...from the field?", its question whole) brings JUNK SYNCHRON; the EXTRA
+# DECK opened on PROXY DRAGON, "LINK SUMMON", "Link Materials" picked on the field, a zone: PROXY DRAGON on the field
+# (screenshots extra_trigger, extra_pile, extra_menu, extra_materials, extra_link)
+if only extra; then
+cat > "$OUT/extra.txt" <<'SCRIPT'
+pressuntil A field 5000
+wait 60
+mp ygo starter 1
+mp ygo giveall 3
+mp ygo code ydke://9slUAvbJVAL2yVQCo6lXBaOpVwWjqVcFdHyKBHR8igR0fIoEOnjsATp47AE6eOwBtPTMArT0zAK09MwCJithACYrYQAmK2EA+21PBfttTwX7bU8FixJoAosSaAKLEmgCYr1iBWK9YgVivWIFAsWLAALFiwACxYsAwY2jBMGNowTBjaMEIP5rBSD+awU3yNUF+932ANKooAUwNtADlYslAA==!yDrLBawtJgR22lwB!!
+wait 20
+press A 2
+wait 30
+press A 2
+wait 10
+mp ygo stack
+mp ygo fast
+mp ygo seed 7
+mp ygo first 0
+mp ygo open
+wait 20
+press DOWN 2
+wait 6
+press A 2
+wait 400
+press A 1
+wait 20
+press A 1
+wait 20
+press A 1
+wait 120
+rendershot extra_trigger
+press A 1
+wait 60
+press A 1
+wait 30
+press A 1
+wait 30
+press A 1
+wait 200
+mp ygo focus 4 2
+wait 10
+press A 1
+wait 20
+rendershot extra_pile
+press A 1
+wait 20
+rendershot extra_menu
+press A 1
+wait 60
+rendershot extra_materials
+press A 1
+wait 30
+press RIGHT 1
+wait 10
+press A 1
+wait 30
+press A 1
+wait 60
+rendershot extra_link
+mp ygo state
+mp ygo monsters
+mp ygo state
+quit
+SCRIPT
+run extra
+expect extra 'pile: menu for Proxy Dragon'
+expect extra 'monster [0-9]: Proxy Dragon'
+echo 'PASS a Link Summon from the Extra Deck: the pile, LINK SUMMON, its materials, the zone (screenshots extra_*)'
+fi
+
 # The table: from the Battle Phase, MAIN PHASE 2 (chosen) or END TURN, which skips it; a Field Spell's picture as the
 # background (Yami, from its artwork); the opponent's main Attribute as the table's theme
 if only zone; then

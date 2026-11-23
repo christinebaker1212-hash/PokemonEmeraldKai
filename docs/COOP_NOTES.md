@@ -8978,3 +8978,20 @@ The user: "Several CO-OP menu features are HOENN-only, and have not been adapted
   by default, the user 2026-11-23: gMpConfig.candyCap, "rare_candy_cap"; mp_achieve.c MP_RareCandyCap; scenarios
   candy_many (on), candy_many_nocap).
 - Tests: coop_kanto_menu (`mp outbreakwhere`, `mp tutorprice`), compass_kanto; `mp candycap 0|1`.
+
+## YU-GI-OH!: Synchro, Xyz, Link and Pendulum Summons checked (2026-11-23)
+- The user: "Special Summons other than effect triggers are not able to be triggered. XYZ summons, Synchros, Pendulums,
+  Links, please check them all." The engine offers every one (tools/ygo/test_edo_cards.c "extra deck summons": a
+  Tuner and a non-Tuner on the field offer GAIA KNIGHT's Synchro, NUMBER 17's Xyz and PROXY DRAGON's Link from the
+  Extra Deck; two Pendulum Scales offer the Pendulum Summon, kind SPECIAL on the left scale's object in its Spell &
+  Trap Zone, which brings a Level 3 from the hand). Before 1.218.0 the table couldn't reach the Extra Deck's (a
+  pile only showed close-ups); since, the EXTRA DECK pile opens on them. Checked through the table end to end:
+  tools/ygo/test_ui.sh "extra" (a Link Summon: the pile, the menu, the materials on the field, the zone).
+- Found on the way, fixed: the menu says what the summon is (KindLabel: SYNCHRO / XYZ / LINK / FUSION SUMMON from the
+  Extra Deck, PENDULUM SUMMON on a scale); the materials' prompt said "Fusion Materials" for all four (EDOPro's hints
+  512 / 513 / 533: YGO_P_SYNCHRO_ / XYZ_ / LINK_MATERIAL, the AI weighs them as Tributes); an optional trigger's
+  question ("Activate the Trigger Effect of "%ls" from [%ls]?", system 221) lost its place and was cut at 63
+  letters: the second %ls is now where the card is (YgoDuel_QueryText), the window's title as tall as its lines
+  (WindowBox: G_TextHeight) so a two-line question no longer runs over NO.
+- Test cards to remember: GOYO GUARDIAN needs an EARTH Tuner, TIMEGAZER MAGICIAN's scale only with no monsters of
+  yours: the engine is right to hold them back. `mp ygo monsters` lists your Monster Zones.

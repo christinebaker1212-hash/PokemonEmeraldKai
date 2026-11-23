@@ -57,6 +57,21 @@ static void Start(const char *const *hand0, const char *const *hand1, const char
     CHECK(YgoDuel_Init(&D, m0, x0, m1, x1, 42, 0));
     CHECK(YgoDuel_Conserved(&D));
 }
+/* ... with an Extra Deck (names, NULL-ended) */
+static void StartX(const char *const *hand0, const char *const *hand1, const char *const *extra0)
+{
+    uint16_t m0[YGO_DECK_MAX], m1[YGO_DECK_MAX], x0[YGO_FUSION_MAX], x1[YGO_FUSION_MAX];
+    unsigned k;
+    memset(x0, 0, sizeof(x0));
+    memset(x1, 0, sizeof(x1));
+    for (k = 0; extra0 && extra0[k] && k < YGO_FUSION_MAX; k++)
+        x0[k] = (uint16_t)Id(extra0[k]);
+    Deck(m0, hand0, "Giant Soldier of Stone");
+    Deck(m1, hand1, "Mystical Elf");
+    gYgoEdoNoShuffle = 1;
+    CHECK(YgoDuel_Init(&D, m0, x0, m1, x1, 42, 0));
+    CHECK(YgoDuel_Conserved(&D));
+}
 static void Answer(const struct YgoAnswer *a)
 {
     if (!YgoDuel_Answer(&D, a))
@@ -834,6 +849,97 @@ int main(void)
 
     YgoDuel_Free(&D);
     CHECK(gYgoEdoRebuilds == 0);
+    /* The Extra Deck's summons by their own rules (the user, 2026-11-23: "XYZ summons, Synchros, Pendulums, Links, please
+     * check them all"): MARAUDING CAPTAIN's Normal Summon brings JUNK SYNCHRON (a Level 3 Tuner) from the hand; the
+     * Main Phase offers GAIA KNIGHT (Synchro 6), NUMBER 17 (Rank 3) and PROXY DRAGON (Link-2) as Special Summons from
+     * the Extra Deck; STARGAZER MAGICIAN (Scale 1) and ODD-EYES PENDULUM DRAGON (Scale 4) set as Pendulum Scales offer a
+     * Pendulum Summon, which brings ZUBABA KNIGHT (Level 3) from the hand */
+    sScenario = "extra deck summons";
+    StartX(LIST("Marauding Captain", "Junk Synchron", "Stargazer Magician", "Odd-Eyes Pendulum Dragon", "Zubaba Knight"),
+           LIST("Feral Imp"), LIST("Gaia Knight, the Force of Earth", "Number 17: Leviathan Dragon", "Proxy Dragon"));
+    Until(0, YGO_Q_IDLE);
+    Act(YGO_ACT_SUMMON, "Marauding Captain");
+    {
+        unsigned guard = 0;
+        while (!(D.query.player == 0 && D.query.type == YGO_Q_IDLE) && guard++ < 40)
+        {
+            struct YgoAnswer a;
+            if (D.query.player == 0 && (D.query.type == YGO_Q_CARDS || D.query.type == YGO_Q_YESNO))
+            {
+                unsigned i, j = D.query.type == YGO_Q_YESNO ? 1 : 0;
+                for (i = 0; D.query.type == YGO_Q_CARDS && i < D.query.count; i++)
+                    if (!strcmp(ItemName(i), "Junk Synchron"))
+                        j = i;
+                Pick(j);
+                continue;
+            }
+            if (D.query.type == YGO_Q_CHAIN && !D.query.min)
+            {
+                if (D.query.player == 0 && D.query.count)
+                    Pick(0);   /* (MARAUDING CAPTAIN's trigger) */
+                else
+                    Pass();
+                continue;
+            }
+            YgoDuel_AiAnswer(&D, &a);
+            Answer(&a);
+        }
+    }
+    CHECK(HasMonster(0, "Junk Synchron") && HasMonster(0, "Marauding Captain"));
+    {
+        unsigned i, syn = 0, xyz = 0, lnk = 0;
+        for (i = 0; i < D.query.count; i++)
+        {
+            const struct YgoChoice *c = &D.query.items[i];
+            unsigned loc = c->obj < D.s.objCount ? D.s.objs[c->obj].location : 0;
+            if (getenv("TRACE"))
+                printf("  idle: [%u] kind %u %s loc %u\n", i, c->kind, ItemName(i), loc);
+            if (c->kind == YGO_ACT_SPECIAL && loc == YGO_LOC_EXTRA)
+            {
+                syn |= !strcmp(ItemName(i), "Gaia Knight, the Force of Earth");
+                xyz |= !strcmp(ItemName(i), "Number 17: Leviathan Dragon");
+                lnk |= !strcmp(ItemName(i), "Proxy Dragon");
+            }
+        }
+        printf("[extra] synchro %u xyz %u link %u\n", syn, xyz, lnk);
+        CHECK(syn && xyz && lnk);
+    }
+    /* the Pendulum Scales, then the Pendulum Summon */
+    Act(YGO_ACT_ACTIVATE, "Stargazer Magician");
+    Until(0, YGO_Q_IDLE);
+    Act(YGO_ACT_ACTIVATE, "Odd-Eyes Pendulum Dragon");
+    Until(0, YGO_Q_IDLE);
+    {
+        unsigned i, pend = 0xFF;
+        for (i = 0; i < D.query.count; i++)
+        {
+            const struct YgoChoice *c = &D.query.items[i];
+            unsigned loc = c->obj < D.s.objCount ? D.s.objs[c->obj].location : 0;
+            if (getenv("TRACE"))
+                printf("  idle 2: [%u] kind %u %s loc %u\n", i, c->kind, ItemName(i), loc);
+            if (c->kind == YGO_ACT_SPECIAL && loc == YGO_LOC_SZONE)
+                pend = i;
+        }
+        printf("[extra] pendulum summon offered %d\n", pend != 0xFF);
+        CHECK(pend != 0xFF);
+        Pick(pend);
+        {
+            unsigned guard = 0;
+            while (!(D.query.player == 0 && D.query.type == YGO_Q_IDLE) && guard++ < 40)
+            {
+                struct YgoAnswer a;
+                if (D.query.type == YGO_Q_CHAIN && !D.query.min)
+                {
+                    Pass();
+                    continue;
+                }
+                YgoDuel_AiAnswer(&D, &a);
+                Answer(&a);
+            }
+        }
+        CHECK(HasMonster(0, "Zubaba Knight"));
+    }
+    printf("ok   extra deck summons\n");
     puts("ygo card scenarios passed");
     return 0;
 }

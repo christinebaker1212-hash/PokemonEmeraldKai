@@ -623,6 +623,9 @@ static void Cards(const struct YgoDuel *d, struct YgoAnswer *out)
         case YGO_P_TRIBUTE:
         case YGO_P_DISCARD:
         case YGO_P_MATERIAL:
+        case YGO_P_SYNCHRO_MATERIAL:
+        case YGO_P_XYZ_MATERIAL:
+        case YGO_P_LINK_MATERIAL:
             v = -v;
             break;
         case YGO_P_ADD_TO_HAND:

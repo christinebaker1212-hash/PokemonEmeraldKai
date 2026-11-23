@@ -164,7 +164,10 @@ enum YgoPrompt
     YGO_P_TO_HAND,       /* return to the hand */
     YGO_P_POSITION,
     YGO_P_CONTROL,
-    YGO_P_DECLARE        /* a Type, an Attribute, a number, a card name */
+    YGO_P_DECLARE,       /* a Type, an Attribute, a number, a card name */
+    YGO_P_SYNCHRO_MATERIAL,   /* (YGO_P_MATERIAL is a Fusion's) */
+    YGO_P_XYZ_MATERIAL,
+    YGO_P_LINK_MATERIAL
 };
 struct YgoQuery
 {

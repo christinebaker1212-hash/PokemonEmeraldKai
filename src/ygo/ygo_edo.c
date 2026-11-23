@@ -1322,7 +1322,10 @@ static unsigned PromptOf(uint64_t hint)
     case 506: case 573: return YGO_P_ADD_TO_HAND;
     case 507: return YGO_P_TO_DECK;
     case 508: case 509: case 510: case 527: return YGO_P_SUMMON;
-    case 511: case 512: case 513: case 533: return YGO_P_MATERIAL;
+    case 511: return YGO_P_MATERIAL;   /* (the materials of a Fusion, a Synchro, an Xyz, a Link: each its own words) */
+    case 512: return YGO_P_SYNCHRO_MATERIAL;
+    case 513: return YGO_P_XYZ_MATERIAL;
+    case 533: return YGO_P_LINK_MATERIAL;
     case 518: return YGO_P_EQUIP;
     case 520: return YGO_P_CONTROL;
     case 528: return YGO_P_POSITION;
@@ -2600,13 +2603,33 @@ const char *YgoDuel_QueryText(const struct YgoDuel *d, char *buf, unsigned size)
 {
     const struct YgoQuery *q = &d->query;
     const struct YgoCard *c = Ygo_Card(q->card);
-    const char *t;
+    const char *t, *p1, *p2;
     if (q->type == YGO_Q_YESNO && q->prompt == YGO_P_EFFECT_YESNO && !q->desc)
         t = YgoEdo_System(95);
     else
         t = q->desc ? YgoEdo_Desc(q->desc) : NULL;
     if (!t)
         return "";
+    /* a second %ls (EDOPro's "Activate the Trigger Effect of "%ls" from [%ls]?") is where the card is: the place its
+     * object is in, its brackets dropped */
+    p1 = strstr(t, "%ls");
+    p2 = p1 ? strstr(p1 + 3, "%ls") : NULL;
+    if (p2)
+    {
+        static const char *const where[] = {"its place", "the Deck", "the hand", "the field", "the field",
+                                            "the Graveyard", "banishment", "the Extra Deck"};
+        unsigned o = q->count ? q->items[0].obj : 0xFF, loc = o < d->s.objCount ? d->s.objs[o].location : 0, k;
+        const char *tail = p2 + 3;
+        int open = p2 > t && p2[-1] == '[';
+        if (open && *tail == ']')
+            tail++;
+        snprintf(buf, size, "%.*s%s%.*s%s%s", (int)(p1 - t), t, c ? c->name : "", (int)(p2 - (p1 + 3) - open), p1 + 3,
+                 where[loc & 7], tail);
+        for (k = 0; buf[k]; k++)   /* (the font has no brackets) */
+            if (buf[k] == '[' || buf[k] == ']')
+                buf[k] = '"';
+        return buf;
+    }
     return Fill(t, c ? c->name : NULL, buf, size);
 }
 const char *YgoDuel_ItemText(const struct YgoDuel *d, unsigned item, char *buf, unsigned size)

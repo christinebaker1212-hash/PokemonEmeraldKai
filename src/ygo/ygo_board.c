@@ -1121,6 +1121,13 @@ static const char *KindLabel(const struct YgoChoice *c)
     case YGO_ACT_ACTIVATE:
         return card && Ygo_IsMonster(card) ? "USE EFFECT" : "ACTIVATE";
     case YGO_ACT_SPECIAL:
+        /* (by its rule: from the Extra Deck by the monster's kind, from a Pendulum Zone the Pendulum Summon) */
+        if (c->obj < B.objCount && T()->objs[c->obj].location == YGO_LOC_SZONE)
+            return "PENDULUM SUMMON";
+        if (c->obj < B.objCount && T()->objs[c->obj].location == YGO_LOC_EXTRA && card)
+            return card->frame == YGO_SYNCHRO ? "SYNCHRO SUMMON" : card->frame == YGO_XYZ ? "XYZ SUMMON"
+                 : card->frame == YGO_LINK    ? "LINK SUMMON"
+                 : card->frame == YGO_FUSION  ? "FUSION SUMMON" : "SPECIAL SUMMON";
         return "SPECIAL SUMMON";
     case YGO_ACT_ATTACK:
         return "ATTACK";
@@ -1149,6 +1156,9 @@ static const char *PromptText(const struct YgoQuery *q, char *buf, size_t size)
         [YGO_P_BANISH] = "Banish",
         [YGO_P_EQUIP] = "Equip to",
         [YGO_P_MATERIAL] = "Fusion Materials",
+        [YGO_P_SYNCHRO_MATERIAL] = "Synchro Materials",
+        [YGO_P_XYZ_MATERIAL] = "Xyz Materials",
+        [YGO_P_LINK_MATERIAL] = "Link Materials",
         [YGO_P_FUSION] = "Fusion Summon",
         [YGO_P_RITUAL] = "Ritual Summon",
         [YGO_P_ORDER] = "In order",
@@ -3610,7 +3620,7 @@ static int RowsWidth(const char *const *rows, int count, int min)
 static void WindowBox(int x, int y, int w, const char *title, const char *const *rows, int count, int cursor,
                       const unsigned *gray)
 {
-    int h = count * 14 + (title ? 14 : 0) + 8, i, ty = y + 4, wide = RowsWidth(rows, count, w);
+    int h, i, ty, wide = RowsWidth(rows, count, w), th = 0;
     if (wide > w)
     {
         /* (a row longer than the box: the box grows, keeping its right edge where it can) */
@@ -3621,11 +3631,22 @@ static void WindowBox(int x, int y, int w, const char *title, const char *const 
         if (x + w > 238)
             x = 238 - w;
     }
+    /* (a title as tall as its lines: a long question wraps, and the rows go under all of it) */
+    if (title)
+        th = G_TextHeight(title, w - 12, TF_SMALL) + 5;
+    if (th < 14 && title)
+        th = 14;
+    h = count * 14 + th + 8;
+    if (y + h > 158)
+        y = 158 - h;
+    if (y < 2)
+        y = 2;
+    ty = y + 4;
     G_Window(x, y, w, h);
     if (title)
     {
         G_Text(x + 8, ty - 1, 0x506070, G_NO_SHADOW, title, w - 12, TF_SMALL);
-        ty += 14;
+        ty += th;
     }
     for (i = 0; i < count; i++)
     {
@@ -3724,7 +3745,7 @@ static void Menus(void)
     }
     case M_WINDOW:
     {
-        char title[64];
+        char title[128];
         const struct YgoCard *asking = q->card ? Ygo_Card(q->card) : NULL;
         int w = 132;
         for (i = 0; i < B.windowCount; i++)
@@ -3791,8 +3812,8 @@ static void Menus(void)
             snprintf(title, sizeof(title), "Activate a card?");
         else if (*YgoDuel_QueryText(B.d, title, sizeof(title)))
         {
-            char text[96];
-            snprintf(title, sizeof(title), "%.63s", YgoDuel_QueryText(B.d, text, sizeof(text)));
+            char text[160];
+            snprintf(title, sizeof(title), "%.127s", YgoDuel_QueryText(B.d, text, sizeof(text)));   /* (two lines: WindowBox) */
             w = 200;
         }
         else if (q->type == YGO_Q_YESNO)
