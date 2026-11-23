@@ -9014,3 +9014,16 @@ The user: "Several CO-OP menu features are HOENN-only, and have not been adapted
   CELADON 5F first, the TRAINER TOWER ROOFTOP then the lobby).
 - Scenarios kanto_rocket_hideout (a spin to its STOP tile, a chain of spins, the elevator from B1F to B4F),
   kanto_hideout_arrows (updated: the up-arrow at 8,11 spins the player back to 8,9).
+
+## CO-OP > FRIENDS > GO TO in KANTO and JOHTO (2026-11-23)
+- The user: "when we selected GO TO, it took us to Fallarbor, in Hoenn." A friend somewhere KANTO's Town Map doesn't list
+  (a building, a cave, the ROCKET HIDEOUT: Quetzal's map sections with no place, QzPlace NULL) fell through to HOENN's
+  Town Map, read with KANTO's number: the nearest visited HOENN town, FALLARBOR, across regions with no customs.
+  `mp nearestaudit h` (every HOENN town visited): 185 of 670 KANTO / JOHTO maps did it.
+- mp_friends.c MP_Friends_DestinationOfMap: outside HOENN the place is the map's own on the region's Town Map, or the one
+  its doors lead out to (OutdoorPlace: the fewest warps), and the town must be the region's own (MP_RegionMap_TownIsQz),
+  else GO TO isn't offered. JOHTO's map sections are 0x100 on, past MAPSEC_NONE (0xD5): every "< MAPSEC_NONE" check
+  (GO TO, its row, a friend's place name) made JOHTO's nowhere; they test "!= MAPSEC_NONE" now.
+- After: 0 maps to HOENN; 38 with no GO TO (NAVEL ROCK, BIRTH ISLAND, the elevators, JOHTO's ROUTE 48 / SAFARI ZONE
+  that its map leaves out). Scenario coop_goto_kanto (VIRIDIAN, CELADON from the HIDEOUT, GOLDENROD from its GYM);
+  `mp gotofriend ID`, `mp nearestaudit [h][k][v]` (h: HOENN visited, k: KANTO / JOHTO visited, v: list the nowheres).

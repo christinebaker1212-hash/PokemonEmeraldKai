@@ -2656,6 +2656,23 @@ mapsec_u16_t MP_RegionMap_NearestVisitedTown(mapsec_u16_t mapsec)
     return best;
 }
 
+bool8 MP_RegionMap_TownIsQz(mapsec_u16_t town)   // (a town of KANTO's / JOHTO's / SINNOH's: their own FLY landings)
+{
+    return QzFlyDestOf(town) != NULL;
+}
+void MP_RegionMap_DebugVisitAllQz(void)   // (tests: every KANTO / JOHTO / SINNOH FLY landing visited)
+{
+    u32 i;
+    for (i = 0; i < QZ_FLY_COUNT; i++)
+        if (QzFlyDestAt(i)->map != QZMAP_UNOVA && QzFlyDestAt(i)->flag)
+            FlagSet(QzFlyDestAt(i)->flag);
+    VarSet(0x5008, 3);
+    VarSet(0x500D, 1);
+}
+bool8 MP_RegionMap_IsQzPlace(mapsec_u16_t mapsec)   // (a place on KANTO's / JOHTO's / SINNOH's Town Map)
+{
+    return QzPlace(mapsec, QZMAP_COUNT) != NULL || QzFlyDestOf(mapsec) != NULL;
+}
 void MP_RegionMap_SetFlyWarp(mapsec_u16_t town)
 {
     if (QzFlyDestOf(town) != NULL)

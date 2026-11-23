@@ -6860,6 +6860,53 @@ void MP_TestCommand(const char *cmd, const char *arg)
         void MP_Events_DebugGoals(void);
         MP_Events_DebugGoals();
     }
+    else if (strcmp(cmd, "nearestaudit") == 0)   // nearestaudit - every KANTO / JOHTO map's GO TO town: any HOENN one?
+    {
+        mapsec_u16_t MP_RegionMap_NearestVisitedTown(mapsec_u16_t mapsec);
+        bool8 MP_RegionMap_TownIsQz(mapsec_u16_t town);
+        u16 g, n, bad = 0, none = 0, total = 0, f;
+        if (arg[0] == 'h')   // (nearestaudit h: every HOENN town visited, as a save that's been round HOENN)
+            for (f = FLAG_VISITED_LITTLEROOT_TOWN; f <= FLAG_VISITED_EVER_GRANDE_CITY; f++)
+                FlagSet(f);
+        if (strchr(arg, 'k'))   // (... k: every KANTO / JOHTO town too)
+        {
+            void MP_RegionMap_DebugVisitAllQz(void);
+            MP_RegionMap_DebugVisitAllQz();
+        }
+        for (g = 0; g < MAP_GROUPS_COUNT; g++)
+        {
+            u8 r = MP_Region_OfGroup((u8)g);
+            if (r != REGION_KANTO && r != REGION_JOHTO)
+                continue;
+            for (n = 0; n < 255 && MP_IsValidMap((u8)g, (u8)n); n++)
+            {
+                mapsec_u16_t MP_Friends_DestinationOfMap(u8 group, u8 num);
+                mapsec_u16_t sec = Overworld_GetMapHeaderByGroupAndId((u8)g, (u8)n)->regionMapSectionId,
+                             town = MP_Friends_DestinationOfMap((u8)g, (u8)n);
+                total++;
+                if (town == 0xD5)   /* (MAPSEC_NONE) */
+                {
+                    none++;
+                    if (strchr(arg, 'v'))
+                        printf("[test] nearestaudit: map %u.%u (mapsec %u) -> nowhere\n", g, n, sec);
+                }
+                else if (!MP_RegionMap_TownIsQz(town))
+                {
+                    bad++;
+                    printf("[test] nearestaudit: map %u.%u (mapsec %u) -> HOENN town %u\n", g, n, sec, town);
+                }
+            }
+        }
+        printf("[test] nearestaudit: %u maps, %u to a HOENN town, %u nowhere\n", total, bad, none);
+    }
+    else if (strcmp(cmd, "gotofriend") == 0)   // gotofriend ID - CO-OP > FRIENDS > GO TO (where to, then the warp)
+    {
+        mapsec_u16_t MP_Friends_Destination(u8 id);
+        bool8 MP_Friends_GoTo(u8 id);
+        u8 id = (u8)atoi(arg);
+        printf("[test] gotofriend %u: town %u\n", id, (unsigned)MP_Friends_Destination(id));
+        printf("[test] gotofriend %u: %s\n", id, MP_Friends_GoTo(id) ? "going" : "can't");
+    }
     else if (strcmp(cmd, "candycap") == 0)   // candycap 0|1 - OPTIONS > BATTLE > RARE CANDY CAP
     {
         gMpConfig.candyCap = atoi(arg) != 0;

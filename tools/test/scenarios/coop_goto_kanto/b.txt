@@ -1,0 +1,16 @@
+pressuntil A field 5000
+waitfor online 6000
+mp warp 37,58,16,20
+wait 100
+barrier viridian 2
+wait 500
+mp warp 36,42,24,26
+wait 100
+barrier hideout 2
+wait 700
+mp warp 34,74,5,10
+wait 100
+barrier johto 2
+wait 700
+barrier done 2
+quit

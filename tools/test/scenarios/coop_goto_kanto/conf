@@ -1,0 +1,12 @@
+# CO-OP > FRIENDS > GO TO in KANTO and JOHTO (the user, 2026-11-23: "shouldn't the visit friend option be looked at,
+# too?" ... "when we selected GO TO, it took us to Fallarbor, in Hoenn"): with every HOENN and KANTO / JOHTO town
+# visited, BOB in VIRIDIAN CITY: ALICE lands in VIRIDIAN; BOB inside the ROCKET HIDEOUT (no place on KANTO's Town Map:
+# HOENN's was read with its number, FALLARBOR): ALICE lands in CELADON CITY, where its doors lead; BOB in GOLDENROD's
+# GYM in JOHTO (whose places are numbered past HOENN's "none": GO TO was never offered there): ALICE, in JOHTO too,
+# lands in GOLDENROD CITY. `mp nearestaudit hk` (every map: none to HOENN).
+MODE=2
+WARP=37,57,10,10
+WARP_B=37,57,12,10
+TMO=240
+EXPECT_A=("nearestaudit: 670 maps, 0 to a HOENN town" "where map 37.58" "where map 37.63" "where map 34.59")
+UNEXPECT_A=("[crash]" "gotofriend 1: can't")

@@ -17,6 +17,7 @@
 #include "string_util.h"
 #include "constants/flags.h"
 #include "constants/map_groups.h"
+#include "constants/maps.h"
 #include "constants/map_types.h"
 #include "constants/region_map_sections.h"
 #include "constants/songs.h"
@@ -80,7 +81,7 @@ void MP_Friends_LocationName(u8 id, u8 *dst)
         return;
     }
     sec = MP_Friends_Mapsec(id);
-    if (sec >= MAPSEC_NONE)
+    if (sec == MAPSEC_NONE)
     {
         MP_AsciiToGame(dst, "?", 4);
         return;
@@ -99,6 +100,51 @@ static bool8 CanFlyFromHere(void)
 
 // The town GO TO FRIEND would take you to (MAPSEC_NONE: nowhere). Never into or out of ORRE (the user, 2026-11-11:
 // it's reached by boat only), and only a friend in the region you're in (another region is a voyage away)
+bool8 MP_RegionMap_TownIsQz(mapsec_u16_t town);
+bool8 MP_RegionMap_IsQzPlace(mapsec_u16_t mapsec);
+// The place on KANTO's / JOHTO's Town Map a map is: its own, or the one its doors lead out to (the fewest warps)
+static mapsec_u16_t OutdoorPlace(u8 group, u8 num)
+{
+    u16 queue[48], head = 0, tail = 0, k;
+    queue[tail++] = (group << 8) | num;
+    while (head < tail)
+    {
+        u8 g = queue[head] >> 8, n = queue[head] & 0xFF, i;
+        const struct MapHeader *h = MP_IsValidMap(g, n) ? Overworld_GetMapHeaderByGroupAndId(g, n) : NULL;
+        head++;
+        if (h == NULL)
+            continue;
+        if (MP_RegionMap_IsQzPlace(h->regionMapSectionId))
+            return h->regionMapSectionId;
+        for (i = 0; h->events && i < h->events->warpCount; i++)
+        {
+            const struct WarpEvent *e = &h->events->warps[i];
+            u16 key = (e->mapGroup << 8) | e->mapNum;
+            if (e->mapNum == MAP_NUM(MAP_DYNAMIC) || !MP_IsValidMap(e->mapGroup, e->mapNum))
+                continue;
+            for (k = 0; k < tail && queue[k] != key; k++)
+                ;
+            if (k == tail && tail < ARRAY_COUNT(queue))
+                queue[tail++] = key;
+        }
+    }
+    return MAPSEC_NONE;
+}
+
+// GO TO's town for someone on that map. KANTO's / JOHTO's: a place their Town Map doesn't list (a building, a cave,
+// the ROCKET HIDEOUT) is where its doors lead out to, and the town is always theirs: HOENN's Town Map read with their
+// numbers flew the player to FALLARBOR (the user, 2026-11-23: "when we selected GO TO, it took us to Fallarbor, in
+// Hoenn"; `mp nearestaudit h` checks every map)
+mapsec_u16_t MP_Friends_DestinationOfMap(u8 group, u8 num)
+{
+    if (MP_Region_OfGroup(group) != REGION_HOENN)
+    {
+        mapsec_u16_t town = MP_RegionMap_NearestVisitedTown(OutdoorPlace(group, num));
+        return town != MAPSEC_NONE && MP_RegionMap_TownIsQz(town) ? town : MAPSEC_NONE;
+    }
+    return MP_RegionMap_NearestVisitedTown(Overworld_GetMapHeaderByGroupAndId(group, num)->regionMapSectionId);
+}
+
 mapsec_u16_t MP_Friends_Destination(u8 id)
 {
     const struct MpState *st;
@@ -110,14 +156,14 @@ mapsec_u16_t MP_Friends_Destination(u8 id)
         return MAPSEC_NONE;
     if (!MP_Region_IsSharedMap(st->mapGroup, st->mapNum) && MP_Region_OfGroup(st->mapGroup) != MP_Region_Current())
         return MAPSEC_NONE;
-    return MP_RegionMap_NearestVisitedTown(MP_Friends_Mapsec(id));
+    return MP_Friends_DestinationOfMap(st->mapGroup, st->mapNum);
 }
 
 // Starts the warp. Returns FALSE (and plays the "no" sound) when it can't.
 bool8 MP_Friends_GoTo(u8 id)
 {
     mapsec_u16_t town = MP_Friends_Destination(id);
-    if (town >= MAPSEC_NONE || !CanFlyFromHere())
+    if (town == MAPSEC_NONE || !CanFlyFromHere())
     {
         PlaySE(SE_FAILURE);
         return FALSE;

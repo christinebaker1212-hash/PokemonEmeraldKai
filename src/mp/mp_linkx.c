@@ -871,14 +871,14 @@ static void Draw(void)
         u8 town[24];
         if (MP_Friends_InGarden(sUi.friend))
             snprintf(right, sizeof(right), "MOEMON GARDEN");
-        else if (dest < MAPSEC_NONE)
+        else if (dest != MAPSEC_NONE)
         {
             GetMapName(town, dest, 0);
             MP_GameToAscii(right, town, sizeof(right) - 1);
         }
         FriendTitle(line, sizeof(line));
         MpUi_Begin(line);
-        MpUi_RowAscii(FR_GOTO, sUi.cursor == FR_GOTO, "GO TO", dest < MAPSEC_NONE ? right : "-");
+        MpUi_RowAscii(FR_GOTO, sUi.cursor == FR_GOTO, "GO TO", dest != MAPSEC_NONE ? right : "-");
         MpUi_RowAscii(FR_CARD, sUi.cursor == FR_CARD, "TRAINER CARD", NULL);
         MpUi_RowAscii(FR_BASE, sUi.cursor == FR_BASE, "VISIT SECRET BASE", NULL);
         static const char *const games[] = {"MOEMON", "YU-GI-OH!", "TRIAD"};
@@ -1127,7 +1127,7 @@ static void Task_LinkxUi(u8 taskId)
             MP_Garden_QuickTravel(FALSE);
             return;
         }
-        if (MP_Friends_Destination(who) >= MAPSEC_NONE)
+        if (MP_Friends_Destination(who) == MAPSEC_NONE)
         {
             PlaySE(SE_FAILURE);
             snprintf(sUi.note, sizeof(sUi.note), "No town you've been to is near them.");

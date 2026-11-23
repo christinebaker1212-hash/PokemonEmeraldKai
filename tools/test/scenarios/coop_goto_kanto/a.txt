@@ -1,0 +1,24 @@
+pressuntil A field 5000
+waitfor online 6000
+mp nearestaudit hk
+barrier viridian 2
+wait 200
+mp gotofriend 1
+wait 300
+mp where
+barrier hideout 2
+wait 200
+mp warp 37,57,10,10
+wait 150
+mp gotofriend 1
+wait 300
+mp where
+rendershot a_celadon
+barrier johto 2
+mp warp 34,59,10,10
+wait 200
+mp gotofriend 1
+wait 300
+mp where
+barrier done 2
+quit
