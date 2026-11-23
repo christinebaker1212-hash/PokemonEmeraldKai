@@ -8936,3 +8936,13 @@ The user: "Let's add more structure decks for purchase with money, both Yugioh a
   cards_gc_theme_decks (MOEMON_DEBUG_REGION=1).
 - The card guide (tools/card_guide/build.sh) builds again: the YU-GI-OH! dump is the game font's Latin-1 (it failed on
   "Beast Machine King Barbaros Ür" since the catalog went to today), and the newer frames have names.
+
+## YU-GI-OH!: effects of cards in the Graveyard (2026-11-23)
+- The user: "cards that have an effect you can trigger in the Graveyard are not able to be triggered at will." The
+  engine offered them (the Main Phase question's items for a card in the Graveyard, Banished or the Extra Deck), but
+  the table only let you look in a pile: A on a card there showed its close-up.
+- ygo_board.c: a pile opened while choosing what to do (B.pileFree) opens on the first card that can do something,
+  framed in the field's blue, the hint "{A} USE {INSPECT} LOOK {B} BACK"; A opens its menu as on the field (OpenMenu:
+  USE EFFECT; B back to the field). The pile on the table is framed too when one of its cards can do something
+  (PileActs). `mp ygo focus 4 PILE` puts the cursor on your pile (tests). Test tools/ygo/test_ui.sh "grave" (FOOLISH
+  BURIAL, then PLAGUESPREADER ZOMBIE's effect from the Graveyard).

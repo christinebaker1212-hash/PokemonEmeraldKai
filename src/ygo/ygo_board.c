@@ -265,7 +265,7 @@ static struct
     int windowOpened;   /* B.frame the chain window opened (a moment before it takes A / B) */
     uint8_t picked[YGO_QUERY_MAX];
     int pickedCount;
-    int gridCursor, pileSide, pilePile;
+    int gridCursor, pileSide, pilePile, pileFree;   /* pileFree: opened while choosing what to do (its cards' effects) */
     uint8_t pileList[YGO_OBJS];
     int pileCount;
     uint32_t queryStamp, askedStamp;   /* a new question resets the input */
@@ -1641,7 +1641,7 @@ static void Tip(const char *text)
 }
 void YgoBoard_DebugFocus(int kind, int index)
 {
-    B.cursorKind = kind == 0 ? SP_HAND : kind == 1 ? SP_MZONE : kind == 2 ? SP_SZONE : SP_MZONE;
+    B.cursorKind = kind == 0 ? SP_HAND : kind == 1 ? SP_MZONE : kind == 2 ? SP_SZONE : kind == 4 ? SP_PILE : SP_MZONE;   /* (4: your pile PILE_*) */
     B.cursorSide = kind == 3;
     B.cursorIndex = index;
 }
@@ -1973,6 +1973,7 @@ static unsigned SpotCard(int i)
     }
     return s->obj < B.objCount && SeesFace(s->obj) ? T()->objs[s->obj].card : 0;
 }
+static int PileObjActs(unsigned o);
 static void OpenPile(unsigned side, unsigned pile)
 {
     unsigned n, i;
@@ -1985,8 +1986,37 @@ static void OpenPile(unsigned side, unsigned pile)
             B.pileList[B.pileCount++] = list[i];
     B.pileSide = (int)side;
     B.pilePile = (int)pile;
+    B.pileFree = B.mode == M_FREE && MyQuestion();
     B.gridCursor = 0;
     B.mode = M_PILE;
+    for (i = 0; B.pileFree && i < B.pileCount; i++)
+        if (PileObjActs(B.pileList[i]))
+        {
+            B.gridCursor = (int)i;   /* (the cursor on the first card that can do something now) */
+            break;
+        }
+}
+/* A card in a pile that can do something now (an effect in the Graveyard, Banished or Extra Deck the question offers:
+ * the user, 2026-11-23, "cards that have an effect you can trigger in the Graveyard are not able to be triggered") */
+static int PileObjActs(unsigned o)
+{
+    const struct YgoQuery *q = &B.d->query;
+    unsigned k;
+    if (!MyQuestion())
+        return 0;
+    for (k = 0; k < q->count; k++)
+        if (q->items[k].obj == o)
+            return 1;
+    return 0;
+}
+static int PileActs(unsigned side, unsigned pile)
+{
+    uint8_t list[YGO_OBJS];
+    unsigned n = PileList(side, pile, list), i;
+    for (i = 0; i < n; i++)
+        if (PileObjActs(list[i]))
+            return 1;
+    return 0;
 }
 
 int YgoBoard_Step(unsigned pressed, unsigned held, struct YgoAnswer *answer, unsigned *card)
@@ -2336,6 +2366,14 @@ int YgoBoard_Step(unsigned pressed, unsigned held, struct YgoAnswer *answer, uns
             B.gridCursor += cols, PlaySE(SE_SELECT);
         if (B.mode == M_PILE)
         {
+            unsigned o = B.pileList[B.gridCursor];
+            if ((pressed & KEY_A) && B.pileFree && PileObjActs(o) && OpenMenu(o))
+            {
+                /* its effect: the card's menu, as on the field (B goes back to the field) */
+                PlaySE(SE_SELECT);
+                printf("[ygo] pile: menu for %s\n", ObjCard(o) ? ObjCard(o)->name : "?");
+                return YB_NONE;
+            }
             if (pressed & (KEY_A | KEY_INSPECT))
             {
                 sInspectObj = -1;   /* (a pile's cards hold no counters) */
@@ -3288,6 +3326,13 @@ static void Highlights(void)
         {
             unsigned k;
             const struct Spot *s = &B.spots[i];
+            if (s->kind == SP_PILE)
+            {
+                /* (a pile holding a card that can do something: its effect from the Graveyard...) */
+                if (PileActs(s->side, s->index))
+                    G_Frame(s->r.x - 1, s->r.y - 1, s->r.w + 2, s->r.h + 2, 0x60d0ff, 130 + 60 * pulse);
+                continue;
+            }
             if (s->obj >= B.objCount)
                 continue;
             for (k = 0; k < q->count; k++)
@@ -3776,6 +3821,8 @@ static void Grid(void)
             Ygo_DrawCard(SeesFace(o) || B.mode == M_PICK_GRID ? T()->objs[o].card : 0, (float)x, (float)y, 30, 42, 0, 255, 0);
         else if (B.mode == M_PICK_GRID && q->items[k].card)
             Ygo_DrawCard(q->items[k].card, (float)x, (float)y, 30, 42, 0, 255, 0);
+        if (B.mode == M_PILE && B.pileFree && o < B.objCount && PileObjActs(o))
+            G_Frame(x - 1, y - 1, 32, 44, 0x60d0ff, 200);   /* (it can do something now: A uses it) */
         if (B.mode == M_PICK_GRID && (q->items[k].flags & (YGO_IF_PICKED | YGO_IF_MUST)))
             G_Frame(x - 1, y - 1, 32, 44, 0xf0c040, 255);
         if (mark)
@@ -3807,7 +3854,8 @@ static void Grid(void)
                 snprintf(line, sizeof(line), "%s", c->frame == YGO_SPELL ? "SPELL CARD" : "TRAP CARD");
             G_Text(8, 129, 0xd8d8f8, 0x302878, line, 226, TF_SMALL);
             G_Hint(8, 152, 0xe0e0ff, G_NO_SHADOW,
-                   B.mode == M_PILE ? "{A} LOOK  {B} BACK"
+                   B.mode == M_PILE && B.pileFree && PileObjActs(o) ? "{A} USE  {INSPECT} LOOK  {B} BACK"
+                   : B.mode == M_PILE                               ? "{A} LOOK  {B} BACK"
                    : q->max > 1     ? "{A} PICK  {START} DONE  {INSPECT} LOOK"
                    : q->min         ? "{A} CHOOSE  {INSPECT} LOOK"
                                     : "{A} CHOOSE  {B} NONE  {INSPECT} LOOK",

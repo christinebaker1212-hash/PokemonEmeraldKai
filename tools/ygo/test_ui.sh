@@ -480,6 +480,64 @@ expect held_starter '\[ygo\] screen 13 opted 0 .* message 0'
 echo 'PASS an A held to close a message opens the Yu-Gi-Oh! screen without choosing anything in it'
 fi
 
+# A card's effect in the Graveyard used from the pile (the user, 2026-11-23: "cards that have an effect you can trigger
+# in the Graveyard are not able to be triggered at will"): the Decks unshuffled, FOOLISH BURIAL sends PLAGUESPREADER
+# ZOMBIE; the Graveyard opened on it (framed, "{A} USE"), A its menu, USE EFFECT puts a hand card on the Deck and asks
+# where it's Special Summoned (screenshots grave_pile, grave_menu, grave_zone)
+if only grave; then
+cat > "$OUT/grave.txt" <<'SCRIPT'
+pressuntil A field 5000
+wait 60
+mp ygo starter 1
+mp ygo giveall 3
+mp ygo code ydke://LvP9AfbJVAL2yVQC9slUAqOpVwWjqVcFo6lXBXR8igR0fIoEdHyKBDp47AE6eOwBOnjsAbT0zAK09MwCtPTMAiYrYQAmK2EAJithAPttTwX7bU8F+21PBYsSaAKLEmgCixJoAmK9YgVivWIFYr1iBQLFiwACxYsAAsWLAMGNowTBjaMEwY2jBCD+awUg/msFgN9uBXwIOAQu8/0BLvP9AcWp2gQ=!!!
+wait 20
+press A 2
+wait 30
+press A 2
+wait 10
+mp ygo stack
+mp ygo fast
+mp ygo seed 7
+mp ygo first 0
+mp ygo open
+wait 20
+press DOWN 2
+wait 6
+press A 2
+wait 400
+press A 1
+wait 20
+press A 1
+wait 30
+press A 1
+wait 90
+mash RIGHT 40 3
+wait 10
+press A 1
+wait 200
+mp ygo focus 4 1
+wait 10
+press A 1
+wait 20
+rendershot grave_pile
+press A 1
+wait 20
+rendershot grave_menu
+press A 1
+wait 60
+press A 1
+wait 200
+rendershot grave_zone
+mp ygo state
+quit
+SCRIPT
+run grave
+expect grave 'pile: menu for Plaguespreader Zombie'
+expect grave 'hands 3/5'
+echo 'PASS a Graveyard effect used from the pile: its menu, the effect, the Special Summon asked (screenshots grave_pile, grave_menu, grave_zone)'
+fi
+
 # The table: from the Battle Phase, MAIN PHASE 2 (chosen) or END TURN, which skips it; a Field Spell's picture as the
 # background (Yami, from its artwork); the opponent's main Attribute as the table's theme
 if only zone; then
