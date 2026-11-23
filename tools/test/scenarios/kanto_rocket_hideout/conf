@@ -1,0 +1,10 @@
+# KANTO's ROCKET HIDEOUT (the user, 2026-11-23: "the tiles don't actually work at all for sending you to a direction
+# and stopping. Additionally, the lift key does nothing. This may affect future dungeons as well"): on B2F a spin tile
+# (Quetzal's 0x54, right) sends the player spinning to the STOP tile (0x58) four tiles on, and a 0x56 (up) one onto
+# the STOP tile above (field_player_avatar.c TrySpinTileMovement); with the LIFT KEY's flag the elevator, entered from
+# B1F, opens on B1F (each elevator's own row: qz_specials.c QzGetElevatorFloorCursor, the rip's multichoicedefault
+# arguments the right way round) and goes down to B4F. Shots spun, panel, b4f.
+MODE=1
+TMO=150
+EXPECT_A=("where map 36.43 xy 7,6" "where map 36.46 xy 2,5" "where map 36.45 ")
+UNEXPECT_A=("[crash]")

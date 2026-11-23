@@ -22,27 +22,27 @@ Kanto_CeladonCity_DepartmentStore_Elevator_EventScript_841C412::
 	end
 
 Kanto_CeladonCity_DepartmentStore_Elevator_EventScript_841C476::
-	multichoicedefault 0, 0, MULTI_QZ_0x59, 1, 0
+	multichoicedefault 0, 0, MULTI_QZ_0x59, 0, FALSE  @ (Moemon Kai: the rip had the cursor and the B button swapped)
 	nop
 	goto Kanto_CeladonCity_DepartmentStore_Elevator_EventScript_841C4B7
 
 Kanto_CeladonCity_DepartmentStore_Elevator_EventScript_841C483::
-	multichoicedefault 0, 0, MULTI_QZ_0x59, 1, 1
+	multichoicedefault 0, 0, MULTI_QZ_0x59, 1, FALSE  @ (Moemon Kai: the rip had the cursor and the B button swapped)
 	nop
 	goto Kanto_CeladonCity_DepartmentStore_Elevator_EventScript_841C4B7
 
 Kanto_CeladonCity_DepartmentStore_Elevator_EventScript_841C490::
-	multichoicedefault 0, 0, MULTI_QZ_0x59, 1, 2
+	multichoicedefault 0, 0, MULTI_QZ_0x59, 2, FALSE  @ (Moemon Kai: the rip had the cursor and the B button swapped)
 	nop
 	goto Kanto_CeladonCity_DepartmentStore_Elevator_EventScript_841C4B7
 
 Kanto_CeladonCity_DepartmentStore_Elevator_EventScript_841C49D::
-	multichoicedefault 0, 0, MULTI_QZ_0x59, 1, 3
+	multichoicedefault 0, 0, MULTI_QZ_0x59, 3, FALSE  @ (Moemon Kai: the rip had the cursor and the B button swapped)
 	nop
 	goto Kanto_CeladonCity_DepartmentStore_Elevator_EventScript_841C4B7
 
 Kanto_CeladonCity_DepartmentStore_Elevator_EventScript_841C4AA::
-	multichoicedefault 0, 0, MULTI_QZ_0x59, 1, 4
+	multichoicedefault 0, 0, MULTI_QZ_0x59, 4, FALSE  @ (Moemon Kai: the rip had the cursor and the B button swapped)
 	nop
 	goto Kanto_CeladonCity_DepartmentStore_Elevator_EventScript_841C4B7
 

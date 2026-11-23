@@ -1,5 +1,8 @@
 #include "global.h"
 #include "s3d.h"   // Moemon Kai
+#include "u3d.h"   // Moemon Kai: (spin tiles never on UNOVA's / ORRE's maps)
+#include "o3d.h"
+#include "constants/metatile_behaviors.h"
 #include "mp_garden.h"
 #include "mp.h"
 #include "main.h"
@@ -416,8 +419,79 @@ static void PlayerAllowForcedMovementIfMovingSameDirection(void)
         gPlayerAvatar.flags &= ~PLAYER_AVATAR_FLAG_CONTROLLABLE;
 }
 
+// Moemon Kai: FireRed's spin tiles on 2D maps (the user, 2026-11-23: KANTO's ROCKET HIDEOUT "the tiles don't actually
+// work at all for sending you to a direction and stopping ... This may affect future dungeons as well"): a spin tile
+// sends the player its way, spinning, over any floor until a STOP tile, another spin tile (which turns them) or
+// something in the way. Moemon Quetzal's numbers: MB_UNUSED_54 right, 55 left, 56 up, 57 down, 58 STOP (never in
+// SINNOH, UNOVA or ORRE, whose engines read those numbers their own way).
+static bool8 DoForcedMovement(u8 direction, void (*moveFunc)(u8));
+static u8 sSpinDir;                 // the way a spin carries on (DIR_NONE: none)
+static u8 sSpinFace;                // the facing it turns through
+static u16 sSpinMap;                // (the map it began on: a warp ends it)
+static u8 SpinTileDir(u8 behavior)
+{
+    switch (behavior)
+    {
+    case MB_UNUSED_54: return DIR_EAST;
+    case MB_UNUSED_55: return DIR_WEST;
+    case MB_UNUSED_56: return DIR_NORTH;
+    case MB_UNUSED_57: return DIR_SOUTH;
+    default:           return DIR_NONE;
+    }
+}
+static bool8 SpinTilesHere(void)
+{
+    u8 group = gSaveBlock1Ptr->location.mapGroup;
+    return !S3D_IsSinnohGroup(group) && !U3D_IsUnovaGroup(group) && !O3D_IsOrreGroup(group);
+}
+bool8 MP_PlayerSpinning(void)
+{
+    return sSpinDir != DIR_NONE;
+}
+static bool8 TrySpinTileMovement(void)
+{
+    static const u8 sTurn[] = {[DIR_SOUTH] = DIR_WEST, [DIR_WEST] = DIR_NORTH, [DIR_NORTH] = DIR_EAST, [DIR_EAST] = DIR_SOUTH};
+    struct ObjectEvent *obj = &gObjectEvents[gPlayerAvatar.objectEventId];
+    u8 behavior = obj->currentMetatileBehavior, dir = SpinTileDir(behavior);
+    u16 map = (gSaveBlock1Ptr->location.mapGroup << 8) | gSaveBlock1Ptr->location.mapNum;
+    if (sSpinDir != DIR_NONE && sSpinMap != map)
+        sSpinDir = DIR_NONE;
+    if (!SpinTilesHere() || (gPlayerAvatar.flags & PLAYER_AVATAR_FLAG_CONTROLLABLE))
+        return FALSE;
+    if (dir != DIR_NONE)
+    {
+        if (sSpinDir == DIR_NONE)
+        {
+            PlaySE(SE_M_RAZOR_WIND2);
+            sSpinFace = obj->facingDirection;
+        }
+        sSpinDir = dir;
+        sSpinMap = map;
+    }
+    else if (behavior == MB_UNUSED_58 && sSpinDir != DIR_NONE)
+    {
+        sSpinDir = DIR_NONE;   // (the STOP tile: on foot again)
+        ForcedMovement_None();
+        return FALSE;
+    }
+    if (sSpinDir == DIR_NONE)
+        return FALSE;
+    sSpinFace = sSpinFace >= DIR_SOUTH && sSpinFace <= DIR_EAST ? sTurn[sSpinFace] : DIR_SOUTH;
+    obj->facingDirectionLocked = FALSE;
+    SetObjectEventDirection(obj, sSpinFace);
+    obj->disableAnim = TRUE;
+    obj->facingDirectionLocked = TRUE;
+    if (DoForcedMovement(sSpinDir, PlayerWalkFast))
+        return TRUE;
+    sSpinDir = DIR_NONE;   // (something in the way: the spin ends there)
+    ForcedMovement_None();
+    return FALSE;
+}
+
 static bool8 TryDoMetatileBehaviorForcedMovement(void)
 {
+    if (TrySpinTileMovement())
+        return TRUE;
     return sForcedMovementFuncs[GetForcedMovementByMetatileBehavior()]();
 }
 

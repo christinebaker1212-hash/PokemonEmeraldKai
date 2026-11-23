@@ -1,0 +1,41 @@
+pressuntil A field 5000
+wait 60
+mp warp 36,43,2,6
+wait 120
+press RIGHT 18
+wait 200
+mp where
+rendershot spun
+mp warp 36,43,11,7
+wait 120
+press UP 18
+wait 300
+mp where
+mp setflag 0x2112
+mp warp 36,42,24,26
+wait 120
+press UP 12
+wait 200
+mp where
+mp warp 36,46,0,3
+wait 90
+press UP 3
+wait 20
+press A 1
+wait 90
+rendershot panel
+press DOWN 1
+wait 10
+press DOWN 1
+wait 10
+press A 1
+wait 300
+mash A 4 30
+wait 60
+mp warp 36,46,2,5
+wait 90
+press DOWN 20
+wait 250
+mp where
+rendershot b4f
+quit

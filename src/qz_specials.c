@@ -825,10 +825,18 @@ u16 QzGetElevatorFloor(void)
     return 0;
 }
 
-// The floor list's row for the floor you're on (Silph: 11F first)
+// The floor list's row for the floor you're on, each elevator's list as it's ordered: SILPH CO.'s 11F first, the
+// CELADON DEPT. STORE's 5F first, the ROCKET HIDEOUT's B1F / B2F / B4F, the TRAINER TOWER's ROOFTOP then the lobby
 static u16 QzGetElevatorFloorCursor_(void)
 {
     u8 floor = ElevatorFloor();
+    u16 here = (gSaveBlock1Ptr->location.mapGroup << 8) | gSaveBlock1Ptr->location.mapNum;
+    if (here == MAP_KANTO_ROCKET_HIDEOUT_ELEVATOR)
+        return floor == 3 ? 0 : floor == 2 ? 1 : floor == 0 ? 2 : 0;
+    if (here == MAP_KANTO_CELADON_CITY_DEPARTMENT_STORE_ELEVATOR)
+        return floor >= 4 && floor <= 8 ? 8 - floor : 0;
+    if (here == MAP_KANTO_TRAINER_TOWER_ELEVATOR)
+        return floor == 15 ? 0 : 1;
     return floor >= 4 && floor <= 14 ? 14 - floor : 0;
 }
 

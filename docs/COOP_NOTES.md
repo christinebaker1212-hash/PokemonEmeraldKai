@@ -8995,3 +8995,22 @@ The user: "Several CO-OP menu features are HOENN-only, and have not been adapted
   (WindowBox: G_TextHeight) so a two-line question no longer runs over NO.
 - Test cards to remember: GOYO GUARDIAN needs an EARTH Tuner, TIMEGAZER MAGICIAN's scale only with no monsters of
   yours: the engine is right to hold them back. `mp ygo monsters` lists your Monster Zones.
+
+## Spin tiles and the KANTO elevators (2026-11-23)
+- The user: "Rocket Hideout in the Game Corner's basement, the tiles don't actually work at all for sending you to a
+  direction and stopping. Additionally, the lift key does nothing. This may affect future dungeons as well, so it must
+  be fixed."
+- Spin tiles: Moemon Quetzal put FireRed's spin tiles at behaviors 0x54 right, 0x55 left, 0x56 up, 0x57 down, 0x58 STOP
+  (Emerald's MB_UNUSED_54..58; the tiles' own arrows agree), which Emerald never acts on. field_player_avatar.c
+  TrySpinTileMovement (before the other forced movements): a spin tile starts a spin its way (SE_M_RAZOR_WIND2, the
+  player turning a quarter each step, PlayerWalkFast), any floor carries it on, another spin tile turns it, the STOP
+  tile or anything in the way ends it, a warp ends it. Never on SINNOH's / UNOVA's / ORRE's maps (0x54-0x57 are
+  SINNOH's bike rails, src/sinnoh/s3d_bike.c). Maps with them: the ROCKET HIDEOUT B2F / B3F, VIRIDIAN GYM, FIVE
+  ISLAND's ROCKET WAREHOUSE; any later map with these behaviors works the same.
+- The elevators: the LIFT KEY's flag (FLAG_QZ_0x2112) opened the panel, but the rip's `multichoicedefault` had the
+  starting row and "B ignored" swapped (Emerald's order is default, then ignoreBPress), so every KANTO elevator (the
+  ROCKET HIDEOUT's, CELADON's, the TRAINER TOWER's) opened on its second row and ignored B oddly: the ten fixed. And
+  QzGetElevatorFloorCursor used SILPH CO.'s order for all: each elevator's own now (the HIDEOUT B1F / B2F / B4F,
+  CELADON 5F first, the TRAINER TOWER ROOFTOP then the lobby).
+- Scenarios kanto_rocket_hideout (a spin to its STOP tile, a chain of spins, the elevator from B1F to B4F),
+  kanto_hideout_arrows (updated: the up-arrow at 8,11 spins the player back to 8,9).

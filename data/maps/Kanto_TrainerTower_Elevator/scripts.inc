@@ -20,12 +20,12 @@ Kanto_TrainerTower_Elevator_EventScript_84148BD::
 	end
 
 Kanto_TrainerTower_Elevator_EventScript_8414900::
-	multichoicedefault 0, 0, MULTI_QZ_0x6F, 1, 0
+	multichoicedefault 0, 0, MULTI_QZ_0x6F, 0, FALSE  @ (Moemon Kai: the rip had the cursor and the B button swapped)
 	nop
 	goto Kanto_TrainerTower_Elevator_EventScript_841491A
 
 Kanto_TrainerTower_Elevator_EventScript_841490D::
-	multichoicedefault 0, 0, MULTI_QZ_0x6F, 1, 1
+	multichoicedefault 0, 0, MULTI_QZ_0x6F, 1, FALSE  @ (Moemon Kai: the rip had the cursor and the B button swapped)
 	nop
 	goto Kanto_TrainerTower_Elevator_EventScript_841491A
 

@@ -86,9 +86,9 @@ enum {
     MB_WESTWARD_CURRENT,
     MB_NORTHWARD_CURRENT,
     MB_SOUTHWARD_CURRENT,
-    MB_UNUSED_54,
-    MB_UNUSED_55,
-    MB_UNUSED_56,
+    MB_UNUSED_54,   // Moemon Kai: on 2D maps FireRed's spin tiles (Moemon Quetzal's numbers: KANTO's ROCKET HIDEOUT,
+    MB_UNUSED_55,   // field_player_avatar.c): 0x54 right, 0x55 left, 0x56 up, 0x57 down, 0x58 the STOP tile;
+    MB_UNUSED_56,   // in SINNOH 0x54-0x57 are its bike rails (src/sinnoh/s3d_bike.c)
     MB_UNUSED_57,
     MB_UNUSED_58,
     MB_UNUSED_59,
