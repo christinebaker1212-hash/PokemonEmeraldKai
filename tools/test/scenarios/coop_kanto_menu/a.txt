@@ -1,0 +1,11 @@
+pressuntil A field 5000
+wait 60
+mp outbreakwhere
+mp tutorprice
+mp additem 104 1
+mp tutorprice
+mp warp 0,10,4,14
+wait 120
+mp outbreakwhere
+mp tutorprice
+quit

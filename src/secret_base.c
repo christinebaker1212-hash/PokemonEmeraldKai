@@ -2162,6 +2162,14 @@ bool8 MP_SecretBase_PrepareVisit(u8 slot)
     sMpBaseExit[1] = n;
     sMpBaseExit[2] = x;
     sMpBaseExit[3] = y + 1;   // the spot in front of the entrance
+    if (MP_Region_OfGroup((u8)g) != MP_Region_Current())
+    {
+        // (visited from another region: back where the player was, never across to HOENN without its customs)
+        sMpBaseExit[0] = gSaveBlock1Ptr->location.mapGroup;
+        sMpBaseExit[1] = gSaveBlock1Ptr->location.mapNum;
+        sMpBaseExit[2] = gSaveBlock1Ptr->pos.x;
+        sMpBaseExit[3] = gSaveBlock1Ptr->pos.y;
+    }
     return TRUE;
 }
 

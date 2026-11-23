@@ -7,14 +7,16 @@
 // Drawn by the port over the finished frame (MP_Compass_Composite, from VDraw), so they take none of
 // the GBA's sprites or palettes.
 //
-// Where a friend is: one world grid for all of Hoenn's outdoor maps, built once by walking the
-// map connections out from Littleroot; a friend indoors (a house, a cave, a POKéMON CENTER's 2F)
+// Where a friend is: a world grid for each region's outdoor maps (HOENN's from Littleroot, KANTO's from Pallet
+// Town, JOHTO's from New Bark Town: the user, 2026-11-23, CO-OP features "HOENN-only"), built once by walking the
+// map connections out from there; a friend in another region gets no arrow; a friend indoors (a house, a cave, a POKéMON CENTER's 2F)
 // is at the door that leads out of their building (found by following the map's warps). Only a
 // place none of that reaches (underwater, the islands) falls back to the Town Map's areas.
 #include <stdlib.h>
 #include <string.h>
 #include "global.h"
 #include "mp.h"
+#include "mp_region.h"
 #include "event_object_movement.h"
 #include "field_player_avatar.h"
 #include "fieldmap.h"
@@ -73,6 +75,7 @@ struct WorldMap
 {
     s16 x, y;
     u8 state;
+    u8 world;      // which grid (the walk it was reached by: 1 HOENN, 2 KANTO, 3 JOHTO); a door: its town's
 };
 
 static struct WorldMap sWorld[MAP_GROUPS_COUNT][256];
@@ -87,10 +90,19 @@ static void BuildWorld(void)
 {
     // A breadth-first walk over the connections; a map keeps the first place it's reached at
     static u16 queue[MAP_GROUPS_COUNT * 64];
+    static const u16 sRoots[] = {MAP_LITTLEROOT_TOWN, MAP_KANTO_PALLET_TOWN, MAP_JOHTO_NEW_BARK_TOWN};
     u16 head = 0, tail = 0;
+    u8 root;
     memset(sWorld, 0, sizeof(sWorld));
-    sWorld[MAP_GROUP(MAP_LITTLEROOT_TOWN)][MAP_NUM(MAP_LITTLEROOT_TOWN)].state = W_PLACED;
-    queue[tail++] = MAP_LITTLEROOT_TOWN;
+    for (root = 0; root < ARRAY_COUNT(sRoots); root++)
+    {
+    struct WorldMap *r = &sWorld[MAP_GROUP(sRoots[root])][MAP_NUM(sRoots[root])];
+    if (r->state != W_UNKNOWN)
+        continue;   // (reached already from an earlier root: one grid)
+    r->state = W_PLACED;
+    r->world = root + 1;
+    head = tail = 0;
+    queue[tail++] = sRoots[root];
     while (head < tail)
     {
         u8 group = queue[head] >> 8, num = queue[head] & 0xFF, i;
@@ -119,16 +131,18 @@ static void BuildWorld(void)
             default: continue;   // (dive / emerge: another layer)
             }
             nw->state = W_PLACED;
+            nw->world = w->world;
             if (tail < ARRAY_COUNT(queue))
                 queue[tail++] = (c->mapGroup << 8) | c->mapNum;
         }
+    }
     }
     sWorldBuilt = TRUE;
 }
 
 // The world tile of map-local (x, y) (MAP_OFFSET included, as object coords are), FALSE when
 // the map is nowhere on the grid. An indoor map gives its door out (*indoors set).
-static bool8 WorldPos(u8 group, u8 num, s16 x, s16 y, s32 *wx, s32 *wy, bool8 *indoors)
+static bool8 WorldPos(u8 group, u8 num, s16 x, s16 y, s32 *wx, s32 *wy, bool8 *indoors, u8 *world)
 {
     struct WorldMap *w;
     if (group >= MAP_GROUPS_COUNT)
@@ -162,6 +176,7 @@ static bool8 WorldPos(u8 group, u8 num, s16 x, s16 y, s32 *wx, s32 *wy, bool8 *i
                     const struct WarpEvent *door = &d->events->warps[e->warpId];
                     w->x = sWorld[e->mapGroup][e->mapNum].x + door->x;
                     w->y = sWorld[e->mapGroup][e->mapNum].y + door->y;
+                    w->world = sWorld[e->mapGroup][e->mapNum].world;
                     w->state = W_DOOR;
                     break;
                 }
@@ -173,6 +188,7 @@ static bool8 WorldPos(u8 group, u8 num, s16 x, s16 y, s32 *wx, s32 *wy, bool8 *i
         }
     }
     *indoors = w->state == W_DOOR;
+    *world = w->world;
     switch (w->state)
     {
     case W_PLACED:
@@ -300,6 +316,7 @@ static bool8 FriendOffset(u8 id, s32 *dx, s32 *dy, s32 *steps, bool8 *onScreen)
     s16 rx, ry;
     s32 mx, my, fx, fy;
     bool8 meIn, themIn;
+    u8 meWorld = 0, themWorld = 0;
     *onScreen = FALSE;
     *steps = -1;
     if (MP_GetRemoteMapPos(id, &rx, &ry))
@@ -311,9 +328,14 @@ static bool8 FriendOffset(u8 id, s32 *dx, s32 *dy, s32 *steps, bool8 *onScreen)
         *steps = abs(*dx) + abs(*dy);
         return TRUE;
     }
+    if (!MP_Region_IsSharedMap(p->state.mapGroup, p->state.mapNum) &&
+        !MP_Region_IsSharedMap(gSaveBlock1Ptr->location.mapGroup, gSaveBlock1Ptr->location.mapNum) &&
+        MP_Region_OfGroup(p->state.mapGroup) != MP_Region_OfGroup(gSaveBlock1Ptr->location.mapGroup))
+        return FALSE;   // (another region: no way to point there)
     if (WorldPos(gSaveBlock1Ptr->location.mapGroup, gSaveBlock1Ptr->location.mapNum, me->currentCoords.x,
-                 me->currentCoords.y, &mx, &my, &meIn)
-     && WorldPos(p->state.mapGroup, p->state.mapNum, p->state.x, p->state.y, &fx, &fy, &themIn))
+                 me->currentCoords.y, &mx, &my, &meIn, &meWorld)
+     && WorldPos(p->state.mapGroup, p->state.mapNum, p->state.x, p->state.y, &fx, &fy, &themIn, &themWorld)
+     && meWorld == themWorld)
     {
         *dx = fx - mx;
         *dy = fy - my;

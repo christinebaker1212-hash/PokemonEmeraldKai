@@ -1,0 +1,10 @@
+# The FRIEND FINDER in KANTO (the user, 2026-11-23: CO-OP features "HOENN-only, and have not been adapted for Kanto"):
+# KANTO's own world grid, walked out from PALLET TOWN (mp_compass.c BuildWorld). ALICE in PALLET TOWN, BOB in VIRIDIAN
+# CITY two maps north (ROUTE 1 between): the arrow points up at him with his steps (exact, not the Town Map's guess).
+# Shot a_viridian.
+MODE=2
+WARP=37,57,10,10
+WARP_B=37,57,12,10
+TMO=170
+EXPECT_A=("friend finder: shown" "compass: player 1 at -6,-70 (76 steps)")
+UNEXPECT_A=("(-1 steps)")

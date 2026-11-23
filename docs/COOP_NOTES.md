@@ -8958,3 +8958,23 @@ The user: "Let's add more structure decks for purchase with money, both Yugioh a
   After the fixes, 1,000 duels: no offer out of reach; the chances still passed by themselves are only your own visible
   Spells and Traps (Set, in hand, face-up) with nothing meant for the moment (hold L to stop at those, as before).
   Build: gcc as tools/ygo/npc_pool.sh's worker line with tools/ygo/audit_reach.c; `audit_reach POOL.txt DUELS [SEED]`.
+
+## CO-OP features in every region, not only HOENN (2026-11-23)
+The user: "Several CO-OP menu features are HOENN-only, and have not been adapted for Kanto. Find them, and patch them."
+- DAILY: the day's outbreak was on HOENN's routes only. Now each region its own (mp_events.c sOutbreakMaps: HOENN,
+  KANTO from ROUTE 1 / VIRIDIAN FOREST, JOHTO from ROUTE 29 / ILEX FOREST; SINNOH, UNOVA, ORRE keep HOENN's): the day
+  picks a slot, the same everywhere, its first 7 early routes (the outbreak goal only then); the starters by the
+  region's GENERATION cap. "Visit a friend's SECRET BASE" only in HOENN (the next together goal elsewhere). Its badge
+  counts (the strong-catch level, the consolation prizes) are the region's (MP_Region_ScaleBadges).
+- MOVE TUTOR: HEART SCALES are all but nowhere outside HOENN, so there a BIG MUSHROOM pays too (FireRed's MOVE MANIAC's
+  price): special MP_MoveTutorPrice (VAR_0x8006 the item, its name in STR_VAR_1), the hub's line counts what's taken.
+- FRIENDS > VISIT SECRET BASE from another region: the bases' group counts as every region's (MP_Region_IsSharedMap:
+  no customs, no key items sent away on the way in) and the way out is where the visitor was (secret_base.c
+  MP_SecretBase_PrepareVisit), never HOENN's entrance.
+- The FRIEND FINDER: a world grid for KANTO (from PALLET TOWN) and JOHTO (from NEW BARK TOWN) beside HOENN's
+  (mp_compass.c BuildWorld roots, WorldMap.world); a friend in another region gets no arrow (scenario compass_kanto).
+- MOEGATCHA TICKETS for KANTO's and JOHTO's gym leaders' TMs too (mp_gatcha.c sStoryItems).
+- RARE CANDIES' cap counted HOENN's badges; now the region's, and only with OPTIONS > BATTLE > RARE CANDY CAP on (off
+  by default, the user 2026-11-23: gMpConfig.candyCap, "rare_candy_cap"; mp_achieve.c MP_RareCandyCap; scenarios
+  candy_many (on), candy_many_nocap).
+- Tests: coop_kanto_menu (`mp outbreakwhere`, `mp tutorprice`), compass_kanto; `mp candycap 0|1`.

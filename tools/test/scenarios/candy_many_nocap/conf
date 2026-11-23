@@ -1,0 +1,7 @@
+# RARE CANDIES by the handful with OPTIONS > BATTLE > RARE CANDY CAP off (the default, the user 2026-11-23): all 12
+# picked, TORCHIC Lv. 5 past the capped Lv. 15 to Lv. 16, where it evolves (that ends the run: one left in the BAG)
+MODE=1
+TMO=150
+ENV_A="MOEMON_DEBUG_PARTY=280:5"
+EXPECT_A=("[test] candycap 0" "[test] bagqty 68: 12" "[test] bagqty 68: 1")
+UNEXPECT_A=("[crash]" "[test] bagqty 68: 2")

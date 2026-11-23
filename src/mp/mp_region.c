@@ -149,6 +149,8 @@ bool8 MP_Region_IsSharedMap(u8 group, u8 num)
         return TRUE;
     if (group == MAP_GROUP(MAP_BATTLE_ISLAND))   // (BATTLE ISLAND: every region's, mp_battleisland.c)
         return TRUE;
+    if (group == MAP_GROUP(MAP_SECRET_BASE_RED_CAVE1))   // (SECRET BASES: a friend's visited from any region)
+        return TRUE;
     if (O3D_IsOrreGroup(group))   // (ORRE: a post-game place every region's boat sails to, src/orre/orre_ferry.c)
         return TRUE;
     for (i = 0; i < ARRAY_COUNT(sShared); i++)

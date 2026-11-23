@@ -1,0 +1,8 @@
+# CO-OP features in KANTO (the user, 2026-11-23: "Several CO-OP menu features are HOENN-only, and have not been adapted
+# for Kanto"): DAILY's outbreak on one of KANTO's routes (region 2) and it shows there, back in HOENN on HOENN's
+# (region 0); MOVE TUTOR takes a BIG MUSHROOM (104) in KANTO, a HEART SCALE (111) in HOENN.
+MODE=1
+TMO=120
+WARP=37,57,10,10
+EXPECT_A=("region 2)" "tutor price 104, has 0" "tutor price 104, has 1" "region 0)" "tutor price 111, has 0")
+UNEXPECT_A=("[crash]" ", 0/1000 there")

@@ -1215,6 +1215,8 @@ void MP_GatchaTicketForItem(void)
 {
     static const u16 sStoryItems[] = {
         ITEM_TM39, ITEM_TM08, ITEM_TM34, ITEM_TM50, ITEM_TM42, ITEM_TM40, ITEM_TM04, ITEM_TM03,   // the 8 gym leaders
+        ITEM_TM19, ITEM_TM06, ITEM_TM38, ITEM_TM26,                     // KANTO's leaders (the rest are HOENN's TMs too)
+        ITEM_TM111, ITEM_TM122, ITEM_TM138, ITEM_TM23, ITEM_TM30, ITEM_TM45, ITEM_TM94,          // JOHTO's leaders
         ITEM_EXP_SHARE,                                                                          // Devon's president
     };
     extern u16 gMpLastScriptItem;

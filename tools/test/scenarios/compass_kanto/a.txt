@@ -1,0 +1,13 @@
+pressuntil A field 5000
+waitfor online 6000
+vpad
+wait 200
+vbtn rstick 1
+wait 2
+vbtn rstick 0
+wait 20
+barrier viridian 2
+wait 240
+rendershot a_viridian
+barrier done 2
+quit

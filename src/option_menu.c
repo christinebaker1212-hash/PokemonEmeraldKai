@@ -70,6 +70,7 @@ enum
     OPT_INSTANTTEXT,  // Moemon Kai: GAME > INSTANT TEXT (words read before at once: mp_qol.c MP_Qol_FieldTextSpeed)
     OPT_LEVELSCALE,
     OPT_MOVESPLIT,
+    OPT_CANDYCAP,     // Moemon Kai: BATTLE > RARE CANDY CAP (OFF / ON: mp_achieve.c MP_RareCandyCap)
     OPT_GENERATION,
     OPT_MEGA,         // Moemon Kai: the battle gimmicks, AUTO / ON / OFF each (battle_gimmick.h)
     OPT_ZMOVES,
@@ -258,6 +259,7 @@ static const u8 sText_FollowPmd[] = _("PMD");
 static const u8 sText_FollowOriginal[] = _("ORIGINAL");
 static const u8 sText_LevelScale[] = _("LEVEL SCALING");
 static const u8 sText_MoveSplit[] = _("MOVE KIND");
+static const u8 sText_CandyCap[] = _("RARE CANDY CAP");
 static const u8 sText_MoveSplitGen3[] = _("GEN 3");
 static const u8 sText_MoveSplitGen4[] = _("GEN 4");
 static const u8 sText_Generation[] = _("GENERATION");
@@ -575,6 +577,7 @@ static void BuildRows(void)
         AddRow(OPT_LEVELSCALE, 0);
         AddRow(OPT_GENERATION, 0);  // Moemon Kai: which generations' Pokémon, moves and types (mp_region.c)
         AddRow(OPT_MOVESPLIT, 0);   // Moemon Kai: Gen 4's physical / special split
+        AddRow(OPT_CANDYCAP, 0);
         AddRow(OPT_MEGA, 0);
         AddRow(OPT_ZMOVES, 0);
         AddRow(OPT_DYNAMAX, 0);
@@ -683,7 +686,7 @@ static u8 Choices(u8 row, const u8 **names, u8 *buf)
         return 3;
     case OPT_TYPEICONS: case OPT_FULLSCREEN: case OPT_VSYNC: case OPT_ANALOGRUN: case OPT_RUMBLE: case OPT_SPECPANEL:
     case OPT_FR_SHOW: case OPT_BIKEMUSIC: case OPT_SURFMUSIC: case OPT_INSTANTTEXT: case OPT_CARDSCALE: case OPT_SHADOWS: case OPT_CARDTITLE: case OPT_BGMUTE:
-    case OPT_WHITEBG: case OPT_GB_SCENERY: case OPT_GB_CAUGHT: case OPT_GB_DAYNIGHT:
+    case OPT_WHITEBG: case OPT_GB_SCENERY: case OPT_GB_CAUGHT: case OPT_GB_DAYNIGHT: case OPT_CANDYCAP:
         names[0] = sText_Off, names[1] = sText_On;
         return 2;
     case OPT_GB_BALLS: case OPT_GB_TRANS: case OPT_GB_MOVES:   // (KAI's, or the style's own game's)
@@ -1024,6 +1027,7 @@ static u8 Current(u8 row)
     case OPT_SC_ON: case OPT_SC_WILD: case OPT_SC_TRAINERS: case OPT_SC_BOSS: case OPT_SC_CAPS: case OPT_SC_PAST8: case OPT_SC_EXP:
         return MP_LevelScaleRule(SC_RULE(sRows[row].opt));
     case OPT_MOVESPLIT:   return gMpConfig.moveSplit != 0;
+    case OPT_CANDYCAP:    return gMpConfig.candyCap != 0;
     case OPT_GENERATION:  return MP_Generation() - 3;
     case OPT_MEGA: case OPT_ZMOVES: case OPT_DYNAMAX: case OPT_TERA:
         return MP_Gimmick_Setting(GIMMICK_MEGA + sRows[row].opt - OPT_MEGA);
@@ -1244,6 +1248,7 @@ static void Change(u8 row, int dir)
         }
         break;
     case OPT_MOVESPLIT:   gMpConfig.moveSplit = !gMpConfig.moveSplit; MP_SendRoomRules(); break;
+    case OPT_CANDYCAP:    gMpConfig.candyCap = !gMpConfig.candyCap; break;
     case OPT_MEGA: case OPT_ZMOVES: case OPT_DYNAMAX: case OPT_TERA:
     {
         u8 g = sRows[row].opt - OPT_MEGA, v;
@@ -1401,6 +1406,7 @@ static const u8 *RowLabel(u8 row, u8 *buf)
     case OPT_INSTANTTEXT: return sText_InstantText;
     case OPT_LEVELSCALE:  return sText_LevelScale;
     case OPT_MOVESPLIT:   return sText_MoveSplit;
+    case OPT_CANDYCAP:    return sText_CandyCap;
     case OPT_GENERATION:  return sText_Generation;
     case OPT_MEGA:        return sText_Mega;
     case OPT_ZMOVES:      return sText_ZMoves;
@@ -1717,6 +1723,9 @@ static bool8 HintText(u8 *buf)
         snprintf(ascii, sizeof(ascii), "%s", (const char *[]){"EXP AS THE GAME GIVES IT",
                  "LESS EXP FAR PAST THE AREA, MORE BELOW IT", "MUCH LESS EXP FAR PAST THE AREA",
                  "EXP OF A FOE 5 LEVELS UNDER ITS SCALED ONE"}[MP_LevelScaleRule(MP_SCALE_EXP) % 4]);
+    else if (opt == OPT_CANDYCAP)
+        snprintf(ascii, sizeof(ascii), "%s", gMpConfig.candyCap ? "RARE CANDIES STOP AT THE NEXT LEADER'S ACE"
+                                                                : "RARE CANDIES RAISE ANY LEVEL");
     else if (opt == OPT_MOVESPLIT)
         snprintf(ascii, sizeof(ascii), MP_Lobby_InRoom() && !MP_LevelScalingIsOurs() ? "ONLINE, THE HOST'S IS USED: %s"
                  : "GEN 4: EACH MOVE PHYSICAL OR SPECIAL", MP_MoveSplit() ? "GEN 4" : "GEN 3");

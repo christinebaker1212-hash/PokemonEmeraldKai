@@ -2,7 +2,8 @@
 @ Same rules as in Fallarbor: one HEART SCALE per move.
 EventScript_MpMoveRelearner::
 	lockall
-	checkitem ITEM_HEART_SCALE
+	special MP_MoveTutorPrice
+	bufferitemname STR_VAR_1, VAR_0x8006
 	goto_if_eq VAR_RESULT, FALSE, EventScript_MpMoveRelearner_NoScale
 	msgbox Text_MpMoveRelearner_Ask, MSGBOX_YESNO
 	goto_if_eq VAR_RESULT, NO, EventScript_MpMoveRelearner_End
@@ -16,7 +17,7 @@ EventScript_MpMoveRelearner_ChooseMon::
 	msgbox FallarborTown_MoveRelearnersHouse_Text_TeachWhichMove, MSGBOX_DEFAULT
 	special TeachMoveRelearnerMove
 	goto_if_eq VAR_0x8004, 0, EventScript_MpMoveRelearner_ChooseMon
-	removeitem ITEM_HEART_SCALE
+	removeitem VAR_0x8006
 	msgbox Text_MpMoveRelearner_UsedScale, MSGBOX_DEFAULT
 EventScript_MpMoveRelearner_End::
 	releaseall
@@ -36,15 +37,15 @@ EventScript_MpMoveRelearner_NoScale::
 	end
 
 Text_MpMoveRelearner_Ask:
-	.string "Use a HEART SCALE to remind a\n"
+	.string "Use a {STR_VAR_1} to remind a\n"
 	.string "MOéMON of a move it forgot?$"
 
 Text_MpMoveRelearner_UsedScale:
-	.string "{PLAYER} used up a HEART SCALE.$"
+	.string "{PLAYER} used up a {STR_VAR_1}.$"
 
 Text_MpMoveRelearner_NoScale:
 	.string "The MOVE TUTOR's service needs a\n"
-	.string "HEART SCALE. You don't have any…$"
+	.string "{STR_VAR_1}. You don't have any…$"
 
 @ Moemon Co-op: walking into a friend's Secret Base from the CO-OP menu
 @ (mp_linkx.c has copied it into our list and picked the exit).

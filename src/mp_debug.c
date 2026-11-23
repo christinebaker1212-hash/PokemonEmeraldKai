@@ -6860,6 +6860,22 @@ void MP_TestCommand(const char *cmd, const char *arg)
         void MP_Events_DebugGoals(void);
         MP_Events_DebugGoals();
     }
+    else if (strcmp(cmd, "candycap") == 0)   // candycap 0|1 - OPTIONS > BATTLE > RARE CANDY CAP
+    {
+        gMpConfig.candyCap = atoi(arg) != 0;
+        printf("[test] candycap %d\n", gMpConfig.candyCap);
+    }
+    else if (strcmp(cmd, "outbreakwhere") == 0)   // outbreakwhere - today's outbreak in this region
+    {
+        void MP_Events_DebugOutbreak(void);
+        MP_Events_DebugOutbreak();
+    }
+    else if (strcmp(cmd, "tutorprice") == 0)   // tutorprice - what CO-OP > MOVE TUTOR takes here
+    {
+        void MP_MoveTutorPrice(void);
+        MP_MoveTutorPrice();
+        printf("[test] tutor price %u, has %u\n", gSpecialVar_0x8006, gSpecialVar_Result);
+    }
     else if (strcmp(cmd, "outbreak") == 0)
     {
         int i, hits = 0;

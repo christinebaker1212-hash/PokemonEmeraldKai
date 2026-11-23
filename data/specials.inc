@@ -547,6 +547,7 @@ gSpecials::
 	def_special QzGoldenrodElevatorMenu
 	def_special QzGoldenrodElevatorGo
 	def_special MP_GatchaTicketForItem
+	def_special MP_MoveTutorPrice
 	def_special MP_GatchaBuyTicket
 	def_special MP_Rematch_Reward
 	def_special MP_Rematch_IsEndgame

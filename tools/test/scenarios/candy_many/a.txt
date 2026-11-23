@@ -1,5 +1,6 @@
 pressuntil A field 5000
 wait 100
+mp candycap 1
 mp item 68 12
 mp bagqty 68
 mp party

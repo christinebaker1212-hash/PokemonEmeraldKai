@@ -32,6 +32,7 @@
 #include "event_object_movement.h"
 #include "field_player_avatar.h"
 #include "mp_life_field.h"
+#include "mp_region.h"
 #include "constants/items.h"
 
 void MP_AsciiToGame(u8 *dst, const char *src, int maxLen);
@@ -447,7 +448,13 @@ static void HubRowText(u8 main, char *name, char *news, int size)
     {
         u16 n = CountTotalItemQuantityInBag(ITEM_HEART_SCALE);
         snprintf(name, size, "MOVE TUTOR");
-        snprintf(news, size, n == 1 ? "1 HEART SCALE" : "%d HEART SCALES", n);
+        if (!n && MP_Region_Current() != REGION_HOENN)   // (outside HOENN a BIG MUSHROOM does too: MP_MoveTutorPrice)
+        {
+            n = CountTotalItemQuantityInBag(ITEM_BIG_MUSHROOM);
+            snprintf(news, size, n == 1 ? "1 BIG MUSHROOM" : "%d BIG MUSHROOMS", n);
+        }
+        else
+            snprintf(news, size, n == 1 ? "1 HEART SCALE" : "%d HEART SCALES", n);
         break;
     }
     case MAIN_ONLINE:
@@ -546,7 +553,8 @@ static void DrawHubHelp(u8 win, u8 cursor)
     case MAIN_DAILY:     snprintf(ascii, sizeof(ascii), "Today's goals, gifts and the weekly race.  %s", keys); break;
     case MAIN_BERRY:     snprintf(ascii, sizeof(ascii), "Blend BERRIES into POK~BLOCKS.  %s", keys); break;
     case MAIN_LOOK:      snprintf(ascii, sizeof(ascii), "Change how you look to everyone.  %s", keys); break;
-    case MAIN_REMINDER:  snprintf(ascii, sizeof(ascii), "Remember a move for a HEART SCALE.  %s", keys); break;
+    case MAIN_REMINDER:  snprintf(ascii, sizeof(ascii), MP_Region_Current() == REGION_HOENN ? "Remember a move for a HEART SCALE.  %s"
+                                                       : "Remember a move for a HEART SCALE or a BIG MUSHROOM.  %s", keys); break;
     default:
         snprintf(ascii, sizeof(ascii), MP_Lobby_InRoom() ? "Your room, its CODE and rules.  %s" : "Host a game or join a friend's.  %s", keys);
         break;

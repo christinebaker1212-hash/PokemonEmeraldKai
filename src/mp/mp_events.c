@@ -277,7 +277,8 @@ static void PickGoalsFull(s32 date, u8 *types, u8 *solo)
         solo[n++] = G_CATCH;
     types[0] = solo[0];
     types[1] = team[0];
-    types[2] = together[0];
+    // (a SECRET BASE is made in HOENN: elsewhere the next together goal)
+    types[2] = together[0] == G_BASE && MP_Region_Current() != REGION_HOENN ? together[1] : together[0];
 }
 
 static void PickGoals(s32 date, u8 *types)
@@ -601,7 +602,7 @@ static const u16 sOutbreakSpecies[] = {
 };
 
 // First partners are wild nowhere else (mp_region.c MP_WildSlotSpecies): one outbreak day in four is one of them,
-// from the generations the GENERATION setting shows in HOENN
+// from the generations the GENERATION setting shows in the region the player is in
 static const u16 sOutbreakStarters[] = {
     SPECIES_BULBASAUR, SPECIES_CHARMANDER, SPECIES_SQUIRTLE, SPECIES_CHIKORITA, SPECIES_CYNDAQUIL, SPECIES_TOTODILE,
     SPECIES_TREECKO, SPECIES_TORCHIC, SPECIES_MUDKIP, SPECIES_TURTWIG, SPECIES_CHIMCHAR, SPECIES_PIPLUP,
@@ -610,23 +611,41 @@ static const u16 sOutbreakStarters[] = {
     SPECIES_SPRIGATITO, SPECIES_FUECOCO, SPECIES_QUAXLY,
 };
 
-static const u16 sOutbreakMaps[] = {
-    MAP_ROUTE101, MAP_ROUTE102, MAP_ROUTE103, MAP_ROUTE104, MAP_ROUTE110, MAP_ROUTE113,
-    MAP_ROUTE114, MAP_ROUTE115, MAP_ROUTE116, MAP_ROUTE117, MAP_ROUTE118, MAP_ROUTE119,
-    MAP_ROUTE120, MAP_ROUTE121, MAP_ROUTE123, MAP_PETALBURG_WOODS,
+// Each region's routes (the user, 2026-11-23: CO-OP features "HOENN-only, and have not been adapted for Kanto"): the
+// day picks a slot, the same in every region; the first OUTBREAK_EARLY of each are routes everyone reaches early
+// (the outbreak goal is only set then). SINNOH, UNOVA and ORRE (their own engines) have HOENN's.
+#define OUTBREAK_SLOTS 16
+#define OUTBREAK_EARLY 7
+static const u16 sOutbreakMaps[][OUTBREAK_SLOTS] = {
+    [REGION_HOENN] = {MAP_ROUTE101, MAP_ROUTE102, MAP_ROUTE103, MAP_ROUTE104, MAP_ROUTE110, MAP_ROUTE116,
+                      MAP_PETALBURG_WOODS, MAP_ROUTE113, MAP_ROUTE114, MAP_ROUTE115, MAP_ROUTE117, MAP_ROUTE118,
+                      MAP_ROUTE119, MAP_ROUTE120, MAP_ROUTE121, MAP_ROUTE123},
+    [REGION_KANTO] = {MAP_KANTO_ROUTE1, MAP_KANTO_ROUTE2, MAP_KANTO_ROUTE22, MAP_KANTO_VIRIDIAN_FOREST,
+                      MAP_KANTO_ROUTE3, MAP_KANTO_ROUTE24, MAP_KANTO_ROUTE25, MAP_KANTO_ROUTE4, MAP_KANTO_ROUTE5,
+                      MAP_KANTO_ROUTE6, MAP_KANTO_ROUTE7, MAP_KANTO_ROUTE8, MAP_KANTO_ROUTE9, MAP_KANTO_ROUTE10,
+                      MAP_KANTO_ROUTE11, MAP_KANTO_ROUTE14},
+    [REGION_JOHTO] = {MAP_JOHTO_ROUTE29, MAP_JOHTO_ROUTE30, MAP_JOHTO_ROUTE31, MAP_JOHTO_ROUTE32,
+                      MAP_JOHTO_ROUTE33, MAP_JOHTO_ROUTE34, MAP_JOHTO_ILEX_FOREST, MAP_JOHTO_ROUTE35,
+                      MAP_JOHTO_ROUTE36, MAP_JOHTO_ROUTE37, MAP_JOHTO_ROUTE38, MAP_JOHTO_ROUTE39, MAP_JOHTO_ROUTE42,
+                      MAP_JOHTO_ROUTE43, MAP_JOHTO_ROUTE44, MAP_JOHTO_ROUTE45},
 };
+static u8 OutbreakRegion(void)
+{
+    u8 r = MP_Region_Current();
+    return r == REGION_KANTO || r == REGION_JOHTO ? r : REGION_HOENN;
+}
 
 static void TodaysOutbreak(u16 *species, u16 *map)
 {
     u32 h = Hash(MP_Lobby_RoomName(), (u32)TodayUTC() * 40503u + 7);
     *species = sOutbreakSpecies[h % ARRAY_COUNT(sOutbreakSpecies)];
-    *map = sOutbreakMaps[(h / 97) % ARRAY_COUNT(sOutbreakMaps)];
+    *map = sOutbreakMaps[OutbreakRegion()][(h / 97) % OUTBREAK_SLOTS];
     if ((h / 2003) % 4 == 0)
     {
         u16 shown[ARRAY_COUNT(sOutbreakStarters)];
         u32 i, n = 0;
         for (i = 0; i < ARRAY_COUNT(sOutbreakStarters); i++)
-            if (MP_Gen_OfSpecies(sOutbreakStarters[i]) <= MP_Gen_Cap(REGION_HOENN))
+            if (MP_Gen_OfSpecies(sOutbreakStarters[i]) <= MP_Gen_Cap(OutbreakRegion()))
                 shown[n++] = sOutbreakStarters[i];
         if (n > 0)
             *species = shown[(h / 8009) % n];
@@ -643,13 +662,8 @@ static bool8 IsTodaysOutbreak(u16 species)
 // The outbreak goal only when the outbreak is on a route everyone reaches early
 static bool8 OutbreakIsEarly(void)
 {
-    static const u16 sEarly[] = {MAP_ROUTE101, MAP_ROUTE102, MAP_ROUTE103, MAP_ROUTE104, MAP_ROUTE110, MAP_ROUTE116, MAP_PETALBURG_WOODS};
-    u16 sp, map, i;
-    TodaysOutbreak(&sp, &map);
-    for (i = 0; i < ARRAY_COUNT(sEarly); i++)
-        if (map == sEarly[i])
-            return TRUE;
-    return FALSE;
+    u32 h = Hash(MP_Lobby_RoomName(), (u32)TodayUTC() * 40503u + 7);
+    return (h / 97) % OUTBREAK_SLOTS < OUTBREAK_EARLY;   // (the same slot in every region)
 }
 
 // From wild_encounter.c: maybe swap a land encounter for the outbreak species
@@ -685,10 +699,8 @@ static void OutbreakText(char *out, int len)
 
 static u8 BadgeCount(void)
 {
-    u8 i, n = 0;
-    for (i = 0; i < 8; i++)
-        n += FlagGet(FLAG_BADGE01_GET + i) ? 1 : 0;
-    return n;
+    u8 n = MP_Region_ScaleBadges();   // (the region the player is in: HOENN is never the default)
+    return n > 8 ? 8 : n;
 }
 
 static u16 CountItems(const u16 *items, u8 count)
@@ -1283,9 +1295,9 @@ void MP_Events_Update(void)
             char msg[96], where[64];
             TodaysOutbreak(&sp, &map);
             OutbreakText(where, sizeof(where));
-            // (HOENN's routes: from another region, it says where)
-            snprintf(msg, sizeof(msg), MP_Region_Current() == REGION_HOENN ? "Outbreak today: %s"
-                                                                          : "Outbreak today in HOENN: %s", where);
+            // (the region's own routes; SINNOH, UNOVA and ORRE have HOENN's: it says where)
+            snprintf(msg, sizeof(msg), MP_Region_Current() == OutbreakRegion() ? "Outbreak today: %s"
+                                                                              : "Outbreak today in HOENN: %s", where);
             QueueToast(msg);
         }
     }
@@ -1708,4 +1720,37 @@ u8 MP_Events_PhoneGoals(char out[][64], s32 *progress, s32 *target, u8 max)
         n++;
     }
     return n;
+}
+
+// Special (data/scripts/mp_qol.inc, CO-OP > MOVE TUTOR): what the service takes. A HEART SCALE, as at FALLARBOR; outside
+// HOENN, where HEART SCALES are all but nowhere (the user, 2026-11-23: CO-OP features "HOENN-only, and have not been
+// adapted for Kanto"), a BIG MUSHROOM does too, FireRed's MOVE MANIAC's price. VAR_RESULT: one is in the BAG;
+// VAR_0x8006: the item asked for (the HEART SCALE when there's neither in HOENN, the BIG MUSHROOM elsewhere).
+void MP_MoveTutorPrice(void)
+{
+    bool8 hoenn = MP_Region_Current() == REGION_HOENN;
+    gSpecialVar_0x8006 = ITEM_HEART_SCALE;
+    gSpecialVar_Result = CheckBagHasItem(ITEM_HEART_SCALE, 1);
+    if (!gSpecialVar_Result && !hoenn)
+    {
+        gSpecialVar_0x8006 = ITEM_BIG_MUSHROOM;
+        gSpecialVar_Result = CheckBagHasItem(ITEM_BIG_MUSHROOM, 1);
+    }
+}
+
+// Test harness (mp outbreakwhere): today's outbreak in the region the player is in, and how often it shows on its map
+void MP_Events_DebugOutbreak(void)
+{
+    u16 sp, map, i, hits = 0;
+    char where[64];
+    struct WarpData was = gSaveBlock1Ptr->location;
+    TodaysOutbreak(&sp, &map);
+    OutbreakText(where, sizeof(where));
+    gSaveBlock1Ptr->location.mapGroup = map >> 8;
+    gSaveBlock1Ptr->location.mapNum = map & 0xFF;
+    for (i = 0; i < 1000; i++)
+        hits += MP_Events_MaybeOutbreak(SPECIES_RATTATA) != SPECIES_RATTATA;
+    gSaveBlock1Ptr->location = was;
+    printf("[test] outbreak today: %s (map %u.%u, region %u), %u/1000 there, early %d\n", where, map >> 8, map & 0xFF,
+           MP_Region_OfGroup((u8)(map >> 8)), hits, OutbreakIsEarly());
 }

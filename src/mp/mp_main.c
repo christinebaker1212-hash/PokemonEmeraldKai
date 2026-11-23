@@ -605,6 +605,7 @@ static void LoadConfig(void)
         else if (strcmp(key, "trainer_padding") == 0) gMpConfig.trainerPadding = atoi(val) != 0;
         else if (strcmp(key, "level_scaling") == 0) gMpConfig.levelScaling = atoi(val) != 0;
         else if (strcmp(key, "move_split") == 0) gMpConfig.moveSplit = atoi(val) != 0;
+        else if (strcmp(key, "rare_candy_cap") == 0) gMpConfig.candyCap = atoi(val) != 0;
         else if (strcmp(key, "generation") == 0) gMpConfig.generation = atoi(val) >= 3 && atoi(val) <= 9 ? atoi(val) : 3;
         else if (strcmp(key, "gimmicks") == 0) gMpConfig.gimmicks = atoi(val) & 0xFF;
         else if (strcmp(key, "level_scaling_rules") == 0)
@@ -886,6 +887,8 @@ void MP_SaveConfig(void)
                    "card_gen = %d\nmagic_gen = %d\n", gMpConfig.cardGen, gMpConfig.mtgGen);
         fprintf(f, "; OPTIONS > GAME > YU-GI-OH! GEN: 0 = every card, 1 FUSION, 2 SYNCHRO, 3 XYZ, 4 PENDULUM (online, the host's)\n"
                    "yugioh_gen = %d\n", gMpConfig.ygoGen);
+        fprintf(f, "; OPTIONS > BATTLE > RARE CANDY CAP: 1 = RARE CANDIES stop at the next gym leader's ace\n"
+                   "rare_candy_cap = %d\n", gMpConfig.candyCap);
         fprintf(f, "; ready-made phrases R2 offers for empty phrase slots (0-%d)\nquick_stock = %d %d %d %d\n",
             MP_Emote_QuickPhraseCount() - 1, gMpConfig.quickStock[0], gMpConfig.quickStock[1],
             gMpConfig.quickStock[2], gMpConfig.quickStock[3]);

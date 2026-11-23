@@ -1797,8 +1797,8 @@ static void TopUpOldRewards(void)
 u8 MP_RareCandyCap(void)
 {
     static const u8 sCap[9] = {15, 20, 27, 33, 36, 41, 47, 51, MAX_LEVEL};
-    u8 i, badges = 0;
-    for (i = 0; i < 8; i++)
-        badges += FlagGet(FLAG_BADGE01_GET + i) ? 1 : 0;
-    return sCap[badges];
+    u8 badges = MP_Region_ScaleBadges();   // (the region the player is in: HOENN is never the default)
+    if (!gMpConfig.candyCap)   // (OPTIONS > BATTLE > RARE CANDY CAP: off by default, the user 2026-11-23)
+        return MAX_LEVEL;
+    return sCap[badges > 8 ? 8 : badges];
 }
