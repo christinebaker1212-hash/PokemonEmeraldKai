@@ -1025,13 +1025,30 @@ int main(void)
            never takes it, at any level: 2000 LP for nothing) */
         printf("[verre] demise offered again after it was negated: %u\n", again);
         {
-            unsigned lv;
+            unsigned lv, blunders = 0;
+            struct YgoAnswer a;
+            /* a careful duelist (no misplays) never does it, at any level, nor does the best */
             for (lv = 0; lv < 4; lv++)
             {
-                struct YgoAnswer a;
-                YgoDuel_AiAnswerLevel(&D, lv, &a);
+                YgoDuel_AiAnswerAs(&D, lv, 0, 0, &a);
                 CHECK(!(a.count && D.query.items[a.picks[0]].kind == YGO_ACT_ACTIVATE &&
                         !strcmp(ItemName(a.picks[0]), "Demise, King of Armageddon")));
+            }
+            YgoDuel_AiAnswerLevel(&D, 3, &a);
+            CHECK(!(a.count && D.query.items[a.picks[0]].kind == YGO_ACT_ACTIVATE &&
+                    !strcmp(ItemName(a.picks[0]), "Demise, King of Armageddon")));
+            /* a child far from good misplays, comically: always, at 100% (the user, 2026-11-24) */
+            YgoDuel_AiAnswerAs(&D, 2, 100, 1, &a);   /* (a steadier hand than a beginner's, so the misplay is its pick) */
+            blunders = a.count && D.query.items[a.picks[0]].kind == YGO_ACT_ACTIVATE &&
+                       !strcmp(ItemName(a.picks[0]), "Demise, King of Armageddon");
+            printf("[verre] a comical child pays 2000 LP for nothing: %u\n", blunders);
+            CHECK(blunders);
+            {
+                int comical = 0;
+                unsigned kid = Ygo_Misplays(0, YGO_AGE_CHILD, 1300, &comical), adult = Ygo_Misplays(0, YGO_AGE_ADULT, 1300, NULL);
+                unsigned pro = Ygo_Misplays(2, YGO_AGE_ADULT, 1800, NULL);
+                printf("[verre] misplays: child %u%% (comical %d), adult %u%%, skilled adult %u%%\n", kid, comical, adult, pro);
+                CHECK(kid > adult && adult > pro && comical);
             }
         }
     }

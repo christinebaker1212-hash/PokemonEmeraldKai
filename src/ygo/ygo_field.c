@@ -829,6 +829,9 @@ int Ygo_FieldPick(struct ObjectEvent *npc, const uint8_t *script, uint32_t h, ui
         if (team)
             o->music = MUS_VS_AQUA_MAGMA;
         o->voice = team ? QUOTE_VOICE_TEAM : Tcg_VoiceOf(Tcg_LookGfx(npc));
+        // how old they are: a child misplays far more, and comically when far from good (Ygo_Misplays)
+        o->age = Tcg_VoiceOf(Tcg_LookGfx(npc)) == QUOTE_VOICE_KID ? YGO_AGE_CHILD
+               : label && !strcmp(label, "TEEN") ? YGO_AGE_TEEN : YGO_AGE_ADULT;
         o->quoteWho[0] = 0;
         *line = CardTable_Hello(o->key, QUOTE_GAME_YGO, NULL, o->voice, team ? sText_DuelTeam : sDuelLines[(h >> 20) % 3], h);
         return PLAY_YGO;

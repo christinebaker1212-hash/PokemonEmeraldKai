@@ -3039,6 +3039,17 @@ field ... Skill level and ELO should be a factor."
   level up when no deck reaches the target: "Card AI levels" above).
 - **Checked**: test_edo_cards "demise and verre" (Verre is offered against Demise; once negated, no level activates
   Demise again); a new-vs-old harness over the NPC pool (old AI built from git with renamed entry points).
+- **Misplays by who they are** (the user, 2026-11-24, after 1.220.0: "I still think they should misplay ... children
+  should misplay more often than adults, maybe even comically so, depending on ELO"): `Ygo_Misplays(level, age, elo)`
+  gives a duelist's chance, at each such moment, of the play a careful one wouldn't make (the sure losses above, a weak
+  monster Summoned face up into a stronger one, an attack it can't win, a Trap sprung at nothing, the wrong
+  position): by level 45 / 20 / 6 / 0%, a child x1.6, a grown-up x0.6 (teens as is), +12 / +6 for a rating under
+  1350 / 1450, a quarter / half off over 1650 / 1750, at most 80%; the best (level 3) never. A child at level 0-1 under
+  1600 is comical: its misplays come gleefully (scored over its sensible plays) and now and then it turns a choice on
+  its head (its removal on its own monster). Age: YgoOpponent.age from the look's voice (QUOTE_VOICE_KID: a child;
+  the TEEN townsfolk: teens; the rest grown-ups); ygo_ui.c plays the opponent through `YgoDuel_AiAnswerAs`;
+  `YgoDuel_AiAnswerLevel` keeps a level's own grown-up rate (30 / 12 / 4 / 0%); the rating tools' level 3 is
+  unchanged. Measured over 800 duels at level 1 and rating 1300 against 1.219's AI: a grown-up 385-361, a child 369-376.
 
 ## Triple Triad: HOENN's rules from the room host (1.49.2)
 

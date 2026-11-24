@@ -1081,7 +1081,12 @@ static void DuelStep(unsigned pressed, unsigned keys)
             else
             {
                 if (Y.duel.query.player == 1)
-                    YgoDuel_AiAnswerLevel(&Y.duel, Y.opp.level, &a);
+                {
+                    // (as who they are: a child misplays more, comically when far from good; Ygo_Misplays)
+                    int comical = 0;
+                    unsigned blunder = Ygo_Misplays(Y.opp.level, Y.opp.age, Y.opp.elo, &comical);
+                    YgoDuel_AiAnswerAs(&Y.duel, Y.opp.level, blunder, comical, &a);
+                }
                 else
                     YgoDuel_AiAnswer(&Y.duel, &a);
                 if (Y.duel.query.player == 1 && YgoBoard_Telegraph(&Y.duel.query, &a))

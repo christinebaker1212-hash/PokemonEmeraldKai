@@ -18,6 +18,14 @@
 
 static unsigned sLevel = 3;
 static uint32_t sRoll;
+/* Misplays (the user, 2026-11-24: "I still think they should misplay ... children should misplay more often than
+ * adults, maybe even comically so, depending on ELO"): sBlunder in percent, the chance at each such moment that the
+ * duelist makes the play a careful one wouldn't (an effect that costs more than it brings, a negated monster's, an
+ * attack into a monster it can't beat, a weak monster Summoned face up into a stronger one, the wrong position);
+ * sComical, a child far from good: also its removal on its own cards now and then, and gleefully */
+static unsigned sBlunder;
+static int sComical;
+
 static uint32_t Next(void)
 {
     sRoll ^= sRoll << 13;
@@ -37,6 +45,7 @@ static void Seed(const struct YgoDuel *d)
     sRoll = h ? h : 1;
     Next();
 }
+static int Blunder(unsigned percent) { return percent && Next() % 100 < percent; }
 /* percent chance, by level */
 static int Chance(const uint8_t *byLevel) { return Next() % 100 < byLevel[sLevel]; }
 /* e^-x in 1/65536 for x = num / den (no libm in the game) */
@@ -676,7 +685,7 @@ static void Idle(const struct YgoDuel *d, struct YgoAnswer *out)
                 score = 900 + Reckon(out) / 4;
                 score = score < 450 ? 450 : score > 1500 ? 1500 : score;
                 if (out < LOSS || Pointless(s, me, c->obj, card, 1))
-                    score = 0;
+                    score = Blunder(sBlunder) ? (sComical ? 1300 : 950) : 0;   /* (a misplay: "it does something!") */
                 else if ((plan & PLAN_GRAVE) && FillsGrave(card) && score < 950)
                     score = 950;   /* (its plan: the Graveyard) */
             }
@@ -693,11 +702,11 @@ static void Idle(const struct YgoDuel *d, struct YgoAnswer *out)
             score = 500 + (card->atk == YGO_STAT_UNKNOWN ? 1000 : card->atk) / 10;
             if ((card->abilities & YGO_ABILITY_FLIP) ||
                 (card->atk != YGO_STAT_UNKNOWN && card->atk < theirBest && card->def > card->atk))
-                score = 0;   /* (Set it instead) */
+                score = Blunder(sBlunder / 2) ? score : 0;   /* (Set it instead) */
             /* a monster that would just be run over in Attack Position, with no effect for being Summoned: Set it */
             else if (card->atk != YGO_STAT_UNKNOWN && theirMonsters && card->atk < theirBest &&
                      !Says(card, "summoned") && !Says(card, "when this card is normal summoned"))
-                score = 0;
+                score = Blunder(sBlunder) ? score : 0;
             break;
         case YGO_ACT_SET_MONSTER:
             if (!card)
@@ -797,7 +806,7 @@ static void Battle(const struct YgoDuel *d, struct YgoAnswer *out)
         const struct YgoChoice *c = &q->items[i];
         if (c->kind == YGO_ACT_ATTACK && c->obj < s->objCount && n < YGO_QUERY_MAX)
         {
-            if (BestTarget(s, me, c->obj, c->flags & 1) == -1 && !Chance(sRash))
+            if (BestTarget(s, me, c->obj, c->flags & 1) == -1 && !Chance(sRash) && !Blunder(sBlunder / 2))
                 continue;
             /* with face-down Spells and Traps waiting (Mirror Force, Sakuretsu Armor...), the monster it can best
                spare attacks first to draw them out; otherwise the strongest */
@@ -845,7 +854,7 @@ static void Chain(const struct YgoDuel *d, struct YgoAnswer *out)
         if (UsedOften(s, c, 0))
             continue;
         /* (never an effect that costs more than it brings, nor a negated card's) */
-        if (Outcome(s, me, c->obj, card, plan) < LOSS)
+        if (Outcome(s, me, c->obj, card, plan) < LOSS && !Blunder(sBlunder))
             continue;
         /* monsters' effects and Spells / Traps that answer the opponent; never a chain to itself (lower levels miss
          * the moment now and then) */
@@ -858,11 +867,12 @@ static void Chain(const struct YgoDuel *d, struct YgoAnswer *out)
             int battling = s->attacker != 0;
             int mineIn = battling && ((s->objs[s->attacker - 1].controller == me) ||
                                       (s->attackTarget && s->objs[s->attackTarget - 1].controller == me));
-            if (ForBattle(card) && !battling)
+            int slip = Blunder(sBlunder / 3);   /* (a Trap sprung at nothing) */
+            if (ForBattle(card) && !battling && !slip)
                 continue;
-            if (Boost(card) && !mineIn)
+            if (Boost(card) && !mineIn && !slip)
                 continue;
-            if (Pointless(s, me, c->obj, card, 0))
+            if (Pointless(s, me, c->obj, card, 0) && !slip)
                 continue;
         }
         if (Pressure(d, me) || (card && card->frame != YGO_TRAP && card->property != YGO_PROP_QUICK &&
@@ -952,6 +962,14 @@ static void Cards(const struct YgoDuel *d, struct YgoAnswer *out)
                 order[i] = order[j];
                 order[j] = t;
             }
+    /* a child at it: now and then the choice turned on its head (its own monster destroyed, the opponent's equipped) */
+    if (sComical && n >= 2 && q->prompt != YGO_P_ATTACK_TARGET && Blunder(sBlunder / 3))
+        for (i = 0; i < n / 2; i++)
+        {
+            uint8_t t = order[i];
+            order[i] = order[n - 1 - i];
+            order[n - 1 - i] = t;
+        }
     /* now and then the second best first (a target misjudged) */
     {
         static const uint8_t sSwap[4] = {50, 32, 15, 5};
@@ -1021,13 +1039,38 @@ static void Sum(const struct YgoDuel *d, struct YgoAnswer *out)
 }
 
 void YgoDuel_AiAnswer(const struct YgoDuel *d, struct YgoAnswer *out) { YgoDuel_AiAnswerLevel(d, 3, out); }
+/* A level's own misplays, for a duelist of no particular age (a grown-up of middling rating: Ygo_Misplays) */
+static const uint8_t sLevelBlunder[4] = {30, 12, 4, 0};
 void YgoDuel_AiAnswerLevel(const struct YgoDuel *d, unsigned level, struct YgoAnswer *out)
+{
+    YgoDuel_AiAnswerAs(d, level, sLevelBlunder[level > 3 ? 3 : level], 0, out);
+}
+/* How often a duelist misplays (percent) and whether comically: their level, their age (a child far more, a grown-up
+ * less) and their own rating (the weaker, the more) */
+unsigned Ygo_Misplays(unsigned level, unsigned age, int elo, int *comical)
+{
+    static const uint8_t sBase[4] = {45, 20, 6, 0};
+    int p = sBase[level > 3 ? 3 : level];
+    if (age == YGO_AGE_CHILD)
+        p = p * 8 / 5;
+    else if (age == YGO_AGE_ADULT)
+        p = p * 3 / 5;
+    if (elo > 0 && p)
+        p += elo < 1350 ? 12 : elo < 1450 ? 6 : elo > 1750 ? -p / 2 : elo > 1650 ? -p / 4 : 0;
+    p = p < 0 ? 0 : p > 80 ? 80 : p;
+    if (comical)
+        *comical = age == YGO_AGE_CHILD && level <= 1 && (elo <= 0 || elo < 1600);
+    return (unsigned)p;
+}
+void YgoDuel_AiAnswerAs(const struct YgoDuel *d, unsigned level, unsigned blunder, int comical, struct YgoAnswer *out)
 {
     const struct YgoQuery *q = &d->query;
     const struct YgoState *s = &d->s;
     unsigned i;
     memset(out, 0, sizeof(*out));
     sLevel = level > 3 ? 3 : level;
+    sBlunder = level >= 3 ? 0 : blunder;   /* (the best never misplay) */
+    sComical = comical && sBlunder;
     Seed(d);
     switch (q->type)
     {
@@ -1063,7 +1106,7 @@ void YgoDuel_AiAnswerLevel(const struct YgoDuel *d, unsigned level, struct YgoAn
         static const uint8_t sWrong[4] = {30, 15, 5, 0};
         unsigned want = c && c->atk != YGO_STAT_UNKNOWN && (c->atk >= theirBest || c->atk >= c->def) ? YGO_POS_ATTACK
                                                                                                       : YGO_POS_DEFENSE;
-        if (Chance(sWrong))
+        if (Chance(sWrong) || Blunder(sBlunder / 3))
             want = want == YGO_POS_ATTACK ? YGO_POS_DEFENSE : YGO_POS_ATTACK;
         for (i = 0; i < q->count; i++)
             if (q->items[i].value == want)

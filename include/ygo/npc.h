@@ -24,6 +24,7 @@ struct YgoOpponent
     uint32_t seed;          /* (who they are today: their decks come from it) */
     uint8_t portraitW, portraitH;
     uint8_t voice;          /* what they say: include/tcg/quotes.h QUOTE_VOICE_*, and who a special duelist is */
+    uint8_t age;            /* YGO_AGE_* (include/ygo/duel.h): a child misplays more (Ygo_Misplays) */
     char quoteWho[16];
     uint32_t portrait[64 * 64]; /* ARGB: their sprite as they faced you (up to 32x32), or 64x64: their battle picture */
 };

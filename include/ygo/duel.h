@@ -308,6 +308,11 @@ unsigned YgoDuel_AnswerCount(const struct YgoDuel *d);
 /* The AI's answer to d->query for its player (src/ygo/ygo_ai.c): at its best, or at a level (0 a beginner .. 3) */
 void YgoDuel_AiAnswer(const struct YgoDuel *d, struct YgoAnswer *answer);
 void YgoDuel_AiAnswerLevel(const struct YgoDuel *d, unsigned level, struct YgoAnswer *answer);
+/* ... as a particular duelist: how often they misplay (percent) and whether comically (a child far from good);
+ * Ygo_Misplays works it out from their level, age (YGO_AGE_*) and own rating */
+enum { YGO_AGE_ADULT, YGO_AGE_TEEN, YGO_AGE_CHILD };
+void YgoDuel_AiAnswerAs(const struct YgoDuel *d, unsigned level, unsigned blunder, int comical, struct YgoAnswer *answer);
+unsigned Ygo_Misplays(unsigned level, unsigned age, int elo, int *comical);
 /* Can the card be played: EDOPro has it whole (src/ygo/ygo_edo_data.c)? Cards that can't don't show up in packs,
  * shops or decks. */
 int Ygo_CardReady(unsigned card);
