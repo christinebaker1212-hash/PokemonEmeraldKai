@@ -2,6 +2,7 @@
 #include <stdio.h>
 #include <string.h>
 #include "global.h"
+#include "mp_weather.h"
 #include "mp.h"
 #include "main.h"
 #include "menu.h"
@@ -41,7 +42,7 @@ u8 MP_Events_PhoneGoals(char out[][64], s32 *progress, s32 *target, u8 max);
 
 // Pages of the CO-OP menu. Rows are per page; each page ends with BACK/CLOSE.
 // No CLOSE row: B or START closes the menu
-enum { MAIN_EMOTES, MAIN_FRIENDS, MAIN_TRADE, MAIN_SHARED_PC, MAIN_GATCHA, MAIN_DAILY, MAIN_TOURNEY, MAIN_BERRY, MAIN_REMINDER, MAIN_LOOK, MAIN_ONLINE, MAIN_COUNT, MAIN_CLOSE = 0xFF };
+enum { MAIN_EMOTES, MAIN_FRIENDS, MAIN_TRADE, MAIN_SHARED_PC, MAIN_GATCHA, MAIN_DAILY, MAIN_TOURNEY, MAIN_BERRY, MAIN_REMINDER, MAIN_LOOK, MAIN_ONLINE, MAIN_FORECAST, MAIN_COUNT, MAIN_CLOSE = 0xFF };
 // LOOK rows. BIKE only shows for a character who rides a Pokemon or a vehicle on a bike: the page's
 // cursor counts the rows shown (LookRowAt / LookCursorOf)
 enum { ROW_GROUP, ROW_SPRITE, ROW_BIKE, ROW_FRONT, ROW_BACKPIC, ROW_SKIN, ROW_HAIR, ROW_OUTFIT, ROW_ACCENT, ROW_CREATE, ROW_EDIT, ROW_SAVE, ROW_REVERT, LOOK_COUNT };
@@ -363,14 +364,14 @@ enum { TAB_PEOPLE, TAB_PLAY, TAB_ME, TAB_COUNT };
 static const u8 sTabRows[TAB_COUNT][TAB_ROWS] = {
     [TAB_PEOPLE] = {MAIN_FRIENDS, MAIN_EMOTES, MAIN_TRADE, MAIN_SHARED_PC},
     [TAB_PLAY]   = {MAIN_TOURNEY, MAIN_GATCHA, MAIN_DAILY, MAIN_BERRY},
-    [TAB_ME]     = {MAIN_LOOK, MAIN_REMINDER, MAIN_ONLINE, MAIN_CLOSE},
+    [TAB_ME]     = {MAIN_LOOK, MAIN_REMINDER, MAIN_FORECAST, MAIN_ONLINE},   // (GO ONLINE always last: the user, 2026-11-24)
 };
 static const char *const sTabNames[TAB_COUNT] = {"PEOPLE", "PLAY", "ME"};
 static const u8 sMainIcon[MAIN_COUNT] = {
     [MAIN_EMOTES] = MP_COOPICON_SOCIAL, [MAIN_FRIENDS] = MP_COOPICON_FRIENDS, [MAIN_TRADE] = MP_COOPICON_TRADE,
     [MAIN_SHARED_PC] = MP_COOPICON_SHAREDPC, [MAIN_GATCHA] = MP_COOPICON_GATCHA, [MAIN_DAILY] = MP_COOPICON_DAILY,
     [MAIN_TOURNEY] = MP_COOPICON_TOURNEY, [MAIN_BERRY] = MP_COOPICON_BERRY, [MAIN_REMINDER] = MP_COOPICON_TUTOR,
-    [MAIN_LOOK] = MP_COOPICON_LOOK, [MAIN_ONLINE] = MP_COOPICON_ONLINE,
+    [MAIN_LOOK] = MP_COOPICON_LOOK, [MAIN_ONLINE] = MP_COOPICON_ONLINE, [MAIN_FORECAST] = MP_COOPICON_FORECAST,
 };
 #define HUB_ROW_Y0 22
 #define HUB_ROW_H  20
@@ -443,6 +444,16 @@ static void HubRowText(u8 main, char *name, char *news, int size)
         break;
     }
     case MAIN_BERRY:     snprintf(name, size, "BERRY GAMES"), snprintf(news, size, "BLEND, CRUSH"); break;
+    case MAIN_FORECAST:
+    {
+        // the sky where the player is now (mp_forecast.c)
+        static const char *const sNow[MP_WX_COUNT] = {"FAIR NOW", "RAIN NOW", "STORMS NOW", "SUNNY NOW", "HAIL NOW",
+                                                      "SANDSTORM NOW", "FOG NOW"};
+        u8 wx = MP_Forecast_Now();
+        snprintf(name, size, "FORECAST");
+        snprintf(news, size, "%s", wx < MP_WX_COUNT ? sNow[wx] : "");
+        break;
+    }
     case MAIN_LOOK:      snprintf(name, size, "LOOK"), snprintf(news, size, "YOUR TRAINER"); break;
     case MAIN_REMINDER:
     {
@@ -553,6 +564,7 @@ static void DrawHubHelp(u8 win, u8 cursor)
     case MAIN_DAILY:     snprintf(ascii, sizeof(ascii), "Today's goals, gifts and the weekly race.  %s", keys); break;
     case MAIN_BERRY:     snprintf(ascii, sizeof(ascii), "Blend BERRIES into POK~BLOCKS.  %s", keys); break;
     case MAIN_LOOK:      snprintf(ascii, sizeof(ascii), "Change how you look to everyone.  %s", keys); break;
+    case MAIN_FORECAST:  snprintf(ascii, sizeof(ascii), "The weather today and for the week ahead.  %s", keys); break;
     case MAIN_REMINDER:  snprintf(ascii, sizeof(ascii), MP_Region_Current() == REGION_HOENN ? "Remember a move for a HEART SCALE.  %s"
                                                        : "Remember a move for a HEART SCALE or a BIG MUSHROOM.  %s", keys); break;
     default:
@@ -628,7 +640,7 @@ static void DrawFriendsList(u8 win, u8 cursor)
 
 static void DrawMenu(u8 windowId, u8 page, u8 cursor, u8 choice)
 {
-    static const char *const mainLabels[] = {"SOCIAL", "FRIENDS", "TRADE", "SHARED PC", "MOEGATCHA", "DAILY", "TOURNAMENT", "BERRY GAMES", "MOVE TUTOR", "LOOK", ""};
+    static const char *const mainLabels[] = {"SOCIAL", "FRIENDS", "TRADE", "SHARED PC", "MOEGATCHA", "DAILY", "TOURNAMENT", "BERRY GAMES", "MOVE TUTOR", "LOOK", "", "FORECAST"};
     const char *const lookLabels[] = {"GROUP", "SPRITE", "BIKE", "ID PIC", "BK PIC", "SKIN", "HAIR", "OUTFIT", "ACCENT", "CREATE...",
                                       "EDIT SPRITES...", sIntroDone ? "ALL DONE!" : "SAVE LOOK", "REVERT"};
     char line[64];
@@ -1535,6 +1547,10 @@ static void HandleMainInput(u8 taskId)
     case MAIN_DAILY:
         CloseMenu(taskId);
         MP_Daily_OpenMenu();
+        break;
+    case MAIN_FORECAST:
+        CloseMenu(taskId);
+        MP_Forecast_Open();
         break;
     case MAIN_GATCHA:
         CloseMenu(taskId);

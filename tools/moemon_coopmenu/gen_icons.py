@@ -18,10 +18,30 @@ ICONS = [('FRIENDS', 'fame_checker'), ('SOCIAL', 'letter'), ('TRADE', 'linking_c
          ('TOURNAMENT', 'battle_flag'), ('MOEGATCHA', 'coin_case'), ('DAILY', 'contest_pass'),
          ('BERRY GAMES', 'berry_pouch'), ('LOOK', 'silk_scarf'), ('MOVE TUTOR', 'heart_scale'), ('ONLINE', 'vs_seeker'),
          # the A-Life pick's (mp_menu.c MP_OpenVerbWheel): drawn ones, then items
-         ('PET', '@hand'), ('GROOM', '@brush'), ('PLAY', 'poke_ball'), ('FEED', 'oran_berry'), ('KEEPSAKE', 'soothe_bell')]
+         ('PET', '@hand'), ('GROOM', '@brush'), ('PLAY', 'poke_ball'), ('FEED', 'oran_berry'), ('KEEPSAKE', 'soothe_bell'),
+         # (after the A-Life ones, so their numbers stay)
+         ('FORECAST', '@forecast')]
 
 # Drawn icons (16x16, a dark outline): a hand for PET, a brush for GROOM
 DRAWN = {
+    # the FORECAST's: the sun behind a cloud (mp_forecast.c's weather icons, at the menu's size)
+    'forecast': (["................",
+                  "......o..o......",
+                  "..o...oyyo...o..",
+                  "...o.yyyyyy.o...",
+                  ".....yywyyyy....",
+                  "...oyyyyyyXXXX..",
+                  "....yyyyyXccccX.",
+                  "..o.yyyyXcwccccX",
+                  ".....yyXccccccccX"[:16],
+                  "...XXXXcccccccccX"[:16],
+                  "..XcwccccccccccX",
+                  ".XccccccccccccX.",
+                  ".XccccccccccccX.",
+                  "..XXXXXXXXXXXX..",
+                  "................",
+                  "................"], {'X': (88, 96, 112), 'o': (240, 136, 40), 'y': (248, 216, 64), 'w': (255, 255, 248),
+                                        'c': (216, 224, 232)}),
     'hand': (["................",
               "......XX.XX.....",
               "..XX..XoXXoX....",

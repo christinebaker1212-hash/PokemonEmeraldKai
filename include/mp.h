@@ -985,7 +985,7 @@ void MpUi_RowBelowFriends(u8 friends, bool8 selected, const char *left);
 // The CO-OP menu's row icons (mp_ui.c, src/data/mp_coopmenu_icons.h from tools/moemon_coopmenu/gen_icons.py)
 enum { MP_COOPICON_FRIENDS, MP_COOPICON_SOCIAL, MP_COOPICON_TRADE, MP_COOPICON_SHAREDPC, MP_COOPICON_TOURNEY,
        MP_COOPICON_GATCHA, MP_COOPICON_DAILY, MP_COOPICON_BERRY, MP_COOPICON_LOOK, MP_COOPICON_TUTOR, MP_COOPICON_ONLINE,
-       MP_COOPICON_PET, MP_COOPICON_GROOM, MP_COOPICON_PLAY, MP_COOPICON_FEED, MP_COOPICON_KEEPSAKE };
+       MP_COOPICON_PET, MP_COOPICON_GROOM, MP_COOPICON_PLAY, MP_COOPICON_FEED, MP_COOPICON_KEEPSAKE, MP_COOPICON_FORECAST };
 void MpUi_Emote(u8 slot, u8 kind, int x, int y);
 void MP_ShowPopupText(const u8 *text);   // map_name_popup.c: a line or two on the map name's sign (A-Life answers)   // an emote's icon (MP_EMOTE_*) as a picture
 void MP_Emote_IconTiles(u8 kind, u8 *tiles, u16 *pal);   // mp_emote.c: its 16x16 tiles and colors
@@ -998,6 +998,9 @@ void MpTheme_Panel(u8 windowId, u8 bandHeight);
 void MpTheme_SelBar(u8 windowId, int y, int h);
 void MpTheme_Print(u8 windowId, u8 font, const u8 *str, int x, int y, u8 fg, u8 bg);
 bool8 MpUi_IsOpen(void);
+u8 MpUi_MainWindow(void);              // the list window (a screen drawing its own picture there)
+void MpUi_MainPalette(u8 pal);          // ... shown in another BG palette slot (its own colours)
+const u16 *MpTheme_Palette(void);       // the theme's sixteen colours
 void MpUi_Open(void);
 void MpUi_Close(void);
 void MpUi_Begin(const char *title);

@@ -345,7 +345,8 @@ src/mp/mp_chatter.c; COOP_NOTES "CHATTER as it was in Platinum"; tests chatter_*
 Also the hourly weather (1.220.0: moving rain / sun fronts over every region's plain outdoor maps, the same for everyone
 by the hour and the server's clock, hail where cold, very rare desert sandstorms, never over a map's own or a script's
 weather, weather-loving POKéMON from the rare slots, "Likes the sun." in the app: src/mp/mp_weather.c; COOP_NOTES
-"The hourly weather"; tests sky_*).
+"The hourly weather"; tests sky_*); its FORECAST (1.221.0: CO-OP > ME > FORECAST, today's hours and seven days for
+any place of the region: src/mp/mp_forecast.c; COOP_NOTES "CO-OP > ME > FORECAST"; test forecast).
 Also fishing as Gen 1 had it (1.97.0: cast, then a bite and the battle or no nibble; no dots or timing: field_player_avatar.c;
 COOP_NOTES "Fishing as Gen 1 had it"; test fishing_gen1).
 Also breeding by Gen 9's rules (1.166.0: NIDORAN / VOLBEAT either kind from any pair, no incense, egg moves from both

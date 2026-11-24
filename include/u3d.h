@@ -44,6 +44,7 @@ u16 U3D_ExpAnimFrames(u16 model, u8 anim);
 bool8 U3D_Elboard_Load(u16 zone);   // u3d_elboard.c: the gates' news boards
 void U3D_Elboard_Frame(void);
 u8 U3D_ZoneWeather(u16 zone);
+u8 U3D_ZoneFieldWeather(u16 zone);   // ... as the game's field weather (mp_forecast.c)
 float U3D_GridGround(s32 x, s32 z, float near);
 void U3D_ViewBob(float dy);
 bool8 U3D_StoneStep(bool8 isPlayer, s16 fromX, s16 fromY, s16 x, s16 y);

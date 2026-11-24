@@ -151,18 +151,23 @@ u8 U3D_ZoneWeather(u16 zone)
 // the field's weather on an UNOVA map: its weather today as the game's (Black's zone_weather.c ids: 0 sunny, 1 snow,
 // 2 rain, 3 and 12 sandstorm, 4 heavy snow, 5 hail, 6 THUNDURUS's thunderstorm, 7 TORNADUS's storm, 8 diamond dust,
 // 9-11 and 13-14 mist; the game has no hail or diamond dust: its snow); 0xFF on any other region's map
-u8 U3D_FieldWeather(void)
+// a zone's field weather today, as the game's (the FORECAST asks of any zone: mp_forecast.c)
+u8 U3D_ZoneFieldWeather(u16 zone)
 {
     static const u8 sKai[15] = {WEATHER_NONE, WEATHER_SNOW, WEATHER_RAIN, WEATHER_SANDSTORM, WEATHER_SNOW, WEATHER_SNOW,
                                 WEATHER_RAIN_THUNDERSTORM, WEATHER_DOWNPOUR, WEATHER_SNOW, WEATHER_FOG_HORIZONTAL,
                                 WEATHER_FOG_HORIZONTAL, WEATHER_FOG_HORIZONTAL, WEATHER_SANDSTORM,
                                 WEATHER_FOG_HORIZONTAL, WEATHER_FOG_HORIZONTAL};
+    u8 w = U3D_ZoneWeather(zone);
+    return w < ARRAY_COUNT(sKai) ? sKai[w] : WEATHER_NONE;
+}
+
+u8 U3D_FieldWeather(void)
+{
     u16 zone = U3D_CurrentZone();
-    u8 w;
     if (zone == 0xFFFF)
         return 0xFF;
-    w = U3D_ZoneWeather(zone);
-    return w < ARRAY_COUNT(sKai) ? sKai[w] : WEATHER_NONE;
+    return U3D_ZoneFieldWeather(zone);
 }
 
 static u8 *SlotsSaved(bool8 save)

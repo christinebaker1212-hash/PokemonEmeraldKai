@@ -339,6 +339,40 @@ void MP_Weather_Update(void)
     SetNextWeather(want);
 }
 
+// The FORECAST (mp_forecast.c): the sky over a map at a UTC hour whose local hour is LOCAL; a map that keeps its own
+// weather says what that is (*own)
+u8 MP_Weather_Forecast(u8 group, u8 num, u32 hour, u8 local, bool8 *own)
+{
+    const struct MapHeader *h = Overworld_GetMapHeaderByGroupAndId(group, num);
+    u8 region, flags, base;
+    s32 x, y;
+    *own = FALSE;
+    if (h == NULL)
+        return MP_WX_CLEAR;
+    base = h->weather;
+    if (U3D_IsUnovaGroup(group))
+    {
+        u16 zone;
+        u8 U3D_ZoneFieldWeather(u16 zone);
+        if (U3D_MapWorldTile(group, num, &x, &y, &zone))
+            base = U3D_ZoneFieldWeather(zone);
+    }
+    if (Place(group, num, base, &region, &x, &y, &flags))
+        return MP_Weather_Sky(region, x, y, hour, flags | (local < 6 || local >= 20 ? MP_WXF_NIGHT : 0));
+    *own = TRUE;
+    switch (base)
+    {
+    case WEATHER_RAIN:                                   return MP_WX_RAIN;
+    case WEATHER_RAIN_THUNDERSTORM: case WEATHER_DOWNPOUR: return MP_WX_STORM;
+    case WEATHER_SNOW:                                   return MP_WX_HAIL;
+    case WEATHER_SANDSTORM:                              return MP_WX_SAND;
+    case WEATHER_DROUGHT:                                return local < 6 || local >= 20 ? MP_WX_CLEAR : MP_WX_SUN;
+    case WEATHER_FOG_HORIZONTAL: case WEATHER_FOG_DIAGONAL: case WEATHER_VOLCANIC_ASH: case WEATHER_SHADE:
+                                                         return MP_WX_FOG;
+    default:                                             return MP_WX_CLEAR;
+    }
+}
+
 // ---------------------------------------------------------------------------------------------------- wild POKéMON
 // What weather a POKéMON likes (MP_WX_*, MP_WX_CLEAR none): its Abilities first (CHLOROPHYLL, SWIFT SWIM...), then its
 // types (sun: FIRE, GRASS; rain: WATER, ELECTRIC, BUG; hail: ICE; sandstorm: ROCK, GROUND, STEEL)

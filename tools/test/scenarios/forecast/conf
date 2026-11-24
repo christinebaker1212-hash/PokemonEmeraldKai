@@ -1,0 +1,8 @@
+# CO-OP > ME > FORECAST (the user's approved mock-up, docs/coop_menu/forecast_mockup.png): the ME tab's new row and
+# its "... NOW", today's hours, a day's words, the next place; shots looked at by hand
+MODE=1
+WARP=0,17,20,10
+TMO=60
+HOUR=13
+EXPECT_A=("[forecast]" "day 7:")
+UNEXPECT_A=("[crash]")

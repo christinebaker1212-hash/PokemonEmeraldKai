@@ -9139,3 +9139,26 @@ like the start menu, or messages ... the player is affected by things like overw
   menu (a framed BG2 pop-up) in FIRERED, CRYSTAL and RED (scenario ui_style_levelup); PLATINUM and BLACK need their ROM
   packs to check.
 
+## CO-OP > ME > FORECAST (1.221.0)
+
+The user, 2026-11-24: "a weather forecast to the CO-OP menu, to see what the weather will be like all day, and for the
+next 7 days"; the mock-up docs/coop_menu/forecast_mockup.png (tools/moemon_coopmenu/forecast_mockup.py, the game's own
+window and fonts) approved as drawn ("Yes, that looks great").
+
+- **src/mp/mp_forecast.c**. The hourly weather comes from the hour alone (mp_weather.c), so it reads ahead:
+  `MP_Weather_Forecast(group, num, hour, local, &own)` is a map's sky at a UTC hour (sun clear at night by the local
+  hour); a map that keeps its own weather (Place() refuses it) says what that is (MP_WX_FOG for fog / ash / shade;
+  UNOVA's by `U3D_ZoneFieldWeather`, today's calendar).
+- **The screen** (MpUi's window, drawn in BG palette 13 while open: `MpUi_MainWindow` / `MpUi_MainPalette`, the theme's
+  colours from `MpTheme_Palette` with ten weather colours in slots 5-12, 14, 15; slot 13 put back on close): TODAY's
+  24 hours as 8x8 icons (the night's 8 PM - 6 AM on a pale band, now boxed in orange, "NOW 1 PM: FAIR" in red), the hour
+  labels 12A / 6A / 12P / 6P, then seven days (weekday from the clock, MP_ClockShift online) by night / morning /
+  afternoon / evening (PartOf: what stands out in the six hours: a storm, hail, a sandstorm, fog, rain, bright sun,
+  else clear: fair by day, the moon by night) and a word (DayWord: STORMS, HAIL, SANDSTORM, FOGGY, RAINY, MORNING
+  SHOWERS, CLEARING, NIGHT RAIN, RAIN LATER, SHOWERS, BRIGHT SUN, SUNNY, SUNNY SPELLS, FAIR). UP / DOWN picks TODAY or a
+  day and the help box says it in words (TodayWords: now, the next stretch of weather, a storm in it; DayWords: up to
+  two parts); LEFT / RIGHT goes round the region's places (its outdoor maps, one per map section, in section order);
+  it opens on the player's (a building is its town's). The hour turning while it's open redraws it.
+- **The row**: the ME tab's third, GO ONLINE always last (the user, 2026-11-24) (MAIN_FORECAST, MP_COOPICON_FORECAST: a drawn sun behind a cloud, appended to
+  gen_icons.py's list so the others keep their numbers), its news the sky here now ("RAIN NOW", MP_Forecast_Now).
+- **Tests**: `mp forecast [place N | day D]` (opens it, prints the place's eight days); scenario forecast.

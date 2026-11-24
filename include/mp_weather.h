@@ -2,7 +2,7 @@
 #define GUARD_MP_WEATHER_H
 // The hourly weather over every region's outdoor maps (src/mp/mp_weather.c)
 
-enum { MP_WX_CLEAR, MP_WX_RAIN, MP_WX_STORM, MP_WX_SUN, MP_WX_HAIL, MP_WX_SAND, MP_WX_COUNT };
+enum { MP_WX_CLEAR, MP_WX_RAIN, MP_WX_STORM, MP_WX_SUN, MP_WX_HAIL, MP_WX_SAND, MP_WX_FOG, MP_WX_COUNT };   // (FOG: a map's own)
 enum { MP_WXF_COLD = 1, MP_WXF_DESERT = 2, MP_WXF_NIGHT = 4 };
 
 struct WildPokemon;
@@ -17,5 +17,10 @@ void MP_Weather_Update(void);                  // each field frame: the hour tur
 u8 MP_Weather_Likes(u16 species);              // the weather a POKéMON likes (MP_WX_CLEAR: none)
 u8 MP_Weather_WildIndex(const struct WildPokemon *mons, const u8 *rates, u8 count, u8 index, u32 roll);
 void MP_Weather_Debug(const char *arg);
+// The FORECAST (mp_forecast.c): the sky over a map at a UTC hour whose local hour is LOCAL (night: sun is clear);
+// *own TRUE when the map keeps weather of its own (then what that is)
+u8 MP_Weather_Forecast(u8 group, u8 num, u32 hour, u8 local, bool8 *own);
+void MP_Forecast_Open(void);   // CO-OP > ME > FORECAST
+u8 MP_Forecast_Now(void);      // the sky here now (MP_WX_*), for the CO-OP menu's row
 
 #endif

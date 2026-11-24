@@ -5101,6 +5101,11 @@ void MP_TestCommand(const char *cmd, const char *arg)
         u8 GetSavedWeather(void);
         printf("[test] weather %u\n", GetSavedWeather());
     }
+    else if (strcmp(cmd, "forecast") == 0)   // forecast [place N | day D] - CO-OP > ME > FORECAST open (mp_forecast.c)
+    {
+        void MP_Forecast_Debug(const char *arg);
+        MP_Forecast_Debug(arg);
+    }
     else if (strcmp(cmd, "sky") == 0)   // sky [hours N | force W | off | apply] - the hourly weather here (mp_weather.c)
     {
         void MP_Weather_Debug(const char *arg);

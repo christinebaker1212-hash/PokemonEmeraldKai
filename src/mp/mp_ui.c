@@ -445,6 +445,24 @@ u8 MpUi_RoomWindowFit(u8 win, u16 baseBlock)
 
 // ---------------------------------------------------------------------------
 
+// The list window itself, for a screen that draws its own picture there (the FORECAST: mp_forecast.c), and the BG
+// palette slot it shows in (its own colours beside the theme's); the theme's palette, to build one from
+u8 MpUi_MainWindow(void)
+{
+    return sMain;
+}
+void MpUi_MainPalette(u8 pal)
+{
+    if (sMain == WINDOW_NONE)
+        return;
+    SetWindowAttribute(sMain, WINDOW_PALETTE_NUM, pal);
+    PutWindowTilemap(sMain);
+}
+const u16 *MpTheme_Palette(void)
+{
+    return sThemePal;
+}
+
 bool8 MpUi_IsOpen(void)
 {
     return sMain != WINDOW_NONE;

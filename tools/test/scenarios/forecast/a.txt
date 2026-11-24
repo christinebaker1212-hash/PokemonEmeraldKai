@@ -1,0 +1,34 @@
+pressuntil A field 5000
+wait 60
+mp menu
+wait 40
+press R 2
+wait 10
+press R 2
+wait 20
+rendershot hub_forecast
+press B 2
+wait 40
+mp forecast
+wait 30
+rendershot fc_today
+press DOWN 2
+wait 20
+rendershot fc_day1
+press DOWN 2
+wait 20
+press DOWN 2
+wait 20
+press DOWN 2
+wait 20
+rendershot fc_day4
+press RIGHT 2
+wait 20
+rendershot fc_next_place
+mp forecast place 5
+wait 20
+rendershot fc_place5
+press B 2
+wait 40
+rendershot closed
+quit
