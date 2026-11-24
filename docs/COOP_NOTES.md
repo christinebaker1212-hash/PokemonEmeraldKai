@@ -3007,6 +3007,39 @@ never shown.
 - **Shuffling**: every card game's duel seed is stirred with the clock (`Tcg_DuelSeed`; scripted tests keep theirs).
   EDOPro never shuffles a Deck itself: ygo_edo.c `Start` shuffles each from the seed (1.48.2).
 
+## The Yu-Gi-Oh! AI reads what its cards do (1.220.0)
+
+The user, 2026-11-24, after Demise, King of Armageddon paid 2000 LP again and again with its effect negated by
+Witchcrafter Madame Verre: "Being able to blow yourself up isn't a glitch, but the AI shouldn't choose to do it ...
+scour Yugioh wikis to check out card effects ... use its cards intelligently to ensure hand and card advantage on the
+field ... Skill level and ELO should be a factor."
+
+- **The engine is right to offer it**: by the rulings a negated monster can still activate its effect (the cost is
+  paid, the effect does nothing), so EDOPro offers it and the player may still do it. The AI never does.
+- **Yugipedia's tags**: every card page carries search tags that say whose cards an effect touches ("Destroys your
+  opponent's Monster Cards" against "Destroys Monster Cards"), what it costs ("You discard for cost", "Pays Life Points
+  for cost", "Tributes for cost") and what it gains ("You draw cards", "Adds from Deck to hand", "Special Summons from
+  your Graveyard"). tools/ygo/fetch_ai_tags.py reads them tag by tag (each tag's cards by password, cached in
+  tools/ygo/.cache/yugipedia/ai_tags) into tools/ygo/ai_tags.json; tools/ygo/gen_ai_tags.py maps them to AT_* bits in
+  src/ygo/ygo_ai_tags.h (included by ygo_ai.c only, so no build list changes). Rerun both for new cards.
+- **Outcome** (ygo_ai.c): what an effect brings in card worth (a card about 1000): the cards it takes from each side
+  ("destroy all" counts the whole field, "other" spares the card itself, one target counts the best of theirs), cards
+  drawn ("draw 2"), searched ("add up to 2"), brought back (Monster Reborn counts the best monster in reach), negations
+  when the opponent is acting, burn (a lethal one wins), less its costs: Life Points by how much is left (LpWorth:
+  little from 8000, a card when it halves them, ruinous near the end), discards, Tributes, itself, and a spent Spell or
+  Trap. What both players draw or discard alike counts for its own side only (the Deck plays it for that).
+- **A loss only when sure**: a negated card's effect on the field; a whole-field wipe that takes more of its own than
+  theirs (Dark Hole, Demise, Torrential Tribute, Heavy Storm); removal with only its own cards to pick (Mystical Space
+  Typhoon on its own Set card); a ruinous Life Point cost. Those are never played, at any level, in the Main Phase, in
+  a chain or at "use this effect?". Anything else the tags can't pin to one effect (cards of several effects, coins and
+  dice, effects nothing recognises) is played as before: the tags are the whole card's.
+- **By level**: Idle's score for an effect is 900 + Outcome / 4 (draws and big swings first); Reckon adds noise by level
+  (EXPERT exact, SKILLED +-150, CASUAL +-350, BEGINNER +-600), so lower levels order their plays more roughly. The
+  level is the one CARD SCALING gives a duelist from the player's rating and theirs (ordinary duelists by badges, a
+  level up when no deck reaches the target: "Card AI levels" above).
+- **Checked**: test_edo_cards "demise and verre" (Verre is offered against Demise; once negated, no level activates
+  Demise again); a new-vs-old harness over the NPC pool (old AI built from git with renamed entry points).
+
 ## Triple Triad: HOENN's rules from the room host (1.49.2)
 
 Online in a room someone else made, HOENN's Triple Triad rules are the host's: every region's rules and TRADE RULE,

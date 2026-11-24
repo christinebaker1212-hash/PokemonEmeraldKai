@@ -940,6 +940,102 @@ int main(void)
         CHECK(HasMonster(0, "Zubaba Knight"));
     }
     printf("ok   extra deck summons\n");
+    /* DEMISE against MADAME VERRE (the user, 2026-11-24: "Demise, King of Armageddon used its ability to pay 2000 LP and
+     * destroyed all other cards on the field. Witchcrafter Madame Verre was on the field but was not prompted"; "I
+     * negated his effect with Madam Verre, he paid 2000 LP 3 more times ... he shouldn't be allowed to pay the 2000 if
+     * the effect was negated"): VERRE revived by MONSTER REBORN, three Spells in the hand; the opponent Ritual Summons
+     * DEMISE with END OF THE WORLD and activates it: VERRE's Quick Effect is offered in answer, negates DEMISE, nothing
+     * is destroyed, and DEMISE can't activate again this turn */
+    sScenario = "demise and verre";
+    {
+        uint16_t m0[YGO_DECK_MAX], m1[YGO_DECK_MAX], x0[YGO_FUSION_MAX], x1[YGO_FUSION_MAX];
+        unsigned guard, i, offered = 0, again = 0;
+        memset(x0, 0, sizeof(x0));
+        memset(x1, 0, sizeof(x1));
+        Deck(m0, LIST("Foolish Burial", "Monster Reborn", "Mystical Space Typhoon", "Pot of Greed", "Card Destruction",
+                      "Witchcrafter Madame Verre"), "Giant Soldier of Stone");
+        Deck(m1, LIST("End of the World", "Demise, King of Armageddon", "Mystical Elf", "Mystical Elf", "Mystical Elf",
+                      "Mystical Elf"), "Mystical Elf");
+        gYgoEdoNoShuffle = 1;
+        CHECK(YgoDuel_Init(&D, m0, x0, m1, x1, 42, 0));
+        Until(0, YGO_Q_IDLE);
+        Act(YGO_ACT_ACTIVATE, "Foolish Burial");
+        for (guard = 0; !(D.query.player == 0 && D.query.type == YGO_Q_IDLE) && guard++ < 40;)
+        {
+            struct YgoAnswer a;
+            if (D.query.player == 0 && D.query.type == YGO_Q_CARDS)
+                Choose(LIST("Witchcrafter Madame Verre"));
+            else if (D.query.type == YGO_Q_CHAIN && !D.query.min)
+                Pass();
+            else
+                YgoDuel_AiAnswer(&D, &a), Answer(&a);
+        }
+        Act(YGO_ACT_ACTIVATE, "Monster Reborn");
+        for (guard = 0; !(D.query.player == 0 && D.query.type == YGO_Q_IDLE) && guard++ < 40;)
+        {
+            struct YgoAnswer a;
+            if (D.query.player == 0 && D.query.type == YGO_Q_CARDS)
+                Choose(LIST("Witchcrafter Madame Verre"));
+            else if (D.query.type == YGO_Q_CHAIN && !D.query.min)
+                Pass();
+            else
+                YgoDuel_AiAnswer(&D, &a), Answer(&a);
+        }
+        CHECK(HasMonster(0, "Witchcrafter Madame Verre"));
+        Until(1, YGO_Q_IDLE);
+        Act(YGO_ACT_ACTIVATE, "End of the World");
+        for (guard = 0; !(D.query.player == 1 && D.query.type == YGO_Q_IDLE) && guard++ < 60;)
+        {
+            struct YgoAnswer a;
+            if (D.query.type == YGO_Q_CHAIN && !D.query.min)
+                Pass();
+            else
+                YgoDuel_AiAnswer(&D, &a), Answer(&a);
+        }
+        CHECK(HasMonster(1, "Demise, King of Armageddon"));
+        Act(YGO_ACT_ACTIVATE, "Demise, King of Armageddon");
+        for (guard = 0; !(D.query.player == 1 && D.query.type == YGO_Q_IDLE) && guard++ < 60;)
+        {
+            struct YgoAnswer a;
+            if (D.query.player == 0 && D.query.type == YGO_Q_CHAIN)
+            {
+                for (i = 0; i < D.query.count; i++)
+                {
+                    if (getenv("TRACE"))
+                        printf("  answer: [%u] %s (quiet %d, meant %u, chain %u)\n", i, ItemName(i),
+                               YgoDuel_QuietChance(&D), D.query.meant, D.s.chainCount);
+                    if (!strcmp(ItemName(i), "Witchcrafter Madame Verre") && !offered)
+                        offered = 1, Pick(i), i = 99;
+                }
+                if (i < 99)
+                    Pass();
+                continue;
+            }
+            if (D.query.type == YGO_Q_CHAIN && !D.query.min)
+                Pass();
+            else
+                YgoDuel_AiAnswer(&D, &a), Answer(&a);
+        }
+        printf("[verre] offered %u, verre still there %d, demise still there %d, lp %d\n", offered,
+               HasMonster(0, "Witchcrafter Madame Verre"), HasMonster(1, "Demise, King of Armageddon"), D.s.players[1].lp);
+        CHECK(offered && HasMonster(0, "Witchcrafter Madame Verre"));
+        for (i = 0; i < D.query.count; i++)
+            again |= D.query.items[i].kind == YGO_ACT_ACTIVATE && !strcmp(ItemName(i), "Demise, King of Armageddon");
+        /* (the engine may offer it: a negated monster can still pay its cost, and its effect is negated. The AI
+           never takes it, at any level: 2000 LP for nothing) */
+        printf("[verre] demise offered again after it was negated: %u\n", again);
+        {
+            unsigned lv;
+            for (lv = 0; lv < 4; lv++)
+            {
+                struct YgoAnswer a;
+                YgoDuel_AiAnswerLevel(&D, lv, &a);
+                CHECK(!(a.count && D.query.items[a.picks[0]].kind == YGO_ACT_ACTIVATE &&
+                        !strcmp(ItemName(a.picks[0]), "Demise, King of Armageddon")));
+            }
+        }
+    }
+    printf("ok   demise and verre\n");
     puts("ygo card scenarios passed");
     return 0;
 }

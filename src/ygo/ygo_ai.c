@@ -5,9 +5,16 @@
  * and Decks are unknown to it (only how many there are). It plays at a level (0 a beginner .. 3 the best): every
  * choice is weighed by how much worse it looks than the best one, e^(-loss / T), T smaller the better the level, so
  * near misses are common and blunders rare; lower levels also miss a Trap's moment, pick the second-best target or
- * the wrong battle position now and then. Its dice come from what both players can see, so a duel replays alike. */
+ * the wrong battle position now and then. Its dice come from what both players can see, so a duel replays alike.
+ * Before it plays an effect it reckons what the effect brings (Outcome: the cards it takes from each side, draws and
+ * searches, against its costs in cards and Life Points), from the card's words and Yugipedia's tags for the card
+ * (ygo_ai_tags.h, tools/ygo/gen_ai_tags.py): an effect that costs more than it brings is never played, at any level,
+ * and a negated card's effect brings nothing (the user, 2026-11-24: "use its cards intelligently to ensure hand and
+ * card advantage on the field, not blow up their monsters for no reason"); the lower its level, the rougher its
+ * reckoning of the rest. */
 #include <string.h>
 #include "ygo_internal.h"
+#include "ygo_ai_tags.h"
 
 static unsigned sLevel = 3;
 static uint32_t sRoll;
@@ -142,13 +149,13 @@ static unsigned CardsOn(const struct YgoState *s, unsigned p)
         n += s->players[p].spells[i] != 0;
     return n;
 }
-/* What a card's text says (any case): the AI reads a card's purpose from its words */
-static int Says(const struct YgoCard *c, const char *phrase)
+/* Where a card's text says something (any case): the AI reads a card's purpose from its words */
+static const char *Find(const struct YgoCard *c, const char *phrase)
 {
     const char *t;
     size_t n = strlen(phrase);
     if (!c || !c->text)
-        return 0;
+        return NULL;
     for (t = c->text; *t; t++)
     {
         size_t k;
@@ -156,7 +163,7 @@ static int Says(const struct YgoCard *c, const char *phrase)
         {
             char a = t[k], b = phrase[k];
             if (!a)
-                return 0;
+                return NULL;
             if (a >= 'A' && a <= 'Z')
                 a += 32;
             if (b >= 'A' && b <= 'Z')
@@ -165,10 +172,39 @@ static int Says(const struct YgoCard *c, const char *phrase)
                 break;
         }
         if (k == n)
-            return 1;
+            return t;
     }
-    return 0;
+    return NULL;
 }
+static int Says(const struct YgoCard *c, const char *phrase) { return Find(c, phrase) != NULL; }
+/* The number right after a phrase ("pay " -> 2000 in "pay 2000 LP"), -1 when it isn't there */
+static int NumberAfter(const struct YgoCard *c, const char *phrase)
+{
+    const char *t = Find(c, phrase);
+    int n = 0, any = 0;
+    if (!t)
+        return -1;
+    for (t += strlen(phrase); *t >= '0' && *t <= '9'; t++)
+        n = n * 10 + (*t - '0'), any = 1;
+    return any ? n : -1;
+}
+/* Yugipedia's tags for a card (AT_* bits) */
+static uint64_t Tags(const struct YgoCard *c)
+{
+    unsigned lo = 0, hi = sizeof(sAiTags) / sizeof(sAiTags[0]);
+    if (!c)
+        return 0;
+    while (lo < hi)
+    {
+        unsigned mid = (lo + hi) / 2;
+        if (sAiTags[mid].password < c->password)
+            lo = mid + 1;
+        else
+            hi = mid;
+    }
+    return lo < sizeof(sAiTags) / sizeof(sAiTags[0]) && sAiTags[lo].password == c->password ? sAiTags[lo].tags : 0;
+}
+#define AT(t) ((uint64_t)1 << (t))
 /* An Equip Spell that cripples the monster it's on (Paralyzing Potion, Germ Infection, Flint, Snatch Steal...);
  * every other one is for a monster of its own */
 static int HarmfulEquip(const struct YgoCard *c)
@@ -233,7 +269,8 @@ static unsigned Plan(const struct YgoState *s, unsigned me)
         if (s->objs[o].owner != me || !(c = Ygo_Card(s->objs[o].card)))
             continue;
         total++;
-        if (Says(c, "sent to the graveyard") || Says(c, "sent to the gy") || Says(c, "is in your graveyard"))
+        if (Says(c, "sent to the graveyard") || Says(c, "sent to the gy") || Says(c, "is in your graveyard") ||
+            Says(c, "is discarded"))
             grave++;
         if (Ygo_IsMonster(c) && (c->abilities & YGO_ABILITY_FLIP))
             flip++;
@@ -286,6 +323,276 @@ static int Pointless(const struct YgoState *s, unsigned me, unsigned o, const st
     }
     return 0;
 }
+
+/* What a side's cards on the field are worth as `me` sees them: its monsters (KIND_MON), its Spells and Traps
+ * (KIND_ST), all but `except`; *best the most one of them is worth, *count how many */
+enum { KIND_MON = 1, KIND_ST = 2 };
+static int FieldWorth(const struct YgoState *s, unsigned me, unsigned p, unsigned kinds, unsigned except, int *best,
+                      unsigned *count)
+{
+    unsigned i;
+    int v = 0, top = 0;
+    if (count)
+        *count = 0;
+    for (i = 0; i < YGO_MZONES && (kinds & KIND_MON); i++)
+        if (s->players[p].monsters[i] && s->players[p].monsters[i] - 1 != except)
+        {
+            int w = Value(s, me, s->players[p].monsters[i] - 1);
+            v += w, top = w > top ? w : top;
+            if (count)
+                (*count)++;
+        }
+    for (i = 0; i <= YGO_FIELD_ZONE && (kinds & KIND_ST); i++)
+        if (s->players[p].spells[i] && s->players[p].spells[i] - 1 != except)
+        {
+            /* (a Spell left face up on the field has done its work: a Continuous one or Equip is still worth keeping) */
+            int w = Value(s, me, s->players[p].spells[i] - 1);
+            v += w, top = w > top ? w : top;
+            if (count)
+                (*count)++;
+        }
+    if (best)
+        *best = top;
+    return v;
+}
+/* The least a monster of its own is worth (a Tribute for a cost), `except` left out; 0 when there's none */
+static int Cheapest(const struct YgoState *s, unsigned me, unsigned except)
+{
+    unsigned i;
+    int low = 0;
+    for (i = 0; i < YGO_MZONES; i++)
+        if (s->players[me].monsters[i] && s->players[me].monsters[i] - 1 != except)
+        {
+            int w = Value(s, me, s->players[me].monsters[i] - 1);
+            low = !low || w < low ? w : low;
+        }
+    return low;
+}
+/* Life Points as cards: paying n is little with plenty left, a card's worth when it halves them, out of the question
+ * near the end */
+static int LpWorth(const struct YgoState *s, unsigned me, int n)
+{
+    int left = s->players[me].lp - n;
+    if (n <= 0)
+        return 0;
+    if (left <= 0)
+        return 100000;
+    return (int)((int64_t)n * 1000 / (left < 400 ? 400 : left));
+}
+static int FreeMonsterZone(const struct YgoState *s, unsigned me)
+{
+    unsigned i;
+    for (i = 0; i < 5; i++)
+        if (!s->players[me].monsters[i])
+            return 1;
+    return 0;
+}
+/* A card of several effects (its tags may be another effect's), or left to a coin or a die */
+static int Multi(const struct YgoCard *c)
+{
+    const char *t, *first;
+    if (!c)
+        return 0;
+    if (Says(c, "\xb7") || Says(c, "pendulum effect") || Says(c, "toss a coin") || Says(c, "roll a") ||
+        Says(c, "if this card is in your gy") || Says(c, "if this card is in your graveyard"))
+        return 1;
+    first = Find(c, "you can ");
+    if (!first)
+        return 0;
+    for (t = first + 1; *t; t++)
+        if ((t[0] == 'Y' || t[0] == 'y') && !strncmp(t + 1, "ou can ", 7))
+            return 1;
+    return 0;
+}
+/* The other side doing something now: their effect in the chain, a Summon of theirs, their attack */
+static int TheyAct(const struct YgoState *s, unsigned me)
+{
+    uint32_t seq;
+    if (s->chainCount)
+        return s->chain[s->chainCount - 1].player != me;
+    if (s->attacker && s->objs[s->attacker - 1].controller != me)
+        return 1;
+    for (seq = s->eventSeq; seq > 0 && s->eventSeq - seq < 6; seq--)
+    {
+        const struct YgoEvent *e = YgoDuel_GetEvent(s, seq - 1);
+        if (!e || e->type == YGO_EV_PHASE || e->type == YGO_EV_TURN)
+            break;
+        if (e->type == YGO_EV_SUMMON && e->player != me)
+            return 1;
+    }
+    return 0;
+}
+/* What playing this card's effect is likely to bring `me`, in card worth (a card is about 1000): the cards it takes
+ * from the other side and its own, what it draws, searches or Summons, less what it costs. A card's words say how
+ * (the numbers: "pay 2000 LP", "draw 2 cards"; "all" for the whole field, "other" sparing itself), Yugipedia's tags
+ * whose cards it touches ("Destroys your opponent's Monster Cards" against "Destroys Monster Cards") and its costs.
+ * An effect nothing here recognises brings a little: its Deck wanted it. */
+static int Outcome(const struct YgoState *s, unsigned me, unsigned o, const struct YgoCard *c, unsigned plan)
+{
+    const struct YgoObj *ob = o < s->objCount ? &s->objs[o] : NULL;
+    uint64_t t = Tags(c);
+    unsigned they = me ^ 1, mineKinds = 0, theirKinds = 0, self = NO_OBJ, n;
+    int gain = 0, cost = 0, known = 0, k, onField, sure = 0;
+    if (!c)
+        return 0;
+    onField = ob && (ob->location == YGO_LOC_MZONE || ob->location == YGO_LOC_SZONE);
+    /* its costs */
+    if ((k = NumberAfter(c, "pay ")) > 0 && (Says(c, " lp") || Says(c, "life points")))
+        cost += LpWorth(s, me, k);
+    else if (Says(c, "pay half your lp") || Says(c, "pay half your life points"))
+        cost += LpWorth(s, me, s->players[me].lp / 2);
+    else if (t & AT(AT_PAY_LP))
+        cost += LpWorth(s, me, 1000);
+    if (t & AT(AT_DISCARD_COST))
+        cost += (plan & PLAN_GRAVE) ? 150 : 500;
+    if (t & AT(AT_TRIBUTE_COST))
+        cost += Cheapest(s, me, o);
+    if ((t & AT(AT_SELF_COST)) && onField)
+        cost += (plan & PLAN_GRAVE) ? Value(s, me, o) / 3 : Value(s, me, o);
+    /* a negated card's effect does nothing; its costs are still paid */
+    if (onField && ob->negated)
+        return -cost - 400;
+    /* destroying, banishing, sending to the Graveyard or returning cards on the field: whose, and which */
+    if (t & (AT(AT_DMON_THEIRS) | AT(AT_DMON_ANY) | AT(AT_REMOVE_THEIRS) | AT(AT_REMOVE_ANY)))
+        theirKinds |= KIND_MON;
+    if (t & (AT(AT_DST_THEIRS) | AT(AT_DST_ANY) | AT(AT_REMOVE_THEIRS) | AT(AT_REMOVE_ANY)))
+        theirKinds |= KIND_ST;
+    if (t & (AT(AT_DMON_ANY) | AT(AT_REMOVE_ANY)))
+        mineKinds |= KIND_MON;
+    if (t & (AT(AT_DST_ANY) | AT(AT_REMOVE_ANY)))
+        mineKinds |= KIND_ST;
+    /* (its own cards alone: a whole field of them, else a cost or a drawback the Deck plays it for: Instant Fusion,
+       Limiter Removal) */
+    if (Says(c, "destroy all") && (t & AT(AT_DMON_MINE)))
+        mineKinds |= KIND_MON;
+    if (Says(c, "destroy all") && (t & AT(AT_DST_MINE)))
+        mineKinds |= KIND_ST;
+    if (!t)
+    {
+        /* no tags for it: its words alone */
+        int all = Says(c, "destroy all") || Says(c, "banish all");
+        if (all && (Says(c, "your opponent controls") || Says(c, "your opponent's")))
+            theirKinds = (Says(c, "monster") ? KIND_MON : 0) | (Says(c, "spell") || Says(c, "trap") ? KIND_ST : 0);
+        else if (all && Says(c, "on the field"))
+        {
+            unsigned kinds = Says(c, "cards on the field") ? KIND_MON | KIND_ST :
+                             (Says(c, "monsters") ? KIND_MON : 0) | (Says(c, "spell") || Says(c, "trap") ? KIND_ST : 0);
+            theirKinds = mineKinds = kinds;
+        }
+    }
+    if (theirKinds | mineKinds)
+    {
+        int mass = Says(c, "destroy all") || Says(c, "banish all") || Says(c, "return all") || Says(c, "send all") ||
+                   Says(c, "as many");
+        int bounce = (t & AT(AT_BOUNCE)) && !(t & (AT(AT_DMON_ANY) | AT(AT_DMON_THEIRS) | AT(AT_DST_ANY) |
+                                                    AT(AT_DST_THEIRS)));
+        int theirBest, mineBest, theirs, mine;
+        unsigned theirCount, mineCount;
+        known = 1;
+        /* (the card itself: spared when it says "other", else it goes with the rest) */
+        if (Says(c, "other cards") || Says(c, "other monsters") || Says(c, "except this card") || !onField)
+            self = o;
+        theirs = FieldWorth(s, me, they, theirKinds, NO_OBJ, &theirBest, &theirCount);
+        mine = FieldWorth(s, me, me, mineKinds, self, &mineBest, &mineCount);
+        if (mass)
+            gain += theirs - mine, sure = theirKinds && mineKinds && !Says(c, "toss a coin") && !Says(c, "roll a");
+                                                                                /* (the whole field: Dark Hole, Demise) */
+        else if (theirCount)
+            gain += theirBest * 9 / 10;   /* one picked: the best of theirs */
+        else if (mineCount)
+            gain -= Cheapest(s, me, self), sure = !Multi(c);   /* only its own to pick (Mystical Space Typhoon) */
+        if (bounce)
+            gain = gain * 3 / 5;   /* (a card returned to the hand comes back) */
+    }
+    /* cards drawn, searched, brought back or Summoned */
+    n = (unsigned)(NumberAfter(c, "draw ") > 0 ? NumberAfter(c, "draw ") : 1);
+    if (Says(c, "same number"))
+        known = 1;   /* (both discard and draw as many: Card Destruction) */
+    else
+    {
+        if (t & AT(AT_DRAW))
+            gain += 1000 * (int)n, known = 1;
+        /* (what both players draw or discard alike, the Deck plays for its own side: One Day of Peace, Dark World
+           Dealings) */
+        int both = Says(c, "each player") || Says(c, "both players");
+        if ((t & AT(AT_THEY_DRAW)) && !both)
+            gain -= 1000 * (int)n, known = 1;
+        if (t & AT(AT_DISCARD_EFFECT))
+        {
+            int d = NumberAfter(c, "discard ");
+            gain -= ((plan & PLAN_GRAVE) ? 150 : 500) * (d > 0 ? d : 1), known = 1;
+        }
+        if ((t & AT(AT_THEY_DISCARD)) && !both)
+            gain += 600, known = 1;
+    }
+    if (t & AT(AT_SEARCH))
+    {
+        /* ("add up to 2", "add 1") */
+        int a = NumberAfter(c, "add up to ") > 0 ? NumberAfter(c, "add up to ") : NumberAfter(c, "add ");
+        gain += 900 * (a > 1 ? (a > 3 ? 3 : a) : 1), known = 1;
+    }
+    if (t & AT(AT_FROM_GY_TO_HAND))
+        gain += 800, known = 1;
+    if ((t & AT(AT_SUMMON)) && FreeMonsterZone(s, me))
+    {
+        /* from a Graveyard: the best monster there it could bring back (Monster Reborn...); else a fair monster */
+        int best = 0;
+        if (Says(c, "graveyard") || Says(c, "gy"))
+        {
+            unsigned p, i;
+            for (p = 0; p < 2; p++)
+                if (p == me || Says(c, "either") || Says(c, "your opponent's graveyard") || Says(c, "your opponent's gy"))
+                    for (i = 0; i < s->players[p].graveCount; i++)
+                    {
+                        const struct YgoCard *m = Card(s, s->players[p].grave[i]);
+                        if (m && Ygo_IsMonster(m))
+                        {
+                            int w = Value(s, me, s->players[p].grave[i]);
+                            best = w > best ? w : best;
+                        }
+                    }
+        }
+        gain += best ? best : 700, known = 1;
+    }
+    if (t & AT(AT_NEGATE))
+    {
+        /* worth it against something of theirs going on (their effect in the chain, their Summon, their attack) */
+        gain += TheyAct(s, me) ? 1500 : FaceUpMonster(s, they) ? 300 : 0;
+        known = 1;
+    }
+    if (t & AT(AT_DAMAGE))
+    {
+        k = NumberAfter(c, "inflict ");
+        gain += k >= s->players[they].lp ? 100000 : k > 0 ? k / 4 : 200;
+        known = 1;
+    }
+    if (t & AT(AT_STATS))
+        gain += 250, known = 1;
+    /* an effect it can't read: worth what it costs (its Deck plays it), unless the cost is ruinous */
+    if (!known)
+        return cost >= 2500 ? 1000 - cost : 300;
+    if (cost >= 2500)
+        sure = 1;
+    if (!Ygo_IsMonster(c) && c->property != YGO_PROP_CONTINUOUS && c->property != YGO_PROP_EQUIP &&
+        c->property != YGO_PROP_FIELD && !Says(c, "same number"))
+        gain -= 300;   /* (a Spell or Trap that's spent: a part of a card, the rest its moment) */
+    /* a loss only when it's sure: the tags are the whole card's, and a card of several effects (or a coin's) may owe
+       its costs and drawbacks to another one than this */
+    if (!sure && gain - cost < 50)
+        return 50;
+    return gain - cost;
+}
+/* The reckoning at its level: exact at the best, rougher below (never so rough that a loss looks like a gain: that
+ * check is made on the exact one) */
+static int Reckon(int outcome)
+{
+    static const uint16_t sRough[4] = {600, 350, 150, 0};
+    if (!sRough[sLevel])
+        return outcome;
+    return outcome + (int)(Next() % (2u * sRough[sLevel] + 1)) - sRough[sLevel];
+}
+/* (an effect that costs more than it brings: a loss) */
+#define LOSS (-150)
 
 /* The best target an attacker has: object, NO_OBJ for a direct attack, or -1 when no attack is worth it */
 static int BestTarget(const struct YgoState *s, unsigned me, unsigned attacker, int direct)
@@ -364,11 +671,15 @@ static void Idle(const struct YgoDuel *d, struct YgoAnswer *out)
         case YGO_ACT_ACTIVATE:
             if (UsedOften(s, c, 0))
                 break;
-            score = 900;
-            if (Pointless(s, me, c->obj, card, 1))
-                score = 0;
-            else if ((plan & PLAN_GRAVE) && FillsGrave(card))
-                score = 950;   /* (its plan: the Graveyard) */
+            {
+                int out = Outcome(s, me, c->obj, card, plan);
+                score = 900 + Reckon(out) / 4;
+                score = score < 450 ? 450 : score > 1500 ? 1500 : score;
+                if (out < LOSS || Pointless(s, me, c->obj, card, 1))
+                    score = 0;
+                else if ((plan & PLAN_GRAVE) && FillsGrave(card) && score < 950)
+                    score = 950;   /* (its plan: the Graveyard) */
+            }
             break;
         case YGO_ACT_SPECIAL:
             score = 800;
@@ -512,31 +823,15 @@ static void Battle(const struct YgoDuel *d, struct YgoAnswer *out)
 /* Should it chain now? When the opponent is acting: an effect in the chain, an attack on it, a Summon */
 static int Pressure(const struct YgoDuel *d, unsigned me)
 {
-    const struct YgoState *s = &d->s;
-    uint32_t seq;
     /* (never onto its own link: one answer to an attack or an effect is enough, Magic Cylinder and Mirror Force
        aren't both spent on one attack) */
-    if (s->chainCount)
-        return s->chain[s->chainCount - 1].player != me;
-    if (s->attacker && s->objs[s->attacker - 1].controller != me)
-        return 1;
-    for (seq = s->eventSeq; seq > 0 && s->eventSeq - seq < 6; seq--)
-    {
-        const struct YgoEvent *e = YgoDuel_GetEvent(s, seq - 1);
-        if (!e)
-            break;
-        if (e->type == YGO_EV_SUMMON && e->player != me)
-            return 1;
-        if (e->type == YGO_EV_PHASE || e->type == YGO_EV_TURN)
-            break;
-    }
-    return 0;
+    return TheyAct(&d->s, me);
 }
 static void Chain(const struct YgoDuel *d, struct YgoAnswer *out)
 {
     const struct YgoQuery *q = &d->query;
     const struct YgoState *s = &d->s;
-    unsigned me = q->player, i;
+    unsigned me = q->player, i, plan = Plan(s, me);
     memset(out, 0, sizeof(*out));
     if (q->min)
     {
@@ -548,6 +843,9 @@ static void Chain(const struct YgoDuel *d, struct YgoAnswer *out)
         const struct YgoChoice *c = &q->items[i];
         const struct YgoCard *card = Card(s, c->obj);
         if (UsedOften(s, c, 0))
+            continue;
+        /* (never an effect that costs more than it brings, nor a negated card's) */
+        if (Outcome(s, me, c->obj, card, plan) < LOSS)
             continue;
         /* monsters' effects and Spells / Traps that answer the opponent; never a chain to itself (lower levels miss
          * the moment now and then) */
@@ -743,6 +1041,13 @@ void YgoDuel_AiAnswerLevel(const struct YgoDuel *d, unsigned level, struct YgoAn
         Chain(d, out);
         return;
     case YGO_Q_YESNO:
+        /* "use this effect?": yes, unless it costs more than it brings */
+        if (q->prompt == YGO_P_EFFECT_YESNO && q->count == 2 &&
+            Outcome(s, q->player, q->items[1].obj, Ygo_Card(q->card), Plan(s, q->player)) < LOSS)
+        {
+            Pick(out, 0);
+            return;
+        }
         Pick(out, 1);
         return;
     case YGO_Q_CARDS:
@@ -820,3 +1125,11 @@ void YgoDuel_AiAnswerLevel(const struct YgoDuel *d, unsigned level, struct YgoAn
         return;
     }
 }
+#ifdef YGO_AI_DEBUG
+/* (tools: what the AI reckons an offered effect brings) */
+int YgoAi_DebugOutcome(const struct YgoDuel *d, unsigned item)
+{
+    const struct YgoChoice *c = &d->query.items[item];
+    return Outcome(&d->s, d->query.player, c->obj, Card(&d->s, c->obj), Plan(&d->s, d->query.player));
+}
+#endif
