@@ -136,6 +136,7 @@ u8 MP_Options_RowView(u8 row, const u8 **label, const u8 **names, u8 *cur, u8 *b
 
 // the renderer (gba_easy_draw.c): BG0's pixels a style draws in place of, this frame (y0 <= line < y1, x0 <= x < x1)
 extern s16 gMpUiHideBg0[4];
+extern bool8 gMpUiHideBg0Sprites;   // ... and the sprites behind it (battles only)
 // ... and in a battle's transition, only the screen's 8x8 cells where BG0 still shows Kai's message box (NULL: all of
 // the rectangle): the transition draws its own pictures on BG0 over the box, and those are never hidden
 extern const u8 *gMpUiHideBg0Cells;   // [20][30], 1 = hide

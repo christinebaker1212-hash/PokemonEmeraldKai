@@ -1,0 +1,14 @@
+pressuntil A field 5000
+wait 60
+mp sky field 6
+wait 300
+shot fog1
+mp sky field 9
+wait 300
+shot haze1
+mp warp 40,30,52,12
+wait 300
+mash B 6 15
+wait 100
+shot r210
+quit

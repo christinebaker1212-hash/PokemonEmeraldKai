@@ -1483,7 +1483,10 @@ static void CreateFogHorizontalSprites(void)
         LoadSpriteSheet(&fogHorizontalSpriteSheet);
         for (i = 0; i < NUM_FOG_HORIZONTAL_SPRITES; i++)
         {
-            spriteId = CreateSpriteAtEnd(&sFogHorizontalSpriteTemplate, 0, 0, 0xFF);
+            // Moemon Kai: in front of the people of its layer, the renderer blending it over them, so everyone is in
+            // the fog alike (the user, 2026-11-24: "the player is affected by things like overworld haze/fog, but any
+            // NPCs are not"; gba_easy_draw.c PutObjPixel); was 0xFF, behind them all
+            spriteId = CreateSpriteAtEnd(&sFogHorizontalSpriteTemplate, 0, 0, 0);
             if (spriteId != MAX_SPRITES)
             {
                 sprite = &gSprites[spriteId];
@@ -1890,7 +1893,7 @@ static void CreateFogDiagonalSprites(void)
         LoadSpriteSheet(&fogDiagonalSpriteSheet);
         for (i = 0; i < NUM_FOG_DIAGONAL_SPRITES; i++)
         {
-            spriteId = CreateSpriteAtEnd(&sFogDiagonalSpriteTemplate, 0, (i / 5) * 64, 0xFF);
+            spriteId = CreateSpriteAtEnd(&sFogDiagonalSpriteTemplate, 0, (i / 5) * 64, 0);   // Moemon Kai: in front, blended over the people (as the fog's)
             if (spriteId != MAX_SPRITES)
             {
                 sprite = &gSprites[spriteId];

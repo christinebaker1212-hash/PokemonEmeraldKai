@@ -1,0 +1,8 @@
+# Fog and haze around every UI STYLE's START menu: the field's sprites (the fog, its people) still drawn where the style's
+# box is smaller than Kai's (the user, 2026-11-24); shots fog_start_<style>, haze_start_<style> looked at by hand
+MODE=1
+WARP=0,17,20,10
+TMO=60
+HOUR=12
+EXPECT_A=("ui style: FIRERED" "ui style: CRYSTAL")
+UNEXPECT_A=("[crash]")

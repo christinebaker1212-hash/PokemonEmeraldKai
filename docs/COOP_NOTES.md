@@ -9103,3 +9103,21 @@ Brighter sun cannot happen during the night - it will simply reroll to nothing."
   sky as letters with the numbers above, 24 hours turning, Route 119 kept), sky_regions (KANTO, JOHTO, SINNOH, UNOVA),
   sky_coop.
 
+## Fog and haze around a UI STYLE's boxes, and over everyone (1.220.0)
+
+The user, 2026-11-24: "when in different UI - any fog or haze or weather effects don't display properly behind the UI,
+like the start menu, or messages ... the player is affected by things like overworld haze/fog, but any NPCs are not."
+
+- **Around the boxes**: where a style's box takes BG0's place, the renderer used to drop every sprite behind BG0 in
+  Kai's box's whole rectangle (gba_easy_draw.c, for BLACK's see-through battle box); a style's START menu or message box
+  is smaller than Kai's or elsewhere, so a strip beside or below it showed the field without its fog sprites (and
+  people). Now only in battle (mp_uistyle.c gMpUiHideBg0Sprites). Scenario fog_ui.
+- **Over everyone**: the fog's and haze's sprites were made last in the sprite order (subpriority 0xFF), behind every
+  person, and the GBA blends a see-through sprite only with the backgrounds, so people were drawn clear over the fog.
+  They're now first (subpriority 0) and the renderer blends the field weather's see-through sprites (palette
+  PALTAG_WEATHER) with the sprite under them in their layer (PutObjPixel sWeatherObjPal): the player and NPCs alike, on
+  the 2D maps and over SINNOH's 3D ones. Scenario weather_npc_tint.
+- **The level up's stats box**: drawn in the style's window both in battle (MP_UiStyle_BattleBox) and in the party
+  menu (a framed BG2 pop-up) in FIRERED, CRYSTAL and RED (scenario ui_style_levelup); PLATINUM and BLACK need their ROM
+  packs to check.
+

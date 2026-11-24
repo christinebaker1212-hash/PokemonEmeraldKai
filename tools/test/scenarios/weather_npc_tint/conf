@@ -1,0 +1,7 @@
+# Fog and haze over the people as over the player (the user, 2026-11-24): ROUTE 102 in fog and haze, SINNOH's foggy
+# ROUTE 210 north with its trainers; shots fog1, haze1, r210 looked at by hand
+MODE=1
+WARP=0,17,20,10
+TMO=60
+HOUR=12
+UNEXPECT_A=("[crash]")

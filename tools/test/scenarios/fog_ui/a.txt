@@ -1,0 +1,70 @@
+pressuntil A field 5000
+wait 60
+mp sky field 6
+wait 200
+mp uistyle kai
+wait 10
+press START 2
+wait 40
+shot fog_start_kai
+press B 2
+wait 30
+mp uistyle red
+wait 10
+press START 2
+wait 40
+shot fog_start_red
+press B 2
+wait 30
+mp uistyle crystal
+wait 10
+press START 2
+wait 40
+shot fog_start_crystal
+press B 2
+wait 30
+mp uistyle firered
+wait 10
+press START 2
+wait 40
+shot fog_start_firered
+press B 2
+wait 30
+mp uistyle platinum
+wait 10
+press START 2
+wait 40
+shot fog_start_platinum
+press B 2
+wait 30
+mp uistyle black
+wait 10
+press START 2
+wait 40
+shot fog_start_black
+press B 2
+wait 30
+mp sky field 9
+wait 200
+mp uistyle firered
+wait 10
+press START 2
+wait 40
+shot haze_start_firered
+press B 2
+wait 30
+mp uistyle platinum
+wait 10
+press START 2
+wait 40
+shot haze_start_platinum
+press B 2
+wait 30
+mp uistyle black
+wait 10
+press START 2
+wait 40
+shot haze_start_black
+press B 2
+wait 30
+quit

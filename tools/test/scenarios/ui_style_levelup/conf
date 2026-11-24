@@ -1,0 +1,7 @@
+# A RARE CANDY's level up in the party menu in FIRERED: its message and the stats box's two pages in the style's
+# window (rendershots lv_firered_msg / _stats1 / _stats2, looked at by hand)
+MODE=1
+TMO=120
+ENV_A="MOEMON_DEBUG_PARTY=280:5"
+EXPECT_A=("ui style: FIRERED" "rendershot")
+UNEXPECT_A=("[crash]")

@@ -3719,6 +3719,7 @@ static void PopUps(struct UiPack *p, u16 *frame)
 // ---------------------------------------------------------------------------------------------------- each frame
 s16 gMpUiHideBg0[4];
 const u8 *gMpUiHideBg0Cells;
+bool8 gMpUiHideBg0Sprites;   // the sprites behind BG0's hidden place stay hidden too (battles: see-through boxes)
 static u8 sBoxCells[DISPLAY_HEIGHT / 8][DISPLAY_WIDTH / 8];
 static bool8 sBoxCellsOn;
 
@@ -3800,6 +3801,10 @@ void MP_UiStyle_PreFrame(void)
     gMpUiHideBg0Cells = NULL, sBoxCellsOn = FALSE;
     gMpUiHideCount = 0;
     sDrawing = 0;
+    // (in battle a style's see-through box (BLACK's) must not show the sprites Kai's box covered; on the field the
+    // style's boxes are smaller than Kai's or elsewhere, and what's around them is the field as it is: its fog and
+    // haze, its people (the user, 2026-11-24: weather effects "don't display properly behind the UI"))
+    gMpUiHideBg0Sprites = InBattle();
     if (style != UISTYLE_KAI && (InField() || InBattle()) && GetPack(style) && FindSpec(GetPack(style), "win"))
     {
         // (Kai's pop-ups on BG0: the style draws its own there, PopUps; their frames not drawn under it)

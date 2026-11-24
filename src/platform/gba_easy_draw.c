@@ -589,6 +589,7 @@ found:
 
 // One sprite pixel of `color` at global_x on this line: battle weather, the dark cave's window, OBJ windows, blending,
 // then the sprite layer (ordinary sprites and Moemon PC's big sprites share it)
+static uint8_t sWeatherObjPal = 0xFF;   // the field weather's sprite palette (PALTAG_WEATHER), 0xFF none
 static void PutObjPixel(struct scanlineData *scanline, uint16_t *pixels, struct OamData *oam, uint16_t color, int global_x,
                         uint16_t vcount, bool windowsEnabled, unsigned int blendMode, bool isSemiTransparent, bool isObjWin,
                         bool is8BPP)
@@ -634,7 +635,13 @@ static void PutObjPixel(struct scanlineData *scanline, uint16_t *pixels, struct 
         {
             uint16_t targetA = color;
             uint16_t targetB = 0;
-            if (alphaBlendSelectTargetB(scanline, &targetB, oam->priority, 0, global_x, false))
+            // Moemon Kai: the field weather's see-through sprites (fog, haze) over a person in their layer blend with
+            // the person, not the ground behind (the GBA blends with the backgrounds only, so they'd wipe the person
+            // out): everyone is in the fog alike (the user, 2026-11-24)
+            if (isSemiTransparent && !is8BPP && oam->paletteNum == sWeatherObjPal && pixels == scanline->spriteLayers[oam->priority]
+             && (pixels[global_x] & 0x8000))
+                color = alphaBlendColor(targetA, pixels[global_x]);
+            else if (alphaBlendSelectTargetB(scanline, &targetB, oam->priority, 0, global_x, false))
             {
                 color = alphaBlendColor(targetA, targetB);
             }
@@ -994,6 +1001,11 @@ static void DrawSprites(struct scanlineData* scanline, uint16_t vcount, bool win
         puts("2-D OBJ Character mapping not supported.");
     }
     memset(sUnderPix, 0, sizeof(sUnderPix));
+    if (vcount == 0)   // (the field weather's palette this frame: its see-through sprites blend over people, PutObjPixel)
+    {
+        u8 IndexOfSpritePaletteTag(u16 tag);
+        sWeatherObjPal = IndexOfSpritePaletteTag(0x1200);   // (PALTAG_WEATHER)
+    }
 
     for (i = OAM_ENTRY_COUNT - 1; i >= 0; i--)
     {
@@ -1361,7 +1373,9 @@ static void DrawScanline(uint16_t *pixels, uint16_t vcount)
         DrawSprites(&scanline, vcount, windowsEnabled);
     // Moemon Kai: UI STYLE: where the style's box takes BG0's place, the sprites BG0 covered stay covered (Kai's box
     // was opaque; a style's may be see-through, as BLACK's battle box is)
-    if ((REG_DISPCNT & DISPCNT_OBJ_ON) && (REG_DISPCNT & DISPCNT_BG0_ON) && gMpUiHideBg0[2] > gMpUiHideBg0[0]
+    // (battles only: on the field a style's box is smaller than Kai's or elsewhere, and around it the field's sprites,
+    // its fog and haze and its people, show as they are)
+    if (gMpUiHideBg0Sprites && (REG_DISPCNT & DISPCNT_OBJ_ON) && (REG_DISPCNT & DISPCNT_BG0_ON) && gMpUiHideBg0[2] > gMpUiHideBg0[0]
      && vcount >= gMpUiHideBg0[1] && vcount < gMpUiHideBg0[3])
     {
         const u8 *cells = gMpUiHideBg0Cells ? gMpUiHideBg0Cells + (vcount >> 3) * 30 : NULL;

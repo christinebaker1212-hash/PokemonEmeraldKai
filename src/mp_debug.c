@@ -5106,7 +5106,12 @@ void MP_TestCommand(const char *cmd, const char *arg)
         void MP_Weather_Debug(const char *arg);
         void SetSavedWeatherFromCurrMapHeader(void);
         void DoCurrentWeather(void);
-        if (!strcmp(arg, "apply"))
+        if (!strncmp(arg, "field ", 6))
+        {
+            void SetWeather(u32 weather);
+            SetWeather(atoi(arg + 6));   // (any field weather, as a script's setweather / doweather)
+        }
+        else if (!strcmp(arg, "apply"))
         {
             SetSavedWeatherFromCurrMapHeader();   // (as the map loading does: the hour's weather now)
             DoCurrentWeather();
