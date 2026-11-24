@@ -1,4 +1,5 @@
 #include "global.h"
+#include "mp_weather.h"
 #include "constants/songs.h"
 #include "constants/weather.h"
 #include "constants/rgb.h"
@@ -401,6 +402,8 @@ static void FadeInScreenWithWeather(void)
         }
         break;
     case WEATHER_DROUGHT:
+        if (MP_Weather_GentleSun())
+            goto plain;   // Moemon Co-op: the hourly weather's sun is a warm light (mp_daytint.c), not GROUDON's palettes
         if (FadeInScreen_Drought() == FALSE)
         {
             gWeatherPtr->colorMapIndex = -6;
@@ -419,6 +422,7 @@ static void FadeInScreenWithWeather(void)
     case WEATHER_FOG_DIAGONAL:
     case WEATHER_UNDERWATER:
     default:
+    plain:
         if (!gPaletteFade.active)
         {
             gWeatherPtr->colorMapIndex = gWeatherPtr->targetColorMapIndex;
@@ -788,7 +792,7 @@ void FadeScreen(u8 mode, s8 delay)
     case WEATHER_FOG_HORIZONTAL:
     case WEATHER_SHADE:
     case WEATHER_DROUGHT:
-        useWeatherPal = TRUE;
+        useWeatherPal = gWeatherPtr->currWeather != WEATHER_DROUGHT || !MP_Weather_GentleSun();   // (Moemon Co-op)
         break;
     default:
         useWeatherPal = FALSE;

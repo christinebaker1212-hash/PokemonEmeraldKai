@@ -894,6 +894,19 @@ bool8 U3D_MapOfZoneTile(u16 zone, u16 x, u16 z, u8 *group, u8 *num, s16 *mapX, s
     return FALSE;
 }
 
+// An UNOVA map's middle in the region's tiles (Black's matrix 0: 32 a block) and its zone; FALSE when it isn't on it
+// (the hourly weather's fronts, mp_weather.c)
+bool8 U3D_MapWorldTile(u8 group, u8 num, s32 *x, s32 *z, u16 *zone)
+{
+    s32 map = MapIndex(group, num);
+    if (map < 0 || sUnovaMaps[map].mat != 0)
+        return FALSE;
+    *x = sUnovaMaps[map].cx * 32 + sUnovaMaps[map].bw * 16;
+    *z = sUnovaMaps[map].cz * 32 + sUnovaMaps[map].bh * 16;
+    *zone = sUnovaMaps[map].zone;
+    return TRUE;
+}
+
 s32 U3D_MapIndex(void)
 {
     return gSaveBlock1Ptr ? MapIndex(gSaveBlock1Ptr->location.mapGroup, gSaveBlock1Ptr->location.mapNum) : -1;

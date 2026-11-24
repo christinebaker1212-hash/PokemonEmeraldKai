@@ -11,6 +11,7 @@
 #include "mp_net.h"
 #include "mp_join.h"
 #include "global.h"
+#include "mp_weather.h"
 #include "save_slots.h"
 #include "mp_region.h"
 #include "mp.h"
@@ -1502,6 +1503,15 @@ static void HandleMessage(u8 type, u8 *data, u16 len)
             return;
         gMpLocalId = data[0];
         gMpPlayers[gMpLocalId].name[0] = EOS;   // our own entry is never filled in
+        if (len >= 10)
+        {
+            // the server's clock: the hourly weather's hour, the same for the whole room (mp_weather.c)
+            u64 t = 0;
+            u32 k;
+            for (k = 0; k < 8; k++)
+                t |= (u64)data[2 + k] << (8 * k);
+            MP_Weather_ServerTime((s64)t);
+        }
         snprintf(sStatus, sizeof(sStatus), "ONLINE (PLAYER %d)", gMpLocalId + 1);
         MPNet_Log("joined \"%s\" as player %d", sLobby.room, gMpLocalId + 1);
         SendLocalBlobs();

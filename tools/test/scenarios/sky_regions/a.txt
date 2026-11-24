@@ -1,0 +1,46 @@
+pressuntil A field 6000
+wait 60
+mash B 12 20
+mp warp 37,76,10,20
+wait 240
+mash B 6 15
+mp sky force 1
+mp sky apply
+wait 300
+mp sky
+shot kanto_rain
+mp warp 35,33,20,8
+wait 240
+mash B 6 15
+mp sky force 3
+mp sky apply
+wait 300
+mp sky
+shot johto_sun
+mp warp 40,1,20,12
+wait 300
+mash B 6 15
+mp sky force 1
+mp sky apply
+wait 300
+mp sky
+shot sinnoh_rain
+mp sky force 3
+mp sky apply
+wait 300
+shot sinnoh_sun
+mp warp 51,20,16,16
+wait 300
+mash B 6 15
+mp sky force 4
+mp sky apply
+wait 300
+mp sky
+shot unova_hail
+mp sky force 1
+mp sky apply
+wait 300
+shot unova_rain
+mp sky off
+mp sky region
+quit

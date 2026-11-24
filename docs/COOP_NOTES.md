@@ -9060,3 +9060,46 @@ The user: "Several CO-OP menu features are HOENN-only, and have not been adapted
 - After: 0 maps to HOENN; 38 with no GO TO (NAVEL ROCK, BIRTH ISLAND, the elevators, JOHTO's ROUTE 48 / SAFARI ZONE
   that its map leaves out). Scenario coop_goto_kanto (VIRIDIAN, CELADON from the HIDEOUT, GOLDENROD from its GYM);
   `mp gotofriend ID`, `mp nearestaudit [h][k][v]` (h: HOENN visited, k: KANTO / JOHTO visited, v: list the nowheres).
+
+## The hourly weather (1.220.0)
+
+The user, 2026-11-24: "randomized weather effects to outdoor areas across all 5 regions, WITHOUT messing with
+pre-existing scripted weather ... Every hour, weather will change. For most routes, this is simply between none, sunny,
+and rainy. But other areas can have hail, and desert areas without sandstorm already can have sandstorm applied. This
+is VERY rare ... Rain and sun have coverage that moves across regions ... calculated and kept track of both by the
+server, and per player, in solo games. Weather will be the same in both regardless. Pokemon that are typically more
+rare on the table might come out in greater frequency during some weather effects. This will be noted on the app ...
+Brighter sun cannot happen during the night - it will simply reroll to nothing."
+
+- **src/mp/mp_weather.c** (include/mp_weather.h). Each region's sky is two smooth value-noise fields (rain, sun: big
+  fronts plus showers, cells of 176 tiles changing shape over 6 hours) drifting with a wind that's new each day (one
+  of eight ways, 16-40 tiles an hour, added up from the last 64-day mark: `Drift`). A map's place on it is its middle on
+  the region's grid: HOENN / KANTO / JOHTO by connections (`MP_Compass_MapWorldTile`, mp_compass.c), SINNOH and UNOVA
+  by Platinum's / Black's matrix 0 (`S3D_MapWorldTile`, `U3D_MapWorldTile`). Rain over 41000 (of 65535; a storm over
+  50500), else sun over 40000, else clear. Measured on ROUTE 102 over 60 days: clear 64%, rain 14%, storm 3%, sun 19%;
+  the next route (60 tiles) has the same sky 72% of the time, a far place 44%, the same place an hour later 78%.
+- **The hour**: UTC hours since 1970 (`MP_Weather_Hour`), the server's clock online (MPMSG_S_WELCOME ends with its
+  time since protocol 94), a fixed seed: every game sees the same sky at the same hour, alone or together (test
+  sky_coop). Night (before 6:00, from 20:00 on the game's clock) turns sun into clear.
+- **Which maps**: ROUTE / TOWN / CITY / OCEAN_ROUTE maps of the five regions (not shared maps, not ORRE) whose own
+  weather is NONE / SUNNY / SUNNY_CLOUDS (UNOVA: a day Black's calendar gives nothing) and with no weather triggers on
+  their ground (Route 111's desert, 113's ash, the 119 / 123 cycles). Applied where the header's is
+  (field_weather_effect.c SetSavedWeatherFromCurrMapHeader, so `resetweather` gives it too); a script's setweather
+  wins, and the hour (`MP_Weather_Update`, overworld.c each frame, 1 in 32) never touches a weather it didn't set.
+- **Kinds**: rain WEATHER_RAIN, storm RAIN_THUNDERSTORM, sun WEATHER_DROUGHT drawn as a soft warm light (mp_daytint.c
+  sSun, eased in: never GROUDON's drought palettes, Drought_Main does nothing for it; it warms SINNOH's 3D picture too)
+  while battles still get sun; hail WEATHER_SNOW where it's cold (sCold: JOHTO's north, MT. SILVER, KANTO's ROUTE 20,
+  SINNOH's ROUTE 210 north / 211; all of UNOVA in winter), real HAIL in battle (battle_util.c, mp_battleweather.c,
+  "It started to hail!") only when it's the hour's; sandstorm, very rarely, on UNOVA's DESERT RESORT / ROUTE 4 on days
+  Black's calendar gives them none (HOENN's desert and SINNOH's ROUTE 228 have their own).
+- **Wild POKéMON**: `MP_Weather_Likes` (Abilities first: CHLOROPHYLL, SWIFT SWIM, ICE BODY, SAND VEIL...; then
+  types: sun FIRE / GRASS, rain WATER / ELECTRIC / BUG, hail ICE, sandstorm ROCK / GROUND / STEEL). In any field
+  weather (a map's own rain too) one encounter in five on land or water is one of the table's rare slots (5% or less)
+  that likes it, if there is one (wild_encounter.c `MP_Weather_WildIndex`).
+- **The app**: data.json's species carry "wl"; the POKéDEX entry's WHERE TO FIND ends "Likes the sun." / "Likes the
+  rain." / "Likes the hail." / "Likes sandstorms." (DexEntryPage likesLine).
+- **Tests**: the harness keeps plain maps' weather unless MOEMON_SKY=1 (so scenarios don't depend on their hour);
+  `mp sky [hours N | force W | off | region | apply]`; scenarios sky_hourly (forced rain / sun / hail, the region's
+  sky as letters with the numbers above, 24 hours turning, Route 119 kept), sky_regions (KANTO, JOHTO, SINNOH, UNOVA),
+  sky_coop.
+

@@ -5101,6 +5101,18 @@ void MP_TestCommand(const char *cmd, const char *arg)
         u8 GetSavedWeather(void);
         printf("[test] weather %u\n", GetSavedWeather());
     }
+    else if (strcmp(cmd, "sky") == 0)   // sky [hours N | force W | off | apply] - the hourly weather here (mp_weather.c)
+    {
+        void MP_Weather_Debug(const char *arg);
+        void SetSavedWeatherFromCurrMapHeader(void);
+        void DoCurrentWeather(void);
+        if (!strcmp(arg, "apply"))
+        {
+            SetSavedWeatherFromCurrMapHeader();   // (as the map loading does: the hour's weather now)
+            DoCurrentWeather();
+        }
+        MP_Weather_Debug(arg);
+    }
     else if (strcmp(cmd, "u3darc") == 0)   // the throne room's arc of light: from person LOCAL to its dais (zone 278's)
     {
         void U3D_Vm_DebugArc(u8 local);

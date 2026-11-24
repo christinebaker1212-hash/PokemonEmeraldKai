@@ -1,0 +1,11 @@
+# Online, two players on ROUTE 102 see the same sky at the same hour (the server's clock from MPMSG_S_WELCOME)
+MODE=2
+WARP=0,17,20,10
+WARP_B=0,17,22,10
+HOUR=12
+TMO=120
+ENV_A="MOEMON_SKY=1"
+ENV_B="MOEMON_SKY=1"
+EXPECT_A=("[weather] hour")
+EXPECT_B=("[weather] hour")
+CHECK="tools/test/check_sky_same.sh"

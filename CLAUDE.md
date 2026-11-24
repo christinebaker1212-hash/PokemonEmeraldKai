@@ -342,6 +342,10 @@ Also CHATOT's CHATTER as Platinum had it (after 1.207.0: OPTIONS > CONTROLS > MI
 into: src/platform/mic.c; the saying in "<save>.chatter", recorded by CHATTER in the party menu with Platinum's script,
 played for CHATOT's cries by whose CHATOT it is, friends' online by MP_BLOB_CHATTER, CHATTER's 1 / 11 / 31% by byte 15:
 src/mp/mp_chatter.c; COOP_NOTES "CHATTER as it was in Platinum"; tests chatter_*; MOEMON_MIC_WAV stands in for a mic).
+Also the hourly weather (1.220.0: moving rain / sun fronts over every region's plain outdoor maps, the same for everyone
+by the hour and the server's clock, hail where cold, very rare desert sandstorms, never over a map's own or a script's
+weather, weather-loving POKéMON from the rare slots, "Likes the sun." in the app: src/mp/mp_weather.c; COOP_NOTES
+"The hourly weather"; tests sky_*).
 Also fishing as Gen 1 had it (1.97.0: cast, then a bite and the battle or no nibble; no dots or timing: field_player_avatar.c;
 COOP_NOTES "Fishing as Gen 1 had it"; test fishing_gen1).
 Also breeding by Gen 9's rules (1.166.0: NIDORAN / VOLBEAT either kind from any pair, no incense, egg moves from both

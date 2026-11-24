@@ -1,4 +1,5 @@
 #include "global.h"
+#include "mp_weather.h"
 #include "battle_anim.h"
 #include "event_object_movement.h"
 #include "fieldmap.h"
@@ -248,6 +249,13 @@ void Drought_InitAll(void)
 
 void Drought_Main(void)
 {
+    if (MP_Weather_GentleSun())
+    {
+        // Moemon Co-op: the hourly weather's bright sun is a warm light over the field (mp_daytint.c), never the
+        // glare of GROUDON's drought (the field weather stays DROUGHT: the sun shines in battle)
+        gWeatherPtr->weatherGfxLoaded = TRUE;
+        return;
+    }
     switch (gWeatherPtr->initStep)
     {
     case 0:
@@ -2526,6 +2534,7 @@ void SetSavedWeatherFromCurrMapHeader(void)
     gSaveBlock1Ptr->weather = TranslateWeatherNum(gMapHeader.weather);
     if (U3D_FieldWeather() != 0xFF)   // Moemon Kai: UNOVA's maps have Black's weather calendar's (u3d_elboard.c)
         gSaveBlock1Ptr->weather = U3D_FieldWeather();
+    gSaveBlock1Ptr->weather = MP_Weather_ForCurrentMap(gSaveBlock1Ptr->weather);   // Moemon Co-op: the hour's (mp_weather.c)
     UpdateRainCounter(gSaveBlock1Ptr->weather, oldWeather);
 }
 

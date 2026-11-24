@@ -470,6 +470,18 @@ s32 S3D_CurrentMapIndex(void)
     return gSaveBlock1Ptr ? MapIndex(gSaveBlock1Ptr->location.mapGroup, gSaveBlock1Ptr->location.mapNum) : -1;
 }
 
+// A SINNOH map's middle in the region's tiles (Platinum's matrix 0: 32 a block); FALSE when it isn't on it (the
+// hourly weather's fronts, mp_weather.c)
+bool8 S3D_MapWorldTile(u8 group, u8 num, s32 *x, s32 *z)
+{
+    s32 map = MapIndex(group, num);
+    if (map < 0 || sMaps[map].mat != 0)
+        return FALSE;
+    *x = sMaps[map].cx * 32 + sMaps[map].bw * 16;
+    *z = sMaps[map].cz * 32 + sMaps[map].bh * 16;
+    return TRUE;
+}
+
 bool8 S3D_IsSinnohGroup(u8 mapGroup)
 {
     // group 40 (outdoors) and the buildings' groups after it (tools/sinnoh/gen_maps.py)

@@ -12,6 +12,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include "global.h"
+#include "mp_weather.h"
 #include "battle.h"
 #include "battle_anim.h"
 #include "battle_main.h"
@@ -509,6 +510,8 @@ u16 MP_BattleWeather_FieldFlags(void)
         return B_WEATHER_SANDSTORM;
     case WEATHER_DROUGHT:
         return B_WEATHER_SUN;
+    case WEATHER_SNOW:
+        return MP_Weather_Ours() ? B_WEATHER_HAIL : 0;   // (the hourly weather's hail: mp_weather.c)
     }
     return 0;
 }

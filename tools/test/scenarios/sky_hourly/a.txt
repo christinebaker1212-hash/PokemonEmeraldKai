@@ -1,0 +1,98 @@
+pressuntil A field 5000
+wait 30
+mp sky region
+shot hoenn_clear
+mp sky force 3
+mp sky apply
+wait 300
+shot hoenn_sun
+mp sky force 1
+mp sky apply
+wait 400
+shot hoenn_rain
+mp sky force 4
+mp sky apply
+wait 300
+shot hoenn_hail
+mp weather
+mp sky off
+mp sky apply
+wait 60
+mp weather
+mp sky hours 1
+wait 120
+mp weather
+mp sky hours 2
+wait 120
+mp weather
+mp sky hours 3
+wait 120
+mp weather
+mp sky hours 4
+wait 120
+mp weather
+mp sky hours 5
+wait 120
+mp weather
+mp sky hours 6
+wait 120
+mp weather
+mp sky hours 7
+wait 120
+mp weather
+mp sky hours 8
+wait 120
+mp weather
+mp sky hours 9
+wait 120
+mp weather
+mp sky hours 10
+wait 120
+mp weather
+mp sky hours 11
+wait 120
+mp weather
+mp sky hours 12
+wait 120
+mp weather
+mp sky hours 13
+wait 120
+mp weather
+mp sky hours 14
+wait 120
+mp weather
+mp sky hours 15
+wait 120
+mp weather
+mp sky hours 16
+wait 120
+mp weather
+mp sky hours 17
+wait 120
+mp weather
+mp sky hours 18
+wait 120
+mp weather
+mp sky hours 19
+wait 120
+mp weather
+mp sky hours 20
+wait 120
+mp weather
+mp sky hours 21
+wait 120
+mp weather
+mp sky hours 22
+wait 120
+mp weather
+mp sky hours 23
+wait 120
+mp weather
+mp sky hours 24
+wait 120
+mp weather
+mp warp 0,34,10,10
+wait 240
+mp sky
+mp weather
+quit

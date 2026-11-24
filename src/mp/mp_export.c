@@ -14,6 +14,7 @@
 #include <string.h>
 #include <sys/stat.h>
 #include "global.h"
+#include "mp_weather.h"
 #include "constants/daycare.h"
 #include "mp.h"
 #include "mp_region.h"
@@ -654,6 +655,7 @@ static void ExportData(const char *dir)
             static u16 pal[512];   // (room for any palette: Kai's hold up to 64 colors)
             u32 k;
             fprintf(f, ",\"cr\":%u,\"gr\":%u", gSpeciesInfo[base].catchRate, gSpeciesInfo[base].growthRate);
+            fprintf(f, ",\"wl\":%u", MP_Weather_Likes(base));   // (the weather it likes: mp_weather.c)
             fprintf(f, ",\"t\":[%u,%u],\"g\":%u,\"bs\":[%u,%u,%u,%u,%u,%u]", gSpeciesInfo[base].types[0],
                     gSpeciesInfo[base].types[1], gSpeciesInfo[base].genderRatio, gSpeciesInfo[base].baseHP,
                     gSpeciesInfo[base].baseAttack, gSpeciesInfo[base].baseDefense, gSpeciesInfo[base].baseSpAttack,

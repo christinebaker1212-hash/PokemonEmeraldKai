@@ -1167,7 +1167,7 @@ static void HandleMessage(int c, uint8_t type, uint8_t *data, uint16_t len)
         if (type == MPMSG_C_HELLO)
         {
             uint16_t ver = data[0] | (data[1] << 8);
-            uint8_t welcome[2];
+            uint8_t welcome[10];
             if (ver != MP_PROTOCOL_VERSION)
             {
                 uint8_t msg[3] = {MP_REJECT_VERSION, MP_PROTOCOL_VERSION & 0xFF, MP_PROTOCOL_VERSION >> 8};
@@ -1176,7 +1176,13 @@ static void HandleMessage(int c, uint8_t type, uint8_t *data, uint16_t len)
             }
             welcome[0] = (uint8_t)sc->slot;
             welcome[1] = MP_MAX_PLAYERS;
-            SendTo(c, MPMSG_S_WELCOME, welcome, 2);
+            {
+                // the server's clock (seconds since 1970): everyone's hour of the hourly weather alike (mp_weather.c)
+                uint64_t now = (uint64_t)time(NULL);
+                for (i = 0; i < 8; i++)
+                    welcome[2 + i] = (uint8_t)(now >> (8 * i));
+            }
+            SendTo(c, MPMSG_S_WELCOME, welcome, sizeof(welcome));
             // Tell the newcomer about everyone already here
             for (i = 0; i < MP_MAX_PLAYERS; i++)
             {

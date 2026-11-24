@@ -141,6 +141,7 @@ bool8 U3D_TryRoamerEncounter(u8 *level);   // UNOVA's roamers (TORNADUS, THUNDUR
 bool8 U3D_RoamerAfterBattle(struct Pokemon *mon, u8 outcome);   // after UNOVA's game clear: CONTINUE starts at home (Black's continue spot)   // a work of Black's event work   // FENNEL gave the C-GEAR (UNOVA's device)
 void U3D_Vm_WhiteoutHome(void);   // a new game in UNOVA: a whiteout returns home to NUVEMA (Black's first warp point)
 bool8 U3D_MapOfZoneTile(u16 zone, u16 x, u16 z, u8 *group, u8 *num, s16 *mapX, s16 *mapY);                                       // the player's map's row of u3d_maps.h (-1: not UNOVA)
+bool8 U3D_MapWorldTile(u8 group, u8 num, s32 *x, s32 *z, u16 *zone);   // a map's middle in the region's tiles (mp_weather.c)
 u8 U3D_MapCellX(s32 index);                                   // ... where it lies on its Black matrix (blocks)
 u8 U3D_MapCellZ(s32 index);
 // UNOVA's scripts (src/unova/u3d_vm.c: Black's own bytecode)

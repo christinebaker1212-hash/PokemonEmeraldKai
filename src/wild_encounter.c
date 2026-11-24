@@ -1,5 +1,6 @@
 #include <stdlib.h>
 #include "global.h"
+#include "mp_weather.h"
 #include "u3d.h"   // Moemon Kai: UNOVA's wild POKéMON
 #include "mp_region.h"
 #include "mp.h"
@@ -468,6 +469,17 @@ static bool8 TryGenerateWildMon(const struct WildPokemonInfo *wildMonInfo, u8 ar
     case WILD_AREA_ROCKS:
         wildMonIndex = ChooseWildMonIndex_WaterRock();
         break;
+    }
+    // Moemon Co-op: the POKéMON that like the weather come out of the rare slots more often in it (mp_weather.c)
+    {
+        static const u8 sLand[NUM_LAND_MONS_ENCOUNTER_SLOTS] = {20, 20, 10, 10, 10, 10, 5, 5, 4, 4, 1, 1};
+        static const u8 sWater[NUM_WATER_MONS_ENCOUNTER_SLOTS] = {60, 30, 5, 4, 1};
+        if (area == WILD_AREA_LAND)
+            wildMonIndex = MP_Weather_WildIndex(wildMonInfo->wildPokemon, sLand, NUM_LAND_MONS_ENCOUNTER_SLOTS,
+                                                wildMonIndex, Random32());
+        else if (area == WILD_AREA_WATER)
+            wildMonIndex = MP_Weather_WildIndex(wildMonInfo->wildPokemon, sWater, NUM_WATER_MONS_ENCOUNTER_SLOTS,
+                                                wildMonIndex, Random32());
     }
 
     level = ChooseWildMonLevel(&wildMonInfo->wildPokemon[wildMonIndex]);

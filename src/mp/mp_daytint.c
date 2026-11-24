@@ -8,6 +8,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include "global.h"
+#include "mp_weather.h"
 #include "main.h"
 #include "overworld.h"
 #include "rtc.h"
@@ -22,6 +23,9 @@ const char *Updater_ExeFile(const char *name);
 static u8 sTable[48][3];
 static bool8 sLoaded, sTried;
 static u16 sMul[3];   // this frame's share of each channel, 256 = all
+static u16 sLayerMul[3];   // ... for the map's layers (SINNOH's 3D world: only the sun's, it lights the hour itself)
+static u16 sSunAmount;   // the hourly weather's bright sun, 0-256 (mp_weather.c)
+static const u16 sSun[3] = {292, 276, 246};   // ... its warm light, at its brightest
 
 static void Load(void)
 {
@@ -50,9 +54,12 @@ static u16 DayTintPixel(u16 c, int x, int y, bool8 sprite)
     u32 r = c & 0x1F, g = (c >> 5) & 0x1F, b = (c >> 10) & 0x1F;
     if (sRedStep != 0xFF && MP_GbPal_RedNight(c, sRedStep, &out))
         return (c & 0x8000) | out;   // (RED's own shades: darkened by whole shades, as Red's fades)
-    r = r * sMul[0] >> 8;
-    g = g * sMul[1] >> 8;
-    b = b * sMul[2] >> 8;
+    {
+        const u16 *mul = sprite ? sMul : sLayerMul;
+        r = r * mul[0] >> 8;
+        g = g * mul[1] >> 8;
+        b = b * mul[2] >> 8;
+    }
     return (c & 0x8000) | (r > 31 ? 31 : r) | ((g > 31 ? 31 : g) << 5) | ((b > 31 ? 31 : b) << 10);
 }
 
@@ -72,7 +79,13 @@ void MP_DayTint_Update(void)
     u32 half, next, ch, mins, i;
     if (!sTried)
         Load();
-    if (!sLoaded || !Wanted())
+    // Moemon Co-op: the hourly weather's bright sun, a warm light eased in and out over a second or two
+    // (mp_weather.c), with or without the day's tint
+    if (MP_Weather_GentleSun() && Wanted())
+        sSunAmount = sSunAmount + 4 > 256 ? 256 : sSunAmount + 4;
+    else
+        sSunAmount = sSunAmount < 4 ? 0 : sSunAmount - 4;
+    if ((!sLoaded && !sSunAmount) || !Wanted())
     {
         if (gMpScenePixel == DayTintPixel)
             gMpScenePixel = NULL;
@@ -87,7 +100,13 @@ void MP_DayTint_Update(void)
     half = (mins / 30) % 48;
     next = (half + 1) % 48;
     for (ch = 0; ch < 3; ch++)   // (eased between half hours; 128 in the table = all of it)
-        sMul[ch] = (sTable[half][ch] * (30 - mins % 30) + sTable[next][ch] * (mins % 30)) * 2 / 30;
+        sMul[ch] = sLoaded ? (sTable[half][ch] * (30 - mins % 30) + sTable[next][ch] * (mins % 30)) * 2 / 30 : 256;
+    for (ch = 0; ch < 3; ch++)
+    {
+        u32 sun = (256 * 256 + (sSun[ch] - 256) * sSunAmount) >> 8;
+        sLayerMul[ch] = S3D_IsSinnohGroup(gSaveBlock1Ptr->location.mapGroup) ? sun : sMul[ch] * sun >> 8;
+        sMul[ch] = sMul[ch] * sun >> 8;
+    }
     sRedStep = 0xFF;
     if (MP_UiStyle_Active() == UISTYLE_RED)
     {
@@ -100,7 +119,7 @@ void MP_DayTint_Update(void)
             gMpSceneObjPal[gSprites[i].oam.paletteNum & 63] = 1;
     // SINNOH's 3D world is lit by the area lights itself (s3d.c): there only its sprites take the tint (the user,
     // 2026-11-02: the light should tint the sprites as well)
-    gMpSceneLayers = S3D_IsSinnohGroup(gSaveBlock1Ptr->location.mapGroup) ? 0 : 0xE;
+    gMpSceneLayers = S3D_IsSinnohGroup(gSaveBlock1Ptr->location.mapGroup) && !sSunAmount ? 0 : 0xE;
     gMpScenePixel = DayTintPixel;
 }
 

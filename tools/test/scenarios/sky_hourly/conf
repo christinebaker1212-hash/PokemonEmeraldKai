@@ -1,0 +1,7 @@
+# The hourly weather on a plain HOENN route (ROUTE 102): the region's sky, then rain, bright sun and hail forced
+MODE=1
+WARP=0,17,20,10
+TMO=60
+ENV_A="MOEMON_SKY=1"
+HOUR=12
+EXPECT_A=("[weather] hour" "next route alike" "keeps its own weather")

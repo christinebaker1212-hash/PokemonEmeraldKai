@@ -140,6 +140,22 @@ static void BuildWorld(void)
     sWorldBuilt = TRUE;
 }
 
+// A map's middle on its region's grid (HOENN, KANTO, JOHTO: the maps reached by connections; indoor maps aren't on
+// it); FALSE when it isn't there (the hourly weather's fronts, mp_weather.c)
+bool8 MP_Compass_MapWorldTile(u8 group, u8 num, s32 *x, s32 *y)
+{
+    const struct MapHeader *h;
+    if (group >= MAP_GROUPS_COUNT)
+        return FALSE;
+    if (!sWorldBuilt)
+        BuildWorld();
+    if (sWorld[group][num].state != W_PLACED || (h = Header(group, num)) == NULL)
+        return FALSE;
+    *x = sWorld[group][num].x + h->mapLayout->width / 2;
+    *y = sWorld[group][num].y + h->mapLayout->height / 2;
+    return TRUE;
+}
+
 // The world tile of map-local (x, y) (MAP_OFFSET included, as object coords are), FALSE when
 // the map is nowhere on the grid. An indoor map gives its door out (*indoors set).
 static bool8 WorldPos(u8 group, u8 num, s16 x, s16 y, s32 *wx, s32 *wy, bool8 *indoors, u8 *world)

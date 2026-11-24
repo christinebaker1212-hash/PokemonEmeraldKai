@@ -1,0 +1,8 @@
+# The hourly weather in KANTO, JOHTO, SINNOH and UNOVA (both 3D engines): rain, bright sun and hail forced on a plain
+# route of each, the weather drawn over the map. Shots kanto_rain, johto_sun, sinnoh_rain / _sun, unova_hail / _rain.
+MODE=1
+TMO=200
+HOUR=12
+ENV_A="MOEMON_SKY=1 MOEMON_DEBUG_PARTY=6:100"
+EXPECT_A=("[weather] hour" "next route alike")
+UNEXPECT_A=("[crash]" "keeps its own weather")

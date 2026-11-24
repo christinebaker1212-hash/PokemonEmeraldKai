@@ -1,4 +1,5 @@
 #include "global.h"
+#include "mp_weather.h"
 #include "orre_shadow.h"   // Moemon Kai: Shadow Pokémon
 #include "battle_gen4.h"
 #include "battle_gen59.h"
@@ -2847,6 +2848,16 @@ u8 AbilityBattleEffects(u8 caseID, u8 battler, u16 ability, u8 special, u16 move
                         {
                             gBattleWeather = B_WEATHER_SANDSTORM;
                             gBattleScripting.animArg1 = B_ANIM_SANDSTORM_CONTINUES;
+                            gBattleScripting.battler = battler;
+                            effect++;
+                        }
+                        break;
+                    case WEATHER_SNOW:
+                        // Moemon Co-op: the hourly weather's hail is hail (mp_weather.c); a map's own snow isn't
+                        if (MP_Weather_Ours() && !(gBattleWeather & B_WEATHER_HAIL))
+                        {
+                            gBattleWeather = B_WEATHER_HAIL;
+                            gBattleScripting.animArg1 = B_ANIM_HAIL_CONTINUES;
                             gBattleScripting.battler = battler;
                             effect++;
                         }

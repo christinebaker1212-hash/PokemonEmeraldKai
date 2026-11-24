@@ -721,7 +721,9 @@ public final class DexEntryPage extends Page {
                 places.add(p);
             }
         }
-        int rows = Math.max(1, places.size()) + (hiddenRare > 0 ? 1 : 0);
+        // the weather it likes: in it, it comes out of a place's rare slots more often (the game's hourly weather)
+        String likes = likesLine(art.species(sp).optInt("wl"));
+        int rows = Math.max(1, places.size()) + (hiddenRare > 0 ? 1 : 0) + (likes != null ? 1 : 0);
         int bh = 24 + rows * 16;
         int ry = panel(c, x0, y, pw, bh, "WHERE TO FIND") - 1;
         if (where == null) {
@@ -742,8 +744,23 @@ public final class DexEntryPage extends Page {
         if (hiddenRare > 0) {
             art.text(c, "Rare in " + hiddenRare + (hiddenRare == 1 ? " more place." : " more places."), x0 + 8, ry,
                     GameArt.GRAY_TEXT, GameArt.SHADOW);
+            ry += 16;
+        }
+        if (likes != null) {
+            art.text(c, likes, x0 + 8, ry, GameArt.BLUE_TEXT, GameArt.SHADOW);
         }
         return y + bh + 8;
+    }
+
+    /** The weather a POKéMON likes (the game's mp_weather.c MP_WX_*: 1 rain, 3 sun, 4 hail, 5 sandstorm) as a line */
+    static String likesLine(int wl) {
+        switch (wl) {
+            case 1: return "Likes the rain.";
+            case 3: return "Likes the sun.";
+            case 4: return "Likes the hail.";
+            case 5: return "Likes sandstorms.";
+            default: return null;
+        }
     }
 
     @Override

@@ -1,4 +1,5 @@
 #include "global.h"
+#include "mp_weather.h"
 #include "orre.h"   // Moemon Kai: ORRE's scripts
 #include "qz_specials.h"
 #include "mp_region.h"
@@ -1640,6 +1641,7 @@ static void OverworldBasic(void)
     MP_Follower_Update(); // Moemon Co-op: after the camera, so it lines up with its owner
     MP_DaycareYard_Update(); // Moemon Kai: ROUTE 34's DAY-CARE yard (mp_daycareyard.c)
     MP_Compass_Update();  // Moemon Co-op: arrows toward friends off screen
+    MP_Weather_Update();  // ... the hour turning the sky (mp_weather.c)
     MP_MapPic_Update();   // ... full-color map pictures in view (mp_mappic.c: the GAME CENTER)
     S3D_Update();         // Moemon Kai: SINNOH's maps drawn in 3D (src/sinnoh/s3d.c)
     O3D_Update();         // Moemon Kai: ORRE's, by their own engine (src/orre/o3d.c)
