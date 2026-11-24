@@ -838,8 +838,9 @@ void UpdateSpritePaletteWithWeather(u8 spritePaletteIndex)
     case WEATHER_PAL_STATE_SCREEN_FADING_IN:
         if (gWeatherPtr->fadeInFirstFrame)
         {
-            if (gWeatherPtr->currWeather == WEATHER_FOG_HORIZONTAL)
-                MarkFogSpritePalToLighten(paletteIndex);
+            // Moemon Kai: no fog lightening of a sprite palette loaded now (the player's, a friend's): the fog's
+            // sprites blend over every person alike (gba_easy_draw.c PutObjPixel), and a lightened palette was fog
+            // twice on the player, and stayed on a friend's (palettes past the weather's) after the fog lifted
             paletteIndex = PLTT_ID(paletteIndex);
             for (i = 0; i < 16; i++)
                 gPlttBufferFaded[paletteIndex + i] = gWeatherPtr->fadeDestColor;
@@ -853,15 +854,8 @@ void UpdateSpritePaletteWithWeather(u8 spritePaletteIndex)
     // WEATHER_PAL_STATE_CHANGING_WEATHER
     // WEATHER_PAL_STATE_CHANGING_IDLE
     default:
-        if (gWeatherPtr->currWeather != WEATHER_FOG_HORIZONTAL)
-        {
-            ApplyColorMap(paletteIndex, 1, gWeatherPtr->colorMapIndex);
-        }
-        else
-        {
-            paletteIndex = PLTT_ID(paletteIndex);
-            BlendPalette(paletteIndex, 16, 12, RGB(28, 31, 28));
-        }
+        // (Moemon Kai: in fog too: no fog tint on a sprite palette, the fog's sprites cover people alike)
+        ApplyColorMap(paletteIndex, 1, gWeatherPtr->colorMapIndex);
         break;
     }
 }

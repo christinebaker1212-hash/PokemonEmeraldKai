@@ -9128,6 +9128,13 @@ like the start menu, or messages ... the player is affected by things like overw
   They're now first (subpriority 0) and the renderer blends the field weather's see-through sprites (palette
   PALTAG_WEATHER) with the sprite under them in their layer (PutObjPixel sWeatherObjPal): the player and NPCs alike, on
   the 2D maps and over SINNOH's 3D ones. Scenario weather_npc_tint.
+- **No fog in people's palettes** (1.220.2; the user: "the fog/mist effect displays on the player character twice, and it
+  can't be cleared on co-op players"): Emerald also lightened a sprite palette loaded during fog (field_weather.c
+  UpdateSpritePaletteWithWeather: MarkFogSpritePalToLighten at a fade's first frame, BlendPalette 12/16 toward
+  RGB(28, 31, 28) after), which is why only the player looked fogged before, and with the fog's sprites over everyone
+  it was fog twice on the player; a friend's avatar palette (past the weather's palettes) kept the tint after the fog
+  lifted until a screen reloaded it. Now a sprite palette takes the weather's colour map in fog as in any weather (fog's
+  is 0: none). Scenario fog_coop (a friend arriving in the fog, the fog lifting).
 - **The level up's stats box**: drawn in the style's window both in battle (MP_UiStyle_BattleBox) and in the party
   menu (a framed BG2 pop-up) in FIRERED, CRYSTAL and RED (scenario ui_style_levelup); PLATINUM and BLACK need their ROM
   packs to check.

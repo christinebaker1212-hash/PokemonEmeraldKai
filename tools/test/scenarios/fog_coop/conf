@@ -1,0 +1,7 @@
+# Fog on and off with a friend next to you (one who arrived in the fog): the fog over you and your friend once, as over
+# the ground, and gone from both when it lifts (the user, 2026-11-24); a_fog / a_clear looked at by hand, CHECK compares
+MODE=2
+WARP=0,17,20,10
+WARP_B=0,17,22,10
+HOUR=12
+TMO=120
