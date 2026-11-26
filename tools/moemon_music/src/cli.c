@@ -10,14 +10,15 @@
 //   moemon_music_studio --save IN OUT.mmsproj [SONG]      a project (SONG: the game song it replaces)
 //   moemon_music_studio --original IN OUT.wav             a rip's own sound (its console's emulator)
 //   moemon_music_studio --reference IN OUT.wav [SECONDS]  what the rip's capture says, mixed at full precision
-//   moemon_music_studio --chip nes|gb IN OUT [ARP]        IN made chiptune: OUT.nsf (NES) / OUT.gbs (Game Boy);
-//                                                       ARP = frames each part holds square 2 when parts share it
+//   moemon_music_studio --chip nes|gb IN OUT [SETTINGS]   IN made chiptune: OUT.nsf (NES) / OUT.gbs (Game Boy); SETTINGS
+//                                                       the arrangement table's (pN=melody, pN.duty=25, chords=arp...: below)
 // IN can also be a rip (PSF, PSF2, USF, GBS / NSF / NSFe / .m3u, 2SF, GSF, GameCube, or a DS sound archive's sequence:
 // "sound_data.sdat#SEQ_NAME" or "sound_data.sdat#NUMBER"); MMS_BIOS = the PlayStation BIOS folder.
 // MMS_DEFAULTS = a defaults file (the window's Defaults panel saves one) every opened song starts with.
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <strings.h>
 #include "studio.h"
 #include "export.h"
 #include "inst.h"
@@ -127,7 +128,36 @@ int cli_main(int argc, char **argv)
     if (chipTarget) {
         ChipOpts o;
         chip_opts_default(&o, !strcmp(chipTarget, "gb") || !strcmp(chipTarget, "gbs") ? CHIP_GB : CHIP_NES);
-        if (argc >= 5) o.arpFrames = atoi(argv[4]);
+        // the arrangement table's settings: pN=melody|harmony|backing|echo|bass|off, pN.duty=12|25|50|75, pN.oct=-2..2
+        // (N: the track, from 1, as the window shows it), chords=auto|hold|arp, arp=FRAMES, dmc=0|1, vibrato=0|1, plan
+        int showPlan = 0;
+        for (int i = 4; i < argc; i++) {
+            const char *a = argv[i], *eq = strchr(a, '=');
+            if (!strcmp(a, "plan")) { showPlan = 1; continue; }
+            if (!eq) { o.chords = CHIP_CHORDS_ARP; o.arpFrames = atoi(a); continue; }   // (a bare number: arpeggio frames)
+            if (a[0] == 'p' && a[1] >= '0' && a[1] <= '9') {
+                int n = atoi(a + 1) - 1;
+                if (n < 0 || n >= CHIP_MAX_PARTS) continue;
+                const char *dot = strchr(a, '.');
+                if (dot && dot < eq && !strncmp(dot, ".duty", 5)) { int d = atoi(eq + 1); o.duty[n] = d <= 13 ? 0 : d <= 25 ? 1 : d <= 50 ? 2 : 3; }
+                else if (dot && dot < eq && !strncmp(dot, ".oct", 4)) o.octave[n] = atoi(eq + 1);
+                else
+                    for (int r = 0; r < CHIP_ROLE_COUNT; r++)
+                        if (!strcasecmp(eq + 1, chip_role_name(r)) || (r == CHIP_ROLE_LEAD && !strcmp(eq + 1, "lead")) ||
+                            (r == CHIP_ROLE_ACCOMP && !strcmp(eq + 1, "accomp"))) o.role[n] = r;
+            } else if (!strncmp(a, "chords=", 7)) o.chords = !strcmp(eq + 1, "hold") ? CHIP_CHORDS_HOLD : !strcmp(eq + 1, "arp") ? CHIP_CHORDS_ARP : CHIP_CHORDS_AUTO;
+            else if (!strncmp(a, "arp=", 4)) o.arpFrames = atoi(eq + 1);
+            else if (!strncmp(a, "dmc=", 4)) o.dmc = atoi(eq + 1);
+            else if (!strncmp(a, "vibrato=", 8)) o.vibrato = atoi(eq + 1);
+        }
+        if (showPlan) {
+            ChipPlan pl;
+            char m[512];
+            if (!chip_plan(&s, &o, &pl, m, sizeof m)) { fprintf(stderr, "%s\n", m); return 1; }
+            for (int i = 0; i < pl.n; i++)
+                printf("track %2d: %-8s %-28s %4d notes, keys %d-%d, duty %d\n", pl.p[i].part + 1, chip_role_name(pl.p[i].role), pl.p[i].what,
+                       pl.p[i].notes, pl.p[i].keyLo, pl.p[i].keyHi, pl.p[i].duty);
+        }
         char msg[1024], out[2048];
         snprintf(out, sizeof(out), "%s%s", argv[3], ends_with(argv[3], chip_ext(o.target)) ? "" : chip_ext(o.target));
         if (!chip_export(&s, &o, out, msg, sizeof(msg))) { fprintf(stderr, "%s\n", msg); return 1; }

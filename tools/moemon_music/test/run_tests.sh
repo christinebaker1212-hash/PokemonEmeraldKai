@@ -156,7 +156,11 @@ echo "== CHIPTUNE: more parts than channels as NES and Game Boy music (melody, h
 python3 test/make_test_chip_midi.py "$T/chip.mid"
 "$B" --chip nes "$T/chip.mid" "$T/chip_nes" > /dev/null          # (the extension is added)
 "$B" --chip gb "$T/chip.mid" "$T/chip_gb.gbs" > /dev/null
-"$B" --chip nes "$T/chip.mid" "$T/chip_arp.nsf" 1 > /dev/null    # chords as arpeggios
+"$B" --chip nes "$T/chip.mid" "$T/chip_arp.nsf" chords=arp arp=2 > /dev/null    # chords as arpeggios (2 frames a note: read
+                                                                                  # back at the same 60 Hz, 1 would be missed)
+"$B" --chip nes "$T/chip.mid" "$T/chip_plan.nsf" plan > "$T/plan.txt"            # the parts as read
+grep -q 'track  1: Melody' "$T/plan.txt" && grep -q 'track  4: Bass' "$T/plan.txt" && grep -q 'track  5: Drums' "$T/plan.txt"
+"$B" --chip nes "$T/chip.mid" "$T/chip_set.nsf" p1=off p3=melody plan | grep -q 'track  3: Melody'   # the table's settings
 for f in chip_nes.nsf chip_gb.gbs chip_arp.nsf; do
     MMS_RIP_VF=0-1200 "$B" --original "$T/$f" "$T/$f.wav" 2> "$T/$f.vf"
     python3 - "$T/$f.wav" "$T/$f.vf" "$f" <<'PY'
@@ -190,6 +194,8 @@ for part in (0, 1):
         assert sq2 and sq2 <= {60, 64, 67, 69}, ('square 2: the harmony', part, sorted(sq2))
     assert k.get(2) == {36}, ('the bass', part, sorted(k.get(2, ())))
 assert keyons.get(3, 0) >= 20, ('the drums on the noise', keyons)
+if sys.argv[3].endswith('.nsf'):
+    assert keyons.get(4, 0) >= 8, ('the kicks and snares as DMC samples', keyons)
 PY
 done
 "$B" --save "$T/chip_nes.nsf" "$T/chip_nes.mmsproj" > /dev/null    # opened again like any NES / Game Boy song

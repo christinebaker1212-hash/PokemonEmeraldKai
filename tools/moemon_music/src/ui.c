@@ -86,8 +86,10 @@ static char sGbsPath[1024];       // a .gbs waiting for its track number
 static int sGbsTrack;
 static char sDropped[1024];
 static int sQuit;
-// CHIPTUNE: the chip, how long each part holds square 2 when parts take turns, and whether the file opens afterwards
-static int sChipTarget = CHIP_NES, sChipArp = 0, sChipOpen = 1;
+// CHIPTUNE: its settings and arrangement table (reset for each song opened), the parts as read, whether the file opens
+static ChipOpts sChipO;
+static ChipPlan sChipPlan;
+static int sChipReady, sChipPlanned, sChipOpen = 1, sChipScroll;
 
 // input for this frame
 static int mx, my, mDown, mPressed, mReleased, pressX, pressY, wheel, dblClick;
@@ -425,6 +427,12 @@ static void set_status(const char *fmt, const char *a)
 
 static void after_open(const char *path)
 {
+    if (sChipReady) {   // a new song: its own arrangement table (the chip and the switches stay)
+        int t = sChipO.target, ch = sChipO.chords, af = sChipO.arpFrames, dm = sChipO.dmc, vb = sChipO.vibrato;
+        chip_opts_default(&sChipO, t);
+        sChipO.chords = ch; sChipO.arpFrames = af; sChipO.dmc = dm; sChipO.vibrato = vb;
+    }
+    sChipPlanned = 0;
     sExported = 0;
     sEdits = 0;
     sSelSlot = -1;
@@ -727,25 +735,39 @@ static void do_export_decomp(const char *dir)
 
 static void guarded(int act);
 
+static void chip_ready(void)
+{
+    if (!sChipReady) { chip_opts_default(&sChipO, CHIP_NES); sChipReady = 1; }
+}
+
+// the parts as the studio reads them, for the table (the table's settings applied)
+static void chip_read_parts(void)
+{
+    chip_ready();
+    busy("Reading the song's parts: melody, harmony, bass, echoes, drums...");
+    char m[512];
+    if (!chip_plan(&S, &sChipO, &sChipPlan, m, sizeof m)) { sChipPlan.n = 0; set_status("%s", m); }
+    else snprintf(sStatus, sizeof(sStatus), "CHIPTUNE: %d parts read. Set what any of them plays as, or export as it is.", sChipPlan.n);
+    sChipPlanned = 1;
+}
+
 static void do_export_chip(const char *path)
 {
-    const char *ext = chip_ext(sChipTarget);
+    chip_ready();
+    const char *ext = chip_ext(sChipO.target);
     char p[1100], msg[1024];
     snprintf(p, sizeof(p), "%s%s", path, ends_with(path, ext) ? "" : ext);
-    ChipOpts o;
-    chip_opts_default(&o, sChipTarget);
-    o.arpFrames = sChipArp;
     char what[200];
-    snprintf(what, sizeof(what), "Making the song chiptune for the %s (every part, every frame)...", chip_name(sChipTarget));
+    snprintf(what, sizeof(what), "Arranging the song for the %s...", chip_name(sChipO.target));
     busy(what);
-    if (!chip_export(&S, &o, p, msg, sizeof(msg))) { set_status("Couldn't make the chiptune: %s", msg); return; }
+    if (!chip_export(&S, &sChipO, p, msg, sizeof(msg))) { set_status("Couldn't make the chiptune: %s", msg); return; }
     if (sChipOpen) {
         // open it like any NES / Game Boy rip: Original plays it on the chip's own emulator
         char keep[1024];
         snprintf(keep, sizeof(keep), "%s", msg);
         snprintf(sDropped, sizeof(sDropped), "%s", p);
         guarded(ACT_OPEN_DROPPED);
-        if (sModal == MODAL_NONE) snprintf(sStatus, sizeof(sStatus), "%s Opened it: Original (Tab) is the %s itself.", keep, chip_name(sChipTarget));
+        if (sModal == MODAL_NONE) snprintf(sStatus, sizeof(sStatus), "%s Opened it: Original (Tab) is the %s itself.", keep, chip_name(sChipO.target));
         else snprintf(sStatus, sizeof(sStatus), "%s", keep);
     } else snprintf(sStatus, sizeof(sStatus), "%s", msg);
 }
@@ -788,12 +810,13 @@ static void run_action(int act)
     }
     case ACT_EXPORT_CHIP: {
         if (export_blocked(0)) break;
+        chip_ready();
         char def[300];
-        default_name(def, sizeof(def), chip_ext(sChipTarget));
+        default_name(def, sizeof(def), chip_ext(sChipO.target));
         char filter[16];
-        snprintf(filter, sizeof(filter), "*%s", chip_ext(sChipTarget));
-        r = dlg_save(path, sizeof(path), sChipTarget == CHIP_GB ? "Export the song as Game Boy music" : "Export the song as NES music",
-                     sChipTarget == CHIP_GB ? "Game Boy music" : "NES music", filter, def);
+        snprintf(filter, sizeof(filter), "*%s", chip_ext(sChipO.target));
+        r = dlg_save(path, sizeof(path), sChipO.target == CHIP_GB ? "Export the song as Game Boy music" : "Export the song as NES music",
+                     sChipO.target == CHIP_GB ? "Game Boy music" : "NES music", filter, def);
         if (r > 0) do_export_chip(path);
         else if (r < 0) ask_path(act, def);
         break;
@@ -905,7 +928,10 @@ static void draw_top(void)
     x += 134;
     if (button(x, 8, 140, 28, "Export decomp", have_song())) run_action(ACT_EXPORT_DECOMP);
     x += 146;
-    if (button(x, 8, 110, 28, "Chiptune...", have_song())) sModal = MODAL_CHIP;
+    if (button(x, 8, 110, 28, "Chiptune...", have_song())) {
+        if (!sChipPlanned) chip_read_parts();
+        sModal = MODAL_CHIP;
+    }
     x += 116;
     if (button(W - 44, 8, 32, 28, "?", 1)) sModal = MODAL_HELP;
     if (button(W - 84, 8, 36, 28, "Aa", 1)) sModal = MODAL_DISPLAY;
@@ -2226,46 +2252,113 @@ static int opt_stepper(int x, int y, const char *label, int *v, int lo, int hi, 
     return ch;
 }
 
-// CHIPTUNE: the song (whatever it was opened from) as NES or Game Boy music (chip.h)
+// CHIPTUNE: the song (whatever it was opened from) as NES or Game Boy music (chip.h): the chip, how chords play, and the
+// arrangement table (each part's role, duty and octave: as the studio reads them, or as set here)
+
+// [<] value [>] of any width (the wheel works over it too)
+static int cycler(int x, int y, int w, int *v, int lo, int hi, const char *valueText, Col c)
+{
+    int nv = *v;
+    if (button(x, y, 20, 20, "<", *v > lo)) nv--;
+    fill(x + 22, y, w - 44, 20, C_ROW);
+    textfit(x + 22 + 4, y + 2, w - 52, valueText, c);
+    if (button(x + w - 20, y, 20, 20, ">", *v < hi)) nv++;
+    if (wheel && hot(x, y, w, 20)) nv += wheel > 0 ? 1 : -1;
+    if (nv < lo) nv = lo;
+    if (nv > hi) nv = hi;
+    if (nv == *v) return 0;
+    *v = nv;
+    return 1;
+}
+
+static void key_name(int k, char *buf, int n)
+{
+    static const char *const nm[12] = {"C", "C#", "D", "D#", "E", "F", "F#", "G", "G#", "A", "A#", "B"};
+    snprintf(buf, n, "%s%d", nm[((k % 12) + 12) % 12], k / 12 - 1);
+}
+
 static void draw_chip(void)
 {
-    int x, y, w = 860, h = 440;
+    chip_ready();
+    if (!sChipPlanned && have_song()) chip_read_parts();   // (a song opened while the panel was up)
+    int x, y, w = 1180, h = 740;
     modal_box(&x, &y, w, h, "CHIPTUNE");
-    text(x + 130, y + 10, "this song as NES or Game Boy music, an .nsf / .gbs that any player plays", C_DIM);
-    int ry = y + 48;
+    text(x + 130, y + 10, "this song as NES or Game Boy music: an .nsf / .gbs that any player plays", C_DIM);
+    int ry = y + 46;
     static const char *const CH[] = {"NES", "Game Boy"};
     static const int VCH[] = {CHIP_NES, CHIP_GB};
-    choice(x + 20, ry, "Chip", &sChipTarget, CH, VCH, 2, 150);
-    ry += 36;
+    choice(x + 20, ry, "Chip", &sChipO.target, CH, VCH, 2, 150);
+    text(x + 520, ry + 3, sChipO.target == CHIP_GB ? "2 squares, the wave channel (the bass), noise (the drums)"
+                                                   : "2 squares, the triangle (the bass), noise and DMC samples (the drums)", C_DIM);
+    ry += 34;
+    static const char *const CD[] = {"Auto", "Hold", "Arpeggio"};
+    static const int VCD[] = {CHIP_CHORDS_AUTO, CHIP_CHORDS_HOLD, CHIP_CHORDS_ARP};
+    choice(x + 20, ry, "Chords", &sChipO.chords, CD, VCD, 3, 110);
     {
-        char lab[24];
-        snprintf(lab, sizeof(lab), sChipArp ? "%d" : "off", sChipArp);
-        stepper(x + 20, ry, "Chord arpeggio", &sChipArp, 0, 4, 1, lab);
-        text(x + 380, ry + 3, "a chord in one part goes round its notes, this many frames each", C_DIM);
+        char lab[16];
+        snprintf(lab, sizeof lab, "%d", sChipO.arpFrames);
+        stepper(x + 560, ry, "frames a note", &sChipO.arpFrames, 1, 4, 1, lab);
+        text(x + 780, ry + 3, sChipO.chords == CHIP_CHORDS_AUTO ? "(a chord under the melody with no harmony line)" :
+                              sChipO.chords == CHIP_CHORDS_HOLD ? "(square 2 holds one note)" : "(every chord on square 2)", C_DIM);
     }
-    ry += 36;
-    checkbox(x + 20, ry, "Open it afterwards (Original plays it on the chip itself)", &sChipOpen);
-    ry += 44;
-    text(x + 20, ry, "HOW EVERY PART IS HEARD", C_ACCENT);
+    ry += 34;
+    checkbox(x + 20, ry, "NES kicks and snares as DMC samples", &sChipO.dmc);
+    checkbox(x + 380, ry, "Vibrato on the melody's long notes", &sChipO.vibrato);
+    checkbox(x + 720, ry, "Open it afterwards (Original plays it on the chip)", &sChipOpen);
+    ry += 40;
+    text(x + 20, ry, "PARTS", C_ACCENT);
+    text(x + 80, ry, "what each part of the song plays as: Auto is what the studio reads it as; set any part yourself", C_DIM);
+    if (button(x + w - 170, ry - 4, 150, 24, "Read them again", have_song())) chip_read_parts();
     ry += 26;
-    const char *bassCh = sChipTarget == CHIP_GB ? "wave channel (its shape drawn from the instrument)" : "triangle";
-    char line[300];
-    text(x + 20, ry, "Drums: the noise channel, each hit at its own loudness and brightness, frame by frame.", C_TEXT);
-    ry += 24;
-    snprintf(line, sizeof(line), "Bass: the %s.", bassCh);
-    text(x + 20, ry, line, C_TEXT);
-    ry += 24;
-    text(x + 20, ry, "Melody: square 1. Square 2: the note that harmonizes with it (a 3rd or 6th first);", C_TEXT);
-    ry += 24;
-    text(x + 20, ry, "   echoes and doublings are found and only fill gaps. Each part keeps one octave.", C_TEXT);
-    ry += 24;
-    text(x + 20, ry, "Each instrument's tone picks its square's duty; vibrato, slides and volume follow the song.", C_TEXT);
-    ry += 30;
-    text(x + 20, ry, "The file opens in the studio again like any NES / Game Boy song.", C_DIM);
+    text(x + 20, ry, "track", C_DIM);
+    text(x + 96, ry, "the studio reads it as", C_DIM);
+    text(x + 360, ry, "notes, range", C_DIM);
+    text(x + 590, ry, "plays as", C_DIM);
+    text(x + 810, ry, "duty", C_DIM);
+    text(x + 960, ry, "octave", C_DIM);
+    ry += 22;
+    int rowH = 27, top = ry, rows = (y + h - 56 - top) / rowH;
+    if (!sChipPlan.n) text(x + 20, ry + 4, sChipPlanned ? "No parts with notes." : "", C_DIM);
+    if (sChipScroll > sChipPlan.n - rows) sChipScroll = sChipPlan.n - rows;
+    if (sChipScroll < 0) sChipScroll = 0;
+    for (int r = 0; r < rows && sChipScroll + r < sChipPlan.n; r++) {
+        int i = sChipScroll + r, ly = top + r * rowH;
+        int part = sChipPlan.p[i].part;
+        if (r & 1) fill(x + 14, ly - 3, w - 28, rowH, C_ROW);
+        char buf[96], a[8], b[8];
+        snprintf(buf, sizeof buf, "%d", part + 1);
+        text(x + 24, ly + 2, buf, C_TEXT);
+        textfit(x + 96, ly + 2, 254, sChipPlan.p[i].what, C_DIM);
+        if (sChipPlan.p[i].keyHi > 0) {
+            key_name(sChipPlan.p[i].keyLo, a, sizeof a);
+            key_name(sChipPlan.p[i].keyHi, b, sizeof b);
+            snprintf(buf, sizeof buf, "%d, %s-%s", sChipPlan.p[i].notes, a, b);
+        } else snprintf(buf, sizeof buf, "%d hits", sChipPlan.p[i].notes);
+        textfit(x + 360, ly + 2, 220, buf, C_DIM);
+        if (part >= CHIP_MAX_PARTS) continue;
+        if (sChipPlan.p[i].role == CHIP_ROLE_DRUMS) { text(x + 590, ly + 2, "Drums (the noise)", C_TEXT); continue; }
+        int *role = &sChipO.role[part];
+        if (*role == CHIP_ROLE_AUTO) snprintf(buf, sizeof buf, "Auto: %s", chip_role_name(sChipPlan.p[i].role));
+        else snprintf(buf, sizeof buf, "%s", chip_role_name(*role));
+        cycler(x + 590, ly, 200, role, CHIP_ROLE_AUTO, CHIP_ROLE_OFF, buf, *role == CHIP_ROLE_AUTO ? C_DIM : C_TEXT);
+        static const char *const DN[4] = {"12.5%", "25%", "50%", "75%"};
+        int *duty = &sChipO.duty[part];
+        if (*duty < 0) snprintf(buf, sizeof buf, "Auto: %s", DN[sChipPlan.p[i].duty & 3]);
+        else snprintf(buf, sizeof buf, "%s", DN[*duty & 3]);
+        cycler(x + 810, ly, 140, duty, -1, 3, buf, *duty < 0 ? C_DIM : C_TEXT);
+        int *oct = &sChipO.octave[part];
+        snprintf(buf, sizeof buf, *oct > 0 ? "+%d" : "%d", *oct);
+        stepper(x + 960, ly, NULL, oct, -2, 2, 1, buf);
+    }
+    scrollbar(x + w - 22, top, rows * rowH, sChipPlan.n, rows, &sChipScroll);
+    if (wheel && hot(x, top, 580, rows * rowH)) sChipScroll -= wheel * 2;
+    if (button(x + 20, y + h - 44, 170, 30, "Reset the table", have_song())) {
+        for (int i = 0; i < CHIP_MAX_PARTS; i++) { sChipO.role[i] = CHIP_ROLE_AUTO; sChipO.duty[i] = -1; sChipO.octave[i] = 0; }
+    }
     char eb[40];
-    snprintf(eb, sizeof(eb), "Export %s...", chip_ext(sChipTarget));
+    snprintf(eb, sizeof(eb), "Export %s...", chip_ext(sChipO.target));
     if (button(x + w - 280, y + h - 44, 150, 30, eb, have_song()) || (kEnter && have_song())) { sModal = MODAL_NONE; run_action(ACT_EXPORT_CHIP); }
-    if (button(x + w - 120, y + h - 44, 104, 30, "Cancel", 1) || kEsc) sModal = MODAL_NONE;
+    if (button(x + w - 120, y + h - 44, 104, 30, "Close", 1) || kEsc) sModal = MODAL_NONE;
 }
 
 static void draw_defaults(void)

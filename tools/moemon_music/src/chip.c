@@ -37,7 +37,17 @@ void chip_opts_default(ChipOpts *o, int target)
 {
     memset(o, 0, sizeof *o);
     o->target = target;
-    o->arpFrames = 0;
+    o->chords = CHIP_CHORDS_AUTO;
+    o->arpFrames = 2;
+    o->dmc = 1;
+    o->vibrato = 1;
+    for (int i = 0; i < CHIP_MAX_PARTS; i++) { o->role[i] = CHIP_ROLE_AUTO; o->duty[i] = -1; o->octave[i] = 0; }
+}
+
+const char *chip_role_name(int role)
+{
+    static const char *const k[CHIP_ROLE_COUNT] = {"Auto", "Melody", "Harmony", "Backing", "Echo", "Bass", "Off", "Drums"};
+    return role >= 0 && role < CHIP_ROLE_COUNT ? k[role] : "?";
 }
 
 // ------------------------------------------------------------------ 1. capture
@@ -371,6 +381,7 @@ typedef struct {
     uint8_t pan;              // Game Boy: bit 0 left, bit 1 right
     int16_t wave;             // Game Boy wave channel: the timbre whose shape it plays
     uint8_t shortNoise;
+    uint8_t dmc;              // [3] only, NES: a DMC drum starts this frame (1 kick, 2 snare)
     float hz;                 // tone: its frequency; noise: its clock
     uint32_t note;
 } ChOut;
@@ -380,6 +391,8 @@ typedef struct {
     ChOut (*ch)[4];           // [frame][square 1, square 2, triangle / wave, noise]
     // what happened, for the message
     int parts, drumParts, echoes, doublings, notesHeard, notesTotal, moved, bass;
+    int usesDmc;              // NES: DMC drums play (the file carries their samples)
+    int arpFrames;            // frames square 2 played a chord's arpeggio
 } Arr;
 
 enum { ROLE_NONE, ROLE_BASS, ROLE_HARMONY, ROLE_OSTINATO, ROLE_PAD };
@@ -395,7 +408,15 @@ typedef struct {
     int shift;                // octaves it's moved by (12s), decided the first time it's placed
     uint8_t shiftSet, heard;
     uint8_t lost;             // another note took its channel: it doesn't come back (no flicker between two notes)
+    float amp12, amp24;       // its loudness 12 and 24 frames in (whether the instrument dies away), -1 = it ended first
+    float level;              // how loud it is against its part's loud notes (0.45-1)
+    float drumHz, drumN;      // drums: the noise clock over its first frames, and how many were summed
+    int drumLen;              // drums: frames until it's below 15% of its peak
+    uint8_t drumKind;         // DRUM_*
 } Note;
+
+// the drum kit a hit is played as
+enum { DRUM_KICK, DRUM_SNARE, DRUM_HAT, DRUM_OPENHAT, DRUM_CRASH, DRUM_TOM, DRUM_KINDS };
 
 typedef struct {
     int notes, frames;
@@ -405,6 +426,12 @@ typedef struct {
     int role;
     int echoOf, dupOf;        // the part it echoes / doubles (-1)
     int shift;                // octaves the whole part moves (12s)
+    // its instrument
+    int duty;                 // 0-3
+    float sus;                // what's left of a note 12 frames in (1 = it holds)
+    uint8_t decaying;         // dies away by itself (a pluck, a piano): the chip's envelope does it
+    int user;                 // CHIP_ROLE_* the arrangement table set (AUTO: the studio's)
+    uint8_t drums;            // has drum hits
 } Part;
 
 static int cmp_float(const void *a, const void *b)
@@ -436,8 +463,9 @@ static int key_rel_ok(float a, float b)
 #define LEAD_WINDOW 240        // capture frames (4 s): the melody is chosen for each stretch this long
 #define ECHO_MAX 60            // the longest echo delay looked for (frames)
 
-static int arrange(const Cap *c, int target, int arpFrames, Arr *a, char *msg, int msglen)
+static int arrange(const Cap *c, const ChipOpts *o, Arr *a, ChipPlan *plan, char *msg, int msglen)
 {
+    int target = o->target;
     memset(a, 0, sizeof *a);
     double fps = target == CHIP_GB ? GB_FPS : SRC_FPS;
     int nf = (int)floor(c->nframes * fps / SRC_FPS);
@@ -485,11 +513,19 @@ static int arrange(const Cap *c, int target, int arpFrames, Arr *a, char *msg, i
                 n->timbre = x->timbre;
                 n->drum = x->drum;
                 n->dupOf = -1;
+                n->amp12 = n->amp24 = -1;
             }
             Note *n = &nt[k];
+            int age = f - n->f0;
             n->f1 = f + 1;
             if (x->amp > n->ampPeak) n->ampPeak = x->amp;
             n->ampSum += x->amp;
+            if (age == 12) n->amp12 = x->amp;
+            if (age == 24) n->amp24 = x->amp;
+            if (n->drum) {
+                if (age < 3) { n->drumHz += x->noiseHz; n->drumN += 1; }
+                if (x->amp >= 0.15f * n->ampPeak) n->drumLen = age + 1;
+            }
             if (!x->drum) {
                 if (x->semis < n->keyMin) n->keyMin = x->semis;
                 if (x->semis > n->keyMax) n->keyMax = x->semis;
@@ -679,6 +715,88 @@ static int arrange(const Cap *c, int target, int arpFrames, Arr *a, char *msg, i
         }
         for (int i = 0; i < np; i++) if (pt[i].echoOf >= 0 || pt[i].dupOf >= 0) { if (pt[i].role == ROLE_BASS && pt[i].dupOf >= 0 && pt[pt[i].dupOf].role != ROLE_BASS) pt[i].role = ROLE_HARMONY; }
     }
+    // the arrangement table: what the user set for a part goes before what the studio worked out
+    {
+        int userBass = 0;
+        for (int p = 0; p < np && p < CHIP_MAX_PARTS; p++) { pt[p].user = o->role[p]; if (pt[p].user == CHIP_ROLE_BASS) userBass = 1; }
+        for (int p = 0; p < np; p++) {
+            Part *P = &pt[p];
+            switch (P->user) {
+            case CHIP_ROLE_BASS: P->role = ROLE_BASS; break;
+            case CHIP_ROLE_LEAD: case CHIP_ROLE_HARMONY: P->role = ROLE_HARMONY; break;
+            case CHIP_ROLE_ACCOMP: P->role = ROLE_PAD; break;
+            case CHIP_ROLE_AUTO: if (userBass && P->role == ROLE_BASS) P->role = ROLE_PAD; break;
+            default: break;
+            }
+        }
+        for (int i = 0; i < nn; i++)
+            if (!nt[i].drum && pt[nt[i].part].user == CHIP_ROLE_ECHO) nt[i].echo = 1;
+    }
+    // ---- the drums: each hit a drum of the kit, by its brightness and length (a kick is low, a snare in the middle,
+    // hi-hats bright and short, a crash bright and long), and how hard it's hit against the kit's others like it
+    {
+        float *pk[DRUM_KINDS];
+        int npk[DRUM_KINDS] = {0};
+        for (int d = 0; d < DRUM_KINDS; d++) pk[d] = malloc(sizeof(float) * (size_t)(nn + 1));
+        for (int i = 0; i < nn; i++) {
+            Note *n = &nt[i];
+            if (!n->drum) continue;
+            pt[n->part].drums = 1;
+            float hz = n->drumN > 0 ? n->drumHz / n->drumN : 4000;
+            n->drumKind = (uint8_t)(hz < 1500 ? DRUM_KICK : hz < 6000 ? DRUM_SNARE : n->drumLen <= 5 ? DRUM_HAT : n->drumLen <= 22 ? DRUM_OPENHAT : DRUM_CRASH);
+            if (pk[n->drumKind]) pk[n->drumKind][npk[n->drumKind]++] = n->ampPeak;
+        }
+        float ref[DRUM_KINDS];
+        for (int d = 0; d < DRUM_KINDS; d++) {
+            ref[d] = 1;
+            if (pk[d] && npk[d]) { qsort(pk[d], (size_t)npk[d], sizeof(float), cmp_float); ref[d] = pk[d][(int)(npk[d] * 0.85f)]; }
+            free(pk[d]);
+        }
+        for (int i = 0; i < nn; i++) {
+            Note *n = &nt[i];
+            if (!n->drum) continue;
+            float l = ref[n->drumKind] > 0 ? powf(n->ampPeak / ref[n->drumKind], 0.6f) : 1;
+            n->level = l < 0.45f ? 0.45f : l > 1 ? 1 : l;
+        }
+    }
+    // ---- each part's instrument: a square's duty (a Game Boy square keeps its own; a sample takes 25% when it's bright,
+    // 50% when it's mellow), whether it dies away by itself, and each note's level against the part's loud ones
+    {
+        float *buf = malloc(sizeof(float) * (size_t)(nn + 1));
+        for (int p = 0; buf && p < np; p++) {
+            Part *P = &pt[p];
+            int k = 0, votes[4] = {0}, sq = 0;
+            // whether it dies away: it keeps falling from 12 to 24 frames in (an attack louder than the rest of the
+            // note isn't a decay)
+            for (int i = 0; i < nn; i++) {
+                const Note *n = &nt[i];
+                if (n->part != p || n->drum) continue;
+                const Timbre *tm = n->timbre >= 0 && n->timbre < c->ntim ? &c->tim[n->timbre] : NULL;
+                if (tm && tm->kind == TIM_SQUARE) { votes[tm->duty & 3]++; sq = 1; }
+                else votes[tm && tm->hasDuty && tm->duty == 0 ? 1 : 2]++;
+                if (n->amp12 > 0 && n->amp24 >= 0) buf[k++] = n->amp24 / n->amp12;
+            }
+            int best = 2;
+            for (int d = 0; d < 4; d++) if (votes[d] > votes[best]) best = d;
+            P->duty = sq ? best : best == 1 ? 1 : 2;
+            if (p < CHIP_MAX_PARTS && o->duty[p] >= 0) P->duty = o->duty[p] & 3;
+            P->sus = 1;
+            if (k >= 3) { qsort(buf, (size_t)k, sizeof(float), cmp_float); P->sus = buf[k / 2]; }
+            P->decaying = P->sus < 0.75f;
+            // the level of its notes
+            k = 0;
+            for (int i = 0; i < nn; i++) if (nt[i].part == p && !nt[i].drum) buf[k++] = nt[i].ampPeak;
+            float ref = 1;
+            if (k) { qsort(buf, (size_t)k, sizeof(float), cmp_float); ref = buf[(int)(k * 0.85f)]; }
+            for (int i = 0; i < nn; i++) {
+                Note *n = &nt[i];
+                if (n->part != p || n->drum) continue;
+                float l = ref > 0 ? powf(n->ampPeak / ref, 0.6f) : 1;
+                n->level = l < 0.45f ? 0.45f : l > 1 ? 1 : l;
+            }
+        }
+        free(buf);
+    }
     for (int i = 0; i < nn; i++) if (nt[i].drum && !pt[nt[i].part].notes) { a->drumParts = 1; break; }
     // two parts moving in the same rhythm on other notes: a melody harmonized (in 3rds...) or stabs; the lower one is
     // the upper one's harmony
@@ -727,10 +845,14 @@ static int arrange(const Cap *c, int target, int arpFrames, Arr *a, char *msg, i
         uint8_t *keysUsed = malloc((size_t)np * 128);
         uint8_t *iois = malloc((size_t)np * 64);     // the gaps between its notes' starts (2-frame steps) it uses
         int *lastStart = malloc(sizeof(int) * (size_t)np);
-        for (int w = 0; lastK && keysUsed && iois && lastStart && w < nwin; w++) {
+        float *hist4 = malloc(sizeof(float) * (size_t)np * 4);   // its last four notes' keys
+        int *cyc = malloc(sizeof(int) * (size_t)np);           // notes on the key of 2 or 4 notes before (a figure)
+        for (int w = 0; lastK && keysUsed && iois && lastStart && hist4 && cyc && w < nwin; w++) {
             memset(wsc, 0, sizeof(float) * (size_t)np * 4);
             memset(keysUsed, 0, (size_t)np * 128);
             memset(iois, 0, (size_t)np * 64);
+            memset(cyc, 0, sizeof(int) * (size_t)np);
+            for (int p = 0; p < np * 4; p++) hist4[p] = -100;
             for (int p = 0; p < np; p++) { lastK[p] = -1; lastStart[p] = -1; }
             for (int r = NOTES_FROM(w * LEAD_WINDOW); r < nn && nt[order[r]].f0 < (w + 1) * LEAD_WINDOW; r++) {
                 const Note *n = &nt[order[r]];
@@ -739,12 +861,17 @@ static int arrange(const Cap *c, int target, int arpFrames, Arr *a, char *msg, i
                 if (lastK[n->part] >= 0 && fabsf(n->key0 - lastK[n->part]) > 0.5f) W[0] += 1;
                 lastK[n->part] = n->key0;
                 int kk = (int)lroundf(n->key0);
-                if (kk >= 0 && kk < 128) keysUsed[n->part * 128 + kk] = 1;
+                if (kk >= 0 && kk < 128 && keysUsed[n->part * 128 + kk] < 255) keysUsed[n->part * 128 + kk]++;
                 if (lastStart[n->part] >= 0 && n->f0 > lastStart[n->part] + 1) {
                     int g = (n->f0 - lastStart[n->part] + 1) / 2;
                     iois[n->part * 64 + (g < 63 ? g : 63)] = 1;
                 }
                 if (n->f0 > lastStart[n->part] + 1) lastStart[n->part] = n->f0;
+                {
+                    float *h = &hist4[n->part * 4];
+                    if (fabsf(h[1] - n->key0) < 0.5f || fabsf(h[3] - n->key0) < 0.5f) cyc[n->part]++;
+                    h[3] = h[2]; h[2] = h[1]; h[1] = h[0]; h[0] = n->key0;
+                }
                 W[1] += 1;
                 W[2] += n->ampSum;
                 W[3] += (float)(n->f1 - n->f0);
@@ -753,8 +880,11 @@ static int arrange(const Cap *c, int target, int arpFrames, Arr *a, char *msg, i
                 float *W = &wsc[p * 4];
                 const Part *P = &pt[p];
                 if (W[1] < 2 || P->role == ROLE_BASS) continue;
-                int distinct = 0, rhythms = 0;
-                for (int kk = 0; kk < 128; kk++) distinct += keysUsed[p * 128 + kk];
+                int distinct = 0, rhythms = 0, most = 0;
+                for (int kk = 0; kk < 128; kk++) {
+                    distinct += keysUsed[p * 128 + kk] > 0;
+                    if (keysUsed[p * 128 + kk] > most) most = keysUsed[p * 128 + kk];
+                }
                 for (int g = 0; g < 64; g++) rhythms += iois[p * 64 + g];
                 // a melody's rhythm varies; a figure keeps one (a broken chord in steady 8ths)
                 float varied = 0.35f + 0.65f * (rhythms >= 4 ? 1 : rhythms <= 1 ? 0 : (rhythms - 1) / 3.0f);
@@ -766,7 +896,13 @@ static int arrange(const Cap *c, int target, int arpFrames, Arr *a, char *msg, i
                 if (presence > 1) presence = 1;
                 float poly = P->poly > 1 ? sqrtf((float)P->poly) : 1;
                 float rep = P->moves + P->repeats ? (float)P->repeats / (P->moves + P->repeats) : 0;
-                float sc = loud * moving * sqrtf((float)distinct) * varied * high * sqrtf(presence) / poly * (1 - 0.7f * rep);
+                // a figure cycles through a few notes (a broken chord: F C# F A# ...); a melody goes somewhere
+                float cy = W[1] > 4 ? cyc[p] / W[1] : 0;
+                // ... or keeps coming back to one note (a pedal under a figure)
+                float pedal = W[1] > 4 ? most / W[1] : 0;
+                if (pedal > 0.25f) cy += (pedal - 0.25f) * 2;
+                if (cy > 1) cy = 1;
+                float sc = loud * moving * sqrtf((float)distinct) * varied * high * sqrtf(presence) / poly * (1 - 0.7f * rep) * (1 - 0.75f * cy);
                 if (P->role == ROLE_OSTINATO) sc *= 0.3f;
                 if (P->harmonyOf >= 0) sc *= 0.3f;
                 scores[(size_t)w * np + p] = sc;
@@ -779,23 +915,99 @@ static int arrange(const Cap *c, int target, int arpFrames, Arr *a, char *msg, i
             int best = -1;
             float bestSc = 0, curSc = 0;
             for (int p = 0; p < np; p++) {
+                if (pt[p].user != CHIP_ROLE_AUTO && pt[p].user != CHIP_ROLE_LEAD) continue;
                 float sc = scores[(size_t)w * np + p] * 2 + (w > 0 ? scores[(size_t)(w - 1) * np + p] : 0) + (w + 1 < nwin ? scores[(size_t)(w + 1) * np + p] : 0);
                 if (sc > bestSc) { bestSc = sc; best = p; }
                 if (p == cur) curSc = sc;
             }
             if (cur < 0 || curSc <= 0 || bestSc > curSc * 1.6f) cur = best;
             leadOf[w] = cur;
+            // a part the table makes the melody is it wherever it plays
+            int forced = -1;
+            for (int p = 0; p < np; p++)
+                if (pt[p].user == CHIP_ROLE_LEAD && scores[(size_t)w * np + p] > 0 && (forced < 0 || scores[(size_t)w * np + p] > scores[(size_t)w * np + forced])) forced = p;
+            if (forced >= 0) { leadOf[w] = forced; cur = forced; }
         }
         free(lastK);
         free(keysUsed);
         free(iois);
         free(lastStart);
+        free(hist4);
+        free(cyc);
     }
     free(wsc);
     // each stretch's strongest melody score, for square 2's "how much of a melody is it"
     float *wmax = calloc((size_t)nwin, sizeof(float));
     for (int w = 0; wmax && w < nwin; w++)
         for (int p = 0; p < np; p++) if (scores[(size_t)w * np + p] > wmax[w]) wmax[w] = scores[(size_t)w * np + p];
+
+    // ---- square 2's line for each stretch: ONE part that goes with the melody there, as a chip composer writes it (a
+    // harmony in 3rds / 6ths, a counter-melody, the melody's echo, or the backing's chords as an arpeggio), kept until a
+    // stretch clearly calls for another; and a second one for when it rests a while
+    int *compOf = malloc(sizeof(int) * (size_t)nwin), *comp2Of = malloc(sizeof(int) * (size_t)nwin);
+    {
+        float *pres = calloc((size_t)np, sizeof(float)), *over = calloc((size_t)np, sizeof(float));
+        float *cons = calloc((size_t)np, sizeof(float)), *poly = calloc((size_t)np, sizeof(float)), *loud = calloc((size_t)np, sizeof(float));
+        float *top = malloc(sizeof(float) * (size_t)np);
+        int *cnt = malloc(sizeof(int) * (size_t)np);
+        int cur = -1;
+        for (int w = 0; compOf && comp2Of && pres && over && cons && poly && loud && top && cnt && w < nwin; w++) {
+            int L = leadOf[w];
+            memset(pres, 0, sizeof(float) * (size_t)np);
+            memset(over, 0, sizeof(float) * (size_t)np);
+            memset(cons, 0, sizeof(float) * (size_t)np);
+            memset(poly, 0, sizeof(float) * (size_t)np);
+            memset(loud, 0, sizeof(float) * (size_t)np);
+            for (int f = w * LEAD_WINDOW; f < (w + 1) * LEAD_WINDOW && f < c->nframes; f++) {
+                for (int p = 0; p < np; p++) { top[p] = -1; cnt[p] = 0; }
+                for (int i = c->first[f]; i < c->first[f + 1]; i++) {
+                    const ChipEv *x = &c->ev[i];
+                    if (!x->note || x->amp < quiet || x->drum) continue;
+                    int ni = idx[x->note];
+                    if (ni < 0) continue;
+                    int p = nt[ni].part;
+                    if (x->semis > top[p]) top[p] = x->semis;
+                    cnt[p]++;
+                    loud[p] += x->amp;
+                }
+                for (int p = 0; p < np; p++) {
+                    if (!cnt[p]) continue;
+                    pres[p] += 1;
+                    poly[p] += (float)cnt[p];
+                    if (L >= 0 && p != L && top[L] >= 0) {
+                        int iv = ((int)lroundf(fabsf(top[p] - top[L]))) % 12;
+                        over[p] += 1;
+                        cons[p] += iv == 3 || iv == 4 || iv == 8 || iv == 9 ? 1.0f : iv == 5 || iv == 7 ? 0.6f : iv == 0 ? -0.6f : 0.2f;
+                    }
+                }
+            }
+            int best = -1, second = -1;
+            float bs = 0, s2 = 0, curSc = 0;
+            for (int p = 0; p < np; p++) {
+                const Part *P = &pt[p];
+                if (p == L || !pres[p] || P->role == ROLE_BASS || P->user == CHIP_ROLE_OFF || P->user == CHIP_ROLE_LEAD) continue;
+                if (L >= 0 && (P->dupOf == L || pt[L].dupOf == p)) continue;                  // (the melody again)
+                float pr = pres[p] / LEAD_WINDOW;
+                float cs = over[p] > 0 ? cons[p] / over[p] : 0.3f;
+                float pl = poly[p] / pres[p];
+                float lv = sqrtf(loud[p] / poly[p] / aref);
+                float sc = powf(pr, 0.7f) * (0.5f + cs) * lv;
+                if (L >= 0 && P->harmonyOf == L) sc *= 1.6f;                                  // the melody's harmony
+                if (L >= 0 && P->echoOf == L) sc *= 0.9f;                                     // its echo
+                if (P->role == ROLE_OSTINATO) sc *= 0.6f;
+                if (pl >= 1.8f) sc *= o->chords == CHIP_CHORDS_ARP ? 2.0f : 0.9f;            // chords: an arpeggio
+                if (P->user == CHIP_ROLE_HARMONY) sc *= 3;
+                if (P->user == CHIP_ROLE_ECHO) sc *= 1.2f;
+                if (sc > bs) { s2 = bs; second = best; bs = sc; best = p; }
+                else if (sc > s2) { s2 = sc; second = p; }
+                if (p == cur) curSc = sc;
+            }
+            if (cur < 0 || curSc <= 0 || bs > curSc * 1.4f) cur = best;
+            compOf[w] = cur;
+            comp2Of[w] = cur == best ? second : best;
+        }
+        free(pres); free(over); free(cons); free(poly); free(loud); free(top); free(cnt);
+    }
 
     // ---- each part's octave: moved as a whole when its notes don't fit the channel its role plays on
     float sqLo = target == CHIP_GB ? 36 : 33, sqHi = 108;     // Game Boy squares reach down to 64 Hz, NES 55 Hz
@@ -815,30 +1027,34 @@ static int arrange(const Cap *c, int target, int arpFrames, Arr *a, char *msg, i
             while (top + 12 * P->shift > hi + 0.5f && low + 12 * (P->shift - 1) >= lo - 0.5f) P->shift--;
         }
         free(ks);
+        if (p < CHIP_MAX_PARTS) P->shift += o->octave[p];
     }
 
     // ---- the channels, frame by frame, a note at a time
+    int nesDmc = target == CHIP_NES && o->dmc;
+    int arpN = o->arpFrames < 1 ? 1 : o->arpFrames > 4 ? 4 : o->arpFrames;
     int curN[4] = {-1, -1, -1, -1};         // the note each channel plays (index), -1 none
     int prevOn[4] = {-1, -1, -1, -1};       // ... and played the frame before
     long arp = 0;
+    int lastComp = -1000;                    // the last frame square 2's line played
     int *act = malloc(sizeof(int) * 1024);
     float *actAmp = malloc(sizeof(float) * 1024), *actKey = malloc(sizeof(float) * 1024);
-    float *actPan = malloc(sizeof(float) * 1024);
+    float *actPan = malloc(sizeof(float) * 1024), *actHz = malloc(sizeof(float) * 1024);
     float *smooth = calloc((size_t)nn + 1, sizeof(float));
-    int ok = act && actAmp && actKey && actPan && smooth;
+    int ok = act && actAmp && actKey && actPan && actHz && smooth;
     if (!ok) snprintf(msg, msglen, "out of memory");
     for (int k = 0; ok && k < nf; k++) {
         int f = (int)lround(k * SRC_FPS / fps);
         if (f >= c->nframes) f = c->nframes - 1;
         int lead = leadOf[f / LEAD_WINDOW];
         ChOut *out = a->ch[k];
-        // the notes sounding (as loud as is worth a channel)
+        // the notes sounding (as loud as is worth a channel; the parts the table turned off aren't)
         int na = 0;
         for (int i = c->first[f]; i < c->first[f + 1] && na < 1024; i++) {
             const ChipEv *x = &c->ev[i];
             if (!x->note || x->amp < quiet) continue;
             int ni = idx[x->note];
-            if (ni < 0) continue;
+            if (ni < 0 || pt[nt[ni].part].user == CHIP_ROLE_OFF) continue;
             int dup = 0;
             for (int j = 0; j < na; j++) if (act[j] == ni) { dup = 1; if (x->amp > actAmp[j]) actAmp[j] = x->amp; }
             if (dup) continue;
@@ -846,24 +1062,32 @@ static int arrange(const Cap *c, int target, int arpFrames, Arr *a, char *msg, i
             actAmp[na] = x->amp;
             actKey[na] = x->semis;
             actPan[na] = x->pan;
+            actHz[na] = x->noiseHz;
             na++;
         }
         int on[4] = {-1, -1, -1, -1};        // the active-list index each channel plays this frame
+        int arpOn = 0;                       // square 2 plays a chord's arpeggio this frame
         // keep each channel's note while it sounds
         for (int q = 0; q < 4; q++)
             for (int j = 0; j < na; j++) if (curN[q] >= 0 && act[j] == curN[q]) on[q] = j;
-        // the noise: the drums (the newest hit, else the loudest; a hit keeps it against one as loud)
+        // the drums. On the NES a kick or a snare starting now is a DMC sample; the noise plays the rest (the newest
+        // hit, else the loudest; a hit keeps it against one as loud), and a drum's sound on it lasts as its kit drum does
         {
-            int best = -1;
+            int dmcHit = -1, best = -1;
             float bs = 0;
             for (int j = 0; j < na; j++) {
                 const Note *n = &nt[act[j]];
                 if (!n->drum) continue;
                 int age = f - n->f0;
+                if (nesDmc && (n->drumKind == DRUM_KICK || n->drumKind == DRUM_SNARE)) {
+                    if (age == 0 && (dmcHit < 0 || n->ampPeak > nt[act[dmcHit]].ampPeak)) dmcHit = j;
+                    if (n->drumKind == DRUM_KICK) continue;           // (the snare keeps a layer of noise)
+                }
                 float sc = actAmp[j] * (age == 0 ? 8.0f : age == 1 ? 4.0f : age == 2 ? 2.0f : 1.0f) * (j == on[3] ? 1.25f : 1);
                 if (sc > bs) { bs = sc; best = j; }
             }
             on[3] = best;
+            if (dmcHit >= 0) out[3].dmc = (uint8_t)(nt[act[dmcHit]].drumKind == DRUM_KICK ? 1 : 2);
         }
         // the triangle / wave: the bass
         if (on[2] < 0 || nt[act[on[2]]].f0 == f) {
@@ -880,15 +1104,19 @@ static int arrange(const Cap *c, int target, int arpFrames, Arr *a, char *msg, i
             }
             if (best >= 0) on[2] = best;
         }
-        // square 1: the melody (its top note; a new melody note takes over at once), else what it was playing,
-        // else the note that matters most
+        // square 1: the melody's line (its top note; a new note takes over at once); when the melody rests, the same
+        // line on its doubling instrument, else it rests too
         {
             int top = -1;
-            for (int j = 0; j < na; j++) {
-                const Note *n = &nt[act[j]];
-                if (n->drum || n->part != lead || n->echo || j == on[2]) continue;
-                if (top < 0 || (n->f0 >= nt[act[top]].f0 && (n->f0 > nt[act[top]].f0 || actKey[j] > actKey[top]))) top = j;
-            }
+            for (int pass = 0; pass < 2 && top < 0; pass++)
+                for (int j = 0; j < na; j++) {
+                    const Note *n = &nt[act[j]];
+                    if (n->drum || n->echo || j == on[2] || lead < 0) continue;
+                    int mine = n->part == lead;
+                    if (pass == 1) mine = pt[n->part].dupOf == lead || pt[lead].dupOf == n->part;
+                    if (!mine) continue;
+                    if (top < 0 || (n->f0 >= nt[act[top]].f0 && (n->f0 > nt[act[top]].f0 || actKey[j] > actKey[top]))) top = j;
+                }
             // the melody as another part slides it: a note that starts with the melody's (or ends on it) and sweeps
             // is the melody's note, played with its slide
             if (top >= 0) {
@@ -901,104 +1129,192 @@ static int arrange(const Cap *c, int target, int arpFrames, Arr *a, char *msg, i
                     if (d0 < 0.6f || d0 > 11.4f || d1 < 0.6f || d1 > 11.4f || d2 < 0.6f || d2 > 11.4f) { top = j; break; }
                 }
             }
-            if (top >= 0 && (on[0] < 0 || (nt[act[on[0]]].part != lead && !(nt[act[on[0]]].keyMax - nt[act[on[0]]].keyMin > 1.5f)) || nt[act[top]].f0 == f)) {
-                if (on[0] >= 0 && on[0] != top) nt[act[on[0]]].lost = 1;
-                on[0] = top;
-            }
+            // a held melody note keeps going unless a new one starts
+            if (top >= 0 && (on[0] < 0 || nt[act[top]].f0 == f || nt[act[on[0]]].f0 < nt[act[top]].f0)) on[0] = top;
+            if (on[0] >= 0 && lead >= 0 && nt[act[on[0]]].part != lead && pt[nt[act[on[0]]].part].dupOf != lead &&
+                pt[lead].dupOf != nt[act[on[0]]].part && !(nt[act[on[0]]].keyMax - nt[act[on[0]]].keyMin > 1.5f)) on[0] = top;
         }
-        // the rest: square 2 (and square 1 when the melody rests), by how much each note matters
-        for (int pass = 0; pass < 2; pass++) {
-            int q = pass == 0 ? 1 : 0;
-            if (q == 0 && on[0] >= 0) continue;
-            float melodyKey = on[0] >= 0 ? actKey[on[0]] : -100;
-            int best = -1;
-            float bs = -1e9f, held = -1e9f;
-            for (int j = 0; j < na; j++) {
+        // square 2: the stretch's line (its second when the first has rested a while): its note, or its chord as an
+        // arpeggio, low to high
+        {
+            int w = f / LEAD_WINDOW, C = compOf[w];
+            int has = 0;
+            for (int j = 0; j < na; j++) if (!nt[act[j]].drum && nt[act[j]].part == C && j != on[0]) has = 1;
+            if (has) lastComp = f;
+            else if (f - lastComp > 24 && comp2Of[w] >= 0) C = comp2Of[w];
+            int ch[16], nc = 0, seen[12] = {0};
+            for (int j = 0; j < na && nc < 16; j++) {
                 const Note *n = &nt[act[j]];
-                if (n->drum || (j == on[0] && q != 0) || (j == on[1] && q != 1) || j == on[2] || n->lost) continue;
-                if (pt[n->part].role == ROLE_BASS && !n->echo) continue;          // (the bass plays on its own channel)
-                // a doubling of a note that's playing is that note
-                if (n->dupOf >= 0) {
-                    int playing = 0;
-                    for (int qq = 0; qq < 3; qq++) if (on[qq] >= 0 && act[on[qq]] == n->dupOf) playing = 1;
-                    if (playing) continue;
+                if (n->drum || n->part != C || j == on[0] || j == on[2]) continue;
+                if (n->echo && pt[C].echoOf < 0 && pt[C].user != CHIP_ROLE_ECHO) continue;
+                // the melody's own note again (a unison or an octave of it) says nothing new
+                if (on[0] >= 0 && ((int)lroundf(fabsf(actKey[j] - actKey[on[0]]))) % 12 == 0 && !n->echo) continue;
+                int pc = ((int)lroundf(actKey[j]) % 12 + 12) % 12;
+                if (seen[pc]) continue;
+                seen[pc] = 1;
+                ch[nc++] = j;
+            }
+            if (nc >= 2 && o->chords != CHIP_CHORDS_HOLD) {
+                for (int x = 1; x < nc; x++)
+                    for (int y = x; y > 0 && actKey[ch[y]] < actKey[ch[y - 1]]; y--) { int t = ch[y]; ch[y] = ch[y - 1]; ch[y - 1] = t; }
+                on[1] = ch[(arp / arpN) % nc];
+                arp++;
+                arpOn = 1;
+            } else if (nc >= 1) {
+                // its note: the one held, unless one starts now (the top of what starts)
+                int pick = -1;
+                for (int x = 0; x < nc; x++) if (ch[x] == on[1]) pick = ch[x];
+                for (int x = 0; x < nc; x++)
+                    if (nt[act[ch[x]]].f0 == f && (pick < 0 || nt[act[pick]].f0 != f || actKey[ch[x]] > actKey[pick])) pick = ch[x];
+                if (pick < 0) {
+                    pick = ch[0];
+                    for (int x = 1; x < nc; x++) if (actKey[ch[x]] > actKey[pick]) pick = ch[x];
                 }
-                const Part *P = &pt[n->part];
-                float sc = P->role == ROLE_HARMONY ? 3 : P->role == ROLE_PAD ? 2 : P->role == ROLE_OSTINATO ? 2 : 1;
-                if (n->part == lead) sc += 1.5f;                                   // the melody's own chord notes
-                if (lead >= 0 && P->harmonyOf == lead) sc += 2;                    // the melody's harmony part
-                if (on[0] >= 0 && abs(n->f0 - nt[act[on[0]]].f0) <= 1) sc += 1.5f;  // moving with the melody's note
-                if (wmax && wmax[f / LEAD_WINDOW] > 0)                             // a melody of its own
-                    sc += 2.5f * scores[(size_t)(f / LEAD_WINDOW) * np + n->part] / wmax[f / LEAD_WINDOW];
-                if (n->echo) sc -= 3;
-                if (n->dupOf >= 0) sc -= 1;
-                if (melodyKey > -100) {
-                    int iv = ((int)lroundf(fabsf(actKey[j] - melodyKey))) % 12;
-                    if (iv == 3 || iv == 4 || iv == 8 || iv == 9) sc += 2;         // a 3rd or a 6th
-                    else if (iv == 5 || iv == 7) sc += 1;                          // a 4th or a 5th
-                    else if (iv == 0) sc -= 2.5f;                                  // the melody's own note again
-                }
-                for (int qq = 0; qq < 3; qq++)
-                    if (on[qq] >= 0 && qq != q && ((int)lroundf(fabsf(actKey[j] - actKey[on[qq]]))) % 12 == 0) sc -= 1.5f;
-                sc += sqrtf(actAmp[j] / aref);
-                if (n->f0 == f) sc += 1.5f;                                        // a note starting now
-                if (n->keyMax - n->keyMin > 1.5f) sc += 3.5f;                      // a sweep (its path is the point)
-                if (j == on[q]) sc += 2.5f;                                        // the note the channel is playing
-                if (j == on[q]) held = sc;
-                if (sc > bs) { bs = sc; best = j; }
-            }
-            // the channel's note keeps it unless a note starting now clearly matters more
-            if (best >= 0 && (on[q] < 0 || best == on[q] || (nt[act[best]].f0 == f && bs > held + 1.0f))) {
-                if (on[q] >= 0 && on[q] != best) nt[act[on[q]]].lost = 1;
-                on[q] = best;
-            }
-            // arpeggio (Taking turns): a chord in one part goes round its notes on square 2
-            if (q == 1 && arpFrames > 0 && on[1] >= 0) {
-                int part = nt[act[on[1]]].part, ch[16], nc = 0;
-                for (int j = 0; j < na && nc < 16; j++)
-                    if (!nt[act[j]].drum && nt[act[j]].part == part && j != on[0] && j != on[2] && !nt[act[j]].echo) ch[nc++] = j;
-                if (nc >= 2) { on[1] = ch[(arp / arpFrames) % nc]; arp++; }
-            }
+                on[1] = pick;
+            } else on[1] = -1;
         }
-        // out
+        // out: each note played by its part's instrument
         for (int q = 0; q < 4; q++) {
-            ChOut *o = &out[q];
+            ChOut *oc = &out[q];
             if (on[q] < 0) { curN[q] = -1; prevOn[q] = -1; continue; }
             int j = on[q];
             Note *n = &nt[act[j]];
+            const Part *P = &pt[n->part];
             n->heard = 1;
-            int vol = (int)lroundf(15.0f * actAmp[j] / aref);
-            // the volume a little smoothed within a note (a sample's own waveform makes its level flutter)
-            float sm = n->f0 == f || smooth[act[j]] <= 0 ? (float)vol : smooth[act[j]] * 0.5f + vol * 0.5f;
-            smooth[act[j]] = sm;
-            vol = (int)lroundf(sm);
-            o->on = 1;
-            o->vol = (uint8_t)(vol < 1 ? 1 : vol > 15 ? 15 : vol);
-            o->note = n->id;
-            o->newNote = act[j] != prevOn[q];
-            o->pan = (uint8_t)(actPan[j] < -0.4f ? 1 : actPan[j] > 0.4f ? 2 : 3);
+            int age = f - n->f0;
+            oc->on = 1;
+            oc->note = n->id;
+            oc->newNote = act[j] != prevOn[q];
+            oc->pan = (uint8_t)(actPan[j] < -0.4f ? 1 : actPan[j] > 0.4f ? 2 : 3);
             const Timbre *tm = n->timbre >= 0 && n->timbre < c->ntim ? &c->tim[n->timbre] : NULL;
             if (q == 3) {
-                for (int i = c->first[f]; i < c->first[f + 1]; i++) if (c->ev[i].note == n->id) { o->hz = c->ev[i].noiseHz; break; }
-                o->shortNoise = (uint8_t)(tm && tm->kind == TIM_NOISE ? tm->duty & 1 : 0);
+                // the kit's drum: its noise frame by frame (clock in Hz, level of the hit's)
+                static const struct { float hz, lv; } k_kit[DRUM_KINDS][12] = {
+                    {{5000, 1}, {700, .85f}, {500, .6f}, {440, .4f}, {440, .25f}, {440, .12f}},                                   // kick
+                    {{9000, 1}, {7000, .85f}, {6000, .72f}, {5500, .6f}, {5000, .5f}, {5000, .4f}, {5000, .32f}, {5000, .25f},     // snare
+                     {5000, .18f}, {5000, .12f}},
+                    {{28000, .75f}, {28000, .4f}},                                                                              // hi-hat
+                    {{28000, .7f}, {28000, .56f}, {28000, .45f}, {28000, .36f}, {28000, .29f}, {28000, .23f}, {28000, .18f},       // open hi-hat
+                     {28000, .14f}, {28000, .11f}},
+                    {{18000, .9f}},                                                                                             // crash (below)
+                    {{1800, 1}, {1400, .8f}, {1200, .6f}, {1100, .45f}, {1000, .3f}, {1000, .2f}},                               // tom
+                };
+                int kind = n->drumKind, len = 0;
+                while (len < 12 && k_kit[kind][len].lv > 0) len++;
+                float lv, hz;
+                if (kind == DRUM_CRASH) {
+                    hz = 18000;
+                    lv = age < 45 ? 0.9f * powf(0.94f, (float)age) : 0;
+                } else if (age < len) {
+                    hz = k_kit[kind][age].hz;
+                    lv = k_kit[kind][age].lv;
+                } else lv = hz = 0;
+                if (nesDmc && kind == DRUM_SNARE) lv *= 0.6f;                    // (the DMC carries the snare's body)
+                int vol = (int)lroundf(15.0f * lv * (0.65f + 0.35f * n->level));
+                if (vol < 1) { oc->on = 0; curN[q] = act[j]; prevOn[q] = act[j]; continue; }
+                oc->vol = (uint8_t)(vol > 15 ? 15 : vol);
+                oc->hz = hz;
+                oc->shortNoise = 0;
             } else {
                 // its octave: the part's, and the note's own only if it still doesn't fit (decided once, for the whole note)
                 if (!n->shiftSet) {
                     float lo = q == 2 ? triLo : sqLo, hi = q == 2 ? triHi : sqHi;
-                    int sh = pt[n->part].shift;
+                    int sh = P->shift;
                     while (n->keyMin + 12 * sh < lo - 0.5f) sh++;
                     while (n->keyMax + 12 * sh > hi + 0.5f) sh--;
                     if (sh) a->moved++;
                     n->shift = sh;
                     n->shiftSet = 1;
                 }
-                o->hz = (float)semis_to_hz(actKey[j] + 12 * n->shift);
-                o->duty = (uint8_t)(tm && tm->hasDuty ? tm->duty : 2);
-                o->wave = n->timbre;
+                float key = actKey[j] + 12 * n->shift;
+                // a delayed vibrato on the melody's long, steady notes (the chip's own; a note that has one keeps its own)
+                if (q == 0 && o->vibrato && n->f1 - n->f0 > 36 && n->keyMax - n->keyMin < 0.15f && age > 18) {
+                    float ramp = (age - 18) / 12.0f;
+                    key += 0.18f * (ramp > 1 ? 1 : ramp) * sinf(2 * (float)M_PI * (age - 18) / 11.0f);
+                }
+                oc->hz = (float)semis_to_hz(key);
+                oc->wave = n->timbre;
+                // its level: the role's (the melody on top, square 2's line under it, arpeggios and echoes further down),
+                // the note's own against its part's (as a velocity), and the chip instrument's envelope: a short note plucks
+                // (full, then down a step a frame), a long one punches and settles to a steady sustain, an instrument that
+                // dies away dies away on the chip too. The original's level from frame to frame isn't followed: a chip
+                // instrument has its own shape
+                float base = q == 2 ? 15 : q == 0 ? (n->part == lead ? 15 : 13) : arpOn ? 9 : n->echo ? 8 : 11;
+                float shape;
+                if (q == 1 && arpOn) shape = 1;
+                else if (P->durMed < 10) shape = 1 - age * 0.09f;
+                else if (P->decaying) shape = (age == 0 ? 1 : 0.94f) - age * 0.018f;
+                else {
+                    static const float k_sus[4] = {1.0f, 0.94f, 0.88f, 0.84f};
+                    shape = age < 4 ? k_sus[age] : 0.82f;
+                }
+                if (shape < 0.25f) shape = 0.25f;
+                if (q == 2 && shape < 0.6f) shape = 0.6f;   // (the bass: the wave channel has only 4 levels)
+                (void)smooth;
+                int vol = (int)lroundf(base * (0.75f + 0.25f * n->level) * shape);
+                oc->vol = (uint8_t)(vol < 1 ? 1 : vol > 15 ? 15 : vol);
+                // its duty: the part's; square 2 takes the other of 25 / 50% when square 1 plays the same (so the two
+                // are heard apart); an arpeggio is 12.5%; a note's first frame a step narrower (the attack's bite)
+                int d = P->duty;
+                if (q == 1 && arpOn) d = 0;
+                else if (q == 1 && on[0] >= 0 && (n->part >= CHIP_MAX_PARTS || o->duty[n->part] < 0)) {
+                    int d0 = pt[nt[act[on[0]]].part].duty;
+                    if (d == d0 || (d == 3 && d0 == 1) || (d == 1 && d0 == 3)) d = d0 == 2 ? 1 : 2;
+                }
+                if (age == 0 && d == 2 && q < 2 && !n->echo) d = 1;
+                oc->duty = (uint8_t)d;
+                (void)tm;
             }
             curN[q] = act[j];
             prevOn[q] = act[j];
         }
+        if (out[3].dmc) a->usesDmc = 1;
+        if (arpOn) a->arpFrames++;
+    }
+    // the song's parts as read, for the arrangement table
+    if (plan && ok) {
+        memset(plan, 0, sizeof *plan);
+        int *leadW = calloc((size_t)np, sizeof(int)), *playW = calloc((size_t)np, sizeof(int));
+        for (int w = 0; leadW && playW && w < nwin; w++) {
+            if (leadOf[w] >= 0) leadW[leadOf[w]]++;
+            for (int p = 0; p < np; p++) if (scores[(size_t)w * np + p] > 0) playW[p]++;
+        }
+        for (int p = 0; p < np && plan->n < CHIP_MAX_PARTS; p++) {
+            const Part *P = &pt[p];
+            int notes = 0, dn = 0;
+            float lo = 200, hi = -1;
+            for (int i = 0; i < nn; i++) {
+                if (nt[i].part != p) continue;
+                if (nt[i].drum) { dn++; continue; }
+                notes++;
+                if (nt[i].keyMin < lo) lo = nt[i].keyMin;
+                if (nt[i].keyMax > hi) hi = nt[i].keyMax;
+            }
+            if (!notes && !dn && P->echoOf < 0) continue;
+            int r;
+            const char *what;
+            char buf[48];
+            if (!notes && dn) { r = CHIP_ROLE_DRUMS; what = "drums"; }
+            else if (P->echoOf >= 0) { r = CHIP_ROLE_ECHO; snprintf(buf, sizeof buf, "echo of track %d", P->echoOf + 1); what = buf; }
+            else if (P->role == ROLE_BASS) { r = CHIP_ROLE_BASS; what = "bass"; }
+            else if (leadW && playW && playW[p] && leadW[p] * 10 >= playW[p] * 4) { r = CHIP_ROLE_LEAD; what = "melody"; }
+            else if (P->harmonyOf >= 0) { r = CHIP_ROLE_HARMONY; snprintf(buf, sizeof buf, "in harmony under track %d", P->harmonyOf + 1); what = buf; }
+            else if (P->dupOf >= 0) { r = CHIP_ROLE_ACCOMP; snprintf(buf, sizeof buf, "doubles track %d", P->dupOf + 1); what = buf; }
+            else if (P->role == ROLE_HARMONY) { r = CHIP_ROLE_HARMONY; what = leadW && leadW[p] ? "melody at times" : "moving part"; }
+            else if (P->role == ROLE_OSTINATO) { r = CHIP_ROLE_ACCOMP; what = "ostinato"; }
+            else { r = CHIP_ROLE_ACCOMP; what = "held notes"; }
+            if (notes && dn) what = "notes and drums";
+            plan->p[plan->n].part = p;
+            plan->p[plan->n].role = r;
+            plan->p[plan->n].notes = notes + dn;
+            plan->p[plan->n].keyLo = notes ? (int)lroundf(lo) : 0;
+            plan->p[plan->n].keyHi = notes ? (int)lroundf(hi) : 0;
+            plan->p[plan->n].duty = P->duty;
+            snprintf(plan->p[plan->n].what, sizeof plan->p[plan->n].what, "%s", what);
+            plan->n++;
+        }
+        free(leadW);
+        free(playW);
     }
     // a note started again right after the same note on the same channel: a frame's gap before it, so it's heard
     // as a new note (the triangle has no attack of its own)
@@ -1024,8 +1340,8 @@ static int arrange(const Cap *c, int target, int arpFrames, Arr *a, char *msg, i
         fprintf(stderr, "\n");
     }
 #undef NOTES_FROM
-    free(act); free(actAmp); free(actKey); free(actPan); free(smooth);
-    free(scores); free(wmax);
+    free(act); free(actAmp); free(actKey); free(actPan); free(actHz); free(smooth);
+    free(scores); free(wmax); free(compOf); free(comp2Of);
     free(idx); free(nt); free(pt); free(order); free(byStart); free(leadOf);
     return ok;
 }
@@ -1087,6 +1403,57 @@ static int nes_period(double hz, int div, int lo, int hi)
 
 static const int k_nesNoise[16] = {4, 8, 16, 32, 64, 96, 128, 160, 202, 254, 380, 508, 762, 1016, 2034, 4068};
 
+// NES drums as DMC samples (1-bit deltas at 33 kHz): a kick (a sine falling from 160 to 45 Hz) and a snare (a
+// 185 Hz tone and noise), both from the DMC's middle and back to it. They sit in the NSF's last bank, at $C000.
+#define DMC_RATE 15
+#define DMC_HZ (NES_CPU / 54.0)
+typedef struct { uint8_t data[2 * 4096]; int kickLen, snareAt, snareLen; } Dmc;   // lengths in bytes (16n + 1)
+
+static int dmc_encode(uint8_t *out, int maxBytes, double secs, int snare)
+{
+    int bits = (int)(secs * DMC_HZ);
+    int bytes = (bits + 7) / 8;
+    bytes = ((bytes - 1 + 15) / 16) * 16 + 1;
+    if (bytes > maxBytes) bytes = maxBytes;
+    int dac = 64;
+    double ph = 0;
+    uint32_t rng = 12345;
+    memset(out, 0, (size_t)bytes);
+    for (int i = 0; i < bytes * 8; i++) {
+        double t = i / DMC_HZ, v;
+        if (!snare) {
+            double f = 45 + 115 * exp(-t / 0.035);
+            ph += 2 * M_PI * f / DMC_HZ;
+            v = sin(ph) * exp(-t / 0.07) * (t < 0.001 ? t / 0.001 : 1);
+        } else {
+            ph += 2 * M_PI * 185 / DMC_HZ;
+            rng = rng * 1664525u + 1013904223u;
+            double nz = ((rng >> 8) & 0xFFFF) / 32768.0 - 1;
+            v = 0.55 * sin(ph) * exp(-t / 0.03) + 0.75 * nz * exp(-t / 0.045);
+        }
+        if (t > secs) v = 0;
+        int target = 64 + (int)lround(56 * (v > 1 ? 1 : v < -1 ? -1 : v));
+        int up = target > dac;
+        if (up && dac <= 125) dac += 2;
+        else if (!up && dac >= 2) dac -= 2;
+        if (up) out[i / 8] |= (uint8_t)(1 << (i % 8));
+    }
+    return bytes;
+}
+
+static const Dmc *dmc_samples(void)
+{
+    static Dmc d;
+    static int made;
+    if (!made) {
+        d.kickLen = dmc_encode(d.data, 4096, 0.16, 0);
+        d.snareAt = (d.kickLen + 63) / 64 * 64;
+        d.snareLen = dmc_encode(d.data + d.snareAt, 4096, 0.13, 1);
+        made = 1;
+    }
+    return &d;
+}
+
 static void nes_frame(Stream *s, const ChOut *o, const ChOut *prev, int full)
 {
     if (full) {
@@ -1094,6 +1461,17 @@ static void nes_frame(Stream *s, const ChOut *o, const ChOut *prev, int full)
         wr(s, 0x15, 0x0F, 1);
         wr(s, 0x01, 0x08, 1);       // sweeps off (negate set: no muting of low notes)
         wr(s, 0x05, 0x08, 1);
+        wr(s, 0x11, 0x40, 1);       // the DMC at its middle (where its drums start and end)
+    }
+    if (o[3].dmc) {
+        // a DMC drum: its sample from the start
+        const Dmc *d = dmc_samples();
+        int kick = o[3].dmc == 1;
+        wr(s, 0x10, DMC_RATE, 0);
+        wr(s, 0x12, kick ? 0 : d->snareAt / 64, 0);
+        wr(s, 0x13, ((kick ? d->kickLen : d->snareLen) - 1) / 16, 0);
+        wr(s, 0x15, 0x0F, 1);
+        wr(s, 0x15, 0x1F, 1);
     }
     for (int q = 0; q < 2; q++) {
         int base = q * 4;
@@ -1266,11 +1644,13 @@ static void gb_frame(Stream *s, GbState *g, const Arr *a, const Cap *c, int k, i
     } else {
         int start = full || o[2].newNote || !prev[2].on;
         const Timbre *tm = o[2].wave >= 0 && o[2].wave < c->ntim ? &c->tim[o[2].wave] : NULL;
-        int w = tm && tm->hasWave ? o[2].wave : -2;
+        // a Game Boy wave keeps its own; anything else plays the classic bass wave (a square with rounded edges: round
+        // and punchy where a sampled instrument's cycle would buzz)
+        int w = tm && tm->kind == TIM_WAVE && tm->key ? o[2].wave : -2;
         if (start && w != g->wave) {
-            static const uint8_t k_tri[32] = {0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15,
-                                              15, 14, 13, 12, 11, 10, 9, 8, 7, 6, 5, 4, 3, 2, 1, 0};
-            const uint8_t *shape = w >= 0 ? tm->wave : k_tri;
+            static const uint8_t k_bass[32] = {15, 15, 15, 15, 15, 15, 15, 15, 15, 15, 14, 12, 9, 6, 3, 1,
+                                               0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 3, 6, 9, 12, 14};
+            const uint8_t *shape = w >= 0 ? tm->wave : k_bass;
             wr(s, 0x0A, 0x00, 1);                               // NR30: off while the wave RAM is written
             for (int i = 0; i < 16; i++) wr(s, 0x20 + i, (shape[i * 2] & 15) << 4 | (shape[i * 2 + 1] & 15), 1);
             g->wave = w;
@@ -1371,7 +1751,7 @@ int chip_file_info(const char *path, double *length, double *loopStart)
 
 static int write_nsf(const char *path, const Stream *s, const Arr *a, const ChipOpts *o, char *msg, int msglen)
 {
-    int banks = 1 + (s->n + 4095) / 4096;
+    int banks = 1 + (s->n + 4095) / 4096 + (a->usesDmc ? 2 : 0);
     if (banks > 256) { snprintf(msg, msglen, "the song is too long for an NSF (%d KB of chip writes; 1020 KB fit)", s->n / 1024); return 0; }
     size_t size = 0x80 + (size_t)banks * 4096;
     uint8_t *d = calloc(1, size);
@@ -1388,6 +1768,13 @@ static int write_nsf(const char *path, const Stream *s, const Arr *a, const Chip
     tag_copy(d + 0x4E, o->copyright);
     d[0x6E] = NSF_SPEED_US & 0xFF; d[0x6F] = NSF_SPEED_US >> 8;
     d[0x70] = 0; d[0x71] = 1;         // bank 0 at $8000 (the driver), the stream through $9000
+    if (a->usesDmc) {
+        // the DMC drums in the last two banks, at $C000-$DFFF
+        const Dmc *dm = dmc_samples();
+        d[0x74] = (uint8_t)(banks - 2);
+        d[0x75] = (uint8_t)(banks - 1);
+        memcpy(d + 0x80 + (size_t)(banks - 2) * 4096, dm->data, sizeof dm->data);
+    }
     d[0x78] = 0x1D; d[0x79] = 0x4E;   // PAL speed (20000 us; NTSC is this file's)
     d[0x7A] = 0;                      // NTSC
     uint8_t *drv = d + 0x80;
@@ -1454,7 +1841,7 @@ int chip_export(Studio *s, const ChipOpts *o, const char *path, char *msg, int m
     if (s->p.isRip && s->p.ripKind == RIP_GCN) { snprintf(msg, msglen, "GameCube music is a recording, not notes: there's nothing to make chiptune from."); return 0; }
     if (!capture(s, &cap, msg, msglen)) { cap_free(&cap); return 0; }
     Arr arr;
-    if (!arrange(&cap, op.target, op.arpFrames, &arr, msg, msglen)) { cap_free(&cap); free(arr.ch); return 0; }
+    if (!arrange(&cap, &op, &arr, NULL, msg, msglen)) { cap_free(&cap); free(arr.ch); return 0; }
     if (getenv("MMS_CHIP_DEBUG")) {   // debugging: the capture and the arrangement, frames A-B
         int f0 = 0, f1 = 60;
         sscanf(getenv("MMS_CHIP_DEBUG"), "%d-%d", &f0, &f1);
@@ -1481,15 +1868,29 @@ int chip_export(Studio *s, const ChipOpts *o, const char *path, char *msg, int m
     int ok = op.target == CHIP_GB ? write_gbs(path, &st, &arr, &op, msg, msglen) : write_nsf(path, &st, &arr, &op, msg, msglen);
     if (ok) {
         int secs = (int)lround(arr.nframes / (op.target == CHIP_GB ? GB_FPS : SRC_FPS));
-        snprintf(msg, msglen, "%s: %d parts%s on the %s's %s, %d:%02d%s. %d%% of the parts' notes heard%s%s%s.",
+        snprintf(msg, msglen, "%s: %d parts%s on the %s's %s, %d:%02d%s. %d%% of the parts' notes heard%s%s%s%s.",
                  path_base(path), arr.parts, arr.drumParts ? " and drums" : "", chip_name(op.target),
                  op.target == CHIP_GB ? "2 squares, wave and noise" : "2 squares, triangle and noise",
                  secs / 60, secs % 60, arr.loopFrame >= 0 ? " with its loop" : "",
                  arr.notesTotal ? (int)(100L * arr.notesHeard / arr.notesTotal) : 100,
-                 arr.echoes ? "; echoes kept for the gaps" : "", arr.doublings ? "; doublings played once" : "",
-                 arr.moved ? "; parts too low or high moved by octaves" : "");
+                 arr.echoes ? "; the melody's echo on square 2" : "", arr.doublings ? "; doublings played once" : "",
+                 arr.moved ? "; parts too low or high moved by octaves" : "", arr.usesDmc ? "; kicks and snares as DMC samples" : "");
     }
     free(st.d);
+    free(arr.ch);
+    cap_free(&cap);
+    return ok;
+}
+
+int chip_plan(Studio *s, const ChipOpts *o, ChipPlan *plan, char *msg, int msglen)
+{
+    msg[0] = 0;
+    memset(plan, 0, sizeof *plan);
+    if (s->p.isRip && s->p.ripKind == RIP_GCN) { snprintf(msg, msglen, "GameCube music is a recording, not notes: there's nothing to make chiptune from."); return 0; }
+    Cap cap;
+    if (!capture(s, &cap, msg, msglen)) { cap_free(&cap); return 0; }
+    Arr arr;
+    int ok = arrange(&cap, o, &arr, plan, msg, msglen);
     free(arr.ch);
     cap_free(&cap);
     return ok;

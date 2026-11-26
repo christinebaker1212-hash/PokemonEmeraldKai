@@ -105,38 +105,43 @@ song: **Original** plays it on the chip's own emulator, **GBA** in the game's en
 `.kaisong`, or made chiptune again for the other chip. Its length and loop are kept in the file.
 
 How (`src/chip.c`): the song plays through the game's engine once and every voice is read each frame: which part of the
-song it belongs to, its pitch with bends and vibrato, its loudness as heard (a sample's own loudness where it is playing,
-with the envelope and volume), its instrument. Then the song is read **note by note**, from how its notes behave and
-never from which instrument plays them, so any song works the same way:
+song it belongs to, its pitch with bends and vibrato, its loudness as heard, its instrument. Then it's arranged the way a
+chip musician would, from how the notes behave and never from which instrument plays them, so any song
+and any instrument works the same way:
 
-- **Echoes**: a part (or the later notes of one part) playing notes another played a steady few frames before, as long
-  and quieter. They only fill a channel nothing else needs.
-- **Doublings**: the same notes at the same moment as a stronger part, in unison or octaves: one note.
-- **Bass**: the lowest steady part. It plays on the triangle (NES) or the wave channel (Game Boy, its 32 steps drawn
-  from the instrument's own waveform when it holds a steady tone), and nothing else does.
-- **Melody**: for each four seconds (weighing the stretches either side, and kept unless another part is clearly more
-  of one), the part that moves from note to note over many pitches in a varied rhythm, loud, high and one note at a time.
-  An ostinato repeating one note, a pad, a broken-chord figure in a steady rhythm, or the lower of two parts moving
-  together (a melody in 3rds, stabs) is accompaniment. Square 1.
-- **Square 2**: the note that matters most next to the melody: its harmony (the lower of two parts moving with it, a
-  note starting with its note, a 3rd or 6th from it before a 4th or 5th, its own note again least), a sweep, the most
-  melodic other part; ostinatos, pads and echoes fill the rest.
-- Each channel keeps a note to its end; only a new note that clearly matters more takes it over, and a note that lost
-  its channel doesn't come back, so nothing flickers between notes. When the melody slides into its note on another
-  instrument (a doubling with a pitch bend), square 1 plays the slide.
-- Each part keeps **one octave**, moved as a whole only when it can't be played where it is (a note decides its own once,
-  for its whole length, so a sweep keeps its path).
-- **Drums**: the noise channel, each hit following its own loudness and brightness frame by frame.
-- **Chord arpeggio** (off unless set): a chord in one part goes round its notes on square 2, 1-4 frames each.
-- Each instrument's tone picks its square's **duty** (12.5, 25 or 50%: the one whose harmonics are closest).
-- Volume follows the song frame by frame (NES: each square's and the noise's volume register; Game Boy: the envelope
-  that follows the next frames' volumes most closely, started again only when the song's volume moves clearly away,
-  since each start restarts a square's waveform). A note repeated on the same channel gets a frame's gap, so it's heard
-  again (the triangle has no attack of its own). On the NES a vibrato across a period's high bits stays at the edge
-  instead of restarting the square's waveform.
+- **What each part is.** Echoes (notes another part, or the same one, played a steady few frames before, as long and
+  quieter); doublings (the same notes at the same moment as a stronger part, in unison or octaves: one note); the bass
+  (the lowest steady part); the melody, chosen for each four seconds (weighing the stretches either side, and kept unless
+  another part is clearly more of one): the part that moves from note to note over many pitches in a varied rhythm, loud,
+  high and one note at a time. An ostinato repeating a note, a pad, a figure cycling a few notes or a pedal, and the lower
+  of two parts moving together (a melody in 3rds, stabs) accompany.
+- **One line a channel, a section at a time**, as a chip composer writes it. Square 1: the melody's line (when it rests,
+  the same line on its doubling instrument, else it rests too; when it slides into a note on another instrument, the
+  slide). Square 2: for each four seconds, ONE part that goes with the melody there (scored by how much it plays, how
+  consonant it is with the melody: 3rds and 6ths best, the melody's own note again worst; the melody's harmony or echo
+  first), kept until a section clearly calls for another; its chords play as an arpeggio, low to high (**Chords**: Auto /
+  Hold / Arpeggio, which also prefers a part playing chords; frames a note); after a long rest, the section's second
+  choice. Each channel rests when its line does. The bass on the triangle (NES) or the wave channel (Game Boy: the
+  classic rounded-square bass wave, or a Game Boy song's own wave). Each part keeps one octave.
+- **Chip instruments, not the original's levels.** Each note has the chip instrument's own envelope: a short note plucks
+  (full, then down a step a frame), a long one punches and settles to a steady sustain, an instrument that dies away
+  dies away; the original's level only sets each note's velocity. The melody near the top, square 2's line under it,
+  arpeggios and echoes further down. Duty by role: a part's own duty (a Game Boy square keeps its; a sample is 25% when
+  bright, 50% when mellow), square 2 the other of 25 / 50% when square 1 plays the same, arpeggios 12.5%, a note's first
+  frame a step narrower; a delayed vibrato on the melody's long steady notes (**Vibrato**). On the Game Boy the hardware
+  envelope plays these shapes, so a note isn't restarted to change its level.
+- **Drums.** Each hit becomes a drum of a kit by its brightness and length (kick, snare, hi-hat, open hi-hat, crash),
+  played as that drum is on the chip: noise frame by frame at the hit's strength; on the NES kicks and snares as DMC
+  samples (**NES kicks and snares as DMC samples**: a falling sine and a tone with noise, in the file's last banks), the
+  noise keeping the hi-hats.
+- **The arrangement table** (the panel's PARTS): every part, what the studio reads it as, its notes and range, and what
+  it plays as (Auto, or Melody / Harmony / Backing / Echo / Bass / Off), its duty and its octave, set by hand.
+  **Read them again** reads the parts with the table's settings.
+- Volume: NES each square's and the noise's volume register; Game Boy the hardware envelope that follows the next
+  frames' volumes most closely. A note repeated on the same channel gets a
+  frame's gap. On the NES a vibrato across a period's high bits stays at the edge instead of restarting the square.
 - The NES plays at the game's own frame rate; the Game Boy at its vertical blank (59.73 Hz), the song read at that rate,
-  so both keep the original's tempo.
-- GameCube music is a recording, not notes, so it can't be made chiptune.
+  so both keep the original's tempo. GameCube music is a recording, not notes, so it can't be made chiptune.
 
 The files: an NSF has the driver in its first 4 KB bank and the song's register writes in the banks after it (up to
 1 MB, NSF bank switching); a GBS has the driver at `$0400` and the writes from bank 1 on (MBC1 banks, up to 496 KB).
@@ -228,8 +233,11 @@ moemon_music_studio --save IN OUT.mmsproj [SONG]
 moemon_music_studio --dump IN                       song bytecode, a track a line
 moemon_music_studio --dump-exact IN VOLUME          converted like mid2agb -E -V VOLUME
 moemon_music_studio --raw IN OUT.f32 FRAMES         the engine's float output, frame by frame
-moemon_music_studio --chip nes|gb IN OUT [ARP]      CHIPTUNE: OUT.nsf (NES) / OUT.gbs (Game Boy); ARP 1-4 = chords as
-                                                     arpeggios (MMS_CHIP_DEBUG=A-B prints the parts and frames A-B)
+moemon_music_studio --chip nes|gb IN OUT [SETTINGS] CHIPTUNE: OUT.nsf (NES) / OUT.gbs (Game Boy). SETTINGS, the panel's:
+                                                     pN=melody|harmony|backing|echo|bass|off, pN.duty=12|25|50|75,
+                                                     pN.oct=-2..2 (N: the track), chords=auto|hold|arp, arp=FRAMES,
+                                                     dmc=0|1, vibrato=0|1, plan (prints the parts as read);
+                                                     MMS_CHIP_DEBUG=A-B prints the parts and frames A-B
 ```
 
 ## Files
@@ -242,7 +250,7 @@ moemon_music_studio --chip nes|gb IN OUT [ARP]      CHIPTUNE: OUT.nsf (NES) / OU
 | `src/inst.c` | game voices -> engine instruments, names, the project file's voice text |
 | `src/project.c` | projects (`.mmsproj`) and loading MIDIs |
 | `src/export.c` | `.kaisong` and decomp sources |
-| `src/chip.c`, `gen_chip_drivers.py` | CHIPTUNE: any song as NES / Game Boy music, its `.nsf` / `.gbs` and their drivers (`src/chip_drivers.h`, checked in) |
+| `src/chip.c`, `gen_chip_drivers.py` | CHIPTUNE: any song arranged as NES / Game Boy music (parts, instruments, drum kit, DMC drums), its `.nsf` / `.gbs` and their drivers (`src/chip_drivers.h`, checked in) |
 | `gen_icon.py` | `icon.png` (the GREAT BALL) -> `src/icon.h` (the window's icon) and `src/icon.ico` (the exe's), checked in |
 | `src/studio.c`, `src/cli.c`, `src/ui.c`, `src/dialog.c` | the open song, command line, window, file dialogs |
 | `src/rip.c`, `src/rip_*.c(pp)` | rips: loading, each console's emulator and capture, the MIDI and instruments made from it (`rip_song.c`), MP2K from the ROM (`rip_mp2k.c`), GM matching (`rip_gm.c`) |

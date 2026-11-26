@@ -21,17 +21,43 @@
 
 enum { CHIP_NES, CHIP_GB };
 
+// what a part of the song plays as (the arrangement table): AUTO = as the studio works it out
+enum { CHIP_ROLE_AUTO, CHIP_ROLE_LEAD, CHIP_ROLE_HARMONY, CHIP_ROLE_ACCOMP, CHIP_ROLE_ECHO, CHIP_ROLE_BASS, CHIP_ROLE_OFF,
+       CHIP_ROLE_DRUMS, CHIP_ROLE_COUNT };
+enum { CHIP_CHORDS_AUTO, CHIP_CHORDS_HOLD, CHIP_CHORDS_ARP };
+#define CHIP_MAX_PARTS 65            // the song's tracks (up to 64) and one for notes whose track isn't known
+
 typedef struct {
     int target;              // CHIP_NES / CHIP_GB
-    int arpFrames;           // chords: 0 = the note that matters most; 1-4 = a part's chord goes round its notes on
-                             // square 2, this many frames each (1 = the classic arpeggio)
+    int chords;              // CHIP_CHORDS_*: a chord under the melody as an arpeggio (AUTO: when no harmony line plays)
+    int arpFrames;           // frames each arpeggio note lasts (1-4)
+    int dmc;                 // NES: kicks and snares as DMC samples (the noise keeps the hi-hats)
+    int vibrato;             // a delayed vibrato on the melody's long notes that have none of their own
+    // per part (the engine's track): CHIP_ROLE_*, duty (-1 auto, 0-3: 12.5 / 25 / 50 / 75%), octaves to move (-2..2)
+    int role[CHIP_MAX_PARTS], duty[CHIP_MAX_PARTS], octave[CHIP_MAX_PARTS];
     char title[64], artist[64], copyright[64];   // the file's tags ("" = the song's)
 } ChipOpts;
+
+// The song's parts as the studio reads them (for the arrangement table)
+typedef struct {
+    int n;
+    struct {
+        int part;            // index into ChipOpts.role[] (the engine's track)
+        int role;            // CHIP_ROLE_* worked out (never AUTO)
+        int notes;
+        int keyLo, keyHi;    // its range (MIDI keys)
+        int duty;            // the duty it gets by itself (0-2)
+        char what[48];       // a word on what it is ("melody in 3rds", "ostinato", "echo of track 3"...)
+    } p[CHIP_MAX_PARTS];
+} ChipPlan;
 
 void chip_opts_default(ChipOpts *o, int target);
 // Translates the open song and writes `path` (.nsf for the NES, .gbs for the Game Boy). msg: what was done
 // (or why it failed). Returns 1 on success.
 int chip_export(Studio *s, const ChipOpts *o, const char *path, char *msg, int msglen);
+// Reads the song's parts as the export would (the options' overrides applied) without writing anything.
+int chip_plan(Studio *s, const ChipOpts *o, ChipPlan *plan, char *msg, int msglen);
+const char *chip_role_name(int role);
 const char *chip_ext(int target);      // ".nsf" / ".gbs"
 const char *chip_name(int target);     // "NES" / "Game Boy"
 
