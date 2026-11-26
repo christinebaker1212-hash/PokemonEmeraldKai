@@ -8,7 +8,7 @@
 #include "rip.h"
 #include "engine.h"
 
-static const char *const k_kindNames[RIP_NUM_KINDS] = {"PSF", "PSF2", "USF", "GBS", "2SF", "GSF", "GameCube stream", "SPC", "VGM", "GSF", "SDAT"};
+static const char *const k_kindNames[RIP_NUM_KINDS] = {"PSF", "PSF2", "USF", "GBS", "2SF", "GSF", "GameCube stream", "SPC", "VGM", "GSF", "SDAT", "NSF"};
 
 const char *rip_kind_name(int kind) { return kind >= 0 && kind < RIP_NUM_KINDS ? k_kindNames[kind] : "?"; }
 int rip_needs_bios(int kind) { return kind == RIP_PSF1 || kind == RIP_PSF2; }
@@ -41,15 +41,16 @@ int rip_kind_of(const char *path) {
     if (ext_is(path, "psf2") || ext_is(path, "minipsf2") || ext_is(path, "psf2lib")) return RIP_PSF2;
     if (ext_is(path, "usf") || ext_is(path, "miniusf") || ext_is(path, "usflib")) return RIP_USF;
     if (ext_is(path, "gbs")) return RIP_GBS;
+    if (ext_is(path, "nsf") || ext_is(path, "nsfe")) return RIP_NSF;
     if (ext_is(path, "m3u")) {
-        // a Game Boy playlist line names its .gbs ("file.gbs::GBS,..."); other playlists aren't rips
+        // a Game Boy / NES playlist line names its .gbs / .nsf ("file.gbs::GBS,..."); other playlists aren't rips
         FILE *f = fopen(path, "rb");
         char buf[4096];
         size_t n = f ? fread(buf, 1, sizeof buf - 1, f) : 0;
         if (f) fclose(f);
         buf[n] = 0;
         for (char *p = buf; *p; p++) *p = (char)toupper((unsigned char)*p);
-        return strstr(buf, "::GBS") ? RIP_GBS : -1;
+        return strstr(buf, "::GBS") ? RIP_GBS : strstr(buf, "::NSF") ? RIP_NSF : -1;
     }
     if (ext_is(path, "2sf") || ext_is(path, "mini2sf") || ext_is(path, "2sflib")) return RIP_2SF;
     if (ext_is(path, "gsf") || ext_is(path, "minigsf") || ext_is(path, "gsflib")) return RIP_GSF;
@@ -57,6 +58,26 @@ int rip_kind_of(const char *path) {
     if (ext_is(path, "spc")) return RIP_SPC;
     if (ext_is(path, "vgm") || ext_is(path, "vgz")) return RIP_VGM;
     return -1;
+}
+
+// How many songs a Game Boy / NES file holds (its header: GBS byte 4, NSF byte 6, NSFe its INFO chunk); 0 = not one
+int rip_song_count(const char *path)
+{
+    unsigned char h[256] = {0};
+    FILE *f = fopen(path, "rb");
+    size_t got = f ? fread(h, 1, sizeof h, f) : 0;
+    if (f) fclose(f);
+    if (got >= 5 && !memcmp(h, "GBS", 3)) return h[4];
+    if (got >= 7 && !memcmp(h, "NESM\x1a", 5)) return h[6];
+    if (got >= 12 && !memcmp(h, "NSFE", 4)) {
+        for (size_t at = 4; at + 8 <= got;) {
+            uint32_t len = h[at] | h[at + 1] << 8 | h[at + 2] << 16 | (uint32_t)h[at + 3] << 24;
+            if (!memcmp(h + at + 4, "INFO", 4)) return at + 8 + 8 < got && len > 8 ? h[at + 8 + 8] : 1;
+            at += 8 + (size_t)len;
+        }
+        return 1;
+    }
+    return 0;
 }
 
 // "3:25.5", "205", "1:02:03"
@@ -180,11 +201,21 @@ static int rip_load_inner(Rip *r, const char *path, const char *biosDir, int gbs
     case RIP_SPC: ok = rip_open_spc(&e, r, err, errlen); break;
     case RIP_VGM: ok = rip_open_vgm(&e, r, err, errlen); break;
     case RIP_SDAT: ok = rip_open_sdat(&e, r, gbsTrack, err, errlen); break;
+    case RIP_NSF: ok = rip_open_nsf(&e, r, gbsTrack, err, errlen); break;
     }
     if (!ok) {
         if (!err[0]) snprintf(err, errlen, "couldn't play %s", path);
         rip_free(r);
         return 0;
+    }
+    // a Game Boy / NES file this studio made (CHIPTUNE): its own length, the intro and the loop twice
+    if ((r->kind == RIP_GBS || r->kind == RIP_NSF) && r->length <= 0) {
+        int chip_file_info(const char *path, double *length, double *loopStart);
+        double len, loop;
+        if (chip_file_info(path, &len, &loop) && len > 0) {
+            r->length = loop >= 0 && loop < len ? len + (len - loop) : len;
+            r->fade = loop >= 0 ? 5 : 0;
+        }
     }
     double secs = r->length > 0 ? r->length + r->fade : (seconds > 0 ? seconds : 180);
     // MMS_RIP_SECONDS: record at least this long (a song whose tags give less than two of its loops: the loop is

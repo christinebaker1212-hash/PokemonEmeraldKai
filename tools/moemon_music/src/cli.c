@@ -10,7 +10,9 @@
 //   moemon_music_studio --save IN OUT.mmsproj [SONG]      a project (SONG: the game song it replaces)
 //   moemon_music_studio --original IN OUT.wav             a rip's own sound (its console's emulator)
 //   moemon_music_studio --reference IN OUT.wav [SECONDS]  what the rip's capture says, mixed at full precision
-// IN can also be a rip (PSF, PSF2, USF, GBS / .m3u, 2SF, GSF, GameCube, or a DS sound archive's sequence:
+//   moemon_music_studio --chip nes|gb IN OUT [ARP]        IN made chiptune: OUT.nsf (NES) / OUT.gbs (Game Boy);
+//                                                       ARP = frames each part holds square 2 when parts share it
+// IN can also be a rip (PSF, PSF2, USF, GBS / NSF / NSFe / .m3u, 2SF, GSF, GameCube, or a DS sound archive's sequence:
 // "sound_data.sdat#SEQ_NAME" or "sound_data.sdat#NUMBER"); MMS_BIOS = the PlayStation BIOS folder.
 // MMS_DEFAULTS = a defaults file (the window's Defaults panel saves one) every opened song starts with.
 #include <stdio.h>
@@ -20,6 +22,7 @@
 #include "export.h"
 #include "inst.h"
 #include "rip.h"
+#include "chip.h"
 
 static int ends_with(const char *s, const char *e)
 {
@@ -66,6 +69,14 @@ int cli_main(int argc, char **argv)
         if (!export_song_table(argv[2], err, sizeof(err))) { fprintf(stderr, "%s\n", err); return 1; }
         return 0;
     }
+    // --chip TARGET IN OUT: the song is the third argument
+    const char *chipTarget = NULL;
+    if (!strcmp(mode, "--chip")) {
+        if (argc < 5) { fprintf(stderr, "usage: --chip nes|gb IN OUT [ARP]\n"); return 2; }
+        chipTarget = argv[2];
+        argv++;
+        argc--;
+    }
     inst_init();
     studio_init(&s);
     if (getenv("MMS_DEFAULTS")) defaults_load(&g_defaults, getenv("MMS_DEFAULTS"));   // the settings panel's file
@@ -111,6 +122,16 @@ int cli_main(int argc, char **argv)
         }
         if (!export_kaisong(&s.p, &s.c, path, err, sizeof(err))) { fprintf(stderr, "%s\n", err); return 1; }
         if (folder && !export_song_table(dir, err, sizeof(err))) { fprintf(stderr, "%s\n", err); return 1; }
+        return 0;
+    }
+    if (chipTarget) {
+        ChipOpts o;
+        chip_opts_default(&o, !strcmp(chipTarget, "gb") || !strcmp(chipTarget, "gbs") ? CHIP_GB : CHIP_NES);
+        if (argc >= 5) o.arpFrames = atoi(argv[4]);
+        char msg[1024], out[2048];
+        snprintf(out, sizeof(out), "%s%s", argv[3], ends_with(argv[3], chip_ext(o.target)) ? "" : chip_ext(o.target));
+        if (!chip_export(&s, &o, out, msg, sizeof(msg))) { fprintf(stderr, "%s\n", msg); return 1; }
+        printf("%s\n", msg);
         return 0;
     }
     if (!strcmp(mode, "--save") && argc >= 4) {

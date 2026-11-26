@@ -17,6 +17,7 @@ common() {
     mkdir -p "$d/licenses"
     cp third_party/README.md "$d/licenses/THIRD_PARTY.md"
     cp third_party/gme/license.txt "$d/licenses/game_music_emu.txt"
+    cp third_party/gme/ext/LICENSE "$d/licenses/emu2413.txt"
     cp third_party/desmume_2sf/IN_XSF_LICENSE "$d/licenses/desmume_2sf.txt"
     cp third_party/he/Readme.txt "$d/licenses/highly_experimental.txt"
     cp third_party/vbam_gsf/License.txt "$d/licenses/vbam_gsf.txt"

@@ -234,14 +234,14 @@ int project_reload_rip(Project *p, const char *biosDir, char *err, int errlen)
     if (!p->isRip || !p->ripPath[0]) { snprintf(err, errlen, "this project isn't from a rip"); return 0; }
     Rip *r = calloc(1, sizeof(Rip));
     if (!r) { snprintf(err, errlen, "out of memory"); return 0; }
-    if (!rip_load(r, p->ripPath, biosDir, p->ripKind == RIP_GBS ? p->ripTrack : -1, 0, err, errlen)) { free(r); return 0; }
+    if (!rip_load(r, p->ripPath, biosDir, rip_is_psg(p->ripKind) ? p->ripTrack : -1, 0, err, errlen)) { free(r); return 0; }
     p->rip = r;
     return 1;
 }
 
 int project_rip_sync_drums(Project *p)
 {
-    if (!p->isRip || p->ripKind != RIP_GBS || !p->rip) return 0;
+    if (!p->isRip || !rip_is_psg(p->ripKind) || !p->rip) return 0;
     int want = 0;
     uint8_t inst[128] = {0};
     for (int s = 0; s < 128; s++) {
@@ -277,7 +277,7 @@ int project_rip_regain(Project *p, float gain, char *err, int errlen)
     if (!p->rip) { snprintf(err, errlen, "the rip isn't loaded"); return 0; }
     if (p->ripKind == RIP_GSF) { snprintf(err, errlen, "GBA songs play at their own volume"); return 0; }
     RipSong song;
-    if (!rip_song_build(p->rip, &song, gain, p->ripGbaDrums, p->ripKind == RIP_GBS ? p->ripInstSlots : NULL, err, errlen)) return 0;
+    if (!rip_song_build(p->rip, &song, gain, p->ripGbaDrums, rip_is_psg(p->ripKind) ? p->ripInstSlots : NULL, err, errlen)) return 0;
     Midi m;
     if (!midi_parse(&m, song.mid, song.midLen, err, errlen)) { rip_song_free(&song); return 0; }
     midi_free(&p->midi);

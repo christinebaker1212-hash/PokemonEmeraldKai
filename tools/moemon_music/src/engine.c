@@ -646,6 +646,7 @@ static void play_note(Engine *e, ETrack *t, int ti)   // the second half of MP2K
         c->freq = MidiKeyToFreq(c->wav, (uint8_t)tk, t->pitchCalculated);
     }
     c->status = SF_START;
+    c->noteId = ++e->noteSerial;
     t->status &= ~0xF;
     if (ti <= ENG_MAX_TRACKS) e->trackLevel[ti] = 255;
 }

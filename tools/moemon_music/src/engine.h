@@ -75,6 +75,7 @@ typedef struct EChan {
     uintptr_t wavePointer, currentPointer;
     struct ETrack *track;
     struct EChan *prev, *next;
+    uint32_t noteId;                  // the studio's own: which note this is (Engine.noteSerial), for chip.c's capture
 } EChan;
 
 typedef struct ETrack {
@@ -140,6 +141,7 @@ typedef struct {
     float cgbOut[ENG_FRAME_SAMPLES * 2];
     // what the UI shows
     uint8_t trackLevel[ENG_MAX_TRACKS + 1];   // a short flash when a track plays a note
+    uint32_t noteSerial;              // notes started so far (EChan.noteId)
 } Engine;
 
 #define ENG_NRING 8192

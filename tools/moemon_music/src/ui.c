@@ -12,6 +12,8 @@
 #include "export.h"
 #include "dialog.h"
 #include "font.h"
+#include "icon.h"
+#include "chip.h"
 
 #define W 1280
 #define H 800
@@ -65,7 +67,7 @@ static int sSelSlot = -1;
 static int sTrackScroll, sSlotScroll;
 
 enum { MODAL_NONE, MODAL_INSTRUMENT, MODAL_SONG_TARGET, MODAL_SONG_VOICES, MODAL_PATH, MODAL_CONFIRM, MODAL_HELP, MODAL_DISPLAY,
-       MODAL_GBS_TRACK, MODAL_DEFAULTS, MODAL_TRACK };
+       MODAL_GBS_TRACK, MODAL_DEFAULTS, MODAL_TRACK, MODAL_CHIP };
 static int sTrackCand;            // the track whose instrument changes are open
 static int sChangeScroll;
 static int sModal;
@@ -79,11 +81,13 @@ static int sConfirmAction;        // what "Discard" continues with
 static char sConfirmText[256];
 
 enum { ACT_OPEN_MIDI = 1, ACT_OPEN_PROJECT, ACT_SAVE_AS, ACT_EXPORT_KAISONG, ACT_EXPORT_DECOMP, ACT_QUIT, ACT_OPEN_DROPPED,
-       ACT_BIOS_FOLDER, ACT_OPEN_LIST, ACT_OPEN_FOLDER };
+       ACT_BIOS_FOLDER, ACT_OPEN_LIST, ACT_OPEN_FOLDER, ACT_EXPORT_CHIP };
 static char sGbsPath[1024];       // a .gbs waiting for its track number
 static int sGbsTrack;
 static char sDropped[1024];
 static int sQuit;
+// CHIPTUNE: the chip, how long each part holds square 2 when parts take turns, and whether the file opens afterwards
+static int sChipTarget = CHIP_NES, sChipArp = 0, sChipOpen = 1;
 
 // input for this frame
 static int mx, my, mDown, mPressed, mReleased, pressX, pressY, wheel, dblClick;
@@ -437,6 +441,9 @@ static void after_open(const char *path)
         snprintf(m, sizeof(m), "Opened %s: a recording, not notes, so the song is the recording itself at the GBA's rate, looping where the game does.", path_base(path));
     else if (S.p.isRip && S.p.ripKind == RIP_GBS)
         snprintf(m, sizeof(m), "Opened %s: the Game Boy's channels, which the GBA has too. Convert GB > GBA (SONG) makes them GBA instruments.", path_base(path));
+    else if (S.p.isRip && S.p.ripKind == RIP_NSF)
+        snprintf(m, sizeof(m), "Opened %s: the NES's squares, triangle and noise as the GBA's Game Boy channels%s. Convert NES > GBA (SONG) makes them GBA instruments.",
+                 path_base(path), S.p.ncustom ? ", its samples as samples" : "");
     else if (S.p.isRip)
         snprintf(m, sizeof(m), "Opened %s: %d instruments from the original, at its volume. Play, then Original (Tab) to compare with the console.", path_base(path), S.p.ncustom);
     else if (S.p.target[0] && !S.p.gmFixes) snprintf(m, sizeof(m), "Opened %s: a game song, with the game's own instruments and settings.", path_base(path));
@@ -562,13 +569,9 @@ static void list_scan(const char *dir)
         char full[1400];
         snprintf(full, sizeof(full), "%s%s", dir, e->d_name);
         if (!is_music(full)) continue;
-        if (ends_with(full, ".gbs")) {
-            // its songs: the header's count (byte 4)
-            unsigned char h[8] = {0};
-            FILE *f = fopen(full, "rb");
-            size_t got = f ? fread(h, 1, sizeof h, f) : 0;
-            if (f) fclose(f);
-            int n = (got >= 5 && !memcmp(h, "GBS", 3)) ? h[4] : 0;
+        if (ends_with(full, ".gbs") || ends_with(full, ".nsf") || ends_with(full, ".nsfe")) {
+            // its songs, one by one
+            int n = rip_song_count(full);
             for (int t = 0; t < n; t++) list_add(full, e->d_name, t);
             continue;
         }
@@ -607,7 +610,7 @@ static int list_step(int dir)
 static void open_path_track(const char *path, int gbsTrack)
 {
     // a .gbs holds many songs: ask which first
-    if ((ends_with(path, ".gbs") || ends_with(path, ".sdat")) && gbsTrack < 0) {   // (an SDAT: which sequence)
+    if ((((ends_with(path, ".gbs") || ends_with(path, ".nsf") || ends_with(path, ".nsfe")) && rip_song_count(path) > 1) || ends_with(path, ".sdat")) && gbsTrack < 0) {   // (an SDAT: which sequence)
         snprintf(sGbsPath, sizeof(sGbsPath), "%s", path);
         sGbsTrack = 0;
         sModal = MODAL_GBS_TRACK;
@@ -722,14 +725,39 @@ static void do_export_decomp(const char *dir)
     else set_status("Couldn't export: %s", err);
 }
 
+static void guarded(int act);
+
+static void do_export_chip(const char *path)
+{
+    const char *ext = chip_ext(sChipTarget);
+    char p[1100], msg[1024];
+    snprintf(p, sizeof(p), "%s%s", path, ends_with(path, ext) ? "" : ext);
+    ChipOpts o;
+    chip_opts_default(&o, sChipTarget);
+    o.arpFrames = sChipArp;
+    char what[200];
+    snprintf(what, sizeof(what), "Making the song chiptune for the %s (every part, every frame)...", chip_name(sChipTarget));
+    busy(what);
+    if (!chip_export(&S, &o, p, msg, sizeof(msg))) { set_status("Couldn't make the chiptune: %s", msg); return; }
+    if (sChipOpen) {
+        // open it like any NES / Game Boy rip: Original plays it on the chip's own emulator
+        char keep[1024];
+        snprintf(keep, sizeof(keep), "%s", msg);
+        snprintf(sDropped, sizeof(sDropped), "%s", p);
+        guarded(ACT_OPEN_DROPPED);
+        if (sModal == MODAL_NONE) snprintf(sStatus, sizeof(sStatus), "%s Opened it: Original (Tab) is the %s itself.", keep, chip_name(sChipTarget));
+        else snprintf(sStatus, sizeof(sStatus), "%s", keep);
+    } else snprintf(sStatus, sizeof(sStatus), "%s", msg);
+}
+
 static void run_action(int act)
 {
     char path[1024];
     int r;
     switch (act) {
     case ACT_OPEN_MIDI:
-        r = dlg_open(path, sizeof(path), "Open music: MIDI, or a PSF / PSF2 / USF / GBS / 2SF / GSF / GameCube rip", "Music",
-                     "*.mid;*.midi;*.psf;*.minipsf;*.psf2;*.minipsf2;*.usf;*.miniusf;*.gbs;*.m3u;*.2sf;*.mini2sf;*.gsf;*.minigsf;*.ish;*.isd;*.dsp;*.spc;*.vgm;*.vgz");
+        r = dlg_open(path, sizeof(path), "Open music: MIDI, or a PSF / PSF2 / USF / GBS / NSF / 2SF / GSF / GameCube rip", "Music",
+                     "*.mid;*.midi;*.psf;*.minipsf;*.psf2;*.minipsf2;*.usf;*.miniusf;*.gbs;*.nsf;*.nsfe;*.m3u;*.2sf;*.mini2sf;*.gsf;*.minigsf;*.ish;*.isd;*.dsp;*.spc;*.vgm;*.vgz");
         if (r > 0) open_path(path);
         else if (r < 0) ask_path(act, "");
         break;
@@ -755,6 +783,18 @@ static void run_action(int act)
         export_default_name(&S.p, def, sizeof(def), ".kaisong");
         r = dlg_save(path, sizeof(path), "Export the song for Moemon Emerald Kai", "Kai songs", "*.kaisong", def);
         if (r > 0) do_export_kaisong(path);
+        else if (r < 0) ask_path(act, def);
+        break;
+    }
+    case ACT_EXPORT_CHIP: {
+        if (export_blocked(0)) break;
+        char def[300];
+        default_name(def, sizeof(def), chip_ext(sChipTarget));
+        char filter[16];
+        snprintf(filter, sizeof(filter), "*%s", chip_ext(sChipTarget));
+        r = dlg_save(path, sizeof(path), sChipTarget == CHIP_GB ? "Export the song as Game Boy music" : "Export the song as NES music",
+                     sChipTarget == CHIP_GB ? "Game Boy music" : "NES music", filter, def);
+        if (r > 0) do_export_chip(path);
         else if (r < 0) ask_path(act, def);
         break;
     }
@@ -798,7 +838,6 @@ static void run_action(int act)
     }
 }
 
-static void guarded(int act);
 
 // opens a song of the playlist (asking first about unsaved changes)
 static void list_open(int i)
@@ -866,6 +905,8 @@ static void draw_top(void)
     x += 134;
     if (button(x, 8, 140, 28, "Export decomp", have_song())) run_action(ACT_EXPORT_DECOMP);
     x += 146;
+    if (button(x, 8, 110, 28, "Chiptune...", have_song())) sModal = MODAL_CHIP;
+    x += 116;
     if (button(W - 44, 8, 32, 28, "?", 1)) sModal = MODAL_HELP;
     if (button(W - 84, 8, 36, 28, "Aa", 1)) sModal = MODAL_DISPLAY;
     if (button(W - 180, 8, 90, 28, "Defaults", 1)) sModal = MODAL_DEFAULTS;
@@ -1102,7 +1143,7 @@ static void draw_slots(int y, int h)
         // a rip's instrument: back to the original, or the closest GM instrument found for it
         int hasGm = S.p.ripGm[sSelSlot].type != 0xFF;
         if (button(x + 182, by, 58, 26, "Orig", 1)) { *v = S.p.ripOrig[sSelSlot]; voices_changed(); }
-        if (button(x + 244, by, 58, 26, S.p.ripKind == RIP_GBS ? "GBA" : "GM", hasGm)) { *v = S.p.ripGm[sSelSlot]; voices_changed(); }
+        if (button(x + 244, by, 58, 26, rip_is_psg(S.p.ripKind) ? "GBA" : "GM", hasGm)) { *v = S.p.ripGm[sSelSlot]; voices_changed(); }
     } else if (button(x + 182, by, 120, 26, "GM match", 1)) {
         int preset = S.c.slotDrum[sSelSlot] ? SF_GM_DRUM_PRESET : sf_gm_preset[S.c.slotGm[sSelSlot] >= 0 ? S.c.slotGm[sSelSlot] : sSelSlot];
         *v = sf_presets[preset].voice;
@@ -1325,13 +1366,13 @@ static void draw_song(void)
     if (p->isRip && p->ripKind != RIP_GSF) {
         // rips: the original instruments, or the closest General MIDI instruments of the game. Game Boy
         // songs: their channels as they are, or Convert GB > GBA (each channel the GBA instrument or drum it sounds like)
-        int gb = p->ripKind == RIP_GBS;
+        int gb = rip_is_psg(p->ripKind), nes = p->ripKind == RIP_NSF;
         ly += 32;
         text(lx, ly + 3, gb ? "Channels" : "Instruments", C_DIM);
         for (int g = 0; g < 2; g++) {
             int bx = lx + 110 + g * 166, bw = 156;
             if (p->ripUseGm == g) fill(bx - 2, ly - 2, bw + 4, 28, C_ACCENT);
-            if (!button(bx, ly, bw, 24, g ? (gb ? "Convert GB > GBA" : "All GM") : (gb ? "Game Boy" : "All original"), 1)) continue;
+            if (!button(bx, ly, bw, 24, g ? (gb ? (nes ? "Convert NES > GBA" : "Convert GB > GBA") : "All GM") : (gb ? (nes ? "NES" : "Game Boy") : "All original"), 1)) continue;
             stop_song();
             project_rip_instruments(p, g);
             sEdits++;
@@ -1340,8 +1381,9 @@ static void draw_song(void)
             studio_match_rip(&S);
             update_mute_mask();
             sFrames = 0;
-            if (gb) set_status("%s", g ? "GB > GBA: every square, wave and noise channel is now the GBA instrument or drum it sounds like."
-                                       : "Every channel is the Game Boy's again.");
+            if (gb) set_status("%s", g ? (nes ? "NES > GBA: every square, triangle and noise channel is now the GBA instrument or drum it sounds like."
+                                             : "GB > GBA: every square, wave and noise channel is now the GBA instrument or drum it sounds like.")
+                                       : (nes ? "Every channel is the NES's again." : "Every channel is the Game Boy's again."));
             else set_status("%s", g ? "Every instrument with a close General MIDI match now uses the game's GM instrument; the rest stay original."
                                     : "Every instrument is the original's sample again.");
         }
@@ -1463,7 +1505,7 @@ static void draw_now_playing(int x, int y, int w, int h)
     panel(x, y, w, h, "NOW PLAYING");
     if (!have_song()) {
         text(x + 16, y + 40, "Open a song, or a folder of them (Open folder...).", C_DIM);
-        text(x + 16, y + 62, "MIDI, PSF / PSF2, USF, GBS, 2SF, GSF, GameCube, SPC, VGM.", C_DIM);
+        text(x + 16, y + 62, "MIDI, PSF / PSF2, USF, GBS, NSF, 2SF, GSF, GameCube, SPC, VGM.", C_DIM);
         text(x + 16, y + 92, "A rip plays two ways: GBA (Moemon's sound engine, as the game", C_DIM);
         text(x + 16, y + 112, "would play it) and Original (the console itself). Tab switches", C_DIM);
         text(x + 16, y + 132, "between them at the same moment of the song.", C_DIM);
@@ -1979,7 +2021,7 @@ static void draw_help(void)
         "",
         "1. Open... a MIDI (or drop it on the window). Each MIDI instrument starts as the game",
         "   instrument closest to its General MIDI sound; drums use a game drum kit.",
-        "   Or a PSF / PSF2 / USF / GBS / 2SF / GSF / GameCube / SPC / VGM rip: it plays in its console's",
+        "   Or a PSF / PSF2 / USF / GBS / NSF / 2SF / GSF / GameCube / SPC / VGM rip: it plays in its console's",
         "   emulator once and comes in with its original instruments. All GM swaps instruments.",
         "2. Click an instrument and Change... it, or tune its envelope and Octave. Hold to hear / keys Z-M.",
         "3. M leaves a track out of the song, S plays a track alone.",
@@ -2118,7 +2160,7 @@ static void apply_window_size(void)
 static void draw_gbs_track(void)
 {
     int x, y, w = 520, h = 170;
-    modal_box(&x, &y, w, h, "GAME BOY SONG");
+    modal_box(&x, &y, w, h, ends_with(sGbsPath, ".nsf") || ends_with(sGbsPath, ".nsfe") ? "NES SONG" : "GAME BOY SONG");
     textfit(x + 20, y + 44, w - 40, path_base(sGbsPath), C_DIM);
     char lab[32];
     snprintf(lab, sizeof(lab), "%d", sGbsTrack + 1);
@@ -2182,6 +2224,48 @@ static int opt_stepper(int x, int y, const char *label, int *v, int lo, int hi, 
     if (ch && was < 0 && *v > was && *v < 0 + step) *v = 0;      // from "the song's" to the first value
     if (ch && was >= 0 && *v < 0) *v = -1;
     return ch;
+}
+
+// CHIPTUNE: the song (whatever it was opened from) as NES or Game Boy music (chip.h)
+static void draw_chip(void)
+{
+    int x, y, w = 860, h = 440;
+    modal_box(&x, &y, w, h, "CHIPTUNE");
+    text(x + 130, y + 10, "this song as NES or Game Boy music, an .nsf / .gbs that any player plays", C_DIM);
+    int ry = y + 48;
+    static const char *const CH[] = {"NES", "Game Boy"};
+    static const int VCH[] = {CHIP_NES, CHIP_GB};
+    choice(x + 20, ry, "Chip", &sChipTarget, CH, VCH, 2, 150);
+    ry += 36;
+    {
+        char lab[24];
+        snprintf(lab, sizeof(lab), sChipArp ? "%d" : "off", sChipArp);
+        stepper(x + 20, ry, "Chord arpeggio", &sChipArp, 0, 4, 1, lab);
+        text(x + 380, ry + 3, "a chord in one part goes round its notes, this many frames each", C_DIM);
+    }
+    ry += 36;
+    checkbox(x + 20, ry, "Open it afterwards (Original plays it on the chip itself)", &sChipOpen);
+    ry += 44;
+    text(x + 20, ry, "HOW EVERY PART IS HEARD", C_ACCENT);
+    ry += 26;
+    const char *bassCh = sChipTarget == CHIP_GB ? "wave channel (its shape drawn from the instrument)" : "triangle";
+    char line[300];
+    text(x + 20, ry, "Drums: the noise channel, each hit at its own loudness and brightness, frame by frame.", C_TEXT);
+    ry += 24;
+    snprintf(line, sizeof(line), "Bass: the %s.", bassCh);
+    text(x + 20, ry, line, C_TEXT);
+    ry += 24;
+    text(x + 20, ry, "Melody: square 1. Square 2: the note that harmonizes with it (a 3rd or 6th first);", C_TEXT);
+    ry += 24;
+    text(x + 20, ry, "   echoes and doublings are found and only fill gaps. Each part keeps one octave.", C_TEXT);
+    ry += 24;
+    text(x + 20, ry, "Each instrument's tone picks its square's duty; vibrato, slides and volume follow the song.", C_TEXT);
+    ry += 30;
+    text(x + 20, ry, "The file opens in the studio again like any NES / Game Boy song.", C_DIM);
+    char eb[40];
+    snprintf(eb, sizeof(eb), "Export %s...", chip_ext(sChipTarget));
+    if (button(x + w - 280, y + h - 44, 150, 30, eb, have_song()) || (kEnter && have_song())) { sModal = MODAL_NONE; run_action(ACT_EXPORT_CHIP); }
+    if (button(x + w - 120, y + h - 44, 104, 30, "Cancel", 1) || kEsc) sModal = MODAL_NONE;
 }
 
 static void draw_defaults(void)
@@ -2406,6 +2490,12 @@ int ui_main(int argc, char **argv)
     }
     sWin = SDL_CreateWindow("Moemon Music Studio", SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, W, H,
                             SDL_WINDOW_RESIZABLE | SDL_WINDOW_ALLOW_HIGHDPI);
+    {
+        // the program's icon: the GREAT BALL (icon.png, gen_icon.py)
+        SDL_Surface *ic = SDL_CreateRGBSurfaceWithFormatFrom((void *)k_studioIcon, STUDIO_ICON_SIZE, STUDIO_ICON_SIZE, 32,
+                                                             STUDIO_ICON_SIZE * 4, SDL_PIXELFORMAT_RGBA32);
+        if (ic) { SDL_SetWindowIcon(sWin, ic); SDL_FreeSurface(ic); }
+    }
     sRen = SDL_CreateRenderer(sWin, -1, SDL_RENDERER_ACCELERATED | SDL_RENDERER_PRESENTVSYNC);
     if (!sRen) sRen = SDL_CreateRenderer(sWin, -1, 0);
     SDL_RenderSetLogicalSize(sRen, W, H);
@@ -2413,6 +2503,8 @@ int ui_main(int argc, char **argv)
     if (!getenv("MMS_SHOT")) apply_window_size();
     if (getenv("MMS_SHOT_MODAL") && !strcmp(getenv("MMS_SHOT_MODAL"), "defaults"))
         sModal = MODAL_DEFAULTS;   // (tests: the screenshot of the DEFAULTS panel)
+    if (getenv("MMS_SHOT_MODAL") && !strcmp(getenv("MMS_SHOT_MODAL"), "chip"))
+        sModal = MODAL_CHIP;       // (the CHIPTUNE panel)
 
     inst_init();
     studio_init(&S);
@@ -2540,6 +2632,7 @@ int ui_main(int argc, char **argv)
         case MODAL_GBS_TRACK: draw_gbs_track(); break;
         case MODAL_DEFAULTS: draw_defaults(); break;
         case MODAL_TRACK: draw_track_changes(); break;
+        case MODAL_CHIP: draw_chip(); break;
         }
         SDL_RenderPresent(sRen);
         if (getenv("MMS_SHOT")) {   // tests: save a screenshot and quit

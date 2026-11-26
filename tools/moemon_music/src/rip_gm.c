@@ -631,7 +631,7 @@ void rip_gm_match(const Rip *r, const RipSong *song, RipGm *out) {
     }
     // Game Boy songs play at the hardware's level, which a GBA instrument can need more than a volume of
     // 127 to reach: everything comes down together instead
-    if (r->kind == RIP_GBS) {
+    if (rip_is_psg(r->kind)) {
         float m = 1;
         for (int s = 0; s < 128; s++) if (out->voice[s].type != 0xFF && out->gain[s] > m) m = out->gain[s];
         out->cgbNorm = 1 / m;

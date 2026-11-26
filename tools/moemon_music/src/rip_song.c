@@ -850,7 +850,8 @@ int rip_song_build(Rip *r, RipSong *out, float gain, int gbaDrums, const uint8_t
         for (int k = 0; k < s->len; k++) { int a = abs(s->pcm[k]); if (a > pk) pk = a; sum += (double)s->pcm[k] * s->pcm[k]; }
         s->peak = pk / 32768.0f;
         s->rms = (float)sqrt(sum / (s->len ? s->len : 1)) / 32768.0f;
-        s->rootKey = rip_detect_root(s->pcm, s->len, s->rate, s->loopStart, s->loops, &s->pitched);
+        if (s->rootKnown) { s->rootKey = 60; s->pitched = 1; }
+        else s->rootKey = rip_detect_root(s->pcm, s->len, s->rate, s->loopStart, s->loops, &s->pitched);
     }
 
     // notes
@@ -980,7 +981,7 @@ int rip_song_build(Rip *r, RipSong *out, float gain, int gbaDrums, const uint8_t
 
     // Game Boy channels played by a GBA instrument (Convert GB > GBA): the chip's tricks made for pure waves,
     // turned into what they mean musically, so a sampled instrument doesn't stutter or warble through them
-    if (r->kind == RIP_GBS && instSlots) gb_for_instruments(r, &notes, &nn, &capN, slotOf, ns, instSlots, gain, aref);
+    if (rip_is_psg(r->kind) && instSlots) gb_for_instruments(r, &notes, &nn, &capN, slotOf, ns, instSlots, gain, aref);
 
     // how each instrument is played: register, envelope, note length
     for (int si = 0; si < nslots; si++) {
@@ -1182,7 +1183,7 @@ int rip_song_build(Rip *r, RipSong *out, float gain, int gbaDrums, const uint8_t
     // Game Boy noise: the drums its hits are (always worked out, so the GBA kit is there to pick), and in
     // GB > GBA the notes' kit key and level
     int *drumKey = NULL, *drumVel = NULL, *drumHold = NULL;
-    if (r->kind == RIP_GBS) {
+    if (rip_is_psg(r->kind)) {
         drumKey = malloc(sizeof(int) * (size_t)nn);
         drumVel = malloc(sizeof(int) * (size_t)nn);
         drumHold = calloc((size_t)nn, sizeof(int));

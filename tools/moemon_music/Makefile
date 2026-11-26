@@ -34,8 +34,9 @@ TP_USF  := ai/ai_controller api/callbacks debugger/dbg_decoder main/main main/ro
            vi/vi_controller
 TP_ZLIB := adler32 crc32 inffast inflate inftrees uncompr zutil
 TP_GME  := Gbs_Emu Gb_Cpu Gb_Apu Gb_Oscs Blip_Buffer Classic_Emu Multi_Buffer Music_Emu Gme_File Data_Reader M3u_Playlist Effects_Buffer \
-           Spc_Emu Snes_Spc Spc_Cpu Spc_Dsp Spc_Filter Fir_Resampler Vgm_Emu Vgm_Emu_Impl Ym2612_Nuked Ym2413_Emu Sms_Apu Dual_Resampler
-TP_C    := $(TP_HE:%=he/%) psflib/psflib psflib/psf2fs $(TP_USF:%=lazyusf2/%) $(TP_ZLIB:%=zlib/%)
+           Spc_Emu Snes_Spc Spc_Cpu Spc_Dsp Spc_Filter Fir_Resampler Vgm_Emu Vgm_Emu_Impl Ym2612_Nuked Ym2413_Emu Sms_Apu Dual_Resampler \
+           Nsf_Emu Nsfe_Emu Nes_Apu Nes_Cpu Nes_Oscs Nes_Fme7_Apu Nes_Namco_Apu Nes_Vrc6_Apu Nes_Vrc7_Apu Nes_Fds_Apu
+TP_C    := $(TP_HE:%=he/%) psflib/psflib psflib/psf2fs $(TP_USF:%=lazyusf2/%) $(TP_ZLIB:%=zlib/%) gme/ext/emu2413
 TP_CXX  := $(TP_GME:%=gme/%) \
            $(patsubst $(TP)/%.cpp,%,$(shell find $(TP)/desmume_2sf $(TP)/vbam_gsf -name '*.cpp'))
 
@@ -76,6 +77,9 @@ build/linux/rip_spc.o: src/rip_spc.cpp $(HDRS)
 build/linux/rip_vgm.o: src/rip_vgm.cpp $(HDRS)
 	@mkdir -p $(dir $@)
 	$(CXX) $(CXXFLAGS) $(CXXINC) -include $(TP)/gme/gme_rename.h -c $< -o $@
+build/linux/rip_nsf.o: src/rip_nsf.cpp $(HDRS)
+	@mkdir -p $(dir $@)
+	$(CXX) $(CXXFLAGS) $(CXXINC) -include $(TP)/gme/gme_rename.h -c $< -o $@
 build/linux/sf_data.o: $(GEN)/sf_data.c src/sf.h
 	@mkdir -p build/linux
 	$(CC) $(CFLAGS) -O0 -c $< -o $@
@@ -89,7 +93,8 @@ build/linux/moemon_music_studio: $(LOBJ)
 WCC  := x86_64-w64-mingw32-gcc
 WCXX := x86_64-w64-mingw32-g++
 WSDL := $(SDL2_DIR)/x86_64-w64-mingw32
-WOBJ := $(SRCS:src/%.c=build/windows/%.o) $(CXXSRCS:src/%.cpp=build/windows/%.o) build/windows/sf_data.o build/windows/sf_pcm.o \
+WINDRES := x86_64-w64-mingw32-windres
+WOBJ := $(SRCS:src/%.c=build/windows/%.o) $(CXXSRCS:src/%.cpp=build/windows/%.o) build/windows/sf_data.o build/windows/sf_pcm.o build/windows/icon_res.o \
         $(TP_C:%=build/windows/tp/%.o) $(TP_CXX:%=build/windows/tp/%.o)
 build/windows/%.o: src/%.c $(HDRS) $(GEN)/sf_counts.h
 	@mkdir -p build/windows
@@ -115,12 +120,19 @@ build/windows/rip_spc.o: src/rip_spc.cpp $(HDRS)
 build/windows/rip_vgm.o: src/rip_vgm.cpp $(HDRS)
 	@mkdir -p $(dir $@)
 	$(WCXX) $(CXXFLAGS) $(CXXINC) -include $(TP)/gme/gme_rename.h -c $< -o $@
+build/windows/rip_nsf.o: src/rip_nsf.cpp $(HDRS)
+	@mkdir -p $(dir $@)
+	$(WCXX) $(CXXFLAGS) $(CXXINC) -include $(TP)/gme/gme_rename.h -c $< -o $@
 build/windows/sf_data.o: $(GEN)/sf_data.c src/sf.h
 	@mkdir -p build/windows
 	$(WCC) $(CFLAGS) -O0 -c $< -o $@
 build/windows/sf_pcm.o: src/sf_pcm.S $(GEN)/sf_pcm.bin src/fonts.bin
 	@mkdir -p build/windows
 	$(WCC) -c -DSF_PCM_BIN='"$(GEN)/sf_pcm.bin"' -DFONTS_BIN='"src/fonts.bin"' $< -o $@
+# the exe's icon (src/icon.ico from gen_icon.py)
+build/windows/icon_res.o: src/icon.rc src/icon.ico
+	@mkdir -p build/windows
+	$(WINDRES) -I src $< -O coff -o $@
 build/windows/MoemonMusicStudio.exe: $(WOBJ)
 	$(WCXX) -o $@ $^ -L$(WSDL)/lib -lmingw32 -lSDL2main -lSDL2 -lcomdlg32 -lole32 -lshell32 -mwindows -static-libgcc -static-libstdc++ -Wl,-Bstatic -lwinpthread -Wl,-Bdynamic
 	cp $(WSDL)/bin/SDL2.dll build/windows/

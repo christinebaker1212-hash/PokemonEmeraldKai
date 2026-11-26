@@ -116,7 +116,7 @@ int studio_rebuild(Studio *s)
             }
         // Game Boy songs with some channels made GBA instruments: those came down to fit under a volume
         // of 127, so the channels still on the Game Boy come down as much
-        if (ripGains && s->p.ripKind == RIP_GBS && s->p.ripCgbNorm < 1)
+        if (ripGains && rip_is_psg(s->p.ripKind) && s->p.ripCgbNorm < 1)
             for (int i = 0; i < 128; i++)
                 if (s->c.slotUsed[i] && !voice_same(&s->p.voice[i], &s->p.ripGm[i]) && voice_is_cgb(&s->p.voice[i]))
                     s->gain[i] = s->p.ripCgbNorm;
@@ -143,7 +143,7 @@ int studio_rebuild(Studio *s)
                                : ENG_INTERP_CUBIC);
     // mixed at the console's own output rate (its samples and its interpolation behave as they did there)
     s->song.nativeRate = 0;
-    if (s->p.isRip && k != RIP_GBS && k != RIP_GSF && s->p.ripNativeRate > 0) s->song.nativeRate = (float)s->p.ripNativeRate;
+    if (s->p.isRip && !rip_is_psg(k) && k != RIP_GSF && s->p.ripNativeRate > 0) s->song.nativeRate = (float)s->p.ripNativeRate;
     s->song.voices = s->voices;
     studio_measure(s);
     s->msg[0] = 0;
@@ -218,7 +218,7 @@ int studio_defaults_voices(Studio *s, const StudioDefaults *d)
     Project *p = &s->p;
     int ch = 0;
     if (p->isRip && p->ripKind != RIP_GSF) {
-        int want = p->ripKind == RIP_GBS ? d->gbToGba : d->ripGm;
+        int want = rip_is_psg(p->ripKind) ? d->gbToGba : d->ripGm;
         if (want != p->ripUseGm) { project_rip_instruments(p, want); ch = 1; }
     }
     for (int i = 0; i < 128; i++) {

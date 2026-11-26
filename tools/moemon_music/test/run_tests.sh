@@ -152,6 +152,51 @@ assert chord == [60, 64, 67], chord
 assert len(gba[0]) < 400, len(gba[0])
 PY
 
+echo "== CHIPTUNE: more parts than channels as NES and Game Boy music (melody, harmony, bass, drums), the files played by their consoles' emulators and opened again"
+python3 test/make_test_chip_midi.py "$T/chip.mid"
+"$B" --chip nes "$T/chip.mid" "$T/chip_nes" > /dev/null          # (the extension is added)
+"$B" --chip gb "$T/chip.mid" "$T/chip_gb.gbs" > /dev/null
+"$B" --chip nes "$T/chip.mid" "$T/chip_arp.nsf" 1 > /dev/null    # chords as arpeggios
+for f in chip_nes.nsf chip_gb.gbs chip_arp.nsf; do
+    MMS_RIP_VF=0-1200 "$B" --original "$T/$f" "$T/$f.wav" 2> "$T/$f.vf"
+    python3 - "$T/$f.wav" "$T/$f.vf" "$f" <<'PY'
+import sys, wave, math, re
+w = wave.open(sys.argv[1]); secs = w.getnframes() / w.getframerate()
+# its own length: 8 s, the loop (2-8 s) again, a 5 s fade
+assert abs(secs - 19) < 0.2, '%s: %.2f s long' % (sys.argv[3], secs)
+keys = [dict(), dict()]          # [first time through, the loop again][voice] -> keys heard
+keyons = {}
+for line in open(sys.argv[2]):
+    m = re.match(r'vf\s+(\d+):(.*)', line)
+    if not m: continue
+    f = int(m.group(1))
+    for tok in m.group(2).split():
+        v, rest = tok.split('=')
+        star = v.endswith('*'); v = int(v.rstrip('*'))
+        s, rate = rest.split('@')[0], float(rest.split('@')[1].split('/')[0])
+        if s == 's-1' or rate <= 0: continue
+        if star: keyons[v] = keyons.get(v, 0) + 1
+        part = 0 if 130 <= f < 470 else 1 if 620 <= f < 950 else -1
+        if part < 0 or v == 3: continue
+        keys[part].setdefault(v, set()).add(round(69 + 12 * math.log2(rate / 440)))
+for part in (0, 1):
+    k = keys[part]
+    assert {72, 74, 76, 77, 79} <= k.get(0, set()), ('square 1: the melody', part, sorted(k.get(0, ())))
+    sq2 = k.get(1, set())
+    if 'arp' in sys.argv[3]:
+        assert {60, 64, 67} <= sq2, ('square 2: the chord going round its notes', part, sorted(sq2))
+    else:
+        # a note of the harmony, held (not a frame-by-frame round of every part)
+        assert sq2 and sq2 <= {60, 64, 67, 69}, ('square 2: the harmony', part, sorted(sq2))
+    assert k.get(2) == {36}, ('the bass', part, sorted(k.get(2, ())))
+assert keyons.get(3, 0) >= 20, ('the drums on the noise', keyons)
+PY
+done
+"$B" --save "$T/chip_nes.nsf" "$T/chip_nes.mmsproj" > /dev/null    # opened again like any NES / Game Boy song
+"$B" --save "$T/chip_gb.gbs" "$T/chip_gb.mmsproj" > /dev/null
+"$B" --render "$T/chip_nes.mmsproj" "$T/chip_nes_gba.wav" 5
+"$B" --chip nes "$T/chip_gb.gbs" "$T/chip_gb_to_nes.nsf" > /dev/null   # and made chiptune again, like any song
+
 # Rips aren't in the repository: MMS_RIPS=folder runs these on every rip in it (and MMS_BIOS=folder with a
 # PlayStation 2 BIOS for PSF / PSF2). Each must convert, sound within 4.5 dB of its emulator band by
 # band, export a .kaisong the reader accepts and come back the same from its project.

@@ -9,8 +9,15 @@
 
 // RIP_GBA: a GSF whose game has its own sound driver (not MP2K), its voices read from the driver as it plays
 // (rip_gsf.cpp: Konami's); RIP_GSF is always a song on MP2K, read from the ROM.
-enum { RIP_PSF1, RIP_PSF2, RIP_USF, RIP_GBS, RIP_2SF, RIP_GSF, RIP_GCN, RIP_SPC, RIP_VGM, RIP_GBA, RIP_SDAT, RIP_NUM_KINDS };
+enum { RIP_PSF1, RIP_PSF2, RIP_USF, RIP_GBS, RIP_2SF, RIP_GSF, RIP_GCN, RIP_SPC, RIP_VGM, RIP_GBA, RIP_SDAT, RIP_NSF, RIP_NUM_KINDS };
 // RIP_SDAT: a DS sound archive's sequence played by rip_sdat.c's own sequencer ("file.sdat#SEQ_NAME")
+// RIP_NSF: an NES song (NSF / NSFe, or a NEZplug .m3u line naming one), rip_nsf.cpp
+
+// Consoles whose channels are the Game Boy's kind (squares of the same four duties, a 32-step wave, noise):
+// the GBA plays them on its own Game Boy channels, and Convert > GBA turns them into instruments.
+static inline int rip_is_psg(int kind) { return kind == RIP_GBS || kind == RIP_NSF; }
+// Files holding many songs, picked by number (a Game Boy / NES file's songs, an SDAT's sequences)
+static inline int rip_has_songs(int kind) { return kind == RIP_GBS || kind == RIP_NSF || kind == RIP_SDAT; }
 
 #define RIP_MAX_VOICES 64
 #define RIP_MAX_SECONDS 900          // longest a rip plays (15 minutes)
@@ -32,6 +39,7 @@ typedef struct {
     uint8_t wave[32];
     uint32_t id;                     // the chip's own name for it (sound RAM address...)
     uint32_t hash;
+    uint8_t rootKnown;               // RIPS_PCM: a waveform made at key 60 (rootKey not detected)
     // filled by rip_song.c
     float rootKey;                   // MIDI key of the sample played at `rate` (pitch detection); 60 unknown
     int pitched;
@@ -86,6 +94,7 @@ typedef struct Rip {
 int rip_load(Rip *r, const char *path, const char *biosDir, int gbsTrack, int seconds, char *err, int errlen);
 void rip_free(Rip *r);
 int rip_kind_of(const char *path);                 // -1 = not a rip
+int rip_song_count(const char *path);              // songs in a .gbs / .nsf / .nsfe (0 = not one of them)
 const char *rip_kind_name(int kind);
 int rip_needs_bios(int kind);
 
@@ -119,6 +128,7 @@ int rip_open_spc(RipEmu *e, Rip *r, char *err, int errlen);
 int rip_open_vgm(RipEmu *e, Rip *r, char *err, int errlen);
 int rip_open_gcn(RipEmu *e, Rip *r, char *err, int errlen);
 int rip_open_sdat(RipEmu *e, Rip *r, int track, char *err, int errlen);
+int rip_open_nsf(RipEmu *e, Rip *r, int track, char *err, int errlen);
 
 // psflib tags -> Rip fields (title, artist, game, year, copyright, length, fade...)
 int rip_psf_tag(Rip *r, const char *name, const char *value);

@@ -1,8 +1,9 @@
 # Moemon Music Studio
 
 A desktop program (Linux / Windows, SDL2) that plays MIDI files, and music ripped from other games
-(PSF, PSF2, USF, GBS, 2SF, GSF, SPC, VGM, GameCube ISH/ISD/DSP, a DS game's own SDAT), with Moemon Emerald Kai's own instruments **and its own sound
-engine**, lets you pick and tune the instruments, and exports the song in a form the game can use.
+(PSF, PSF2, USF, GBS, NSF, 2SF, GSF, SPC, VGM, GameCube ISH/ISD/DSP, a DS game's own SDAT), with Moemon Emerald Kai's own instruments **and its own sound
+engine**, lets you pick and tune the instruments, and exports the song in a form the game can use. **CHIPTUNE** makes
+any of them NES or Game Boy music (an `.nsf` / `.gbs` that any player plays, and the studio opens again).
 
 ## Music from other games
 
@@ -12,6 +13,7 @@ engine**, lets you pick and tune the instruments, and exports the song in a form
 | PSF2, minipsf2 | PlayStation 2 | Highly Experimental | the same for both SPU2 cores (48 voices) |
 | USF, miniusf | Nintendo 64 | lazyusf2 | the audio microcode's command lists (libultra's ABI 1 "audio" as in Bomberman Hero, n_audio, EAD), sub-frame by sub-frame (libultra mixes each buffer in 184-sample parts, every voice in each): codebook, decode, pitch, envelope, each voice by its own mixer state (a voice whose sample has ended still mixes, on silence); samples found from the driver's wavetables and decoded (VADPCM) from the ROM |
 | GBS (+ .m3u) | Game Boy | Game_Music_Emu | the four channels' registers; they become the game's own Game Boy voices (the GBA has the same channels) |
+| NSF, NSFe (+ .m3u) | NES / Famicom | Game_Music_Emu (2A03 and the cartridges' chips) | the 2A03's registers: its squares (the Game Boy's four duties) and triangle (32 steps of 4 bits, the Game Boy's wave channel playing a triangle) become the game's Game Boy voices, the noise its noise, the DMC's 1-bit samples decoded from memory as samples; the cartridges' chips from their registers: VRC6 (16-step pulses, the sawtooth), Namco 163 (each channel's wave from its RAM), Sunsoft 5B (squares, 3 dB volume steps), the Famicom Disk System (its 64-step wave), MMC5 (two more squares), VRC7 (a pure tone per FM patch: notes, pitch and volume exact, the patch's sound not) |
 | 2SF, mini2sf | Nintendo DS | vio2sf's DeSmuME | the 16 SPU channels: sample (PCM8/16, IMA-ADPCM), timer, volume, pan; PSG squares and noise |
 | SDAT (`file.sdat#SEQ_NAME` or `#NUMBER`) | Nintendo DS | played here (`src/rip_sdat.c`): no emulator, no 2SF | the archive's own sequence (SSEQ) run on a sequencer written after the DS's sound library (its 192 Hz update, tempo / 240 ticks, notes, loops, calls, variables and random, ties, portamento, pitch bend, modulation), its bank's instruments (SBNK: PCM waves, PSG squares, noise, drum sets, key splits; ADSR in decibels) and waves (SWAR: PCM8/16, IMA-ADPCM), on 16 channels reported like a 2SF's (test/make_test_sdat.py). In the window, opening an `.sdat` asks for the sequence's number; its length is the intro and the loop twice |
 | SPC | Super Nintendo | Game_Music_Emu (SPC700 + S-DSP) | the S-DSP's 8 voices: each key-on, the sample its SRCN names in the directory (start, loop), pitch, envelope and volume, echo; samples decoded from the sound RAM as the DSP decodes them (BRR) |
@@ -49,7 +51,8 @@ GBA songs on MP2K need none of that: their own commands and samples come straigh
   of the game (compared by harmonic make-up, whether notes hold or die away, and the instrument's
   usual range; drums by brightness and length). Instruments with no close GM match keep the
   original sample. Per instrument: **Orig** / **GM**, or **Change...** as usual.
-- **Game Boy / Convert GB > GBA** (SONG, Game Boy songs): the channels as the GBA's own Game Boy
+- **Game Boy / Convert GB > GBA** (SONG, Game Boy songs; **NES / Convert NES > GBA** for NES songs, whose squares,
+  triangle and noise are the same kind of channels): the channels as the GBA's own Game Boy
   channels, or each one as the GBA instrument it sounds like. Squares (by duty) and the wave channel
   (its 32 steps) are built from their harmonics and matched like samples, with how the song holds
   them and where they play (the wave channel is usually the bass). The noise channel becomes a drum
@@ -91,6 +94,54 @@ GBA songs on MP2K need none of that: their own commands and samples come straigh
 
 The game's own MIDIs (`sound/songs/midi/mus_*.mid`) open with their real voicegroup, volume,
 reverb and priority from `midi.cfg`.
+
+## CHIPTUNE: any song as NES or Game Boy music
+
+**Chiptune...** (top bar, CONVERT) makes the open song, whatever it was opened from (a MIDI, a project, every kind of
+rip above but GameCube recordings), into music for the NES's 2A03 or the Game Boy's sound chip, and writes it as that console's own file: an
+`.nsf` or a `.gbs`, with a small driver that plays it (`gen_chip_drivers.py`), so it plays in any NSF / GBS player and on
+the consoles' flash carts. **Open it afterwards** (on by default) opens the file in the studio like any NES / Game Boy
+song: **Original** plays it on the chip's own emulator, **GBA** in the game's engine, and it can be exported as a
+`.kaisong`, or made chiptune again for the other chip. Its length and loop are kept in the file.
+
+How (`src/chip.c`): the song plays through the game's engine once and every voice is read each frame: which part of the
+song it belongs to, its pitch with bends and vibrato, its loudness as heard (a sample's own loudness where it is playing,
+with the envelope and volume), its instrument. Then the song is read **note by note**, from how its notes behave and
+never from which instrument plays them, so any song works the same way:
+
+- **Echoes**: a part (or the later notes of one part) playing notes another played a steady few frames before, as long
+  and quieter. They only fill a channel nothing else needs.
+- **Doublings**: the same notes at the same moment as a stronger part, in unison or octaves: one note.
+- **Bass**: the lowest steady part. It plays on the triangle (NES) or the wave channel (Game Boy, its 32 steps drawn
+  from the instrument's own waveform when it holds a steady tone), and nothing else does.
+- **Melody**: for each four seconds (weighing the stretches either side, and kept unless another part is clearly more
+  of one), the part that moves from note to note over many pitches in a varied rhythm, loud, high and one note at a time.
+  An ostinato repeating one note, a pad, a broken-chord figure in a steady rhythm, or the lower of two parts moving
+  together (a melody in 3rds, stabs) is accompaniment. Square 1.
+- **Square 2**: the note that matters most next to the melody: its harmony (the lower of two parts moving with it, a
+  note starting with its note, a 3rd or 6th from it before a 4th or 5th, its own note again least), a sweep, the most
+  melodic other part; ostinatos, pads and echoes fill the rest.
+- Each channel keeps a note to its end; only a new note that clearly matters more takes it over, and a note that lost
+  its channel doesn't come back, so nothing flickers between notes. When the melody slides into its note on another
+  instrument (a doubling with a pitch bend), square 1 plays the slide.
+- Each part keeps **one octave**, moved as a whole only when it can't be played where it is (a note decides its own once,
+  for its whole length, so a sweep keeps its path).
+- **Drums**: the noise channel, each hit following its own loudness and brightness frame by frame.
+- **Chord arpeggio** (off unless set): a chord in one part goes round its notes on square 2, 1-4 frames each.
+- Each instrument's tone picks its square's **duty** (12.5, 25 or 50%: the one whose harmonics are closest).
+- Volume follows the song frame by frame (NES: each square's and the noise's volume register; Game Boy: the envelope
+  that follows the next frames' volumes most closely, started again only when the song's volume moves clearly away,
+  since each start restarts a square's waveform). A note repeated on the same channel gets a frame's gap, so it's heard
+  again (the triangle has no attack of its own). On the NES a vibrato across a period's high bits stays at the edge
+  instead of restarting the square's waveform.
+- The NES plays at the game's own frame rate; the Game Boy at its vertical blank (59.73 Hz), the song read at that rate,
+  so both keep the original's tempo.
+- GameCube music is a recording, not notes, so it can't be made chiptune.
+
+The files: an NSF has the driver in its first 4 KB bank and the song's register writes in the banks after it (up to
+1 MB, NSF bank switching); a GBS has the driver at `$0400` and the writes from bank 1 on (MBC1 banks, up to 496 KB).
+The stream: `00-3F rr vv` a register write, `81-FE` the frame's end and frames to wait, `80` the loop, `FF` the end
+(the top of `gen_chip_drivers.py`).
 
 ## Releases
 
@@ -177,6 +228,8 @@ moemon_music_studio --save IN OUT.mmsproj [SONG]
 moemon_music_studio --dump IN                       song bytecode, a track a line
 moemon_music_studio --dump-exact IN VOLUME          converted like mid2agb -E -V VOLUME
 moemon_music_studio --raw IN OUT.f32 FRAMES         the engine's float output, frame by frame
+moemon_music_studio --chip nes|gb IN OUT [ARP]      CHIPTUNE: OUT.nsf (NES) / OUT.gbs (Game Boy); ARP 1-4 = chords as
+                                                     arpeggios (MMS_CHIP_DEBUG=A-B prints the parts and frames A-B)
 ```
 
 ## Files
@@ -189,7 +242,10 @@ moemon_music_studio --raw IN OUT.f32 FRAMES         the engine's float output, f
 | `src/inst.c` | game voices -> engine instruments, names, the project file's voice text |
 | `src/project.c` | projects (`.mmsproj`) and loading MIDIs |
 | `src/export.c` | `.kaisong` and decomp sources |
+| `src/chip.c`, `gen_chip_drivers.py` | CHIPTUNE: any song as NES / Game Boy music, its `.nsf` / `.gbs` and their drivers (`src/chip_drivers.h`, checked in) |
+| `gen_icon.py` | `icon.png` (the GREAT BALL) -> `src/icon.h` (the window's icon) and `src/icon.ico` (the exe's), checked in |
 | `src/studio.c`, `src/cli.c`, `src/ui.c`, `src/dialog.c` | the open song, command line, window, file dialogs |
 | `src/rip.c`, `src/rip_*.c(pp)` | rips: loading, each console's emulator and capture, the MIDI and instruments made from it (`rip_song.c`), MP2K from the ROM (`rip_mp2k.c`), GM matching (`rip_gm.c`) |
+| `src/rip_nsf.cpp` | NES rips (NSF / NSFe) |
 | `third_party/` | the emulators, psflib, zlib (`third_party/README.md`: sources and licenses; the studio as a whole is GPL 2+) |
 | `test/` | `run_tests.sh`, `check_mid2agb.py`, `read_kaisong.py` (reference reader), `make_test_midi.py` |
