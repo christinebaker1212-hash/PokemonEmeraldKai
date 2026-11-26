@@ -37,8 +37,8 @@ void chip_opts_default(ChipOpts *o, int target)
 {
     memset(o, 0, sizeof *o);
     o->target = target;
-    o->chords = CHIP_CHORDS_AUTO;
-    o->arpFrames = 2;
+    o->chords = CHIP_CHORDS_FULL;
+    o->arpFrames = 1;
     o->dmc = 1;
     o->vibrato = 1;
     o->keepRegister = 1;
@@ -293,7 +293,7 @@ static int capture(Studio *s, Cap *c, char *msg, int msglen)
             // sound's own loudness and not its waveform
             double rate0 = (ch->type & TYPE_FIX) ? ENG_RATE : (double)ch->freq;
             int span = (int)(rate0 / SRC_FPS) + 1, hiEnd = ch->cur, loEnd;
-            if (span < BLK) span = BLK;
+            if (span < 1024) span = 1024;   // (long enough to be the sound's level, not its waveform's ripple)
             if (hiEnd > tm->len) hiEnd = tm->len;
             if (hiEnd < span) hiEnd = span < tm->len ? span : tm->len;
             loEnd = hiEnd - span < 0 ? 0 : hiEnd - span;
@@ -493,6 +493,16 @@ static int arrange(const Cap *c, const ChipOpts *o, Arr *a, ChipPlan *plan, char
         if (aref <= 0) aref = 0.25f;
     }
     float quiet = aref * 0.035f;       // below this a note isn't worth a channel (it would be volume 0)
+    // the level the loud end of the tonal notes plays at 15
+    float arefT = aref;
+    {
+        float *amps = malloc(sizeof(float) * (size_t)(c->nev + 1));
+        int na2 = 0;
+        for (int i = 0; amps && i < c->nev; i++) if (c->ev[i].amp > 0 && !c->ev[i].drum) amps[na2++] = c->ev[i].amp;
+        if (amps && na2) { qsort(amps, (size_t)na2, sizeof(float), cmp_float); arefT = amps[(int)(na2 * 0.97)]; }
+        free(amps);
+        if (arefT <= 0) arefT = aref;
+    }
 
     // ---- the notes
     uint32_t maxId = 0;
@@ -1222,9 +1232,16 @@ static int arrange(const Cap *c, const ChipOpts *o, Arr *a, ChipPlan *plan, char
             if (has) lastComp = f;
             else if (f - lastComp > 24 && comp2Of[w] >= 0) C = comp2Of[w];
             int ch[16], nc = 0, seen[12] = {0};
+            // FULL: the chord of everything sounding but the melody's and the bass's notes (their note names left out)
+            int full = o->chords == CHIP_CHORDS_FULL;
+            if (full) {
+                for (int qq = 0; qq < 3; qq += 2)
+                    if (on[qq] >= 0) seen[((int)lroundf(actKey[on[qq]]) % 12 + 12) % 12] = 1;
+            }
             for (int j = 0; j < na && nc < 16; j++) {
                 const Note *n = &nt[act[j]];
-                if (n->drum || n->part != C || j == on[0] || j == on[2]) continue;
+                if (n->drum || (!full && n->part != C) || j == on[0] || j == on[2]) continue;
+                if (full && n->echo) continue;
                 if (n->echo && pt[C].echoOf < 0 && pt[C].user != CHIP_ROLE_ECHO) continue;
                 // the melody's own note again (a unison or an octave of it) says nothing new
                 if (on[0] >= 0 && ((int)lroundf(fabsf(actKey[j] - actKey[on[0]]))) % 12 == 0 && !n->echo) continue;
@@ -1347,24 +1364,16 @@ static int arrange(const Cap *c, const ChipOpts *o, Arr *a, ChipPlan *plan, char
                 }
                 oc->hz = (float)semis_to_hz(key);
                 oc->wave = n->timbre;
-                // its level: the role's (the melody on top, square 2's line under it, arpeggios and echoes further down),
-                // the note's own against its part's (as a velocity), and the chip instrument's envelope: a short note plucks
-                // (full, then down a step a frame), a long one punches and settles to a steady sustain, an instrument that
-                // dies away dies away on the chip too. The original's level from frame to frame isn't followed: a chip
-                // instrument has its own shape
-                float base = q == 2 ? 15 : q == 0 ? (n->part == lead ? 15 : 13) : arpOn ? 9 : n->echo ? 8 : 11;
-                float shape;
-                if (q == 1 && arpOn) shape = 1;
-                else if (P->durMed < 10) shape = 1 - age * 0.09f;
-                else if (P->decaying) shape = (age == 0 ? 1 : 0.94f) - age * 0.018f;
-                else {
-                    static const float k_sus[4] = {1.0f, 0.94f, 0.88f, 0.84f};
-                    shape = age < 4 ? k_sus[age] : 0.82f;
-                }
-                if (shape < 0.25f) shape = 0.25f;
-                if (q == 2 && shape < 0.6f) shape = 0.6f;   // (the bass: the wave channel has only 4 levels)
-                (void)smooth;
-                int vol = (int)lroundf(base * (0.75f + 0.25f * n->level) * shape);
+                // its level: the original's own, frame by frame (its instrument's attack and decay, the song's swells and
+                // accents, every part against the others as the original mixes them), on one scale for every channel: the
+                // loud end of the song's notes is 15. The squares sit at 55% of it: a square is louder than a sample of the
+                // same level (measured against the originals: the closest balance on both chips). The Game Boy's wave
+                // channel has 4 levels: the bass stays at half or more
+                float a1 = actAmp[j];
+                float sm2 = age == 0 || smooth[act[j]] <= 0 ? a1 : smooth[act[j]] * 0.4f + a1 * 0.6f;
+                smooth[act[j]] = sm2;
+                int vol = (int)lroundf(15.0f * sm2 / arefT * (q < 2 ? 0.55f : 1.0f));
+                if (q == 2 && vol < 9) vol = 9;
                 oc->vol = (uint8_t)(vol < 1 ? 1 : vol > 15 ? 15 : vol);
                 // its duty: the part's; square 2 takes the other of 25 / 50% when square 1 plays the same (so the two
                 // are heard apart); an arpeggio is 12.5%; a note's first frame a step narrower (the attack's bite)
@@ -1375,6 +1384,11 @@ static int arrange(const Cap *c, const ChipOpts *o, Arr *a, ChipPlan *plan, char
                     if (d == d0 || (d == 3 && d0 == 1) || (d == 1 && d0 == 3)) d = d0 == 2 ? 1 : 2;
                 }
                 if (age == 0 && d == 2 && q < 2 && !n->echo) d = 1;
+                if (getenv("MMS_CHIP_DUTY") && q < 2) {   // (experiments: square 1's and square 2's duty, "1,2")
+                    int d0 = 1, d1 = 2;
+                    sscanf(getenv("MMS_CHIP_DUTY"), "%d,%d", &d0, &d1);
+                    d = q == 0 ? d0 : d1;
+                }
                 oc->duty = (uint8_t)d;
                 (void)tm;
             }
@@ -1655,21 +1669,24 @@ static void env_step(GbEnv *e)
 // the envelope (start, direction, speed) that follows the volumes a note wants next most closely
 static int env_fit(const uint8_t *want, int n, GbEnv *out)
 {
-    int best = 0;
+    // every start level (0-15) and every direction and speed: the one closest to the volumes wanted over the next frames
+    // (an attack that rises fast is better started near its peak than at its first, quiet frame)
+    int best = 0, bestV = want[0];
     double bestErr = 1e30;
-    for (int opt = 0; opt < 15; opt++) {
-        GbEnv e = {want[0], opt >= 8, opt == 0 ? 0 : opt < 8 ? opt : opt - 7, 0, 0};
-        e.cnt = e.period;
-        double err = 0;
-        for (int i = 0; i < n; i++) {
-            double d = e.vol - want[i];
-            err += fabs(d) * (1.0 - i * 0.5 / n);    // the near frames matter more
-            env_step(&e);
+    for (int v = 1; v <= 15; v++)
+        for (int opt = 0; opt < 15; opt++) {
+            GbEnv e = {v, opt >= 8, opt == 0 ? 0 : opt < 8 ? opt : opt - 7, 0, 0};
+            e.cnt = e.period;
+            double err = 0;
+            for (int i = 0; i < n; i++) {
+                double d = e.vol - want[i];
+                err += fabs(d) * (1.0 - i * 0.5 / n);    // the near frames matter more
+                env_step(&e);
+            }
+            if (opt == 0) err -= 0.01;                    // a steady volume when it's as good
+            if (err < bestErr) { bestErr = err; best = opt; bestV = v; }
         }
-        if (opt == 0) err -= 0.01;                    // a steady volume when it's as good
-        if (err < bestErr) { bestErr = err; best = opt; }
-    }
-    out->vol = want[0];
+    out->vol = bestV;
     out->dir = best >= 8;
     out->period = best == 0 ? 0 : best < 8 ? best : best - 7;
     out->cnt = out->period;

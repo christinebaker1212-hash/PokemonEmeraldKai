@@ -146,7 +146,8 @@ int cli_main(int argc, char **argv)
                     for (int r = 0; r < CHIP_ROLE_COUNT; r++)
                         if (!strcasecmp(eq + 1, chip_role_name(r)) || (r == CHIP_ROLE_LEAD && !strcmp(eq + 1, "lead")) ||
                             (r == CHIP_ROLE_ACCOMP && !strcmp(eq + 1, "accomp"))) o.role[n] = r;
-            } else if (!strncmp(a, "chords=", 7)) o.chords = !strcmp(eq + 1, "hold") ? CHIP_CHORDS_HOLD : !strcmp(eq + 1, "arp") ? CHIP_CHORDS_ARP : CHIP_CHORDS_AUTO;
+            } else if (!strncmp(a, "chords=", 7)) o.chords = !strcmp(eq + 1, "hold") ? CHIP_CHORDS_HOLD : !strcmp(eq + 1, "arp") ? CHIP_CHORDS_ARP :
+                                                       !strcmp(eq + 1, "full") ? CHIP_CHORDS_FULL : CHIP_CHORDS_AUTO;
             else if (!strncmp(a, "arp=", 4)) o.arpFrames = atoi(eq + 1);
             else if (!strncmp(a, "dmc=", 4)) o.dmc = atoi(eq + 1);
             else if (!strncmp(a, "vibrato=", 8)) o.vibrato = atoi(eq + 1);

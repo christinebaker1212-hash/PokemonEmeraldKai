@@ -2291,15 +2291,16 @@ static void draw_chip(void)
     text(x + 520, ry + 3, sChipO.target == CHIP_GB ? "2 squares, the wave channel (the bass), noise (the drums)"
                                                    : "2 squares, the triangle (the bass), noise and DMC samples (the drums)", C_DIM);
     ry += 34;
-    static const char *const CD[] = {"Auto", "Hold", "Arpeggio"};
-    static const int VCD[] = {CHIP_CHORDS_AUTO, CHIP_CHORDS_HOLD, CHIP_CHORDS_ARP};
-    choice(x + 20, ry, "Chords", &sChipO.chords, CD, VCD, 3, 110);
+    static const char *const CD[] = {"Whole chord", "Line", "Hold", "Line's chords"};
+    static const int VCD[] = {CHIP_CHORDS_FULL, CHIP_CHORDS_AUTO, CHIP_CHORDS_HOLD, CHIP_CHORDS_ARP};
+    choice(x + 20, ry, "Square 2", &sChipO.chords, CD, VCD, 4, 120);
     {
         char lab[16];
         snprintf(lab, sizeof lab, "%d", sChipO.arpFrames);
-        stepper(x + 560, ry, "frames a note", &sChipO.arpFrames, 1, 4, 1, lab);
-        text(x + 780, ry + 3, sChipO.chords == CHIP_CHORDS_AUTO ? "(a chord under the melody with no harmony line)" :
-                              sChipO.chords == CHIP_CHORDS_HOLD ? "(square 2 holds one note)" : "(every chord on square 2)", C_DIM);
+        stepper(x + 720, ry, "frames", &sChipO.arpFrames, 1, 4, 1, lab);
+        text(x + 880, ry + 3, sChipO.chords == CHIP_CHORDS_FULL ? "(the backing's chord as an arpeggio)" :
+                              sChipO.chords == CHIP_CHORDS_AUTO ? "(one part a section)" :
+                              sChipO.chords == CHIP_CHORDS_HOLD ? "(one part, one note)" : "(one part, its chords)", C_DIM);
     }
     ry += 34;
     checkbox(x + 20, ry, "NES kicks and snares as DMC samples", &sChipO.dmc);

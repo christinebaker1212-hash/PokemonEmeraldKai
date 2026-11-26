@@ -24,13 +24,15 @@ enum { CHIP_NES, CHIP_GB };
 // what a part of the song plays as (the arrangement table): AUTO = as the studio works it out
 enum { CHIP_ROLE_AUTO, CHIP_ROLE_LEAD, CHIP_ROLE_HARMONY, CHIP_ROLE_ACCOMP, CHIP_ROLE_ECHO, CHIP_ROLE_BASS, CHIP_ROLE_OFF,
        CHIP_ROLE_DRUMS, CHIP_ROLE_COUNT };
-enum { CHIP_CHORDS_AUTO, CHIP_CHORDS_HOLD, CHIP_CHORDS_ARP };
+enum { CHIP_CHORDS_AUTO, CHIP_CHORDS_HOLD, CHIP_CHORDS_ARP, CHIP_CHORDS_FULL };   // FULL: square 2 arpeggiates the
+                                     // whole chord the backing plays (what square 1 and the bass don't)
 #define CHIP_MAX_PARTS 65            // the song's tracks (up to 64) and one for notes whose track isn't known
 
 typedef struct {
     int target;              // CHIP_NES / CHIP_GB
-    int chords;              // CHIP_CHORDS_*: a chord under the melody as an arpeggio (AUTO: when no harmony line plays)
-    int arpFrames;           // frames each arpeggio note lasts (1-4)
+    int chords;              // CHIP_CHORDS_*: what square 2 plays (FULL, the default: the backing's whole chord as an
+                             // arpeggio; AUTO: one part a section, its chords arpeggiated; HOLD: that part, one note)
+    int arpFrames;           // frames each arpeggio note lasts (1-4; 1, the default)
     int dmc;                 // NES: kicks and snares as DMC samples (the noise keeps the hi-hats)
     int vibrato;             // a delayed vibrato on the melody's long notes that have none of their own
     int keepRegister;        // square 2 and the bass stay in one register: a note far from where its line has been plays

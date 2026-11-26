@@ -115,28 +115,28 @@ and any instrument works the same way:
   another part is clearly more of one): the part that moves from note to note over many pitches in a varied rhythm, loud,
   high and one note at a time. An ostinato repeating a note, a pad, a figure cycling a few notes or a pedal, and the lower
   of two parts moving together (a melody in 3rds, stabs) accompany.
-- **One line a channel, a section at a time**, as a chip composer writes it. Square 1: the melody's line (when it rests,
-  the same line on its doubling instrument, else it rests too; when it slides into a note on another instrument, the
-  slide). Square 2: for each four seconds, ONE part that goes with the melody there (scored by how much it plays, how
-  consonant it is with the melody: 3rds and 6ths best, the melody's own note again worst; the melody's harmony or echo
-  first), kept until a section clearly calls for another; its chords play as an arpeggio, low to high (**Chords**: Auto /
-  Hold / Arpeggio, which also prefers a part playing chords; frames a note); after a long rest, the section's second
-  choice. Each channel rests when its line does. The bass on the triangle (NES) or the wave channel (Game Boy: the
-  classic rounded-square bass wave, or a Game Boy song's own wave). Each part keeps one octave.
-- **One register a line** (**Square 2 and the bass stay in one register**, on unless turned off): square 2 and the bass
-  keep near where their line has been (a note further than a tritone, the bass a 5th, away plays in the octave near it:
-  the same note, the same harmony), arpeggios within an octave; square 1 plays the melody's upper voice (a held note of
-  its part with a higher one sounding over it is a lower voice), a flourish (a run of 8 quick notes or fewer from a held
-  note and back, far from the line) an octave nearer as a whole, and the melody's doubling instrument, while the melody
-  rests, in the melody's octave. Of two parts playing the melody, the one that keeps leaping octaves is the less of one.
-  The melody's held notes keep their real leaps.
-- **Chip instruments, not the original's levels.** Each note has the chip instrument's own envelope: a short note plucks
-  (full, then down a step a frame), a long one punches and settles to a steady sustain, an instrument that dies away
-  dies away; the original's level only sets each note's velocity. The melody near the top, square 2's line under it,
-  arpeggios and echoes further down. Duty by role: a part's own duty (a Game Boy square keeps its; a sample is 25% when
-  bright, 50% when mellow), square 2 the other of 25 / 50% when square 1 plays the same, arpeggios 12.5%, a note's first
-  frame a step narrower; a delayed vibrato on the melody's long steady notes (**Vibrato**). On the Game Boy the hardware
-  envelope plays these shapes, so a note isn't restarted to change its level.
+- **Square 2: the whole chord.** Square 1 plays the melody's line (when it rests, the same line on its doubling
+  instrument, else it rests too; when it slides into a note on another instrument, the slide). Square 2 plays the chord
+  the backing is playing (every part but the melody, its echoes and the bass), the note names square 1 and the bass
+  already give left out, as an arpeggio one frame a note, low to high, kept within an octave: so every moment's harmony
+  is heard, not one line of it (**Square 2**: Whole chord; or Line: one part a section that goes with the melody, its
+  chords arpeggiated; Hold: that part, one note; Line's chords: that part, preferring a part playing chords). The bass on
+  the triangle (NES) or the wave channel (Game Boy: the classic rounded-square bass wave, or a Game Boy song's own wave).
+  Each part keeps one octave.
+- **The original's own dynamics.** Every note's level follows the original frame by frame (its instrument's attack and
+  decay, the song's swells and accents, each part against the others as the original mixes them), measured over 75 ms
+  (long enough to be the sound's level, not its waveform's ripple) and put on one scale for every channel; the squares
+  at 55% of it (a square is louder than a sample of the same level). Duty: a part's own (a Game Boy square keeps its; a
+  sample is 25% when bright, 50% when mellow), square 2 the other of 25 / 50% when square 1 plays the same, arpeggios
+  12.5%, a note's first frame a step narrower; a delayed vibrato on the melody's long steady notes (**Vibrato**). The
+  Game Boy's hardware envelope plays it: each note's start level, direction and speed are the ones closest to the
+  levels wanted next.
+- **Measured against the original** (`test/chip_compare.py ORIG.wav CHIP.wav`: harmony as chroma every 100 ms, the
+  original's chord tones the chip leaves out, rhythm as the onset envelope, dynamics as the loudness contour, tone balance
+  per band). These choices are the ones that brought the chip versions closest to the originals: on three Final
+  Fantasy I & II (GBA) battle songs, from the line-based square 2 with designed envelopes to these, harmony 0.80 -> 0.85
+  (NES) / 0.87 -> 0.92 (Game Boy), the original's chord tones missing per moment 1.8 -> 1.4 / 1.2 -> 0.35, dynamics
+  0.38 -> 0.61 / 0.43 -> 0.81.
 - **Drums.** Each hit becomes a drum of a kit by its brightness and length (kick, snare, hi-hat, open hi-hat, crash),
   played as that drum is on the chip: noise frame by frame at the hit's strength; on the NES kicks and snares as DMC
   samples (**NES kicks and snares as DMC samples**: a falling sine and a tone with noise, in the file's last banks), the
@@ -242,7 +242,7 @@ moemon_music_studio --dump-exact IN VOLUME          converted like mid2agb -E -V
 moemon_music_studio --raw IN OUT.f32 FRAMES         the engine's float output, frame by frame
 moemon_music_studio --chip nes|gb IN OUT [SETTINGS] CHIPTUNE: OUT.nsf (NES) / OUT.gbs (Game Boy). SETTINGS, the panel's:
                                                      pN=melody|harmony|backing|echo|bass|off, pN.duty=12|25|50|75,
-                                                     pN.oct=-2..2 (N: the track), chords=auto|hold|arp, arp=FRAMES,
+                                                     pN.oct=-2..2 (N: the track), chords=full|auto|hold|arp, arp=FRAMES,
                                                      dmc=0|1, vibrato=0|1, plan (prints the parts as read);
                                                      MMS_CHIP_DEBUG=A-B prints the parts and frames A-B
 ```
