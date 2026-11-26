@@ -123,6 +123,13 @@ and any instrument works the same way:
   Hold / Arpeggio, which also prefers a part playing chords; frames a note); after a long rest, the section's second
   choice. Each channel rests when its line does. The bass on the triangle (NES) or the wave channel (Game Boy: the
   classic rounded-square bass wave, or a Game Boy song's own wave). Each part keeps one octave.
+- **One register a line** (**Square 2 and the bass stay in one register**, on unless turned off): square 2 and the bass
+  keep near where their line has been (a note further than a tritone, the bass a 5th, away plays in the octave near it:
+  the same note, the same harmony), arpeggios within an octave; square 1 plays the melody's upper voice (a held note of
+  its part with a higher one sounding over it is a lower voice), a flourish (a run of 8 quick notes or fewer from a held
+  note and back, far from the line) an octave nearer as a whole, and the melody's doubling instrument, while the melody
+  rests, in the melody's octave. Of two parts playing the melody, the one that keeps leaping octaves is the less of one.
+  The melody's held notes keep their real leaps.
 - **Chip instruments, not the original's levels.** Each note has the chip instrument's own envelope: a short note plucks
   (full, then down a step a frame), a long one punches and settles to a steady sustain, an instrument that dies away
   dies away; the original's level only sets each note's velocity. The melody near the top, square 2's line under it,

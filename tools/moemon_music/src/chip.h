@@ -33,6 +33,8 @@ typedef struct {
     int arpFrames;           // frames each arpeggio note lasts (1-4)
     int dmc;                 // NES: kicks and snares as DMC samples (the noise keeps the hi-hats)
     int vibrato;             // a delayed vibrato on the melody's long notes that have none of their own
+    int keepRegister;        // square 2 and the bass stay in one register: a note far from where its line has been plays
+                             // in the octave near it (the same note name), arpeggios within an octave
     // per part (the engine's track): CHIP_ROLE_*, duty (-1 auto, 0-3: 12.5 / 25 / 50 / 75%), octaves to move (-2..2)
     int role[CHIP_MAX_PARTS], duty[CHIP_MAX_PARTS], octave[CHIP_MAX_PARTS];
     char title[64], artist[64], copyright[64];   // the file's tags ("" = the song's)

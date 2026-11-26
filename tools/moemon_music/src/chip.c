@@ -41,6 +41,7 @@ void chip_opts_default(ChipOpts *o, int target)
     o->arpFrames = 2;
     o->dmc = 1;
     o->vibrato = 1;
+    o->keepRegister = 1;
     for (int i = 0; i < CHIP_MAX_PARTS; i++) { o->role[i] = CHIP_ROLE_AUTO; o->duty[i] = -1; o->octave[i] = 0; }
 }
 
@@ -392,6 +393,7 @@ typedef struct {
     // what happened, for the message
     int parts, drumParts, echoes, doublings, notesHeard, notesTotal, moved, bass;
     int usesDmc;              // NES: DMC drums play (the file carries their samples)
+    int folded;               // notes played in the octave near their line's register
     int arpFrames;            // frames square 2 played a chord's arpeggio
 } Arr;
 
@@ -406,8 +408,11 @@ typedef struct {
     uint8_t drum, echo;
     int dupOf;                // the note (index) it doubles, -1 none
     int shift;                // octaves it's moved by (12s), decided the first time it's placed
+    int fold;                 // semitones (12s) it's moved to stay in its channel's register, decided when placed
     uint8_t shiftSet, heard;
     uint8_t lost;             // another note took its channel: it doesn't come back (no flicker between two notes)
+    uint8_t under;            // sounds under another note of its own part (a lower voice of a part playing two)
+    int runFold;              // a quick run far from its part's held notes: semitones (12s) the whole run moves, on square 1
     float amp12, amp24;       // its loudness 12 and 24 frames in (whether the instrument dies away), -1 = it ended first
     float level;              // how loud it is against its part's loud notes (0.45-1)
     float drumHz, drumN;      // drums: the noise clock over its first frames, and how many were summed
@@ -547,6 +552,65 @@ static int arrange(const Cap *c, const ChipOpts *o, Arr *a, ChipPlan *plan, char
         }
     }
 #define NOTES_FROM(f) byStart[(f) < 0 ? 0 : (f) > c->nframes ? c->nframes : (f)]
+
+    // a held note with a higher note of its own part sounding over it (8 frames or more) is that part's lower voice
+    for (int q = 0; q < nn; q++) {
+        Note *n = &nt[order[q]];
+        if (n->drum || n->f1 - n->f0 < 12) continue;
+        for (int r = NOTES_FROM(n->f0 - 600); r < nn && nt[order[r]].f0 < n->f1; r++) {
+            const Note *m = &nt[order[r]];
+            if (m == n || m->part != n->part || m->drum || m->key0 <= n->key0 + 2) continue;
+            int a0 = m->f0 > n->f0 ? m->f0 : n->f0, a1 = m->f1 < n->f1 ? m->f1 : n->f1;
+            if (a1 - a0 >= 8) { n->under = 1; break; }
+        }
+    }
+
+    // runs: a burst of quick notes (each under 16 frames, close together) far from where its part's held notes are (more
+    // than a 6th) is a flourish; on square 1 the whole run plays an octave nearer, its shape kept
+    {
+        float *reg = malloc(sizeof(float) * (size_t)np);
+        int *regF = malloc(sizeof(int) * (size_t)np);    // when the part's last held note ended
+        int *run = malloc(sizeof(int) * (size_t)(nn + 1));
+        for (int p = 0; reg && regF && p < np; p++) { reg[p] = -1; regF[p] = -1000; }
+        for (int q = 0; reg && regF && run && q < nn; q++) {
+            Note *n = &nt[order[q]];
+            if (n->drum) continue;
+            int p = n->part;
+            if (n->f1 - n->f0 >= 16) { reg[p] = reg[p] < 0 ? n->key0 : reg[p] * 0.7f + n->key0 * 0.3f; regF[p] = n->f1; continue; }
+            if (reg[p] < 0 || n->runFold || n->f0 - regF[p] > 120) continue;
+            // the run from here: this part's quick notes, each starting within 16 frames of the one before
+            int k = 0, lastF = n->f0;
+            for (int r = q; r < nn && k < nn; r++) {
+                Note *m = &nt[order[r]];
+                if (m->part != p || m->drum) continue;
+                if (m->f0 - lastF > 16 || m->f1 - m->f0 >= 16) break;
+                run[k++] = order[r];
+                lastF = m->f0;
+            }
+            // a flourish: a short run (8 notes or fewer) from a held note and back to one in the line's register
+            if (k < 2 || k > 8) continue;
+            const Note *after = NULL;
+            for (int r = q + 1; r < nn; r++) {
+                const Note *m = &nt[order[r]];
+                if (m->part != p || m->drum || m->f0 <= nt[run[k - 1]].f0) continue;
+                after = m;
+                break;
+            }
+            if (!after || after->f1 - after->f0 < 16 || fabsf(after->key0 - reg[p]) > 9) continue;
+            float keys[64];
+            int kk = k < 64 ? k : 64;
+            for (int i = 0; i < kk; i++) keys[i] = nt[run[i]].key0;
+            qsort(keys, (size_t)kk, sizeof(float), cmp_float);
+            float med = keys[kk / 2];
+            int fold = 0;
+            while (med + fold - reg[p] > 9) fold -= 12;
+            while (reg[p] - (med + fold) > 9) fold += 12;
+            if (fold) for (int i = 0; i < k; i++) nt[run[i]].runFold = fold;
+        }
+        free(reg);
+        free(regF);
+        free(run);
+    }
 
     // ---- echoes and doublings between parts: for each pair, the delay at which most of one part's notes are the
     // other's (same key, or octaves of it), within a frame
@@ -846,12 +910,14 @@ static int arrange(const Cap *c, const ChipOpts *o, Arr *a, ChipPlan *plan, char
         uint8_t *iois = malloc((size_t)np * 64);     // the gaps between its notes' starts (2-frame steps) it uses
         int *lastStart = malloc(sizeof(int) * (size_t)np);
         float *hist4 = malloc(sizeof(float) * (size_t)np * 4);   // its last four notes' keys
+        int *leaps = malloc(sizeof(int) * (size_t)np);         // notes an octave or so from the one before
         int *cyc = malloc(sizeof(int) * (size_t)np);           // notes on the key of 2 or 4 notes before (a figure)
         for (int w = 0; lastK && keysUsed && iois && lastStart && hist4 && cyc && w < nwin; w++) {
             memset(wsc, 0, sizeof(float) * (size_t)np * 4);
             memset(keysUsed, 0, (size_t)np * 128);
             memset(iois, 0, (size_t)np * 64);
             memset(cyc, 0, sizeof(int) * (size_t)np);
+            if (leaps) memset(leaps, 0, sizeof(int) * (size_t)np);
             for (int p = 0; p < np * 4; p++) hist4[p] = -100;
             for (int p = 0; p < np; p++) { lastK[p] = -1; lastStart[p] = -1; }
             for (int r = NOTES_FROM(w * LEAD_WINDOW); r < nn && nt[order[r]].f0 < (w + 1) * LEAD_WINDOW; r++) {
@@ -859,6 +925,7 @@ static int arrange(const Cap *c, const ChipOpts *o, Arr *a, ChipPlan *plan, char
                 if (n->drum || n->echo || n->dupOf >= 0 || pt[n->part].role == ROLE_BASS) continue;
                 float *W = &wsc[n->part * 4];
                 if (lastK[n->part] >= 0 && fabsf(n->key0 - lastK[n->part]) > 0.5f) W[0] += 1;
+                if (leaps && lastK[n->part] >= 0 && fabsf(n->key0 - lastK[n->part]) >= 10) leaps[n->part]++;
                 lastK[n->part] = n->key0;
                 int kk = (int)lroundf(n->key0);
                 if (kk >= 0 && kk < 128 && keysUsed[n->part * 128 + kk] < 255) keysUsed[n->part * 128 + kk]++;
@@ -902,10 +969,18 @@ static int arrange(const Cap *c, const ChipOpts *o, Arr *a, ChipPlan *plan, char
                 float pedal = W[1] > 4 ? most / W[1] : 0;
                 if (pedal > 0.25f) cy += (pedal - 0.25f) * 2;
                 if (cy > 1) cy = 1;
-                float sc = loud * moving * sqrtf((float)distinct) * varied * high * sqrtf(presence) / poly * (1 - 0.7f * rep) * (1 - 0.75f * cy);
+                // ... and stays in its register: of two parts playing the melody, the one that keeps leaping octaves (a
+                // doubling that jumps up for its runs) is the less of one
+                float lp = leaps && W[1] > 2 ? leaps[p] / W[1] : 0;
+                float stay = 1 - 2.5f * lp;
+                if (stay < 0.25f) stay = 0.25f;
+                float sc = loud * moving * sqrtf((float)distinct) * varied * high * sqrtf(presence) / poly * (1 - 0.7f * rep) * (1 - 0.75f * cy) * stay;
                 if (P->role == ROLE_OSTINATO) sc *= 0.3f;
                 if (P->harmonyOf >= 0) sc *= 0.3f;
                 scores[(size_t)w * np + p] = sc;
+                if (getenv("MMS_CHIP_SCORES"))
+                    fprintf(stderr, "w%d part %d: %.3f (loud %.2f moving %.2f distinct %d varied %.2f high %.2f pres %.2f poly %.2f rep %.2f cy %.2f stay %.2f)\n",
+                            w, p, sc, loud, moving, distinct, varied, high, presence, poly, rep, cy, stay);
             }
         }
         // the choice weighs the stretches either side too, and stays with the part that has it unless another is
@@ -934,6 +1009,7 @@ static int arrange(const Cap *c, const ChipOpts *o, Arr *a, ChipPlan *plan, char
         free(lastStart);
         free(hist4);
         free(cyc);
+        free(leaps);
     }
     free(wsc);
     // each stretch's strongest melody score, for square 2's "how much of a melody is it"
@@ -1037,6 +1113,8 @@ static int arrange(const Cap *c, const ChipOpts *o, Arr *a, ChipPlan *plan, char
     int prevOn[4] = {-1, -1, -1, -1};       // ... and played the frame before
     long arp = 0;
     int lastComp = -1000;                    // the last frame square 2's line played
+    float center[3] = {-1, -1, -1};          // the register each tonal channel's line has been in (keepRegister)
+    int linePart[3] = {-1, -1, -1};          // ... and the part it was
     int *act = malloc(sizeof(int) * 1024);
     float *actAmp = malloc(sizeof(float) * 1024), *actKey = malloc(sizeof(float) * 1024);
     float *actPan = malloc(sizeof(float) * 1024), *actHz = malloc(sizeof(float) * 1024);
@@ -1114,8 +1192,9 @@ static int arrange(const Cap *c, const ChipOpts *o, Arr *a, ChipPlan *plan, char
                     if (n->drum || n->echo || j == on[2] || lead < 0) continue;
                     int mine = n->part == lead;
                     if (pass == 1) mine = pt[n->part].dupOf == lead || pt[lead].dupOf == n->part;
-                    if (!mine) continue;
-                    if (top < 0 || (n->f0 >= nt[act[top]].f0 && (n->f0 > nt[act[top]].f0 || actKey[j] > actKey[top]))) top = j;
+                    if (!mine || n->under) continue;   // (the melody is the part's upper voice)
+                    // the top voice (a part playing two voices: the melody is the upper one)
+                    if (top < 0 || actKey[j] > actKey[top] + 0.5f || (fabsf(actKey[j] - actKey[top]) <= 0.5f && n->f0 > nt[act[top]].f0)) top = j;
                 }
             // the melody as another part slides it: a note that starts with the melody's (or ends on it) and sweeps
             // is the melody's note, played with its slide
@@ -1129,8 +1208,8 @@ static int arrange(const Cap *c, const ChipOpts *o, Arr *a, ChipPlan *plan, char
                     if (d0 < 0.6f || d0 > 11.4f || d1 < 0.6f || d1 > 11.4f || d2 < 0.6f || d2 > 11.4f) { top = j; break; }
                 }
             }
-            // a held melody note keeps going unless a new one starts
-            if (top >= 0 && (on[0] < 0 || nt[act[top]].f0 == f || nt[act[on[0]]].f0 < nt[act[top]].f0)) on[0] = top;
+            // a held melody note keeps going unless a new one starts above or on it (a note starting under it is another voice)
+            if (top >= 0 && (on[0] < 0 || (nt[act[top]].f0 == f && actKey[top] >= actKey[on[0]] - 0.5f) || nt[act[on[0]]].f0 < nt[act[top]].f0)) on[0] = top;
             if (on[0] >= 0 && lead >= 0 && nt[act[on[0]]].part != lead && pt[nt[act[on[0]]].part].dupOf != lead &&
                 pt[lead].dupOf != nt[act[on[0]]].part && !(nt[act[on[0]]].keyMax - nt[act[on[0]]].keyMin > 1.5f)) on[0] = top;
         }
@@ -1225,8 +1304,42 @@ static int arrange(const Cap *c, const ChipOpts *o, Arr *a, ChipPlan *plan, char
                     if (sh) a->moved++;
                     n->shift = sh;
                     n->shiftSet = 1;
+                    // its register: square 2 and the bass keep near where their line has been (a note further than a
+                    // tritone, the bass a 5th, away plays in the octave near it: the same note, the same harmony), so a
+                    // line doesn't bounce between octaves; a new part on the channel starts where it is. The melody keeps
+                    // its own leaps
+                    n->fold = 0;
+                    // the melody: a flourish (a quick run far from its held notes) plays an octave nearer, the whole run
+                    // together; its held notes keep their real leaps
+                    if (o->keepRegister && q == 0 && n->runFold && n->keyMin + 12 * n->shift + n->runFold >= lo - 0.5f &&
+                        n->keyMax + 12 * n->shift + n->runFold <= hi + 0.5f) {
+                        n->fold = n->runFold;
+                        a->folded++;
+                    }
+                    // the melody's line on its doubling instrument (while the melody rests) in the melody's own octave
+                    if (o->keepRegister && q == 0 && n->part != lead && center[0] >= 0) {
+                        float k = n->key0 + 12 * n->shift;
+                        while (k + n->fold - center[0] > 6.5f && n->keyMin + 12 * n->shift + n->fold - 12 >= lo - 0.5f) n->fold -= 12;
+                        while (center[0] - (k + n->fold) > 6.5f && n->keyMax + 12 * n->shift + n->fold + 12 <= hi + 0.5f) n->fold += 12;
+                        if (n->fold) a->folded++;
+                    }
+                    if (o->keepRegister && q >= 1) {
+                        float k = n->key0 + 12 * n->shift, R = q == 1 ? 6.5f : 7.5f;
+                        if (linePart[q] == n->part && center[q] >= 0) {
+                            while (k + n->fold - center[q] > R && n->keyMin + 12 * n->shift + n->fold - 12 >= lo - 0.5f) n->fold -= 12;
+                            while (center[q] - (k + n->fold) > R && n->keyMax + 12 * n->shift + n->fold + 12 <= hi + 0.5f) n->fold += 12;
+                            if (n->fold) a->folded++;
+                        }
+                    }
                 }
-                float key = actKey[j] + 12 * n->shift;
+                // the line's register follows its notes slowly (a new part on the channel starts it again)
+                if (o->keepRegister && oc->newNote && (q >= 1 || n->f1 - n->f0 >= 10)) {
+                    // (the melody's register follows its held notes only)
+                    float k = n->key0 + 12 * n->shift + n->fold;
+                    if ((q >= 1 && linePart[q] != n->part) || center[q] < 0) { center[q] = k; linePart[q] = n->part; }
+                    else center[q] = center[q] * 0.8f + k * 0.2f;
+                }
+                float key = actKey[j] + 12 * n->shift + n->fold;
                 // a delayed vibrato on the melody's long, steady notes (the chip's own; a note that has one keeps its own)
                 if (q == 0 && o->vibrato && n->f1 - n->f0 > 36 && n->keyMax - n->keyMin < 0.15f && age > 18) {
                     float ramp = (age - 18) / 12.0f;

@@ -428,9 +428,9 @@ static void set_status(const char *fmt, const char *a)
 static void after_open(const char *path)
 {
     if (sChipReady) {   // a new song: its own arrangement table (the chip and the switches stay)
-        int t = sChipO.target, ch = sChipO.chords, af = sChipO.arpFrames, dm = sChipO.dmc, vb = sChipO.vibrato;
+        int t = sChipO.target, ch = sChipO.chords, af = sChipO.arpFrames, dm = sChipO.dmc, vb = sChipO.vibrato, kr = sChipO.keepRegister;
         chip_opts_default(&sChipO, t);
-        sChipO.chords = ch; sChipO.arpFrames = af; sChipO.dmc = dm; sChipO.vibrato = vb;
+        sChipO.chords = ch; sChipO.arpFrames = af; sChipO.dmc = dm; sChipO.vibrato = vb; sChipO.keepRegister = kr;
     }
     sChipPlanned = 0;
     sExported = 0;
@@ -2305,7 +2305,9 @@ static void draw_chip(void)
     checkbox(x + 20, ry, "NES kicks and snares as DMC samples", &sChipO.dmc);
     checkbox(x + 380, ry, "Vibrato on the melody's long notes", &sChipO.vibrato);
     checkbox(x + 720, ry, "Open it afterwards (Original plays it on the chip)", &sChipOpen);
-    ry += 40;
+    ry += 28;
+    checkbox(x + 20, ry, "Square 2 and the bass stay in one register (a note far from its line plays an octave nearer)", &sChipO.keepRegister);
+    ry += 36;
     text(x + 20, ry, "PARTS", C_ACCENT);
     text(x + 80, ry, "what each part of the song plays as: Auto is what the studio reads it as; set any part yourself", C_DIM);
     if (button(x + w - 170, ry - 4, 150, 24, "Read them again", have_song())) chip_read_parts();

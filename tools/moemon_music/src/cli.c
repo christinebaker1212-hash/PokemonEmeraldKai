@@ -129,7 +129,8 @@ int cli_main(int argc, char **argv)
         ChipOpts o;
         chip_opts_default(&o, !strcmp(chipTarget, "gb") || !strcmp(chipTarget, "gbs") ? CHIP_GB : CHIP_NES);
         // the arrangement table's settings: pN=melody|harmony|backing|echo|bass|off, pN.duty=12|25|50|75, pN.oct=-2..2
-        // (N: the track, from 1, as the window shows it), chords=auto|hold|arp, arp=FRAMES, dmc=0|1, vibrato=0|1, plan
+        // (N: the track, from 1, as the window shows it), chords=auto|hold|arp, arp=FRAMES, dmc=0|1, vibrato=0|1,
+        // register=0|1 (square 2 and the bass in one register), plan
         int showPlan = 0;
         for (int i = 4; i < argc; i++) {
             const char *a = argv[i], *eq = strchr(a, '=');
@@ -149,6 +150,7 @@ int cli_main(int argc, char **argv)
             else if (!strncmp(a, "arp=", 4)) o.arpFrames = atoi(eq + 1);
             else if (!strncmp(a, "dmc=", 4)) o.dmc = atoi(eq + 1);
             else if (!strncmp(a, "vibrato=", 8)) o.vibrato = atoi(eq + 1);
+            else if (!strncmp(a, "register=", 9)) o.keepRegister = atoi(eq + 1);
         }
         if (showPlan) {
             ChipPlan pl;
