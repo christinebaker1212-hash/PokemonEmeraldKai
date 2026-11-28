@@ -9162,3 +9162,14 @@ window and fonts) approved as drawn ("Yes, that looks great").
 - **The row**: the ME tab's third, GO ONLINE always last (the user, 2026-11-24) (MAIN_FORECAST, MP_COOPICON_FORECAST: a drawn sun behind a cloud, appended to
   gen_icons.py's list so the others keep their numbers), its news the sky here now ("RAIN NOW", MP_Forecast_Now).
 - **Tests**: `mp forecast [place N | day D]` (opens it, prints the place's eight days); scenario forecast.
+
+## YU-GI-OH!: the Graveyards at any time (2026-11-28)
+
+The user: players couldn't check their Graveyards; "they should be able to check it at any time". A pile only opened
+with A while choosing a move or watching (M_FREE / M_WATCH); mid-question (targets, chains, yes / no, lists, names, a
+card's menu) the piles weren't reachable, CHECK showed only a pile's top card, and a pile closed back to M_WATCH.
+Now (src/ygo/ygo_board.c): R at any moment of a duel opens your Graveyard, R again the opponent's (and back); A on a
+pile in CHECK opens it; B goes back to the mode it was opened from (B.pileBack, PileBack: watching if that question
+is no longer ours); a new question arriving while a pile is open is set up behind it and the pile stays. The hints
+show {R}GY. Logs "[ygo] pile P of side S opened ... (mode M)", "pile closed: back to mode M". Scenario
+ygo_grave_any_time.

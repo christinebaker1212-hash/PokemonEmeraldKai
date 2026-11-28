@@ -1,0 +1,8 @@
+# The Graveyards at any time (the user, 2026-11-28: "players cannot check their graveyards ... They should be able to
+# check it at any time"): R opens yours whatever is being done, R again the opponent's, B goes back to exactly where
+# you were. In a practice duel with cards in both Graveyards: on your own move, then in the middle of a question
+# (choosing cards on the table). Shots gy_free, gy_theirs, gy_question
+MODE=1
+TMO=240
+EXPECT_A=("pile 1 of side 0 opened" "pile 1 of side 1 opened" "pile closed: back to mode 1" "ygo mine reached" "pile 1 of side 0 opened: 3 to see of 3 (mode 5)" "pile closed: back to mode 5")
+UNEXPECT_A=("[crash]")

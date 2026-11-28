@@ -1,0 +1,30 @@
+pressuntil A field 5000
+wait 30
+mp ygo starter 0
+mp ygo seed 7
+mp ygo first 0
+mp ygo fast
+mp ygo auto
+mp ygo practice
+wait 1500
+mp ygo auto
+wait 400
+mp ygo state
+press R 1
+wait 20
+rendershot gy_free
+press R 1
+wait 20
+rendershot gy_theirs
+press B 1
+wait 20
+mp ygo mineuntil 5
+wait 600
+press R 1
+wait 20
+rendershot gy_question
+press B 1
+wait 30
+rendershot back_to_question
+mp ygo state
+quit

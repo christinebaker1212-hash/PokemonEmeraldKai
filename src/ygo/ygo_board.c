@@ -266,6 +266,7 @@ static struct
     uint8_t picked[YGO_QUERY_MAX];
     int pickedCount;
     int gridCursor, pileSide, pilePile, pileFree;   /* pileFree: opened while choosing what to do (its cards' effects) */
+    int pileBack;   /* the mode a pile was opened from (R any time, A on a pile): B goes back to it */
     uint8_t pileList[YGO_OBJS];
     int pileCount;
     uint32_t queryStamp, askedStamp;   /* a new question resets the input */
@@ -1990,6 +1991,14 @@ static unsigned SpotCard(int i)
     return s->obj < B.objCount && SeesFace(s->obj) ? T()->objs[s->obj].card : 0;
 }
 static int PileObjActs(unsigned o);
+/* where a pile goes back to: what it was opened from while that question is still ours, else watching */
+static int PileBack(void)
+{
+    int back = B.pileBack;
+    if (back == M_PILE || back == M_OVER || (!MyQuestion() && back != M_WATCH))
+        back = M_WATCH;
+    return back;
+}
 static void OpenPile(unsigned side, unsigned pile)
 {
     unsigned n, i;
@@ -2002,7 +2011,10 @@ static void OpenPile(unsigned side, unsigned pile)
             B.pileList[B.pileCount++] = list[i];
     B.pileSide = (int)side;
     B.pilePile = (int)pile;
+    printf("[ygo] pile %u of side %u opened: %d to see of %u (mode %d)\n", pile, side, B.pileCount, n, B.mode);
     B.pileFree = B.mode == M_FREE && MyQuestion();
+    if (B.mode != M_PILE)
+        B.pileBack = B.mode;
     B.gridCursor = 0;
     B.mode = M_PILE;
     for (i = 0; B.pileFree && i < B.pileCount; i++)
@@ -2108,14 +2120,33 @@ int YgoBoard_Step(unsigned pressed, unsigned held, struct YgoAnswer *answer, uns
         uint32_t stamp = B.d->s.eventSeq * 131u + YgoDuel_AnswerCount(B.d) * 7u + q->type + q->count * 3u + q->prompt;
         if (B.mode == M_WATCH || stamp != B.askedStamp)
         {
+            int looking = B.mode == M_PILE, grid = B.gridCursor;
             B.askedStamp = stamp;
             NewQuestion();
+            if (looking)
+            {
+                /* (a pile being looked through stays open: the question waits behind it, B goes to it) */
+                B.pileBack = B.mode;
+                B.pileFree = B.mode == M_FREE;
+                B.gridCursor = grid;
+                B.mode = M_PILE;
+            }
             if (B.tipShown)
                 return YB_NONE;
         }
     }
     else if (B.mode != M_PILE && B.mode != M_PHASE && B.mode != M_CONFIRM)
         B.mode = M_WATCH;
+    if (pressed & KEY_R && B.mode != M_OVER && B.mode != M_CONFIRM)
+    {
+        /* R, at any moment of the duel: the Graveyards (the user, 2026-11-28: "they should be able to check it at any
+         * time"): yours, R again the opponent's, R again yours; B back to whatever was being done */
+        unsigned side = B.mode == M_PILE && B.pilePile == PILE_GRAVE ? (unsigned)!B.pileSide : 0;
+        OpenPile(side, PILE_GRAVE);
+        B.pileFree = 0;
+        PlaySE(SE_SELECT);
+        return YB_NONE;
+    }
     BuildSpots();
     if (B.toActionable)
     {
@@ -2204,7 +2235,10 @@ int YgoBoard_Step(unsigned pressed, unsigned held, struct YgoAnswer *answer, uns
                     OpenPile(s->side, s->index);
                 }
                 else
+                {
+                    printf("[ygo] pile %d of side %d not opened\n", s->index, s->side);
                     PlaySE(SE_FAILURE);
+                }
                 return YB_NONE;
             }
             if (B.mode == M_FREE && s->obj < B.objCount && OpenMenu(s->obj))
@@ -2379,7 +2413,7 @@ int YgoBoard_Step(unsigned pressed, unsigned held, struct YgoAnswer *answer, uns
         if (count <= 0)
         {
             if (pressed & (KEY_A | KEY_B))
-                B.mode = M_WATCH;
+                B.mode = B.mode == M_PILE ? PileBack() : M_WATCH;
             return YB_NONE;
         }
         if (pressed & KEY_LEFT && B.gridCursor > 0)
@@ -2408,7 +2442,8 @@ int YgoBoard_Step(unsigned pressed, unsigned held, struct YgoAnswer *answer, uns
             }
             if (pressed & KEY_B)
             {
-                B.mode = M_WATCH;
+                B.mode = PileBack();
+                printf("[ygo] pile closed: back to mode %d\n", B.mode);
                 PlaySE(SE_SELECT);
             }
             return YB_NONE;
@@ -2483,6 +2518,19 @@ int YgoBoard_Step(unsigned pressed, unsigned held, struct YgoAnswer *answer, uns
         if (pressed & (KEY_UP | KEY_DOWN | KEY_LEFT | KEY_RIGHT))
             MoveCursor(pressed);
         cur = CurrentSpot();
+        if (pressed & KEY_A && cur >= 0 && B.spots[cur].kind == SP_PILE && B.spots[cur].index != PILE_DECK &&
+            !(B.spots[cur].index == PILE_EXTRA && B.spots[cur].side))
+        {
+            /* (a pile looked through, as at any other time; B back to CHECK) */
+            uint8_t list[YGO_OBJS];
+            if (PileList(B.spots[cur].side, B.spots[cur].index, list))
+            {
+                PlaySE(SE_SELECT);
+                OpenPile(B.spots[cur].side, B.spots[cur].index);
+                B.pileFree = 0;
+                return YB_NONE;
+            }
+        }
         if (pressed & (KEY_A | KEY_INSPECT))
         {
             unsigned id = InspectSpot(cur);
@@ -3263,8 +3311,8 @@ static void Gap(void)
             else if (onDeck)
                 hint = B.mode == M_FREE && PileActs(0, PILE_DECK) ? "{A}USE {B}MENU" : "{A}CONCEDE {B}MENU";
             else
-                hint = rightTaken ? (B.mode == M_FREE ? "{A}ACT {B}MENU" : "{B}MENU")
-                       : B.mode == M_FREE ? "{A}ACT {INSPECT}LOOK {B}MENU" : "{INSPECT}LOOK {B}MENU";
+                hint = rightTaken ? (B.mode == M_FREE ? "{A}ACT {R}GY {B}MENU" : "{R}GY {B}MENU")
+                       : B.mode == M_FREE ? "{A}ACT {INSPECT}LOOK {R}GY {B}MENU" : "{INSPECT}LOOK {R}GY {B}MENU";
             break;
         }
         case M_PICK_FIELD:
@@ -3272,16 +3320,16 @@ static void Gap(void)
             hint = q->max > 1 ? "{A}PICK {START}DONE" : q->min ? "{A}CHOOSE {INSPECT}LOOK" : "{A}CHOOSE {B}NONE";
             break;
         case M_PILE:
-            hint = "{A}LOOK {B}BACK";
+            hint = B.pilePile == PILE_GRAVE ? "{A}LOOK {R}OTHER GY {B}BACK" : "{A}LOOK {B}BACK";
             break;
         case M_ZONE:
             hint = "{A}PUT IT HERE {B}BACK";
             break;
         case M_CHECK:
-            hint = "{A}LOOK {B}CANCEL";
+            hint = "{A}LOOK {R}GY {B}CANCEL";
             break;
         default:
-            hint = "{A}OK {INSPECT}LOOK";
+            hint = "{A}OK {INSPECT}LOOK {R}GY";
             break;
         }
         if (B.mode != M_OVER)   /* (the end screen has its own) */
