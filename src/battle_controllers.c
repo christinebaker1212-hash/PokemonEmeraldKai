@@ -1187,6 +1187,36 @@ static void Task_HandleCopyReceivedLinkBuffersData(u8 taskId)
     }
 }
 
+// Behind the master: a command a move's several targets get at once (battle_script_commands.c's spread flush: every
+// hit flash, every HP bar, the HP kept, every fainting cry and faint animation, each sent to all its battlers in one
+// step) may start while the only ones still running here are the same command for other battlers. One at a time,
+// the bars a SURF lowered on both foes together on the master's screen went down one after the other on the
+// others' (the user, 2026-11-28: "not calculating damage simultaneously anymore")
+static bool8 SameStepAsBusy(u8 cmd, u8 battler)
+{
+    u8 b;
+    bool8 any = FALSE;
+    switch (cmd)
+    {
+    case CONTROLLER_HITANIMATION:
+    case CONTROLLER_HEALTHBARUPDATE:
+    case CONTROLLER_SETMONDATA:
+    case CONTROLLER_FAINTINGCRY:
+    case CONTROLLER_FAINTANIMATION:
+        break;
+    default:
+        return FALSE;
+    }
+    for (b = 0; b < MAX_BATTLERS_COUNT; b++)
+        if (gBattleControllerExecFlags & gBitTable[b])
+        {
+            if (b == battler || gBattleBufferA[b][0] != cmd)
+                return FALSE;
+            any = TRUE;
+        }
+    return any;
+}
+
 // FALSE when there was nothing to do (or the battler is still busy)
 static bool8 CopyReceivedLinkBuffersData(u8 taskId)
 {
@@ -1228,7 +1258,8 @@ static bool8 CopyReceivedLinkBuffersData(u8 taskId)
                 // Behind the master: one command at a time while fast ones are involved,
                 // so the screen shows them in the master's order
                 bool8 fast = MasterMayRunAhead(BYTE_TO_RECEIVE(LINK_BUFF_DATA), battler);
-                if ((fast || sLocalFastBusy) && (gBattleControllerExecFlags & EXEC_FLAGS_LOCAL_MASK))
+                if ((fast || sLocalFastBusy) && (gBattleControllerExecFlags & EXEC_FLAGS_LOCAL_MASK)
+                 && !SameStepAsBusy(BYTE_TO_RECEIVE(LINK_BUFF_DATA), battler))
                     return FALSE;
                 if (fast)
                     sLocalFastBusy |= gBitTable[battler];

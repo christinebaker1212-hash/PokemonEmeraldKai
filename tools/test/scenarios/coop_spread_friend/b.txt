@@ -1,0 +1,17 @@
+pressuntil A field 5000
+mp teach 0 150
+waitfor online 6000
+wait 300
+mp wilddouble 100
+mp wild 288:10
+waitfor battle 2000
+waitfor action 4000
+wait 30
+press A 2
+wait 20
+press A 2
+wait 20
+shotburst b 1400 2
+mash A 60 15
+wait 300
+quit

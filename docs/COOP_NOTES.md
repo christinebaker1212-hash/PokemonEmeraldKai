@@ -8862,6 +8862,12 @@ res/moves/chatter/anim.s).
 - MP_Spread_Reset at each move (battle_util.c HandleAction_UseMove) logs "spread left unshown" if anything waited.
 - What the move's per-target move-end does (a target's Ability, an item) still happens between targets, before the
   flush. Scenarios spread_at_once (SURF), spread_quake (EARTHQUAKE on three).
+- (2026-11-28, the user: "not calculating damage simultaneously anymore", SURF in co-op) On a friend's screen in a
+  co-op battle the hits still went one after another: behind the master, the fast link sync starts one command at a
+  time (battle_controllers.c CopyReceivedLinkBuffersData), so each flash and HP bar waited for the last. Now a hit
+  flash, HP bar, HP data, fainting cry or faint animation may start while the only ones running are the same command
+  for other battlers (SameStepAsBusy): the flush's steps, as the master shows them. Scenario coop_spread_friend
+  (check.py measures both foes' bars in both games' frames).
 - (2026-11-21, the user) The second ball on the battle screen too: a wild foe's box shows both balls when the player
   has it in their own POKéDEX too (MP_OwnDexBall, mp_dexplus.c): the KAI healthbox's tile drawn twice (battle_interface.c
   MP_CaughtBallsGfx: the front ball 1 down, the back one 1 right, in the same 8x8 tile), the Triple Battle cards

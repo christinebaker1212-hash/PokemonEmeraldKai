@@ -1,0 +1,15 @@
+# A move's several targets hit at once on a friend's screen too (the user, 2026-11-28: "enemies hit by multi target
+# moves are not calculating damage simultaneously anymore", with SURF): a co-op wild Double Battle (BOB's encounter, so
+# BOB's game runs it); ALICE's GYARADOS SURFs both foes. The friend's game took the master's commands one at a time, so
+# the two HP bars went down one after the other there; now both go down together on both screens (check.py measures
+# each foe's bar in ALICE's and BOB's frames)
+MODE=2
+WARP=0,16,12,11
+WARP_B=0,16,14,11
+TMO=300
+ENV_A="MOEMON_DEBUG_PARTY=130:60"
+ENV_B="MOEMON_DEBUG_PARTY=26:60"
+EXPECT_B=("lands on 2 at once")
+UNEXPECT_A=("[crash]")
+UNEXPECT_B=("[crash]" "spread left unshown")
+CHECK="python3 tools/test/scenarios/coop_spread_friend/check.py"
